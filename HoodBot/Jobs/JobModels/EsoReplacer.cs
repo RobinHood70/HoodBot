@@ -354,7 +354,7 @@
 		{
 			bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
 
-			oldNodes.RemoveAll<ITemplateNode>(node => IsRemovable(node));
+			oldNodes.RemoveAll<ITemplateNode>(IsRemovable);
 		}
 		#endregion
 
