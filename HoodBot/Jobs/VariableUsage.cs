@@ -21,7 +21,7 @@
 		#region Constructors
 		[JobInfo("Variable Usage")]
 		public VariableUsage(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

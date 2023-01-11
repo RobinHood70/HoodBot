@@ -29,7 +29,7 @@
 			[JobParameter(DefaultValue = true)] bool respectRedirects,
 			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location,
 			bool checkAllTemplates)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			location.ThrowNull();
 			this.respectRedirects = respectRedirects;

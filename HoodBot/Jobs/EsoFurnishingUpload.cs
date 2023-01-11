@@ -20,12 +20,13 @@
 		#region Constructors
 		[JobInfo("Furnishing Icon Upload", "ESO")]
 		public EsoFurnishingUpload(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 		}
 		#endregion
 
 		#region Protected Override Methods
+
 		protected override void Main()
 		{
 			var site = (UespSite)this.Site;

@@ -28,10 +28,10 @@
 		#endregion
 
 		#region Fields
-		private readonly CancellationTokenSource canceller = new();
 		private readonly IDiffViewer? diffViewer;
 		private readonly PauseTokenSource pauser = new();
 
+		private CancellationTokenSource? canceller;
 		private double completedJobs;
 		private bool editingEnabled;
 		private DateTime? eta;
@@ -196,7 +196,7 @@
 		#region Private Methods
 		private void CancelJobs()
 		{
-			this.canceller.Cancel();
+			this.canceller?.Cancel();
 			this.Reset();
 			this.PauseJobs(isPaused: false);
 		}
@@ -223,7 +223,9 @@
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
-			var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, this.canceller);
+			CancellationTokenSource cancel = new();
+			this.canceller = cancel;
+			var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, cancel);
 			try
 			{
 				jobManager.StartingJob += this.JobManager_StartingJob;
@@ -238,7 +240,7 @@
 				jobManager.Site.Login(loginName, loginPassword);
 				jobManager.Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
 					? null
-					: new PageJobLogger(jobManager.Site, wikiInfo.LogPage, JobTypes.Write);
+					: new PageJobLogger(jobManager.Site, wikiInfo.LogPage);
 				jobManager.ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
 					? null
 					: new PageResultHandler(jobManager.Site, wikiInfo.ResultsPage);

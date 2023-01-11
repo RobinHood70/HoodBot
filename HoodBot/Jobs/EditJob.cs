@@ -11,14 +11,10 @@
 	{
 		#region Constructors
 		protected EditJob(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 			this.Pages = new PageCollection(this.Site);
 		}
-		#endregion
-
-		#region Public Override Properties
-		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Properties

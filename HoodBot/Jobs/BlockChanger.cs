@@ -21,17 +21,13 @@
 		#region Constructors
 		[JobInfo("Fix Infinite IP Blocks", "Maintenance")]
 		public BlockChanger(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 		}
 		#endregion
 
 		#region Public Override Properties
 		public override string LogName => "Fix Infinite IP Blocks";
-		#endregion
-
-		#region Protected Overwrite Properties
-		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Override Methods

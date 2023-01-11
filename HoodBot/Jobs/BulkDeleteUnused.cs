@@ -13,7 +13,7 @@
 		#region Constructors
 		[JobInfo("Bulk Delete Unused")]
 		public BulkDeleteUnused(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 			this.deleteTitles = new TitleCollection(this.Site);
 		}
@@ -21,10 +21,6 @@
 
 		#region Public Override Properties
 		public override string LogName => "Bulk Delete";
-		#endregion
-
-		#region Protected Override Properties
-		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Override Methods

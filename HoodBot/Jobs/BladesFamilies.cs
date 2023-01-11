@@ -19,7 +19,7 @@
 		#region Constructors
 		[JobInfo("Blades Families", "Blades")]
 		public BladesFamilies(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

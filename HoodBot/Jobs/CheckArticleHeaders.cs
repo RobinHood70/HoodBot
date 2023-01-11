@@ -25,7 +25,7 @@
 
 		[JobInfo("Check Article Headers", "Maintenance|")]
 		public CheckArticleHeaders(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			this.ns = UespNamespaces.Online;
 		}

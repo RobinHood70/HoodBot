@@ -12,7 +12,7 @@
 	{
 		[JobInfo("NPCs from Lang")]
 		public GenderedNPCsFromLang(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 

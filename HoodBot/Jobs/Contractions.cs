@@ -17,7 +17,7 @@
 		#region Constructors
 		[JobInfo("Contractions")]
 		public Contractions(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

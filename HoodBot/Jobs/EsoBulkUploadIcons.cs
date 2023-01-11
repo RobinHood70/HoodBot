@@ -69,7 +69,7 @@
 		#region Constructors
 		[JobInfo("Bulk Upload Icons", "ESO Update")]
 		public EsoBulkUploadIcons(JobManager jobManager, string styles)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 			var styleSplit = styles.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			this.styles = new List<string>(styleSplit.Length);
@@ -80,10 +80,6 @@
 
 			this.styles.Sort(StringComparer.Ordinal);
 		}
-		#endregion
-
-		#region Protected Overwrite Properties
-		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Override Methods

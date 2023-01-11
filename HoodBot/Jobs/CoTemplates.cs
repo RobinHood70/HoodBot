@@ -10,7 +10,7 @@
 		#region Constructors
 		[JobInfo("Co-occurring Templates")]
 		public CoTemplates(JobManager jobManager, string template1, string template2)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			this.Title1 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template1);
 			this.Title2 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template2);

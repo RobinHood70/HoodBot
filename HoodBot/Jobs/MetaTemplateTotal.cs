@@ -23,7 +23,7 @@
 		#region Constructors
 		[JobInfo("MetaTemplate Totals")]
 		public MetaTemplateTotal(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

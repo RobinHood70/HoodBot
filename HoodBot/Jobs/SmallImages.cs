@@ -8,7 +8,7 @@
 	{
 		[JobInfo("Find Small Images")]
 		public SmallImages(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 

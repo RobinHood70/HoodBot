@@ -9,19 +9,11 @@
 	using RobinHood70.Robby.Design;
 
 	#region Public Enumerations
-	[Flags]
-	public enum JobTypes
+	public enum JobType
 	{
-		/*
-		Currently only supporting simple Read/Write flags, but could be expanded to distinguish between different types of jobs, for example:
-			* PageEdit (anything that edits pages as opposed to moving them or whatever)
-			* Report (for single-page reports)
-			* User (anything that works only on users or in user space)
-			... etc.
-		*/
-		None = 0,
-		Read = 1,
-		Write = 1 << 1,
+		ReadOnly,
+		UnloggedWrite,
+		Write
 	}
 	#endregion
 
@@ -34,13 +26,14 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob(JobManager jobManager)
+		protected WikiJob(JobManager jobManager, JobType jobType)
 		{
 			this.JobManager = jobManager.NotNull();
 			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 			this.logName = this.GetType().Name.UnCamelCase();
 			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 			this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
+			this.JobType = jobType;
 		}
 		#endregion
 
@@ -52,6 +45,8 @@
 
 		#region Public Properties
 		public JobManager JobManager { get; }
+
+		public JobType JobType { get; }
 
 		public JobLogger? Logger { get; protected set; }
 
@@ -81,8 +76,6 @@
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual JobTypes JobType => JobTypes.Read;
-
 		public virtual string? LogDetails { get; protected set; }
 
 		public virtual string LogName => this.logName;
@@ -148,9 +141,8 @@
 		{
 			this.Started?.Invoke(this, EventArgs.Empty);
 			this.BeforeLogging();
-			if (this.Logger?.ShouldLog(this.JobType) == true)
+			if (this.Logger != null)
 			{
-				this.StatusWriteLine("Adding Log Entry");
 				LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
 				this.Logger.AddLogEntry(logInfo);
 			}
@@ -172,12 +164,7 @@
 
 		protected virtual void JobCompleted()
 		{
-			if (this.Logger?.ShouldLog(this.JobType) == true)
-			{
-				this.StatusWriteLine("Ending Log Entry");
-				this.Logger.EndLogEntry();
-			}
-
+			this.Logger?.EndLogEntry();
 			this.Results?.Save();
 			this.Completed?.Invoke(this, EventArgs.Empty);
 		}

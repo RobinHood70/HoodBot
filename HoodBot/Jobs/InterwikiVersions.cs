@@ -11,7 +11,7 @@
 	{
 		[JobInfo("Interwiki Versions", "External")]
 		public InterwikiVersions(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 

@@ -10,7 +10,7 @@
 		#region Constructors
 		[JobInfo("Wanted Pages in Main Space", "Maintenance")]
 		public WantedInMain(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

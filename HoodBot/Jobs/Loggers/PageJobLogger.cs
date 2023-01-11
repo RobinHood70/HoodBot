@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -29,8 +28,7 @@
 		#endregion
 
 		#region Constructors
-		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
-			: base(typesToLog)
+		public PageJobLogger(Site site, string pageName)
 		{
 			this.logTitle = TitleFactory.FromUnvalidated(site.NotNull(), pageName.NotNull());
 		}

@@ -12,7 +12,7 @@
 		#region Constructors
 		[JobInfo("Find Deletable NPCs", "ESO")]
 		public EsoDeletableNpcs(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			this.SetResultDescription("ESO NPC pages with no matching database entry");
 		}

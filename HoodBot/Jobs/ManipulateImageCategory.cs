@@ -10,7 +10,7 @@
 	{
 		[JobInfo("Manipulate Image Category")]
 		public ManipulateImageCategory(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			this.Results = new PageResultHandler(this.Site, "User:Jeancey/Kah");
 		}

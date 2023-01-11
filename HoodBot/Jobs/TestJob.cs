@@ -11,7 +11,7 @@
 		#region Constructors
 		[JobInfo("Test Job")]
 		public TestJob(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 			var page = this.Site.CreatePage("Test", "Hello\n\n=== {{Header}} ====  <!--Whitespace--> <!--Another comment-->");
 			var parser = new ContextualParser(page);

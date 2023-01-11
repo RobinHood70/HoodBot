@@ -8,7 +8,7 @@
 		#region Constructors
 		[JobInfo("One-Off Job")]
 		public OneOffJob(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.Write)
 		{
 		}
 

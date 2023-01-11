@@ -10,7 +10,7 @@
 		#region Constructors
 		[JobInfo("Find On Pages")]
 		public FindOnPages(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.ReadOnly)
 		{
 		}
 		#endregion

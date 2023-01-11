@@ -16,7 +16,7 @@
 
 		[JobInfo("Mass Purge")]
 		public MassPurge(JobManager jobManager, string pages, bool linkUpdate, bool recursive)
-			: base(jobManager)
+			: base(jobManager, JobType.UnloggedWrite)
 		{
 			pages = pages.NotNull().Replace("\r\n", "\n", StringComparison.Ordinal);
 			var values = pages.Split('\n', StringSplitOptions.RemoveEmptyEntries);
