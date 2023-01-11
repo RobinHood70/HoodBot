@@ -88,20 +88,21 @@
 			}
 		}
 
-		public static void CheckResult(JToken parent, IEnumerable<IQueryModule> modules)
+		public static void CheckResult(JToken parent, IReadOnlyList<IQueryModule> modules)
 		{
 			if (parent["limits"] is JToken limits)
 			{
+				var moduleDict = new Dictionary<string, IQueryModule>(modules.Count, StringComparer.Ordinal);
+				foreach (var module in modules)
+				{
+					moduleDict.Add(module.Name, module);
+				}
+
 				foreach (var limit in limits.Children<JProperty>())
 				{
-					var value = (int)limit.Value;
-					foreach (var module in modules)
+					if (moduleDict.TryGetValue(limit.Name, out var module) && module is IContinuableQueryModule continuableModule)
 					{
-						if (string.Equals(module.Name, limit.Name, StringComparison.Ordinal) && module is IContinuableQueryModule continuableModule)
-						{
-							continuableModule.ModuleLimit = value;
-							break;
-						}
+						continuableModule.ModuleLimit = (int)limit.Value;
 					}
 				}
 			}
