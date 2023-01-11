@@ -7,7 +7,7 @@
 	{
 		[JobInfo("Watch Template Space")]
 		public WatchTemplates(JobManager jobManager)
-			: base(jobManager)
+			: base(jobManager, JobType.UnloggedWrite)
 		{
 		}
 
