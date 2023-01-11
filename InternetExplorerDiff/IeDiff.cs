@@ -59,7 +59,9 @@
 			}
 
 			var disposable = new object();
+#pragma warning disable CA2020 // Prevent from behavioral change
 			HandleRef hwnd = new(disposable, (IntPtr)ie.HWND);
+#pragma warning restore CA2020 // Prevent from behavioral change
 			_ = SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
 			var processId32 = Convert.ToInt32(processId);
 			if (processId32 == 0)
