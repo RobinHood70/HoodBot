@@ -104,14 +104,11 @@
 		#endregion
 
 		#region Public Methods
-		public string SkillDamageText()
-		{
-			// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
-			return
-				this.Mechanic >= 0 ? this.BitFieldDamage() :
-				this.Mechanic < -1 ? this.IndexedDamage() :
-				throw new InvalidOperationException("Mechanic is invalid.");
-		}
+
+		// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
+		public string SkillDamageText() => this.Mechanic >= 0 ? this.BitFieldDamage() :
+			this.Mechanic < -1 ? this.IndexedDamage() :
+			throw new InvalidOperationException("Mechanic is invalid.");
 		#endregion
 
 		#region Private Methods
