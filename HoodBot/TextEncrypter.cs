@@ -14,8 +14,7 @@
 		public TextEncrypter(string encryptionKey)
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
-			using var sha = SHA256.Create();
-			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull()));
+			this.encryptionKeyBytes = SHA256.HashData(Encoding.UTF8.GetBytes(encryptionKey.NotNull()));
 		}
 
 		public string Encrypt(string value)
