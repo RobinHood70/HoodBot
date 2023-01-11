@@ -133,10 +133,7 @@
 			this.builder.Append(equalsSigns);
 			node.Title.Accept(this);
 			this.builder.Append(equalsSigns);
-			if (node.Comment is not null)
-			{
-				node.Comment.Accept(this);
-			}
+			node.Comment?.Accept(this);
 		}
 
 		/// <inheritdoc/>
