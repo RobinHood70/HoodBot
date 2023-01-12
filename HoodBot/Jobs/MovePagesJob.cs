@@ -54,7 +54,7 @@
 	public abstract class MovePagesJob : EditJob
 	{
 		#region Fields
-		private readonly IDictionary<Title, DetailedActions> actions = new Dictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, DetailedActions> actions = new SortedDictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
 		private readonly ParameterReplacers parameterReplacers;
 		private readonly IDictionary<Title, Title> moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		private readonly IDictionary<Title, Title> linkUpdates = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
@@ -247,7 +247,7 @@
 
 		protected override void Main()
 		{
-			this.SavePages();
+			base.Main();
 			if (this.MoveAction != MoveAction.None)
 			{
 				this.MovePages();
@@ -261,15 +261,21 @@
 
 		protected override void PageLoaded(EditJob job, Page page)
 		{
-			ContextualParser parser = new(page);
-			if (this.linkUpdates.TryGetValue(page, out var linkUpdate) &&
-				this.actions[page].HasAction(ReplacementActions.NeedsEdited))
+			if (this.linkUpdates.TryGetValue(page, out var linkUpdate))
 			{
-				this.EditPageLoaded(parser, linkUpdate);
-			}
+				var pageActions = this.actions[page];
+				if (!pageActions.HasAction(ReplacementActions.Skip))
+				{
+					ContextualParser parser = new(page);
+					if (pageActions.HasAction(ReplacementActions.NeedsEdited))
+					{
+						this.EditPageLoaded(parser, linkUpdate);
+					}
 
-			this.BacklinkPageLoaded(parser);
-			parser.UpdatePage();
+					this.BacklinkPageLoaded(parser);
+					parser.UpdatePage();
+				}
+			}
 		}
 		#endregion
 
@@ -365,7 +371,11 @@
 				this.WriteLine("|-");
 				this.Write(FormattableString.Invariant($"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
 				List<string> actionsList = new();
-				if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
+				if (action.HasAction(ReplacementActions.Skip))
+				{
+					actionsList.Add("skip");
+				}
+				else if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
 				{
 					actionsList.Add("move to " + this.moves[from].AsLink());
 					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
@@ -373,15 +383,12 @@
 						actionsList.Add("update links");
 					}
 				}
-				else
+				else if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
 				{
-					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
-					{
-						actionsList.Add("update links to " + this.linkUpdates[from].AsLink());
-					}
+					actionsList.Add("update links to " + this.linkUpdates[from].AsLink());
 				}
 
-				if (action.HasAction(ReplacementActions.Edit))
+				if (action.HasAction(ReplacementActions.Edit) && !action.HasAction(ReplacementActions.Skip))
 				{
 					actionsList.Add("edit" + (action.HasAction(ReplacementActions.Move) ? " moved page" : string.Empty));
 				}
@@ -389,11 +396,6 @@
 				if (action.HasAction(ReplacementActions.Propose))
 				{
 					actionsList.Add("propose for deletion");
-				}
-
-				if (action.HasAction(ReplacementActions.Skip))
-				{
-					actionsList.Add("skip");
 				}
 
 				if (actionsList.Count == 0)
@@ -495,22 +497,20 @@
 		{
 			this.StatusWriteLine("Moving pages");
 			this.Progress = 0;
-			var moveTitles = new List<Title>();
+			var moveCount = 0;
 			foreach (var action in this.actions)
 			{
 				if (action.Value.HasAction(ReplacementActions.Move))
 				{
-					moveTitles.Add(action.Key);
+					moveCount++;
 				}
 			}
 
-			moveTitles.Sort(SimpleTitleComparer.Instance);
-
-			this.ProgressMaximum = moveTitles.Count;
-			foreach (var from in moveTitles)
+			this.ProgressMaximum = moveCount;
+			foreach (var from in this.actions)
 			{
-				var to = this.moves[from];
-				var fromNs = from.Namespace;
+				var to = this.moves[from.Key];
+				var fromNs = from.Key.Namespace;
 				var moveTalkPage =
 					!fromNs.IsTalkSpace &&
 					(this.MoveExtra & MoveOptions.MoveTalkPage) != 0;
@@ -518,7 +518,7 @@
 					fromNs.AllowsSubpages &&
 					(this.MoveExtra & MoveOptions.MoveSubPages) != 0;
 				this.Site.Move(
-					from,
+					from.Key,
 					to,
 					this.EditSummaryMove,
 					moveTalkPage,
