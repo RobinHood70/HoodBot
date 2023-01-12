@@ -6,11 +6,9 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -39,6 +37,17 @@
 			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishings",
 			[FurnishingType.SpecialCollectibles] = "Special Collectibles",
 		};
+
+		private static readonly Dictionary<string, string> PageNameExceptions = new(StringComparer.Ordinal)
+		{
+			["Dwarven Spider Pet"] = "Dwaven Spider Pet (furnishing)",
+			["Frostbane Bear Mount"] = "Frostbane Bear (mount)",
+			["Frostbane Bear Pet"] = "Frostbane Bear (pet)",
+			["Frostbane Sabre Cat Pet"] = "Frostbane Sabre Cat (pet)",
+			["Frostbane Sabre Cat Mount"] = "Frostbane Sabre Cat (mount)",
+			["Frostbane Wolf Mount"] = "Frostbane Wolf (mount)",
+			["Frostbane Wolf Pet"] = "Frostbane Wolf (pet)",
+		};
 		#endregion
 
 		#region Fields
@@ -56,17 +65,6 @@
 			: base(jobManager)
 		{
 			//// jobManager.ShowDiffs = false;
-		}
-		#endregion
-
-		#region Private Enumerations
-		private enum FurnishingType
-		{
-			None = -1,
-			TraditionalFurnishings,
-			SpecialFurnishings,
-			CollectibleFurnishings,
-			SpecialCollectibles
 		}
 		#endregion
 
@@ -120,6 +118,7 @@
 			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
 			*/
 
+			// TODO: There's potential for overlap between mined items and collectibles. These should be separated into different result sets.
 			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, (IDataRecord record) => new Furnishing(record, this.Site, false)))
 			{
 				this.furnishings.Add(furnishing.Id, furnishing);
@@ -171,7 +170,8 @@
 
 		private static void CheckIcon(SiteTemplateNode template, string labelName)
 		{
-			if (string.Equals(template.GetValue("icon"), $"ON-icon-furnishing-{labelName}.png", StringComparison.Ordinal))
+			var fileName = labelName.Replace(':', ',');
+			if (string.Equals(template.GetValue("icon"), $"ON-icon-furnishing-{fileName}.png", StringComparison.Ordinal))
 			{
 				template.Remove("icon");
 			}
@@ -216,10 +216,10 @@
 		#endregion
 
 		#region Private Methods
-		private void CheckImage(SiteTemplateNode template, string name, bool isCollectible, string link)
+		private void CheckImage(SiteTemplateNode template, string name, string link)
 		{
 			var fileSpace = template.TitleValue.Site[MediaWikiNamespaces.File];
-			var imageName = Furnishing.ImageName(name, isCollectible);
+			var imageName = Furnishing.ImageName(name);
 			if (template.GetValue("image") is string imageValue)
 			{
 				imageValue = imageValue.Trim();
@@ -256,12 +256,13 @@
 		private void CheckPageName(Page? page, string labelName, Furnishing furnishing)
 		{
 			page.ThrowNull();
-			if (!string.Equals(labelName, furnishing.Title.LabelName(), StringComparison.Ordinal))
+			var compareName = PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
+			if (!string.Equals(labelName, compareName, StringComparison.Ordinal))
 			{
 				this.pageMessages.Add($"[[{page.FullPageName}|{labelName}]] ''should be''<br>\n" +
-				  $"{furnishing.Title.PageName}");
+				  $"{compareName}");
 				if (!page.PageName.Contains(':', StringComparison.Ordinal) &&
-					furnishing.Title.PageName.Contains(':', StringComparison.Ordinal) &&
+					compareName.Contains(':', StringComparison.Ordinal) &&
 					string.Equals(page.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
 				{
 					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
@@ -349,12 +350,11 @@
 				return;
 			}
 
-			var isCollectible = furnishing.Collectible;
-			this.CheckImage(template, name, isCollectible, page.AsLink(LinkFormat.LabelName));
+			this.CheckImage(template, name, page.AsLink(LinkFormat.LabelName));
 			this.CheckPageName(page, labelName, furnishing);
 
 			template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);
-			if (isCollectible)
+			if (furnishing.Collectible)
 			{
 				template.Update("nickname", furnishing.NickName, ParameterFormat.OnePerLine, true);
 			}
@@ -498,194 +498,6 @@
 			this.FixBundles(template);
 			this.FixList(template, "material");
 			this.FixList(template, "skill");
-		}
-		#endregion
-
-		#region Private Classes
-		private sealed class Furnishing
-		{
-			#region Static Fields
-			private static readonly HashSet<string> AliveCats = new(StringComparer.Ordinal)
-			{
-				"Amory Assitants",
-				"Banking Assistants",
-				"Companions",
-				"Creatures",
-				"Deconstruction Assistants",
-				"Houseguests",
-				"Merchant Assistants",
-				"Mounts",
-				"Non-Combat Pets",
-				"Statues",
-			};
-
-			private static readonly Regex IngredientsFinder = new(@"\|cffffffINGREDIENTS\|r\n(?<ingredients>.+)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
-			private static readonly Regex SizeFinder = new(@"This is a (?<size>\w+) house item.", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			private static readonly HashSet<string> AllSkills = new(StringComparer.Ordinal)
-			{
-				"Engraver",
-				"Metalworking",
-				"Potency Improvement",
-				"Provisioning",
-				"Recipe Improvement",
-				"Solvent Proficiency",
-				"Tailoring",
-				"Woodworking",
-			};
-			#endregion
-
-			#region Constructors
-			public Furnishing(IDataRecord record, Site site, bool collectible)
-			{
-				this.Collectible = collectible;
-				this.Id = collectible ? (long)record["itemId"] : (int)record["itemId"];
-				var titleName = (string)record["name"];
-				titleName = titleName.TrimEnd(',');
-				titleName = site.SanitizePageName(titleName);
-				this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
-				if (!this.Title.PageNameEquals(titleName))
-				{
-					this.TitleName = titleName;
-				}
-
-				var desc = (string)record["description"];
-				var sizeMatch = SizeFinder.Match(desc);
-				this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
-				desc = desc
-					.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
-					.Replace("|r", string.Empty, StringComparison.Ordinal);
-				this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
-				var furnCategory = (string)record["furnCategory"];
-				this.Behavior = ((string)record["tags"])
-					.Replace(",,", ",", StringComparison.Ordinal)
-					.Trim(',');
-				if (collectible)
-				{
-					this.FurnishingCategory = furnCategory;
-					this.FurnishingSubcategory = (string)record["furnSubCategory"];
-					this.NickName = (string)record["nickname"];
-				}
-				else
-				{
-					var bindType = (int)record["bindType"];
-					this.BindType = bindType switch
-					{
-						-1 => null,
-						0 => string.Empty,
-						1 => "Bind on Pickup",
-						2 => "Bind on Equip",
-						3 => "Backpack Bind on Pickup",
-						_ => throw new InvalidOperationException()
-					};
-
-					if (!string.IsNullOrEmpty(furnCategory))
-					{
-						var furnSplit = furnCategory.Split(TextArrays.Colon, 2);
-						if (furnSplit.Length > 0)
-						{
-							this.FurnishingCategory = furnSplit[0];
-							this.FurnishingSubcategory = furnSplit[1]
-								.Split(TextArrays.Parentheses)[0]
-								.TrimEnd();
-						}
-					}
-
-					var quality = (string)record["quality"];
-					this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
-						? "nfsel".Substring(qualityNum - 1, 1)
-						: quality;
-					this.Type = (ItemType)record["type"];
-					var abilityDesc = (string)record["abilityDesc"];
-					var ingrMatch = IngredientsFinder.Match(abilityDesc);
-					if (ingrMatch.Success)
-					{
-						var ingredientList = ingrMatch.Groups["ingredients"].Value;
-						var entries = ingredientList.Split(", ", StringSplitOptions.None);
-						foreach (var entry in entries)
-						{
-							var ingSplit = entry.Split(" (", 2, StringSplitOptions.None);
-							var count = ingSplit.Length == 2
-								? ingSplit[1]
-								: "1";
-							var ingredient = ingSplit[0];
-							var addAs = $"{ingredient} ({count})";
-							if (AllSkills.Contains(ingredient))
-							{
-								this.Skills.Add(addAs);
-							}
-							else
-							{
-								this.Materials.Add(addAs);
-							}
-						}
-					}
-				}
-
-				var furnishingLimitType = collectible
-					? (FurnishingType)(sbyte)record["furnLimitType"]
-					: (FurnishingType)record["furnLimitType"];
-				if (furnishingLimitType == FurnishingType.None)
-				{
-					furnishingLimitType = (
-						AliveCats.Contains(this.FurnishingCategory!) ||
-						AliveCats.Contains(this.FurnishingSubcategory!))
-							? collectible
-								? FurnishingType.SpecialCollectibles
-								: FurnishingType.SpecialFurnishings
-							: collectible
-								? FurnishingType.CollectibleFurnishings
-								: FurnishingType.TraditionalFurnishings;
-				}
-
-				this.FurnishingLimitType = furnishingLimitType;
-				var itemLink = (string)record["resultitemLink"];
-				this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
-			}
-			#endregion
-
-			#region Public Properties
-			public string? Behavior { get; }
-
-			public string? BindType { get; }
-
-			public bool Collectible { get; }
-
-			public string? Description { get; }
-
-			public FurnishingType FurnishingLimitType { get; }
-
-			public string? FurnishingCategory { get; }
-
-			public string? FurnishingSubcategory { get; }
-
-			public long Id { get; }
-
-			public SortedSet<string> Materials { get; } = new(StringComparer.Ordinal);
-
-			public string? NickName { get; }
-
-			public string? Quality { get; }
-
-			public string? ResultItemLink { get; }
-
-			public string? Size { get; }
-
-			public SortedSet<string> Skills { get; } = new(StringComparer.Ordinal);
-
-			public Title Title { get; }
-
-			public string? TitleName { get; }
-
-			public ItemType Type { get; }
-			#endregion
-
-			#region Public Static Methods
-			public static string ImageName(string itemName, bool collectible) => $"ON-{(collectible ? string.Empty : "item-")}furnishing-{itemName.Replace(':', ',')}.jpg";
-			#endregion
-
-			#region Public Override Methods
-			public override string ToString() => $"({this.Id}) {this.TitleName}";
-			#endregion
 		}
 		#endregion
 	}
