@@ -25,6 +25,10 @@
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override string LogName => "ESO Furnishing Upload";
+		#endregion
+
 		#region Protected Override Methods
 
 		protected override void Main()
@@ -32,22 +36,32 @@
 			var site = (UespSite)this.Site;
 			var pages = site.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id");
 			pages.GetBacklinks("Template:Online Furnishing Summary", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
-			/* pages.Remove("Online:Aeonstone Formation");
-			pages.Remove("Online:Armory Station");
-			pages.Remove("Online:Blackwood Tapestry");
-			pages.Remove("Online:Lady Garick's Sacred Shield");
-			pages.Remove("Online:Sacred Hourglass of Alkosh");
-			*/
 
 			var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
-			this.GetPages(pages, false, items);
-			this.GetPages(pages, true, items);
+			this.GetPages(pages, items, false);
+			this.GetPages(pages, items, true);
+
+			var existingTitles = new TitleCollection(this.Site);
+			foreach (var item in items)
+			{
+				if (string.IsNullOrWhiteSpace(item.Value.IconName))
+				{
+					Debug.WriteLine("Empty: " + item.Key);
+				}
+				else
+				{
+					existingTitles.Add(item.Value.IconName);
+				}
+			}
+
+			var existing = existingTitles.Load(PageModules.Info);
+			existing.RemoveExists(false);
 
 			this.ProgressMaximum = items.Count;
 			foreach (var item in items)
 			{
 				var iconInfo = item.Value;
-				if (iconInfo.LocalIcon != null)
+				if (iconInfo.LocalIcon != null && !existing.Contains(iconInfo.IconName))
 				{
 					var pageText =
 						"== Summary ==\n" +
@@ -56,27 +70,37 @@
 						"== Licensing ==\n" +
 						"{{Zenimage}}" +
 						"[[Category:Online-Icons-Furnishings]]";
-
-					site.Upload(Path.Combine(WikiIconFolder, iconInfo.LocalIcon), iconInfo.IconName, "Upload furnishing icon", pageText);
+					var wikiIconName = iconInfo.IconName.Replace("\"", string.Empty, StringComparison.Ordinal);
+					site.Upload(Path.Combine(WikiIconFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
 				}
 
 				this.Progress++;
 			}
 		}
 
-		private void GetPages(PageCollection pages, bool collectibleFilter, SortedList<string, IconInfo> items)
+		private void GetPages(PageCollection pages, SortedList<string, IconInfo> items, bool collectibleFilter)
 		{
 			var retvalIds = new Dictionary<long, IconInfo>();
 			foreach (var page in pages)
 			{
 				if (page is VariablesPage varPage && varPage.GetVariable("id") is string idText)
 				{
-					if (collectibleFilter == varPage.GetVariable("collectible") is not null)
+					if (collectibleFilter == (varPage.GetVariable("collectible") is not null))
 					{
 						var id = long.Parse(idText, this.Site.Culture);
 						var toName = Title.ToLabelName(page.PageName);
-						var icon = varPage.GetVariable("icon") ?? Furnishing.IconName(toName);
-						var iconInfo = new IconInfo(id, icon);
+						var icon = varPage.GetVariable("icon");
+						if (string.IsNullOrEmpty(icon))
+						{
+							icon = Furnishing.IconName(toName);
+						}
+
+						var iconInfo = new IconInfo(id, "File:" + icon);
+						if (icon.Contains('"'))
+						{
+							Debug.WriteLine("Quote in title: " + icon);
+						}
+
 						if (items.TryAdd(toName, iconInfo))
 						{
 							retvalIds.Add(id, iconInfo);
@@ -89,7 +113,9 @@
 				}
 			}
 
-			var query = collectibleFilter ? "SELECT id, icon FROM collectibles WHERE id" : "SELECT CAST(itemId AS SIGNED INT) id, icon FROM minedItemSummary WHERE itemId";
+			var query = collectibleFilter
+				? "SELECT id, icon FROM collectibles WHERE id"
+				: "SELECT CAST(itemId AS SIGNED INT) id, icon FROM minedItemSummary WHERE itemId";
 			query += " IN(" + string.Join(",", retvalIds.Keys) + ") AND icon != '/esoui/art/icons/icon_missing.dds'";
 			var dbItems = EsoLog.Database.RunQuery(query);
 			foreach (var row in dbItems)
