@@ -96,9 +96,9 @@
 						}
 
 						var iconInfo = new IconInfo(id, "File:" + icon);
-						if (icon.Contains('"'))
+						if (icon.Contains('"', StringComparison.Ordinal))
 						{
-							Debug.WriteLine("Quote in title: " + icon);
+							this.Warn("Quote in title: " + icon);
 						}
 
 						if (items.TryAdd(toName, iconInfo))
