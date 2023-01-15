@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.IO;
 	using RobinHood70.WikiCommon;
 
 	public class MovePages : MovePagesJob
@@ -20,8 +19,8 @@
 					MediaWikiNamespaces.Template);
 			}
 
-			this.MoveAction = MoveAction.None;
-			this.FollowUpActions = FollowUpActions.Default & ~FollowUpActions.EmitReport;
+			this.MoveAction = MoveAction.MoveSafely;
+			this.FollowUpActions = FollowUpActions.Default;
 			this.Site.WaitForJobQueue();
 		}
 		#endregion
@@ -29,11 +28,12 @@
 		#region Protected Override Methods
 		protected override void PopulateMoves()
 		{
-			var lines = File.ReadAllLines("D:\\MoveList.txt");
-			foreach (var line in lines)
-			{
-				this.AddMove(line, line.Replace("ON-item-", "ON-", System.StringComparison.Ordinal));
-			}
+			this.AddMove("Online:Frostbane Bear Mount", "Online:Frostbane Bear (mount)");
+			this.AddMove("Online:Frostbane Bear Pet", "Online:Frostbane Bear (pet)");
+			this.AddMove("Online:Frostbane Sabre Cat Pet", "Online:Frostbane Sabre Cat (pet)");
+			this.AddMove("Online:Frostbane Sabre Cat Mount", "Online:Frostbane Sabre Cat (mount)");
+			this.AddMove("Online:Frostbane Wolf Mount", "Online:Frostbane Wolf (mount)");
+			this.AddMove("Online:Frostbane Wolf Pet", "Online:Frostbane Wolf (pet)");
 		}
 
 		//// this.AddLinkUpdate("Category:Online-Furnishings", "Category:Online-Furnishing Images");
