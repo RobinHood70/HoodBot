@@ -162,6 +162,28 @@
 		}
 		#endregion
 
+		#region Public Static Properties
+		public static Dictionary<FurnishingType, string> FurnishingLimitTypes { get; } = new()
+		{
+			[FurnishingType.None] = string.Empty,
+			[FurnishingType.TraditionalFurnishings] = "Traditional Furnishings",
+			[FurnishingType.SpecialFurnishings] = "Special Furnishings",
+			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishings",
+			[FurnishingType.SpecialCollectibles] = "Special Collectibles",
+		};
+
+		public static Dictionary<string, string> PageNameExceptions { get; } = new(StringComparer.Ordinal)
+		{
+			["Dwarven Spider Pet"] = "Dwarven Spider Pet (furnishing)",
+			["Frostbane Bear Mount"] = "Frostbane Bear (mount)",
+			["Frostbane Bear Pet"] = "Frostbane Bear (pet)",
+			["Frostbane Sabre Cat Pet"] = "Frostbane Sabre Cat (pet)",
+			["Frostbane Sabre Cat Mount"] = "Frostbane Sabre Cat (mount)",
+			["Frostbane Wolf Mount"] = "Frostbane Wolf (mount)",
+			["Frostbane Wolf Pet"] = "Frostbane Wolf (pet)",
+		};
+		#endregion
+
 		#region Public Properties
 		public string? Behavior { get; }
 

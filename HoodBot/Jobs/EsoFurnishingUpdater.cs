@@ -29,25 +29,6 @@
 		#region Static Fields
 		private static readonly string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname, tags FROM collectibles WHERE furnCategory != ''";
 		private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
-		private static readonly Dictionary<FurnishingType, string> FurnishingLimitTypes = new()
-		{
-			[FurnishingType.None] = string.Empty,
-			[FurnishingType.TraditionalFurnishings] = "Traditional Furnishings",
-			[FurnishingType.SpecialFurnishings] = "Special Furnishings",
-			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishings",
-			[FurnishingType.SpecialCollectibles] = "Special Collectibles",
-		};
-
-		private static readonly Dictionary<string, string> PageNameExceptions = new(StringComparer.Ordinal)
-		{
-			["Dwarven Spider Pet"] = "Dwaven Spider Pet (furnishing)",
-			["Frostbane Bear Mount"] = "Frostbane Bear (mount)",
-			["Frostbane Bear Pet"] = "Frostbane Bear (pet)",
-			["Frostbane Sabre Cat Pet"] = "Frostbane Sabre Cat (pet)",
-			["Frostbane Sabre Cat Mount"] = "Frostbane Sabre Cat (mount)",
-			["Frostbane Wolf Mount"] = "Frostbane Wolf (mount)",
-			["Frostbane Wolf Pet"] = "Frostbane Wolf (pet)",
-		};
 		#endregion
 
 		#region Fields
@@ -145,7 +126,11 @@
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			parser.ThrowNull();
-			this.GenericTemplateFixes(template);
+			if (this.GenericTemplateFixes(template))
+			{
+				this.Warn("Template problem on " + parser.Page.FullPageName);
+			}
+
 			this.FurnishingFixes(template, parser.Page);
 		}
 		#endregion
@@ -256,7 +241,7 @@
 		private void CheckPageName(Page? page, string labelName, Furnishing furnishing)
 		{
 			page.ThrowNull();
-			var compareName = PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
+			var compareName = Furnishing.PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
 			if (!string.Equals(labelName, compareName, StringComparison.Ordinal))
 			{
 				this.pageMessages.Add($"[[{page.FullPageName}|{labelName}]] ''should be''<br>\n" +
@@ -361,8 +346,16 @@
 
 			template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine, true);
 			template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
-			template.Update("cat", furnishing.FurnishingCategory, ParameterFormat.OnePerLine, false);
-			template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
+			if (!string.IsNullOrEmpty(furnishing.FurnishingCategory))
+			{
+				template.Update("cat", furnishing.FurnishingCategory, ParameterFormat.OnePerLine, false);
+			}
+
+			if (!string.IsNullOrEmpty(furnishing.FurnishingSubcategory))
+			{
+				template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
+			}
+
 			CheckBehavior(template, furnishing);
 
 			var craft = template.GetValue("craft");
@@ -419,7 +412,7 @@
 			}
 			else if (template.GetValue("furnLimitType") is string furnLimitType)
 			{
-				var wantsToBe = FurnishingLimitTypes[furnishing.FurnishingLimitType];
+				var wantsToBe = Furnishing.FurnishingLimitTypes[furnishing.FurnishingLimitType];
 				if (!string.Equals(furnLimitType + 's', wantsToBe, StringComparison.Ordinal))
 				{
 					template.Update("furnLimitType", wantsToBe);
@@ -466,9 +459,11 @@
 			return furnishing;
 		}
 
-		private void GenericTemplateFixes(SiteTemplateNode template)
+		private bool GenericTemplateFixes(SiteTemplateNode template)
 		{
-			template.Remove("1");
+			var retval = template.Find(1) != null;
+
+			// template.Remove("1");
 			template.Remove("animated");
 			template.Remove("audible");
 			template.Remove("collectible");
@@ -498,6 +493,8 @@
 			this.FixBundles(template);
 			this.FixList(template, "material");
 			this.FixList(template, "skill");
+
+			return retval;
 		}
 		#endregion
 	}
