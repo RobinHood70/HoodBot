@@ -743,7 +743,7 @@
 		/// <returns>The parameter that was altered.</returns>
 		public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy, false);
 
-		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
+		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist. Also applies the selected formatting.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
