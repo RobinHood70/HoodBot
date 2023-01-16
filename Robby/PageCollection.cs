@@ -188,6 +188,13 @@
 				}
 			}
 
+			if (subTitles.Count > 0)
+			{
+				var input = new PurgeInput(subTitles, method);
+				retval.MergeWith(Purge(site, input));
+				subTitles.Clear();
+			}
+
 			return retval;
 		}
 
