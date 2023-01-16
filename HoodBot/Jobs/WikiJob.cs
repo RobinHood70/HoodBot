@@ -141,7 +141,7 @@
 		{
 			this.Started?.Invoke(this, EventArgs.Empty);
 			this.BeforeLogging();
-			if (this.Logger != null)
+			if (this.Logger != null && this.JobType == JobType.Write)
 			{
 				LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
 				this.Logger.AddLogEntry(logInfo);
@@ -164,7 +164,11 @@
 
 		protected virtual void JobCompleted()
 		{
-			this.Logger?.EndLogEntry();
+			if (this.Logger is not null && this.JobType == JobType.Write)
+			{
+				this.Logger.EndLogEntry();
+			}
+
 			this.Results?.Save();
 			this.Completed?.Invoke(this, EventArgs.Empty);
 		}
