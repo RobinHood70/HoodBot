@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -34,10 +33,6 @@
 
 		#region Public Static Methods
 		public static UespSite CreateInstance(IWikiAbstractionLayer abstractionLayer) => new(abstractionLayer);
-
-		public static string GetBotDataFolder() => Environment.ExpandEnvironmentVariables("%BotData%");
-
-		public static string GetBotDataFolder(string file) => Path.Combine(GetBotDataFolder(), file);
 		#endregion
 
 		#region Public Override Methods

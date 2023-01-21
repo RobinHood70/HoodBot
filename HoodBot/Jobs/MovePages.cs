@@ -38,7 +38,7 @@
 
 		//// this.AddLinkUpdate("Category:Online-Furnishings", "Category:Online-Furnishing Images");
 		//// this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
-		//// this.LoadReplacementsFromFile(UespSite.GetBotDataFolder("Replacements5.txt"));
+		//// this.LoadReplacementsFromFile(LocalConfig.BotDataSubPath("Replacements5.txt"));
 		#endregion
 	}
 }

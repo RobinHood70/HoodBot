@@ -43,7 +43,7 @@
 		#region Protected Override Methods
 		protected override void LoadPages()
 		{
-			var fileName = UespSite.GetBotDataFolder("QuestLanguageDatabase.txt");
+			var fileName = LocalConfig.BotDataSubPath("QuestLanguageDatabase.txt");
 			Dictionary<string, string> translation = new(StringComparer.Ordinal);
 			CsvFile langFile = new();
 			langFile.ReadFile(fileName, true);
@@ -52,7 +52,7 @@
 				translation.Add(entry["ID"], entry["en-US"]);
 			}
 
-			fileName = UespSite.GetBotDataFolder("ItemPropertyList.txt");
+			fileName = LocalConfig.BotDataSubPath("ItemPropertyList.txt");
 			var lines = File.ReadAllLines(fileName);
 			var codeLines = BladesCodeLine.Parse(lines);
 

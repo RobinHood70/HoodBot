@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -135,7 +135,7 @@
 
 			var type = isLoadCall ? "Loaded" : "Saved";
 			Debug.WriteLine($"{type}: {csvFile.Count} rows");
-			csvFile.WriteFile(UespSite.GetBotDataFolder(type + " Variables.txt"));
+			csvFile.WriteFile(LocalConfig.BotDataSubPath(type + " Variables.txt"));
 		}
 		#endregion
 

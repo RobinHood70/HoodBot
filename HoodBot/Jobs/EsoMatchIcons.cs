@@ -8,7 +8,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -25,7 +24,6 @@
 
 		#region Static Fields
 		private static readonly DateTime LastRun = new(2020, 9, 25);
-		private static readonly string WikiIconsFolder = UespSite.GetBotDataFolder(@"WikiIcons\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
 		#region Fields
@@ -182,9 +180,9 @@
 		#region Private Methods
 		private void GetIconChecksums()
 		{
-			if (Directory.Exists(WikiIconsFolder))
+			if (Directory.Exists(LocalConfig.WikiIconsFolder))
 			{
-				foreach (var file in Directory.EnumerateFiles(WikiIconsFolder, "*.*", SearchOption.AllDirectories))
+				foreach (var file in Directory.EnumerateFiles(LocalConfig.WikiIconsFolder, "*.*", SearchOption.AllDirectories))
 				{
 					var fileData = File.ReadAllBytes(file);
 					var checksum = Globals.GetHash(fileData, HashType.Sha1);
@@ -194,7 +192,7 @@
 						this.allIcons.Add(checksum, list);
 					}
 
-					list.Add(file[WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
+					list.Add(file[LocalConfig.WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
 				}
 			}
 		}

@@ -13,10 +13,6 @@
 
 	internal sealed class EsoFurnishingUpload : WikiJob
 	{
-		#region Fields
-		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "icons");
-		#endregion
-
 		#region Constructors
 		[JobInfo("Furnishing Icon Upload", "ESO")]
 		public EsoFurnishingUpload(JobManager jobManager)
@@ -71,7 +67,7 @@
 						"{{Zenimage}}" +
 						"[[Category:Online-Icons-Furnishings]]";
 					var wikiIconName = iconInfo.IconName.Replace("\"", string.Empty, StringComparison.Ordinal);
-					site.Upload(Path.Combine(WikiIconFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
+					site.Upload(Path.Combine(LocalConfig.WikiIconsFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
 				}
 
 				this.Progress++;

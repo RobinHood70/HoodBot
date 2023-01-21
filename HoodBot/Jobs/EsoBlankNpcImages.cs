@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
@@ -13,7 +14,7 @@
 				  jobManager,
 				  new string[] { "Online NPC Summary" },
 				  true,
-				  UespSite.GetBotDataFolder("ESO NPCs No Images.txt"),
+				  LocalConfig.BotDataSubPath("ESO NPCs No Images.txt"),
 				  false)
 		{
 		}

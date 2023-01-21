@@ -31,16 +31,6 @@
 		#endregion
 
 		#region Public Methods
-		public static string GetPatchVersion(WikiJob job)
-		{
-			if (patchVersion == null)
-			{
-				GetPatchPage(job);
-			}
-
-			return patchVersion!;
-		}
-
 		public static PlaceCollection GetPlaces(Site site)
 		{
 			var places = site.NotNull().CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
@@ -82,7 +72,23 @@
 			return retval;
 		}
 
-		public static void SetBotUpdateVersion(WikiJob job, string pageType)
+		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
+		#endregion
+
+		#region Public WikiJob Extension Methods
+		public static string GetPatchVersion(this WikiJob job)
+		{
+			if (patchVersion == null)
+			{
+				_ = GetPatchPage(job);
+			}
+
+			return patchVersion!;
+		}
+
+		public static string IconDownloadPath(this WikiJob job) => $"https://esofiles.uesp.net/update-{GetPatchVersion(job)}/icons.zip";
+
+		public static void SetBotUpdateVersion(this WikiJob job, string pageType)
 		{
 			// Assumes EsoPatchVersion has already been updated.
 			job.StatusWriteLine("Update bot parameters");
@@ -92,13 +98,11 @@
 			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();
-				param.Value.AddText(GetPatchVersion(job) + '\n');
+				param.Value.AddText(job.GetPatchVersion() + '\n');
 				parser.UpdatePage();
 				patchPage.Save("Update " + paramName, true);
 			}
 		}
-
-		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
 		#endregion
 
 		#region Private Methods

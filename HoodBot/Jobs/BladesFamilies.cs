@@ -7,7 +7,7 @@
 	using System.Text;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 
 	internal sealed class BladesFamilies : WikiJob
 	{
@@ -27,7 +27,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			foreach (var file in Directory.EnumerateFiles(UespSite.GetBotDataFolder("Enemies")))
+			foreach (var file in Directory.EnumerateFiles(LocalConfig.BotDataSubPath("Enemies")))
 			{
 				// var fi = new FileInfo(file);
 				var text = File.ReadAllText(file);
@@ -45,7 +45,7 @@
 			this.families.Sort((x, y) => string.CompareOrdinal(x.Sort, y.Sort));
 			this.enemies.Sort((x, y) => string.CompareOrdinal(x.Sort, y.Sort));
 
-			using var output = File.CreateText(UespSite.GetBotDataFolder("Enemies.txt"));
+			using var output = File.CreateText(LocalConfig.BotDataSubPath("Enemies.txt"));
 			foreach (var family in this.families)
 			{
 				output.Write(family.Build());

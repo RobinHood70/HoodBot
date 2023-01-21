@@ -6,7 +6,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
@@ -57,8 +56,6 @@
 
 		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '/esoui/art/icons/%'";
 
-		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "icons");
-
 		private readonly List<string> styles;
 		#endregion
 
@@ -85,7 +82,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var allFiles = Directory.GetFiles(WikiIconFolder);
+			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
 			TitleCollection fileTitles = new(this.Site);
@@ -116,7 +113,7 @@
 						$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n" +
 						$"== Licensing ==\n" +
 						$"{{{{Zenimage}}}}";
-					var fileName = Path.Combine(WikiIconFolder, upload.Icon + ".png");
+					var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
 					this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText);
 				}
 			}

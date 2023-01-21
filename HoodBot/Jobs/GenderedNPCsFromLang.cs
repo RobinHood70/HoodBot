@@ -4,8 +4,7 @@
 	using System.Globalization;
 	using System.IO;
 	using RobinHood70.CommonCode;
-
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 
 	internal sealed class GenderedNPCsFromLang : WikiJob
@@ -21,8 +20,8 @@
 			TitleCollection esoNpcs = new(this.Site);
 			esoNpcs.GetCategoryMembers("Online-NPCs");
 
-			var fileName = UespSite.GetBotDataFolder("en.lang.csv");
-			var fileNameOut = UespSite.GetBotDataFolder("GenderedNPCs.txt");
+			var fileName = LocalConfig.BotDataSubPath("en.lang.csv");
+			var fileNameOut = LocalConfig.BotDataSubPath("GenderedNPCs.txt");
 			using var reader = File.OpenText(fileName);
 			CsvFile csvFile = new()
 			{
