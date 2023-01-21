@@ -1,5 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
+
 	public class MovePages : MovePagesJob
 	{
 		#region Constructors
@@ -16,12 +22,18 @@
 		#region Protected Override Methods
 		protected override void PopulateMoves()
 		{
-			this.AddMove("Online:Frostbane Bear Mount", "Online:Frostbane Bear (mount)");
-			this.AddMove("Online:Frostbane Bear Pet", "Online:Frostbane Bear (pet)");
-			this.AddMove("Online:Frostbane Sabre Cat Pet", "Online:Frostbane Sabre Cat (pet)");
-			this.AddMove("Online:Frostbane Sabre Cat Mount", "Online:Frostbane Sabre Cat (mount)");
-			this.AddMove("Online:Frostbane Wolf Mount", "Online:Frostbane Wolf (mount)");
-			this.AddMove("Online:Frostbane Wolf Pet", "Online:Frostbane Wolf (pet)");
+			var templatePages = new PageCollection(this.Site);
+			templatePages.SetLimitations(LimitationType.OnlyAllow, MediaWikiNamespaces.Template);
+			templatePages.GetCategoryMembers("Pages Needing Renaming", CategoryMemberTypes.Page, false);
+			foreach (var page in templatePages)
+			{
+				var parsed = new ContextualParser(page, InclusionType.CurrentPage, false);
+				var rename = parsed.FindSiteTemplate("Rename");
+				if (rename != null && rename.Find(1) is IParameterNode renameTo)
+				{
+					this.AddMove(page.FullPageName, renameTo.Value.ToRaw().Replace(" Gods", " Religion", StringComparison.Ordinal));
+				}
+			}
 		}
 
 		//// this.AddLinkUpdate("Category:Online-Furnishings", "Category:Online-Furnishing Images");
