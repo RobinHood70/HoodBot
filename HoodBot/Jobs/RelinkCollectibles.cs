@@ -20,7 +20,7 @@
 		#region Constructors
 		[JobInfo("Relink ESO Collectibles", "ESO")]
 		public RelinkCollectibles(JobManager jobManager)
-				: base(jobManager)
+				: base(jobManager, false)
 		{
 			this.MoveAction = MoveAction.None;
 			this.EditSummaryMove = "Match page name to item";

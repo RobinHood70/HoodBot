@@ -5,7 +5,7 @@
 		#region Constructors
 		[JobInfo("Quick Move")]
 		public QuickMove(JobManager jobManager, string from, string to)
-				: base(jobManager)
+				: base(jobManager, false)
 		{
 			this.FollowUpActions = FollowUpActions.FixLinks;
 			this.EditSummaryMove = $"Move to [[{to}]]";

@@ -63,10 +63,20 @@
 		#endregion
 
 		#region Constructors
-		protected MovePagesJob(JobManager jobManager)
+		protected MovePagesJob(JobManager jobManager, bool updateUserSpace)
 			: base(jobManager)
 		{
 			this.parameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
+			if (updateUserSpace)
+			{
+				this.Pages.SetLimitations(
+					LimitationType.Disallow,
+					MediaWikiNamespaces.Media,
+					MediaWikiNamespaces.MediaWiki,
+					MediaWikiNamespaces.Special,
+					MediaWikiNamespaces.Template);
+			}
+
 		}
 		#endregion
 

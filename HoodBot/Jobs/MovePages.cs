@@ -1,24 +1,12 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.WikiCommon;
-
 	public class MovePages : MovePagesJob
 	{
 		#region Constructors
 		[JobInfo("Move Pages")]
 		public MovePages(JobManager jobManager, bool updateUserSpace)
-				: base(jobManager)
+				: base(jobManager, updateUserSpace)
 		{
-			if (updateUserSpace)
-			{
-				this.Pages.SetLimitations(
-					Robby.LimitationType.Disallow,
-					MediaWikiNamespaces.Media,
-					MediaWikiNamespaces.MediaWiki,
-					MediaWikiNamespaces.Special,
-					MediaWikiNamespaces.Template);
-			}
-
 			this.MoveAction = MoveAction.MoveSafely;
 			this.FollowUpActions = FollowUpActions.Default;
 			this.Site.WaitForJobQueue();
