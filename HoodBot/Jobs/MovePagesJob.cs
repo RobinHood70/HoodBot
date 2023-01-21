@@ -261,21 +261,19 @@
 
 		protected override void PageLoaded(EditJob job, Page page)
 		{
+			ContextualParser parser = new(page);
 			if (this.linkUpdates.TryGetValue(page, out var linkUpdate))
 			{
 				var pageActions = this.actions[page];
-				if (!pageActions.HasAction(ReplacementActions.Skip))
+				if (!pageActions.HasAction(ReplacementActions.Skip) &&
+					pageActions.HasAction(ReplacementActions.NeedsEdited))
 				{
-					ContextualParser parser = new(page);
-					if (pageActions.HasAction(ReplacementActions.NeedsEdited))
-					{
-						this.EditPageLoaded(parser, linkUpdate);
-					}
-
-					this.BacklinkPageLoaded(parser);
-					parser.UpdatePage();
+					this.EditPageLoaded(parser, linkUpdate);
 				}
 			}
+
+			this.BacklinkPageLoaded(parser);
+			parser.UpdatePage();
 		}
 		#endregion
 
