@@ -88,6 +88,7 @@
 				return;
 			}
 
+			this.StatusWriteLine("Saving pages");
 			if (this.Shuffle && !this.Site.EditingEnabled)
 			{
 				pages.Shuffle();
