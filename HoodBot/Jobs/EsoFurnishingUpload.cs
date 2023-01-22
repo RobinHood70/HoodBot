@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
+	using System.IO.Compression;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
@@ -29,6 +30,19 @@
 
 		protected override void Main()
 		{
+			var downloadPath = this.IconDownloadPath();
+			var localFile = Path.Combine(LocalConfig.BotDataFolder, "icons.zip");
+			var extractPath = LocalConfig.WikiIconsFolder;
+
+			if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
+			{
+				this.StatusWriteLine("Updating local icons file");
+				this.Site.Download(downloadPath, localFile);
+
+				this.StatusWriteLine("Extracting icons");
+				ZipFile.ExtractToDirectory(localFile, extractPath, true);
+			}
+
 			var site = (UespSite)this.Site;
 			var pages = site.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id");
 			pages.GetBacklinks("Template:Online Furnishing Summary", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);

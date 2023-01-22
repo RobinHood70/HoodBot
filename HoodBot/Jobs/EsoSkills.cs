@@ -139,8 +139,9 @@
 			EsoSpace.SetBotUpdateVersion(this, "skills");
 		}
 
-		protected override void PageLoaded(EditJob job, Page page) =>
+		protected override void PageLoaded(Page page) =>
 			this.skills[page.FullPageName].UpdatePageText(page, this.Site);
+
 		#endregion
 
 		#region Private Static Methods

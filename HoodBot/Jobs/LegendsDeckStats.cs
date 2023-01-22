@@ -34,7 +34,7 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			SortedDictionary<int, int> powerCount = new();
 			if (parser.NotNull().FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)

@@ -69,7 +69,7 @@
 
 		protected override void LoadPages() => this.Pages.GetTitles(this.allTitles);
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			page.Text = page.Text.Replace("==Licensing== {{esimage}}", "==Licensing==\n{{esimage}}", StringComparison.Ordinal);
 			var title = this.primaryLookup[page];

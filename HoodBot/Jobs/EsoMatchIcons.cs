@@ -65,7 +65,7 @@
 
 		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{

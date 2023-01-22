@@ -25,7 +25,7 @@
 			this.Pages.GetBacklinks(title.FullPageName, BacklinksTypes.EmbeddedIn);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			foreach (var template in parser.FindSiteTemplates(this.TemplateName))
 			{

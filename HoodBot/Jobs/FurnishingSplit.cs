@@ -63,7 +63,7 @@
 			base.Main();
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			parser.ThrowNull();
 			parser.Page.PropertyThrowNull(nameof(parser));

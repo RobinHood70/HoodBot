@@ -70,7 +70,7 @@
 			this.Pages.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn, true);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser) =>
+		protected override void ParseText(ContextualParser parser) =>
 			parser.Replace(node => this.ReplaceNode(node, parser), false);
 
 		private NodeCollection? ReplaceNode(IWikiNode node, ContextualParser parser)

@@ -82,11 +82,11 @@
 			{
 				var page = this.Site.CreatePage(collectible.Key, this.blankText);
 				this.Pages.Add(page);
-				this.PageLoaded(this, page);
+				this.PageLoaded(page);
 			}
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			var page = parser.Page;
 			parser.ReplaceText(

@@ -116,7 +116,7 @@
 			}
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			// TODO: For now, LoadPages takes care of everything. Should be split out.
 		}

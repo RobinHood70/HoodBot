@@ -43,7 +43,7 @@
 			this.Pages.GetTitles(titles);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			foreach (var link in parser.LinkNodes)
 			{

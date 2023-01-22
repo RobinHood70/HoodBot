@@ -109,7 +109,7 @@
 			EsoSpace.SetBotUpdateVersion(this, "itemset");
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			var setData = this.sets[page];
 			if (!page.Exists && setData.Page is not null)

@@ -18,14 +18,14 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract void ParseText(object sender, ContextualParser parser);
+		protected abstract void ParseText(ContextualParser parser);
 		#endregion
 
 		#region Protected Override Methods
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			ContextualParser parser = new(page);
-			this.ParseText(job, parser);
+			this.ParseText(parser);
 			parser.UpdatePage();
 		}
 		#endregion

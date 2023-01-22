@@ -32,7 +32,7 @@
 		#region Protected Override Methods
 		protected override void LoadPages() => this.Pages.GetCategoryMembers("Online-Furnishings-Tagged for Bot");
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			if (parser.FindSiteTemplate("Online Furnishing Summary") is not SiteTemplateNode template)
 			{

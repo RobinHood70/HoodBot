@@ -49,7 +49,7 @@
 			}
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			// TODO: Might be candidate for a new job type.
 		}

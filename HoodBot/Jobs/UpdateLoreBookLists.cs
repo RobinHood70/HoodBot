@@ -62,7 +62,7 @@
 			}
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			ContextualParser parser = new(page);
 			var factory = parser.Factory;

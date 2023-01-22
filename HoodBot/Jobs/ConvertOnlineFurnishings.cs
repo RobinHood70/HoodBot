@@ -44,7 +44,7 @@
 			"Online:Windhelm Wolfhound (furnishing)");
 		*/
 
-		protected override void PageLoaded(EditJob sender, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			var originalParser = new ContextualParser(page);
 			var index = originalParser.FindIndex(node => node is SiteTemplateNode templateNode &&

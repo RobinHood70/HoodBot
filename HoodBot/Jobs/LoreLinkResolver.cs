@@ -54,7 +54,7 @@
 			this.Pages.Remove(books);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
+		protected override void ParseText(ContextualParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
 		#endregion
 
 		#region Private Static Methods

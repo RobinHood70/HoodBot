@@ -73,7 +73,7 @@
 			this.Pages.GetTitles(npcPages);
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 			{

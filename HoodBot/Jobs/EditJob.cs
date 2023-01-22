@@ -71,7 +71,7 @@
 					page = new Title(page).Load();
 					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 					{
-						this.PageMissing(this, page);
+						this.PageMissing(page);
 					}
 
 					editConflictAction(this, page);
@@ -133,7 +133,7 @@
 		#region Protected Abstract Methods
 		protected abstract void LoadPages();
 
-		protected abstract void PageLoaded(EditJob job, Page page);
+		protected abstract void PageLoaded(Page page);
 		#endregion
 
 		#region Protected Virtual Methods
@@ -145,15 +145,15 @@
 		{
 		}
 
-		protected virtual void PageMissing(EditJob sender, Page page)
+		protected virtual void PageMissing(Page page)
 		{
 		}
 		#endregion
 
 		#region Private Methods
-		private void Pages_PageLoaded(PageCollection sender, Page eventArgs) => this.PageLoaded(this, eventArgs);
+		private void Pages_PageLoaded(PageCollection sender, Page eventArgs) => this.PageLoaded(eventArgs);
 
-		private void Pages_PageMissing(PageCollection sender, Page eventArgs) => this.PageMissing(this, eventArgs);
+		private void Pages_PageMissing(PageCollection sender, Page eventArgs) => this.PageMissing(eventArgs);
 		#endregion
 	}
 }

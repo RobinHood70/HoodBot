@@ -49,7 +49,7 @@
 			this.Pages.GetCategoryMembers("Online-Mounts", CategoryMemberTypes.Page, false);
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			var idPageName = page.PageName.Replace(" (mount)", string.Empty, StringComparison.Ordinal);
 			if (this.ids.TryGetValue(idPageName, out var id))

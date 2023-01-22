@@ -56,6 +56,7 @@
 		#region Fields
 		private readonly IDictionary<Title, DetailedActions> actions = new SortedDictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
 		private readonly ParameterReplacers parameterReplacers;
+		private readonly IDictionary<Title, string> edits = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
 		private readonly IDictionary<Title, Title> moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		private readonly IDictionary<Title, Title> linkUpdates = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		private bool isRedirectLink;
@@ -191,6 +192,10 @@
 			if (this.MoveAction != MoveAction.None)
 			{
 				this.moves.Add(from, to);
+				if ((initialActions & ReplacementActions.NeedsEdited) != 0)
+				{
+					this.edits.Add(this.Site.EditingEnabled ? to : from, reason ?? "Update after move");
+				}
 			}
 
 			if (this.MoveAction == MoveAction.None ||
@@ -269,19 +274,9 @@
 			}
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			ContextualParser parser = new(page);
-			if (this.linkUpdates.TryGetValue(page, out var linkUpdate))
-			{
-				var pageActions = this.actions[page];
-				if (!pageActions.HasAction(ReplacementActions.Skip) &&
-					pageActions.HasAction(ReplacementActions.NeedsEdited))
-				{
-					this.EditPageLoaded(parser, linkUpdate);
-				}
-			}
-
 			this.BacklinkPageLoaded(parser);
 			parser.UpdatePage();
 		}
@@ -346,7 +341,7 @@
 			}
 		}
 
-		protected virtual void CustomEdit(Page page, Title from)
+		protected virtual void CustomEdit(ContextualParser parser, Title from)
 		{
 		}
 
@@ -366,7 +361,7 @@
 
 			if (action.HasAction(ReplacementActions.Edit))
 			{
-				this.CustomEdit(page, from);
+				this.CustomEdit(parser, from);
 			}
 		}
 
@@ -534,6 +529,11 @@
 					this.SuppressRedirects);
 				this.Progress++;
 			}
+
+			var editAfterMove = PageCollection.UnlimitedDefault(this.Site);
+			editAfterMove.PageLoaded += this.EditAfterMove_PageLoaded;
+			editAfterMove.GetTitles(this.edits.Keys);
+			editAfterMove.PageLoaded -= this.EditAfterMove_PageLoaded;
 		}
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
@@ -832,6 +832,13 @@
 		#endregion
 
 		#region Private Methods
+		private void EditAfterMove_PageLoaded(PageCollection sender, Page page)
+		{
+			var parser = new ContextualParser(page);
+			this.EditPageLoaded(parser, this.linkUpdates[page]);
+			parser.UpdatePage();
+		}
+
 		private void GetBacklinkTitles(PageCollection pageInfo, TitleCollection backlinkTitles)
 		{
 			foreach (var linkUpdate in this.linkUpdates)

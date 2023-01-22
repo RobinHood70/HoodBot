@@ -52,7 +52,7 @@
 			//// this.Pages.GetTitles("Online:Enchanted Snow Globe Home", "Online:Lucky Cat Landing", "Online:Potentate's Retreat", "Online:Varlaisvea Ayleid Ruins", "Online:Varlaisvea Ayleid Ruins", "Online:Stone Eagle Aerie", "Online:Pantherfang Chapel", "Online:Sweetwater Cascades");
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			var sections = new List<Section>(parser.ToSections());
 			foreach (var section in FindFurnishings(sections))

@@ -98,7 +98,7 @@
 			this.Titles.AddRange(allTitles);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parser)
+		protected override void ParseText(ContextualParser parser)
 		{
 			parser.ThrowNull();
 			foreach (var title in this.Titles)

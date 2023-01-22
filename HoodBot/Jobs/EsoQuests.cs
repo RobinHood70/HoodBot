@@ -182,12 +182,12 @@
 			foreach (var quest in this.quests)
 			{
 				var page = this.Site.CreatePage(quest.Key);
-				this.PageMissing(this, page); // TODO: This shouldn't need to be called manually.
+				this.PageMissing(page); // TODO: This shouldn't need to be called manually.
 				this.Pages.Add(page);
 			}
 		}
 
-		protected override void PageMissing(EditJob sender, Page page)
+		protected override void PageMissing(Page page)
 		{
 			var quest = this.quests[page];
 			SortedSet<string> locs = new(StringComparer.Ordinal);
@@ -307,7 +307,7 @@
 			page.Text = sb.ToString();
 		}
 
-		protected override void PageLoaded(EditJob job, Page page)
+		protected override void PageLoaded(Page page)
 		{
 			// TODO: Nothing to do here since this is a create-only job.
 		}
