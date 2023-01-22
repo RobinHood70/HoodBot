@@ -55,10 +55,10 @@
 	{
 		#region Fields
 		private readonly IDictionary<Title, DetailedActions> actions = new SortedDictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
-		private readonly ParameterReplacers parameterReplacers;
-		private readonly IDictionary<Title, string> edits = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
-		private readonly IDictionary<Title, Title> moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		private readonly IDictionary<Title, Title> linkUpdates = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, Title> moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
+		private readonly ParameterReplacers parameterReplacers;
+
 		private bool isRedirectLink;
 		private string? logDetails;
 		#endregion
@@ -192,10 +192,6 @@
 			if (this.MoveAction != MoveAction.None)
 			{
 				this.moves.Add(from, to);
-				if ((initialActions & ReplacementActions.NeedsEdited) != 0)
-				{
-					this.edits.Add(this.Site.EditingEnabled ? to : from, reason ?? "Update after move");
-				}
 			}
 
 			if (this.MoveAction == MoveAction.None ||
@@ -262,12 +258,12 @@
 
 		protected override void Main()
 		{
-			base.Main();
 			if (this.MoveAction != MoveAction.None)
 			{
 				this.MovePages();
 			}
 
+			base.Main();
 			if ((this.FollowUpActions & FollowUpActions.CheckLinksRemaining) != 0)
 			{
 				this.CheckRemaining();
@@ -332,35 +328,20 @@
 					}
 				}
 
-				leftovers.Sort();
-				this.WriteLine("The following pages are still linked to:");
-				foreach (var title in leftovers)
+				if (leftovers.Count > 0)
 				{
-					this.WriteLine($"* [[Special:WhatLinksHere/{title}|{title}]]");
+					leftovers.Sort();
+					this.WriteLine("The following pages are still linked to:");
+					foreach (var title in leftovers)
+					{
+						this.WriteLine($"* [[Special:WhatLinksHere/{title}|{title}]]");
+					}
 				}
 			}
 		}
 
 		protected virtual void CustomEdit(ContextualParser parser, Title from)
 		{
-		}
-
-		protected virtual void EditPageLoaded(ContextualParser parser, Title from)
-		{
-			var page = parser.Page;
-			var action = this.actions[from];
-			if (page.Exists &&
-				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
-				action.HasAction(ReplacementActions.Propose))
-			{
-				var reason = action.Reason.NotNull();
-				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
-			}
-
-			if (action.HasAction(ReplacementActions.Edit))
-			{
-				this.CustomEdit(parser, from);
-			}
 		}
 
 		protected virtual void EmitReport()
@@ -499,19 +480,27 @@
 			this.StatusWriteLine("Moving pages");
 			this.Progress = 0;
 			var moveCount = 0;
+			var editTitles = new TitleCollection(this.Site);
 			foreach (var action in this.actions)
 			{
-				if (action.Value.HasAction(ReplacementActions.Move))
+				var actionValue = action.Value;
+				if (actionValue.HasAction(ReplacementActions.Move))
 				{
 					moveCount++;
 				}
+
+				if (actionValue.HasAction(ReplacementActions.Edit) || actionValue.HasAction(ReplacementActions.Edit))
+				{
+					editTitles.Add(action.Key);
+				}
 			}
 
+			var editPages = editTitles.Load();
 			this.ProgressMaximum = moveCount;
-			foreach (var from in this.actions)
+			foreach (var action in this.actions)
 			{
-				var to = this.moves[from.Key];
-				var fromNs = from.Key.Namespace;
+				var to = this.moves[action.Key];
+				var fromNs = action.Key.Namespace;
 				var moveTalkPage =
 					!fromNs.IsTalkSpace &&
 					(this.MoveExtra & MoveOptions.MoveTalkPage) != 0;
@@ -519,19 +508,44 @@
 					fromNs.AllowsSubpages &&
 					(this.MoveExtra & MoveOptions.MoveSubPages) != 0;
 				this.Site.Move(
-					from.Key,
+					action.Key,
 					to,
 					this.EditSummaryMove,
 					moveTalkPage,
 					moveSubPages,
 					this.SuppressRedirects);
+				if (editPages.TryGetValue(action.Key, out var editPage))
+				{
+					var actionValue = action.Value;
+					var parser = new ContextualParser(editPage);
+					var isMinor = true;
+					string? editSummary = null;
+					if (actionValue.HasAction(ReplacementActions.Edit))
+					{
+						editSummary = this.EditSummaryEditMovedPage;
+						isMinor = this.MinorEdit;
+						this.CustomEdit(parser, action.Key);
+					}
+
+					if (actionValue.HasAction(ReplacementActions.Propose))
+					{
+						var reason = action.Value.Reason.NotNull();
+						ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
+						editSummary = this.EditSummaryPropose;
+						isMinor = false;
+					}
+
+					if (editSummary is null)
+					{
+						throw new InvalidOperationException("Edit summary is null editing moved page.");
+					}
+
+					parser.UpdatePage();
+					editPage.SaveAs(to.FullPageName, editSummary, isMinor, Tristate.False, false, true);
+				}
+
 				this.Progress++;
 			}
-
-			var editAfterMove = PageCollection.UnlimitedDefault(this.Site);
-			editAfterMove.PageLoaded += this.EditAfterMove_PageLoaded;
-			editAfterMove.GetTitles(this.edits.Keys);
-			editAfterMove.PageLoaded -= this.EditAfterMove_PageLoaded;
 		}
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
@@ -830,13 +844,6 @@
 		#endregion
 
 		#region Private Methods
-		private void EditAfterMove_PageLoaded(PageCollection sender, Page page)
-		{
-			var parser = new ContextualParser(page);
-			this.EditPageLoaded(parser, this.linkUpdates[page]);
-			parser.UpdatePage();
-		}
-
 		private void GetBacklinkTitles(PageCollection pageInfo, TitleCollection backlinkTitles)
 		{
 			foreach (var linkUpdate in this.linkUpdates)
