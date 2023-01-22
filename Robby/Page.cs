@@ -367,9 +367,11 @@
 				};
 
 				var retval = this.Site.AbstractionLayer.Edit(input);
-				return string.Equals(retval.Result, "Success", StringComparison.Ordinal)
-					? ChangeStatus.Success
-					: ChangeStatus.Failure;
+				return (retval.Flags & EditFlags.NoChange) != 0
+					? ChangeStatus.NoEffect
+					: string.Equals(retval.Result, "Success", StringComparison.Ordinal)
+						? ChangeStatus.Success
+						: ChangeStatus.Failure;
 			}
 		}
 
