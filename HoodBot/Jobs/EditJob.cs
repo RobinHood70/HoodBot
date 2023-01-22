@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -19,10 +18,6 @@
 
 		#region Protected Properties
 		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
-
-		protected IDictionary<Title, string> CustomEditSummaries { get; } = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
-
-		protected IDictionary<Title, bool> CustomMinorEdits { get; } = new Dictionary<Title, bool>(SimpleTitleComparer.Instance);
 
 		protected bool MinorEdit { get; set; } = true;
 
@@ -53,7 +48,7 @@
 		#region Protected Methods
 		protected void SavePage(Page page) => this.SavePage(page.NotNull(), this.EditSummary, this.MinorEdit, this.EditConflictAction);
 
-		protected void SavePage(Page page, string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction)
+		protected void SavePage(Page page, string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
 		{
 			page.ThrowNull();
 			var saved = false;
@@ -61,8 +56,6 @@
 			{
 				try
 				{
-					var editSummary = this.CustomEditSummaries.TryGetValue(page, out var customSummary) ? customSummary : defaultSummary;
-					var isMinor = this.CustomMinorEdits.TryGetValue(page, out var customIsMinor) ? customIsMinor : defaultIsMinor;
 					page.Save(editSummary, isMinor, this.CreateOnly, this.RecreateIfDeleted);
 					saved = true;
 				}

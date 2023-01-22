@@ -355,8 +355,6 @@
 			{
 				var reason = action.Reason.NotNull();
 				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
-				this.CustomEditSummaries[from] = this.EditSummaryPropose;
-				this.CustomMinorEdits[from] = false;
 			}
 
 			if (action.HasAction(ReplacementActions.Edit))
