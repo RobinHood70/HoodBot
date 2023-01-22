@@ -375,6 +375,39 @@
 			}
 		}
 
+		/// <summary>Saves the page text under a new name, overwriting any previous text.</summary>
+		/// <param name="saveName">The name to save the page as.</param>
+		/// <param name="editSummary">The edit summary.</param>
+		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
+		/// <param name="createOnly">Whether the edit should only occur if it would create a new page (<see cref="Tristate.True"/>), if it would not create a new page (<see cref="Tristate.False"/>) or it doesn't matter (<see cref="Tristate.Unknown"/>).</param>
+		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
+		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
+		/// <returns>A value indicating the change status of the edit.</returns>
+		public ChangeStatus SaveAs(string saveName, [Localizable(true)] string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted, bool isBotEdit)
+		{
+			PageTextChangeArgs changeArgs = new(this, nameof(this.SaveAs), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
+			return this.Site.PublishPageTextChange(changeArgs, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				EditInput input = new(saveName, this.Text)
+				{
+					Bot = changeArgs.BotEdit,
+					Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
+					Recreate = changeArgs.RecreateIfJustDeleted,
+					Summary = changeArgs.EditSummary,
+					RequireNewPage = createOnly,
+				};
+
+				var retval = this.Site.AbstractionLayer.Edit(input);
+				return (retval.Flags & EditFlags.NoChange) != 0
+					? ChangeStatus.NoEffect
+					: string.Equals(retval.Result, "Success", StringComparison.Ordinal)
+						? ChangeStatus.Success
+						: ChangeStatus.Failure;
+			}
+		}
+
 		/// <summary>Sets <see cref="StartTimestamp"/> to 2000-01-01. This allows the Save function to detect if a page has ever been deleted.</summary>
 		public void SetMinimalStartTimestamp() => this.StartTimestamp = new DateTime(2000, 1, 1);
 		#endregion
