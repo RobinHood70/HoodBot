@@ -114,7 +114,7 @@
 			ChangeStatus ChangeFunc()
 			{
 				DeleteInput input = new(title.FullPageName) { Reason = reason };
-				var retval = title.Namespace.Site.AbstractionLayer.Delete(input);
+				var retval = title.Site.AbstractionLayer.Delete(input);
 				return retval.LogId == 0
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -146,7 +146,7 @@
 		{
 			if (title.NotNull().Namespace.CanTalk)
 			{
-				var pages = PageCollection.Unlimited(title.Namespace.Site, options);
+				var pages = PageCollection.Unlimited(title.Site, options);
 				pages.GetTitles(title.FullPageName);
 				if (pages.Count == 1)
 				{
@@ -271,7 +271,7 @@
 				[nameof(protections)] = protections,
 			};
 
-			return title.Namespace.Site.PublishChange(title, parameters, ChangeFunc);
+			return title.Site.PublishChange(title, parameters, ChangeFunc);
 
 			ChangeStatus ChangeFunc()
 			{
@@ -281,7 +281,7 @@
 					Reason = reason
 				};
 
-				return Protect(title.Namespace.Site, input)
+				return Protect(title.Site, input)
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
 			}

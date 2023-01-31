@@ -434,7 +434,7 @@
 					.Append("{{ESO Sets With|subtype=|source=}}\n")
 					.Append("{{Stub|Item Set}}");
 
-				return title.Namespace.Site.CreatePage(title, sb.ToString());
+				return title.Site.CreatePage(title, sb.ToString());
 			}
 			#endregion
 
