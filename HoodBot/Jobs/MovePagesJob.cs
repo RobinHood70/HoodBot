@@ -77,7 +77,6 @@
 					MediaWikiNamespaces.Special,
 					MediaWikiNamespaces.Template);
 			}
-
 		}
 		#endregion
 
