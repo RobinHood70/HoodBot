@@ -72,8 +72,11 @@
 			this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
 			desc = desc
 				.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
-				.Replace("|r", string.Empty, StringComparison.Ordinal);
-			this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
+				.Replace("|r", string.Empty, StringComparison.Ordinal)
+				.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
+			this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length
+				? null
+				: desc;
 			var furnCategory = (string)record["furnCategory"];
 			this.Behavior = ((string)record["tags"])
 				.Replace(",,", ",", StringComparison.Ordinal)
