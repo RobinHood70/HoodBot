@@ -4,6 +4,8 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.IO;
+	using System.IO.Compression;
 	using System.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
@@ -76,6 +78,23 @@
 		#endregion
 
 		#region Public WikiJob Extension Methods
+		public static void GetIcons(this WikiJob job, string updateFolder)
+		{
+			// var version = GetPatchVersion(job);
+			var downloadPath = IconDownloadPath(job, updateFolder);
+			var localFile = Path.Combine(LocalConfig.BotDataFolder, "icons.zip");
+			var extractPath = LocalConfig.WikiIconsFolder;
+
+			if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
+			{
+				job.StatusWriteLine("Updating local icons file");
+				job.Site.Download(downloadPath, localFile);
+
+				job.StatusWriteLine("Extracting icons");
+				ZipFile.ExtractToDirectory(localFile, extractPath, true);
+			}
+		}
+
 		public static string GetPatchVersion(this WikiJob job)
 		{
 			if (patchVersion == null)
@@ -86,7 +105,7 @@
 			return patchVersion!;
 		}
 
-		public static string IconDownloadPath(this WikiJob job) => $"https://esofiles.uesp.net/update-{GetPatchVersion(job)}/icons.zip";
+		public static string IconDownloadPath(this WikiJob job, string updateFolder) => $"https://esofiles.uesp.net/update-{updateFolder}/icons.zip";
 
 		public static void SetBotUpdateVersion(this WikiJob job, string pageType)
 		{
