@@ -283,11 +283,13 @@
 				this.Description = (string)row["description"];
 				this.Category = (string)row["categoryName"];
 				this.Subcategory = (string)row["subCategoryName"];
-				var fileCategory = this.Category switch
+				var catSingular = CategorySingular(this.Category);
+				var subcatSingular = CategorySingular(this.Subcategory);
+				var fileCategory = catSingular switch
 				{
-					"Appearance" => string.Equals(this.Subcategory, "Hair Style", StringComparison.Ordinal) ? "hairstyle" : this.Subcategory,
-					"Memento" or "Mount" or "Pet" => this.Category,
-					_ => this.Subcategory
+					"Appearance" => string.Equals(subcatSingular, "Hair Style", StringComparison.Ordinal) ? "hairstyle" : CategorySingular(subcatSingular),
+					"Memento" or "Mount" or "Pet" => catSingular,
+					_ => subcatSingular
 				};
 
 				fileCategory = fileCategory.ToLowerInvariant();
