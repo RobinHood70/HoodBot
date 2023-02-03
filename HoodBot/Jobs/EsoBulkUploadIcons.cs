@@ -9,9 +9,12 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job. Put the file in HoodBot's folder and extract it to the icons folder.
 	internal sealed class EsoBulkUploadIcons : WikiJob
 	{
+		#region Private Constants
+		private const string RemoteIconPath = "/esoui/art/icons/";
+		#endregion
+
 		#region Static Fields
 		private static readonly Dictionary<long, string> NameFixes = new()
 		{
@@ -54,7 +57,7 @@
 			new("Staff", "weapons", "Staves"),
 		};
 
-		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '/esoui/art/icons/%'";
+		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 
 		private readonly List<string> styles;
 		#endregion
@@ -64,7 +67,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Bulk Upload Icons", "ESO Update")]
+		[JobInfo("Bulk Upload Style Icons", "ESO Update")]
 		public EsoBulkUploadIcons(JobManager jobManager, string styles)
 			: base(jobManager, JobType.Write)
 		{
@@ -82,6 +85,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
+			this.GetIcons("37pts");
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
@@ -133,7 +137,7 @@
 				}
 
 				var icon = (string)row["icon"];
-				iconLookup.Add(name, (id, icon[17..].Replace(".dds", ".png", StringComparison.Ordinal)));
+				iconLookup.Add(name, (id, icon[RemoteIconPath.Length..].Replace(".dds", ".png", StringComparison.Ordinal)));
 			}
 
 			return iconLookup;
@@ -147,7 +151,7 @@
 			var iconLookup = GetIcons();
 			foreach (var style in this.styles)
 			{
-				this.WriteLine($"=={style} Style==");
+				this.WriteLine($"==[[Online:{style} Style|]]==");
 				foreach (var part in Parts)
 				{
 					var dbName = $"{style} {part.Name}";
