@@ -85,6 +85,15 @@
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; }
 
+		/// <summary>Gets or sets the modules loaded by <see cref="LoadPages(QueryPageSetInput)"/>.</summary>
+		/// <value>The LoadOptions modules.</value>
+		/// <remarks>This is an alias for the <see cref="LoadOptions"/>.<see cref="PageLoadOptions.Modules">Modules</see> property.</remarks>
+		public PageModules Modules
+		{
+			get => this.LoadOptions.Modules;
+			set => this.LoadOptions.Modules = value;
+		}
+
 		/// <summary>Gets the title map.</summary>
 		/// <value>The title map.</value>
 		/// <remarks>
