@@ -32,6 +32,7 @@
 		#endregion
 
 		#region Fields
+		private readonly Dictionary<long, Furnishing> collectibles = new();
 		private readonly Dictionary<long, Furnishing> furnishings = new();
 		private readonly List<string> fileMessages = new();
 		private readonly List<string> pageMessages = new();
@@ -99,28 +100,19 @@
 			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
 			*/
 
-			// TODO: There's potential for overlap between mined items and collectibles. These should be separated into different result sets.
+			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, (IDataRecord record) => new Furnishing(record, this.Site, true)))
+			{
+				this.collectibles.Add(furnishing.Id, furnishing);
+			}
+
 			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, (IDataRecord record) => new Furnishing(record, this.Site, false)))
 			{
 				this.furnishings.Add(furnishing.Id, furnishing);
 			}
 
-			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, (IDataRecord record) => new Furnishing(record, this.Site, true)))
-			{
-				this.furnishings.Add(furnishing.Id, furnishing);
-			}
-
 			var dupes = new HashSet<string>(StringComparer.Ordinal);
-			foreach (var furnishingKvp in this.furnishings)
-			{
-				var furnishing = furnishingKvp.Value;
-				var labelName = furnishing.Title.LabelName();
-				if (!dupes.Contains(labelName) && !this.nameLookup.TryAdd(labelName, furnishingKvp.Key))
-				{
-					dupes.Add(labelName);
-					this.nameLookup.Remove(labelName);
-				}
-			}
+			this.FindDupes(this.collectibles, dupes);
+			this.FindDupes(this.furnishings, dupes);
 		}
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
@@ -253,6 +245,46 @@
 					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
 				}
 			}
+		}
+
+		private void FindDupes(Dictionary<long, Furnishing> items, HashSet<string> dupes)
+		{
+			foreach (var item in items)
+			{
+				var furnishing = item.Value;
+				var labelName = furnishing.Title.LabelName();
+				if (!dupes.Contains(labelName) && !this.nameLookup.TryAdd(labelName, item.Key))
+				{
+					dupes.Add(labelName);
+					this.nameLookup.Remove(labelName);
+				}
+			}
+		}
+
+		private Furnishing? FindFurnishing(SiteTemplateNode template, Page page, string labelName)
+		{
+			Furnishing? furnishing = null;
+			if (template.GetValue("id") is not string idText ||
+				string.IsNullOrEmpty(idText) ||
+				!int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+			{
+				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
+			}
+			else if (!this.furnishings.TryGetValue(id, out furnishing) && !this.collectibles.TryGetValue(id, out furnishing))
+			{
+				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
+			}
+
+			if (furnishing is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
+			{
+				Debug.WriteLine($"  Recovered ID {recoveredId} from {labelName}.");
+				if (this.collectibles.TryGetValue(recoveredId, out furnishing) || this.furnishings.TryGetValue(recoveredId, out furnishing))
+				{
+					template.Update("id", recoveredId.ToStringInvariant());
+				}
+			}
+
+			return furnishing;
 		}
 
 		private void FixBundles(SiteTemplateNode template)
@@ -433,30 +465,6 @@
 					template.Update("collectible", furnishing.Collectible ? "1" : "0");
 				}
 			}
-		}
-
-		private Furnishing? FindFurnishing(SiteTemplateNode template, Page page, string labelName)
-		{
-			Furnishing? furnishing = null;
-			if (template.GetValue("id") is not string idText ||
-				string.IsNullOrEmpty(idText) ||
-				!int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
-			{
-				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
-			}
-			else if (!this.furnishings.TryGetValue(id, out furnishing))
-			{
-				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
-			}
-
-			if (furnishing is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
-			{
-				Debug.WriteLine($"  Recovered ID {recoveredId} from {labelName}.");
-				furnishing = this.furnishings[recoveredId];
-				template.Update("id", recoveredId.ToStringInvariant());
-			}
-
-			return furnishing;
 		}
 
 		private bool GenericTemplateFixes(SiteTemplateNode template)
