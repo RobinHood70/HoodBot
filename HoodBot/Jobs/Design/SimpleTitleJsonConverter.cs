@@ -24,6 +24,6 @@
 			return TitleFactory.FromUnvalidated(this.site, title);
 		}
 
-		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.NotNull().ToString() ?? string.Empty);
+		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.NotNull().FullPageName);
 	}
 }

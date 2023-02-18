@@ -123,6 +123,13 @@
 			: this.talkPage ??= TitleFactory.FromValidated(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
+		#region Public Virtual Properties
+
+		/// <summary>Gets a name suitable for linking to this title.</summary>
+		/// <returns>A name suitable for linking to this title.</returns>
+		public virtual string LinkName => (this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) + this.FullPageName;
+		#endregion
+
 		#region Public Static Methods
 
 		/// <summary>Trims the disambiguator off of a string (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
@@ -244,22 +251,10 @@
 			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
 		#endregion
 
-		#region Public Virtual Methods
-
-		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
-		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
-		/// <returns>A <see cref="string" /> that represents this title.</returns>
-		public virtual string ToString(bool forceLink)
-		{
-			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
-			return colon + this.FullPageName;
-		}
-		#endregion
-
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override string ToString() => this.ToString(false);
+		public override string ToString() => this.LinkName;
 		#endregion
 	}
 }

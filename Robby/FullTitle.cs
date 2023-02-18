@@ -41,6 +41,16 @@
 		public bool IsLocal => this.Interwiki?.LocalWiki != false;
 		#endregion
 
+		#region Public Override Properties
+
+		/// <inheritdoc/>
+		public override string LinkName =>
+			(this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) +
+			(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':') +
+			this.FullPageName +
+			(this.Fragment == null ? string.Empty : '#' + this.Fragment);
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
@@ -54,21 +64,6 @@
 			ns = this.Namespace;
 			pageName = this.PageName;
 			fragment = this.Fragment;
-		}
-		#endregion
-
-		#region Public Override Methods
-
-		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
-		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File).</param>
-		/// <returns>A <see cref="string" /> that represents this title.</returns>
-		public override string ToString(bool forceLink)
-		{
-			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
-			var interwiki = this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':';
-			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
-
-			return colon + interwiki + this.FullPageName + fragment;
 		}
 		#endregion
 	}

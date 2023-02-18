@@ -218,6 +218,10 @@
 			set => this.SetParameterValue(ParameterType.Link, value);
 		}
 
+		/// <summary>Gets the full text of the link.</summary>
+		/// <returns>The full text of the link.</returns>
+		public override string LinkName => WikiTextVisitor.Raw(this.ToLinkNode());
+
 		/// <summary>Gets the original text of the link, in case we need to make display text out of it.</summary>
 		/// <value>The original link.</value>
 		/// <remarks>This will normally only be null if the title was created from scratch using one of the constructors.</remarks>
@@ -506,12 +510,7 @@
 
 		/// <summary>Returns the full text of the link.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString()
-		{
-			var linkNode = this.ToLinkNode();
-			var text = WikiTextVisitor.Raw(linkNode);
-			return text;
-		}
+		public override string ToString() => this.LinkName;
 		#endregion
 
 		#region Private Static Methods

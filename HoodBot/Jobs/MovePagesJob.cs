@@ -713,12 +713,12 @@
 					var to = this.linkUpdates[from];
 					if (from is IFullTitle fullTitle)
 					{
-						return fullTitle.FullEquals(newTitle) ? to.ToString() : null;
+						return fullTitle.FullEquals(newTitle) ? to.LinkName : null;
 					}
 
 					if (from.SimpleEquals(newTitle))
 					{
-						return to.ToString();
+						return to.LinkName;
 					}
 
 					if ((this.FollowUpActions & FollowUpActions.UpdatePageNameCaption) != 0)
@@ -958,7 +958,7 @@
 						newLink.Text = newText;
 					}
 
-					return newLink.ToString()[2..^2].TrimEnd();
+					return newLink.LinkName[2..^2].TrimEnd();
 				}
 			}
 
