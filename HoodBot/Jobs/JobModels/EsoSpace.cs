@@ -81,7 +81,7 @@
 		public static void GetIcons(this WikiJob job, string updateFolder)
 		{
 			// var version = GetPatchVersion(job);
-			var downloadPath = IconDownloadPath(job, updateFolder);
+			var downloadPath = IconDownloadPath(updateFolder);
 			var localFile = Path.Combine(LocalConfig.BotDataFolder, "icons.zip");
 			var extractPath = LocalConfig.WikiIconsFolder;
 
@@ -105,7 +105,7 @@
 			return patchVersion!;
 		}
 
-		public static string IconDownloadPath(this WikiJob job, string updateFolder) => $"https://esofiles.uesp.net/update-{updateFolder}/icons.zip";
+		public static string IconDownloadPath(string updateFolder) => $"https://esofiles.uesp.net/update-{updateFolder}/icons.zip";
 
 		public static void SetBotUpdateVersion(this WikiJob job, string pageType)
 		{
