@@ -162,11 +162,11 @@
 		public static PageCollection FromTransclusions(IEnumerable<Title> titles, bool recursive, bool subjectSpaceOnly)
 		{
 			var first = titles.NotNullOrEmpty().First()!;
-			var fullSet = Unlimited(first.Site, PageModules.Info | PageModules.Backlinks, true);
+			var fullSet = Unlimited(first.Site, PageModules.Info | PageModules.TranscludedIn, true);
 			var nextTitles = new TitleCollection(first.Site, titles);
 			do
 			{
-				var loadPages = nextTitles.Load(PageModules.Info | PageModules.Backlinks);
+				var loadPages = nextTitles.Load(PageModules.Info | PageModules.TranscludedIn);
 				fullSet.AddRange(loadPages);
 				nextTitles.Clear();
 				foreach (var page in loadPages)
@@ -174,15 +174,15 @@
 					foreach (var backlink in page.Backlinks)
 					{
 						var title = backlink.Key;
-						if (backlink.Value == BacklinksTypes.EmbeddedIn &&
-							(!subjectSpaceOnly || title.Namespace.IsSubjectSpace) &&
+						if ((!subjectSpaceOnly || title.Namespace.IsSubjectSpace) &&
 							!fullSet.Contains(title))
 						{
 							nextTitles.TryAdd(title);
 						}
 					}
 				}
-			} while (recursive && nextTitles.Count > 0);
+			}
+			while (recursive && nextTitles.Count > 0);
 
 			fullSet.RemoveExists(false);
 			return fullSet;
