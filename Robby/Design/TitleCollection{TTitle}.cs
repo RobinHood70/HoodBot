@@ -198,13 +198,13 @@
 		#region Public Methods
 
 		/// <summary>Adds an item to the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="item">The object to add to the <see cref="TitleCollection">collection</see>.</param>
-		public void Add(TTitle item)
-		{
-			item.ThrowNull();
-			this.Remove(item);
-			this.InsertItem(this.items.Count, item);
-		}
+		/// <param name="item">The item to add to the <see cref="TitleCollection">collection</see>.</param>
+		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
+		/// <exception cref="ArgumentException">An element with the same key already exists in the collection.</exception>
+		/// <exception cref="ArgumentNullException">The item is null.</exception>
+		/// <exception cref="InvalidOperationException">The item's site does not match the collection's site.</exception>
+		/// <remarks>This method underlies all methods that insert pages into the collection, and can be overridden in derived classes.</remarks>
+		public void Add(TTitle item) => this.InsertItem(this.items.Count, item);
 
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
@@ -380,7 +380,7 @@
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		public IEnumerator<TTitle> GetEnumerator() => this.items.GetEnumerator();
 
-		/// <summary>Returns an enumerator that iterates through the collection.</summary>
+		/// <summary>Object-based enumerator.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
@@ -912,6 +912,35 @@
 			}
 		}
 
+		/// <summary>Attempts to add the given item to the list, gracefully skipping the item if it's already present in the text.</summary>
+		/// <param name="item">The item to try to add.</param>
+		/// <returns><see langword="true"/> if the item was added; otherwise, <see langword="false"/>.</returns>
+		public bool TryAdd(TTitle item)
+		{
+			if (this.Contains(item))
+			{
+				return false;
+			}
+
+			this.Add(item);
+			return true;
+		}
+
+		/// <summary>Attempts to add the given item to the list, gracefully skipping the item if it's already present in the text.</summary>
+		/// <param name="items">The items to try to add.</param>
+		/// <returns><see langword="true"/> if any items were added; otherwise, <see langword="false"/>.</returns>
+		public bool TryAdd(IEnumerable<TTitle> items)
+		{
+			ArgumentNullException.ThrowIfNull(items);
+			var retval = false;
+			foreach (var item in items)
+			{
+				retval |= this.TryAdd(item);
+			}
+
+			return retval;
+		}
+
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
@@ -1009,18 +1038,21 @@
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>
 		/// <param name="item">The item.</param>
+		/// <exception cref="ArgumentException">An element with the same key already exists in the collection.</exception>
+		/// <exception cref="ArgumentNullException">The item is null.</exception>
 		/// <exception cref="InvalidOperationException">The item's site does not match the collection's site.</exception>
 		/// <remarks>This method underlies all methods that insert pages into the collection, and can be overridden in derived classes.</remarks>
 		protected virtual void InsertItem(int index, TTitle item)
 		{
-			if (item.NotNull().Namespace.Site != this.Site)
+			ArgumentNullException.ThrowIfNull(item);
+			if (item.Site != this.Site)
 			{
 				throw new InvalidOperationException(Resources.InvalidSite);
 			}
 
 			if (this.IsTitleInLimits(item))
 			{
-				this.lookup[item] = item;
+				this.lookup.Add(item, item);
 				this.items.Insert(index, item);
 			}
 		}
