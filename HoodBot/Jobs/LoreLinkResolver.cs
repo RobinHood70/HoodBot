@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Linq;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -13,7 +15,9 @@
 	{
 		#region Fields
 		private readonly UespNamespaceList nsList;
-		private readonly PageCollection wikiPages;
+		private readonly PageCollection targetPages;
+		private readonly PageCollection backlinkPages;
+
 		#endregion
 
 		#region Constructors
@@ -22,9 +26,8 @@
 			: base(jobManager)
 		{
 			this.nsList = new UespNamespaceList(this.Site);
-			this.Pages.LoadOptions.Modules |= PageModules.TranscludedIn;
-			this.Pages.SetLimitations(LimitationType.Disallow, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-			this.wikiPages = new PageCollection(this.Site, PageModules.Info | PageModules.TranscludedIn);
+			this.backlinkPages = new PageCollection(this.Site, PageModules.Info);
+			this.targetPages = new PageCollection(this.Site, PageModules.Info);
 		}
 		#endregion
 
@@ -35,64 +38,87 @@
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			this.ResetProgress(UespNamespaces.Gamespaces.Count);
-			foreach (var ns in UespNamespaces.Gamespaces)
-			{
-				this.wikiPages.GetNamespace(ns);
-				this.Progress++;
-			}
-		}
+			var limits =
+				from ns in this.nsList
+				where ns.IsGameSpace && !ns.IsPseudoNamespace
+				select ns.BaseNamespace.Id;
 
-		protected override void LoadPages()
-		{
-			this.Pages.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn);
-			this.Pages.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
+			var linkTitles = new TitleCollection(this.Site);
+			linkTitles.SetLimitations(LimitationType.OnlyAllow, limits);
+			linkTitles.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn);
+			linkTitles.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
 
 			// Book Header gets all book variants in one request.
 			var books = new TitleCollection(this.Site);
 			books.GetBacklinks("Template:Book Header", BacklinksTypes.EmbeddedIn);
-			this.Pages.Remove(books);
+			linkTitles.Remove(books);
+
+			var pages = linkTitles.Load(PageModules.Default | PageModules.TranscludedIn);
+			this.backlinkPages.AddRange(this.FromTransclusions(pages));
+			for (var i = pages.Count - 1; i >= 0; i--)
+			{
+				var page = pages[i];
+				if (!this.NamespaceCheck(page, page.Backlinks, new TitleCollection(this.Site)))
+				{
+					pages.RemoveAt(i);
+				}
+			}
+
+			this.Pages.AddRange(pages);
+
+			var findTitles = new TitleCollection(this.Site);
+			foreach (var page in this.Pages)
+			{
+				var parser = new ContextualParser(page);
+				foreach (var linkTemplate in parser.FindSiteTemplates("Lore Link"))
+				{
+					var ns = this.GetNamespace(linkTemplate, page);
+					if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
+					{
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site, overridden.ToRaw().Trim()));
+					}
+					else if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
+					{
+						var pageName = nodes.ToRaw();
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName));
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.Parent, pageName));
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName));
+					}
+				}
+			}
+
+			this.targetPages.GetTitles(findTitles);
+			this.targetPages.RemoveExists(false); // If commented out, changes everything to red links
+		}
+
+		protected override void LoadPages()
+		{
+			foreach (var page in this.Pages)
+			{
+				this.PageLoaded(page);
+			}
+		}
+
+		protected override void Main()
+		{
+			this.Pages.RemoveChanged(false);
+			foreach (var page in this.Pages)
+			{
+				Debug.WriteLine(page.AsLink());
+			}
+
+			base.Main();
 		}
 
 		protected override void ParseText(ContextualParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
 		#endregion
 
 		#region Private Static Methods
-		private HashSet<UespNamespace> GetBacklinkSpaces(Page page)
-		{
-			var fullSet = new HashSet<UespNamespace>();
-			this.RecurseBacklinkSpaces(page, fullSet);
-			return fullSet;
-		}
-
-		private void RecurseBacklinkSpaces(Page page, HashSet<UespNamespace> fullSet)
-		{
-			var pageBacklinks = new PageCollection(this.Site);
-			foreach (var backlink in page.Backlinks)
-			{
-				var title = backlink.Key;
-				if (backlink.Value == BacklinksTypes.EmbeddedIn &&
-					title.Namespace.IsSubjectSpace &&
-					title.Namespace != MediaWikiNamespaces.User &&
-					this.wikiPages.TryGetValue(title, out var wikiPage) &&
-					fullSet.Add(this.nsList.FromTitle(title)))
-				{
-					// Having fullSet.Add() as a condition avoids circular redirect issues.
-					pageBacklinks.Add(wikiPage);
-				}
-			}
-
-			foreach (var backlinkPage in pageBacklinks)
-			{
-				this.RecurseBacklinkSpaces(backlinkPage, fullSet);
-			}
-		}
-
 		private Title? ResolveLink(params Title[] titles)
 		{
 			foreach (var title in titles)
 			{
-				if (this.wikiPages.Contains(title))
+				if (this.targetPages!.Contains(title))
 				{
 					return title;
 				}
@@ -124,6 +150,50 @@
 		#endregion
 
 		#region Private Methods
+
+		private PageCollection FromTransclusions(IEnumerable<Title> titles)
+		{
+			var fullSet = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.TranscludedIn, true);
+			var nextTitles = new TitleCollection(this.Site, titles);
+			do
+			{
+				Debug.WriteLine($"Loading {nextTitles.Count} transclusion pages.");
+				var loadPages = nextTitles.Load(PageModules.Info | PageModules.TranscludedIn);
+				fullSet.AddRange(loadPages);
+				nextTitles.Clear();
+				foreach (var page in loadPages)
+				{
+					var ns = this.nsList.FromTitle(page);
+					foreach (var backlink in page.Backlinks)
+					{
+						// Once we have a page that's out of the desired namespace, we don't need to follow it anymore, so don't try to load it.
+						var title = backlink.Key;
+						if (title.Namespace.IsSubjectSpace &&
+							title.Namespace == ns.BaseNamespace &&
+							!fullSet.Contains(title))
+						{
+							nextTitles.TryAdd(title);
+						}
+					}
+				}
+			}
+			while (nextTitles.Count > 0);
+
+			return fullSet;
+		}
+
+		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, Title title)
+		{
+			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
+			{
+				var lookup = nsBase.Value.ToValue();
+				return this.nsList.GetAnyBase(lookup)
+					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
+			}
+
+			return this.nsList.FromTitle(title);
+		}
+
 		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
 		{
 			if (node is not SiteTemplateNode linkTemplate ||
@@ -147,23 +217,13 @@
 			}
 
 			var ns = this.GetNamespace(linkTemplate, page);
-			var backlinkSpaces = new List<UespNamespace>(this.GetBacklinkSpaces(page));
 
-			// If link doesn't resolve to anything, do nothing.
-			if (this.ResolveTemplate(linkTemplate, ns) is not Title link)
-			{
-				return null;
-			}
-
-			// If transcluded to more than one space or to a space other than the current one, do nothing.
-			if (backlinkSpaces.Count > 1 || (backlinkSpaces.Count == 1 && backlinkSpaces[0] != ns))
-			{
-				return null;
-			}
-
-			// If this is a Future Link outside of Lore space that resolves to something IN Lore space, do nothing.
-			if (!isLoreLink && link.Namespace == UespNamespaces.Lore &&
-				page.Namespace != UespNamespaces.Lore)
+			// If link doesn't resolve to anything OR
+			// if this is a Future Link outside of Lore space that resolves to something IN Lore space, do nothing.
+			if (
+				this.ResolveTemplate(linkTemplate, ns) is not Title link ||
+				(!isLoreLink && link.Namespace == UespNamespaces.Lore &&
+				page.Namespace != UespNamespaces.Lore))
 			{
 				return null;
 			}
@@ -171,19 +231,28 @@
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 				? displayNode.Value.ToRaw()
 				: Title.ToLabelName(linkNode.Value.ToRaw());
-			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.ToString(), displayText));
+			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkName, displayText));
 		}
 
-		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, Title title)
+		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)
 		{
-			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
+			var ns = this.nsList.FromTitle(page);
+			foreach (var backlink in backlinks)
 			{
-				var lookup = nsBase.Value.ToValue();
-				return this.nsList.GetAnyBase(lookup)
-					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
+				var title = backlink.Key;
+				if (!titlesChecked.Contains(title))
+				{
+					titlesChecked.Add(title);
+					if ((title.Namespace != ns.BaseNamespace && title.Namespace != MediaWikiNamespaces.User) ||
+						(this.backlinkPages.TryGetValue(title, out var newBacklinks) &&
+						!this.NamespaceCheck(page, newBacklinks.Backlinks, titlesChecked)))
+					{
+						return false;
+					}
+				}
 			}
 
-			return this.nsList.FromTitle(title);
+			return true;
 		}
 		#endregion
 	}
