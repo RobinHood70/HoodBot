@@ -220,7 +220,26 @@
 
 		/// <summary>Gets the full text of the link.</summary>
 		/// <returns>The full text of the link.</returns>
-		public override string LinkName => WikiTextVisitor.Raw(this.ToLinkNode());
+		public override string LinkName
+		{
+			get
+			{
+				var sb = new StringBuilder()
+					.Append(this.TitleWhitespaceBefore)
+					.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
+					.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
+					.Append(this.ForcedNamespaceLink ? ":" : string.Empty)
+					.Append(this.FullPageName);
+				if (this.Fragment != null)
+				{
+					sb
+						.Append('#')
+						.Append(this.Fragment);
+				}
+
+				return sb.ToString();
+			}
+		}
 
 		/// <summary>Gets the original text of the link, in case we need to make display text out of it.</summary>
 		/// <value>The original link.</value>
@@ -411,26 +430,9 @@
 			return (0, 0);
 		}
 
-		/// <summary>Builds the title portion of the link.</summary>
-		/// <returns>A string with the title text.</returns>
-		public string GetTitle()
-		{
-			var sb = new StringBuilder()
-				.Append(this.TitleWhitespaceBefore)
-				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
-				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
-				.Append(this.ForcedNamespaceLink ? ":" : string.Empty)
-				.Append(this.FullPageName);
-			if (this.Fragment != null)
-			{
-				sb
-					.Append('#')
-					.Append(this.Fragment);
-			}
-
-			sb.Append(this.TitleWhitespaceAfter);
-			return sb.ToString();
-		}
+		/// <summary>Gets the full text of the link.</summary>
+		/// <returns>The full text of the link.</returns>
+		public string LinkText() => WikiTextVisitor.Raw(this.ToLinkNode());
 
 		/// <summary>Sets the image size, formatting the <see cref="Dimensions"/> paramter appropriately.</summary>
 		/// <param name="height">The height.</param>
@@ -465,7 +467,7 @@
 				values.Add(text);
 			}
 
-			return new SiteNodeFactory(this.Site).LinkNodeFromParts(this.GetTitle(), values);
+			return new SiteNodeFactory(this.Site).LinkNodeFromParts(this.TitleWhitespaceBefore + this.LinkName + this.TitleWhitespaceAfter, values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>

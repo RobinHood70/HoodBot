@@ -958,7 +958,7 @@
 						newLink.Text = newText;
 					}
 
-					return newLink.LinkName[2..^2].TrimEnd();
+					return newLink.LinkName;
 				}
 			}
 
