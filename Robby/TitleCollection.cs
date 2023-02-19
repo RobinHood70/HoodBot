@@ -79,22 +79,6 @@
 		}
 		#endregion
 
-		#region Public Static Methods
-
-		/// <summary>Constructs a TitleCollection from the template transclusions for a list of titles.</summary>
-		/// <param name="titles">The titles whose backlinks should be collected.</param>
-		/// <param name="recursive">Set to <see langword="true"/> to get the entire call tree.</param>
-		/// <param name="subjectSpaceOnly">Set to <see langword="true"/> to only allow pages from subject space.</param>
-		/// <returns>A collection of pages that transclude the listed pages.</returns>
-		public static TitleCollection FromTransclusions(IEnumerable<Title> titles, bool recursive, bool subjectSpaceOnly)
-		{
-			var first = titles.NotNullOrEmpty().First()!;
-			var retval = new TitleCollection(first.Site);
-			RecurseEmbeddedIn(new TitleCollection(first.Site, titles), recursive, subjectSpaceOnly, retval);
-			return retval;
-		}
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
@@ -549,36 +533,6 @@
 			var creator = this.Site.PageCreator;
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
-		}
-		#endregion
-
-		#region Private Static Methods
-
-		private static void RecurseEmbeddedIn(TitleCollection titles, bool recursive, bool subjectSpaceOnly, TitleCollection fullSet)
-		{
-			var site = titles.Site;
-			var loadPages = new PageCollection(site);
-			loadPages.GetTitles(titles);
-			var nextTitles = new TitleCollection(site);
-			foreach (var page in loadPages)
-			{
-				foreach (var backlink in page.Backlinks)
-				{
-					var title = backlink.Key;
-					if (backlink.Value == BacklinksTypes.EmbeddedIn &&
-						(!subjectSpaceOnly || title.Namespace.IsSubjectSpace) &&
-						!fullSet.Contains(title))
-					{
-						fullSet.Add(title);
-						nextTitles.Add(title);
-					}
-				}
-			}
-
-			if (recursive && nextTitles.Count > 0)
-			{
-				RecurseEmbeddedIn(nextTitles, recursive, subjectSpaceOnly, fullSet);
-			}
 		}
 		#endregion
 

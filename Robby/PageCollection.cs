@@ -154,6 +154,40 @@
 			return retval;
 		}
 
+		/// <summary>Constructs a TitleCollection from the template transclusions for a list of titles.</summary>
+		/// <param name="titles">The titles whose backlinks should be collected.</param>
+		/// <param name="recursive">Set to <see langword="true"/> to get the entire call tree.</param>
+		/// <param name="subjectSpaceOnly">Set to <see langword="true"/> to only allow pages from subject space.</param>
+		/// <returns>A collection of pages that transclude the listed pages.</returns>
+		public static PageCollection FromTransclusions(IEnumerable<Title> titles, bool recursive, bool subjectSpaceOnly)
+		{
+			var first = titles.NotNullOrEmpty().First()!;
+			var fullSet = Unlimited(first.Site, PageModules.Info | PageModules.Backlinks, true);
+			var nextTitles = new TitleCollection(first.Site, titles);
+			do
+			{
+				var loadPages = nextTitles.Load(PageModules.Info | PageModules.Backlinks);
+				fullSet.AddRange(loadPages);
+				nextTitles.Clear();
+				foreach (var page in loadPages)
+				{
+					foreach (var backlink in page.Backlinks)
+					{
+						var title = backlink.Key;
+						if (backlink.Value == BacklinksTypes.EmbeddedIn &&
+							(!subjectSpaceOnly || title.Namespace.IsSubjectSpace) &&
+							!fullSet.Contains(title))
+						{
+							nextTitles.TryAdd(title);
+						}
+					}
+				}
+			} while (recursive && nextTitles.Count > 0);
+
+			fullSet.RemoveExists(false);
+			return fullSet;
+		}
+
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="site">The site to work on.</param>
 		/// <param name="input">The input.</param>
@@ -282,7 +316,7 @@
 		}
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
-		/// <param name="changed"><see langword="true"/>to remove changed pages; <see langword="false"/> to remove unchanged pages.</param>
+		/// <param name="changed"><see langword="true"/> to remove changed pages; <see langword="false"/> to remove unchanged pages.</param>
 		public void RemoveChanged(bool changed)
 		{
 			for (var i = this.Count - 1; i >= 0; i--)
