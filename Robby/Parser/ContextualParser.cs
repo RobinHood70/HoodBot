@@ -185,28 +185,54 @@
 		/// <summary>Finds the first template that matches the provided title.</summary>
 		/// <param name="find">The name of the template to find.</param>
 		/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-		public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates(find).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="find">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplate(Title find) => this.FindSiteTemplates(find);
+		public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
-		/// <param name="find">The name of the template to find.</param>
+		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string find) => this.FindSiteTemplates(TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], find));
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string findName) => this.FindSiteTemplates(new[] { findName });
 
 		/// <summary>Finds all templates that match the provided title.</summary>
-		/// <param name="find">The template to find.</param>
+		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title find)
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName)
 		{
+			ArgumentNullException.ThrowIfNull(findName);
+			return this.FindSiteTemplates(new[] { findName });
+		}
+
+		/// <summary>Finds all templates that match the provided title.</summary>
+		/// <param name="findNames">The templates to find.</param>
+		/// <returns>The templates that match the title provided, if any.</returns>
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<string> findNames)
+		{
+			ArgumentNullException.ThrowIfNull(findNames);
+			var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, findNames);
+			return this.FindSiteTemplates(titles);
+		}
+
+		/// <summary>Finds all templates that match the provided title.</summary>
+		/// <param name="findNames">The templates to find.</param>
+		/// <returns>The templates that match the title provided, if any.</returns>
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
+		{
+			ArgumentNullException.ThrowIfNull(findNames);
 			foreach (var templateNode in this.TemplateNodes)
 			{
-				if (templateNode is SiteTemplateNode siteTemplate && siteTemplate.TitleValue.SimpleEquals(find))
+				if (templateNode is SiteTemplateNode siteTemplate)
 				{
-					yield return siteTemplate;
+					foreach (var find in findNames)
+					{
+						if (siteTemplate.TitleValue.SimpleEquals(find))
+						{
+							yield return siteTemplate;
+						}
+					}
 				}
 			}
 		}
