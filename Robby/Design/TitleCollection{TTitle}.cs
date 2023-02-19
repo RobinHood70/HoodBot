@@ -215,7 +215,7 @@
 			{
 				foreach (var title in titles)
 				{
-					this.Add(title);
+					this.TryAdd(title);
 				}
 			}
 		}
@@ -922,7 +922,7 @@
 				return false;
 			}
 
-			this.Add(item);
+			this.InsertItem(this.items.Count, item);
 			return true;
 		}
 

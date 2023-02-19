@@ -32,7 +32,7 @@
 			foreach (var item in titles.NotNull())
 			{
 				var newTitle = TitleFactory.FromUnvalidated(site, item);
-				this.Add(newTitle);
+				this.TryAdd(newTitle);
 			}
 		}
 
@@ -52,7 +52,7 @@
 			: base(site)
 		{
 			this.LimitationType = LimitationType.None;
-			this.Add(ns, titles.NotNull());
+			this.AddRange(ns, titles.NotNull());
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
@@ -74,7 +74,7 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var title in titles.NotNull())
 			{
-				this.Add(title);
+				this.TryAdd(title);
 			}
 		}
 		#endregion
@@ -84,18 +84,18 @@
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
 		/// <param name="defaultNamespace">The namespace to coerce.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public void Add(int defaultNamespace, IEnumerable<string> titles)
+		public void AddRange(int defaultNamespace, IEnumerable<string> titles)
 		{
 			foreach (var title in titles.NotNull())
 			{
-				this.Add(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
 			}
 		}
 
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="names">The page names, with or without the leading namespace text.</param>
-		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
+		public void AddRange(int defaultNamespace, params string[] names) => this.AddRange(defaultNamespace, names as IEnumerable<string>);
 
 		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
@@ -299,13 +299,13 @@
 			foreach (var item in result)
 			{
 				var mainTitle = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
-				this.Add(mainTitle);
+				this.TryAdd(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
 						var title = TitleFactory.FromUnvalidated(this.Site, redirectedItem.FullPageName);
-						this.Add(new Backlink(title, mainTitle));
+						this.TryAdd(new Backlink(title, mainTitle));
 					}
 				}
 			}
@@ -318,7 +318,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Category], item.Category));
+				this.TryAdd(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Category], item.Category));
 			}
 		}
 
@@ -508,7 +508,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
+				this.TryAdd(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
 			}
 		}
 
@@ -542,7 +542,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -551,7 +551,7 @@
 			foreach (var item in result)
 			{
 				item.FullPageName.PropertyThrowNull(nameof(item));
-				this.Add(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -571,7 +571,7 @@
 				var title = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
 				if (input.Type.HasFlag(item.Type))
 				{
-					this.Add(title);
+					this.TryAdd(title);
 				}
 
 				if (item.Type == CategoryMemberTypes.Subcat && item.FullPageName is string itemTitle)

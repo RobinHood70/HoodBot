@@ -67,8 +67,8 @@
 						// pageName = pageName[9..];
 					}
 
-					titles.Add(UespNamespaces.Blades, pageName);
-					titles.Add(UespNamespaces.Blades, pageName + " (effect)");
+					titles.AddRange(UespNamespaces.Blades, pageName);
+					titles.AddRange(UespNamespaces.Blades, pageName + " (effect)");
 				}
 				else
 				{

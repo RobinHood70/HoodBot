@@ -230,7 +230,7 @@
 				{
 					foreach (var setName in set.AllNames)
 					{
-						titles.Add(UespNamespaces.Online, setName);
+						titles.AddRange(UespNamespaces.Online, setName);
 					}
 				}
 			}

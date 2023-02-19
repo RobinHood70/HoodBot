@@ -201,7 +201,7 @@
 			TitleCollection checkTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{
-				checkTitles.Add(UespNamespaces.Online, npc.DataName);
+				checkTitles.AddRange(UespNamespaces.Online, npc.DataName);
 			}
 
 			PageCollection checkPages = new(this.Site, PageModules.Info | PageModules.Properties, true);
