@@ -37,7 +37,7 @@
 		public EsoMatchIcons(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.Pages.LoadOptions.Modules = PageModules.Info | PageModules.Revisions | PageModules.FileInfo;
+			this.Pages.Modules = PageModules.Info | PageModules.Revisions | PageModules.FileInfo;
 			this.Pages.SetLimitations(LimitationType.OnlyAllow, MediaWikiNamespaces.File);
 		}
 		#endregion
