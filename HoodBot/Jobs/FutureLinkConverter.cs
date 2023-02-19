@@ -65,7 +65,7 @@
 
 		protected override void LoadPages()
 		{
-			this.Pages.LoadOptions.Modules = PageModules.Default | PageModules.Backlinks;
+			this.Pages.Modules = PageModules.Default | PageModules.Backlinks;
 			this.Pages.SetLimitations(LimitationType.Disallow, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 			this.Pages.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn, true);
 		}
