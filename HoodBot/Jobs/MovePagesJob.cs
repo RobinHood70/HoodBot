@@ -304,7 +304,7 @@
 					if (!page.SimpleEquals(leftover.Key))
 					{
 						// This time around, we add each backlink to the list, each of which will be purged.
-						leftovers.Add(leftover.Key);
+						leftovers.TryAdd(leftover.Key);
 					}
 				}
 			}
@@ -851,7 +851,7 @@
 				{
 					foreach (var backlink in fromPage.Backlinks)
 					{
-						backlinkTitles.Add(backlink.Key);
+						backlinkTitles.TryAdd(backlink.Key);
 					}
 				}
 				else
