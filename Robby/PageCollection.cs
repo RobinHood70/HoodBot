@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
@@ -103,38 +102,6 @@
 		public IReadOnlyDictionary<string, FullTitle> TitleMap => this.titleMap;
 		#endregion
 
-		#region Public Indexers
-
-		/// <summary>Gets or sets the <see cref="Page"/> with the specified key.</summary>
-		/// <param name="key">The key.</param>
-		/// <returns>The requested <see cref="Page"/>.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the page cannot be found either by the name requested or via the substitute name in the <see cref="TitleMap"/>.</exception>
-		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
-		public override Page this[string key]
-		{
-			get => this.TryGetValue(key.NotNull(), out var retval) ||
-				(this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
-					? retval!
-					: throw new KeyNotFoundException();
-
-			set => base[key] = value;
-		}
-
-		/// <summary>Gets or sets the <see cref="Title"/> with the specified key.</summary>
-		/// <param name="title">The title.</param>
-		/// <returns>The <see cref="Title">Title</see>.</returns>
-		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
-		/// <exception cref="KeyNotFoundException">Thrown when the title could not be found.</exception>
-		public override Page this[Title title]
-		{
-			get => this.TryGetValue(title.NotNull(), out var page)
-				? page
-				: throw new KeyNotFoundException();
-
-			set => base[title] = value;
-		}
-		#endregion
-
 		#region Public Static Methods
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
@@ -148,7 +115,7 @@
 			foreach (var title in other.NotNull())
 			{
 				var page = retval.pageCreator.CreateEmptyPage(title);
-				retval[page] = page;
+				retval.Add(page);
 			}
 
 			return retval;
@@ -202,7 +169,7 @@
 				foreach (var item in result)
 				{
 					var page = retval.New(item);
-					retval[page] = page;
+					retval.Add(page);
 				}
 			}
 
@@ -278,7 +245,7 @@
 			foreach (var item in result)
 			{
 				var page = retval.New(item);
-				retval[page] = page;
+				retval.Add(page);
 			}
 
 			return retval;
@@ -286,6 +253,30 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Gets the <see cref="Page"/> with the specified key or <see langword="null"/> if not found.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The requested <see cref="Page"/>.</returns>
+		public Page? GetMapped(string key)
+		{
+			ArgumentNullException.ThrowIfNull(key);
+			return this.GetMapped(TitleFactory.FromUnvalidated(this.Site, key));
+		}
+
+		/// <summary>Gets the <see cref="Page"/> with the specified key or <see langword="null"/> if not found.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The requested <see cref="Page"/>.</returns>
+		public Page? GetMapped(Title key)
+		{
+			ArgumentNullException.ThrowIfNull(key);
+			return this.TryGetValue(key, out var retval)
+				? retval
+				: (
+					this.titleMap.TryGetValue(key.FullPageName, out var altKey) &&
+					this.TryGetValue(altKey, out retval))
+						? retval
+						: default;
+		}
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
@@ -344,13 +335,6 @@
 
 		#region Public Override Methods
 
-		/// <summary>Removes all items from the <see cref="TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
-		public override void Clear()
-		{
-			base.Clear();
-			this.titleMap.Clear();
-		}
-
 		/// <inheritdoc/>
 		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
 
@@ -360,44 +344,8 @@
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
 		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 
-		/// <inheritdoc/>
-		public override bool TryGetValue(Page key, [MaybeNullWhen(false)] out Page value)
-		{
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull().FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
-			{
-				value = retval;
-				return true;
-			}
-
-			value = default;
-			return false;
-		}
-
-		/// <inheritdoc/>
-		public override bool TryGetValue(Title key, [MaybeNullWhen(false)] out Page value)
-		{
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull().FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
-			{
-				value = retval;
-				return true;
-			}
-
-			value = default;
-			return false;
-		}
-
-		/// <inheritdoc/>
-		public override bool TryGetValue(string key, [MaybeNullWhen(false)] out Page value)
-		{
-			if (base.TryGetValue(key.NotNull(), out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
-			{
-				value = retval;
-				return true;
-			}
-
-			value = default;
-			return false;
-		}
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
+		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Internal Methods
@@ -429,6 +377,13 @@
 		#endregion
 
 		#region Protected Override Methods
+
+		/// <summary>Removes all items from the <see cref="TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
+		protected override void ClearItems()
+		{
+			this.titleMap.Clear();
+			base.ClearItems();
+		}
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -491,6 +446,9 @@
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
 		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+
+		/// <inheritdoc/>
+		protected override Title GetKeyForItem(Page item) => item;
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -607,7 +565,7 @@
 				var page = this.New(item);
 				if (pageValidator(page))
 				{
-					this[page] = page;
+					this.Add(page);
 					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 					{
 						this.PageMissing?.Invoke(this, page);

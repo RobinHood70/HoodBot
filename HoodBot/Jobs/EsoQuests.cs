@@ -146,7 +146,7 @@
 			var filteredQuests = GetQuestData(existing);
 			var questNames = filteredQuests.ConvertAll(q => q.Name);
 			var titleChecker = new TitleCollection(this.Site, UespNamespaces.Online, questNames);
-			var disambigs = titleChecker.Load(PageModules.Info | PageModules.Properties | PageModules.Links);
+			var disambigs = titleChecker.Load(PageModules.Info | PageModules.Properties | PageModules.Links, true);
 
 			var ignoredQuests = this.BuildQuestInfo(existing, filteredQuests, disambigs);
 			this.ReportIgnoredQuests(ignoredQuests);
@@ -388,8 +388,13 @@
 			for (var i = allQuests.Count - 1; i >= 0; i--)
 			{
 				var quest = allQuests[i];
-				var checkPage = disambigs["Online:" + quest.Name];
+				var questTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], quest.Name);
 				var add = true;
+				if (disambigs.GetMapped(questTitle) is not Page checkPage)
+				{
+					continue;
+				}
+
 				if (checkPage.IsRedirect || checkPage.IsDisambiguation == true)
 				{
 					foreach (var link in checkPage.Links)

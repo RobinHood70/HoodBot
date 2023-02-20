@@ -600,27 +600,29 @@
 
 			foreach (var linkUpdate in this.linkUpdates)
 			{
-				var fromPage = fromPages[linkUpdate.Key];
-				if (fromPage.Exists &&
-					fromPage.Backlinks.Count == 0 &&
-					!catMembers.ContainsKey(fromPage))
+				if (fromPages.GetMapped(linkUpdate.Key) is not Page fromPage ||
+					!fromPage.Exists ||
+					fromPage.Backlinks.Count != 0 ||
+					catMembers.ContainsKey(fromPage))
 				{
-					var action = this.actions[linkUpdate.Key];
-					if (doNotDelete.Contains(fromPage))
+					continue;
+				}
+
+				var action = this.actions[linkUpdate.Key];
+				if (doNotDelete.Contains(fromPage))
+				{
+					if (this.MoveAction != MoveAction.None)
 					{
-						if (this.MoveAction != MoveAction.None)
-						{
-							action.SetMoveActions(ReplacementActions.Skip, "no links, but marked to not be deleted");
-						}
+						action.SetMoveActions(ReplacementActions.Skip, "no links, but marked to not be deleted");
 					}
-					else if (deletions.Contains(fromPage))
-					{
-						action.SetMoveActions(ReplacementActions.Skip, "no links, but already proposed for deletion");
-					}
-					else
-					{
-						action.SetMoveActions(ReplacementActions.Propose, "unused so propose for deletion");
-					}
+				}
+				else if (deletions.Contains(fromPage))
+				{
+					action.SetMoveActions(ReplacementActions.Skip, "no links, but already proposed for deletion");
+				}
+				else
+				{
+					action.SetMoveActions(ReplacementActions.Propose, "unused so propose for deletion");
 				}
 			}
 		}
@@ -771,8 +773,7 @@
 				var action = this.actions[move.Key];
 				if (action.HasAction(ReplacementActions.Move) && !action.HasAction(ReplacementActions.Skip))
 				{
-					var fromPage = fromPages[move.Key];
-					if (!fromPage.Exists)
+					if (fromPages.GetMapped(move.Key) is Page fromPage && !fromPage.Exists)
 					{
 						// From title does not exist. Should still have an entry in linkUpdates, if appropriate.
 						this.actions[move.Key] = new(ReplacementActions.Skip, $"{fromPage.AsLink()} doesn't exist");

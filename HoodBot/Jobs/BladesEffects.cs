@@ -88,30 +88,40 @@
 					.Replace("{1}", "<magnitude2>", StringComparison.Ordinal)
 					.Replace("{2}", "<magnitude3>", StringComparison.Ordinal);
 
-				if (entry["_editorName"].Value is string pageName && !IgnoreList.Contains(pageName))
+				if (entry["_editorName"].Value is not string pageName || IgnoreList.Contains(pageName))
 				{
-					var isMaterial = pageName.StartsWith("Material ", StringComparison.Ordinal);
-					if (isMaterial)
-					{
-						// pageName = pageName[9..];
-					}
+					continue;
+				}
 
-					pageName = "Blades:" + pageName;
-					var altPageName = pageName + " (effect)";
-					var page = pages[pageName];
-					if (pages[altPageName].Exists || (page.Exists && !page.Text.Contains("Effect Summary", StringComparison.Ordinal)))
-					{
-						page = pages[altPageName];
-					}
+				var isMaterial = pageName.StartsWith("Material ", StringComparison.Ordinal);
+				if (isMaterial)
+				{
+					// pageName = pageName[9..];
+				}
 
-					if (!page.Exists)
-					{
-						page.Text = isMaterial
-							? $"#REDIRECT [[Blades:{page.PageName[9..]}]] [[Category:Redirects from Alternate Names]]"
-							: string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}");
+				pageName = "Blades:" + pageName;
+				var altPageName = pageName + " (effect)";
+				var page = pages.GetMapped(pageName);
+				if (page is null)
+				{
+					continue;
+				}
 
-						this.Pages.Add(page);
-					}
+				var altPage = pages.GetMapped(altPageName);
+				if (altPage is not null &&
+					(altPage.Exists ||
+					(page.Exists && !page.Text.Contains("Effect Summary", StringComparison.Ordinal))))
+				{
+					page = altPage;
+				}
+
+				if (!page.Exists)
+				{
+					page.Text = isMaterial
+						? $"#REDIRECT [[Blades:{page.PageName[9..]}]] [[Category:Redirects from Alternate Names]]"
+						: string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}");
+
+					this.Pages.Add(page);
 				}
 			}
 		}

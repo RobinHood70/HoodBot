@@ -279,6 +279,9 @@
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
 		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
+
+		/// <inheritdoc/>
+		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Protected Override Methods
@@ -367,6 +370,9 @@
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
 		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+
+		/// <inheritdoc/>
+		protected override Title GetKeyForItem(Title item) => item;
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
