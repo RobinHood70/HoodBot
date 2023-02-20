@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
 
 	public class OneOffTemplateJob : TemplateJob
 	{
@@ -20,17 +19,16 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Fix link templates";
+		protected override string EditSummary => "Update remaining Future Links to Lore Links";
 
-		protected override string TemplateName => "Lore Link";
+		protected override string TemplateName => "Future Link";
 		#endregion
 
 		#region Protected Override Methods
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			template.RenameParameter("ONLink", "ONlink");
-			//// template.RenameParameter("LoreLink", "LOlink");
-			template.RenameParameter("SILink", "SIlink");
+			template.Title.Clear();
+			template.Title.AddText("Lore Link");
 		}
 		#endregion
 	}

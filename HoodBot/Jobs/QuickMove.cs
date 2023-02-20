@@ -4,10 +4,11 @@
 	{
 		#region Constructors
 		[JobInfo("Quick Move")]
-		public QuickMove(JobManager jobManager, string from, string to)
+		public QuickMove(JobManager jobManager, string from, string to, bool renameOnly)
 				: base(jobManager, false)
 		{
-			this.FollowUpActions = FollowUpActions.FixLinks;
+			this.Pages.SetLimitations(Robby.LimitationType.None);
+			this.MoveAction = renameOnly ? MoveAction.None : MoveAction.MoveSafely;
 			this.EditSummaryMove = $"Move to [[{to}]]";
 			this.AddMove(from, to);
 		}
