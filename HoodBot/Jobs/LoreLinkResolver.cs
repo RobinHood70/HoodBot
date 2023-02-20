@@ -32,7 +32,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Update FutureLink/LoreLink";
+		protected override string EditSummary => "Update LoreLink";
 		#endregion
 
 		#region Protected Override Methods
@@ -45,8 +45,8 @@
 
 			var linkTitles = new TitleCollection(this.Site);
 			linkTitles.SetLimitations(LimitationType.OnlyAllow, limits);
-			linkTitles.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn);
 			linkTitles.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
+			//// linkTitles.Add("Lore:Ghost");
 
 			// Book Header gets all book variants in one request.
 			var books = new TitleCollection(this.Site);
@@ -73,22 +73,31 @@
 				foreach (var linkTemplate in parser.FindSiteTemplates("Lore Link"))
 				{
 					var ns = this.GetNamespace(linkTemplate, page);
+					string term;
 					if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
 					{
-						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site, overridden.ToRaw().Trim()));
+						term = overridden.ToRaw().Trim();
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site, term));
 					}
 					else if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
 					{
-						var pageName = nodes.ToRaw();
-						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName));
-						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.Parent, pageName));
-						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName));
+						term = nodes.ToRaw().Trim();
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.BaseNamespace, term));
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.Parent, term));
+						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], term));
 					}
+					else
+					{
+						term = "<malformed template>";
+					}
+
+					Debug.WriteLine($"{term} ({page.FullPageName})");
 				}
 			}
 
 			this.targetPages.GetTitles(findTitles);
-			this.targetPages.RemoveExists(false); // If commented out, changes everything to red links
+			//// If the next line is uncommented, it allows altering red links as well
+			// this.targetPages.RemoveExists(false);
 		}
 
 		protected override void LoadPages()
@@ -99,16 +108,19 @@
 			}
 		}
 
-		protected override void Main()
-		{
-			this.Pages.RemoveChanged(false);
-			foreach (var page in this.Pages)
-			{
-				Debug.WriteLine(page.AsLink());
-			}
+		/*
+				protected override void Main()
+				{
+					this.Pages.RemoveChanged(false);
+					this.Pages.Sort();
+					foreach (var page in this.Pages)
+					{
+						Debug.WriteLine(page.AsLink());
+					}
 
-			base.Main();
-		}
+					base.Main();
+				}
+		*/
 
 		protected override void ParseText(ContextualParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
 		#endregion
@@ -137,12 +149,10 @@
 			if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
 			{
 				var pageName = nodes.ToRaw();
-				var fullName = TitleFactory.FromUnvalidated(this.Site, ns.Full + pageName);
-				var parentName = TitleFactory.FromUnvalidated(this.Site, ns.Parent.DecoratedName + pageName);
-				var loreName = TitleFactory.FromUnvalidated(this.Site, "Lore:" + pageName);
-				return linkTemplate.TitleValue.PageNameEquals("Future Link") && ns.BaseNamespace == UespNamespaces.Lore
-						? (Title)fullName
-						: this.ResolveLink(fullName, parentName, loreName);
+				var fullName = TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName);
+				var parentName = TitleFactory.FromUnvalidated(ns.Parent, pageName);
+				var loreName = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName);
+				return this.ResolveLink(fullName, parentName, loreName);
 			}
 
 			throw new InvalidOperationException("Template has no valid values.");
@@ -197,14 +207,8 @@
 		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
 		{
 			if (node is not SiteTemplateNode linkTemplate ||
-				linkTemplate.TitleValue is not Title callTitle)
-			{
-				return null;
-			}
-
-			// Only assign one to a variable since it's boolean Lore/Future after this.
-			var isLoreLink = callTitle.PageNameEquals("Lore Link");
-			if (!isLoreLink && !callTitle.PageNameEquals("Future Link"))
+				linkTemplate.TitleValue is not Title callTitle ||
+				!callTitle.PageNameEquals("Lore Link"))
 			{
 				return null;
 			}
@@ -218,12 +222,8 @@
 
 			var ns = this.GetNamespace(linkTemplate, page);
 
-			// If link doesn't resolve to anything OR
-			// if this is a Future Link outside of Lore space that resolves to something IN Lore space, do nothing.
-			if (
-				this.ResolveTemplate(linkTemplate, ns) is not Title link ||
-				(!isLoreLink && link.Namespace == UespNamespaces.Lore &&
-				page.Namespace != UespNamespaces.Lore))
+			// If link doesn't resolve to anything, do nothing.
+			if (this.ResolveTemplate(linkTemplate, ns) is not Title link)
 			{
 				return null;
 			}
