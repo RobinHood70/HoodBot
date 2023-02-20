@@ -1,12 +1,5 @@
 ﻿namespace RobinHood70.Robby
 {
-	using System;
-	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
-	using RobinHood70.WikiCommon;
-
 	/// <summary>A collection of Title objects.</summary>
 	public class TitleCollection : TitleData<Title>, IMessageSource
 	{
@@ -319,6 +312,16 @@
 				this.TryAdd(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
 			}
 		}
+
+		/// <inheritdoc/>
+		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
+
+		/// <summary>Adds pages to the collection from their revision IDs.</summary>
+		/// <param name="revisionIds">The revision IDs.</param>
+		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
+
+		/// <inheritdoc/>
+		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
 
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
 		/// <param name="defaultNamespace">The default namespace.</param>

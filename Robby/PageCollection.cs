@@ -1,13 +1,5 @@
 ﻿namespace RobinHood70.Robby
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
-	using RobinHood70.WikiCommon;
-
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
 	/// <seealso cref="TitleCollection{TTitle}" />
