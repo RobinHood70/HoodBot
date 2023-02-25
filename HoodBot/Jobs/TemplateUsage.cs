@@ -15,10 +15,10 @@
 	{
 		#region Fields
 		private readonly string saveLocation;
-		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
 		private readonly List<string> headerOrder = new();
 		private readonly bool checkAllTemplates;
+		private readonly TitleCollection allTemplateNames;
 		#endregion
 
 		#region Constructors
@@ -34,33 +34,25 @@
 			location.ThrowNull();
 			this.respectRedirects = respectRedirects;
 			this.checkAllTemplates = checkAllTemplates;
-			List<string> allTemplateNames = new();
+			List<string> allNames = new();
 			foreach (var templateName in templateNames.NotNull())
 			{
-				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
+				allNames.AddRange(templateName.Split(TextArrays.Pipe));
 			}
 
-			this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allTemplateNames[0]), StringComparison.Ordinal);
-			this.originalTemplateNames = allTemplateNames;
+			this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allNames[0]), StringComparison.Ordinal);
+			this.allTemplateNames = new(this.Site, MediaWikiNamespaces.Template, allNames);
 		}
 		#endregion
 
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			// TODO: Handle case where a redirect was provided rather than the base...doesn't seem to be working right now. (Should it? If not, at least spit out an error.)
 			// CONSIDER: Adapt this and/or the parser to handle relative templates like {{/Template}} and {{../Template}}.
-			TitleCollection templates = new(this.Site, MediaWikiNamespaces.Template, this.originalTemplateNames);
-			TitleCollection allTemplateNames;
 			if (this.respectRedirects)
 			{
 				this.StatusWriteLine("Loading template redirects");
-				templates = new TitleCollection(this.Site, this.FollowRedirects(templates));
-				allTemplateNames = BuildRedirectList(templates);
-			}
-			else
-			{
-				allTemplateNames = templates;
+				this.BuildRedirectList();
 			}
 
 			this.StatusWriteLine("Loading pages");
@@ -70,10 +62,10 @@
 				results.GetNamespace(MediaWikiNamespaces.Template);
 			}
 
-			results.GetPageTranscludedIn(templates);
+			results.GetPageTranscludedIn(this.allTemplateNames);
 			this.StatusWriteLine("Exporting");
 			results.Sort();
-			this.ExportTemplates(allTemplateNames, results);
+			this.ExportTemplates(results);
 		}
 		#endregion
 
@@ -84,46 +76,28 @@
 		#endregion
 
 		#region Private Static Methods
-		private static TitleCollection BuildRedirectList(TitleCollection titles)
+		private void BuildRedirectList()
 		{
-			TitleCollection retval = new(titles.Site, titles);
+			// First, make sure we're at the redirect target of all redirects.
+			var pages = this.allTemplateNames.Load(PageModules.None, true);
 
-			// Loop until nothing new is added.
-			HashSet<Title> titlesToCheck = new(titles);
-			HashSet<Title> alreadyChecked = new();
-			do
+			pages.RemoveExists(false);
+			var titles = pages.ToFullPageNames();
+
+			foreach (var title in titles)
 			{
-				foreach (var title in titlesToCheck)
-				{
-					retval.GetBacklinks(title.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
-				}
-
-				alreadyChecked.UnionWith(titlesToCheck);
-				titlesToCheck.Clear();
-				titlesToCheck.UnionWith(retval);
-				titlesToCheck.ExceptWith(alreadyChecked);
+				this.allTemplateNames.TryAdd(title); // Make sure the title iteself is there, in case we started at a redirect.
+				this.allTemplateNames.GetBacklinks(title, BacklinksTypes.Backlinks, true, Filter.Only); // Grab immediate redirects of the page.
 			}
-			while (titlesToCheck.Count > 0);
-
-			return retval;
 		}
-
-		private PageCollection FollowRedirects(TitleCollection titles)
-		{
-			var originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
-			originalsFollowed.GetTitles(titles);
-
-			return originalsFollowed;
-		}
-
 		#endregion
 
 		#region Private Methods
-		private void AddPage(IReadOnlyCollection<Title> allNames, List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser)
+		private void AddPage(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser)
 		{
 			foreach (var template in parser.FindAll<SiteTemplateNode>())
 			{
-				if (this.ShouldAddTemplate(template, parser) && allNames.Contains(template.TitleValue))
+				if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.TitleValue))
 				{
 					this.AddTemplate(templates, paramTranslator, parser, template);
 				}
@@ -142,9 +116,9 @@
 			}
 		}
 
-		private void ExportTemplates(IReadOnlyCollection<Title> allNames, PageCollection pages)
+		private void ExportTemplates(PageCollection pages)
 		{
-			var templates = this.ExtractTemplates(allNames, pages);
+			var templates = this.ExtractTemplates(pages);
 			if (templates.Count == 0)
 			{
 				this.StatusWriteLine("No template calls found!");
@@ -163,7 +137,7 @@
 			}
 		}
 
-		private List<(Title Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<Title> allNames, PageCollection pages)
+		private List<(Title Page, ITemplateNode Template)> ExtractTemplates(PageCollection pages)
 		{
 			List<(Title Page, ITemplateNode Template)> templates = new();
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
@@ -172,7 +146,7 @@
 				ContextualParser parser = new(page);
 				if (this.ShouldAddPage(parser))
 				{
-					this.AddPage(allNames, templates, paramTranslator, parser);
+					this.AddPage(templates, paramTranslator, parser);
 				}
 			}
 

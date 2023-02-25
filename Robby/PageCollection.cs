@@ -11,7 +11,7 @@
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
 	/// <seealso cref="TitleCollection{TTitle}" />
-	public class PageCollection : TitleCollection<Page>
+	public class PageCollection : TitleData<Page>
 	{
 		#region Fields
 		private readonly PageCreator pageCreator;
@@ -112,12 +112,7 @@
 		{
 			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var retval = UnlimitedDefault(site);
-			foreach (var title in other.NotNull())
-			{
-				var page = retval.pageCreator.CreateEmptyPage(title);
-				retval.Add(page);
-			}
-
+			retval.CreateRange(other);
 			return retval;
 		}
 
@@ -253,6 +248,39 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="title">The title to create the page with.</param>
+		public void Create(Title title) => this.Create(title, string.Empty);
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="title">The title to create the page with.</param>
+		/// <param name="text">The text to add to the page.</param>
+		public void Create(Title title, string text)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+
+			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
+			var page = this.pageCreator.CreateEmptyPage(title);
+			page.Text = text;
+			this.Add(page);
+		}
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="titles">The collection to initialize this instance from.</param>
+		public void CreateRange(IEnumerable<Title> titles) => this.CreateRange(titles, string.Empty);
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="titles">The collection to initialize this instance from.</param>
+		/// <param name="text">The text to add to each page.</param>
+		public void CreateRange(IEnumerable<Title> titles, string text)
+		{
+			ArgumentNullException.ThrowIfNull(titles);
+			foreach (var title in titles.NotNull())
+			{
+				this.Create(title, text ?? string.Empty);
+			}
+		}
 
 		/// <summary>Gets the <see cref="Page"/> with the specified key or <see langword="null"/> if not found.</summary>
 		/// <param name="key">The key.</param>

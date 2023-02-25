@@ -85,11 +85,8 @@
 
 		protected void SetTitlesFromSubpages(IEnumerable<Title> titles)
 		{
-			TitleCollection allTitles = new(this.Site)
-			{
-				titles.NotNull()
-			};
-
+			ArgumentNullException.ThrowIfNull(titles);
+			TitleCollection allTitles = new(this.Site, titles);
 			foreach (var title in titles)
 			{
 				allTitles.GetNamespace(title.Namespace.Id, Filter.Exclude, title.PageName + ' ');

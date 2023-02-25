@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -54,11 +53,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override IReadOnlyCollection<Title> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
+		protected override TitleCollection LoadDeletionCategories() => new(this, MediaWikiNamespaces.Category, "Marked for Deletion");
 
-		protected override IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
+		protected override TitleCollection LoadDeletePreventionTemplates() => new(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
 
-		protected override IReadOnlyCollection<Title> LoadDiscussionPages()
+		protected override TitleCollection LoadDiscussionPages()
 		{
 			TitleCollection titles = new(this);
 			titles.GetCategoryMembers("Message Boards");

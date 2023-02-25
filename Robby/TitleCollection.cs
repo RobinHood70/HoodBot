@@ -2,15 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A collection of Title objects.</summary>
-	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
-	public class TitleCollection : TitleCollection<Title>, IMessageSource
+	public class TitleCollection : TitleData<Title>, IMessageSource
 	{
 		#region Constructors
 
@@ -81,20 +79,44 @@
 
 		#region Public Methods
 
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The namespace to coerce.</param>
+		/// <summary>Adds a new title to the collection with the specified name.</summary>
+		/// <param name="name">The name of title to add.</param>
+		public void Add(string name)
+		{
+			ArgumentException.ThrowIfNullOrEmpty(name);
+			this.Add(TitleFactory.FromUnvalidated(this.Site, name).ToTitle());
+		}
+
+		/// <summary>Adds titles with the given names to the list.</summary>
+		/// <param name="names">The names of the titles to add.</param>
+		public void AddRange(IEnumerable<string> names)
+		{
+			ArgumentNullException.ThrowIfNull(names);
+			foreach (var title in names)
+			{
+				this.Add(title);
+			}
+		}
+
+		/// <summary>Adds titles with the given names to the list.</summary>
+		/// <param name="names">The names of the titles to add.</param>
+		public void AddRange(params string[] names) => this.AddRange(names as IEnumerable<string>);
+
+		/// <summary>Adds titles with the given names to the list.</summary>
+		/// <param name="defaultNamespace">The namespace to coerce the titles into if none is specified.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
 		public void AddRange(int defaultNamespace, IEnumerable<string> titles)
 		{
-			foreach (var title in titles.NotNull())
+			ArgumentNullException.ThrowIfNull(titles);
+			foreach (var title in titles)
 			{
-				this.TryAdd(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
+				this.Add(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
 			}
 		}
 
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
 		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="names">The page names, with or without the leading namespace text.</param>
+		/// <param name="names">The names of the items to add, with or without the leading namespace text.</param>
 		public void AddRange(int defaultNamespace, params string[] names) => this.AddRange(defaultNamespace, names as IEnumerable<string>);
 
 		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
@@ -241,38 +263,6 @@
 
 		#region Public Override Methods
 
-		/// <summary>Adds a new object to the collection with the specified name.</summary>
-		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(TitleFactory.FromUnvalidated(this.Site, title));
-
-		/// <summary>Adds new objects to the collection based on an existing <see cref="Title"/> collection.</summary>
-		/// <param name="titles">The titles to be added.</param>
-		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public void Add(IEnumerable<Title> titles)
-		{
-			if (titles != null)
-			{
-				foreach (var title in titles)
-				{
-					this.Add(title);
-				}
-			}
-		}
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles.</param>
-		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles to add.</param>
-		public void Add(IEnumerable<string> titles)
-		{
-			foreach (var title in titles.NotNull())
-			{
-				this.Add(title);
-			}
-		}
-
 		/// <inheritdoc/>
 		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
 
@@ -280,8 +270,60 @@
 		/// <param name="revisionIds">The revision IDs.</param>
 		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 
-		/// <inheritdoc/>
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
+
+		/// <summary>Attempts to add a title with the given name to the list, gracefully skipping the item if it's already present.</summary>
+		/// <param name="title">The name of the title to try to add.</param>
+		/// <returns><see langword="true"/> if the item was added; otherwise, <see langword="false"/>.</returns>
+		public bool TryAdd(string title)
+		{
+			ArgumentException.ThrowIfNullOrEmpty(title);
+			var realTitle = TitleFactory.FromUnvalidated(this.Site, title);
+			if (this.Contains(realTitle))
+			{
+				return false;
+			}
+
+			this.Add(realTitle);
+			return true;
+		}
+
+		/// <summary>Attempts to add titles with the given names to the list, gracefully skipping them if they're already present.</summary>
+		/// <param name="titles">The names of the titles to try to add.</param>
+		/// <returns><see langword="true"/> if any items were added; otherwise, <see langword="false"/>.</returns>
+		public bool TryAddRange(IEnumerable<string> titles)
+		{
+			ArgumentNullException.ThrowIfNull(titles);
+			var retval = false;
+			foreach (var title in titles)
+			{
+				retval |= this.TryAdd(title);
+			}
+
+			return retval;
+		}
+
+		/// <summary>Adds titles with the given names to the list.</summary>
+		/// <param name="names">The names of the titles to add.</param>
+		public void TryAddRange(params string[] names) => this.AddRange(names as IEnumerable<string>);
+
+		/// <summary>Adds titles with the given names to the list.</summary>
+		/// <param name="defaultNamespace">The namespace to coerce the titles into if none is specified.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public void TryAddRange(int defaultNamespace, IEnumerable<string> titles)
+		{
+			ArgumentNullException.ThrowIfNull(titles);
+			foreach (var title in titles.NotNull())
+			{
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
+			}
+		}
+
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The default namespace.</param>
+		/// <param name="names">The names of the items to add, with or without the leading namespace text.</param>
+		public void TryAddRange(int defaultNamespace, params string[] names) => this.AddRange(defaultNamespace, names as IEnumerable<string>);
 		#endregion
 
 		#region Protected Override Methods

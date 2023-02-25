@@ -80,10 +80,10 @@
 		private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
-		private IReadOnlyCollection<Title>? deletePreventionTemplates;
-		private IReadOnlyCollection<Title>? deletionCategories;
-		private HashSet<Title>? disambiguationTemplates;
-		private IReadOnlyCollection<Title>? discussionPages;
+		private TitleCollection? deletePreventionTemplates;
+		private TitleCollection? deletionCategories;
+		private TitleCollection? disambiguationTemplates;
+		private TitleCollection? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private FullTitle? mainPage;
 		private string? mainPageName;
@@ -105,6 +105,10 @@
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.FilterPages = new TitleCollection(this);
+			this.deletePreventionTemplates = new TitleCollection(this);
+			this.deletionCategories = new TitleCollection(this);
+			this.disambiguationTemplates = new TitleCollection(this);
+			this.discussionPages = new TitleCollection(this);
 		}
 		#endregion
 
@@ -151,19 +155,19 @@
 
 		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
-		public IReadOnlyCollection<Title> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
+		public TitleCollection DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
 
 		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page is flagged for deletion.</value>
-		public IReadOnlyCollection<Title> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
+		public TitleCollection DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
 
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+		public TitleCollection DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
-		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
+		public TitleCollection DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -1226,31 +1230,40 @@
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page should never be flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
+		protected virtual TitleCollection LoadDeletePreventionTemplates() => this.deletePreventionTemplates ??= new TitleCollection(this);
 
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page is flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page is flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
+		protected virtual TitleCollection LoadDeletionCategories() => this.deletionCategories ??= new TitleCollection(this);
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual IReadOnlyCollection<Title> LoadDisambiguationTemplates()
+		protected virtual TitleCollection LoadDisambiguationTemplates()
 		{
 			if (this.disambiguationTemplates == null)
 			{
-				this.disambiguationTemplates = new HashSet<Title>();
+				this.disambiguationTemplates = new TitleCollection(this);
 				Title title = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
-						this.disambiguationTemplates.Add(TitleFactory.FromUnvalidated(this, page.Text.Trim()));
+						var parser = new ContextualParser(page);
+						foreach (var link in parser.LinkNodes)
+						{
+							this.disambiguationTemplates.Add(SiteLink.FromLinkNode(this, link));
+						}
+
+						if (this.disambiguationTemplates.Count == 0)
+						{
+							this.disambiguationTemplates.AddRange(page.Text.Split('\n', StringSplitOptions.RemoveEmptyEntries));
+						}
 					}
 					else
 					{
-						this.disambiguationTemplates.UnionWith(page.Links);
+						this.disambiguationTemplates.AddRange(page.Links);
 					}
 				}
 			}
@@ -1261,7 +1274,7 @@
 		/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 		/// <returns>A list of pages that function as talk pages.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
+		protected virtual TitleCollection LoadDiscussionPages() => this.discussionPages = new TitleCollection(this);
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
 		/// <param name="input">The input parameters.</param>

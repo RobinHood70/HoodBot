@@ -2,11 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
@@ -64,122 +62,23 @@
 	#endregion
 
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
-	/// <typeparam name="TTitle">The type of the title.</typeparam>
+	/// <typeparam name="T">The type of the title.</typeparam>
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
-	public abstract class TitleCollection<TTitle> : KeyedCollection<Title, TTitle>, ISiteSpecific, IWikiData
+	public abstract class TitleData<T> : TitleCollection<T>, ISiteSpecific, IWikiData
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleData{TTitle}" /> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
-		protected TitleCollection([NotNull, ValidatedNotNull] Site site)
-			: base(SimpleTitleComparer.Instance)
+		protected TitleData([NotNull, ValidatedNotNull] Site site)
+			: base(site)
 		{
-			this.Site = site.NotNull();
-		}
-		#endregion
-
-		#region Public Properties
-
-		/// <summary>Gets the site for the collection.</summary>
-		/// <value>The site.</value>
-		public Site Site { get; }
-		#endregion
-
-		#region Protected Properties
-
-		/// <summary>Gets or sets a value indicating whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
-		/// <value>The type of the namespace limitation.</value>
-		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		protected LimitationType LimitationType { get; set; } = LimitationType.Disallow;
-
-		/// <summary>Gets the namespace limitations.</summary>
-		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
-		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		protected ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
-		{
-			MediaWikiNamespaces.Media,
-			MediaWikiNamespaces.MediaWiki,
-			MediaWikiNamespaces.Special,
-			MediaWikiNamespaces.Template,
-			MediaWikiNamespaces.User,
-		};
-		#endregion
-
-		#region Public Indexers
-
-		/// <summary>Gets or sets the <see cref="Title">Title</see> with the specified key.</summary>
-		/// <param name="key">The key.</param>
-		/// <returns>The <see cref="Title">Title</see>.</returns>
-		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
-		public virtual TTitle this[string key]
-		{
-			get
-			{
-				ArgumentNullException.ThrowIfNull(key);
-				return this[TitleFactory.FromUnvalidated(this.Site, key)];
-			}
 		}
 		#endregion
 
 		#region Public Methods
-
-		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
-		/// <param name="titles">The titles to add.</param>
-		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Collection{T}.Add(T)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles)
-		{
-			if (titles != null)
-			{
-				foreach (var title in titles)
-				{
-					this.TryAdd(title);
-				}
-			}
-		}
-
-		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
-		/// <param name="key">The key to search for.</param>
-		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
-		public bool Contains(string key)
-		{
-			ArgumentNullException.ThrowIfNull(key);
-			var title = TitleFactory.FromUnvalidated(this.Site, key);
-			return this.Contains(title);
-		}
-
-		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
-		public void FilterByLimitationRules()
-		{
-			if (this.LimitationType == LimitationType.Disallow)
-			{
-				this.RemoveNamespaces(this.NamespaceLimitations);
-			}
-			else if (this.LimitationType == LimitationType.OnlyAllow)
-			{
-				this.FilterToNamespaces(this.NamespaceLimitations);
-			}
-		}
-
-		/// <summary>Filters the collection to one or more namespaces.</summary>
-		/// <param name="namespaces">The namespaces to filter to.</param>
-		public void FilterToNamespaces(IEnumerable<int> namespaces)
-		{
-			HashSet<int> hash = new(namespaces);
-			for (var i = this.Count - 1; i >= 0; i--)
-			{
-				if (!hash.Contains(this.GetKeyForItem(this[i]).Namespace.Id))
-				{
-					this.RemoveAt(i);
-				}
-			}
-		}
-
-		/// <summary>Filters the collection to one or more namespaces.</summary>
-		/// <param name="namespaces">The namespaces to filter to.</param>
-		public void FilterToNamespaces(params int[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<int>);
 
 		/// <inheritdoc/>
 		public void GetBacklinks(string title) => this.GetBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any);
@@ -478,147 +377,6 @@
 		/// <inheritdoc/>
 		public void GetWatchlistRaw(string owner, string token) => this.GetWatchlistRaw(new WatchlistRawInput { Owner = owner, Token = token });
 
-		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
-		/// <returns>The index of the item with the specified <paramref name="key" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(string key)
-		{
-			ArgumentNullException.ThrowIfNull(key);
-			var title = TitleFactory.FromUnvalidated(this.Site, key);
-			return this.IndexOf(this[title]);
-		}
-
-		/// <summary>Removes the item with the specified key from the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="key">The key of the item to remove from the <see cref="TitleCollection">collection</see>.</param>
-		/// <returns><see langword="true" /> if and item with the specified <paramref name="key" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if an item with the specified <paramref name="key" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
-		public bool Remove(string key)
-		{
-			var title = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
-			return this.Remove(title);
-		}
-
-		/// <summary>Removes a series of items from the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="titles">The titless to remove.</param>
-		/// <returns><see langword="true" /> if any of the <paramref name="titles" /> were removed; otherwise, <see langword="false" />.</returns>
-		public bool Remove(IEnumerable<Title> titles)
-		{
-			titles.ThrowNull();
-			var removed = false;
-			foreach (var item in titles)
-			{
-				removed |= this.Remove(item);
-			}
-
-			return removed;
-		}
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(IEnumerable<int> namespaces) => this.RemoveNamespaces(false, namespaces);
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(params int[] namespaces) => this.RemoveNamespaces(false, namespaces as IEnumerable<int>);
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, IEnumerable<int>? namespaces)
-		{
-			if (namespaces is not HashSet<int> hash)
-			{
-				hash = new(namespaces ?? Array.Empty<int>());
-			}
-
-			for (var i = this.Count - 1; i >= 0; i--)
-			{
-				var ns = this.GetKeyForItem(this[i]).Namespace;
-				if ((removeTalk && ns.IsTalkSpace) || hash.Contains(ns.Id))
-				{
-					this.RemoveAt(i);
-				}
-			}
-		}
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, params int[] namespaces) => this.RemoveNamespaces(removeTalk, namespaces as IEnumerable<int>);
-
-		/// <summary>Removes all talk spaces from the collection.</summary>
-		public void RemoveTalkNamespaces() => this.RemoveNamespaces(true, null as IEnumerable<int>);
-
-		/// <summary>Sets namespace limitations for the Load() methods.</summary>
-		/// <param name="limitationType">Type of the limitation.</param>
-		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
-		/// <remarks>Limitations apply only to the current collection; result collections will inherently be unfiltered to allow for cross-namespace redirection. Filtering can be added to result collections after they are returned.</remarks>
-		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
-
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="Comparison{T}" />.</summary>
-		/// <param name="comparison">The comparison.</param>
-		public void Sort(Comparison<TTitle> comparison)
-		{
-			ArgumentNullException.ThrowIfNull(comparison);
-			var list = (List<TTitle>)this.Items;
-			list.Sort(comparison);
-		}
-
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="IComparer{T}" />.</summary>
-		/// <param name="comparer">The comparer.</param>
-		public void Sort(IComparer<TTitle> comparer)
-		{
-			ArgumentNullException.ThrowIfNull(comparer);
-			var list = (List<TTitle>)this.Items;
-			list.Sort(comparer);
-		}
-
-		/// <summary>Attempts to add the given item to the list, gracefully skipping the item if it's already present in the text.</summary>
-		/// <param name="item">The item to try to add.</param>
-		/// <returns><see langword="true"/> if the item was added; otherwise, <see langword="false"/>.</returns>
-		public bool TryAdd(TTitle item)
-		{
-			if (this.Contains(item))
-			{
-				return false;
-			}
-
-			this.Add(item);
-			return true;
-		}
-
-		/// <summary>Attempts to add the given item to the list, gracefully skipping the item if it's already present in the text.</summary>
-		/// <param name="items">The items to try to add.</param>
-		/// <returns><see langword="true"/> if any items were added; otherwise, <see langword="false"/>.</returns>
-		public bool TryAdd(IEnumerable<TTitle> items)
-		{
-			ArgumentNullException.ThrowIfNull(items);
-			var retval = false;
-			foreach (var item in items)
-			{
-				retval |= this.TryAdd(item);
-			}
-
-			return retval;
-		}
-
-		/// <summary>Returns the requested value, or null if not found.</summary>
-		/// <param name="key">The key.</param>
-		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(Title key)
-		{
-			ArgumentNullException.ThrowIfNull(key);
-			_ = this.TryGetValue(key, out var retval);
-			return retval;
-		}
-
-		/// <summary>Returns the requested value, or null if not found.</summary>
-		/// <param name="key">The key.</param>
-		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(string key)
-		{
-			ArgumentNullException.ThrowIfNull(key);
-			return this.ValueOrDefault(TitleFactory.FromUnvalidated(this.Site, key));
-		}
 		#endregion
 
 		#region Public Abstract Methods
@@ -630,80 +388,6 @@
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
 		public abstract void GetRevisionIds(IEnumerable<long> revisionIds);
-
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
-		public abstract void Sort();
-		#endregion
-
-		#region Public Virtual Methods
-
-		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
-		/// <param name="limitationType">The type of namespace limitations to apply.</param>
-		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
-		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
-		public virtual void SetLimitations(LimitationType limitationType, IEnumerable<int>? namespaceLimitations)
-		{
-			this.LimitationType = limitationType;
-			this.NamespaceLimitations.Clear();
-			if (limitationType != LimitationType.None && namespaceLimitations != null)
-			{
-				this.NamespaceLimitations.AddRange(namespaceLimitations);
-			}
-		}
-
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
-		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public virtual bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ArgumentNullException.ThrowIfNull(key);
-			var title = TitleFactory.FromUnvalidated(this.Site, key);
-			return this.TryGetValue(title, out value);
-		}
-		#endregion
-
-		#region Protected Methods
-
-		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
-		/// <param name="title">The title.</param>
-		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
-		/// <exception cref="InvalidOperationException">Thrown when the <see cref="LimitationType"/> is not one of the recognized values.</exception>
-		protected bool IsTitleInLimits(Title title) =>
-			title != null &&
-			this.LimitationType switch
-			{
-				LimitationType.None => true,
-				LimitationType.Disallow => !this.NamespaceLimitations.Contains(title.Namespace.Id),
-				LimitationType.OnlyAllow => this.NamespaceLimitations.Contains(title.Namespace.Id),
-				_ => throw new ArgumentOutOfRangeException(Resources.InvalidLimitationType)
-			};
-		#endregion
-
-		#region Protected Virtual Methods
-
-		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="index">The index to insert at.</param>
-		/// <param name="item">The item.</param>
-		/// <exception cref="ArgumentException">An element with the same key already exists in the collection.</exception>
-		/// <exception cref="ArgumentNullException">The item is null.</exception>
-		/// <exception cref="InvalidOperationException">The item's site does not match the collection's site.</exception>
-		/// <remarks>This method underlies all methods that insert pages into the collection, and can be overridden in derived classes.</remarks>
-		protected override void InsertItem(int index, TTitle item)
-		{
-			ArgumentNullException.ThrowIfNull(item);
-			var key = this.GetKeyForItem(item);
-			if (key.Site != this.Site)
-			{
-				throw new InvalidOperationException(Resources.InvalidSite);
-			}
-
-			if (this.IsTitleInLimits(key))
-			{
-				base.InsertItem(index, item);
-			}
-		}
 		#endregion
 
 		#region Protected Abstract Methods
