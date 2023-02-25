@@ -12,11 +12,87 @@
 	internal sealed class ConvertOnlineFurnishings : EditJob
 	{
 		#region Static Fields
-		private static readonly string[] AntiquityNames = new[] { string.Empty, "id", "quality", "difficulty", "zone", "source", "antiquarian1", "codex1", "antiquarian2", "codex2", "antiquarian3", "codex3" };
-		private static readonly string[] AntiquityFormatting = new[] { "\n  |name=", "\n  |id=", "\n  |quality=", "\n  |difficulty=", "\n  |zone=", "\n  |source=", "\n  |antiquarian1=", "\n  |codex1=", "\n  |antiquarian2=", "\n  |codex2=", "\n  |antiquarian3=", "\n  |codex3=" };
-		private static readonly string[] CraftingParameters = new[] { "craft", "document", "folio", "materials", "planid", "planname", "planpricewv", "planquality", "planvendorwv", "skills" };
-		private static readonly string[] NonHouseCats = new[] { "Miscellaneous", "Mounts", "Non-Combat Pets", "Services" };
-		private static readonly string[] PurchaseParameters = new[] { "priceap", "pricecg", "pricecrowns", "priceet", "pricegold", "pricetv", "pricewv", "vendorap", "vendorcg", "vendorcgpreview", "vendorcity", "vendorcity2", "vendorcity3", "vendorcityap", "vendorcityother", "vendorcitytv", "vendorcrowns", "vendoret", "vendorgold", "vendorother", "vendorother2", "vendorother3", "vendortv", "vendorwv" };
+		private static readonly string[] AntiquityNames = new[]
+		{
+			string.Empty,
+			"id",
+			"quality",
+			"difficulty",
+			"zone",
+			"source",
+			"antiquarian1",
+			"codex1",
+			"antiquarian2",
+			"codex2",
+			"antiquarian3",
+			"codex3"
+		};
+
+		private static readonly string[] AntiquityFormatting = new[]
+		{
+			"\n  |name=",
+			"\n  |id=",
+			"\n  |quality=",
+			"\n  |difficulty=",
+			"\n  |zone=",
+			"\n  |source=",
+			"\n  |antiquarian1=",
+			"\n  |codex1=",
+			"\n  |antiquarian2=",
+			"\n  |codex2=",
+			"\n  |antiquarian3=",
+			"\n  |codex3="
+		};
+
+		private static readonly string[] CraftingParameters = new[]
+		{
+			"craft",
+			"document",
+			"folio",
+			"materials",
+			"planid",
+			"planname",
+			"planpricewv",
+			"planquality",
+			"planvendorwv",
+			"skills"
+		};
+
+		private static readonly HashSet<string> NonHouseCats = new(StringComparer.Ordinal)
+		{
+			"Miscellaneous",
+			"Mounts",
+			"Non-Combat Pets",
+			"Services"
+		};
+
+		private static readonly string[] PurchaseParameters = new[]
+		{
+			"priceap",
+			"pricecg",
+			"pricecrowns",
+			"priceet",
+			"pricegold",
+			"pricetv",
+			"pricewv",
+			"vendorap",
+			"vendorcg",
+			"vendorcgpreview",
+			"vendorcity",
+			"vendorcity2",
+			"vendorcity3",
+			"vendorcityap",
+			"vendorcityother",
+			"vendorcitytv",
+			"vendorcrowns",
+			"vendoret",
+			"vendorgold",
+			"vendorother",
+			"vendorother2",
+			"vendorother3",
+			"vendortv",
+			"vendorwv"
+		};
 		#endregion
 
 		#region Constructors
