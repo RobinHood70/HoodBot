@@ -190,8 +190,8 @@
 
 		/// <summary>Gets the interwiki prefixes.</summary>
 		/// <value>A hashset of all interwiki prefixes, to allow <see cref="PageSetRedirectItem.Interwiki"/> emulation for MW 1.24 and below.</value>
-		/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as a writable HashSet, since it's the fastest lookup.</remarks>
-		public IReadOnlyCollection<string> InterwikiPrefixes => this.interwikiPrefixes;
+		/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as an IReadOnlySet, since it's the fastest lookup.</remarks>
+		public IReadOnlySet<string> InterwikiPrefixes => this.interwikiPrefixes;
 
 		/// <summary>Gets or sets the maximum length of get requests for a given site. Get requests that are longer than this will be sent as POST requests instead.</summary>
 		/// <value>The maximum length of get requests.</value>

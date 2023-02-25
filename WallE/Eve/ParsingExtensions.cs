@@ -250,7 +250,7 @@
 		/// <param name="redirects">The dictionary of redirects to populate.</param>
 		/// <param name="interwikiPrefixes">The interwiki prefixes.</param>
 		/// <param name="siteVersion">The site version.</param>
-		public static void GetRedirects(this JToken? token, IDictionary<string, PageSetRedirectItem> redirects, IReadOnlyCollection<string> interwikiPrefixes, int siteVersion)
+		public static void GetRedirects(this JToken? token, IDictionary<string, PageSetRedirectItem> redirects, IReadOnlySet<string> interwikiPrefixes, int siteVersion)
 		{
 			const string fromName = "from";
 			const string toName = "to";
@@ -269,7 +269,7 @@
 					{
 						// Pre-1.25 code did not split out interwiki prefixes from the title, so do that.
 						var titleSplit = to.TrimStart(TextArrays.Colon).Split(TextArrays.Colon, 2);
-						if (titleSplit.Length == 2 && interwikiPrefixes.Contains(titleSplit[0]))
+						if (titleSplit.Length == 2 && interwikiPrefixes.Contains(titleSplit[0], StringComparer.Ordinal))
 						{
 							interwiki = titleSplit[0];
 							to = titleSplit[1];
