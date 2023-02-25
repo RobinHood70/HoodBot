@@ -13,7 +13,7 @@
 	public class BladesEffects : EditJob
 	{
 		#region Static Fields
-		private static readonly string[] IgnoreList = new[]
+		private static readonly HashSet<string> IgnoreList = new(StringComparer.Ordinal)
 		{
 			"Black Green Smoke",
 			"Continuous Frost Damage",
