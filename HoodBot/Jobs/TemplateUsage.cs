@@ -37,7 +37,7 @@
 			List<string> allNames = new();
 			foreach (var templateName in templateNames.NotNull())
 			{
-				allNames.AddRange(templateName.Split(TextArrays.Pipe));
+				allNames.AddRange(templateName.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries));
 			}
 
 			this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allNames[0]), StringComparison.Ordinal);
