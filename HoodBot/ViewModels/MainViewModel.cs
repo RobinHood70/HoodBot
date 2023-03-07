@@ -251,6 +251,8 @@
 			finally
 			{
 				jobManager.PagePreview -= this.SitePagePreview;
+				jobManager.StatusUpdated -= this.JobManager_StatusUpdated;
+				jobManager.ProgressUpdated -= this.JobManager_ProgressUpdated;
 				jobManager.FinishedJob -= this.JobManager_FinishedJob;
 				jobManager.StartingJob -= this.JobManager_StartingJob;
 			}
