@@ -214,12 +214,7 @@
 			}
 
 			var page = parser.Page;
-			var linkNode = linkTemplate.Find(1);
-			if (linkNode is null)
-			{
-				throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.FullPageName}.");
-			}
-
+			var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.FullPageName}.");
 			var ns = this.GetNamespace(linkTemplate, page);
 
 			// If link doesn't resolve to anything, do nothing.

@@ -130,12 +130,7 @@
 			#region Constructors
 			public BladesEnemy(JToken token)
 			{
-				var stats = token["_stats"];
-				if (stats == null)
-				{
-					throw new InvalidOperationException();
-				}
-
+				var stats = token["_stats"] ?? throw new InvalidOperationException();
 				this.Name = (string?)token["m_Name"] ?? string.Empty;
 				this.HealthBase = (double?)stats["_healthBase"] ?? 0;
 				this.HealthIncrement = (double?)stats["_healthIncrement"] ?? 0;

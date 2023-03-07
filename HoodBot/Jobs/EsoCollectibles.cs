@@ -93,12 +93,7 @@
 				"<gallery>\n</gallery>",
 				$"<gallery>\nON-crown store-{page.PageName}.jpg\n</gallery>",
 				StringComparison.Ordinal);
-			var collectible = this.collectibles[page];
-			if (collectible is null)
-			{
-				throw new InvalidOperationException();
-			}
-
+			var collectible = this.collectibles[page] ?? throw new InvalidOperationException();
 			if (this.crateTiers.TryGetValue(collectible.Name, out var crateInfo))
 			{
 				collectible.Crates.AddRange(crateInfo);
