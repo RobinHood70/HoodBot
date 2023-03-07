@@ -32,20 +32,18 @@ namespace RobinHood70.WallE.Clients
 			{
 				retval = base.Send(request, cancellationToken);
 			}
-			catch (HttpRequestException hre) when
-				(hre.InnerException is SocketException se &&
-				(se.SocketErrorCode == SocketError.TimedOut ||
-				se.SocketErrorCode == SocketError.HostNotFound))
+			catch (HttpRequestException hre) when (hre.InnerException is SocketException se)
 			{
-				return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
-			}
+				var responseCode = se.SocketErrorCode switch
+				{
+					SocketError.ConnectionRefused => HttpStatusCode.Forbidden,
+					SocketError.HostNotFound => HttpStatusCode.NotFound,
+					SocketError.TimedOut => HttpStatusCode.RequestTimeout,
+					_ => HttpStatusCode.BadRequest
+				};
 
-			/* Temporary code, but it might make sense to add this or perhaps a more narrow version to catch more errors.
-			catch
-			{
-				return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+				return new HttpResponseMessage(responseCode);
 			}
-			*/
 
 			var retry = this.parent.Retries;
 			while (retry > 0)
