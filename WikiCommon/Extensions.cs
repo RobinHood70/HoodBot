@@ -19,7 +19,7 @@
 		/// <summary>Formats a <see cref="DateTime"/>? in the standard MediaWiki format.</summary>
 		/// <param name="timestamp">The timestamp to format.</param>
 		/// <returns>A string with the date in the standard MediaWiki format or <see langword="null"/> if the input value was null.</returns>
-		[return: NotNullIfNotNull("timestamp")]
+		[return: NotNullIfNotNull(nameof(timestamp))]
 		public static string? ToMediaWiki(this DateTime? timestamp) => timestamp == null ? null : ToMediaWiki(timestamp.Value);
 		#endregion
 

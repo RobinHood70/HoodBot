@@ -63,7 +63,7 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Methods
 
-		[return: NotNullIfNotNull("revision")]
+		[return: NotNullIfNotNull(nameof(revision))]
 		public static string? GetDiffToValue(int? revision) => revision switch
 		{
 			null => null,

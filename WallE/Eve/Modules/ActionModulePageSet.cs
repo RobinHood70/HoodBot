@@ -128,7 +128,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Static Methods
-		[return: NotNullIfNotNull("pageId")]
+		[return: NotNullIfNotNull(nameof(pageId))]
 		protected static string? FakeTitleFromId(long? pageId) => pageId == null ? null : '#' + pageId.Value.ToStringInvariant();
 		#endregion
 

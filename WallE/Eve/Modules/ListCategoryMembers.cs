@@ -95,7 +95,7 @@
 		#endregion
 
 		#region Private Static Methods
-		[return: NotNullIfNotNull("hexValue")]
+		[return: NotNullIfNotNull(nameof(hexValue))]
 		private static string? PackHex(string? hexValue)
 		{
 			if (hexValue == null)

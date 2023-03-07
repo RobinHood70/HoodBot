@@ -108,7 +108,7 @@
 		#endregion
 
 		#region Private Methods
-		[return: NotNullIfNotNull("dt")]
+		[return: NotNullIfNotNull(nameof(dt))]
 		private static string? IndexDateTime(DateTime? dt) => dt?.ToUniversalTime().ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 		#endregion
 	}

@@ -88,7 +88,7 @@
 				subnet: GetRateLimit(value["subnet"]),
 				user: GetRateLimit(value["user"]));
 
-		[return: NotNullIfNotNull("value")]
+		[return: NotNullIfNotNull(nameof(value))]
 		private static RateLimitInfo? GetRateLimit(JToken? value) => value == null
 			? null
 			: new RateLimitInfo(
