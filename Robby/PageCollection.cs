@@ -594,7 +594,7 @@
 				if (pageValidator(page))
 				{
 					this.TryAdd(page);
-					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+					if (page.IsMissing || (((page.LoadOptions.Modules & PageModules.Revisions) != 0) && string.IsNullOrWhiteSpace(page.Text)))
 					{
 						this.PageMissing?.Invoke(this, page);
 					}
