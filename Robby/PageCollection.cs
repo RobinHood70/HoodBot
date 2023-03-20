@@ -593,7 +593,7 @@
 				var page = this.New(item);
 				if (pageValidator(page))
 				{
-					this.Add(page);
+					this.TryAdd(page);
 					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 					{
 						this.PageMissing?.Invoke(this, page);
