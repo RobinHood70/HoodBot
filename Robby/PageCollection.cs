@@ -80,11 +80,11 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the options used by <see cref="LoadPages(QueryPageSetInput)"/>.</summary>
+		/// <summary>Gets the options used by <see cref="LoadPages(QueryPageSetInput, Func{Page, bool})"/>.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; }
 
-		/// <summary>Gets or sets the modules loaded by <see cref="LoadPages(QueryPageSetInput)"/>.</summary>
+		/// <summary>Gets or sets the modules loaded by <see cref="LoadPages(QueryPageSetInput, Func{Page, bool})"/>.</summary>
 		/// <value>The LoadOptions modules.</value>
 		/// <remarks>This is an alias for the <see cref="LoadOptions"/>.<see cref="PageLoadOptions.Modules">Modules</see> property.</remarks>
 		public PageModules Modules
@@ -320,7 +320,7 @@
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
+		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()), this.IsTitleInLimits);
 
 		/// <summary>Merges the current PageCollection with another, including all <see cref="TitleMap"/> entries.</summary>
 		/// <param name="other">The PageCollection to merge with.</param>
@@ -364,13 +364,13 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
+		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput), this.IsTitleInLimits);
 
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
+		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds), this.IsTitleInLimits);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
@@ -606,9 +606,7 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()));
-
-		private void LoadPages(QueryPageSetInput pageSetInput) => this.LoadPages(pageSetInput, this.IsTitleInLimits);
+		private void LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()), this.IsTitleInLimits);
 
 		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
 		/// <param name="item">The <see cref="IApiTitle"/> with all the information for the page.</param>
