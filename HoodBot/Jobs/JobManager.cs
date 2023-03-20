@@ -281,8 +281,9 @@
 		private Site CreateSite()
 		{
 			var retval = Site.GetFactoryMethod(this.wikiInfo.SiteClassIdentifier)(this.AbstractionLayer);
-			retval.PagePreview += this.OnPagePreview;
 			retval.Changing += this.SiteChanging;
+			retval.PagePreview += this.OnPagePreview;
+			retval.WarningOccurred += this.SiteWarningOccurred;
 			return retval;
 		}
 
@@ -299,9 +300,9 @@
 
 		private void DisposeSite()
 		{
+			this.Site.WarningOccurred -= this.SiteWarningOccurred;
 			this.Site.PagePreview -= this.OnPagePreview;
 			this.Site.Changing -= this.SiteChanging;
-			this.Site.WarningOccurred -= this.SiteWarningOccurred;
 		}
 		#endregion
 	}
