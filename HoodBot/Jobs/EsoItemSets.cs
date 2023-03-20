@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 	using System.Data;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -39,8 +38,7 @@
 		#endregion
 
 		#region Fields
-		private readonly KeyedCollection<Page, SetData> sets = new SetCollection();
-		private readonly List<SetData> allSets = new();
+		private readonly Dictionary<Title, SetData> sets = new(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors
@@ -62,19 +60,22 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AfterLoadPages()
-		{
-			this.allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
 
-			// Needs to be after update, since update modifies item's IsNonTrivial property.
-			this.GenerateReport();
-		}
+		// Needs to be after update, since update modifies item's IsNonTrivial property.
+		protected override void AfterLoadPages() => this.GenerateReport();
 
 		protected override void BeforeLoadPages()
 		{
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
-			this.GetSetPages();
+			var allSets = GetSetData();
+			PageCollection catPages = new(this.Site, PageModules.Info, true);
+			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
+			var unresolved = this.UpdateSetPages(catPages, allSets);
+			foreach (var setName in unresolved)
+			{
+				this.Warn($"A page for {setName} could not be determined. Please check this and add the title to {nameof(TitleOverrides)}.");
+			}
 		}
 
 		protected override void JobCompleted()
@@ -85,19 +86,10 @@
 
 		protected override void LoadPages()
 		{
-			this.allSets.Sort((x, y) => SimpleTitleComparer.Instance.Compare(x.Page, y.Page));
 			TitleCollection titles = new(this.Site);
-			foreach (var set in this.allSets)
+			foreach (var (page, _) in this.sets)
 			{
-				if (set.Page is not null)
-				{
-					this.sets.Add(set);
-					titles.Add(set.Page);
-				}
-				else
-				{
-					throw new InvalidOperationException($"The page for set {set.Name} is null!");
-				}
+				titles.Add(page);
 			}
 
 			this.Pages.GetTitles(titles);
@@ -109,15 +101,35 @@
 			EsoSpace.SetBotUpdateVersion(this, "itemset");
 		}
 
+		protected override void PageMissing(Page page)
+		{
+			var set = this.sets[page];
+			StringBuilder sb = new();
+			sb
+				.Append("{{Trail|Sets}}{{Online Update}}{{Minimal}}\n")
+				.Append("'''")
+				.Append(set.Name)
+				.Append("''' is a {{huh}}-rank [[Online:Sets|item set]] found in {{huh}}.\n\n")
+				.Append("Set pieces are {{huh}} style in {{huh}}.\n\n")
+				.Append("===Bonuses===\n")
+				.Append("<onlyinclude>\n")
+				.Append("</onlyinclude>\n")
+				.Append("===Pieces===\n")
+				.Append("The set consists of {{huh}}. For detailed weapon stats and set values, see individual item pages by clicking on the links below.\n")
+				.Append("<!--\n")
+				.Append("* {{Item Link|id=|}}\n")
+				.Append("* {{Item Link|id=|}}\n")
+				.Append("-->\n")
+				.Append("===Notes===\n\n")
+				.Append("{{Online Sets}}\n")
+				.Append("{{ESO Sets With|subtype=|source=}}\n")
+				.Append("{{Stub|Item Set}}");
+			page.Text = sb.ToString();
+		}
+
 		protected override void PageLoaded(Page page)
 		{
 			var setData = this.sets[page];
-			if (!page.Exists && setData.Page is not null)
-			{
-				// TODO: Check this, it's definitely not the optimal way of doing it. Why do we have loaded pages and a page object as part of .sets?
-				page.Text = setData.Page.Text;
-			}
-
 			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
 			if (oldPage.Count < 2 || !(
 					oldPage[0] is IIgnoreNode firstNode &&
@@ -169,197 +181,139 @@
 		#endregion
 
 		#region Private Static Methods
-		private void GetSetData()
+		private static List<SetData> GetSetData()
 		{
+			var retval = new List<SetData>();
 			foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new SetData(row)))
 			{
-				this.allSets.Add(item);
+				retval.Add(item);
 			}
+
+			return retval;
 		}
 		#endregion
 
 		#region Private Methods
 		private void GenerateReport()
 		{
-			StringBuilder sb = new();
-			foreach (var item in this.allSets)
+			var sorted = new SortedDictionary<Title, string>(SimpleTitleComparer.Instance);
+			foreach (var (page, set) in this.sets)
 			{
-				if (item.Page is null)
-				{
-					throw new InvalidOperationException($"{item.Name}'s Page property is null. This should never happen.");
-				}
-
-				if (item.IsNonTrivial)
+				StringBuilder sb = new();
+				if (set.IsNonTrivial)
 				{
 					sb
 						.Append("* {{Pl|")
-						.Append(item.Page!.FullPageName)
+						.Append(page.FullPageName)
 						.Append('|')
-						.Append(item.Name)
-						.AppendLine("|diff=cur}}");
+						.Append(set.Name)
+						.Append("|diff=cur}}");
+					sorted.Add(page, sb.ToString());
 				}
 			}
 
-			if (sb.Length > 0)
+			if (sorted.Count > 0)
 			{
 				this.WriteLine("== Item Sets With Non-Trivial Updates ==");
-				this.WriteLine(sb.ToString().Replace("\r", string.Empty, StringComparison.Ordinal));
-			}
-		}
-
-		private void GetSetPages()
-		{
-			this.GetSetData();
-			this.MatchCategoryPages();
-			this.MatchUnresolvedPages();
-		}
-
-		private void MatchCategoryPages()
-		{
-			PageCollection catPages = new(this.Site, PageModules.Info, true);
-			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
-			this.UpdateSetPages(catPages);
-		}
-
-		private void MatchUnresolvedPages()
-		{
-			TitleCollection titles = new(this.Site);
-			foreach (var set in this.allSets)
-			{
-				if (set.Page is null)
+				foreach (var (_, text) in sorted)
 				{
-					foreach (var setName in set.AllNames)
-					{
-						titles.AddRange(UespNamespaces.Online, setName);
-					}
+					this.WriteLine(text);
 				}
 			}
-
-			this.ResolveDisambiguations(titles);
 		}
 
-		private void ResolveDisambiguations(TitleCollection newTitles)
+		private SortedSet<string> ResolveDisambiguations(Dictionary<Title, SetData> notFound)
 		{
-			if (newTitles.Count == 0)
-			{
-				return;
-			}
-
-			List<Page> removePages = new();
-			List<Title> addTitles = new();
-			PageCollection pages = new(this.Site, PageModules.Info | PageModules.Links | PageModules.Properties, true);
-			pages.GetTitles(newTitles);
+			var unresolved = new SortedSet<string>(StringComparer.Ordinal);
+			var titles = new TitleCollection(this.Site, notFound.Keys);
+			var pages = titles.Load(PageModules.Info | PageModules.Links | PageModules.Properties, true);
 			foreach (var page in pages)
 			{
-				if (page.IsDisambiguation == true)
+				var set = notFound[page];
+				if (page.IsDisambiguation == true && unresolved.Contains(set.Name))
 				{
 					var resolved = false;
 					foreach (var link in page.Links)
 					{
 						if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 						{
+							this.sets.Add(page, set);
 							resolved = true;
-							removePages.Add(page);
-							addTitles.Add(link);
 							break;
 						}
 					}
 
 					if (!resolved)
 					{
-						this.Warn($"{page.FullPageName} exists but is neither a set nor a disambiguation to one. Please check this and add the title to TitleOverrides to specify the desired page name.");
+						unresolved.Add(set.Name);
 					}
 				}
-			}
-
-			if (removePages.Count > 0)
-			{
-				foreach (var page in removePages)
+				else if (page.Exists && page.PageName.EndsWith(" (set)", StringComparison.Ordinal))
 				{
-					pages.Remove(page);
+					unresolved.Add(set.Name);
 				}
-
-				PageCollection addPages = new(this.Site, PageModules.Info);
-				addPages.GetTitles(addTitles);
-				foreach (var page in addPages)
+				else
 				{
-					pages.Add(page);
+					// Unless it's a (set) page, add it to the list. If missing, it'll get created.
+					this.sets.Add(page, set);
 				}
 			}
 
-			this.UpdateSetPages(pages);
+			return unresolved;
 		}
 
-		private void UpdateSetPageAnyCase(SetData set, PageCollection setMembers)
+		private SortedSet<string> UpdateSetPages(PageCollection setMembers, List<SetData> sets)
 		{
-			foreach (var setName in set.AllNames)
+			var notFound = new Dictionary<Title, SetData>(SimpleTitleComparer.Instance);
+			foreach (var set in sets)
 			{
-				foreach (var setMember in setMembers)
+				if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 				{
-					if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0 && string.Compare(setMember.PageName, setName, false, this.Site.Culture) != 0)
+					var title = TitleFactory.FromValidated(this.Site[UespNamespaces.Online], overrideName);
+					this.sets.Add(title, set);
+					continue;
+				}
+
+				Page? foundPage = null;
+				var checkSets = new[] { set.Name + " (set)", set.Name };
+				foreach (var setName in checkSets)
+				{
+					var checkTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], setName);
+					if (setMembers.TryGetValue(checkTitle, out foundPage))
 					{
-						set.Page = setMember;
-						this.Warn($"Substituted {setMember.PageName} for {setName}");
+						break;
+					}
+
+					foreach (var setMember in setMembers)
+					{
+						if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0 &&
+							string.Compare(setMember.PageName, setName, false, this.Site.Culture) != 0)
+						{
+							foundPage = setMember;
+							this.Warn($"Substituted {setMember.PageName} for {setName}. It's safer to override this in {nameof(TitleOverrides)}.");
+							break;
+						}
+					}
+
+					if (foundPage is not null)
+					{
+						this.sets.Add(foundPage, set);
 						break;
 					}
 				}
 
-				if (set.Page is not null)
+				if (foundPage is null)
 				{
-					break;
+					var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], set.Name);
+					notFound.Add(title, set);
 				}
 			}
-		}
 
-		private void UpdateSetPages(PageCollection setMembers)
-		{
-			foreach (var set in this.allSets)
-			{
-				if (set.Page is null)
-				{
-					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
-					{
-						var checkTitle = TitleFactory.FromValidated(this.Site[UespNamespaces.Online], overrideName);
-						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
-							? foundPage
-							: set.BuildNewPage(checkTitle);
-					}
-					else
-					{
-						foreach (var setName in set.AllNames)
-						{
-							var checkTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], setName);
-							set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
-								? foundPage
-								: set.BuildNewPage(checkTitle);
-						}
-
-						if (set.Page is null)
-						{
-							this.UpdateSetPageAnyCase(set, setMembers);
-						}
-					}
-				}
-
-				if (set.Page != null)
-				{
-					this.Pages.Add(set.Page);
-				}
-			}
+			return this.ResolveDisambiguations(notFound);
 		}
 		#endregion
 
 		#region Private Classes
-		private sealed class SetCollection : KeyedCollection<Page, SetData>
-		{
-			public SetCollection()
-				: base(SimpleTitleComparer.Instance)
-			{
-			}
-
-			protected override Page GetKeyForItem(SetData item) => item.Page ?? throw new InvalidOperationException("Item Page is null!");
-		}
-
 		private sealed class SetData
 		{
 			#region Constructors
@@ -394,52 +348,15 @@
 
 			#region Public Properties
 
-			public IEnumerable<string> AllNames
-			{
-				get
-				{
-					yield return this.Name + " (set)";
-					yield return this.Name;
-				}
-			}
-
 			public List<(string ItemCount, string Text)> BonusDescriptions { get; } = new();
 
 			public bool IsNonTrivial { get; set; }
 
 			public string Name { get; }
-
-			public Page? Page { get; set; }
-			#endregion
-
-			#region Public Methods
-			public Page BuildNewPage(Title title)
-			{
-				StringBuilder sb = new();
-				sb
-					.Append("{{Trail|Sets}}{{Online Update}}{{Minimal}}\n")
-					.Append("'''").Append(this.Name).Append("''' is a {{huh}}-rank [[Online:Sets|item set]] found in {{huh}}.\n\n")
-					.Append("Set pieces are {{huh}} style in {{huh}}.\n\n")
-					.Append("===Bonuses===\n")
-					.Append("<onlyinclude>\n")
-					.Append("</onlyinclude>\n")
-					.Append("===Pieces===\n")
-					.Append("The set consists of {{huh}}. For detailed weapon stats and set values, see individual item pages by clicking on the links below.\n")
-					.Append("<!--\n")
-					.Append("* {{Item Link|id=|}}\n")
-					.Append("* {{Item Link|id=|}}\n")
-					.Append("-->\n")
-					.Append("===Notes===\n\n")
-					.Append("{{Online Sets}}\n")
-					.Append("{{ESO Sets With|subtype=|source=}}\n")
-					.Append("{{Stub|Item Set}}");
-
-				return title.Site.CreatePage(title, sb.ToString());
-			}
 			#endregion
 
 			#region Public Override Methods
-			public override string ToString() => $"{this.Name} ({this.Page?.FullPageName ?? "NO PAGE"})";
+			public override string ToString() => this.Name;
 			#endregion
 		}
 		#endregion
