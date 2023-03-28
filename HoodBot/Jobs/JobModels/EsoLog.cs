@@ -72,7 +72,7 @@
 			[-79] = "Health or Weapon/Spell Damage",
 		};
 
-		public static int LatestUpdate
+		public static int LatestDBUpdate
 		{
 			get
 			{

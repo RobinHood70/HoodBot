@@ -92,7 +92,7 @@
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
 			this.skills = GetSkillList(0);
-			var latestVersion = EsoLog.LatestUpdate - 1;
+			var latestVersion = EsoLog.LatestDBUpdate - 1;
 			var prevSkills = GetSkillList(latestVersion);
 			foreach (var (key, skill) in this.skills)
 			{

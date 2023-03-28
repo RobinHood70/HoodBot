@@ -117,7 +117,7 @@
 			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();
-				param.Value.AddText(job.GetPatchVersion() + '\n');
+				param.Value.AddText(EsoLog.LatestDBUpdate.ToStringInvariant() + '\n');
 				parser.UpdatePage();
 				patchPage.Save("Update " + paramName, true);
 			}
