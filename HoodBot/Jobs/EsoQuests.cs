@@ -144,7 +144,13 @@
 			this.StatusWriteLine("Getting ESO titles");
 			var existing = this.GetQuestIdsFromWiki();
 			var filteredQuests = GetQuestData(existing);
-			var questNames = filteredQuests.ConvertAll(q => q.Name);
+			var questNames = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var quest in filteredQuests)
+			{
+				// Only get unique names
+				questNames.Add(quest.Name);
+			}
+
 			var titleChecker = new TitleCollection(this.Site, UespNamespaces.Online, questNames);
 			var disambigs = titleChecker.Load(PageModules.Info | PageModules.Properties | PageModules.Links, true);
 
