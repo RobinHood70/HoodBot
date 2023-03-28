@@ -5,6 +5,7 @@
 
 	internal static class ReplacementData
 	{
+		#region Public Static Properties
 		// Replacements that are specific to certain IDs but do not apply to the general case.
 		public static Dictionary<int, (string From, string To)> IdPartialReplacements { get; } = new Dictionary<int, (string, string)>
 		{
@@ -91,5 +92,6 @@
 			new Synergy("Trapping Webs", "Arachnophobia", "{{ESO Synergy Link|Arachnophobia|Spawn Broodlings}}"),
 			new Synergy("Trapping Webs", "Black Widows", "{{ESO Synergy Link|Black Widows|Spawn Broodlings}}"),
 		};
+		#endregion
 	}
 }
