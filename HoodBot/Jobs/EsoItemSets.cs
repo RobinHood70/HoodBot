@@ -26,14 +26,8 @@
 		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
-			/* ["Immolator Charr"] = "Immolator Charr (set)",
-			["Magma Incarnate"] = "Magma Incarnate (set)",
-			["Zoal the Ever-Wakeful"] = "Zoal the Ever-Wakeful (set)", */
-			["Baron Thirsk"] = "Baron Thirsk (set)",
-			["Lady Malygda"] = "Lady Malygda (set)",
-			["Kargaeda"] = "Kargaeda (set)",
-			["Nazaray"] = "Nazaray (set)",
-			["Nunatak"] = "Nunatak (set)",
+			["Dro'Zakar's Claws"] = "Dro'zakar's Claws",
+			["Roksa the Warped"] = "Roksa the Warped (set)"
 		};
 		#endregion
 
