@@ -101,11 +101,22 @@ namespace RobinHood70.WallE.Base
 
 		public static ParseInput FromPageId(long pageId) => new() { PageId = pageId };
 
-		public static ParseInput FromText(string text) => FromText(text, null);
+		public static ParseInput FromText(string text) => FromTextAndContentModel(text, null);
 
-		// Odd that someone would pass whitespace here, but not inconceivable, so only check text for null. Title can be null, so no check.
-		public static ParseInput FromText(string text, string? title) =>
-			new() { Text = text.NotNull(), Title = title };
+		public static ParseInput FromText(string text, string? title)
+		{
+			ArgumentNullException.ThrowIfNull(text);
+			return title is null
+				? FromTextAndContentModel(text, "wikitext")
+				: new() { Text = text, Title = title };
+		}
+
+		public static ParseInput FromTextAndContentModel(string text, string? contentModel)
+		{
+			ArgumentNullException.ThrowIfNull(text);
+			ArgumentNullException.ThrowIfNull(contentModel);
+			return new() { Text = text, ContentModel = contentModel };
+		}
 		#endregion
 	}
 }
