@@ -65,25 +65,36 @@
 		{
 			foreach (var morph in this.morphs)
 			{
-				morph.ParseDescription();
+				morph.Description = morph.GetParsedDescription();
 			}
 		}
 
-		public override void SetBigChange(Skill prev)
+		public override void SetChangeType(Skill previous)
 		{
-			if (prev is not ActiveSkill prevSkill)
+			if (previous is not ActiveSkill prevSkill)
 			{
 				throw new InvalidOperationException();
 			}
 
-			var retval = false;
+			var retval = ChangeType.None;
 			for (var i = 0; i < this.morphs.Count; i++)
 			{
-				var morph = this.morphs[i];
-				retval |= morph.IsBigChange(prevSkill.morphs[i]);
+				var curMorph = this.morphs[i];
+				var prevMorph = prevSkill.morphs[i];
+				var changeType = curMorph.GetChangeType(prevMorph);
+				if (changeType > retval)
+				{
+					if (changeType == ChangeType.Major)
+					{
+						this.ChangeType = ChangeType.Major;
+						return;
+					}
+
+					retval = changeType;
+				}
 			}
 
-			this.BigChange = retval;
+			this.ChangeType = retval;
 		}
 		#endregion
 
@@ -203,7 +214,7 @@
 				UpdateParameter(factory, template, morphName + "name", morph.Name);
 				UpdateParameter(factory, template, morphName + "id", morph.Ranks[^1].Id.ToStringInvariant());
 				var iconValue = MakeIcon(this.SkillLine, morph.Name);
-				UpdateParameter(factory, template, morphName + "icon", EsoSkills.IconValueFixup(template.Find(morphName + "icon"), iconValue));
+				UpdateParameter(factory, template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon"), iconValue));
 				UpdateParameter(factory, template, morphName + "desc", morph.EffectLine, usedList, this.Name);
 			}
 		}

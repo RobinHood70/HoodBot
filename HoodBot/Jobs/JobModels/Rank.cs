@@ -51,13 +51,23 @@
 		#endregion
 
 		#region Public Methods
-		public virtual bool IsBigChange(Rank rank)
+		public virtual ChangeType GetChangeType(Rank previous)
 		{
-			var curSkill = Skill.Highlight.Replace(this.Description, string.Empty);
-			var oldSkill = Skill.Highlight.Replace(rank.Description, string.Empty);
-			return
-				this.RankNum != rank.RankNum ||
-				!string.Equals(curSkill, oldSkill, StringComparison.OrdinalIgnoreCase);
+			if (this.RankNum != previous.RankNum)
+			{
+				throw new InvalidOperationException("I don't think this is possible.");
+			}
+
+			if (string.Equals(this.Description, previous.Description, StringComparison.Ordinal))
+			{
+				return ChangeType.None;
+			}
+
+			var curSkill = Skill.HighlightVar.Replace(this.Description, " ");
+			var oldSkill = Skill.HighlightVar.Replace(previous.Description, " ");
+			return string.Equals(curSkill, oldSkill, StringComparison.OrdinalIgnoreCase)
+				? ChangeType.Minor
+				: ChangeType.Major;
 		}
 		#endregion
 

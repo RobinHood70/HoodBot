@@ -4,10 +4,10 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class EsoSkills : EditJob
 	{
@@ -54,10 +54,6 @@
 		"ORDER BY skillTree.baseName, skillTree.skillTypeName, minedSkills.morph, minedSkills.rank;";
 		#endregion
 
-		#region Static Fields
-		private static readonly SortedList<string, string> IconNameCache = new(StringComparer.Ordinal);
-		#endregion
-
 		#region Fields
 		private Dictionary<string, Skill> skills = new(StringComparer.Ordinal);
 		#endregion
@@ -67,7 +63,15 @@
 		public EsoSkills(JobManager jobManager)
 			: base(jobManager)
 		{
+			if (this.Results is PageResultHandler pageResults)
+			{
+				var oldPage = pageResults.Page;
+				var newPage = TitleFactory.FromValidated(oldPage.Namespace, oldPage.PageName + "/ESO Skills");
+				pageResults.Page = this.Site.CreatePage(newPage);
+			}
+
 			this.MinorEdit = false;
+			this.JobManager.ShowDiffs = true;
 		}
 		#endregion
 
@@ -80,24 +84,6 @@
 
 		#endregion
 
-		#region Public Static Methods
-		public static string IconValueFixup(IParameterNode? parameter, string newValue)
-		{
-			if (parameter != null)
-			{
-				var currentValue = parameter.Value.ToValue().Trim();
-				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
-				{
-					return oldValue;
-				}
-
-				IconNameCache.Add(currentValue, newValue);
-			}
-
-			return newValue;
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void AfterLoadPages() => this.GenerateReport();
 
@@ -106,12 +92,13 @@
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
 			this.skills = GetSkillList(0);
-			var prevSkills = GetSkillList(EsoLog.LatestUpdate - 1);
+			var latestVersion = EsoLog.LatestUpdate - 1;
+			var prevSkills = GetSkillList(latestVersion);
 			foreach (var (key, skill) in this.skills)
 			{
 				if (prevSkills.TryGetValue(key, out var prevSkill))
 				{
-					skill.SetBigChange(prevSkill);
+					skill.SetChangeType(prevSkill);
 				}
 			}
 		}
@@ -139,16 +126,22 @@
 			EsoSpace.SetBotUpdateVersion(this, "skills");
 		}
 
-		protected override void PageLoaded(Page page) =>
-			this.skills[page.FullPageName].UpdatePageText(page, this.Site);
-
+		protected override void PageLoaded(Page page)
+		{
+			var skill = this.skills[page.FullPageName];
+			var result = skill.UpdatePageText(page);
+			if (result is not null)
+			{
+				this.Warn(result);
+			}
+		}
 		#endregion
 
 		#region Private Static Methods
 		private static SortedList<string, string> GetIconChanges()
 		{
-			SortedList<string, string> iconChanges = new(IconNameCache.Count, StringComparer.Ordinal);
-			foreach (var kvp in IconNameCache)
+			SortedList<string, string> iconChanges = new(Skill.IconNameCache.Count, StringComparer.Ordinal);
+			foreach (var kvp in Skill.IconNameCache)
 			{
 				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))
 				{
@@ -209,11 +202,11 @@
 			foreach (var skill in this.skills)
 			{
 				var title = (Title)TitleFactory.FromUnvalidated(this.Site, skill.Key);
-				if (skill.Value.BigChange)
+				if (skill.Value.ChangeType == ChangeType.Major)
 				{
 					this.WriteLine($"* {{{{Pl|{title.FullPageName}|{title.PipeTrick()}|diff=cur}}}}");
 				}
-				else
+				else if (skill.Value.ChangeType == ChangeType.Minor)
 				{
 					trivialList.Add(title.AsLink(LinkFormat.LabelName));
 				}

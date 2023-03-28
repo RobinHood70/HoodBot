@@ -51,20 +51,32 @@
 			return retval;
 		}
 
-		public override void SetBigChange(Skill prev)
+		public override void SetChangeType(Skill previous)
 		{
-			if (prev is not PassiveSkill prevSkill)
+			if (previous is not PassiveSkill prevSkill)
 			{
 				throw new InvalidOperationException();
 			}
 
-			var retval = false;
+			var retval = ChangeType.None;
 			for (var i = 0; i < this.ranks.Count; i++)
 			{
-				retval |= this.ranks[i].IsBigChange(prevSkill.ranks[i]);
+				var curRank = this.ranks[i];
+				var prevRank = prevSkill.ranks[i];
+				var changeType = curRank.GetChangeType(prevRank);
+				if (changeType > retval)
+				{
+					if (changeType == ChangeType.Major)
+					{
+						this.ChangeType = ChangeType.Major;
+						return;
+					}
+
+					retval = changeType;
+				}
 			}
 
-			this.BigChange = retval;
+			this.ChangeType = retval;
 		}
 		#endregion
 

@@ -21,7 +21,7 @@
 		#region Public Properties
 		public string CastingTime { get; }
 
-		public string? Description { get; private set; }
+		public string? Description { get; internal set; }
 
 		public string EffectLine { get; }
 
@@ -42,26 +42,42 @@
 		#endregion
 
 		#region Public Methods
-		public bool IsBigChange(Morph morph)
+		public ChangeType GetChangeType(Morph previous)
 		{
-			if (!string.Equals(this.CastingTime, morph.CastingTime, StringComparison.OrdinalIgnoreCase) ||
-				!string.Equals(this.Description, morph.Description, StringComparison.OrdinalIgnoreCase) ||
-				!string.Equals(this.EffectLine, morph.EffectLine, StringComparison.OrdinalIgnoreCase) ||
-				!string.Equals(this.Target, morph.Target, StringComparison.OrdinalIgnoreCase))
+			// Descriptions are handled via the ranks, which allows it to compare original descriptions.
+			if (!string.Equals(this.CastingTime, previous.CastingTime, StringComparison.OrdinalIgnoreCase) ||
+				!string.Equals(this.EffectLine, previous.EffectLine, StringComparison.OrdinalIgnoreCase) ||
+				!string.Equals(this.Target, previous.Target, StringComparison.OrdinalIgnoreCase))
 			{
-				return true;
+				return ChangeType.Major;
+			}
+
+			// TODO: Re-examine this to see if it captures all cases. Also, it's comparing based on both text and post-parsed values whereas it should probably be done by comparing values directly.
+			var retval = ChangeType.None;
+			var curDesc = this.GetParsedDescription();
+			var prevDesc = previous.GetParsedDescription();
+			if (!string.Equals(curDesc, prevDesc, StringComparison.Ordinal))
+			{
+				retval = ChangeType.Minor;
 			}
 
 			for (var i = 0; i < this.Ranks.Count; i++)
 			{
-				var rank = this.Ranks[i];
-				if (rank.IsBigChange(morph.Ranks[i]))
+				var curRank = this.Ranks[i];
+				var prevRank = previous.Ranks[i];
+				var changeType = curRank.GetChangeType(prevRank);
+				if (changeType > retval)
 				{
-					return true;
+					if (changeType == ChangeType.Major)
+					{
+						return ChangeType.Major;
+					}
+
+					retval = changeType;
 				}
 			}
 
-			return false;
+			return retval;
 		}
 
 		public string RankCosts()
@@ -89,7 +105,7 @@
 		#endregion
 
 		#region Public Internal Methods
-		internal void ParseDescription()
+		internal string GetParsedDescription()
 		{
 			var splitDescriptions = this.GetDescriptions();
 			var splitLength = splitDescriptions[0].Length;
@@ -129,20 +145,22 @@
 				}
 			}
 
-			if (!errors)
+			if (errors)
 			{
-				List<string> descriptions = new();
-				for (var i = 0; i < text.Count; i++)
-				{
-					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every odd-numbered value with bold instead.
-					var fragment = text[i];
-					descriptions.Add((i & 1) == 1
-						? "'''" + fragment + "'''"
-						: fragment);
-				}
-
-				this.Description = string.Concat(descriptions);
+				return string.Empty;
 			}
+
+			List<string> descriptions = new();
+			for (var i = 0; i < text.Count; i++)
+			{
+				// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every odd-numbered value with bold instead.
+				var fragment = text[i];
+				descriptions.Add((i & 1) == 1
+					? "'''" + fragment + "'''"
+					: fragment);
+			}
+
+			return string.Concat(descriptions);
 		}
 		#endregion
 

@@ -10,6 +10,15 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
+	#region Public Enumerations
+	internal enum ChangeType
+	{
+		None,
+		Minor,
+		Major
+	}
+	#endregion
+
 	internal abstract class Skill
 	{
 		#region Private Constants
@@ -50,10 +59,14 @@
 
 		#region Public Static Properties
 		public static Regex Highlight => new(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, Globals.DefaultRegexTimeout);
+
+		public static Regex HighlightVar => new(@"\s*([\d]+(\.\d+)?|\|c[0-9a-fA-F]{6}[^\|]+?\|r)\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
+		public static SortedList<string, string> IconNameCache { get; } = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Public Properties
-		public bool BigChange { get; protected set; }
+		public ChangeType ChangeType { get; protected set; }
 
 		public string PageName { get; }
 		#endregion
@@ -67,11 +80,19 @@
 		#endregion
 
 		#region Public Methods
-		public string? UpdatePageText(Page page, Site site)
+		public string? UpdatePageText(Page page)
 		{
 			if (!page.Exists)
 			{
-				page.Text = "{{Minimal|Skill}}\n{{Online Skill Summary}}\n\n<!--\n==Notes==\n* -->\n{{Stub}}\n{{Online Skills " + this.Class + "}}";
+				page.Text =
+					"{{Minimal|Skill}}\n" +
+					"{{Online Skill Summary}}\n" +
+					"\n" +
+					"<!--\n" +
+					"==Notes==\n" +
+					"* -->\n" +
+					"{{Stub}}\n" +
+					"{{Online Skills " + this.Class + "}}";
 			}
 
 			ContextualParser oldPage = new(page);
@@ -86,7 +107,7 @@
 			template.RemoveDuplicates();
 			template.Remove("update");
 
-			var factory = new SiteNodeFactory(site);
+			var factory = new SiteNodeFactory(page.Site);
 			UpdateParameter(factory, template, "line", this.SkillLine);
 			var iconValue = MakeIcon(this.SkillLine, this.Name);
 
@@ -105,14 +126,15 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var newValue = EsoSkills.IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				var newValue = IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				UpdateParameter(factory, template, iconName, newValue);
 			}
 
 			this.UpdateTemplate(factory, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
+			parser.UpdatePage();
 
-			EsoReplacer replacer = new(site);
+			EsoReplacer replacer = new(page.Site);
 			var newLinks = replacer.CheckNewLinks(oldPage, parser);
 			if (newLinks.Count > 0)
 			{
@@ -120,13 +142,9 @@
 			}
 
 			var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
-			if (newTemplates.Count > 0)
-			{
-				return EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates");
-			}
-
-			parser.UpdatePage();
-			return null;
+			return newTemplates.Count > 0
+				? EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates")
+				: null;
 		}
 		#endregion
 
@@ -139,7 +157,7 @@
 
 		public abstract bool Check();
 
-		public abstract void SetBigChange(Skill prev);
+		public abstract void SetChangeType(Skill previous);
 		#endregion
 
 		#region Public Virtual Methods
@@ -159,6 +177,22 @@
 			"1" => "1 second",
 			_ => $"{value} seconds"
 		};
+
+		protected static string IconValueFixup(IParameterNode? parameter, string newValue)
+		{
+			if (parameter != null)
+			{
+				var currentValue = parameter.Value.ToValue().Trim();
+				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
+				{
+					return oldValue;
+				}
+
+				IconNameCache.Add(currentValue, newValue);
+			}
+
+			return newValue;
+		}
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
