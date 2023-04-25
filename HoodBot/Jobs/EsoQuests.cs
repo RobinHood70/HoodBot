@@ -107,7 +107,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, QuestData> quests = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, QuestData> quests = new();
 		#endregion
 
 		#region Constructors
