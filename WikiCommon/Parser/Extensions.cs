@@ -33,6 +33,7 @@
 	public static class Extensions
 	{
 		#region Fields
+		private static readonly Regex AttribRegex = new(@"\b(?<key>\w+)\s*=?\s*(""(?<value>[^""]*)""|'(?<value>[^']*)'|(?<value>\w+))", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex LeadingSpace = new(@"\A\s*", RegexOptions.None, Globals.DefaultRegexTimeout);
 		private static readonly Regex TrailingSpace = new(@"\s*\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 		#endregion
@@ -181,6 +182,32 @@
 			return retval.Trim().Length == 0
 				? defaultValue
 				: retval;
+		}
+		#endregion
+
+		#region ITagNode Extensions
+
+		/// <summary>Gets the attributes from a tag.</summary>
+		/// <param name="tag">The tag to examine.</param>
+		/// <returns>The list of attributes on the specified tag. Name-only tags will be returned as [name] = null.</returns>
+		/// <remarks>This is a very simple Regex-based solution that should cover the vast majority of tags. For complete HTML compliance, you'll need to use another method.</remarks>
+		public static IReadOnlyList<KeyValuePair<string, string?>> GetAttributeList(this ITagNode tag)
+		{
+			ArgumentNullException.ThrowIfNull(tag);
+			if (string.IsNullOrEmpty(tag.Attributes))
+			{
+				return Array.Empty<KeyValuePair<string, string?>>();
+			}
+
+			var attribs = new List<KeyValuePair<string, string?>>();
+			foreach (var match in AttribRegex.Matches(tag.Attributes) as IReadOnlyList<Match>)
+			{
+				var valueGroup = match.Groups["value"];
+				var value = valueGroup.Success ? valueGroup.Value : null;
+				attribs.Add(new KeyValuePair<string, string?>(match.Groups["key"].Value, value));
+			}
+
+			return attribs;
 		}
 		#endregion
 
