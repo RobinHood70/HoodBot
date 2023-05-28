@@ -73,6 +73,7 @@
 			this.Text = text;
 			this.textLength = text.Length;
 
+			this.ignoredTags.UnionWith(ParsedTags);
 			HashSet<string> allTags = new(UnparsedTags, StringComparer.Ordinal);
 			switch (inclusionType)
 			{
@@ -110,6 +111,10 @@
 		#endregion
 
 		#region Public Static Properties
+
+		/// <summary>Gets the list of tags which should be parsed as ignored ITagNodes (i.e., where there's valid wikitext inside of them).</summary>
+		/// <value>The tags.</value>
+		public static IList<string> ParsedTags { get; } = new List<string>();
 
 		/// <summary>Gets the list of tags which are not parsed into wikitext.</summary>
 		/// <value>The unparsed tags.</value>
