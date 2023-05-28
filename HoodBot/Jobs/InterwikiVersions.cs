@@ -30,16 +30,26 @@
 				{
 					var originalPath = entry.Path;
 					var path = originalPath.TrimEnd('/');
+					this.StatusWrite(path + '\t');
 					if (!path.EndsWith("$1", StringComparison.Ordinal))
 					{
-						this.StatusWriteLine($"URL not wiki-like: {path}");
+						this.StatusWriteLine($"URL not wiki-like");
 						continue;
 					}
 
 					path = path[0..^2];
 					path = path.Split('?', 2)[0];
 					Uri uri = new(path);
-					var capabilities = GetSiteCapabilities(client, originalPath, path, uri);
+					string capabilities;
+					try
+					{
+						capabilities = GetSiteCapabilities(client, uri);
+					}
+					catch (System.Net.Http.HttpRequestException)
+					{
+						capabilities = "Unknown error";
+					}
+
 					this.StatusWriteLine(capabilities);
 				}
 
@@ -49,26 +59,26 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string GetSiteCapabilities(SimpleClient client, string originalPath, string path, Uri uri)
+		private static string GetSiteCapabilities(SimpleClient client, Uri uri)
 		{
 			var capabilities = new SiteCapabilities(client);
 			try
 			{
 				return capabilities.Get(uri)
-					? $"Found: {capabilities.SiteName}\t{capabilities.Version}\t{originalPath} (API: {capabilities.Api})"
-					: capabilities.ErrorMessage ?? $"Does not appear to be a wiki: {path}";
+					? $"Found: {capabilities.SiteName}\t{capabilities.Version} (API: {capabilities.Api})"
+					: capabilities.ErrorMessage ?? $"Does not appear to be a wiki";
 			}
 			catch (IOException)
 			{
-				return $"Error response: {path}";
+				return $"Error response";
 			}
 			catch (WebException e)
 			{
-				return $"Error response: {path} {e.Message}";
+				return $"Error response: {e.Message}";
 			}
 			catch (InvalidDataException)
 			{
-				return $"May be a wiki, but if so, API is blocked: {path}";
+				return $"May be a wiki, but if so, API is blocked";
 			}
 			catch (Exception e)
 			{
