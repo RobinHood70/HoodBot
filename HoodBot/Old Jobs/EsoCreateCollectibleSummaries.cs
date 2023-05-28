@@ -1,13 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
-
 	public class EsoCreateCollectibleSummaries : EditJob
 	{
 		#region Constants
@@ -31,13 +23,8 @@
 			"}}\n" +
 			"{{NewLeft}}\n" +
 			"<!--==Occurrences==\n" +
-			"{{scrollbox\n" +
-			"| width=70%\n" +
-			"| height=100px\n" +
-			"| content =\n" +
 			"'''Appearances: '''\n" +
 			"* - \n" +
-			"}}\n" +
 			"--><!--== Physical Description==\n\n" +
 			"--><!--==Gallery==\n" +
 			"<gallery>\n" +
