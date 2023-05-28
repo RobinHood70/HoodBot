@@ -100,7 +100,7 @@
 
 					if (this.MoveAction != MoveAction.None)
 					{
-						var value = (this.SuppressRedirects ? "suppress" : "create") + "redirects";
+						var value = (this.SuppressRedirects ? "suppress" : "create") + " redirects";
 						list.Add(value);
 					}
 
