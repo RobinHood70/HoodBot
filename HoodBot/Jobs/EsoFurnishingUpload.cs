@@ -29,10 +29,16 @@
 
 		protected override void Main()
 		{
-			this.GetIcons(this.GetPatchVersion());
-			var site = (UespSite)this.Site;
-			var pages = site.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id");
+			this.GetIcons("38", false);
+			var uesp = (UespSite)this.Site;
+			var pages = uesp.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id", "transcluded");
 			pages.GetBacklinks("Template:Online Furnishing Summary", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
+			pages.Remove("Online:Alliance War Dog");
+			pages.Remove("Online:Alliance War Dog (Dominion)");
+			pages.Remove("Online:Alliance War Dog (Pact)");
+			pages.Remove("Online:Alliance War Horse");
+			pages.Remove("Online:Alliance War Horse (Dominion)");
+			pages.Remove("Online:Alliance War Horse (Pact)");
 
 			var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
 			this.GetPages(pages, items, false);
@@ -47,7 +53,7 @@
 				}
 				else
 				{
-					existingTitles.Add(item.Value.IconName);
+					existingTitles.TryAdd(item.Value.IconName);
 				}
 			}
 
@@ -68,7 +74,7 @@
 						"{{Zenimage}}" +
 						"[[Category:Online-Icons-Furnishings]]";
 					var wikiIconName = iconInfo.IconName.Replace("\"", string.Empty, StringComparison.Ordinal);
-					site.Upload(Path.Combine(LocalConfig.WikiIconsFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
+					uesp.Upload(Path.Combine(LocalConfig.WikiIconsFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
 				}
 
 				this.Progress++;
@@ -78,18 +84,18 @@
 		private void GetPages(PageCollection pages, SortedList<string, IconInfo> items, bool collectibleFilter)
 		{
 			var retvalIds = new Dictionary<long, IconInfo>();
+			var retvalDupes = new Dictionary<long, Page>();
 			foreach (var page in pages)
 			{
 				if (page is VariablesPage varPage && varPage.GetVariable("id") is string idText)
 				{
-					if (collectibleFilter == (varPage.GetVariable("collectible") is not null))
+					if (idText.Length > 0 && collectibleFilter == (varPage.GetVariable("collectible") is not null))
 					{
 						var id = long.Parse(idText, this.Site.Culture);
-						var toName = Title.ToLabelName(page.PageName);
 						var icon = varPage.GetVariable("icon");
 						if (string.IsNullOrEmpty(icon))
 						{
-							icon = Furnishing.IconName(toName);
+							icon = Furnishing.IconName(page.PageName);
 						}
 
 						var iconInfo = new IconInfo(id, "File:" + icon);
@@ -98,13 +104,14 @@
 							this.Warn("Quote in title: " + icon);
 						}
 
-						if (items.TryAdd(toName, iconInfo))
+						items.Add(page.PageName, iconInfo);
+						if (retvalIds.TryAdd(id, iconInfo))
 						{
-							retvalIds.Add(id, iconInfo);
+							retvalDupes.Add(id, page);
 						}
 						else
 						{
-							Debug.WriteLine($"Duplicate ID: {id}. Pages: {items[toName]} => {page.PageName}");
+							Debug.WriteLine($"Duplicate id: {id} on {retvalDupes[id]} => {page.PageName}");
 						}
 					}
 				}

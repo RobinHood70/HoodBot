@@ -78,10 +78,9 @@
 		#endregion
 
 		#region Public WikiJob Extension Methods
-		public static void GetIcons(this WikiJob job, string updateFolder)
+		public static void GetIcons(this WikiJob job, string updateFolder, bool pts)
 		{
-			// var version = GetPatchVersion(job);
-			var downloadPath = IconDownloadPath(updateFolder);
+			var downloadPath = IconDownloadPath(updateFolder, pts);
 			var localFile = Path.Combine(LocalConfig.BotDataFolder, "icons.zip");
 			var extractPath = LocalConfig.WikiIconsFolder;
 
@@ -105,7 +104,11 @@
 			return patchVersion!;
 		}
 
-		public static string IconDownloadPath(string updateFolder) => $"https://esofiles.uesp.net/update-{updateFolder}/icons.zip";
+		public static string IconDownloadPath(string updateFolder, bool pts)
+		{
+			var ptsText = pts ? "pts" : string.Empty;
+			return $"https://esofiles.uesp.net/update-{updateFolder}{ptsText}/icons.zip";
+		}
 
 		public static void SetBotUpdateVersion(this WikiJob job, string pageType)
 		{

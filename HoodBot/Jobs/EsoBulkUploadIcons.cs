@@ -85,7 +85,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.GetIcons("37pts");
+			this.GetIcons("37", true);
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
