@@ -35,7 +35,6 @@
 			for (long offset = 0; true; offset += pageSize)
 			{
 				var limitedQuery = query + (pageSize == long.MaxValue ? string.Empty : $" LIMIT {offset}, {pageSize}");
-				// Debug.WriteLine(limitedQuery.Replace('\n', ' '));
 				using MySqlCommand command = new(limitedQuery, connection);
 				using var reader = command.ExecuteReader();
 				var recordsRead = 0;
