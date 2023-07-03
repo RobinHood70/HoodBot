@@ -266,7 +266,7 @@
 			Furnishing? furnishing = null;
 			if (template.GetValue("id") is not string idText ||
 				string.IsNullOrEmpty(idText) ||
-				!int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+				!long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
 			{
 				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
 			}
