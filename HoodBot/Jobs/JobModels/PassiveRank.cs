@@ -4,10 +4,10 @@
 
 	internal sealed class PassiveRank : Rank
 	{
-		public PassiveRank(IDataRecord data)
-			: base(data)
+		public PassiveRank(IDataRecord row)
+			: base(row)
 		{
-			this.LearnedLevel = (int)data["learnedLevel"];
+			this.LearnedLevel = (int)row["learnedLevel"];
 		}
 
 		public int LearnedLevel { get; }
