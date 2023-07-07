@@ -91,8 +91,13 @@
 		{
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
-			var prevVersion = EsoSpace.GetPatchVersion(this, "botskills");
 			this.version = EsoLog.LatestDBUpdate(false);
+			var prevVersion = EsoSpace.GetPatchVersion(this, "botskills");
+			if (prevVersion >= this.version)
+			{
+				prevVersion = new EsoVersion(this.version.Version - 1, false);
+			}
+
 			this.skills = GetSkillList(prevVersion);
 			var prevSkills = GetSkillList(null);
 			foreach (var (key, skill) in this.skills)
