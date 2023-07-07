@@ -24,7 +24,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.698">
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.63">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
@@ -32,7 +32,7 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
