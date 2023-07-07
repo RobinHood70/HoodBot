@@ -23,7 +23,7 @@
 
 		public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
-		public static Database Database => database ??= new Database(Connection);
+		public static Database EsoDb => database ??= new Database(Connection);
 
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
@@ -81,7 +81,7 @@
 				latestPtsVersion = EsoVersion.Empty;
 				var highestSort = 0;
 				var highestPtsSort = 0;
-				foreach (var table in Database.ShowTables())
+				foreach (var table in EsoDb.ShowTables())
 				{
 					var match = UpdateFinder.Match(table);
 					if (match.Success)

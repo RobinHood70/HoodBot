@@ -121,7 +121,7 @@
 				? "SELECT id, icon FROM collectibles WHERE id"
 				: "SELECT CAST(itemId AS SIGNED INT) id, icon FROM minedItemSummary WHERE itemId";
 			query += " IN(" + string.Join(",", retvalIds.Keys) + ") AND icon != '/esoui/art/icons/icon_missing.dds'";
-			var dbItems = EsoLog.Database.RunQuery(query);
+			var dbItems = EsoLog.EsoDb.RunQuery(query);
 			foreach (var row in dbItems)
 			{
 				var icon = (string)row["icon"];
