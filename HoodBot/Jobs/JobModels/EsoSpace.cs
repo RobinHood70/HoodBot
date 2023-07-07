@@ -17,7 +17,7 @@
 	internal static class EsoSpace
 	{
 		#region Static Fields
-		private static string? patchVersion;
+		private static VariablesPage? patchVarPage;
 		#endregion
 
 		#region Public Properties
@@ -94,14 +94,14 @@
 			}
 		}
 
-		public static string GetPatchVersion(this WikiJob job)
+		public static EsoVersion GetPatchVersion(this WikiJob job, string paramName)
 		{
-			if (patchVersion == null)
-			{
-				_ = GetPatchPage(job);
-			}
-
-			return patchVersion!;
+			ArgumentException.ThrowIfNullOrEmpty(paramName);
+			var patchPage = GetPatchPage(job);
+			var version = patchPage.GetVariable(paramName);
+			return version is null
+				? throw new InvalidOperationException($"Patch variable \"{paramName}\" not found")
+				: EsoVersion.FromText(version);
 		}
 
 		public static string IconDownloadPath(string updateFolder, bool pts)
@@ -110,17 +110,19 @@
 			return $"https://esofiles.uesp.net/update-{updateFolder}{ptsText}/icons.zip";
 		}
 
-		public static void SetBotUpdateVersion(this WikiJob job, string pageType)
+		public static void SetBotUpdateVersion(this WikiJob job, string pageType, EsoVersion version)
 		{
-			// Assumes EsoPatchVersion has already been updated.
+			ArgumentNullException.ThrowIfNull(job);
+			ArgumentException.ThrowIfNullOrEmpty(pageType);
+			ArgumentNullException.ThrowIfNull(version);
+
 			job.StatusWriteLine("Update bot parameters");
+			var paramName = pageType;
 			var patchPage = GetPatchPage(job);
-			ContextualParser parser = new(patchPage);
-			var paramName = "bot" + pageType.NotNull();
+			var parser = new ContextualParser(patchPage);
 			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
-				param.Value.Clear();
-				param.Value.AddText(EsoLog.LatestDBUpdate.ToStringInvariant() + '\n');
+				param.SetValue(version.Text, ParameterFormat.NoChange);
 				parser.UpdatePage();
 				patchPage.Save("Update " + paramName, true);
 			}
@@ -130,19 +132,18 @@
 		#region Private Methods
 		private static VariablesPage GetPatchPage(WikiJob job)
 		{
-			job.StatusWriteLine("Fetching ESO update number");
-			TitleCollection patchTitle = new(job.Site, "Online:Patch");
-			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
-			pages.GetTitles(patchTitle);
-			if (pages.Count == 1
-				&& pages[0] is VariablesPage patchPage
-				&& patchPage.MainSet?["number"] is string version)
+			if (patchVarPage is null)
 			{
-				patchVersion = version;
-				return patchPage;
+				job.StatusWriteLine("Fetching ESO update number");
+				TitleCollection patchTitle = new(job.Site, "Online:Patch");
+				var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
+				pages.GetTitles(patchTitle);
+				patchVarPage = pages.Count == 1 && pages[0] is VariablesPage varPage
+					? varPage
+					: throw new InvalidOperationException("Could not find patch page.");
 			}
 
-			throw new InvalidOperationException("Could not find patch version on page.");
+			return patchVarPage;
 		}
 
 		private static void GetPlaceCategory(Site site, PlaceCollection places, PlaceInfo placeInfo)

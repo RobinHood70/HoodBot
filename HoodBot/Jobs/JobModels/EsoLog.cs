@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
@@ -12,14 +11,16 @@
 	internal static class EsoLog
 	{
 		#region Static Fields
-		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
-		private static readonly Regex UpdateFinder = new(@"(?<update>\d+)\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static Database? database;
-		private static int latestUpdate;
+		private static EsoVersion? latestVersion;
+		private static EsoVersion? latestPtsVersion;
 		#endregion
 
 		#region Public Properties
+		public static Regex ColourCode { get; } = new(@"\|c[0-9A-Fa-f]{6}(<content>[^\|]*?)\|r", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
 		public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
 		public static Database Database => database ??= new Database(Connection);
@@ -72,29 +73,38 @@
 			[-79] = "Health or Weapon/Spell Damage",
 		};
 
-		public static int LatestDBUpdate
+		public static EsoVersion LatestDBUpdate(bool includePts)
 		{
-			get
+			if (latestVersion is null || latestPtsVersion is null)
 			{
-				if (latestUpdate == 0)
+				latestVersion = EsoVersion.Empty;
+				latestPtsVersion = EsoVersion.Empty;
+				var highestSort = 0;
+				var highestPtsSort = 0;
+				foreach (var table in Database.ShowTables())
 				{
-					foreach (var table in Database.ShowTables())
+					var match = UpdateFinder.Match(table);
+					if (match.Success)
 					{
-						var match = UpdateFinder.Match(table);
-						if (match.Success)
+						var version = EsoVersion.FromText(match.Value);
+						if (version.Pts)
 						{
-							var updateText = match.Groups["update"].Value;
-							var update = int.Parse(updateText, CultureInfo.InvariantCulture);
-							if (update > latestUpdate)
+							if (highestPtsSort < version.SortOrder)
 							{
-								latestUpdate = update;
+								highestPtsSort = version.SortOrder;
+								latestPtsVersion = version;
 							}
+						}
+						else if (highestSort < version.SortOrder)
+						{
+							highestSort = version.SortOrder;
+							latestVersion = version;
 						}
 					}
 				}
-
-				return latestUpdate;
 			}
+
+			return includePts ? latestPtsVersion : latestVersion;
 		}
 		#endregion
 

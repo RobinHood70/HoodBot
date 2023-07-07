@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -56,6 +55,7 @@
 
 		#region Fields
 		private Dictionary<string, Skill> skills = new(StringComparer.Ordinal);
+		private EsoVersion? version;
 		#endregion
 
 		#region Constructors
@@ -91,9 +91,10 @@
 		{
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
-			this.skills = GetSkillList(0);
-			var latestVersion = EsoLog.LatestDBUpdate - 1;
-			var prevSkills = GetSkillList(latestVersion);
+			var prevVersion = EsoSpace.GetPatchVersion(this, "botskills");
+			this.version = EsoLog.LatestDBUpdate(false);
+			this.skills = GetSkillList(prevVersion);
+			var prevSkills = GetSkillList(null);
 			foreach (var (key, skill) in this.skills)
 			{
 				if (prevSkills.TryGetValue(key, out var prevSkill))
@@ -123,7 +124,7 @@
 		protected override void Main()
 		{
 			base.Main();
-			EsoSpace.SetBotUpdateVersion(this, "skills");
+			EsoSpace.SetBotUpdateVersion(this, "botskills", this.version!);
 		}
 
 		protected override void PageLoaded(Page page)
@@ -152,15 +153,14 @@
 			return iconChanges;
 		}
 
-		private static Dictionary<string, Skill> GetSkillList(int version)
+		private static Dictionary<string, Skill> GetSkillList(EsoVersion? version)
 		{
 			Dictionary<string, Skill> retval = new(StringComparer.Ordinal);
-			var versionText = version.ToStringInvariant();
-			var query = version == 0
+			var query = version is null
 				? Query
 				: Query
-					.Replace(SkillTable, SkillTable + versionText, StringComparison.Ordinal)
-					.Replace(MinedTable, MinedTable + versionText, StringComparison.Ordinal);
+					.Replace(SkillTable, SkillTable + version.Text, StringComparison.Ordinal)
+					.Replace(MinedTable, MinedTable + version.Text, StringComparison.Ordinal);
 
 			var errors = false;
 			Skill? currentSkill = null;
