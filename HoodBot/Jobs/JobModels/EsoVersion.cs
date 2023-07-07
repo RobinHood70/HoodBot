@@ -4,7 +4,7 @@
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 
-	internal sealed record EsoVersion(int Version, bool Pts)
+	internal sealed record EsoVersion(int Version, bool Pts) : IComparable, IComparable<EsoVersion>
 	{
 		#region Public Static Properties
 		public static EsoVersion Empty => new(0, false);
@@ -19,7 +19,24 @@
 		public string Text => this.Version.ToStringInvariant() + (this.Pts ? "pts" : string.Empty);
 		#endregion
 
+		#region Operator Overloads
+		public static bool operator <(EsoVersion left, EsoVersion right) => Compare(left, right) < 0;
+
+		public static bool operator >(EsoVersion left, EsoVersion right) => Compare(left, right) > 0;
+
+		public static bool operator <=(EsoVersion left, EsoVersion right) => Compare(left, right) <= 0;
+
+		public static bool operator >=(EsoVersion left, EsoVersion right) => Compare(left, right) >= 0;
+
+		#endregion
+
 		#region Public Static Methods
+		public static int Compare(EsoVersion left, EsoVersion right) => left is null
+			? right is null
+				? 0
+				: 1
+			: left.CompareTo(right);
+
 		public static EsoVersion FromText(string text)
 		{
 			var pts = false;
@@ -33,6 +50,14 @@
 
 			return new EsoVersion(version, pts);
 		}
+		#endregion
+
+		#region Public Methods
+		public int CompareTo(object? obj) => this.CompareTo(obj as EsoVersion);
+
+		public int CompareTo(EsoVersion? other) => other is null
+			? 1
+			: this.SortOrder.CompareTo(other.SortOrder);
 		#endregion
 	}
 }
