@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System.Collections.Generic;
-	using GalaSoft.MvvmLight;
+	using CommunityToolkit.Mvvm.ComponentModel;
 	using RobinHood70.CommonCode;
 
 	public class TreeNode : ObservableObject
@@ -35,7 +35,7 @@
 			get => this.isChecked;
 			set
 			{
-				if (this.Set(ref this.isChecked, value))
+				if (this.SetProperty(ref this.isChecked, value))
 				{
 					var selected = this.SelectedItem;
 					if (selected != null)
@@ -66,7 +66,7 @@
 			{
 				if (this.isSelected != value)
 				{
-					this.Set(ref this.isSelected, value);
+					this.SetProperty(ref this.isSelected, value);
 					this.Root.selectedItem = value ? this : null;
 					this.OnSelectionChange(new SelectedItemChangedEventArgs(this, value));
 				}

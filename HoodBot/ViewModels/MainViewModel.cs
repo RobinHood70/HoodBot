@@ -8,8 +8,8 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
-	using GalaSoft.MvvmLight;
-	using GalaSoft.MvvmLight.Command;
+	using CommunityToolkit.Mvvm.ComponentModel;
+	using CommunityToolkit.Mvvm.Input;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
@@ -20,7 +20,7 @@
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
 
-	public class MainViewModel : ViewModelBase
+	public class MainViewModel : ObservableRecipient
 	{
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
@@ -96,7 +96,7 @@
 		public bool EditingEnabled
 		{
 			get => this.editingEnabled;
-			set => this.Set(ref this.editingEnabled, value, nameof(this.EditingEnabled));
+			set => this.SetProperty(ref this.editingEnabled, value);
 		}
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
@@ -104,13 +104,13 @@
 		public bool JobParametersEnabled
 		{
 			get => this.jobParametersEnabled;
-			private set => this.Set(ref this.jobParametersEnabled, value, nameof(this.JobParametersEnabled));
+			private set => this.SetProperty(ref this.jobParametersEnabled, value);
 		}
 
 		public Visibility JobParameterVisibility
 		{
 			get => this.jobParameterVisibility;
-			private set => this.Set(ref this.jobParameterVisibility, value, nameof(this.JobParameterVisibility));
+			private set => this.SetProperty(ref this.jobParameterVisibility, value);
 		}
 
 		public TreeNode JobTree { get; } = JobNode.Populate();
@@ -118,25 +118,25 @@
 		public double OverallProgress
 		{
 			get => this.overallProgress;
-			private set => this.Set(ref this.overallProgress, value, nameof(this.OverallProgress));
+			private set => this.SetProperty(ref this.overallProgress, value);
 		}
 
 		public double OverallProgressMax
 		{
 			get => this.overallProgressMax;
-			private set => this.Set(ref this.overallProgressMax, value < 1 ? 1 : value, nameof(this.OverallProgressMax));
+			private set => this.SetProperty(ref this.overallProgressMax, value < 1 ? 1 : value);
 		}
 
 		public string? Password
 		{
 			get => this.password;
-			set => this.Set(ref this.password, value, nameof(this.Password));
+			set => this.SetProperty(ref this.password, value);
 		}
 
 		public Brush ProgressBarColor
 		{
 			get => this.progressBarColor;
-			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
+			set => this.SetProperty(ref this.progressBarColor, value);
 		}
 
 		public WikiInfoViewModel? SelectedItem
@@ -153,14 +153,14 @@
 					}
 				}
 
-				this.Set(ref this.selectedItem, value, nameof(this.SelectedItem));
+				this.SetProperty(ref this.selectedItem, value);
 			}
 		}
 
 		public string Status
 		{
 			get => this.status;
-			set => this.Set(ref this.status, value ?? string.Empty, nameof(this.Status));
+			set => this.SetProperty(ref this.status, value ?? string.Empty);
 		}
 
 		public UserSettings UserSettings { get; } = App.UserSettings;
@@ -168,7 +168,7 @@
 		public string? UserName
 		{
 			get => this.userName;
-			set => this.Set(ref this.userName, value, nameof(this.UserName));
+			set => this.SetProperty(ref this.userName, value);
 		}
 
 		public DateTime? UtcEta
@@ -176,9 +176,9 @@
 			get => this.eta;
 			private set
 			{
-				if (this.Set(ref this.eta, value, nameof(this.UtcEta)))
+				if (this.SetProperty(ref this.eta, value))
 				{
-					this.RaisePropertyChanged(nameof(this.Eta));
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -308,7 +308,7 @@
 		{
 			// For full MVVM compliance, this should actually be opening the window from an IWindowFactory-type class, but for now, this is fine.
 			new SettingsWindow().Show();
-			this.MessengerInstance.Send<MainViewModel, SettingsViewModel>(this);
+			this.Messenger.Send(this, nameof(SettingsViewModel));
 		}
 
 		private void PauseJobs()

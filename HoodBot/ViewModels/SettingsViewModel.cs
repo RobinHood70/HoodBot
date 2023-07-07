@@ -4,15 +4,16 @@
 	using System.ComponentModel;
 	using System.Threading;
 	using System.Windows;
-	using GalaSoft.MvvmLight;
-	using GalaSoft.MvvmLight.Command;
+	using CommunityToolkit.Mvvm.ComponentModel;
+	using CommunityToolkit.Mvvm.Input;
+	using CommunityToolkit.Mvvm.Messaging;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
-	public class SettingsViewModel : ViewModelBase, IEditableObject
+	public class SettingsViewModel : ObservableRecipient, IEditableObject
 	{
 		#region Fields
 		private readonly IMediaWikiClient client = new SimpleClient(CancellationToken.None);
@@ -22,7 +23,7 @@
 		#region Constructors
 		public SettingsViewModel()
 		{
-			this.MessengerInstance.Register<SettingsParameters>(this, this.Initialize);
+			this.Messenger.Register<SettingsViewModel, SettingsParameters>(this, static (r, m) => r.Initialize(m));
 		}
 		#endregion
 
@@ -47,7 +48,7 @@
 				if (value != this.selectedItem)
 				{
 					this.CancelEdit();
-					this.Set(ref this.selectedItem, value);
+					this.SetProperty(ref this.selectedItem, value);
 					this.BeginEdit();
 				}
 			}
@@ -148,7 +149,7 @@
 		private void Initialize(SettingsParameters parameters)
 		{
 			// TODO: main.Client no longer guaranteed to be non-null...likely not to be, in fact.
-			this.MessengerInstance.Unregister(this);
+			this.Messenger.UnregisterAll(this);
 			this.SelectedItem = parameters.SelectedItem;
 		}
 		#endregion

@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.ComponentModel;
-	using GalaSoft.MvvmLight;
+	using CommunityToolkit.Mvvm.ComponentModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 
@@ -39,13 +39,13 @@
 		public Uri? Api
 		{
 			get => this.api;
-			set => this.Set(ref this.api, value);
+			set => this.SetProperty(ref this.api, value);
 		}
 
 		public string? DisplayName
 		{
 			get => this.displayName;
-			set => this.Set(ref this.displayName, value);
+			set => this.SetProperty(ref this.displayName, value);
 		}
 
 		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
@@ -53,43 +53,43 @@
 		public string? LogPage
 		{
 			get => this.logPage;
-			set => this.Set(ref this.logPage, value);
+			set => this.SetProperty(ref this.logPage, value);
 		}
 
 		public int? MaxLag
 		{
 			get => this.maxLag;
-			set => this.Set(ref this.maxLag, value);
+			set => this.SetProperty(ref this.maxLag, value);
 		}
 
 		public string? Password
 		{
 			get => this.password;
-			set => this.Set(ref this.password, value);
+			set => this.SetProperty(ref this.password, value);
 		}
 
 		public int? ReadThrottling
 		{
 			get => this.readThrottling;
-			set => this.Set(ref this.readThrottling, value);
+			set => this.SetProperty(ref this.readThrottling, value);
 		}
 
 		public string? ResultsPage
 		{
 			get => this.resultPage;
-			set => this.Set(ref this.resultPage, value);
+			set => this.SetProperty(ref this.resultPage, value);
 		}
 
 		public string? SiteClassIdentifier
 		{
 			get => this.siteClassIdentifier;
-			set => this.Set(ref this.siteClassIdentifier, value);
+			set => this.SetProperty(ref this.siteClassIdentifier, value);
 		}
 
 		public string? UserName
 		{
 			get => this.userName;
-			set => this.Set(ref this.userName, value);
+			set => this.SetProperty(ref this.userName, value);
 		}
 
 		public WikiInfo WikiInfo { get; }
@@ -97,7 +97,7 @@
 		public int? WriteThrottling
 		{
 			get => this.writeThrottling;
-			set => this.Set(ref this.writeThrottling, value);
+			set => this.SetProperty(ref this.writeThrottling, value);
 		}
 		#endregion
 
