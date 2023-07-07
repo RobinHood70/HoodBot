@@ -48,6 +48,10 @@
 		#endregion
 
 		#region Public Methods
+		public IDictionary<string, string> GetSet(string setName) => this.subsets.TryGetValue(setName, out var set)
+			? set
+			: ImmutableDictionary<string, string>.Empty;
+
 		public string? GetVariable(string name) =>
 			this.MainSet != null && this.MainSet.TryGetValue(name, out var retval)
 				? retval
