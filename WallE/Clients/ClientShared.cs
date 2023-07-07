@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
 	using System;
+	using System.Globalization;
 	using System.Reflection;
-	using static System.FormattableString;
 
 	/// <summary>Shared classes that apply to multiple client classes.</summary>
 	public static class ClientShared
@@ -39,7 +39,9 @@
 				? string.Empty
 				: $" ({contactInfo.Trim()})";
 
-			return Invariant($"{botInfo}{contactInfo} {libraryName.Name}/{libraryName.Version}");
+			return string.Create(
+				CultureInfo.InvariantCulture,
+				$"{botInfo}{contactInfo} {libraryName.Name}/{libraryName.Version}");
 		}
 	}
 }

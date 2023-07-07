@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
+	using System.Globalization;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
@@ -20,7 +20,9 @@
 			{
 				if (page is FilePage file && file.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
 				{
-					this.WriteLine(FormattableString.Invariant($"* {file.AsLink(LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
+					this.WriteLine(string.Create(
+						CultureInfo.InvariantCulture,
+						$"* {file.AsLink(LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
 				}
 			}
 		}

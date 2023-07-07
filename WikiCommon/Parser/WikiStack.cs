@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Globalization;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
@@ -211,7 +212,9 @@
 					break;
 				default:
 					var curChar = this.Index < this.Text.Length ? this.Text[this.Index] : '\uffff';
-					throw new InvalidOperationException(FormattableString.Invariant($"Found unexpected character '{curChar}' at position {this.Index}."));
+					throw new InvalidOperationException(string.Create(
+						CultureInfo.InvariantCulture,
+						$"Found unexpected character '{curChar}' at position {this.Index}."));
 			}
 		}
 

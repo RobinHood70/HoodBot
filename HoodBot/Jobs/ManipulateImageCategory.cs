@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -36,7 +36,9 @@
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
 				{
-					this.WriteLine(FormattableString.Invariant($"* {image.AsLink(LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
+					this.WriteLine(string.Create(
+						CultureInfo.InvariantCulture,
+						$"* {image.AsLink(LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
 				}
 			}
 		}

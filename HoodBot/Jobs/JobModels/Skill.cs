@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -118,7 +119,12 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var newValue = IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				var destType = loopCount > 0
+					? string.Create(
+						CultureInfo.InvariantCulture,
+						$" ({DestructionTypes[i]})")
+					: string.Empty;
+				var newValue = IconValueFixup(template.Find(iconName), iconValue + destType);
 				UpdateParameter(factory, template, iconName, newValue);
 			}
 
