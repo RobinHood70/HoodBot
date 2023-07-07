@@ -201,7 +201,7 @@
 				if (placeType.Value.Count > 1)
 				{
 					wroteSomething = true;
-					Debug.Write($"[[Online:{this.Title?.FullPageName ?? this.DataName}|{this.DataName}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
+					Debug.Write($"[[Online:{this.Title?.PageName ?? this.DataName}|{this.DataName}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
 			}
 
