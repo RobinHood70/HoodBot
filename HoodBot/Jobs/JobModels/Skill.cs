@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Diagnostics;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -41,16 +40,9 @@
 				? classValue
 				: "Crafting";
 			this.SkillLine = classLine[1];
-			var testName = this.Name;
-			if (!ReplacementData.SkillNameFixes.TryGetValue(testName, out var newName))
+			if (!ReplacementData.SkillNameFixes.TryGetValue(this.Name, out var newName))
 			{
-				testName = this.Name + " - " + this.SkillLine;
-				ReplacementData.SkillNameFixes.TryGetValue(testName, out newName);
-			}
-
-			if (newName != null)
-			{
-				Debug.WriteLine("Page Name Changed: {0} => {1}", testName, newName);
+				ReplacementData.SkillNameFixes.TryGetValue($"{this.Name} - {this.SkillLine}", out newName);
 			}
 
 			this.PageName = "Online:" + (newName ?? this.Name);
@@ -58,9 +50,9 @@
 		#endregion
 
 		#region Public Static Properties
-		public static Regex Highlight => new(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, Globals.DefaultRegexTimeout);
+		public static Regex Highlight => new(@"(?:\|c[0-9a-fA-F]{6})+|(?:\|r)+", RegexOptions.None, Globals.DefaultRegexTimeout);
 
-		public static Regex HighlightVar => new(@"\s*([\d]+(\.\d+)?|\|c[0-9a-fA-F]{6}[^\|]+?\|r)\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		public static Regex HighlightVar => new(@"\s*([\d]+(\.\d+)?|\|c[0-9A-Fa-f]{6}[^\|]+?\|r)\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
 		public static SortedList<string, string> IconNameCache { get; } = new(StringComparer.Ordinal);
 		#endregion
