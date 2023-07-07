@@ -231,12 +231,15 @@
 		#region Private Methods
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			var text = Globals.CurrentCulture(
-				Resources.DelayRequested,
-				eventArgs.Reason,
-				$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
-				eventArgs.Description);
-			this.OnUpdateStatus(text + '\n');
+			if (eventArgs.Reason != DelayReason.ClientThrottled)
+			{
+				var text = Globals.CurrentCulture(
+					Resources.DelayRequested,
+					eventArgs.Reason,
+					$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
+					eventArgs.Description);
+				this.OnUpdateStatus(text + '\n');
+			}
 		}
 
 		private IWikiAbstractionLayer CreateAbstractionLayer()
