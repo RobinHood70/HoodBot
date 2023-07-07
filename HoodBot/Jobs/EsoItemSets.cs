@@ -127,7 +127,9 @@
 			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
 			if (oldPage.Count < 2 || !(
 					oldPage[0] is IIgnoreNode firstNode &&
-					oldPage[^1] is IIgnoreNode lastNode))
+					firstNode.Value.EndsWith("<onlyinclude>", StringComparison.Ordinal) &&
+					oldPage[^1] is IIgnoreNode lastNode &&
+					lastNode.Value.StartsWith("</onlyinclude>", StringComparison.Ordinal)))
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}\n");
 				return;
