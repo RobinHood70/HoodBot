@@ -82,7 +82,7 @@
 		#endregion
 
 		#region Private Methods
-		private void Fill(string page)
+		private void Fill(string? page)
 		{
 			if (this.SelectedItem is not WikiInfoViewModel selectedItem)
 			{
