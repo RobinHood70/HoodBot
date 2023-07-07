@@ -86,7 +86,7 @@
 			try
 			{
 				var attributes = File.GetAttributes(fileName);
-				if ((attributes & FileAttributes.Directory) != 0)
+				if (attributes.HasAnyFlag(FileAttributes.Directory))
 				{
 					fileName = Path.Combine(fileName, this.PageName);
 				}

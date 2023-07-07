@@ -37,7 +37,7 @@
 			request
 				.NotNull()
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 123)
-				.AddIf("url", (input.Properties & LanguageLinksProperties.Url) != 0, this.SiteVersion is >= 117 and < 123)
+				.AddIf("url", input.Properties.HasAnyFlag(LanguageLinksProperties.Url), this.SiteVersion is >= 117 and < 123)
 				.AddIfNotNull("lang", input.Language)
 				.AddIfNotNull("title", input.Title)
 				.AddIf("dir", "descending", input.SortDescending)

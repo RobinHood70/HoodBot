@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Globalization;
 	using System.IO;
 	using System.Text;
 	using System.Threading;
@@ -104,22 +105,22 @@
 						list.Add(value);
 					}
 
-					if ((this.FollowUpActions & FollowUpActions.FixLinks) != 0)
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 					{
 						list.Add("fix links");
 					}
 
-					if ((this.FollowUpActions & FollowUpActions.UpdateCategoryMembers) != 0)
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
 					{
 						list.Add("re-categorize category members");
 					}
 
-					if ((this.FollowUpActions & FollowUpActions.ProposeUnused) != 0)
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.ProposeUnused))
 					{
 						list.Add("propose unused pages for deletion");
 					}
 
-					if ((this.FollowUpActions & FollowUpActions.CheckLinksRemaining) != 0)
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.CheckLinksRemaining))
 					{
 						list.Add("report remaining links");
 					}
@@ -195,7 +196,7 @@
 
 			if (this.MoveAction == MoveAction.None ||
 				initialActions == ReplacementActions.None ||
-				(this.FollowUpActions & FollowUpActions.FixLinks) != 0)
+				this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 			{
 				this.linkUpdates.Add(from, to);
 			}
@@ -236,7 +237,7 @@
 			var loadTitles = this.GetLoadTitles(fromPages, categoryMembers);
 
 			this.StatusWriteLine("Figuring out what to do");
-			if ((this.FollowUpActions & FollowUpActions.ProposeUnused) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.ProposeUnused))
 			{
 				this.SetupProposedDeletions(fromPages, categoryMembers);
 			}
@@ -246,7 +247,7 @@
 				this.ValidateActions();
 			}
 
-			if ((this.FollowUpActions & FollowUpActions.EmitReport) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.EmitReport))
 			{
 				this.EmitReport();
 				this.Results?.Save(); // Save prematurely so results are not lost in the event of a later problem.
@@ -263,7 +264,7 @@
 			}
 
 			base.Main();
-			if ((this.FollowUpActions & FollowUpActions.CheckLinksRemaining) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.CheckLinksRemaining))
 			{
 				this.CheckRemaining();
 			}
@@ -350,7 +351,7 @@
 			foreach (var (from, action) in this.actions)
 			{
 				this.WriteLine("|-");
-				this.Write(FormattableString.Invariant($"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
+				this.Write(string.Create(CultureInfo.InvariantCulture, $"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
 				List<string> actionsList = new();
 				if (action.HasAction(ReplacementActions.Skip))
 				{
@@ -359,12 +360,12 @@
 				else if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
 				{
 					actionsList.Add("move to " + this.moves[from].AsLink());
-					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 					{
 						actionsList.Add("update links");
 					}
 				}
-				else if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
+				else if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 				{
 					actionsList.Add("update links to " + this.linkUpdates[from].AsLink());
 				}
@@ -420,7 +421,7 @@
 		{
 			this.StatusWriteLine("Getting category members");
 			Dictionary<Title, TitleCollection> retval = new();
-			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.NeedsCategoryMembers))
 			{
 				var categoryReplacements = new Dictionary<Title, Title>();
 				foreach (var replacement in this.linkUpdates)
@@ -441,7 +442,7 @@
 				foreach (var category in categoryReplacements)
 				{
 					var from = category.Key;
-					if ((this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 ||
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.ProposeUnused) ||
 						this.linkUpdates.ContainsKey(from))
 					{
 						TitleCollection catMembers = new(this.Site);
@@ -470,7 +471,7 @@
 			(from.ForcedNamespaceLink
 				|| from.Namespace != MediaWikiNamespaces.Category
 				|| to.Namespace != from.Namespace
-				|| (this.FollowUpActions & FollowUpActions.UpdateCategoryMembers) != 0)
+				|| this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
 			? to
 			: null;
 
@@ -488,7 +489,7 @@
 					moveCount++;
 				}
 
-				if (actionValue.HasAction(ReplacementActions.Edit) || actionValue.HasAction(ReplacementActions.Edit))
+				if (actionValue.HasAction(ReplacementActions.Edit))
 				{
 					editTitles.Add(action.Key);
 				}
@@ -502,10 +503,10 @@
 				var fromNs = action.Key.Namespace;
 				var moveTalkPage =
 					!fromNs.IsTalkSpace &&
-					(this.MoveExtra & MoveOptions.MoveTalkPage) != 0;
+					this.MoveExtra.HasAnyFlag(MoveOptions.MoveTalkPage);
 				var moveSubPages =
 					fromNs.AllowsSubpages &&
-					(this.MoveExtra & MoveOptions.MoveSubPages) != 0;
+					this.MoveExtra.HasAnyFlag(MoveOptions.MoveSubPages);
 				this.Site.Move(
 					action.Key,
 					to,
@@ -704,7 +705,7 @@
 			page.ThrowNull();
 			from.ThrowNull();
 			toLink.ThrowNull();
-			if ((this.FollowUpActions & FollowUpActions.UpdateCaption) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCaption))
 			{
 				// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
 				if (toLink.Text != null
@@ -723,7 +724,7 @@
 						return to.LinkName;
 					}
 
-					if ((this.FollowUpActions & FollowUpActions.UpdatePageNameCaption) != 0)
+					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdatePageNameCaption))
 					{
 						if (string.Equals(from.FullPageName, toLink.Text, StringComparison.Ordinal))
 						{
@@ -780,7 +781,7 @@
 					}
 					else if (toPages.Contains(move.Value))
 					{
-						this.actions[move.Key] = (action.Actions & ReplacementActions.Propose) != 0
+						this.actions[move.Key] = action.Actions.HasAnyFlag(ReplacementActions.Propose)
 							? this.HandleConflict(move.Key, move.Value)
 							: new(ReplacementActions.Skip, $"{move.Value.AsLink()} exists");
 					}
@@ -865,7 +866,7 @@
 		private PageCollection GetFromPages()
 		{
 			var modules = this.PageInfoExtraModules | PageModules.Info;
-			if ((this.FollowUpActions & FollowUpActions.AffectsBacklinks) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.AffectsBacklinks))
 			{
 				modules |= PageModules.Backlinks;
 			}
@@ -886,10 +887,10 @@
 		private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<Title, TitleCollection> categoryMembers)
 		{
 			TitleCollection backlinkTitles = new(this.Site);
-			if ((this.FollowUpActions & FollowUpActions.AffectsBacklinks) != 0)
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.AffectsBacklinks))
 			{
 				this.GetBacklinkTitles(fromPages, backlinkTitles);
-				if (categoryMembers.Count > 0 && (this.FollowUpActions & FollowUpActions.UpdateCategoryMembers) != 0)
+				if (categoryMembers.Count > 0 && this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
 				{
 					foreach (var catTitles in categoryMembers)
 					{

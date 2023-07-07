@@ -335,7 +335,7 @@
 			input.ThrowNull();
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasAnyFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 			}
@@ -617,7 +617,7 @@
 			{
 				item.FullPageName.PropertyThrowNull(nameof(item));
 				var title = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
-				if (input.Type.HasFlag(item.Type))
+				if (input.Type.HasAnyFlag(item.Type))
 				{
 					this.TryAdd(title);
 				}

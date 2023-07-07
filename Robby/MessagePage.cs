@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
@@ -31,9 +32,9 @@
 					case 1:
 						var item = result[0];
 						this.IsInvalid = false;
-						this.IsMissing = (item.NotNull().Flags & MessageFlags.Missing) != 0;
-						this.Customized = (item.Flags & MessageFlags.Customized) != 0;
-						this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
+						this.IsMissing = item.Flags.HasAnyFlag(MessageFlags.Missing);
+						this.Customized = item.Flags.HasAnyFlag(MessageFlags.Customized);
+						this.DefaultMissing = item.Flags.HasAnyFlag(MessageFlags.DefaultMissing);
 						this.DefaultMessage = item.Default;
 						this.NormalizedName = item.NormalizedName;
 						this.Text = item.Content ?? item.Default;
@@ -52,10 +53,11 @@
 		internal MessagePage(Title title, AllMessagesItem item)
 			: base(title, PageLoadOptions.None, null)
 		{
+			ArgumentNullException.ThrowIfNull(item);
 			this.IsInvalid = false;
-			this.IsMissing = (item.NotNull().Flags & MessageFlags.Missing) != 0;
-			this.Customized = (item.Flags & MessageFlags.Customized) != 0;
-			this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
+			this.IsMissing = item.Flags.HasAnyFlag(MessageFlags.Missing);
+			this.Customized = item.Flags.HasAnyFlag(MessageFlags.Customized);
+			this.DefaultMissing = item.Flags.HasAnyFlag(MessageFlags.DefaultMissing);
 			this.DefaultMessage = item.Default;
 			this.NormalizedName = item.NormalizedName;
 			this.Text = item.Content ?? item.Default ?? string.Empty;

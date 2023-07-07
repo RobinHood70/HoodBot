@@ -105,7 +105,7 @@
 			}
 
 			regexTags.Sort(StringComparer.Ordinal);
-			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			this.tagsRegex = new Regex(@"\G(" + string.Join('|', regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			this.Preprocess();
 		}
 		#endregion

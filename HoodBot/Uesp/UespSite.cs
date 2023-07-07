@@ -81,7 +81,7 @@
 			}
 
 			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen if there are messages waiting, even if editing is disabled.
-			if (this.AbstractionLayer.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.HasMessage) ?? false)
+			if (this.AbstractionLayer.CurrentUserInfo?.Flags.HasAnyFlag(UserInfoFlags.HasMessage) ?? false)
 			{
 				this.ClearMessage(force: true);
 			}

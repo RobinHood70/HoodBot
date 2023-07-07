@@ -201,9 +201,9 @@
 					this.Version = general.Generator;
 					this.ReadEntryPoint = EntryPoint.Api;
 					this.SupportsMaxLag = api.SupportsMaxLag;
-					this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
+					this.CurrentUser = (api.CurrentUserInfo?.Flags.HasAnyFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
 					this.WriteEntryPoint =
-						(general.Flags & SiteInfoFlags.WriteApi) != 0 ? EntryPoint.Api :
+						general.Flags.HasAnyFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
 						this.Index == null ? EntryPoint.None :
 						EntryPoint.Index;
 

@@ -90,21 +90,21 @@
 				if (insert >= 0)
 				{
 					text = text.Insert(insert, "\n{{ESO House Furnishings");
-					insert = text.IndexOf("\n", StringComparison.Ordinal);
+					insert = text.IndexOf('\n', StringComparison.Ordinal);
 					insert = text.LastIndexOf("\n|", StringComparison.Ordinal);
 					if (insert == -1)
 					{
 						throw new InvalidOperationException();
 					}
 
-					insert = text.IndexOf("\n", insert + 1, StringComparison.Ordinal);
+					insert = text.IndexOf('\n', insert + 1);
 					if (insert == -1)
 					{
 						insert = text.Length;
 					}
 
 					itemList.Sort(StringComparer.Ordinal);
-					var insertText = string.Join("\n", itemList) + "\n";
+					var insertText = string.Join('\n', itemList) + "\n";
 					if (string.Equals(section.Header?.GetTitle(true), "Furnishings", StringComparison.Ordinal))
 					{
 						insertText += "furnished=1\n";
@@ -191,7 +191,7 @@
 							if (text.Length > 1 && text[1] == ';')
 							{
 								itemList.Sort(StringComparer.Ordinal);
-								var prevList = string.Join("\n", itemList);
+								var prevList = string.Join('\n', itemList);
 								itemList.Clear();
 								var (link, _) = SplitLine(line[2..]);
 								link = link

@@ -40,7 +40,7 @@
 		public ListLogEvents(WikiAbstractionLayer wal, LogEventsInput input)
 			: base(wal, input)
 		{
-			this.getUserId = (input.Properties & LogEventsProperties.UserId) != 0;
+			this.getUserId = input.Properties.HasAnyFlag(LogEventsProperties.UserId);
 		}
 		#endregion
 

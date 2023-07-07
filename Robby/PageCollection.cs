@@ -420,7 +420,7 @@
 			input.ThrowNull();
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasAnyFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 				input.Title.PropertyThrowNull(nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
@@ -579,7 +579,7 @@
 				{
 					limited.Limit = options.PageLimit;
 				}
-				else if ((options.Modules & PageModules.Revisions) != 0)
+				else if (options.Modules.HasAnyFlag(PageModules.Revisions))
 				{
 					// API-specific. Because of the way revisions output is handled in a pageset, setting the page limit to be the same as the revisions limit results in a much more optimal result, returning less data in more evenly sized batches. This might apply to other modules as well, but revisions is likely the biggest concern, so we always set 500 here unless a higher limit was specifically requested above.
 					limited.Limit = 500;
@@ -594,7 +594,7 @@
 				if (pageValidator(page))
 				{
 					this.TryAdd(page);
-					if (page.IsMissing || (((page.LoadOptions.Modules & PageModules.Revisions) != 0) && string.IsNullOrWhiteSpace(page.Text)))
+					if (page.IsMissing || (page.LoadOptions.Modules.HasAnyFlag(PageModules.Revisions) && string.IsNullOrWhiteSpace(page.Text)))
 					{
 						this.PageMissing?.Invoke(this, page);
 					}

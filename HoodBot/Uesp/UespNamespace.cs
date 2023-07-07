@@ -25,7 +25,7 @@
 				? baseName[..colonLoc]
 				: baseName;
 			this.BaseNamespace = site[baseNamespace];
-			this.Full = baseName + (this.IsPseudoNamespace ? '/' : ':');
+			this.Full = baseName + (this.IsPseudoNamespace ? "/" : ":");
 			this.Id = nsData[1].Length == 0 ? baseName.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? baseName : nsData[2];
 			this.Parent = site[parentName];

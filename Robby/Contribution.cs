@@ -20,8 +20,8 @@
 			contribution.ThrowNull();
 			contribution.FullPageName.PropertyThrowNull(nameof(contribution));
 			this.Title = TitleFactory.CoValidate(site, contribution.Namespace, contribution.FullPageName);
-			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
-			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
+			this.New = contribution.Flags.HasAnyFlag(UserContributionFlags.New);
+			this.Patrolled = contribution.Flags.HasAnyFlag(UserContributionFlags.Patrolled);
 			this.NewSize = contribution.Size;
 			this.OldSize = contribution.Size - contribution.SizeDifference;
 			this.Tags = contribution.Tags;

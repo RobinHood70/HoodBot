@@ -54,7 +54,7 @@
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = userItem.EditCount;
-			this.Emailable = (userItem.Flags & UserFlags.Emailable) != 0;
+			this.Emailable = userItem.Flags.HasAnyFlag(UserFlags.Emailable);
 			this.Gender = userItem.Gender;
 			List<string> groups = new();
 			if (userItem.Groups != null)

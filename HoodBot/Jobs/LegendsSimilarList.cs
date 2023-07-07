@@ -82,7 +82,7 @@
 						newLines.Add(newLine);
 					}
 
-					galleryNode.InnerText = string.Join("\n", newLines);
+					galleryNode.InnerText = string.Join('\n', newLines);
 				}
 
 				var siteLinks = SiteLink.FromGalleryNode(factory, galleryNode);

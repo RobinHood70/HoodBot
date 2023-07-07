@@ -45,7 +45,7 @@
 
 		/// <summary>Gets a value indicating whether the namespace allows subpages.</summary>
 		/// <value><see langword="true"/> if the namespace allows subpages; otherwise, <see langword="false"/>.</value>
-		public bool AllowsSubpages => (this.Flags & NamespaceFlags.AllowsSubpages) != 0;
+		public bool AllowsSubpages => this.Flags.HasAnyFlag(NamespaceFlags.AllowsSubpages);
 
 		/// <summary>Gets the canonical name of the namespace.</summary>
 		/// <value>The canonical name of the namespace. For built-in namespaces, this is the default English name of the namespace (e.g., File, Project talk, etc.).</value>
@@ -53,11 +53,11 @@
 
 		/// <summary>Gets a value indicating whether this page can have editable content.</summary>
 		/// <value><see langword="true"/> if the namespace can have editable content; otherwise, <see langword="false"/> (e.g., for Special and Media spaces).</value>
-		public bool CanTalk => (this.Flags & NamespaceFlags.CanTalk) != 0;
+		public bool CanTalk => this.Flags.HasAnyFlag(NamespaceFlags.CanTalk);
 
 		/// <summary>Gets a value indicating whether the first letter of the namespace name is case-sensitive.</summary>
 		/// <value><see langword="true"/> if the first letter of the namespace name is case-sensitive; otherwise, <see langword="false"/>.</value>
-		public bool CaseSensitive => (this.Flags & NamespaceFlags.CaseSensitive) != 0;
+		public bool CaseSensitive => this.Flags.HasAnyFlag(NamespaceFlags.CaseSensitive);
 
 		/// <summary>Gets the decorated name of the namespace.</summary>
 		/// <value>The decorated name of the namespace.</value>
@@ -73,10 +73,10 @@
 
 		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
 		/// <value><see langword="true"/> if this namespace is counted as content space; otherwise, <see langword="false"/>.</value>
-		public bool IsContentSpace => (this.Flags & NamespaceFlags.ContentSpace) != 0;
+		public bool IsContentSpace => this.Flags.HasAnyFlag(NamespaceFlags.ContentSpace);
 
 		/// <summary>Gets a value indicating whether this namespace requires a colon to be prepended in order to create a link.</summary>
-		public bool IsForcedLinkSpace => (this.Flags & NamespaceFlags.ForcedLinkSpace) != 0;
+		public bool IsForcedLinkSpace => this.Flags.HasAnyFlag(NamespaceFlags.ForcedLinkSpace);
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><see langword="true"/> if this instance is a subject namespace; otherwise, <see langword="false"/>.</value>

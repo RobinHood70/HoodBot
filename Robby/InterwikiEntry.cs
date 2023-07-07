@@ -17,8 +17,8 @@
 		{
 			this.Site = site;
 			this.Language = item.NotNull().Language;
-			this.LocalFarm = (item.Flags & InterwikiMapFlags.Local) != 0;
-			this.LocalWiki = (item.Flags & InterwikiMapFlags.LocalInterwiki) != 0;
+			this.LocalFarm = item.Flags.HasAnyFlag(InterwikiMapFlags.Local);
+			this.LocalWiki = item.Flags.HasAnyFlag(InterwikiMapFlags.LocalInterwiki);
 			this.Path = item.Url;
 			this.Prefix = item.Prefix;
 		}

@@ -17,7 +17,7 @@
 			this.Anonymous = contributionItem.NotNull().UserId == 0;
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
-			this.Minor = (contributionItem.Flags & UserContributionFlags.Minor) != 0;
+			this.Minor = contributionItem.Flags.HasAnyFlag(UserContributionFlags.Minor);
 			this.ParentId = contributionItem.ParentId;
 			this.Text = null;
 			this.Timestamp = contributionItem.Timestamp;
@@ -28,10 +28,11 @@
 		/// <param name="revisionItem">The <see cref="RevisionItem"/>.</param>
 		protected internal Revision(RevisionItem revisionItem)
 		{
-			this.Anonymous = (revisionItem.NotNull().Flags & RevisionFlags.Anonymous) != 0;
+			ArgumentNullException.ThrowIfNull(revisionItem);
+			this.Anonymous = revisionItem.Flags.HasAnyFlag(RevisionFlags.Anonymous);
 			this.Comment = revisionItem.Comment;
 			this.Id = revisionItem.RevisionId;
-			this.Minor = (revisionItem.Flags & RevisionFlags.Minor) != 0;
+			this.Minor = revisionItem.Flags.HasAnyFlag(RevisionFlags.Minor);
 			this.ParentId = revisionItem.ParentId;
 			this.Text = revisionItem.Content;
 			this.Timestamp = revisionItem.Timestamp;

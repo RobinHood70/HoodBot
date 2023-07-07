@@ -36,16 +36,16 @@
 				case null:
 					break;
 				case PurgeItem purgeItem:
-					this.IsInvalid = (purgeItem.Flags & PurgeFlags.Invalid) != 0;
-					this.IsMissing = (purgeItem.Flags & PurgeFlags.Missing) != 0;
+					this.IsInvalid = purgeItem.Flags.HasAnyFlag(PurgeFlags.Invalid);
+					this.IsMissing = purgeItem.Flags.HasAnyFlag(PurgeFlags.Missing);
 					break;
 				case WatchItem watchItem:
 					this.IsInvalid = false;
-					this.IsMissing = (watchItem.Flags & WatchFlags.Missing) != 0;
+					this.IsMissing = watchItem.Flags.HasAnyFlag(WatchFlags.Missing);
 					break;
 				case PageItem pageItem:
-					this.IsInvalid = (pageItem.Flags & PageFlags.Invalid) != 0;
-					this.IsMissing = (pageItem.Flags & PageFlags.Missing) != 0;
+					this.IsInvalid = pageItem.Flags.HasAnyFlag(PageFlags.Invalid);
+					this.IsMissing = pageItem.Flags.HasAnyFlag(PageFlags.Missing);
 					PopulateRevisions(pageItem);
 					PopulateInfo(pageItem);
 					this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
@@ -104,8 +104,8 @@
 					this.canonicalPath = info.CanonicalUrl;
 					this.CurrentRevisionId = info.LastRevisionId;
 					this.editPath = info.EditUrl;
-					this.IsNew = (info.Flags & PageInfoFlags.New) != 0;
-					this.IsRedirect = (info.Flags & PageInfoFlags.Redirect) != 0;
+					this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
+					this.IsRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
 					this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
 					this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
 					foreach (var protItem in pageItem.Info.Protections)
@@ -313,7 +313,7 @@
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 		/// <param name="module">The module to check.</param>
 		/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>
-		public bool ModuleLoaded(PageModules module) => (this.LoadOptions.Modules & module) != 0;
+		public bool ModuleLoaded(PageModules module) => this.LoadOptions.Modules.HasAnyFlag(module);
 
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>
@@ -367,7 +367,7 @@
 				};
 
 				var retval = this.Site.AbstractionLayer.Edit(input);
-				return (retval.Flags & EditFlags.NoChange) != 0
+				return retval.Flags.HasAnyFlag(EditFlags.NoChange)
 					? ChangeStatus.NoEffect
 					: string.Equals(retval.Result, "Success", StringComparison.Ordinal)
 						? ChangeStatus.Success
@@ -400,7 +400,7 @@
 				};
 
 				var retval = this.Site.AbstractionLayer.Edit(input);
-				return (retval.Flags & EditFlags.NoChange) != 0
+				return retval.Flags.HasAnyFlag(EditFlags.NoChange)
 					? ChangeStatus.NoEffect
 					: string.Equals(retval.Result, "Success", StringComparison.Ordinal)
 						? ChangeStatus.Success

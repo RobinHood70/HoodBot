@@ -59,7 +59,7 @@
 		public override void Accept(IParameterVisitor visitor) => visitor.NotNull().Visit(this);
 
 		/// <inheritdoc/>
-		public override string ToString() => this.Name + "=" + string.Join("|", this.Values);
+		public override string ToString() => this.Name + "=" + string.Join('|', this.Values);
 		#endregion
 	}
 }

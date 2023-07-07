@@ -263,7 +263,7 @@
 
 		/// <summary>Gets the stop check methods that are valid for current state.</summary>
 		/// <value>The stop methods.</value>
-		public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) != false)
+		public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo?.Flags.HasAnyFlag(UserInfoFlags.Anonymous) != false)
 			? this.StopCheckMethods & StopCheckMethods.LoggedOut
 			: this.StopCheckMethods;
 
@@ -436,7 +436,7 @@
 				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
 				if (articleBaseIndex < 0)
 				{
-					articleBaseIndex = general.BasePage.IndexOf("/", general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
+					articleBaseIndex = general.BasePage.IndexOf('/', general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2);
 				}
 
 				path = general.BasePage[..articleBaseIndex] + path;
@@ -919,7 +919,7 @@
 		/// <remarks>No stop checking is performed on logging out.</remarks>
 		public void Logout(bool clear)
 		{
-			if (this.CurrentUserInfo is UserInfoResult userInfo && (userInfo.Flags & UserInfoFlags.Anonymous) == 0)
+			if (this.CurrentUserInfo is UserInfoResult userInfo && (!userInfo.Flags.HasAnyFlag(UserInfoFlags.Anonymous)))
 			{
 				LogoutInput input = new();
 				if (this.SiteVersion >= 134)
@@ -1315,7 +1315,7 @@
 		/// <exception cref="WikiException">Thrown when user information could not be retrieved.</exception>
 		protected virtual void DoStopCheck(UserInfoResult? userInfoResult)
 		{
-			if ((this.ValidStopCheckMethods & StopCheckMethods.Custom) != 0 && (this.CustomStopCheck?.Invoke() == true))
+			if (this.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.Custom) && (this.CustomStopCheck?.Invoke() == true))
 			{
 				throw new StopException(EveMessages.CustomStopCheckFailed);
 			}
@@ -1324,7 +1324,7 @@
 			{
 				if (userInfoResult == null)
 				{
-					Debug.Assert((this.ValidStopCheckMethods & StopCheckMethods.TalkCheckQuery) != 0, "Something's not right here, this should've been an integrated check!");
+					Debug.Assert(this.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.TalkCheckQuery), "Something's not right here, this should've been an integrated check!");
 					if (this.userTalkChecksIgnored >= this.UserCheckFrequency)
 					{
 						var input = DefaultUserInformation;
@@ -1345,7 +1345,7 @@
 
 				if (userInfoResult != null)
 				{
-					if ((this.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0
+					if (this.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.UserNameCheck)
 						&& this.SiteVersion < 128
 						&& !string.Equals(this.CurrentUserInfo?.Name, userInfoResult.Name, StringComparison.Ordinal))
 					{
@@ -1353,7 +1353,7 @@
 						throw new StopException(EveMessages.UserNameChanged);
 					}
 
-					if ((userInfoResult.Flags & UserInfoFlags.HasMessage) != 0
+					if (userInfoResult.Flags.HasAnyFlag(UserInfoFlags.HasMessage)
 						&& ((this.ValidStopCheckMethods & StopCheckMethods.TalkChecks) != StopCheckMethods.None))
 					{
 						throw new StopException(EveMessages.TalkPageChanged);

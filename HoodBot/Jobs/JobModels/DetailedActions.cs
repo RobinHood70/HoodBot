@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
+	using RobinHood70.CommonCode;
 
 	[Flags]
 	public enum ReplacementActions
@@ -30,7 +31,7 @@
 		#endregion
 
 		#region Public Methods
-		public bool HasAction(ReplacementActions action) => (this.Actions & action) != 0;
+		public bool HasAction(ReplacementActions action) => this.Actions.HasAnyFlag(action);
 
 		public void SetActionFlag(ReplacementActions actions, string reason)
 		{

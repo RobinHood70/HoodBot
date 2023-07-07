@@ -275,7 +275,7 @@
 									mergeList.Add(kvp.Name + '=' + kvp.Value);
 								}
 
-								parameterList.Add(string.Join("|", mergeList));
+								parameterList.Add(string.Join('|', mergeList));
 								break;
 							default:
 								// Nothing else should be possible, so if it happens, just send it to the debug window for now.

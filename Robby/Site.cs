@@ -752,7 +752,7 @@
 				var retval = this.AbstractionLayer.Edit(input);
 
 				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
-					? (retval.Flags & EditFlags.NoChange) == 0
+					? (!retval.Flags.HasAnyFlag(EditFlags.NoChange))
 						? ChangeStatus.Success
 						: ChangeStatus.NoEffect
 					: ChangeStatus.Failure;
@@ -1400,7 +1400,7 @@
 			var doGuess = true;
 			foreach (var item in siteInfo.InterwikiMap)
 			{
-				if ((item.Flags & InterwikiMapFlags.LocalInterwiki) != 0)
+				if (item.Flags.HasAnyFlag(InterwikiMapFlags.LocalInterwiki))
 				{
 					doGuess = false;
 					break;

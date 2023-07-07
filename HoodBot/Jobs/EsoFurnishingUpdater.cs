@@ -420,12 +420,12 @@
 
 			if (furnishing.Materials.Count > 0)
 			{
-				template.Update("materials", string.Join("~", furnishing.Materials), ParameterFormat.OnePerLine, true);
+				template.Update("materials", string.Join('~', furnishing.Materials), ParameterFormat.OnePerLine, true);
 			}
 
 			if (furnishing.Skills.Count > 0)
 			{
-				template.Update("skills", string.Join("~", furnishing.Skills), ParameterFormat.OnePerLine, true);
+				template.Update("skills", string.Join('~', furnishing.Skills), ParameterFormat.OnePerLine, true);
 			}
 
 			var bindTypeValue = template.GetValue("bindtype");

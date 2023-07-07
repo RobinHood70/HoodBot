@@ -364,7 +364,7 @@
 				("gender", npc.GenderText),
 				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
 				("reaction", npc.Reaction),
-				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficultyText : string.Empty),
+				("pickpocket", npc.PickpocketDifficulty > PickpocketDifficulty.Unknown ? npc.PickpocketDifficultyText : string.Empty),
 				("loottype", npc.LootType),
 				("faction", string.Empty)
 			};
