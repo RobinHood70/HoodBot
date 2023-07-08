@@ -316,7 +316,7 @@
 		public Page CreatePage(Title title, string text)
 		{
 			var retval = this.PageCreator.CreateEmptyPage(title);
-			retval.Text = text;
+			retval.Text = text ?? string.Empty;
 			return retval;
 		}
 
