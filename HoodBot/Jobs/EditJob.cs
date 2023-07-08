@@ -112,10 +112,11 @@
 		protected override void BeforeLogging()
 		{
 			this.BeforeLoadPages();
-			this.StatusWriteLine("Loading pages");
 			this.Pages.PageMissing += this.Pages_PageMissing;
 			this.Pages.PageLoaded += this.Pages_PageLoaded;
+			this.StatusWriteLine("Loading pages");
 			this.LoadPages();
+			this.StatusWriteLine("Finished loading");
 			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 			this.Pages.PageMissing -= this.Pages_PageMissing;
 			this.AfterLoadPages();
