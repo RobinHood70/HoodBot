@@ -308,6 +308,28 @@
 		public bool TextModified => !string.Equals(this.Text, this.CurrentRevision?.Text ?? string.Empty, StringComparison.Ordinal);
 		#endregion
 
+		#region Public Static Methods
+
+		/// <summary>Creates a new page from a <see cref="Title"/> object.</summary>
+		/// <param name="title">The title to use.</param>
+		/// <returns>A new page based on the title.</returns>
+		public static Page FromTitle(Title title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return title.Site.CreatePage(title);
+		}
+
+		/// <summary>Creates a new page from a <see cref="Title"/> object, filled with the supplied text.</summary>
+		/// <param name="title">The title to use.</param>
+		/// <param name="text">The text of the page.</param>
+		/// <returns>A new page based on the title.</returns>
+		public static Page FromTitle(Title title, string text)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return title.Site.CreatePage(title, text);
+		}
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
