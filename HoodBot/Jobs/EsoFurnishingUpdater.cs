@@ -8,6 +8,7 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -47,6 +48,11 @@
 			: base(jobManager)
 		{
 			//// jobManager.ShowDiffs = false;
+			if (this.Results is PageResultHandler pageResults)
+			{
+				var title = pageResults.Title;
+				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Furnishings");
+			}
 		}
 		#endregion
 

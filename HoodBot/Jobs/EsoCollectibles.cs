@@ -6,6 +6,7 @@
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -32,6 +33,11 @@
 			: base(jobManager)
 		{
 			this.CreateOnly = Tristate.True;
+			if (this.Results is PageResultHandler pageResults)
+			{
+				var title = pageResults.Title;
+				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Collectibles");
+			}
 		}
 		#endregion
 
