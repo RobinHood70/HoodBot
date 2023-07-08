@@ -12,7 +12,10 @@
 		public ManipulateImageCategory(JobManager jobManager)
 			: base(jobManager, JobType.ReadOnly)
 		{
-			this.Results = new PageResultHandler(this.Site, "User:Jeancey/Kah");
+			if (this.Results is PageResultHandler results)
+			{
+				results.Title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
+			}
 		}
 
 		protected override void Main()

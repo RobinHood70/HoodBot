@@ -42,7 +42,8 @@
 			if (this.resultCount == 0 && this.Results is PageResultHandler pageResults)
 			{
 				this.pageNumber++;
-				pageResults.Page = this.Site.CreatePage($"User:HoodBot/Legends Images {this.pageNumber}", string.Empty);
+				var title = pageResults.Title;
+				pageResults.Title = TitleFactory.FromValidated(title.Namespace, $"User:HoodBot/Legends Images {this.pageNumber}");
 				this.WriteLine("{| class=\"wikitable compress\"");
 			}
 

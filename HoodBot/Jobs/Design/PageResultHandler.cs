@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
-	using RobinHood70.CommonCode;
+	using System;
 	using RobinHood70.Robby;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
@@ -12,18 +12,17 @@
 		/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
 		/// <param name="site">The site the results page is on.</param>
 		/// <param name="pageName">The page name to save results to.</param>
-		public PageResultHandler(Site site, string pageName)
-			: base(site?.Culture)
+		public PageResultHandler(Title title)
+			: base(title?.Site.Culture)
 		{
-			site.ThrowNull();
-			pageName.ThrowNull();
-			this.Page = site.CreatePage(pageName, string.Empty);
-			this.DefaultText = this.ResourceManager.GetString("Results", site.Culture);
+			ArgumentNullException.ThrowIfNull(title);
+			this.Title = title;
+			this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);
 		}
 		#endregion
 
 		#region Public Properties
-		public Page Page { get; set; }
+		public Title Title { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -35,8 +34,8 @@
 				this.StringBuilder.ToString().Trim() is var text &&
 				text.Length > 0)
 			{
-				this.Page.Text = text;
-				this.Page.Save(this.Description, false);
+				var page = Page.FromTitle(this.Title, text);
+				page.Save(this.Description, false);
 			}
 		}
 		#endregion

@@ -63,15 +63,13 @@
 		public EsoSkills(JobManager jobManager)
 			: base(jobManager)
 		{
+			//// this.JobManager.ShowDiffs = false;
+			this.MinorEdit = false;
 			if (this.Results is PageResultHandler pageResults)
 			{
-				var oldPage = pageResults.Page;
-				var newPage = TitleFactory.FromValidated(oldPage.Namespace, oldPage.PageName + "/ESO Skills");
-				pageResults.Page = this.Site.CreatePage(newPage);
+				var title = pageResults.Title;
+				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Skills");
 			}
-
-			this.MinorEdit = false;
-			this.JobManager.ShowDiffs = true;
 		}
 		#endregion
 
@@ -98,8 +96,8 @@
 				prevVersion = new EsoVersion(this.version.Version - 1, false);
 			}
 
-			this.skills = GetSkillList(prevVersion);
-			var prevSkills = GetSkillList(null);
+			var prevSkills = GetSkillList(prevVersion);
+			this.skills = GetSkillList(null);
 			foreach (var (key, skill) in this.skills)
 			{
 				if (prevSkills.TryGetValue(key, out var prevSkill))

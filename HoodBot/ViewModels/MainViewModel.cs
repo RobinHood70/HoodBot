@@ -19,6 +19,7 @@
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	public class MainViewModel : ObservableRecipient
 	{
@@ -243,7 +244,7 @@
 					: new PageJobLogger(jobManager.Site, wikiInfo.LogPage);
 				jobManager.ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
 					? null
-					: new PageResultHandler(jobManager.Site, wikiInfo.ResultsPage);
+					: new PageResultHandler(TitleFactory.FromUnvalidated(jobManager.Site, wikiInfo.ResultsPage));
 				var allJobsTimer = Stopwatch.StartNew();
 				await jobManager.Run(jobList).ConfigureAwait(true);
 				this.StatusWrite($"Total time for last run: {FormatTimeSpan(allJobsTimer.Elapsed)}{Environment.NewLine}");
