@@ -107,8 +107,8 @@
 
 			if (parser.FindSiteTemplate(TemplateName) is SiteTemplateNode template)
 			{
-				template.Update("collectibletype", CategorySingular(collectible.Category));
-				template.Update("type", CategorySingular(collectible.Subcategory));
+				template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
+				template.Update("type", CategorySingular(collectible.Type));
 				template.UpdateIfEmpty("image", $"<!--{collectible.ImageName}-->");
 				template.UpdateIfEmpty("icon", $"<!--{collectible.IconName}-->");
 				template.Update("id", collectible.Id.ToStringInvariant());
@@ -205,7 +205,7 @@
 				var titleText = item.Name;
 				if (dupeNames.Contains(item.Name))
 				{
-					var cat = item.Subcategory.Length == 0 ? item.Category : item.Subcategory;
+					var cat = item.Type.Length == 0 ? item.CollectibleType : item.Type;
 					titleText += $" ({cat})";
 				}
 
@@ -282,15 +282,19 @@
 					: (string)row["name"];
 				this.NickName = (string)row["nickname"];
 				this.Description = (string)row["description"];
-				this.Category = (string)row["categoryName"];
-				this.Subcategory = (string)row["subCategoryName"];
-				var catSingular = CategorySingular(this.Category);
-				var subcatSingular = CategorySingular(this.Subcategory);
-				var fileCategory = catSingular switch
+				this.CollectibleType = (string)row["categoryName"];
+				this.Type = (string)row["subCategoryName"];
+				var colTypeSingular = CategorySingular(this.CollectibleType);
+				var typeSingular = CategorySingular(this.Type);
+				var fileCategory = colTypeSingular switch
 				{
-					"Appearance" => string.Equals(subcatSingular, "Hair Style", StringComparison.Ordinal) ? "hairstyle" : CategorySingular(subcatSingular),
-					"Memento" or "Mount" or "Pet" => catSingular,
-					_ => subcatSingular
+					"Appearance" => string.Equals(typeSingular, "Hair Style", StringComparison.Ordinal)
+						? "hairstyle"
+						: typeSingular,
+					"Customized Action" => "Action",
+					"Tool" => "Memento",
+					"Ally" or "Memento" or "Mount" or "Pet" => colTypeSingular,
+					_ => typeSingular
 				};
 
 				fileCategory = fileCategory.ToLowerInvariant();
@@ -316,7 +320,7 @@
 			#endregion
 
 			#region Public Properties
-			public string Category { get; }
+			public string CollectibleType { get; }
 
 			public List<string> Crates { get; } = new List<string>();
 
@@ -334,7 +338,7 @@
 
 			public string NickName { get; }
 
-			public string Subcategory { get; }
+			public string Type { get; }
 
 			public string? Tier { get; }
 			#endregion
