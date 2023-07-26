@@ -14,7 +14,7 @@
 			this.MoveAction = MoveAction.MoveSafely;
 			this.FollowUpActions = FollowUpActions.Default;
 			this.EditSummaryEditMovedPage = "Fix page name case";
-			// this.Site.WaitForJobQueue();
+			this.Site.WaitForJobQueue();
 		}
 		#endregion
 
