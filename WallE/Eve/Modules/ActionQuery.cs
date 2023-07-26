@@ -201,7 +201,7 @@
 
 		private void ParseResponse(string? response)
 		{
-			if (response is null)
+			if (string.IsNullOrWhiteSpace(response))
 			{
 				throw new InvalidDataException();
 			}
