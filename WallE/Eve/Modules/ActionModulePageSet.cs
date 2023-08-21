@@ -184,10 +184,6 @@ namespace RobinHood70.WallE.Eve.Modules
 					{
 						this.DeserializeResult(node, pages);
 					}
-					else
-					{
-						throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
-					}
 				}
 				else if (result is not JArray array || array.Count != 0)
 				{
