@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Clients
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Net;
 	using System.Net.Http;
@@ -26,29 +27,28 @@ namespace RobinHood70.WallE.Clients
 
 		#region Constructors
 		public SimpleClient(CancellationToken cancellationToken)
-			: this(null, null, cancellationToken)
+			: this(null, null, null, cancellationToken)
 		{
 		}
 
 		public SimpleClient(string cookiesLocation, CancellationToken cancellationToken)
-			: this(null, cookiesLocation, cancellationToken)
+			: this(null, cookiesLocation, null, cancellationToken)
 		{
 		}
 
-		public SimpleClient(string? contactInfo, string? cookiesLocation, CancellationToken cancellationToken)
+		public SimpleClient(string? contactInfo, string? cookiesLocation, ICredentials? credentials, CancellationToken cancellationToken)
 		{
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
 			this.cookiesLocation = cookiesLocation;
 			this.LoadCookies();
 			this.cancellationToken = cancellationToken;
-
-			// See http://stackoverflow.com/questions/8739065/using-object-initializer-generates-ca-2000-warning for why we're not using an object initializer.
 			this.webHandler = new()
 			{
 				AllowAutoRedirect = true,
 				AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
 				CookieContainer = this.cookieContainer,
+				Credentials = credentials,
 				UseCookies = true,
 			};
 			this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
@@ -81,6 +81,16 @@ namespace RobinHood70.WallE.Clients
 		#endregion
 
 		#region Public Methods
+		public void ClearCookies(Uri? uri)
+		{
+			var cookies = uri is null
+				? this.cookieContainer.GetAllCookies()
+				: this.cookieContainer.GetCookies(uri);
+			foreach (var cookie in cookies as IEnumerable<Cookie>)
+			{
+				cookie.Expires = DateTime.Now.Subtract(TimeSpan.FromDays(1));
+			}
+		}
 
 		public void Dispose()
 		{
