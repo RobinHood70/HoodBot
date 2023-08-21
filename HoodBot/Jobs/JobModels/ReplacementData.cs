@@ -61,7 +61,6 @@
 			["Hireling - Enchanting"] = "Hireling (Enchanting)",
 			["Hireling - Provisioning"] = "Hireling (Provisioning)",
 			["Ruination"] = "Ruination (skill)",
-			["Skeletal Mage"] = "Skeletal Mage (skill)",
 			["Spectral Assassin"] = "Spectral Assassin (skill)",
 			["Unstoppable"] = "Unstoppable (skill)",
 			["Woodworking"] = "Woodworking (skill)",
