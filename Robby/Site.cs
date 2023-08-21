@@ -435,7 +435,6 @@
 		/// <returns>The text of the page.</returns>
 		public Page? LoadPage(Title title)
 		{
-			ArgumentNullException.ThrowIfNull(title);
 			var pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title);
 			return pages.Count == 1 ? pages[0] : null;
@@ -447,7 +446,6 @@
 		/// <returns>The text of the page.</returns>
 		public Page? LoadPage(Title title, string subPageName)
 		{
-			ArgumentNullException.ThrowIfNull(title);
 			var titleName = title.PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
@@ -473,7 +471,6 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(Title title)
 		{
-			ArgumentNullException.ThrowIfNull(title);
 			var pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title);
 			return pages.Count == 1 ? pages[0].Text : null;
@@ -1189,11 +1186,7 @@
 		/// <summary>Removes invalid characters from the title's PageName and replaces quote-like characters with quotes.</summary>
 		/// <param name="title">The title to sanitize.</param>
 		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
-		public virtual Title SanitizeTitle(Title title)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
-		}
+		public virtual Title SanitizeTitle(Title title) => TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
 		#endregion
 
 		#region Protected Static Methods

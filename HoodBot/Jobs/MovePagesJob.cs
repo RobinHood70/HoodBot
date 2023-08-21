@@ -471,7 +471,7 @@
 				(from.ForcedNamespaceLink ||
 				from.Title.Namespace != MediaWikiNamespaces.Category ||
 				to.Title.Namespace != from.Title.Namespace ||
-				(this.FollowUpActions & FollowUpActions.UpdateCategoryMembers) != 0)
+				this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
 					? to
 					: null;
 

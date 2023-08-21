@@ -15,7 +15,7 @@
 			this.site = site;
 		}
 
-		public override Title ReadJson(JsonReader reader, Type objectType, Title? existingValue, bool hasExistingValue, JsonSerializer serializer)
+		public override Title ReadJson(JsonReader reader, Type objectType, Title existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			var title = (string)reader
 				.NotNull()
@@ -24,6 +24,6 @@
 			return TitleFactory.FromUnvalidated(this.site, title);
 		}
 
-		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.NotNull().FullPageName);
+		public override void WriteJson(JsonWriter writer, Title value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.FullPageName());
 	}
 }

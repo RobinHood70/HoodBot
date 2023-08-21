@@ -6,6 +6,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
+
 	/// <summary>A collection of Title objects.</summary>
 	public class TitleCollection : TitleData<ITitle>, IMessageSource
 	{
