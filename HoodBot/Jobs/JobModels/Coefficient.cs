@@ -114,42 +114,48 @@
 		#region Private Methods
 		private string BitFieldDamage()
 		{
-			int CappedStat()
+			float CappedStat()
 			{
-				var value = (int)Math.Round(this.A * Stat);
-				var maxValue = (int)Math.Round(this.B * Health);
+				var value = this.A * Stat;
+				var maxValue = this.B * Health;
 				return value > maxValue ? maxValue : value;
 			}
 
+			string ToText(float result) => ((int)Math.Round(result)).ToStringInvariant();
+
+			var resultList = new List<string>();
 			switch (this.Mechanic)
 			{
 				case 0: // Old Magicka
 				case 6: // Old Stamina
 				case 10: // Old Ultimate
-					var value = (int)Math.Round(this.A * Stat);
-					var maxValue = (int)Math.Round(this.B * Health);
+					var value = this.A * Stat;
+					var maxValue = this.B * Health;
 					//// Debug.WriteLine("Old stamina/ultimate (mechanic = 0/6/10) used!");
-					return (value > maxValue ? maxValue : value).ToStringInvariant();
-			}
+					resultList.Add(ToText(value > maxValue ? maxValue : value));
+					break;
+				default:
+					var mechanicFlags = (MechanicTypes)this.Mechanic;
+					foreach (var mechanicType in mechanicFlags.GetUniqueFlags())
+					{
+						var result = mechanicType switch
+						{
+							MechanicTypes.None => throw new InvalidOperationException("No bits were set."),
+							MechanicTypes.Magicka => this.A * Stat,
+							MechanicTypes.Werewolf => this.A * Damage, // Werewolf
+							MechanicTypes.Stamina => this.A * Stat,
+							MechanicTypes.Ultimate => CappedStat(),
+							MechanicTypes.MountStamina => 0, // Mount Stamina
+							MechanicTypes.Health =>
+								this.A * Health + this.C,
+							MechanicTypes.Daedric => 0, // Daedric
+							_ => throw new InvalidOperationException("A bit was specified that has no current value."),
+						};
 
-			var resultList = new List<string>();
-			var mechanicFlags = (MechanicTypes)this.Mechanic;
-			foreach (var mechanicType in mechanicFlags.GetUniqueFlags())
-			{
-				var result = mechanicType switch
-				{
-					MechanicTypes.None => throw new InvalidOperationException("No bits were set."),
-					MechanicTypes.Magicka => ((int)Math.Round(this.A * Stat)).ToStringInvariant(),
-					MechanicTypes.Werewolf => ((int)Math.Round(this.A * Damage)).ToStringInvariant(), // Werewolf
-					MechanicTypes.Stamina => ((int)Math.Round(this.A * Stat)).ToStringInvariant(),
-					MechanicTypes.Ultimate => CappedStat().ToStringInvariant(),
-					MechanicTypes.MountStamina => "0", // Mount Stamina
-					MechanicTypes.Health =>
-						((int)Math.Round(this.A * Health + this.C)).ToStringInvariant(),
-					MechanicTypes.Daedric => "0", // Daedric
-					_ => throw new InvalidOperationException("A bit was specified that has no current value."),
-				};
-				resultList.Add(result);
+						resultList.Add(ToText(result));
+					}
+
+					break;
 			}
 
 			return string.Join(", ", resultList);

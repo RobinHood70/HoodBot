@@ -9,7 +9,10 @@
 	internal class Rank
 	{
 		#region Static Fields
-		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, Globals.DefaultRegexTimeout);
+		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
+		private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
 		#endregion
 
 		#region Constructors
@@ -19,18 +22,15 @@
 			this.Id = (int)row["id"];
 			this.RankNum = (sbyte)row["rank"];
 
-			var description = (string)row["coefDescription"];
-			if (string.IsNullOrWhiteSpace(description))
-			{
-				description = (string)row["description"];
-			}
-
+			var leadText = LeadText.Match((string)row["coefDescription"]);
+			var description = leadText.Value + (string)row["description"];
 			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
 			{
 				description = description.Replace(partial.From, partial.To, StringComparison.Ordinal);
 			}
 
-			this.Description = HarmonizeDescription(description);
+			description = BonusFinder.Replace(description, string.Empty);
+			this.Description = RegexLibrary.WhitespaceToSpace(description);
 			this.Id = (int)row["id"];
 			this.Coefficients = Coefficient.GetCoefficientList(row);
 		}
@@ -44,10 +44,6 @@
 		public int Id { get; }
 
 		public sbyte RankNum { get; }
-		#endregion
-
-		#region Public Sttic Methods
-		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 		#endregion
 
 		#region Public Methods
