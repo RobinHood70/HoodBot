@@ -15,7 +15,9 @@
 			this.Title1 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template1);
 			this.Title2 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template2);
 		}
+		#endregion
 
+		#region Public Properties
 		public Title Title1 { get; }
 
 		public Title Title2 { get; }
@@ -25,7 +27,7 @@
 		protected override void Main()
 		{
 			var pages = PageCollection.Unlimited(this.Site, PageModules.Templates, true);
-			pages.GetBacklinks(this.Title1.FullPageName);
+			pages.GetBacklinks(this.Title1.FullPageName());
 			foreach (var page in pages)
 			{
 				var titles = new TitleCollection(this.Site, page.Templates);

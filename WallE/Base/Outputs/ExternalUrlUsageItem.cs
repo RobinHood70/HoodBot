@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal ExternalUrlUsageItem(int? ns, string? title, long pageId, string? url)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Url = url;
 		}
@@ -21,13 +21,13 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public string? Url { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? this.Url ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? this.Url ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

@@ -41,7 +41,7 @@
 			TitleCollection allTitles = new(this.Site);
 			foreach (var page in furnishingFiles)
 			{
-				allTitles.Add(PageFromFile(page));
+				allTitles.Add(PageFromFile(page.Title));
 			}
 
 			var allPages = PageCollection.Unlimited(this.Site);
@@ -68,7 +68,7 @@
 			parser.ThrowNull();
 			parser.Page.PropertyThrowNull(nameof(parser));
 			List<string> pageIssues = new();
-			if (!parser.Page.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+			if (!parser.Page.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");
 			}
@@ -78,7 +78,7 @@
 				pageIssues.Add("does not have a Furnishing Summary");
 			}
 
-			var title = PageFromFile(parser.Page);
+			var title = PageFromFile(parser.Page.Title);
 			if (this.existingPages!.Contains(title))
 			{
 				pageIssues.Add($"page exists: {title.AsLink(LinkFormat.LabelName)}");
@@ -101,7 +101,7 @@
 				pageName = pageName[..extension];
 			}
 
-			return TitleFactory.FromUnvalidated(page.Namespace.Site[UespNamespaces.Online], pageName);
+			return TitleFactory.FromUnvalidated(page.Site[UespNamespaces.Online], pageName);
 		}
 		#endregion
 	}

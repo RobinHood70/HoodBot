@@ -51,7 +51,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var idPageName = page.PageName.Replace(" (mount)", string.Empty, StringComparison.Ordinal);
+			var idPageName = page.Title.PageName.Replace(" (mount)", string.Empty, StringComparison.Ordinal);
 			if (this.ids.TryGetValue(idPageName, out var id))
 			{
 				this.ids.Remove(idPageName);

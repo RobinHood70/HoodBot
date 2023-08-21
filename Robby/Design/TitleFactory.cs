@@ -6,8 +6,12 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public sealed class TitleFactory : ILinkTitle, IFullTitle
+	public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	{
+		#region Private Fields
+		private Title? title;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
@@ -54,8 +58,8 @@
 					if (remaining.Length == 0 && site.MainPage is FullTitle mp)
 					{
 						this.Interwiki = mp.Interwiki ?? iw;
-						this.Namespace = mp.Namespace;
-						pageName = mp.PageName;
+						this.Namespace = mp.Title.Namespace;
+						pageName = mp.Title.PageName;
 						this.Fragment = mp.Fragment;
 						isMainPage = true;
 					}
@@ -113,9 +117,10 @@
 
 		private TitleFactory(Namespace ns, string pageName)
 		{
-			// Shortcut constructor for times when a pre-validated, local page is be provided.
+			// Shortcut constructor for times when a pre-validated, local page is provided. Capitalization is also handled for semi-validated cases, such as modifications to an existing pagename or other known-good cases.
 			this.Namespace = ns;
 
+			pageName = ns.CapitalizePageName(pageName);
 			var split = pageName.Split(TextArrays.Octothorpe, 2);
 			if (split.Length == 2)
 			{
@@ -143,7 +148,7 @@
 
 		/// <summary>Gets the full page name of a title.</summary>
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
-		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
+		public string FullPageName => this.Namespace.DecoratedName() + this.PageName;
 
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
@@ -152,7 +157,8 @@
 		/// <summary>Gets a value indicating whether this object represents the local wiki (either via being a direct link or local interwiki link.</summary>
 		public bool IsLocal => this.Interwiki?.LocalWiki != false;
 
-		/// <inheritdoc/>
+		/// <summary>Gets the namespace object for the title.</summary>
+		/// <value>The namespace.</value>
 		public Namespace Namespace { get; }
 
 		/// <summary>Gets a value indicating whether the namespace is displayed as part of the name.</summary>
@@ -160,8 +166,12 @@
 		/// <remarks>This value will be false for Main space links without a leading colon, Template calls (unless they actually specify <c>Template:</c>), and any gallery links that don't specify <c>File:</c>.</remarks>
 		public bool NamespaceVisible { get; }
 
-		/// <inheritdoc/>
+		/// <summary>Gets the name of the page without the namespace.</summary>
+		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; }
+
+		/// <inheritdoc/>
+		public Title Title => this.title ??= new Title(this.Namespace, this.PageName);
 		#endregion
 
 		#region Public Implicit Operators
@@ -170,13 +180,17 @@
 		/// <param name="factory">The value to convert.</param>
 		public static implicit operator FullTitle(TitleFactory factory) => new((IFullTitle)factory);
 
+		/// <summary>Implicit conversion to <see cref="Robby.Title"/>.</summary>
+		/// <param name="factory">The value to convert.</param>
+		public static implicit operator Title(TitleFactory factory)
+		{
+			ArgumentNullException.ThrowIfNull(factory);
+			return new(factory.Namespace, factory.PageName);
+		}
+
 		/// <summary>Implicit conversion to <see cref="FullTitle"/>.</summary>
 		/// <param name="factory">The value to convert.</param>
 		public static implicit operator SiteLink(TitleFactory factory) => new((ILinkTitle)factory);
-
-		/// <summary>Implicit conversion to <see cref="Title"/>.</summary>
-		/// <param name="factory">The value to convert.</param>
-		public static implicit operator Title(TitleFactory factory) => new(factory);
 		#endregion
 
 		#region Public Static Methods
@@ -222,13 +236,11 @@
 
 		#region Public Methods
 
-		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
-		/// <param name="other">The object to compare to.</param>
-		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
-		public bool SimpleEquals(Title? other) =>
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => new SiteLink((ILinkTitle)this).AsLink(linkFormat);
+
+		/// <inheritdoc/>
+		public string LinkName() => new SiteLink((ILinkTitle)this).AsLink();
 		#endregion
 
 		#region Public Override Methods
@@ -247,15 +259,15 @@
 
 		/// <summary>Converts the current title to a <see cref="FullTitle"/>.</summary>
 		/// <returns>A new FullTitle with the relevant properties set.</returns>
-		public FullTitle ToFullTitle() => new((IFullTitle)this);
+		public FullTitle ToFullTitle() => (FullTitle)this;
 
 		/// <summary>Converts the current title to a <see cref="SiteLink"/>.</summary>
 		/// <returns>A new SiteLink with the relevant properties set.</returns>
-		public SiteLink ToSiteLink() => new((ILinkTitle)this);
+		public SiteLink ToSiteLink() => (SiteLink)this;
 
-		/// <summary>Converts the current title to a <see cref="Title"/>.</summary>
-		/// <returns>A new Title with the relevant properties set.</returns>
-		public Title ToTitle() => new(this);
+		/// <summary>Converts the current title to a <see cref="Robby.Title"/>.</summary>
+		/// <returns>A new SiteLink with the relevant properties set.</returns>
+		public Title ToTitle() => (Title)this;
 		#endregion
 	}
 }

@@ -19,14 +19,14 @@
 		#region Fields
 		private readonly Site site;
 		private readonly List<ParameterReplacer> generalReplacers = new();
-		private readonly IReadOnlyDictionary<Title, Title> globalUpdates;
-		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
+		private readonly IReadOnlyDictionary<Title, ITitle> globalUpdates;
+		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = new();
 		private UespNamespaceList? nsList;
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
-		internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, Title> linkUpdates)
+		internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, ITitle> linkUpdates)
 		{
 			this.site = site.NotNull();
 			this.globalUpdates = linkUpdates.NotNull();
@@ -109,7 +109,7 @@
 		#region Protected Methods
 		protected void BasicNpc(Page page, SiteTemplateNode template)
 		{
-			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
+			if (this.NamespaceList.FromTitle(page.Title) is UespNamespace nsPage)
 			{
 				this.PageNameReplace(nsPage.Parent, template.Find("race"));
 			}
@@ -125,7 +125,7 @@
 			}
 
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(page, nsParam?.Value.ToValue()) is not UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(page.Title, nsParam?.Value.ToValue()) is not UespNamespace oldNs)
 			{
 				return;
 			}
@@ -138,8 +138,8 @@
 			}
 
 			link.Value.Clear();
-			link.SetValue(toTitle.PageName, ParameterFormat.Copy);
-			if (this.NamespaceList.FromTitle(new Title(toTitle)) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
+			link.SetValue(toTitle.Title.PageName, ParameterFormat.Copy);
+			if (this.NamespaceList.FromTitle(toTitle.Title) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -153,7 +153,7 @@
 				nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
 			}
 
-			if (toTitle.SimpleEquals(newNs.MainPage))
+			if (toTitle.Title == newNs.MainPage)
 			{
 				template.Add("altname", oldTitle);
 			}
@@ -183,7 +183,7 @@
 
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
 
-		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Namespace, template.Find("icon"));
+		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Title.Namespace, template.Find("icon"));
 
 		protected void GenericImage(Page page, SiteTemplateNode template)
 		{
@@ -194,13 +194,13 @@
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(page, nsParam?.Value.ToValue()) is UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(page.Title, nsParam?.Value.ToValue()) is UespNamespace oldNs)
 			{
 				var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
 				var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
 				if (this.globalUpdates.TryGetValue(title, out var toTitle))
 				{
-					var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.PageName);
+					var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.Title.PageName);
 					if (template.Find(1) is IParameterNode param1 &&
 						template.Find(2) is IParameterNode param2)
 					{
@@ -229,13 +229,13 @@
 
 		protected void NpcSummary(Page page, SiteTemplateNode template)
 		{
-			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
+			if (this.NamespaceList.FromTitle(page.Title) is UespNamespace nsPage)
 			{
 				this.PageNameReplace(nsPage.Parent, template.Find("race"));
 			}
 		}
 
-		protected void PageNameFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Namespace, template.Find(1));
+		protected void PageNameFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Title.Namespace, template.Find(1));
 		#endregion
 
 		#region Private Methods
@@ -246,7 +246,7 @@
 				&& TitleFactory.FromUnvalidated(page.Site, param.Value.ToValue()) is var from
 				&& this.globalUpdates.TryGetValue(from, out var to))
 			{
-				param.SetValue(to.Namespace.DecoratedName + to.PageName, ParameterFormat.Copy);
+				param.SetValue(to.Title.Namespace.DecoratedName() + to.Title.PageName, ParameterFormat.Copy);
 			}
 		}
 
@@ -286,11 +286,10 @@
 		{
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
-				if ((Title)TitleFactory.FromUnvalidated(page.Namespace, param.Value.ToValue()) is var from
-					&& this.globalUpdates.TryGetValue(from, out var to)
-					&& from.Namespace.Id == to.Namespace.Id)
+				Title from = TitleFactory.FromUnvalidated(page.Title.Namespace, param.Value.ToValue());
+				if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Title.Namespace)
 				{
-					param.SetValue(to.PageName, ParameterFormat.Copy);
+					param.SetValue(to.Title.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
@@ -303,9 +302,9 @@
 			if (param != null)
 			{
 				if (this.globalUpdates.TryGetValue(TitleFactory.FromUnvalidated(ns, param.Value.ToValue().Trim()), out var target) &&
-					target.Namespace == ns)
+					target.Title.Namespace == ns)
 				{
-					param.SetValue(target.PageName, ParameterFormat.Copy);
+					param.SetValue(target.Title.PageName, ParameterFormat.Copy);
 				}
 			}
 		}

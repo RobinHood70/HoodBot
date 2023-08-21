@@ -18,10 +18,10 @@
 			: base(contribution)
 		{
 			contribution.ThrowNull();
-			contribution.FullPageName.PropertyThrowNull(nameof(contribution));
-			this.Title = TitleFactory.CoValidate(site, contribution.Namespace, contribution.FullPageName);
+			this.Title = TitleFactory.CoValidate(site, contribution.Namespace, contribution.Title ?? string.Empty);
 			this.New = contribution.Flags.HasAnyFlag(UserContributionFlags.New);
 			this.Patrolled = contribution.Flags.HasAnyFlag(UserContributionFlags.Patrolled);
+			contribution.Title.PropertyThrowNull(nameof(contribution));
 			this.NewSize = contribution.Size;
 			this.OldSize = contribution.Size - contribution.SizeDifference;
 			this.Tags = contribution.Tags;

@@ -106,7 +106,7 @@
 
 		private void AddTemplate(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser, SiteTemplateNode template)
 		{
-			templates.Add((parser.Page, template));
+			templates.Add((parser.Page.Title, template));
 			foreach (var (name, _) in template.GetResolvedParameters())
 			{
 				if (paramTranslator.TryAdd(name, name))
@@ -166,7 +166,7 @@
 
 			foreach (var template in results)
 			{
-				var row = csvFile.Add(template.Page.FullPageName, template.Template.GetTitleText());
+				var row = csvFile.Add(template.Page.FullPageName(), template.Template.GetTitleText());
 				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.

@@ -201,7 +201,7 @@
 
 		protected override void PageMissing(Page page)
 		{
-			var quest = this.quests[page];
+			var quest = this.quests[page.Title];
 			SortedSet<string> locs = new(StringComparer.Ordinal);
 			var mergedStages = this.MergeStages(quest, locs);
 			var journalEntries = GetJournalEntries(mergedStages);
@@ -394,25 +394,25 @@
 		#endregion
 
 		#region Private Methods
-		private Dictionary<Title, QuestData> BuildQuestInfo(PageCollection questPages, List<QuestData> allQuests, PageCollection disambigs)
+		private List<(Title Title, QuestData QuestData)> BuildQuestInfo(PageCollection existing, List<QuestData> allQuests, PageCollection disambigs)
 		{
-			var ignoredQuests = new Dictionary<Title, QuestData>();
+			var ignoredQuests = new List<(Title, QuestData)>();
 			for (var i = allQuests.Count - 1; i >= 0; i--)
 			{
 				var quest = allQuests[i];
 				var questTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], quest.Name);
-				var add = true;
 				if (disambigs.GetMapped(questTitle) is not Page checkPage)
 				{
 					continue;
 				}
 
-				if (checkPage.IsRedirect || checkPage.IsDisambiguation == true)
+				var add = !existing.Contains(questTitle) && !existing.Contains(checkPage);
+				if (add && (checkPage.IsRedirect || checkPage.IsDisambiguation == true))
 				{
 					foreach (var link in checkPage.Links)
 					{
 						if (link.Namespace == UespNamespaces.Online &&
-							questPages.Contains(link, SimpleTitleComparer.Instance))
+							existing.Contains(link))
 						{
 							add = false;
 							break;
@@ -423,12 +423,12 @@
 				if (add)
 				{
 					var titleName = checkPage.Exists
-						? checkPage.FullPageName + " (quest)"
-						: checkPage.FullPageName;
+						? checkPage.Title.FullPageName() + " (quest)"
+						: checkPage.Title.FullPageName();
 					var title = (Title)TitleFactory.FromUnvalidated(this.Site, titleName);
 					if (!this.quests.TryAdd(title, quest))
 					{
-						ignoredQuests.Add(title, quest);
+						ignoredQuests.Add((title, quest));
 					}
 				}
 			}
@@ -538,14 +538,14 @@
 			return mergedStages;
 		}
 
-		private void ReportIgnoredQuests(Dictionary<Title, QuestData> ignoredQuests)
+		private void ReportIgnoredQuests(List<(Title Title, QuestData QuestData)> ignoredQuests)
 		{
 			if (ignoredQuests.Count > 0)
 			{
 				this.WriteLine("The following quests were ignored because there is an existing, identically named quest which is assumed to be the parent quest. Information may need to be moved to the correct page by hand or the quest may need separate pages created to allow for faction or region differences.");
-				foreach (var quest in ignoredQuests)
+				foreach (var (title, questData) in ignoredQuests)
 				{
-					this.WriteLine($"* {quest.Key.AsLink()} (Log: [http://esolog.uesp.net/viewlog.php?action=view&record=uniqueQuest&id={quest.Value.Id} {quest.Value}])");
+					this.WriteLine($"* {title.AsLink()} (Log: [http://esolog.uesp.net/viewlog.php?action=view&record=uniqueQuest&id={questData.Id} {questData}])");
 				}
 			}
 		}

@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		internal PageSetRedirectItem(string title, string? fragment, string? interwiki, IReadOnlyDictionary<string, object> generatorInfo)
 		{
-			this.FullPageName = title;
+			this.Title = title;
 			this.Fragment = fragment;
 			this.Interwiki = interwiki;
 			this.GeneratorInfo = generatorInfo;
@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string? Fragment { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 
 		// Sample query to get generator info: https://en.wikipedia.org/w/api.php?action=query&generator=prefixsearch&gpssearch=allsta&gpslimit=500&redirects
 		public IReadOnlyDictionary<string, object> GeneratorInfo { get; }
@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Base
 					.Append(':');
 			}
 
-			target.Append(this.FullPageName ?? string.Empty);
+			target.Append(this.Title ?? string.Empty);
 			if (this.Fragment is not null)
 			{
 				target

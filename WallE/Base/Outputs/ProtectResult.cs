@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal ProtectResult(int ns, string title, string reason, bool cascade, IReadOnlyList<ProtectResultItem> protections)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.Reason = reason;
 			this.Cascade = cascade;
 			this.Protections = protections;
@@ -26,11 +26,11 @@ namespace RobinHood70.WallE.Base
 
 		public string Reason { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

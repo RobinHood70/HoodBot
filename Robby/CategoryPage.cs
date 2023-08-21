@@ -17,12 +17,14 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		internal CategoryPage(Title title, PageLoadOptions options, IApiTitle? apiItem)
+		internal CategoryPage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title, options, apiItem)
 		{
-			if (title.Namespace.Id != MediaWikiNamespaces.Category)
+			if (title.Title.Namespace.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name))
+				throw new ArgumentException(
+					Globals.CurrentCulture(Resources.NamespaceMustBe, this.Title.Site[MediaWikiNamespaces.Category].Name),
+					nameof(title))
 				;
 			}
 

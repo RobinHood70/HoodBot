@@ -118,7 +118,7 @@
 				if (!page.Exists)
 				{
 					page.Text = isMaterial
-						? $"#REDIRECT [[Blades:{page.PageName[9..]}]] [[Category:Redirects from Alternate Names]]"
+						? $"#REDIRECT [[Blades:{page.Title.PageName[9..]}]] [[Category:Redirects from Alternate Names]]"
 						: string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}");
 
 					this.Pages.Add(page);

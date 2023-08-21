@@ -3,6 +3,6 @@ namespace RobinHood70.WikiCommon
 {
 	public interface IApiTitle
 	{
-		string FullPageName { get; }
+		string Title { get; }
 	}
 }

@@ -97,7 +97,7 @@
 			this.WriteLine("| " + image);
 			foreach (var entry in galleryEntries)
 			{
-				this.WriteLine($"| [[{entry.FullPageName}|upright=0.5|thumb|{entry.Text ?? "''No description''"}]]");
+				this.WriteLine($"| [[{entry.Title.FullPageName()}|upright=0.5|thumb|{entry.Text ?? "''No description''"}]]");
 			}
 
 			this.resultCount++;

@@ -7,15 +7,17 @@
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>
-	public class RecentChange
+	public class RecentChange : ITitle
 	{
+		#region Constructors
+
 		/// <summary>Initializes a new instance of the <see cref="RecentChange"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
 			recentChange.ThrowNull();
-			this.Title = TitleFactory.CoValidate(site, recentChange.Namespace, recentChange.FullPageName);
+			this.Title = TitleFactory.CoValidate(site, recentChange.Namespace, recentChange.Title);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;
@@ -31,6 +33,7 @@
 			this.Timestamp = recentChange.Timestamp ?? DateTime.MinValue;
 			this.User = recentChange.User == null ? null : new User(site, recentChange.User);
 		}
+		#endregion
 
 		#region Public Properties
 
@@ -93,6 +96,15 @@
 		/// <summary>Gets the user who made the change.</summary>
 		/// <value>The user who made the change.</value>
 		public User? User { get; }
+		#endregion
+
+		#region Public Methods
+
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
+
+		/// <inheritdoc/>
+		public string LinkName() => this.Title.LinkName();
 		#endregion
 	}
 }

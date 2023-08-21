@@ -77,7 +77,7 @@
 				.Append("Watch for ")
 				.Append(warningType)
 				.Append(" on ")
-				.AppendLine(newPage.Page.FullPageName)
+				.AppendLine(newPage.Page.Title.FullPageName())
 				.Append(warningType.UpperFirst(newPage.Site.Culture))
 				.Append(": ");
 			foreach (var link in titles)
@@ -104,12 +104,12 @@
 			{
 				var jobSite = job.Site;
 				job.StatusWriteLine("Parsing replacements");
-				if (jobSite.User is not Title user)
+				if (jobSite.User is not User user)
 				{
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacements = jobSite.LoadPageText(user, "/ESO Replacements");
+				var replacements = jobSite.LoadPageText(user.Title, "/ESO Replacements");
 				if (string.IsNullOrEmpty(replacements))
 				{
 					throw new InvalidOperationException("Replacements page not found or empty!");
@@ -308,17 +308,17 @@
 
 		public ICollection<Title> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<Title> oldLinks = new(SimpleTitleComparer.Instance);
+			HashSet<Title> oldLinks = new();
 			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
-				oldLinks.Add(siteLink);
+				oldLinks.Add(siteLink.Title);
 			}
 
 			foreach (var node in newPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
-				oldLinks.Remove(siteLink);
+				oldLinks.Remove(siteLink.Title);
 			}
 
 			return oldLinks;
@@ -326,7 +326,7 @@
 
 		public ICollection<Title> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<Title> oldTemplates = new(SimpleTitleComparer.Instance);
+			HashSet<Title> oldTemplates = new();
 			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(TitleFactory.FromBacklinkNode(this.site, node));

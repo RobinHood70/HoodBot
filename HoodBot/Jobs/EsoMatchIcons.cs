@@ -77,7 +77,7 @@
 				{
 					if (parts.OriginalFiles.Count > 0)
 					{
-						this.WriteLine($"* [[{page.FullPageName}]] used to be identified, but no longer is. It may have been removed from the game.");
+						this.WriteLine($"* [[{page.Title.FullPageName()}]] used to be identified, but no longer is. It may have been removed from the game.");
 						return;
 					}
 
@@ -148,10 +148,11 @@
 			var isBook = false;
 			foreach (var link in parts.Categories)
 			{
-				if (link.PageNameEquals("Online-Icons-Books") ||
-					(link.PageNameEquals("Online-Icons-Quest Items") && parts.Page.PageName.Contains("Book", StringComparison.Ordinal)) ||
-					link.PageNameEquals("ON-icon-minor adornment-Necklace.png") ||
-					link.PageNameEquals("ON-icon-minor adornment-Ring.png"))
+				var title = link.Title;
+				if (title.PageNameEquals("Online-Icons-Books") ||
+					(title.PageNameEquals("Online-Icons-Quest Items") && parts.Page.Title.PageName.Contains("Book", StringComparison.Ordinal)) ||
+					title.PageNameEquals("ON-icon-minor adornment-Necklace.png") ||
+					title.PageNameEquals("ON-icon-minor adornment-Ring.png"))
 				{
 					isBook = true;
 					break;
@@ -222,7 +223,7 @@
 			copyrightTemplates.Remove("Template:Zenimage");
 			foreach (var template in copyrightTemplates)
 			{
-				this.licenseTemplates.Add(template);
+				this.licenseTemplates.Add(template.Title);
 			}
 		}
 
@@ -336,7 +337,7 @@
 			#endregion
 
 			#region Public Properties
-			public ICollection<SiteLink> Categories { get; } = new SortedSet<SiteLink>(SimpleTitleComparer.Instance);
+			public ICollection<SiteLink> Categories { get; } = new SortedSet<SiteLink>(TitleComparer.Instance);
 
 			public ICollection<string> OriginalFiles { get; } = new SortedSet<string>(StringComparer.Ordinal);
 

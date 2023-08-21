@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Base
 			this.Name = name;
 			this.FileArchiveId = fileArchiveId;
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 		}
 		#endregion
 
@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Base
 
 		public long FileArchiveId { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 		#endregion
 
 		#region Public Override Methods

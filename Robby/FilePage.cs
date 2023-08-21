@@ -23,12 +23,12 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		internal FilePage(Title title, PageLoadOptions options, IApiTitle? apiItem)
+		internal FilePage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title, options, apiItem)
 		{
-			if (title.Namespace.Id != MediaWikiNamespaces.File)
+			if (title.Title.Namespace.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name));
+				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Title.Site[MediaWikiNamespaces.File].Name));
 			}
 
 			this.fileRevisions.Clear();
@@ -88,19 +88,19 @@
 				var attributes = File.GetAttributes(fileName);
 				if (attributes.HasAnyFlag(FileAttributes.Directory))
 				{
-					fileName = Path.Combine(fileName, this.PageName);
+					fileName = Path.Combine(fileName, this.Title.PageName);
 				}
 			}
 			catch (FileNotFoundException)
 			{
 			}
 
-			this.Site.Download(uri.OriginalString, fileName);
+			this.Title.Site.Download(uri.OriginalString, fileName);
 		}
 
 		/// <summary>Finds all pages the file is used on.</summary>
 		/// <returns>A list of <see cref="Title"/>s that the file is used on.</returns>
-		public TitleCollection FileUsage() => this.FileUsage(Filter.Any, this.Site.Namespaces.RegularIds);
+		public TitleCollection FileUsage() => this.FileUsage(Filter.Any, this.Title.Site.Namespaces.RegularIds);
 
 		/// <summary>Finds all pages the file is used on within the given namespaces and optionally filters out redirects.</summary>
 		/// <param name="filterRedirects">Filter redirects out of the result set.</param>
@@ -108,7 +108,7 @@
 		/// <returns>A list of <see cref="Title"/>s that the file is used on.</returns>
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
-			TitleCollection titles = new(this.Site);
+			TitleCollection titles = new(this.Title.Site);
 			titles.GetFileUsage(new[] { this }, filterRedirects, namespaces);
 
 			return titles;
@@ -123,7 +123,7 @@
 		/// <returns>A collection of duplicate file titles.</returns>
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
-			TitleCollection titles = new(this.Site);
+			TitleCollection titles = new(this.Title.Site);
 			titles.GetDuplicateFiles(new[] { this }, localOnly);
 
 			return titles;

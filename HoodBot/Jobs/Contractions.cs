@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
 	internal sealed class Contractions : WikiJob
@@ -54,7 +53,7 @@
 			}
 
 			this.Progress = 0;
-			var hash = new HashSet<Title>(titles, SimpleTitleComparer.Instance);
+			var hash = new HashSet<ITitle>(titles);
 			hash.ExceptWith(ignore);
 			this.StatusWriteLine($"Loading {hash.Count} pages");
 

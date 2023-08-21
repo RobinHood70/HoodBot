@@ -88,15 +88,6 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
-        /// </summary>
-        internal static string InvalidSite {
-            get {
-                return ResourceManager.GetString("InvalidSite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The attempt to log in to the wiki failed: {0}.
         /// </summary>
         internal static string LoginFailed {
@@ -138,6 +129,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string PageCouldNotBeLoaded {
             get {
                 return ResourceManager.GetString("PageCouldNotBeLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
+        /// </summary>
+        internal static string SiteMismatch {
+            get {
+                return ResourceManager.GetString("SiteMismatch", resourceCulture);
             }
         }
         

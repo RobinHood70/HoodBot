@@ -1,19 +1,20 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using RobinHood70.CommonCode;
+	using System;
 
 	// TODO: Review constructors for various title objects.
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
-	public class FullTitle : Title, IFullTitle
+	public class FullTitle : IFullTitle
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="fullTitle">The <see cref="IFullTitle"/> with the desired information.</param>
 		public FullTitle(IFullTitle fullTitle)
-			: base(fullTitle.NotNull().Namespace, fullTitle.PageName)
 		{
+			ArgumentNullException.ThrowIfNull(fullTitle);
+			this.Title = fullTitle.Title;
 			this.Fragment = fullTitle.Fragment;
 			this.Interwiki = fullTitle.Interwiki;
 		}
@@ -21,8 +22,8 @@
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="title">The <see cref="Title"/> to downcast.</param>
 		public FullTitle(Title title)
-			: base(title.NotNull())
 		{
+			this.Title = title;
 		}
 		#endregion
 
@@ -39,30 +40,46 @@
 		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
 		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
 		public bool IsLocal => this.Interwiki?.LocalWiki != false;
+
+		/// <inheritdoc/>
+		public Title Title { get; }
 		#endregion
 
 		#region Public Override Properties
 
 		/// <inheritdoc/>
-		public override string LinkName =>
-			(this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) +
-			(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':') +
-			this.FullPageName +
-			(this.Fragment == null ? string.Empty : '#' + this.Fragment);
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain)
+		{
+			var link = this.LinkName();
+
+			return link;
+		}
+
+		/// <inheritdoc/>
+		public string LinkName()
+		{
+			var retval = this.Interwiki is not null
+				? this.Interwiki.Prefix + ':'
+				: this.Title.Namespace.LinkName();
+			retval += this.Title.FullPageName();
+			retval += this.Fragment is null
+				? string.Empty
+				: '#' + this.Fragment;
+
+			return retval;
+		}
 		#endregion
 
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
 		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
-		/// <param name="ns">The value returned by <see cref="Title.Namespace"/>.</param>
-		/// <param name="pageName">The value returned by <see cref="Title.PageName"/>.</param>
+		/// <param name="title">The title returned by <see cref="Title"/>.</param>
 		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
-		public void Deconstruct(out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
+		public void Deconstruct(out InterwikiEntry? interwiki, out Title title, out string? fragment)
 		{
 			interwiki = this.Interwiki;
-			ns = this.Namespace;
-			pageName = this.PageName;
+			title = this.Title;
 			fragment = this.Fragment;
 		}
 		#endregion

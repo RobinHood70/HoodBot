@@ -282,7 +282,7 @@
 			#endregion
 
 			#region Protected Override Methods
-			protected override string GetKeyForItem(PageItem item) => item?.FullPageName ?? Globals.Unknown;
+			protected override string GetKeyForItem(PageItem item) => item?.Title ?? Globals.Unknown;
 			#endregion
 		}
 		#endregion

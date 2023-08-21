@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 		public PageItem(int ns, string title, long pageId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 		}
 		#endregion
@@ -78,13 +78,13 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<IApiTitle> Templates { get; } = new List<IApiTitle>();
 
-		public string FullPageName { get; }
+		public string Title { get; }
 
 		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; } = new List<TranscludedInItem>();
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

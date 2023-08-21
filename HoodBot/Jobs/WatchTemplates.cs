@@ -16,7 +16,7 @@
 			var pages = this.Site.Watch(MediaWikiNamespaces.Template);
 			foreach (var page in pages.Value)
 			{
-				Debug.WriteLine(page.PageName);
+				Debug.WriteLine(page.Title.PageName);
 			}
 		}
 	}

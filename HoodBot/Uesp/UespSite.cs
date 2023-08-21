@@ -37,9 +37,9 @@
 		#region Public Override Methods
 		public override void Logout(bool force)
 		{
-			if (this.User is Title user)
+			if (this.User is User user)
 			{
-				this.FilterPages.Remove(user.FullPageName + "/Results");
+				this.FilterPages.Remove(user.Title.FullPageName() + "/Results");
 			}
 
 			if (this.LogTitle is not null)
@@ -73,11 +73,9 @@
 			if (this.EditingEnabled)
 			{
 				// Assumes we'll never be editing UESP anonymously.
-				this.AbstractionLayer.Assert = (
-					string.Equals(this.User.PageName, "HotnBOThered", StringComparison.Ordinal) ||
-					string.Equals(this.User.PageName, "HoodBot", StringComparison.Ordinal))
-						? "bot"
-						: "user";
+				this.AbstractionLayer.Assert = string.Equals(this.User.Title.PageName, "HoodBot", StringComparison.Ordinal)
+					? "bot"
+					: "user";
 			}
 
 			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen if there are messages waiting, even if editing is disabled.
@@ -86,10 +84,10 @@
 				this.ClearMessage(force: true);
 			}
 
-			var resultPage = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
+			var resultPage = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.Title.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
-			this.LogTitle = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.PageName + "/Log");
+			this.LogTitle = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.Title.PageName + "/Log");
 			this.FilterPages.Add(this.LogTitle);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}

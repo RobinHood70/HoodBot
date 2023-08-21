@@ -1,86 +1,68 @@
-﻿namespace RobinHood70.Robby
+﻿#pragma warning disable CA1036 // Override methods on comparable types
+// Comparison semantics make no sense outside of sorting, so we strictly implement CompareTo and nothing else.
+namespace RobinHood70.Robby
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
-	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title
+	/// <summary>A structure to hold page Title information.</summary>
+	public readonly struct Title : IComparable<Title>, IEquatable<Title>, ITitle // Struct will be renamed Title once Title itself is gone.
 	{
-		#region Constants
+		#region Private Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
 		private const string TitleChars = @"[ %!\""$&'()*,\-.\/0-9:;=?@A-Z\\^_`a-z~+\P{IsBasicLatin}-[()（）]]";
 		#endregion
 
 		#region Static Fields
 
-		/// <summary>Gets a regular expression matching all comma-like characters in a stirng.</summary>
-		private static readonly Regex LabelCommaRemover = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		/// <summary>Gets a regular expression matching all comma-like characters in a string.</summary>
+		private static readonly Regex LabelCommaRemover =
+			new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
-		/// <summary>Gets a regular expression matching all parenthetical text in a stirng.</summary>
-		private static readonly Regex LabelParenthesesRemover = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		#endregion
-
-		#region Fields
-		private Title? subjectPage;
-		private Title? talkPage;
+		/// <summary>Gets a regular expression matching all parenthetical text in a string.</summary>
+		private static readonly Regex LabelParenthesesRemover =
+			new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		/// <param name="title">The title to copy from.</param>
-		public Title([NotNull, ValidatedNotNull] TitleFactory title)
+		/// <summary>Initializes a new instance of the <see cref="Title"/> struct.</summary>
+		/// <param name="site">The site the page is from.</param>
+		/// <param name="ns">The integer namespace of the Title.</param>
+		/// <param name="pageName">The page name of the Title.</param>
+		public Title([NotNull, ValidatedNotNull] Site site, int ns, [NotNull, ValidatedNotNull] string pageName)
 		{
-			title.ThrowNull();
-			this.Namespace = title.Namespace;
-			this.PageName = title.PageName;
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(pageName);
+			this.Namespace = site[ns];
+			this.PageName = pageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		/// <param name="title">The title to copy from.</param>
-		/// <remarks>Temporary kludge until titles are fully redesigned.</remarks>
-		public Title([NotNull, ValidatedNotNull] IFullTitle title)
+		/// <summary>Initializes a new instance of the <see cref="Title"/> struct.</summary>
+		/// <param name="ns">The integer namespace of the Title.</param>
+		/// <param name="pageName">The page name of the Title.</param>
+		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
-			title.ThrowNull();
-			this.Namespace = title.Namespace;
-			this.PageName = title.PageName;
+			ArgumentNullException.ThrowIfNull(ns);
+			ArgumentNullException.ThrowIfNull(pageName);
+			this.Namespace = ns;
+			this.PageName = pageName;
 		}
+		#endregion
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		/// <param name="title">The title to copy from.</param>
-		public Title([NotNull, ValidatedNotNull] Title title)
-		{
-			title.ThrowNull();
-			this.Namespace = title.Namespace;
-			this.PageName = title.PageName;
-		}
+		#region Public Static Properties
 
-		// This method is strictly internal, since we need a way to create titles from their parts, but this *must* be a validated source.
-		internal Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
-		{
-			this.Namespace = ns.NotNull();
-			this.PageName = pageName.NotNull();
-		}
+		/// <summary>Gets a <see cref="Comparison{T}"/> intended for sorting purposes only.</summary>
+		/// <remarks>This is defined as a Comparison rather than making the class IComparable since less-than/greater-than semantics don't really make sense outside of sorting.</remarks>
+		public static Comparison<Title> SortComparer => new(Compare);
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
-		/// <returns>The name of the base page.</returns>
-		public string BasePageName => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
-				? this.PageName[..subPageLoc]
-				: this.PageName;
-
-		/// <summary>Gets the full page name of a title.</summary>
-		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
-		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
-
-		/// <summary>Gets the namespace object for the title.</summary>
+		/// <summary>Gets the namespace object for the Title.</summary>
 		/// <value>The namespace.</value>
 		public Namespace Namespace { get; }
 
@@ -88,118 +70,105 @@
 		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; }
 
-		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
-		/// <returns>The name of the base page.</returns>
-		public string RootPageName =>
-			this.Namespace.AllowsSubpages &&
-			this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
-			subPageLoc >= 0
-				? this.PageName[..subPageLoc]
-				: this.PageName;
-
-		/// <summary>Gets the site to which this title belongs.</summary>
+		/// <summary>Gets the site to which this Title belongs.</summary>
 		/// <value>The site.</value>
 		public Site Site => this.Namespace.Site;
 
-		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
-		/// <returns>The subject page.</returns>
-		/// <remarks>If title Title is a subject page, returns itself.</remarks>
-		public Title SubjectPage => this.subjectPage ??= TitleFactory.FromValidated(this.Namespace.SubjectSpace, this.PageName);
-
-		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
-		/// <returns>The name of the subpage.</returns>
-		public string SubPageName =>
-			this.Namespace.AllowsSubpages &&
-			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
-			subPageLoc > 0
-				? this.PageName[subPageLoc..]
-				: this.PageName;
-
-		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
-		/// <returns>The talk page.</returns>
-		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
-		public Title? TalkPage => this.Namespace.TalkSpace == null
-			? null
-			: this.talkPage ??= TitleFactory.FromValidated(this.Namespace.TalkSpace, this.PageName);
+		Title ITitle.Title => this;
 		#endregion
 
-		#region Public Virtual Properties
+		#region Operators
 
-		/// <summary>Gets a name suitable for linking to this title.</summary>
-		/// <returns>A name suitable for linking to this title.</returns>
-		public virtual string LinkName => (this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) + this.FullPageName;
+		/// <summary>Determines whether one <see cref="Title"/> is equal to another one.</summary>
+		/// <param name="left">The first Title to compare.</param>
+		/// <param name="right">The second Title to compare.</param>
+		/// <returns><see langword="true"/> if the specified Titles are equal; otherwise, <see langword="false"/>.</returns>
+		public static bool operator ==(Title left, Title right) => left.Equals(right);
+
+		/// <summary>Determines whether one <see cref="Title"/> is different from another one.</summary>
+		/// <param name="left">The first Title to compare.</param>
+		/// <param name="right">The second Title to compare.</param>
+		/// <returns><see langword="true"/> if the specified Titles are different; otherwise, <see langword="false"/>.</returns>
+		public static bool operator !=(Title left, Title right) => !(left == right);
 		#endregion
 
 		#region Public Static Methods
+
+		/// <summary>Compares two <see cref="Title"/>s and returns an integer indicating the sort position of the first relative to the second.</summary>
+		/// <param name="x">The first Title.</param>
+		/// <param name="y">The second Title.</param>
+		/// <returns>An integer indicating whether the first Title is less than (-1), equal to (0), or greater than (1) the second Title.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the Site values don't match.</exception>
+		/// <remarks>This is not implemented as an IComparer because less-than/greater-than semantics only really apply in the context of sorting. The Comparer is made public primarily for the convenience of other sorting methods.</remarks>
+		public static int Compare(Title x, Title y)
+		{
+			var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
+			return nsCompare != 0
+				? nsCompare
+				: x.Namespace.ComparePageNames(x.PageName, y.PageName);
+		}
 
 		/// <summary>Trims the disambiguator off of a string (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The page name to modify.</param>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		/// <remarks>No other string processing is done, making this useful when case or embedded invisible characters must be preserved.</remarks>
 		public static string ToLabelName(string pageName) => LabelParenthesesRemover.Replace(pageName.NotNull(), string.Empty, 1, 1);
-
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <param name="pageName">The page name to modify.</param>
-		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
-		public static string ToPipeTrickName(string pageName)
-		{
-			var retval = LabelCommaRemover.Replace(pageName.NotNull(), string.Empty, 1, 1);
-			return LabelParenthesesRemover.Replace(retval, string.Empty, 1, 1);
-		}
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Returns the provided title as link text.</summary>
-		/// <returns>The current title, formatted as a link.</returns>
-		public string AsLink() => this.AsLink(null);
-
-		/// <summary>Returns the provided title as link text.</summary>
-		/// <param name="linkType">The default text to use for the link.</param>
-		/// <returns>The current title, formatted as a link.</returns>
-		public string AsLink(LinkFormat linkType)
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain)
 		{
-			var text = linkType switch
+			var text = linkFormat switch
 			{
-				LinkFormat.LabelName => this.LabelName(),
-				LinkFormat.PipeTrick => this.PipeTrick(),
-				LinkFormat.Plain => null,
-				_ => throw new ArgumentOutOfRangeException(nameof(linkType)),
+				LinkFormat.LabelName => this.PageName.Length == 0
+					? this.PageName
+					: LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1),
+				LinkFormat.PipeTrick =>
+					LabelParenthesesRemover.Replace(
+					LabelCommaRemover.Replace(this.PageName, string.Empty, 1, 1), string.Empty, 1, 1),
+				LinkFormat.Plain => this.FullPageName(),
+				_ => throw new ArgumentOutOfRangeException(nameof(linkFormat)),
 			};
 
-			return this.AsLink(text);
+			return $"[[{this.LinkName()}|{text}]]";
 		}
 
-		/// <summary>Returns the provided title as link text.</summary>
-		/// <param name="linkText">The text to use for the link.</param>
-		/// <returns>The current title, formatted as a link.</returns>
-		public string AsLink(string? linkText)
+		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string BasePageName() => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
+				? this.PageName[..subPageLoc]
+				: this.PageName;
+
+		/// <inheritdoc/>
+		public int CompareTo(Title other)
 		{
-			var linkName = this.Namespace.LinkName;
-			StringBuilder sb = new(linkName.Length + 5 + (this.PageName.Length << 1));
-			sb
-				.Append("[[")
-				.Append(linkName)
-				.Append(this.PageName);
-			if (linkText != null)
-			{
-				sb
-					.Append('|')
-					.Append(linkText);
-			}
-
-			sb.Append("]]");
-			return sb.ToString();
+			var nsCompare = Namespace.Compare(this.Namespace, other.Namespace);
+			return nsCompare != 0
+				? nsCompare
+				: this.Namespace.ComparePageNames(this.PageName, other.PageName);
 		}
 
-		/// <summary>Gets the article path for the current page.</summary>
-		/// <returns>A Uri to the index.php page.</returns>
-		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
+		/// <summary>Determines whether the specified <see cref="Title"/> is equal to the current one.</summary>
+		/// <param name="other">The Title to compare with the current one.</param>
+		/// <returns><see langword="true"/> if the specified object is equal to the current one; otherwise, <see langword="false"/>.</returns>
+		public bool Equals(Title other) => this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
+
+		/// <summary>Gets the full page name of a Title.</summary>
+		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a Title.</returns>
+		public string FullPageName() => this.Namespace is null ? string.Empty : (this.Namespace.DecoratedName() + this.PageName);
+
+		/// <summary>Determines whether this is considered a discussion page on this site.</summary>
+		/// <returns><see langword="true"/> if this is either a talk page or other page flagged by the site as a discussion page; otherwise, <see langword="false"/>.</returns>
+		public bool IsDiscussionPage() => this.Namespace.IsTalkSpace || this.Site.DiscussionPages.Contains(this);
 
 		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		public string LabelName() => this.PageName.Length == 0 ? this.PageName : ToLabelName(this.PageName);
+
+		/// <inheritdoc/>
+		public string LinkName() => this.Namespace.LinkName() + this.PageName;
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="other">The title to compare to.</param>
@@ -231,30 +200,52 @@
 			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
 		}
 
-		/*
-		/// <summary>Compares two <see cref="SimpleTitle"/> objects for namespace and page name equality.</summary>
-		/// <param name="other">The object to compare to.</param>
-		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
-		public bool SimpleEquals(this SimpleTitle title, SimpleTitle other) =>
-			title == null ? other == null :
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
-		*/
+		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string RootPageName() =>
+			this.Namespace.AllowsSubpages &&
+			this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
+			subPageLoc >= 0
+				? this.PageName[..subPageLoc]
+				: this.PageName;
 
-		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
-		/// <param name="other">The object to compare to.</param>
-		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
-		public bool SimpleEquals(Title? other) =>
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
+		/// <summary>Gets a Title object for the Title's corresponding subject page.</summary>
+		/// <returns>The subject page.</returns>
+		/// <remarks>If the Title is a subject page, returns itself.</remarks>
+		public Title SubjectPage() => new(this.Namespace.SubjectSpace, this.PageName);
+
+		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <returns>The name of the subpage.</returns>
+		public string SubPageName() =>
+			this.Namespace.AllowsSubpages &&
+			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
+			subPageLoc > 0
+				? this.PageName[subPageLoc..]
+				: this.PageName;
+
+		/// <summary>Gets a Title object for the Title's corresponding subject page.</summary>
+		/// <returns>The talk page.</returns>
+		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
+		public Title? TalkPage() => this.Namespace.TalkSpace is null
+			? null
+			: new(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
 		#region Public Override Methods
 
-		/// <inheritdoc/>
-		public override string ToString() => this.LinkName;
+		/// <summary>Determines whether the specified object is equal to the current <see cref="Title"/>.</summary>
+		/// <param name="obj">The object to compare with the current Title.</param>
+		/// <returns><see langword="true"/> if the specified object is equal to the current Title; otherwise, <see langword="false"/>.</returns>
+		public override bool Equals(object? obj) => obj is Title title && this.Equals(title);
+
+		/// <summary>A hash function combining the hashes of both <see cref="Namespace"/> and <see cref="PageName"/>.</summary>
+		/// <returns>A hash code for the current <see cref="Title"/>.</returns>
+		public override int GetHashCode() => HashCode.Combine(this.Namespace, this.PageName);
+
+		/// <summary>Returns the full page name of this <see cref="Title"/>.</summary>
+		/// <returns>The full page name.</returns>
+		public override string ToString() => this.FullPageName();
 		#endregion
 	}
 }
+#pragma warning restore CA1036 // Override methods on comparable types

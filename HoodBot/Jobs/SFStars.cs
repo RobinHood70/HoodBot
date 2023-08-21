@@ -35,6 +35,7 @@
 
 		protected override void PageMissing(Page page)
 		{
+			var star = this.stars[page.Title.PageName];
 			page.Text = $"{{{{System Infobox\n" +
 			$"|eid={star["id"]}\n" +
 			$"|name={star["proper"]}\n" +

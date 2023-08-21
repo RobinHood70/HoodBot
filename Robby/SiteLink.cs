@@ -55,7 +55,7 @@
 	#endregion
 
 	/// <summary>Represents a link with site-specific Title information and parameters in the site's language.</summary>
-	public class SiteLink : FullTitle, ILinkTitle
+	public class SiteLink : ILinkTitle
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new(StringComparer.Ordinal);
@@ -98,26 +98,29 @@
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The <see cref="TitleFactory"/> with the desired information.</param>
 		public SiteLink(ILinkTitle title)
-			: base(title)
+			: this((IFullTitle)title)
 		{
-			this.Coerced = title.NotNull().Coerced;
+			this.Coerced = title.Coerced;
 			this.ForcedInterwikiLink = title.ForcedInterwikiLink;
 			this.ForcedNamespaceLink = title.ForcedNamespaceLink;
-			InitializeImageInfo(this.Site);
+			InitializeImageInfo(this.Title.Site);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The <see cref="IFullTitle"/> to downcast.</param>
 		public SiteLink(IFullTitle title)
-			: base(title)
 		{
+			ArgumentNullException.ThrowIfNull(title);
+			this.Title = title.Title;
+			this.Fragment = title.Fragment;
+			this.Interwiki = title.Interwiki;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The <see cref="Title"/> to downcast.</param>
 		public SiteLink(Title title)
-			: base(title)
 		{
+			this.Title = title;
 		}
 		#endregion
 
@@ -185,6 +188,10 @@
 			}
 		}
 
+		/// <summary>Gets or sets the title's fragment (the section or ID to scroll to).</summary>
+		/// <value>The fragment.</value>
+		public string? Fragment { get; set; }
+
 		/// <summary>Gets or sets the image height.</summary>
 		/// <value>The image height.</value>
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
@@ -202,6 +209,14 @@
 			set => this.SetDirectValue(ParameterType.Halign, value);
 		}
 
+		/// <summary>Gets or sets the interwiki prefix.</summary>
+		/// <value>The interwiki prefix.</value>
+		public InterwikiEntry? Interwiki { get; set; }
+
+		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
+		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
+		public bool IsLocal => this.Interwiki?.LocalWiki != false;
+
 		/// <summary>Gets or sets the image's language, for image formats that are language-aware (e.g., SVG).</summary>
 		/// <value>The image language.</value>
 		public string? Language
@@ -216,29 +231,6 @@
 		{
 			get => this.GetValue(ParameterType.Link);
 			set => this.SetParameterValue(ParameterType.Link, value);
-		}
-
-		/// <summary>Gets the full text of the link.</summary>
-		/// <returns>The full text of the link.</returns>
-		public override string LinkName
-		{
-			get
-			{
-				var sb = new StringBuilder()
-					.Append(this.TitleWhitespaceBefore)
-					.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
-					.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
-					.Append(this.ForcedNamespaceLink ? ":" : string.Empty)
-					.Append(this.FullPageName);
-				if (this.Fragment != null)
-				{
-					sb
-						.Append('#')
-						.Append(this.Fragment);
-				}
-
-				return sb.ToString();
-			}
 		}
 
 		/// <summary>Gets the original text of the link, in case we need to make display text out of it.</summary>
@@ -270,6 +262,9 @@
 			set => this.SetDirectValue(ParameterType.Caption, value);
 		}
 
+		/// <inheritdoc/>
+		public Title Title { get; }
+
 		/// <summary>Gets or sets the whitespace after the title.</summary>
 		/// <value>The whitespace after the title.</value>
 		public string TitleWhitespaceAfter { get; set; } = string.Empty;
@@ -287,7 +282,7 @@
 			{
 				null => null,
 				string tv when tv.TrimEnd().Length == 0 => 1,
-				string tv when double.TryParse(tv, NumberStyles.Any, this.Site.Culture, out var retval) => retval,
+				string tv when double.TryParse(tv, NumberStyles.Any, this.Title.Site.Culture, out var retval) => retval,
 				_ => double.NaN
 			};
 
@@ -411,6 +406,9 @@
 
 		#region Public Methods
 
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => WikiTextVisitor.Raw(this.ToLinkNode());
+
 		/// <summary>Gets the image size.</summary>
 		/// <returns>The image height and width. If either value is missing, a zero will be returned for that value.</returns>
 		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
@@ -421,8 +419,8 @@
 				var split = dimensions.Split(SplitX, 2);
 				return split.Length switch
 				{
-					1 => (0, int.TryParse(split[0], NumberStyles.Integer, this.Site.Culture, out var result) ? result : throw NonNumeric),
-					2 => (int.TryParse("0" + split[0], NumberStyles.Integer, this.Site.Culture, out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], NumberStyles.Integer, this.Site.Culture, out var height) ? height : throw NonNumeric),
+					1 => (0, int.TryParse(split[0], NumberStyles.Integer, this.Title.Site.Culture, out var result) ? result : throw NonNumeric),
+					2 => (int.TryParse("0" + split[0], NumberStyles.Integer, this.Title.Site.Culture, out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], NumberStyles.Integer, this.Title.Site.Culture, out var height) ? height : throw NonNumeric),
 					_ => (0, 0)
 				};
 			}
@@ -430,9 +428,23 @@
 			return (0, 0);
 		}
 
-		/// <summary>Gets the full text of the link.</summary>
-		/// <returns>The full text of the link.</returns>
-		public string LinkText() => WikiTextVisitor.Raw(this.ToLinkNode());
+		/// <inheritdoc/>
+		public string LinkName()
+		{
+			var sb = new StringBuilder()
+				.Append(this.TitleWhitespaceBefore)
+				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
+				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
+				.Append(this.Title.LinkName());
+			if (this.Fragment != null)
+			{
+				sb
+					.Append('#')
+					.Append(this.Fragment);
+			}
+
+			return sb.ToString();
+		}
 
 		/// <summary>Sets the image size, formatting the <see cref="Dimensions"/> paramter appropriately.</summary>
 		/// <param name="height">The height.</param>
@@ -467,7 +479,7 @@
 				values.Add(text);
 			}
 
-			return new SiteNodeFactory(this.Site).LinkNodeFromParts(this.TitleWhitespaceBefore + this.LinkName + this.TitleWhitespaceAfter, values);
+			return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.TitleWhitespaceBefore + this.LinkName() + this.TitleWhitespaceAfter, values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
@@ -512,7 +524,7 @@
 
 		/// <summary>Returns the full text of the link.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => this.LinkName;
+		public override string ToString() => this.LinkName();
 		#endregion
 
 		#region Private Static Methods

@@ -72,7 +72,7 @@
 			{
 				List<IWikiNode> newNodes = new();
 				parser.RemoveRange(first, last + 1 - first);
-				var letter = page.PageName[6..];
+				var letter = page.Title.PageName[6..];
 				var entries = this.pageBooks[letter];
 				foreach (var entry in entries)
 				{
@@ -143,7 +143,7 @@
 
 			listBooks.Sort((title1, title2) =>
 			{
-				var page1 = title1.PageName;
+				var page1 = title1.Title.PageName;
 				if (this.titleOverrides.TryGetValue(page1, out var linkTitle))
 				{
 					page1 += linkTitle;
@@ -151,7 +151,7 @@
 
 				page1 = SortableName(page1);
 
-				var page2 = title2.PageName;
+				var page2 = title2.Title.PageName;
 				if (this.titleOverrides.TryGetValue(page2, out linkTitle))
 				{
 					page2 += linkTitle;
@@ -170,7 +170,7 @@
 			TitleCollection loreBookTitles = new(this.Site);
 			foreach (var book in listBooks)
 			{
-				var label = SortableName(book.PageName);
+				var label = SortableName(book.Title.PageName);
 				var letter = label[..1].ToUpperInvariant();
 				if (!char.IsLetter(label[0]))
 				{
@@ -184,7 +184,7 @@
 					loreBookTitles.Add("Lore:Books " + letter);
 				}
 
-				titles.Add(book.PageName);
+				titles.Add(book.Title.PageName);
 			}
 		}
 		#endregion

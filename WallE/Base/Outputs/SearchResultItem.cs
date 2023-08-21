@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		public SearchResultItem(int ns, string title, string? redirSnippet, string? redirTitle, string? sectionSnippet, string? sectionTitle, int size, string? snippet, DateTime? timestamp, string? titleSnippet, int wordCount)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.RedirectSnippet = redirSnippet;
 			this.RedirectTitle = redirTitle;
 			this.SectionSnippet = sectionSnippet;
@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 
 		public string? TitleSnippet { get; }
 
@@ -51,7 +51,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

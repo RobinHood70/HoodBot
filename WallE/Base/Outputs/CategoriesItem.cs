@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		public CategoriesItem(int ns, string title, bool hidden, string? sortkey, string? sortkeyPrefix, DateTime? timestamp)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.Hidden = hidden;
 			this.SortKey = sortkey;
 			this.SortKeyPrefix = sortkeyPrefix;
@@ -29,11 +29,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

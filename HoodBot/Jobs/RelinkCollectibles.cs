@@ -14,7 +14,7 @@
 	{
 		#region Fields
 		private readonly List<Title> esoTitles = new();
-		private readonly Dictionary<Title, string> disambigs = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, string> disambigs = new();
 		#endregion
 
 		#region Constructors
@@ -30,16 +30,19 @@
 
 		#region Protected Override Methods
 
-		protected override SiteLink GetToLink(Title page, bool isRedirectTarget, SiteLink from, Title to)
+		protected override SiteLink GetToLink(Page page, bool isRedirectTarget, SiteLink from, Title to)
 		{
 			if (from.Interwiki == null && from.Fragment != null)
 			{
-				var newTitle =
-					this.esoTitles.Find(title => title.PageNameEquals(from.Fragment + this.disambigs[to])) ??
-					this.esoTitles.Find(title => title.PageNameEquals(from.Fragment));
-				if (newTitle == null)
+				var newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment + this.disambigs[to]));
+				if (newTitle.Namespace is null)
 				{
-					this.WriteLine($"* Match not found for {from} on page {page.AsLink()}.");
+					newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment));
+				}
+
+				if (newTitle.Namespace is null)
+				{
+					this.WriteLine($"* Match not found for {from} on page {page.AsLink(LinkFormat.Plain)}.");
 					return from;
 				}
 
@@ -61,7 +64,7 @@
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online);
 			allTitles.Sort();
-			this.esoTitles.AddRange(allTitles);
+			this.esoTitles.AddRange(allTitles.Titles());
 
 			// var collectionTitles = this.GetCollectionTitles();
 			var collectionTitles = GetTitles();
@@ -83,12 +86,12 @@
 				}
 			}
 
-			if (from.Namespace == MediaWikiNamespaces.Media)
+			if (from.Title.Namespace == MediaWikiNamespaces.Media)
 			{
-				Title key = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], from.PageName);
+				Title key = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], from.Title.PageName);
 				if (this.LinkUpdates.TryGetValue(key, out var toMedia))
 				{
-					var toLink = this.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia!.PageName));
+					var toLink = this.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.Title.PageName));
 					if (!from.FullEquals(toLink))
 					{
 						toLink.UpdateLinkNode(node);
@@ -129,7 +132,8 @@
 			var allTitles = new TitleCollection(this.Site);
 			foreach (var page in collectionPages)
 			{
-				var disambig = page.PageName switch
+				var title = page.Title;
+				var disambig = title.PageName switch
 				{
 					"Mementos (collection)" => " (memento)",
 					"Mounts" => " (mount)",
@@ -139,19 +143,19 @@
 					_ => string.Empty
 				};
 
-				if (page.Templates.Contains(plm, SimpleTitleComparer.Instance))
+				if (page.Templates.Contains(plm))
 				{
 					for (var c = 'A'; c <= 'Z'; c++)
 					{
-						var title = page.PageName + ' ' + c;
-						allTitles.Add(page.Namespace.DecoratedName + title);
-						this.disambigs.Add(TitleFactory.FromValidated(page.Namespace, title), disambig);
+						var indexedTitle = title.PageName + ' ' + c;
+						allTitles.Add(title.Namespace.DecoratedName() + indexedTitle);
+						this.disambigs.Add(TitleFactory.FromValidated(title.Namespace, indexedTitle), disambig);
 					}
 				}
 				else
 				{
-					allTitles.Add(page.FullPageName);
-					this.disambigs.Add(TitleFactory.FromValidated(page.Namespace, page.PageName), disambig);
+					allTitles.Add(page.Title.FullPageName());
+					this.disambigs.Add(TitleFactory.FromValidated(title.Namespace, title.PageName), disambig);
 				}
 			}
 
@@ -167,7 +171,7 @@
 		{
 			foreach (var title in collections)
 			{
-				this.AddReplacement(title, title, ReplacementActions.None, "dummy update");
+				this.AddReplacement(title.Title, title, ReplacementActions.None, "dummy update");
 			}
 		}
 		#endregion

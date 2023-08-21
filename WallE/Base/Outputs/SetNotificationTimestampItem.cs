@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Base
 		internal SetNotificationTimestampItem(int ns, string title, long pageId, SetNotificationTimestampFlags flags, DateTime? notificationTimestamp, long revId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Flags = flags;
 			this.NotificationTimestamp = notificationTimestamp;
@@ -41,11 +41,11 @@ namespace RobinHood70.WallE.Base
 
 		public long RevisionId { get; internal set; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

@@ -22,7 +22,7 @@
 
 		#region Protected Override Methods
 		protected override bool ShouldAddPage(ContextualParser parser) =>
-			parser.Page.Namespace == UespNamespaces.Online &&
+			parser.Page.Title.Namespace == UespNamespaces.Online &&
 			parser.FindSiteTemplate("Template:Mod Header") is null;
 
 		protected override bool ShouldAddTemplate(SiteTemplateNode template, ContextualParser parser)

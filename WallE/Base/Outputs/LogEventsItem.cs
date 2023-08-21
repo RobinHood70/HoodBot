@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal LogEventsItem(int? ns, string? title, long logPageId, IReadOnlyList<string> tags)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.LogPageId = logPageId;
 			this.Tags = tags;
 		}
@@ -23,11 +23,11 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<string> Tags { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

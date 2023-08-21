@@ -54,7 +54,7 @@
 			linkTitles.Remove(books);
 
 			var pages = linkTitles.Load(PageModules.Default | PageModules.TranscludedIn);
-			this.backlinkPages.AddRange(this.FromTransclusions(pages));
+			this.backlinkPages.AddRange(this.FromTransclusions(pages.Titles()));
 			for (var i = pages.Count - 1; i >= 0; i--)
 			{
 				var page = pages[i];
@@ -91,7 +91,7 @@
 						term = "<malformed template>";
 					}
 
-					Debug.WriteLine($"{term} ({page.FullPageName})");
+					Debug.WriteLine($"{term} ({page.Title.FullPageName()})");
 				}
 			}
 
@@ -149,9 +149,9 @@
 			if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
 			{
 				var pageName = nodes.ToRaw();
-				var fullName = TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName);
-				var parentName = TitleFactory.FromUnvalidated(ns.Parent, pageName);
-				var loreName = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName);
+				Title fullName = TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName);
+				Title parentName = TitleFactory.FromUnvalidated(ns.Parent, pageName);
+				Title loreName = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName);
 				return this.ResolveLink(fullName, parentName, loreName);
 			}
 
@@ -173,7 +173,7 @@
 				nextTitles.Clear();
 				foreach (var page in loadPages)
 				{
-					var ns = this.nsList.FromTitle(page);
+					var ns = this.nsList.FromTitle(page.Title);
 					foreach (var backlink in page.Backlinks)
 					{
 						// Once we have a page that's out of the desired namespace, we don't need to follow it anymore, so don't try to load it.
@@ -192,7 +192,7 @@
 			return fullSet;
 		}
 
-		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, Title title)
+		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, ITitle title)
 		{
 			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
 			{
@@ -201,20 +201,19 @@
 					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
 			}
 
-			return this.nsList.FromTitle(title);
+			return this.nsList.FromTitle(title.Title);
 		}
 
 		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
 		{
 			if (node is not SiteTemplateNode linkTemplate ||
-				linkTemplate.TitleValue is not Title callTitle ||
-				!callTitle.PageNameEquals("Lore Link"))
+				!linkTemplate.TitleValue.PageNameEquals("Lore Link"))
 			{
 				return null;
 			}
 
 			var page = parser.Page;
-			var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.FullPageName}.");
+			var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.Title.FullPageName()}.");
 			var ns = this.GetNamespace(linkTemplate, page);
 
 			// If link doesn't resolve to anything, do nothing.
@@ -226,12 +225,12 @@
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 				? displayNode.Value.ToRaw()
 				: Title.ToLabelName(linkNode.Value.ToRaw());
-			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkName, displayText));
+			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkName(), displayText));
 		}
 
 		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)
 		{
-			var ns = this.nsList.FromTitle(page);
+			var ns = this.nsList.FromTitle(page.Title);
 			foreach (var backlink in backlinks)
 			{
 				var title = backlink.Key;

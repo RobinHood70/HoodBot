@@ -41,7 +41,7 @@
 		#endregion
 
 		#region Fields
-		private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>();
 		private readonly List<ProtectionInfo> searchList = new()
 		{
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AJavascript/.*?\.js", new PageProtection(
@@ -218,7 +218,7 @@
 
 			foreach (var page in this.Pages)
 			{
-				var protection = this.pageProtections[page];
+				var protection = this.pageProtections[page.Title];
 				if (page.Exists &&
 					(!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) ||
 					page.StartTimestamp?.AddDays(30) < DateTime.Now))
@@ -245,13 +245,24 @@
 			var namespacesToLoad = this.NamespacesInSearchList();
 			var titlesToProtect = this.LoadPageNames(namespacesToLoad);
 			this.StatusWriteLine("Loading Current Protection Levels");
-			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Info, true)
-			{
-				InfoGetProtection = true,
-			});
-
+			var pageLoadOptions = new PageLoadOptions(PageModules.Info, true) { InfoGetProtection = true };
+			var currentProtectionPages = PageCollection.Unlimited(this.Site, pageLoadOptions);
+			currentProtectionPages.GetTitles(titlesToProtect);
 			currentProtectionPages.RemoveExists(false);
-			this.FindProtectionMismatches(titlesToProtect, currentProtectionPages);
+			foreach (var protectedTitle in titlesToProtect)
+			{
+				var protection = protectedTitle.Protection;
+				if (currentProtectionPages.TryGetValue(protectedTitle.Title, out var page))
+				{
+					var editProtection = ProtectionFromPage(page, "edit");
+					var moveProtection = ProtectionFromPage(page, "move");
+					if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
+					{
+						this.pageProtections.TryAdd(page.Title, protection);
+					}
+				}
+			}
+
 			if (this.pageProtections.Count == 0)
 			{
 				this.Logger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
@@ -275,9 +286,8 @@
 			this.Progress = 0;
 			foreach (var page in this.Pages)
 			{
-				var protection = this.pageProtections[page];
-				Title title = new(page);
-				title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
+				var protection = this.pageProtections[page.Title];
+				page.Title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 
 				if (page.TextModified)
 				{
@@ -288,7 +298,11 @@
 			}
 		}
 
-		protected override void LoadPages() => this.Pages.GetTitles(this.pageProtections.Keys);
+		protected override void LoadPages()
+		{
+			var titles = new TitleCollection(this.Site, this.pageProtections.Keys);
+			this.Pages.GetTitles(titles);
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -321,7 +335,7 @@
 			}
 
 			var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
-			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.SimpleEquals(headerTemplate.TitleValue));
+			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue == headerTemplate.TitleValue);
 			if (index != -1)
 			{
 				var existing = (SiteTemplateNode)nodes[index];
@@ -333,12 +347,12 @@
 					insertPos--;
 				}
 
-				Title title = new(parser.Page);
+				var title = parser.Page.Title;
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					var sourceTitle = TitleFactory.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue());
-					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
+					var sourceTitle = TitleFactory.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue()).ToTitle();
+					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageNameEquals(title.BasePageName()))
 					{
 						existing.Parameters.RemoveAt(index);
 					}
@@ -487,7 +501,7 @@
 
 		private void UpdatePage(Page page)
 		{
-			var protection = this.pageProtections[page];
+			var protection = this.pageProtections[page.Title];
 			var insertPos = 0;
 			ContextualParser parser = new(page);
 			var nodes = parser;
@@ -562,26 +576,9 @@
 		#endregion
 
 		#region Private Methods
-		private void FindProtectionMismatches(TitleCollection titlesToProtect, PageCollection currentProtectionPages)
+		private List<ProtectedTitle> LoadPageNames(ICollection<int> spacesToLoad)
 		{
-			foreach (var searchTitle in titlesToProtect)
-			{
-				var protection = ((ProtectedTitle)searchTitle).Protection;
-				if (currentProtectionPages.TryGetValue(searchTitle, out var page))
-				{
-					var editProtection = ProtectionFromPage(page, "edit");
-					var moveProtection = ProtectionFromPage(page, "move");
-					if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
-					{
-						this.pageProtections.TryAdd(page, protection);
-					}
-				}
-			}
-		}
-
-		private TitleCollection LoadPageNames(ICollection<int> spacesToLoad)
-		{
-			TitleCollection titlesToProtect = new(this.Site);
+			List<ProtectedTitle> titlesToProtect = new();
 			UespNamespaceList uespNamespaceList = new(this.Site);
 			foreach (var ns in uespNamespaceList)
 			{
@@ -601,9 +598,9 @@
 				{
 					foreach (var si in this.searchList)
 					{
-						if (si.Namespaces.Contains(title.Namespace.Id) && si.SearchPattern.IsMatch(title.PageName))
+						if (si.Namespaces.Contains(title.Title.Namespace.Id) && si.SearchPattern.IsMatch(title.Title.PageName))
 						{
-							titlesToProtect.Add(new ProtectedTitle(title, si.PageProtection));
+							titlesToProtect.Add(new ProtectedTitle(title.Title, si.PageProtection));
 							break;
 						}
 					}
@@ -671,15 +668,27 @@
 			#endregion
 		}
 
-		private sealed class ProtectedTitle : Title
+		private sealed class ProtectedTitle : ITitle
 		{
+			#region Constructors
 			public ProtectedTitle(Title title, PageProtection protection)
-				: base(title)
 			{
+				this.Title = title;
 				this.Protection = protection;
 			}
+			#endregion
 
+			#region Public Properties
 			public PageProtection Protection { get; }
+
+			public Title Title { get; }
+			#endregion
+
+			#region Public Methods
+			public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
+
+			public string LinkName() => this.Title.LinkName();
+			#endregion
 		}
 
 		private sealed class ProtectionInfo

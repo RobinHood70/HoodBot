@@ -9,7 +9,7 @@
 	public class FixDoubleRedirects : ParsedPageJob
 	{
 		#region Fields
-		private readonly Dictionary<Title, FullTitle> lookup = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, SiteLink> lookup = new();
 		#endregion
 
 		#region Constructors
@@ -37,7 +37,7 @@
 			{
 				var from = TitleFactory.FromUnvalidated(this.Site, mapping.Key);
 				titles.Add(from);
-				this.lookup.Add(from, mapping.Value);
+				this.lookup.Add(from, new SiteLink(mapping.Value));
 			}
 
 			this.Pages.GetTitles(titles);
@@ -47,17 +47,16 @@
 		{
 			foreach (var link in parser.LinkNodes)
 			{
-				var siteLink = SiteLink.FromLinkNode(this.Site, link);
-				FullTitle lookupLink = siteLink;
-				while (this.lookup.TryGetValue(lookupLink, out var target))
+				var original = SiteLink.FromLinkNode(this.Site, link);
+				var newLink = original;
+				while (this.lookup.TryGetValue(newLink.Title, out var tempLink))
 				{
-					lookupLink = target;
+					newLink = tempLink;
 				}
 
-				var newLink = new SiteLink((IFullTitle)lookupLink);
-				if (siteLink.Fragment is not null)
+				if (original.Fragment is not null)
 				{
-					newLink.Fragment = siteLink.Fragment;
+					newLink.Fragment = original.Fragment;
 				}
 
 				newLink.UpdateLinkNode(link);

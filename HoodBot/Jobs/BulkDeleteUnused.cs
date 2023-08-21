@@ -32,7 +32,7 @@
 			this.deleteTitles.Clear();
 			foreach (var title in unused)
 			{
-				if (title.Namespace == MediaWikiNamespaces.File && title.PageName.StartsWith("LG-audio-", StringComparison.Ordinal))
+				if (title.Title.Namespace == MediaWikiNamespaces.File && title.Title.PageName.StartsWith("LG-audio-", StringComparison.Ordinal))
 				{
 					this.deleteTitles.Add(title);
 				}
@@ -45,10 +45,9 @@
 		protected override void Main()
 		{
 			this.ProgressMaximum = this.deleteTitles.Count;
-			foreach (var simpleTitle in this.deleteTitles)
+			foreach (var title in this.deleteTitles)
 			{
-				Title title = new(simpleTitle);
-				title.Delete("Unused audio file.");
+				title.Title.Delete("Unused audio file.");
 				this.Progress++;
 			}
 		}

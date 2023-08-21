@@ -6,7 +6,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
@@ -68,18 +67,17 @@
 					var name = template.GetTitleText();
 					if (name.StartsWith("#load", StringComparison.OrdinalIgnoreCase))
 					{
-						this.loadCalls.Add(new LoadSaveCall(page, template));
+						this.loadCalls.Add(new LoadSaveCall(page.Title, template));
 					}
 					else if (name.StartsWith("#save", StringComparison.OrdinalIgnoreCase))
 					{
-						this.saveCalls.Add(new LoadSaveCall(page, template));
+						this.saveCalls.Add(new LoadSaveCall(page.Title, template));
 					}
 				}
 			}
 
-			var comparer = SimpleTitleComparer.Instance;
-			this.loadCalls.Sort((x, y) => comparer.Compare(x.Page, y.Page));
-			this.saveCalls.Sort((x, y) => comparer.Compare(x.Page, y.Page));
+			this.loadCalls.Sort((x, y) => Title.Compare(x.Page, y.Page));
+			this.saveCalls.Sort((x, y) => Title.Compare(x.Page, y.Page));
 		}
 
 		private void WriteFile(bool isLoadCall)

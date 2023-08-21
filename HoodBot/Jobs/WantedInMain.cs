@@ -23,10 +23,10 @@
 			List<string> sorted = new();
 			foreach (var title in titles)
 			{
-				if (title.Namespace == MediaWikiNamespaces.Main)
+				if (title.Title.Namespace == MediaWikiNamespaces.Main)
 				{
-					var uri = Uri.EscapeDataString(title.FullPageName + '?');
-					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.FullPageName}]");
+					var uri = Uri.EscapeDataString(title.Title.FullPageName() + '?');
+					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.Title.FullPageName()}]");
 				}
 			}
 

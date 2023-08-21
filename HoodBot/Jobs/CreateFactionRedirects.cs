@@ -93,7 +93,7 @@
 			if (!this.Pages.Contains(pageName))
 			{
 				var page = site.CreatePage(pageName);
-				page.Text = $"#REDIRECT [[{factionPage.FullPageName}#{section}]] [[Category:Redirects to Broader Subjects]] [[Category:Beyond Skyrim-Cyrodiil-Factions]]";
+				page.Text = $"#REDIRECT [[{factionPage.Title.FullPageName()}#{section}]] [[Category:Redirects to Broader Subjects]] [[Category:Beyond Skyrim-Cyrodiil-Factions]]";
 				this.Pages.Add(page);
 			}
 		}

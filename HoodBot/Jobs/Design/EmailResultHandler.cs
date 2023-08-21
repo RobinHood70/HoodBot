@@ -18,7 +18,7 @@
 		/// <summary>Initializes a new instance of the <see cref="EmailResultHandler"/> class.</summary>
 		/// <param name="user">The user whose talk page should be added to.</param>
 		public EmailResultHandler(User user)
-			: base(user?.Site.Culture)
+			: base(user?.Title.Site.Culture)
 		{
 			user.NotNull().LoadUserInfo();
 			if (user.Info?.Emailable == false)

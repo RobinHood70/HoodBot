@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Base
 		internal AllRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionItem> revisions)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title.NotNull();
+			this.Title = title.NotNull();
 			this.PageId = pageId;
 			this.Revisions = revisions;
 		}
@@ -24,11 +24,11 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<RevisionItem> Revisions { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

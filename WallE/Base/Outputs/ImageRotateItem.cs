@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 		internal ImageRotateItem(int ns, string title, long pageId, IReadOnlyList<WarningsItem> errorMessage, string? result, ImageRotateFlags flags)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.ErrorMessage = errorMessage;
 			this.Result = result;
@@ -40,11 +40,11 @@ namespace RobinHood70.WallE.Base
 
 		public string? Result { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

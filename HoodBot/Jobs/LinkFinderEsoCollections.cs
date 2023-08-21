@@ -17,7 +17,7 @@
 		protected override void LoadPages()
 		{
 			TitleCollection titles = new(this.Site, UespNamespaces.Online, "Assistants", "Body Markings", "Collectible Emotes", "Collectible Furnishings", "Costumes", "Facial Hair", "Fragments", "Hair Styles", "Hats(collectible)", "Head Markings", "Houseguests", "Major Adornments", "Mementos (collection)", "Minor Adornments", "Mounts", "Personalities", "Pets", "Polymorphs", "Skins");
-			this.SetTitlesFromSubpages(titles);
+			this.SetTitlesFromSubpages(titles.Titles());
 			base.LoadPages();
 		}
 		#endregion

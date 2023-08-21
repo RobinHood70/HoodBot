@@ -39,7 +39,7 @@
 		private readonly List<string> pageMessages = new();
 		private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
 
-		//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new(SimpleTitleComparer.Instance);
+		//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new();
 		#endregion
 
 		#region Constructors
@@ -126,7 +126,7 @@
 			parser.ThrowNull();
 			if (this.GenericTemplateFixes(template))
 			{
-				this.Warn("Template problem on " + parser.Page.FullPageName);
+				this.Warn("Template problem on " + parser.Page.Title.FullPageName());
 			}
 
 			this.FurnishingFixes(template, parser.Page);
@@ -218,8 +218,8 @@
 			}
 
 			var nameFix = imageName.Replace(':', ',');
-			var oldTitle = TitleFactory.FromUnvalidated(fileSpace, imageName).ToTitle();
-			var newTitle = TitleFactory.FromUnvalidated(fileSpace, nameFix).ToTitle();
+			var oldTitle = TitleFactory.FromUnvalidated(fileSpace, imageName).Title;
+			var newTitle = TitleFactory.FromUnvalidated(fileSpace, nameFix).Title;
 
 			if (!string.Equals(oldTitle.LabelName(), newTitle.LabelName(), StringComparison.Ordinal))
 			{
@@ -236,19 +236,18 @@
 			}
 		}
 
-		private void CheckPageName(Page? page, string labelName, Furnishing furnishing)
+		private void CheckTitle(Title title, string labelName, Furnishing furnishing)
 		{
-			page.ThrowNull();
 			var compareName = Furnishing.PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
 			if (!string.Equals(labelName, compareName, StringComparison.Ordinal))
 			{
-				this.pageMessages.Add($"[[{page.FullPageName}|{labelName}]] ''should be''<br>\n" +
+				this.pageMessages.Add($"[[{title.FullPageName()}|{labelName}]] ''should be''<br>\n" +
 				  $"{compareName}");
-				if (!page.PageName.Contains(':', StringComparison.Ordinal) &&
+				if (!title.PageName.Contains(':', StringComparison.Ordinal) &&
 					compareName.Contains(':', StringComparison.Ordinal) &&
-					string.Equals(page.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
+					string.Equals(title.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
 				{
-					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
+					Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\t{furnishing.Title}");
 				}
 			}
 		}
@@ -365,7 +364,7 @@
 		private void FurnishingFixes(SiteTemplateNode template, Page? page)
 		{
 			page.ThrowNull();
-			var labelName = page.LabelName();
+			var labelName = page.Title.LabelName();
 			var name = CheckName(template, labelName);
 			CheckIcon(template, labelName);
 			if (this.FindFurnishing(template, page, labelName) is not Furnishing furnishing)
@@ -374,7 +373,7 @@
 			}
 
 			this.CheckImage(template, name, page.AsLink(LinkFormat.LabelName));
-			this.CheckPageName(page, labelName, furnishing);
+			this.CheckTitle(page.Title, labelName, furnishing);
 
 			template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);
 			if (furnishing.Collectible)
@@ -411,7 +410,7 @@
 					_ => throw new InvalidOperationException()
 				};
 
-				var expectedNmae = craftWord + ": " + (template.GetValue("name") ?? page.LabelName());
+				var expectedNmae = craftWord + ": " + (template.GetValue("name") ?? page.Title.LabelName());
 				var planname = template.GetValue("planname");
 				if (string.Equals(expectedNmae, planname, StringComparison.Ordinal))
 				{

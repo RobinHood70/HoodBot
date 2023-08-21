@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		public PagesWithPropertyItem(int? ns, string? title, long pageId, string? value)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Value = value;
 		}
@@ -21,13 +21,13 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public string? Value { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? this.Value ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? this.Value ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

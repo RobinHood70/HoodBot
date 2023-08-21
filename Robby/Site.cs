@@ -82,7 +82,7 @@
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private TitleCollection? deletePreventionTemplates;
 		private TitleCollection? deletionCategories;
-		private TitleCollection? disambiguationTemplates;
+		private IReadOnlySet<Title>? disambiguationTemplates;
 		private TitleCollection? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private FullTitle? mainPage;
@@ -107,7 +107,6 @@
 			this.FilterPages = new TitleCollection(this);
 			this.deletePreventionTemplates = new TitleCollection(this);
 			this.deletionCategories = new TitleCollection(this);
-			this.disambiguationTemplates = new TitleCollection(this);
 			this.discussionPages = new TitleCollection(this);
 		}
 		#endregion
@@ -164,7 +163,7 @@
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-		public TitleCollection DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+		public IReadOnlySet<Title> DisambiguationTemplates => this.disambiguationTemplates ??= this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 		public TitleCollection DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
@@ -198,7 +197,7 @@
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
-		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
+		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName()</c>, but is provided so that the original name is available, if needed.</remarks>
 		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string MainPageName => this.mainPageName ?? throw NoSite();
 
@@ -289,12 +288,16 @@
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="fullPageName">The full name of the page to create.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(string fullPageName) => this.CreatePage(TitleFactory.FromUnvalidated(this, fullPageName), string.Empty);
+		public Page CreatePage(string fullPageName) => this.CreatePage(fullPageName, string.Empty);
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="title">The title containing the name of the page to create.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(Title title) => this.CreatePage(title, string.Empty);
+		public Page CreatePage(ITitle title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return this.CreatePage(title.Title.FullPageName(), string.Empty);
+		}
 
 		/// <summary>Creates a new page with the specified text.</summary>
 		/// <param name="fullPageName">The full name of the page to create.</param>
@@ -313,10 +316,10 @@
 		/// <param name="title">The <see cref="Title"/> of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(Title title, string text)
+		public Page CreatePage(ITitle title, string text)
 		{
-			var retval = this.PageCreator.CreateEmptyPage(title);
-			retval.Text = text ?? string.Empty;
+			var retval = this.PageCreator.CreatePage(title);
+			retval.Text = text;
 			return retval;
 		}
 
@@ -349,13 +352,6 @@
 		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
 		public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
-
-		/// <summary>Determines whether the title provided is considered a discussion page on this site.</summary>
-		/// <param name="title">The title to check.</param>
-		/// <returns><see langword="true"/> if the title represents a discussion page; otherwise, <see langword="false"/>.</returns>
-		public bool IsDiscussionPage(Title title) =>
-			title.NotNull().Namespace.IsTalkSpace ||
-			this.DiscussionPages.Contains(title);
 
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
@@ -439,8 +435,9 @@
 		/// <returns>The text of the page.</returns>
 		public Page? LoadPage(Title title)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(title.NotNull());
+			pages.GetTitles(title);
 			return pages.Count == 1 ? pages[0] : null;
 		}
 
@@ -450,7 +447,8 @@
 		/// <returns>The text of the page.</returns>
 		public Page? LoadPage(Title title, string subPageName)
 		{
-			var titleName = title.NotNull().PageName;
+			ArgumentNullException.ThrowIfNull(title);
+			var titleName = title.PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
 				if (subPageName[0] != '/')
@@ -475,8 +473,9 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(Title title)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(title.NotNull());
+			pages.GetTitles(title);
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
 
@@ -486,7 +485,7 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(Title title, string subPageName)
 		{
-			var titleName = title.NotNull().PageName;
+			var titleName = title.PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
 				if (subPageName[0] != '/')
@@ -540,7 +539,7 @@
 			Messages = messages,
 			Arguments = arguments,
 			EnableParser = true,
-			EnableParserTitle = context?.FullPageName,
+			EnableParserTitle = context?.FullPageName(),
 		});
 
 		/// <summary>Gets all recent changes.</summary>
@@ -692,7 +691,7 @@
 			{
 				var retval = this.Patrol(new PatrolInput(rcid));
 
-				return retval.FullPageName == null
+				return retval.Title == null
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
 			}
@@ -713,9 +712,9 @@
 			ChangeStatus ChangeFunc()
 			{
 				var retval = this.Patrol(new PatrolInput(revid));
-				return retval.FullPageName == null
-				? ChangeStatus.Failure
-				: ChangeStatus.Success;
+				return retval.Title == null
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
 			}
 		}
 
@@ -732,7 +731,7 @@
 
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
-				[nameof(title)] = title.FullPageName,
+				[nameof(title)] = title.FullPageName(),
 				[nameof(revisionId)] = revisionId,
 				[nameof(editSummary)] = editSummary
 			};
@@ -741,7 +740,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				EditInput input = new(title.FullPageName, revisionId)
+				EditInput input = new(title.FullPageName(), revisionId)
 				{
 					Bot = true,
 					Minor = Tristate.True,
@@ -1043,18 +1042,16 @@
 			Dictionary<string, string> disabledResult = new(StringComparer.Ordinal);
 			if (!this.EditingEnabled)
 			{
-				disabledResult.Add(from.FullPageName, to.FullPageName);
-				var fromTalk = from.TalkPage;
-				if (moveTalk && fromTalk is not null)
+				disabledResult.Add(from.FullPageName(), to.FullPageName());
+				if (moveTalk && from.TalkPage() is Title fromTalk)
 				{
-					var toTalk = to.TalkPage;
-					disabledResult.Add(fromTalk.FullPageName, toTalk?.FullPageName ?? string.Empty);
+					disabledResult.Add(fromTalk.FullPageName(), to.TalkPage()?.FullPageName() ?? string.Empty);
 				}
 
 				if (moveSubpages && from.Namespace.AllowsSubpages)
 				{
 					var toSubPage = TitleFactory.FromUnvalidated(this, to + subPageName);
-					disabledResult.Add(from.FullPageName + subPageName, toSubPage.FullPageName);
+					disabledResult.Add(from.FullPageName() + subPageName, toSubPage.Title.FullPageName());
 				}
 			}
 
@@ -1071,7 +1068,7 @@
 
 			ChangeValue<IDictionary<string, string>> ChangeFunc()
 			{
-				MoveInput input = new(from.FullPageName, to.FullPageName)
+				MoveInput input = new(from.FullPageName(), to.FullPageName())
 				{
 					IgnoreWarnings = true,
 					MoveSubpages = moveSubpages,
@@ -1089,7 +1086,7 @@
 					{
 						if (item.Error != null)
 						{
-							this.PublishWarning(this, Globals.CurrentCulture(Resources.MovePageWarning, from.FullPageName, to, item.Error.Info));
+							this.PublishWarning(this, Globals.CurrentCulture(Resources.MovePageWarning, from.FullPageName(), to, item.Error.Info));
 						}
 						else if (item.From != null && item.To != null)
 						{
@@ -1192,7 +1189,11 @@
 		/// <summary>Removes invalid characters from the title's PageName and replaces quote-like characters with quotes.</summary>
 		/// <param name="title">The title to sanitize.</param>
 		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
-		public virtual Title SanitizeTitle(Title title) => new(TitleFactory.FromValidated(title.NotNull().Namespace, this.SanitizePageName(title.PageName)));
+		public virtual Title SanitizeTitle(Title title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
+		}
 		#endregion
 
 		#region Protected Static Methods
@@ -1239,36 +1240,37 @@
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual TitleCollection LoadDisambiguationTemplates()
+		protected virtual IReadOnlySet<Title> LoadDisambiguationTemplates()
 		{
-			if (this.disambiguationTemplates == null)
+			var retval = new HashSet<Title>();
+			Title title = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+			var page = title.Load(PageModules.Default | PageModules.Links, false);
+			if (page.Exists)
 			{
-				this.disambiguationTemplates = new TitleCollection(this);
-				Title title = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
-				var page = title.Load(PageModules.Default | PageModules.Links, false);
-				if (page.Exists)
+				if (page.Links.Count > 0)
 				{
-					if (page.Links.Count == 0)
+					retval.UnionWith(page.Links);
+				}
+				else
+				{
+					var parser = new ContextualParser(page);
+					foreach (var link in parser.LinkNodes)
 					{
-						var parser = new ContextualParser(page);
-						foreach (var link in parser.LinkNodes)
-						{
-							this.disambiguationTemplates.Add(SiteLink.FromLinkNode(this, link));
-						}
-
-						if (this.disambiguationTemplates.Count == 0)
-						{
-							this.disambiguationTemplates.AddRange(page.Text.Split('\n', StringSplitOptions.RemoveEmptyEntries));
-						}
+						retval.Add(SiteLink.FromLinkNode(this, link).Title);
 					}
-					else
+
+					if (retval.Count == 0)
 					{
-						this.disambiguationTemplates.AddRange(page.Links);
+						var split = page.Text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+						foreach (var link in split)
+						{
+							retval.Add(TitleFactory.FromUnvalidated(this, link));
+						}
 					}
 				}
 			}
 
-			return this.disambiguationTemplates;
+			return retval;
 		}
 
 		/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>

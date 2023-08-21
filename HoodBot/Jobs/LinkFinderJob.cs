@@ -100,19 +100,19 @@
 			parser.ThrowNull();
 			foreach (var title in this.Titles)
 			{
-				if (!this.results.TryGetValue(title, out var section))
+				if (!this.results.TryGetValue(title.Title, out var section))
 				{
 					section = new PageLinkList();
-					this.results.Add(title, section);
+					this.results.Add(title.Title, section);
 				}
 
-				if (!section.TryGetValue(parser.Page, out var links))
+				if (!section.TryGetValue(parser.Page.Title, out var links))
 				{
 					links = new LinkTargets();
-					section.Add(parser.Page, links);
+					section.Add(parser.Page.Title, links);
 				}
 
-				foreach (var link in parser.FindSiteLinks(title))
+				foreach (var link in parser.FindSiteLinks(title.Title))
 				{
 					if (this.CheckLink(link) &&
 						WikiTextVisitor.Raw(link) is var textTitle &&
@@ -145,10 +145,6 @@
 
 		private sealed class PageLinkList : SortedDictionary<Title, LinkTargets>
 		{
-			public PageLinkList()
-				: base(SimpleTitleComparer.Instance)
-			{
-			}
 		}
 		#endregion
 	}

@@ -4,14 +4,13 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 
 	internal sealed class BotRevert : EditJob
 	{
 		#region Fields
-		private readonly SortedDictionary<Title, long> undos = new(SimpleTitleComparer.Instance);
+		private readonly SortedDictionary<Title, long> undos = new();
 		#endregion
 
 		#region Constructors

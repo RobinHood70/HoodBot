@@ -52,7 +52,7 @@
 		{
 			title.ThrowNull();
 			var ns = title.Namespace.SubjectSpace;
-			return this.TryGetValue(ns.DecoratedName + title.RootPageName, out var retval) ? retval : this[ns.Name];
+			return this.TryGetValue(ns.DecoratedName() + title.RootPageName(), out var retval) ? retval : this[ns.Name];
 		}
 
 		public UespNamespace? GetAnyBase(string? nsBase) =>

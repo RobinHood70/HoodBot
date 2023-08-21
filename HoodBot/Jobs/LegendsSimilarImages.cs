@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -23,7 +22,7 @@
 			: base(jobManager)
 		{
 			this.allTitles = new TitleCollection(this.Site);
-			this.primaryLookup = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
+			this.primaryLookup = new Dictionary<Title, Title>();
 		}
 		#endregion
 
@@ -49,18 +48,15 @@
 					{
 						var title = linkNode.TitleValue;
 						this.allTitles.Add(title);
-						if (first is null)
+						if (first is not Title firstTitle)
 						{
 							first = title;
 						}
-						else
+						else if (!this.primaryLookup.TryAdd(title, firstTitle))
 						{
-							if (!this.primaryLookup.TryAdd(title, first))
-							{
-								Debug.WriteLine($"\nDuplicate entries for {title.FullPageName}");
-								Debug.WriteLine("  " + this.primaryLookup[title]);
-								Debug.WriteLine("  " + first);
-							}
+							Debug.WriteLine($"\nDuplicate entries for {title.FullPageName}");
+							Debug.WriteLine("  " + this.primaryLookup[title]);
+							Debug.WriteLine("  " + first);
 						}
 					}
 				}
@@ -72,13 +68,13 @@
 		protected override void PageLoaded(Page page)
 		{
 			page.Text = page.Text.Replace("==Licensing== {{esimage}}", "==Licensing==\n{{esimage}}", StringComparison.Ordinal);
-			var title = this.primaryLookup[page];
+			var title = this.primaryLookup[page.Title];
 			AddSimilarImages(page, title);
 		}
 		#endregion
 
 		#region Private Methods
-		private static void AddSimilarImages(Page page, Title? title)
+		private static void AddSimilarImages(Page page, Title title)
 		{
 			var parser = new ContextualParser(page);
 			if (parser.FindSiteTemplate("Similar Images") is null)
@@ -97,11 +93,7 @@
 				var sectionHeader = parser.Factory.HeaderNodeFromParts(2, "Similar Images");
 				var nodes = new NodeCollection(parser.Factory);
 				var template = parser.Factory.TemplateNodeFromParts("Similar Images");
-				if (title is not null)
-				{
-					template.Add(title.PageName);
-				}
-
+				template.Add(title.PageName);
 				sections[insertSection - 1].Content.AddText("\n\n");
 				nodes.AddText("\n");
 				nodes.Add(template);

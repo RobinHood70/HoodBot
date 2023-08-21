@@ -53,7 +53,7 @@
 				// TODO: Take another look at this later. Error catching added here that triggered on [[Online:Hircine's Hunting Grounds]]. Having a bad day and not sure if this is the right thing to do.
 				try
 				{
-					if (retval[mappedName.Value.PageName] is Place place)
+					if (retval[mappedName.Value.Title.PageName] is Place place)
 					{
 						// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
 						var key = TitleFactory.FromUnvalidated(site, mappedName.Key).PageName;
@@ -157,12 +157,12 @@
 			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)
 			{
-				if (member.Namespace == UespNamespaces.Online)
+				if (member.Title.Namespace == UespNamespaces.Online)
 				{
 					// TODO: Take another look at this later. Error catching added here that triggered on [[Online:Farm House]]. Having a bad day and not sure if this is the right thing to do.
 					try
 					{
-						if (places[member.PageName] is Place place)
+						if (places[member.Title.PageName] is Place place)
 						{
 							if (place.PlaceType == PlaceType.Unknown)
 							{
@@ -170,7 +170,7 @@
 							}
 							else
 							{
-								Debug.WriteLine($"Multiple place types on page: {member.FullPageName}");
+								Debug.WriteLine($"Multiple place types on page: {member.Title.FullPageName()}");
 							}
 						}
 					}
@@ -179,9 +179,9 @@
 						// Do nothing
 					}
 				}
-				else if (member.Namespace != UespNamespaces.Category)
+				else if (member.Title.Namespace != UespNamespaces.Category)
 				{
-					Debug.WriteLine($"Unexpected page [[{member.FullPageName}]] found in [[:Category:{placeInfo.CategoryName}]].");
+					Debug.WriteLine($"Unexpected page [[{member.Title.FullPageName()}]] found in [[:Category:{placeInfo.CategoryName}]].");
 				}
 			}
 		}

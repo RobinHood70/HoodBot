@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		internal RedirectItem(int? ns, string? title, long pageId, string? fragment)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Fragment = fragment;
 		}
@@ -22,11 +22,11 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

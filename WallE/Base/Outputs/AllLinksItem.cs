@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal AllLinksItem(int? ns, string? title, long fromId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.FromId = fromId;
 		}
 		#endregion
@@ -20,11 +20,11 @@ namespace RobinHood70.WallE.Base
 
 		public int? Namespace { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

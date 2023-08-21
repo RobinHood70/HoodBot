@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		internal UndeleteResult(int ns, string title, int revisions, int fileVersions, string reason)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.Revisions = revisions;
 			this.FileVersions = fileVersions;
 			this.Reason = reason;
@@ -25,11 +25,11 @@ namespace RobinHood70.WallE.Base
 
 		public int Revisions { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

@@ -61,7 +61,7 @@
 				}
 				catch (EditConflictException) when (editConflictAction != null)
 				{
-					page = new Title(page).Load();
+					page = page.Title.Load();
 					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 					{
 						this.PageMissing(page);

@@ -2,7 +2,6 @@
 {
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -40,8 +39,7 @@
 		private static NodeCollection? Replacer(IWikiNode node, ContextualParser parser)
 		{
 			if (node is not SiteTemplateNode template ||
-			template.TitleValue is not Title scrollbox ||
-			!scrollbox.PageNameEquals("Scrollbox") ||
+			!template.TitleValue.PageNameEquals("Scrollbox") ||
 			template.Find("content") is not IParameterNode contentNode)
 			{
 				return null;
@@ -53,7 +51,7 @@
 			if (!contentLines[0].Contains("Appearances: " + numOccurrences, System.StringComparison.Ordinal) &&
 				!contentLines[0].Contains("Discounts: " + numOccurrences, System.StringComparison.Ordinal))
 			{
-				Debug.WriteLine("Possible appearances mismatch on " + parser.Page.FullPageName);
+				Debug.WriteLine("Possible appearances mismatch on " + parser.Page.Title.FullPageName());
 			}
 
 			return (contentLines.Length > 5 || content.Length > 1000)

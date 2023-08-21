@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		internal OpenSearchItem(string? title, string? description, Uri? uri)
 		{
-			this.FullPageName = title;
+			this.Title = title;
 			this.Description = description;
 			this.Uri = uri;
 		}
@@ -19,13 +19,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string? Description { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public Uri? Uri { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? Globals.Unknown;
+		public override string ToString() => this.Title ?? Globals.Unknown;
 		#endregion
 	}
 }

@@ -76,9 +76,9 @@
 
 		private bool IsException(Page page, string header) =>
 			(string.Equals(header, "Quests", StringComparison.Ordinal) &&
-			page.PageName.StartsWith("Patch/", StringComparison.Ordinal))
+			page.Title.PageName.StartsWith("Patch/", StringComparison.Ordinal))
 			||
 			(this.exceptions.TryGetValue(header, out var exceptionGroup) &&
-			exceptionGroup.Contains(page));
+			exceptionGroup.Contains(page.Title));
 	}
 }

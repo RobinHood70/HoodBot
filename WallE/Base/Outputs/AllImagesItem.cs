@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		internal AllImagesItem(int ns, string title, string name)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.Name = name;
 		}
 		#endregion
@@ -21,13 +21,13 @@ namespace RobinHood70.WallE.Base
 
 		public int Namespace { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 
 		public string? Url { get; internal set; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

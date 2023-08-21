@@ -33,6 +33,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
+			this.ProgressMaximum = this.reblocks.Count;
 			foreach (var block in this.reblocks)
 			{
 				try

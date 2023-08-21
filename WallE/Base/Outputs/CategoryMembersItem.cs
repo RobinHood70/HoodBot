@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal CategoryMembersItem(int? ns, string? title, long pageId, string? sortKey, string? sortKeyPrfix, DateTime? timestamp, CategoryMemberTypes type)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.SortKey = sortKey;
 			this.SortKeyPrefix = sortKeyPrfix;
@@ -30,13 +30,13 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public CategoryMemberTypes Type { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

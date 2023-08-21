@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Base
 			this.User = user;
 			this.UserId = userId;
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Comment = comment;
 			this.Flags = flags;
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public string User { get; }
 
@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? this.User ?? FallbackText.NoTitle;
+		public override string ToString() => this.Title ?? this.User ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

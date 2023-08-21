@@ -3,6 +3,7 @@
 	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
@@ -17,12 +18,19 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		internal MessagePage(Title title, PageLoadOptions options, IApiTitle? apiItem)
-		: base(title, options, apiItem)
+		internal MessagePage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
+			: base(title, options, apiItem)
 		{
+			if (title.Title.Namespace.Id != MediaWikiNamespaces.MediaWiki)
+			{
+				throw new ArgumentException(
+					Globals.CurrentCulture(Resources.NamespaceMustBe, title.Title.Site[MediaWikiNamespaces.MediaWiki].Name),
+					nameof(title));
+			}
+
 			if (apiItem is PageItem && !this.IsMissing)
 			{
-				AllMessagesInput input = new() { Messages = new[] { this.PageName } };
+				AllMessagesInput input = new() { Messages = new[] { title.Title.PageName } };
 				var result = this.Site.AbstractionLayer.AllMessages(input);
 				switch (result.Count)
 				{
@@ -50,7 +58,7 @@
 		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
-		internal MessagePage(Title title, AllMessagesItem item)
+		internal MessagePage(ITitle title, AllMessagesItem item)
 			: base(title, PageLoadOptions.None, null)
 		{
 			ArgumentNullException.ThrowIfNull(item);

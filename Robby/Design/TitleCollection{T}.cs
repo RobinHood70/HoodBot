@@ -14,16 +14,17 @@
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
-	public abstract class TitleCollection<T> : KeyedCollection<Title, T>, ISiteSpecific
+	public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>, ISiteSpecific
+		where T : ITitle
 	{
-		#region Constructors
+		#region Public Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
-		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
-		protected TitleCollection([NotNull, ValidatedNotNull] Site site)
-			: base(SimpleTitleComparer.Instance)
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection{T}"/> class.</summary>
+		/// <param name="site">The <see cref="Site"/> the titles in this collection belong to.</param>
+		public TitleCollection(Site site)
 		{
-			this.Site = site.NotNull();
+			ArgumentNullException.ThrowIfNull(site);
+			this.Site = site;
 		}
 		#endregion
 
@@ -56,11 +57,11 @@
 
 		#region Public Indexers
 
-		/// <summary>Gets or sets the <see cref="Title">Title</see> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="ITitle">IHasTitle</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
-		/// <returns>The <see cref="Title">Title</see>.</returns>
+		/// <returns>The <see cref="ITitle">IHasTitle</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
-		public virtual T this[string key]
+		public T this[string key]
 		{
 			get
 			{
@@ -149,13 +150,13 @@
 		/// <summary>Removes a series of items from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="titles">The titless to remove.</param>
 		/// <returns><see langword="true" /> if any of the <paramref name="titles" /> were removed; otherwise, <see langword="false" />.</returns>
-		public bool Remove(IEnumerable<Title> titles)
+		public bool Remove(IEnumerable<ITitle> titles)
 		{
 			titles.ThrowNull();
 			var removed = false;
 			foreach (var item in titles)
 			{
-				removed |= this.Remove(item);
+				removed |= this.Remove(item.Title);
 			}
 
 			return removed;
@@ -221,6 +222,26 @@
 			list.Sort(comparer);
 		}
 
+		/// <summary>Returns the Title values of each item in the collection.</summary>
+		/// <returns>The Title values of each item in the collection.</returns>
+		public IEnumerable<Title> Titles()
+		{
+			foreach (var item in this)
+			{
+				yield return item.Title;
+			}
+		}
+
+		/// <summary>Convert a collection of ITitles to their full page names.</summary>
+		/// <returns>An enumeration of the titles converted to their full page names.</returns>
+		public IEnumerable<string> ToFullPageNames()
+		{
+			foreach (var title in this)
+			{
+				yield return title.Title.FullPageName();
+			}
+		}
+
 		/// <summary>Attempts to add a title with the given name to the list, gracefully skipping the item if it's already present.</summary>
 		/// <param name="item">The item to try to add.</param>
 		/// <returns><see langword="true"/> if the item was added; otherwise, <see langword="false"/>.</returns>
@@ -253,7 +274,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public T? ValueOrDefault(Title key)
+		public T? ValueOrDefault(ITitle key)
 		{
 			ArgumentNullException.ThrowIfNull(key);
 			_ = this.TryGetValue(key, out var retval);
@@ -273,7 +294,7 @@
 		#region Public Abstract Methods
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
-		public abstract void Sort();
+		public void Sort() => ((List<T>)this.Items).Sort();
 		#endregion
 
 		#region Public Virtual Methods
@@ -297,11 +318,22 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public virtual bool TryGetValue(ITitle key, [MaybeNullWhen(false)] out T value)
+		{
+			ArgumentNullException.ThrowIfNull(key);
+			return base.TryGetValue(key.Title, out value);
+		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public virtual bool TryGetValue(string key, [MaybeNullWhen(false)] out T value)
 		{
 			ArgumentNullException.ThrowIfNull(key);
-			var title = TitleFactory.FromUnvalidated(this.Site, key);
-			return this.TryGetValue(title, out value);
+			var title = TitleFactory.FromUnvalidated(this.Site, key).ToTitle();
+			return base.TryGetValue(title, out value);
 		}
 		#endregion
 
@@ -311,18 +343,21 @@
 		/// <param name="title">The title.</param>
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the <see cref="LimitationType"/> is not one of the recognized values.</exception>
-		protected bool IsTitleInLimits(Title title) =>
+		protected bool IsTitleInLimits(T title) =>
 			title != null &&
 			this.LimitationType switch
 			{
 				LimitationType.None => true,
-				LimitationType.Disallow => !this.NamespaceLimitations.Contains(title.Namespace.Id),
-				LimitationType.OnlyAllow => this.NamespaceLimitations.Contains(title.Namespace.Id),
+				LimitationType.Disallow => !this.NamespaceLimitations.Contains(title.Title.Namespace.Id),
+				LimitationType.OnlyAllow => this.NamespaceLimitations.Contains(title.Title.Namespace.Id),
 				_ => throw new ArgumentOutOfRangeException(Resources.InvalidLimitationType)
 			};
 		#endregion
 
 		#region Protected Override Methods
+
+		/// <inheritdoc/>
+		protected override Title GetKeyForItem(T item) => item.Title;
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>
@@ -334,13 +369,12 @@
 		protected override void InsertItem(int index, T item)
 		{
 			ArgumentNullException.ThrowIfNull(item);
-			var key = this.GetKeyForItem(item);
-			if (key.Site != this.Site)
+			if (item.Title.Site != item.Title.Site)
 			{
-				throw new InvalidOperationException(Resources.InvalidSite);
+				throw new InvalidOperationException(Resources.SiteMismatch);
 			}
 
-			if (this.IsTitleInLimits(key))
+			if (this.IsTitleInLimits(item))
 			{
 				base.InsertItem(index, item);
 			}

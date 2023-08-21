@@ -11,7 +11,7 @@
 
 	/// <summary>Represents a wiki page.</summary>
 	/// <seealso cref="Title" />
-	public class Page : Title
+	public class Page : ITitle
 	{
 		#region Fields
 		private Uri? canonicalPath;
@@ -26,11 +26,12 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		protected internal Page([NotNull, ValidatedNotNull] Title title, PageLoadOptions options, IApiTitle? apiItem)
-			: base(title)
+		protected internal Page([NotNull, ValidatedNotNull] ITitle title, PageLoadOptions options, IApiTitle? apiItem)
 		{
 			// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
+			ArgumentNullException.ThrowIfNull(title);
 			this.LoadOptions = options;
+			this.Title = title.Title;
 			switch (apiItem)
 			{
 				case null:
@@ -72,8 +73,8 @@
 			{
 				foreach (var link in list)
 				{
-					link.FullPageName.PropertyThrowNull(nameof(link));
-					Title title = TitleFactory.FromUnvalidated(this.Site, link.FullPageName);
+					link.Title.PropertyThrowNull(nameof(link));
+					Title title = TitleFactory.FromUnvalidated(this.Title.Site, link.Title);
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;
@@ -91,7 +92,7 @@
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
-					var factory = TitleFactory.CoValidate(this.Site, category.Namespace, category.FullPageName);
+					var factory = TitleFactory.CoValidate(this.Site, category.Namespace, category.Title);
 					categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
@@ -132,7 +133,7 @@
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(TitleFactory.FromUnvalidated(this.Site, link.FullPageName));
+					links.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
 				}
 			}
 
@@ -164,7 +165,7 @@
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(TitleFactory.FromUnvalidated(this.Site, link.FullPageName));
+					templates.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
 				}
 			}
 		}
@@ -181,7 +182,7 @@
 		/// <value>The canonical article path.</value>
 		public Uri CanonicalPath
 		{
-			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName);
+			get => this.canonicalPath ?? this.Title.Site.GetArticlePath(this.Title.FullPageName());
 			set => this.canonicalPath = value;
 		}
 
@@ -205,9 +206,9 @@
 		/// <value>The edit path.</value>
 		public Uri EditPath
 		{
-			get => this.editPath ?? new UriBuilder(this.Site.ScriptPath)
+			get => this.editPath ?? new UriBuilder(this.Title.Site.ScriptPath)
 			{
-				Query = "title=" + Uri.EscapeDataString(this.FullPageName) + "&action=edit"
+				Query = "title=" + Uri.EscapeDataString(this.Title.FullPageName()) + "&action=edit"
 			}.Uri;
 			set => this.editPath = value;
 		}
@@ -222,20 +223,22 @@
 		{
 			get
 			{
+				var site = this.Title.Site;
+
 				// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-				if (this.Site.DisambiguatorAvailable && this.ModuleLoaded(PageModules.Properties))
+				if (site.DisambiguatorAvailable && this.ModuleLoaded(PageModules.Properties))
 				{
 					return this.Properties.ContainsKey("disambiguation");
 				}
 
 				if (!this.ModuleLoaded(PageModules.Templates) ||
-					this.Site.DisambiguationTemplates.Count == 0)
+					site.DisambiguationTemplates.Count == 0)
 				{
 					return null;
 				}
 
 				HashSet<Title> templates = new(this.Templates);
-				templates.IntersectWith(this.Site.DisambiguationTemplates);
+				templates.IntersectWith(site.DisambiguationTemplates);
 
 				return templates.Count > 0;
 			}
@@ -306,6 +309,13 @@
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified => !string.Equals(this.Text, this.CurrentRevision?.Text ?? string.Empty, StringComparison.Ordinal);
+
+		/// <summary>Gets the site to which this Page belongs.</summary>
+		/// <value>The site.</value>
+		public Site Site => this.Title.Site; // Temporary
+
+		/// <summary>Gets the page title.</summary>
+		public Title Title { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -313,24 +323,44 @@
 		/// <summary>Creates a new page from a <see cref="Title"/> object.</summary>
 		/// <param name="title">The title to use.</param>
 		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(Title title)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return title.Site.CreatePage(title);
-		}
+		public static Page FromTitle(Title title) => title.Site.CreatePage(title);
 
 		/// <summary>Creates a new page from a <see cref="Title"/> object, filled with the supplied text.</summary>
 		/// <param name="title">The title to use.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(Title title, string text)
+		public static Page FromTitle(Title title, string text) => title.Site.CreatePage(title, text);
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Creates a new page from a <see cref="Title"/> object.</summary>
+		/// <param name="title">The title to use.</param>
+		/// <returns>A new page based on the title.</returns>
+		public static Page FromTitle(ITitle title)
 		{
 			ArgumentNullException.ThrowIfNull(title);
-			return title.Site.CreatePage(title, text);
+			return title.Title.Site.CreatePage(title);
+		}
+
+		/// <summary>Creates a new page from a <see cref="ITitle"/> object, filled with the supplied text.</summary>
+		/// <param name="title">The title to use.</param>
+		/// <param name="text">The text of the page.</param>
+		/// <returns>A new page based on the title.</returns>
+		public static Page FromTitle(ITitle title, string text)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return title.Title.Site.CreatePage(title.Title, text);
 		}
 		#endregion
 
 		#region Public Methods
+
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
+
+		/// <inheritdoc/>
+		public string LinkName() => this.Title.LinkName();
 
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 		/// <param name="module">The module to check.</param>
@@ -377,7 +407,7 @@
 					return ChangeStatus.NoEffect;
 				}
 
-				EditInput input = new(this.FullPageName, this.Text)
+				EditInput input = new(this.Title.FullPageName(), this.Text)
 				{
 					BaseTimestamp = this.CurrentRevision?.Timestamp,
 					StartTimestamp = this.StartTimestamp,

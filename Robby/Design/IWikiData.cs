@@ -84,12 +84,12 @@
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		void GetDuplicateFiles(IEnumerable<Title> titles);
+		void GetDuplicateFiles(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="titles">The titles to find duplicates of.</param>
 		/// <param name="localOnly">if set to <see langword="true"/> [local only].</param>
-		void GetDuplicateFiles(IEnumerable<Title> titles, bool localOnly);
+		void GetDuplicateFiles(IEnumerable<ITitle> titles, bool localOnly);
 
 		/// <summary>Adds files uploaded by the specified user to the collection.</summary>
 		/// <param name="user">The user.</param>
@@ -119,18 +119,18 @@
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		void GetFileUsage(IEnumerable<Title> titles);
+		void GetFileUsage(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
 		/// <param name="redirects">Filter for redirects.</param>
-		void GetFileUsage(IEnumerable<Title> titles, Filter redirects);
+		void GetFileUsage(IEnumerable<ITitle> titles, Filter redirects);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
 		/// <param name="redirects">Filter for redirects.</param>
 		/// <param name="namespaces">The namespaces to limit results to.</param>
-		void GetFileUsage(IEnumerable<Title> titles, Filter redirects, IEnumerable<int> namespaces);
+		void GetFileUsage(IEnumerable<ITitle> titles, Filter redirects, IEnumerable<int> namespaces);
 
 		/// <summary>Adds pages that link to a given namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
@@ -171,31 +171,31 @@
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		void GetPageCategories(IEnumerable<Title> titles);
+		void GetPageCategories(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="hidden">Filter for hidden categories.</param>
-		void GetPageCategories(IEnumerable<Title> titles, Filter hidden);
+		void GetPageCategories(IEnumerable<ITitle> titles, Filter hidden);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="hidden">Filter for hidden categories.</param>
 		/// <param name="limitTo">Limit the results to these categories.</param>
-		void GetPageCategories(IEnumerable<Title> titles, Filter hidden, IEnumerable<string> limitTo);
+		void GetPageCategories(IEnumerable<ITitle> titles, Filter hidden, IEnumerable<string> limitTo);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		void GetPageLinks(IEnumerable<Title> titles);
+		void GetPageLinks(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="namespaces">The namespaces to limit results to.</param>
-		void GetPageLinks(IEnumerable<Title> titles, IEnumerable<int>? namespaces);
+		void GetPageLinks(IEnumerable<ITitle> titles, IEnumerable<int>? namespaces);
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		void GetPageLinksHere(IEnumerable<Title> titles);
+		void GetPageLinksHere(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
 		/// <param name="property">The property to find.</param>
@@ -203,7 +203,7 @@
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		void GetPageTranscludedIn(IEnumerable<Title> titles);
+		void GetPageTranscludedIn(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
@@ -215,17 +215,17 @@
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		void GetPageTransclusions(IEnumerable<Title> titles);
+		void GetPageTransclusions(IEnumerable<ITitle> titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		/// <param name="limitTo">Limit the results to these transclusions.</param>
-		void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<string> limitTo);
+		void GetPageTransclusions(IEnumerable<ITitle> titles, IEnumerable<string> limitTo);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		/// <param name="namespaces">Limit the results to these namespaces.</param>
-		void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<int> namespaces);
+		void GetPageTransclusions(IEnumerable<ITitle> titles, IEnumerable<int> namespaces);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="prefix">The prefix to search for.</param>

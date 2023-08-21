@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 
 	#region Public Enumerations
 	public enum PlaceType
@@ -25,11 +24,12 @@
 		#region Constructors
 		public Place(VariablesPage page)
 		{
-			this.Alliance = page.NotNull().GetVariable("alliance");
-			this.Key = page.PageName;
+			ArgumentNullException.ThrowIfNull(page);
+			this.Alliance = page.GetVariable("alliance");
+			this.Key = page.Title.PageName;
 			this.Settlement = page.GetVariable("settlement");
-			this.Title = new Title(page);
-			this.TitleName = page.GetVariable("titlename") ?? page.PageName;
+			this.Title = page.Title;
+			this.TitleName = page.GetVariable("titlename") ?? page.Title.PageName;
 			this.TypeText = page.GetVariable("type");
 			this.Zone = page.GetVariable("zone");
 		}
@@ -37,8 +37,9 @@
 		// For ad-hoc places created when no place was found.
 		public Place(string titleName)
 		{
-			this.TitleName = titleName.NotNull();
+			ArgumentNullException.ThrowIfNull(titleName);
 			this.Key = titleName;
+			this.TitleName = titleName;
 		}
 		#endregion
 
@@ -51,7 +52,7 @@
 
 		public string? Settlement { get; private set; }
 
-		public Title? Title { get; private set; }
+		public Title Title { get; private set; }
 
 		public string TitleName { get; }
 
@@ -92,7 +93,7 @@
 
 		public override int GetHashCode() => this.Key.GetHashCode(StringComparison.Ordinal);
 
-		public override string? ToString() => this.Title is null ? this.TitleName : this.Title.AsLink(LinkFormat.LabelName);
+		public override string? ToString() => this.Title.Namespace is null ? this.TitleName : this.Title.AsLink(LinkFormat.LabelName);
 		#endregion
 	}
 }

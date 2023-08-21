@@ -59,7 +59,7 @@
 			}
 
 			ProtectInputItem protection = new("create", createProtection) { Expiry = expiry };
-			return Protect(title.NotNull(), reason, new[] { protection });
+			return Protect(title, reason, new[] { protection });
 		}
 
 		/// <summary>Protects a non-existent page from being created.</summary>
@@ -103,7 +103,7 @@
 		public static ChangeStatus Delete(this Title title, string reason)
 		{
 			reason.ThrowNull();
-			var site = title.NotNull().Namespace.Site;
+			var site = title.Namespace.Site;
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(reason)] = reason,
@@ -113,7 +113,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				DeleteInput input = new(title.FullPageName) { Reason = reason };
+				DeleteInput input = new(title.FullPageName()) { Reason = reason };
 				var retval = title.Site.AbstractionLayer.Delete(input);
 				return retval.LogId == 0
 					? ChangeStatus.Failure
@@ -144,17 +144,17 @@
 		/// <returns>A page for this title.</returns>
 		public static Page Load(this Title title, PageLoadOptions options)
 		{
-			if (title.NotNull().Namespace.CanTalk)
+			if (title.Namespace.CanTalk)
 			{
 				var pages = PageCollection.Unlimited(title.Site, options);
-				pages.GetTitles(title.FullPageName);
+				pages.GetTitles(title.FullPageName());
 				if (pages.Count == 1)
 				{
 					return pages[0];
 				}
 			}
 
-			throw new InvalidOperationException(Globals.CurrentCulture(Resources.PageCouldNotBeLoaded, title.FullPageName));
+			throw new InvalidOperationException(Globals.CurrentCulture(Resources.PageCouldNotBeLoaded, title.FullPageName()));
 		}
 
 		/// <summary>Protects the title.</summary>
@@ -207,7 +207,7 @@
 		/// <param name="moveProtection">The move-protection level.</param>
 		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
-		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(Title, string, ProtectionLevel, ProtectionLevel, string)"/> version of title call.</remarks>
+		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(Title, string, ProtectionLevel, ProtectionLevel, string?)"/> version of title call.</remarks>
 		public static ChangeStatus Protect(this Title title, string reason, string? editProtection, string? moveProtection, string? duration)
 		{
 			duration ??= "infinite";
@@ -275,7 +275,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				ProtectInput input = new(title.FullPageName)
+				ProtectInput input = new(title.FullPageName())
 				{
 					Protections = protections,
 					Reason = reason

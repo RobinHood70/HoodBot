@@ -55,7 +55,7 @@
 			TitleCollection goodTitles = new(this.Site);
 			foreach (var title in uespImageTitles)
 			{
-				var titleSplit = title.PageName.Split('-');
+				var titleSplit = title.Title.PageName.Split('-');
 				if (titleSplit.Length > 2 &&
 					string.Equals(titleSplit[0], "ON", StringComparison.Ordinal) &&
 					prefixes.Contains(titleSplit[1]))

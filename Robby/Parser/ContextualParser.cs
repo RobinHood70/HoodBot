@@ -46,9 +46,10 @@
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public ContextualParser(Page page, string text, InclusionType inclusionType, bool strictInclusion)
-			: base(new SiteNodeFactory(page.NotNull().Namespace.Site))
+			: base(new SiteNodeFactory(page.NotNull().Title.Namespace.Site))
 		{
 			this.Page = page;
+			this.Site = page.Title.Namespace.Site;
 			this.Factory.ParseInto(this, text, inclusionType, strictInclusion);
 		}
 		#endregion
@@ -71,7 +72,7 @@
 		/// <summary>Gets the current Site from the Title.</summary>
 		/// <value>The site.</value>
 		/// <remarks>This property is a direct link to Title and will therefore change if the Title's Site does. Changing Sites within a session may produce unexpected results.</remarks>
-		public Site Site => this.Page.Namespace.Site;
+		public Site Site { get; }
 
 		/// <summary>Gets a set of functions to evaluate templates (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
 		/// <value>The template resolvers.</value>
@@ -94,7 +95,7 @@
 				if (this[i] is SiteLinkNode link &&
 					link.TitleValue.Namespace == MediaWikiNamespaces.Category)
 				{
-					if (TitleFactory.FromBacklinkNode(this.Site, link).SimpleEquals(catTitle))
+					if (TitleFactory.FromBacklinkNode(this.Site, link).Title == catTitle)
 					{
 						return false;
 					}
@@ -159,7 +160,7 @@
 			foreach (var link in this.LinkNodes)
 			{
 				Title linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-				if (link is SiteLinkNode siteLink && linkTitle.SimpleEquals(find))
+				if (link is SiteLinkNode siteLink && linkTitle == find)
 				{
 					yield return siteLink;
 				}
@@ -190,7 +191,7 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="find">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(ITitle find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
@@ -200,10 +201,10 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName)
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(ITitle findName)
 		{
 			ArgumentNullException.ThrowIfNull(findName);
-			return this.FindSiteTemplates(new[] { findName });
+			return this.FindSiteTemplates(new[] { findName.Title.FullPageName() });
 		}
 
 		/// <summary>Finds all templates that match the provided title.</summary>
@@ -219,7 +220,7 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findNames">The templates to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<ITitle> findNames)
 		{
 			ArgumentNullException.ThrowIfNull(findNames);
 			foreach (var templateNode in this.TemplateNodes)
@@ -228,7 +229,7 @@
 				{
 					foreach (var find in findNames)
 					{
-						if (siteTemplate.TitleValue.SimpleEquals(find))
+						if (siteTemplate.TitleValue == find.Title)
 						{
 							yield return siteTemplate;
 						}

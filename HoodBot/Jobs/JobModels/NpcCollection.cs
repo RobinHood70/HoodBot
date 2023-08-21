@@ -5,6 +5,7 @@
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby;
 
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
@@ -14,8 +15,9 @@
 
 		#region Public Methods
 
-		public void GetLocations()
+		public void GetLocations(Site site)
 		{
+			ArgumentNullException.ThrowIfNull(site);
 			List<long> npcIds = new(this.Count);
 			foreach (var npc in this)
 			{

@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Base
 			this.Sections = sections;
 			this.Templates = templates;
 			this.Text = text;
-			this.FullPageName = title;
+			this.Title = title;
 			this.WikiText = wikiText;
 		}
 		#endregion
@@ -97,13 +97,13 @@ namespace RobinHood70.WallE.Base
 
 		public string? Text { get; }
 
-		public string? FullPageName { get; }
+		public string? Title { get; }
 
 		public string? WikiText { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName ?? Globals.Unknown;
+		public override string ToString() => this.Title ?? Globals.Unknown;
 		#endregion
 	}
 }

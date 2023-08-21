@@ -126,9 +126,6 @@
   <data name="InvalidLimitationType" xml:space="preserve">
     <value>The value of LimitationType is invalid.</value>
   </data>
-  <data name="InvalidSite" xml:space="preserve">
-    <value>You attempted to use an object from one site with an object from another.</value>
-  </data>
   <data name="LoginFailed" xml:space="preserve">
     <value>The attempt to log in to the wiki failed: {0}</value>
   </data>
@@ -143,6 +140,9 @@
   </data>
   <data name="PageCouldNotBeLoaded" xml:space="preserve">
     <value>The page {0} could not be loaded, probably because it's not an article or the title is invalid.</value>
+  </data>
+  <data name="SiteMismatch" xml:space="preserve">
+    <value>You attempted to use an object from one site with an object from another.</value>
   </data>
   <data name="SiteNotInitialized" xml:space="preserve">
     <value>{0} is invalid until the site has been initialized.</value>

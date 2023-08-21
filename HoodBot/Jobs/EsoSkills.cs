@@ -132,7 +132,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var skill = this.skills[page.FullPageName];
+			var skill = this.skills[page.Title.FullPageName()];
 			var result = skill.UpdatePageText(page);
 			if (result is not null)
 			{

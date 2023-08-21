@@ -95,7 +95,7 @@
 				var moduleDict = new Dictionary<string, IQueryModule>(modules.Count, StringComparer.Ordinal);
 				foreach (var module in modules)
 				{
-					moduleDict.Add(module.Name, module);
+					moduleDict[module.Name] = module;
 				}
 
 				foreach (var limit in limits.Children<JProperty>())

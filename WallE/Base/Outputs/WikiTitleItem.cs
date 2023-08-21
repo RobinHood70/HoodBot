@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		public WikiTitleItem(int ns, string title, long pageId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 		}
 		#endregion
@@ -19,11 +19,11 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

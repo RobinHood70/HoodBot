@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		internal RollbackResult(int ns, string title, long pageId, string summary, long revisionId, long oldRevisionId, long lastRevisionId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.PageId = pageId;
 			this.Summary = summary;
 			this.RevisionId = revisionId;
@@ -31,11 +31,11 @@ namespace RobinHood70.WallE.Base
 
 		public string Summary { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

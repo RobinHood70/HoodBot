@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		public ProtectedTitlesItem(int ns, string title, string? comment, DateTime? expiry, string? level, string? parsedComment, DateTime? timestamp, string? user, long userId)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title;
+			this.Title = title;
 			this.Comment = comment;
 			this.Expiry = expiry;
 			this.Level = level;
@@ -34,7 +34,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string FullPageName { get; }
+		public string Title { get; }
 
 		public string? User { get; }
 
@@ -42,7 +42,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

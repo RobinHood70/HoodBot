@@ -59,7 +59,7 @@
 			{
 				if (section.Content.Find<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("ESO House Furnishings")) is not null)
 				{
-					this.WriteLine($"* [[{parser.Page.FullPageName}]] has already been converted.");
+					this.WriteLine($"* [[{parser.Page.Title.FullPageName()}]] has already been converted.");
 					continue;
 				}
 
@@ -212,7 +212,7 @@
 								}
 
 								if (string.Equals(link, "general", StringComparison.Ordinal) &&
-									this.generalCategories.TryGetValue(page.PageName, out newLink))
+									this.generalCategories.TryGetValue(page.Title.PageName, out newLink))
 								{
 									link = newLink;
 								}
@@ -230,7 +230,7 @@
 							return null;
 						}
 
-						this.Warn($"Page {page.FullPageName}, Unknown: {text}");
+						this.Warn($"Page {page.Title.FullPageName()}, Unknown: {text}");
 						break;
 				}
 			}
@@ -240,7 +240,7 @@
 				return line;
 			}
 
-			Debug.WriteLine($"Page {page.FullPageName}, Default: {line}");
+			Debug.WriteLine($"Page {page.Title.FullPageName}, Default: {line}");
 			return line;
 		}
 		#endregion

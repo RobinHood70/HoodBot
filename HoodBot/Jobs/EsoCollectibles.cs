@@ -22,7 +22,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, Collectible> collectibles = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, Collectible> collectibles = new();
 		private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
 		private string? blankText;
 		#endregion
@@ -97,9 +97,9 @@
 			var page = parser.Page;
 			parser.ReplaceText(
 				"<gallery>\n</gallery>",
-				$"<gallery>\nON-crown store-{page.PageName}.jpg\n</gallery>",
+				$"<gallery>\nON-crown store-{page.Title.PageName}.jpg\n</gallery>",
 				StringComparison.Ordinal);
-			var collectible = this.collectibles[page] ?? throw new InvalidOperationException();
+			var collectible = this.collectibles[page.Title] ?? throw new InvalidOperationException();
 			if (this.crateTiers.TryGetValue(collectible.Name, out var crateInfo))
 			{
 				collectible.Crates.AddRange(crateInfo);
@@ -263,7 +263,7 @@
 						}
 
 						// allTiers.Add($"[[Online:{crate.PageName}#{tier}|{crate.PageName}]]");
-						allTiers.Add(crate.PageName);
+						allTiers.Add(crate.Title.PageName);
 					}
 				}
 			}

@@ -9,7 +9,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
-	public class User : Title
+	public class User : ITitle
 	{
 		#region Constructors
 
@@ -17,8 +17,10 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="user">The user's name.</param>
 		public User(Site site, string user)
-			: base(site.NotNull()[MediaWikiNamespaces.User], user.NotNull())
 		{
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(user);
+			this.Title = GetTitle(site, user);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
@@ -27,16 +29,21 @@
 		public User(Site site, AllUsersItem userInfo)
 			: this(site, userInfo.NotNull().Name)
 		{
-			this.Info = new UserInfo(this.Site, userInfo);
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(userInfo);
+			this.Title = GetTitle(site, userInfo.Name);
+			this.Info = new UserInfo(site, userInfo);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
 		/// <param name="title">The base user page.</param>
 		/// <param name="userInfo">The API user information.</param>
 		public User(Title title, UsersItem userInfo)
-			: base(title)
 		{
-			this.Info = new UserInfo(this.Site, userInfo);
+			ArgumentNullException.ThrowIfNull(title);
+			ArgumentNullException.ThrowIfNull(userInfo);
+			this.Title = title;
+			this.Info = new UserInfo(title.Site, userInfo);
 		}
 		#endregion
 
@@ -48,7 +55,10 @@
 		/// <summary>Gets the user's name.</summary>
 		/// <value>The name.</value>
 		/// <remarks>This is an alias to PageName for ease-of-use.</remarks>
-		public string Name => this.PageName;
+		public string Name => this.Title.PageName;
+
+		/// <inheritdoc/>
+		public Title Title { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -57,10 +67,20 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The username.</param>
 		/// <returns>A title corresponding to the User page.</returns>
-		public static Title GetTitle(Site site, string name) => new(TitleFactory.FromValidated(site.NotNull()[MediaWikiNamespaces.User], name.NotNull()));
+		public static Title GetTitle(Site site, string name)
+		{
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(name);
+			return TitleFactory
+				.FromValidated(site[MediaWikiNamespaces.User], name)
+				.ToTitle();
+		}
 		#endregion
 
 		#region Public Methods
+
+		/// <inheritdoc/>
+		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
 
 		/// <summary>Blocks the specified user.</summary>
 		/// <param name="reason">The reason for the block.</param>
@@ -121,12 +141,12 @@
 				[nameof(ccMe)] = ccMe,
 			};
 
-			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+			return this.Title.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<string> ChangeFunc()
 			{
 				EmailUserInput input = new(this.Name, body) { CCMe = ccMe, Subject = subject };
-				var retval = this.Site.AbstractionLayer.EmailUser(input);
+				var retval = this.Title.Site.AbstractionLayer.EmailUser(input);
 				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
@@ -143,11 +163,11 @@
 		public IReadOnlyList<Contribution> GetContributions()
 		{
 			UserContributionsInput input = new(this.Name);
-			var result = this.Site.AbstractionLayer.UserContributions(input);
+			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
 			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(new Contribution(this.Site, item));
+				retval.Add(new Contribution(this.Title.Site, item));
 			}
 
 			return retval;
@@ -159,11 +179,11 @@
 		public IReadOnlyList<Contribution> GetContributions(IEnumerable<int> namespaces)
 		{
 			UserContributionsInput input = new(this.Name) { Namespaces = namespaces };
-			var result = this.Site.AbstractionLayer.UserContributions(input);
+			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
 			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(new Contribution(this.Site, item));
+				retval.Add(new Contribution(this.Title.Site, item));
 			}
 
 			return retval;
@@ -176,11 +196,11 @@
 		public IReadOnlyList<Contribution> GetContributions(DateTime? from, DateTime? to)
 		{
 			UserContributionsInput input = new(this.Name) { Start = from, End = to, SortAscending = (from ?? DateTime.MinValue) < (to ?? DateTime.MaxValue) };
-			var result = this.Site.AbstractionLayer.UserContributions(input);
+			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
 			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(new Contribution(this.Site, item));
+				retval.Add(new Contribution(this.Title.Site, item));
 			}
 
 			return retval;
@@ -188,13 +208,13 @@
 
 		/// <summary>Gets the user's entire watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
-		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
+		/// <returns>A read-only list of <see cref="Robby.Title"/>s in the user's watchlist.</returns>
 		public IReadOnlyList<Title> GetWatchlist(string token) => this.GetWatchlist(token, null);
 
 		/// <summary>Gets the user's watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <param name="namespaces">The namespaces of the contributions to retrieve.</param>
-		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
+		/// <returns>A read-only list of <see cref="Robby.Title"/>s in the user's watchlist.</returns>
 		public IReadOnlyList<Title> GetWatchlist(string token, IEnumerable<int>? namespaces)
 		{
 			WatchlistRawInput input = new()
@@ -203,15 +223,18 @@
 				Token = token,
 				Namespaces = namespaces
 			};
-			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
+			var result = this.Title.Site.AbstractionLayer.WatchlistRaw(input);
 			List<Title> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName));
+				retval.Add(TitleFactory.CoValidate(this.Title.Site, item.Namespace, item.Title));
 			}
 
 			return retval;
 		}
+
+		/// <inheritdoc/>
+		public string LinkName() => this.Title.LinkName();
 
 		/// <summary>Loads all user information. This is necessary for any User object not provided by one of the <see cref="Site"/>.LoadUserInformation() methods.</summary>
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
@@ -221,10 +244,10 @@
 			{
 				Properties = UsersProperties.All
 			};
-			var result = this.Site.AbstractionLayer.Users(input);
+			var result = this.Title.Site.AbstractionLayer.Users(input);
 			if (result.Count == 1)
 			{
-				this.Info = new UserInfo(this.Site, result[0]);
+				this.Info = new UserInfo(this.Title.Site, result[0]);
 			}
 		}
 
@@ -237,7 +260,7 @@
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
 			msg = msg.NotNull().Trim();
-			if (this.TalkPage is not Title talkPage)
+			if (this.Title.TalkPage() is not Title talkPage)
 			{
 				throw new InvalidOperationException(Resources.TitleInvalid);
 			}
@@ -255,11 +278,11 @@
 				[nameof(editSummary)] = editSummary,
 			};
 
-			return this.Site.PublishChange(this, parameters, ChangeFunc);
+			return this.Title.Site.PublishChange(this, parameters, ChangeFunc);
 
 			ChangeStatus ChangeFunc()
 			{
-				EditInput input = new(talkPage.FullPageName, msg)
+				EditInput input = new(talkPage.FullPageName(), msg)
 				{
 					Bot = false, // A new talk page message should not be auto-ignored.
 					Minor = Tristate.False,
@@ -269,7 +292,7 @@
 					Summary = editSummary,
 				};
 
-				var retval = this.Site.AbstractionLayer.Edit(input);
+				var retval = this.Title.Site.AbstractionLayer.Edit(input);
 
 				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
@@ -287,12 +310,12 @@
 				[nameof(reason)] = reason
 			};
 
-			return this.Site.PublishChange(this, parameters, ChangeFunc);
+			return this.Title.Site.PublishChange(this, parameters, ChangeFunc);
 
 			ChangeStatus ChangeFunc()
 			{
 				UnblockInput input = new(this.Name) { Reason = reason };
-				var retval = this.Site.AbstractionLayer.Unblock(input);
+				var retval = this.Title.Site.AbstractionLayer.Unblock(input);
 				return retval.Id == 0
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -313,11 +336,11 @@
 				[nameof(input.Reblock)] = input.Reblock,
 			};
 
-			return this.Site.PublishChange(this, parameters, ChangeFunc);
+			return this.Title.Site.PublishChange(this, parameters, ChangeFunc);
 
 			ChangeStatus ChangeFunc()
 			{
-				var retval = this.Site.AbstractionLayer.Block(input);
+				var retval = this.Title.Site.AbstractionLayer.Block(input);
 				return retval.Id == 0
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;

@@ -7,7 +7,7 @@
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class NaturalTitleComparer : IComparer<Title>, IComparer
+	public sealed class NaturalTitleComparer : IComparer<ITitle>, IComparer
 	{
 		#region Constructors
 		private NaturalTitleComparer()
@@ -29,41 +29,43 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(Title? x, Title? y)
+		public int Compare(ITitle? x, ITitle? y)
 		{
-			if (x == null)
+			if (x is null)
 			{
-				return y == null ? 0 : -1;
+				return y is null ? 0 : -1;
 			}
 
-			if (y == null)
+			if (y is null)
 			{
 				return 1;
 			}
 
-			var nsCompare = x.Namespace.Id.CompareTo(y.Namespace.Id);
+			var xTitle = x.Title;
+			var yTitle = y.Title;
+			var nsCompare = xTitle.Namespace.Id.CompareTo(yTitle.Namespace.Id);
 			if (nsCompare != 0)
 			{
 				return nsCompare;
 			}
 
-			if (x.PageName == null)
+			if (xTitle.PageName == null)
 			{
-				return y.PageName == null ? 0 : -1;
+				return yTitle.PageName == null ? 0 : -1;
 			}
 
-			if (y.PageName == null)
+			if (yTitle.PageName == null)
 			{
 				return 1;
 			}
 
-			var siteCulture = x.Namespace.Site.Culture;
-			return x.Namespace.CaseSensitive
-				? NaturalSort.Compare(x.PageName, y.PageName, siteCulture, CompareOptions.None)
-				: NaturalSort.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), siteCulture, CompareOptions.IgnoreCase);
+			var siteCulture = xTitle.Namespace.Site.Culture;
+			return xTitle.Namespace.CaseSensitive
+				? NaturalSort.Compare(xTitle.PageName, yTitle.PageName, siteCulture, CompareOptions.None)
+				: NaturalSort.Compare(xTitle.PageName.UpperFirst(siteCulture), yTitle.PageName.UpperFirst(siteCulture), siteCulture, CompareOptions.IgnoreCase);
 		}
 
-		int IComparer.Compare(object? x, object? y) => this.Compare(x as Title, y as Title);
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as ITitle, y as ITitle);
 		#endregion
 	}
 }

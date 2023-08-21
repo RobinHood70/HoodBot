@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, SetData> sets = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<ITitle, SetData> sets = new(TitleComparer.Instance);
 		#endregion
 
 		#region Constructors
@@ -139,7 +139,7 @@
 					oldPage[^1] is IIgnoreNode lastNode &&
 					lastNode.Value.StartsWith("</onlyinclude>", StringComparison.Ordinal)))
 			{
-				this.Warn($"Delimiters not found on page {page.FullPageName}");
+				this.Warn($"Delimiters not found on page {page.Title.FullPageName}");
 				return;
 			}
 
@@ -200,7 +200,7 @@
 		#region Private Methods
 		private void GenerateReport()
 		{
-			var sorted = new SortedDictionary<Title, string>(SimpleTitleComparer.Instance);
+			var sorted = new SortedDictionary<ITitle, string>(TitleComparer.Instance);
 			foreach (var (page, set) in this.sets)
 			{
 				StringBuilder sb = new();
@@ -208,7 +208,7 @@
 				{
 					sb
 						.Append("* {{Pl|")
-						.Append(page.FullPageName)
+						.Append(page.Title.FullPageName())
 						.Append('|')
 						.Append(set.Name)
 						.Append("|diff=cur}}");
@@ -226,7 +226,7 @@
 			}
 		}
 
-		private SortedSet<string> ResolveDisambiguations(Dictionary<Title, SetData> notFound)
+		private SortedSet<string> ResolveDisambiguations(Dictionary<ITitle, SetData> notFound)
 		{
 			var unresolved = new SortedSet<string>(StringComparer.Ordinal);
 			var titles = new TitleCollection(this.Site, notFound.Keys);
@@ -252,7 +252,7 @@
 						unresolved.Add(set.Name);
 					}
 				}
-				else if (page.Exists && page.PageName.EndsWith(" (set)", StringComparison.Ordinal))
+				else if (page.Exists && page.Title.PageName.EndsWith(" (set)", StringComparison.Ordinal))
 				{
 					unresolved.Add(set.Name);
 				}
@@ -268,7 +268,7 @@
 
 		private SortedSet<string> UpdateSetPages(PageCollection setMembers, List<SetData> sets)
 		{
-			var notFound = new Dictionary<Title, SetData>(SimpleTitleComparer.Instance);
+			var notFound = new Dictionary<ITitle, SetData>(TitleComparer.Instance);
 			foreach (var set in sets)
 			{
 				if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
@@ -290,11 +290,11 @@
 
 					foreach (var setMember in setMembers)
 					{
-						if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0 &&
-							string.Compare(setMember.PageName, setName, false, this.Site.Culture) != 0)
+						if (string.Compare(setMember.Title.PageName, setName, true, this.Site.Culture) == 0 &&
+							string.Compare(setMember.Title.PageName, setName, false, this.Site.Culture) != 0)
 						{
 							foundPage = setMember;
-							this.Warn($"Substituted {setMember.PageName} for {setName}. It's safer to override this in {nameof(TitleOverrides)}.");
+							this.Warn($"Substituted {setMember.Title.PageName} for {setName}. It's safer to override this in {nameof(TitleOverrides)}.");
 							break;
 						}
 					}

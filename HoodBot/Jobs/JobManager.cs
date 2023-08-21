@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Net;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
@@ -180,7 +181,7 @@
 			}
 
 			var page = eventArgs.Page;
-			DiffContent diffContent = new(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
+			DiffContent diffContent = new(page.Title.FullPageName(), page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
 			{
 				EditPath = page.EditPath,
 				EditToken = eventArgs.Token,
@@ -268,7 +269,8 @@
 
 		private IMediaWikiClient CreateClient()
 		{
-			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), this.CancelToken);
+			var credentials = new NetworkCredential("betasfwiki", "wegothereearly");
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, this.CancelToken);
 			if (this.wikiInfo.ReadThrottling > 0 || this.wikiInfo.WriteThrottling > 0)
 			{
 				client = new ThrottledClient(

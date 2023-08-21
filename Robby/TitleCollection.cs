@@ -6,9 +6,8 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-
 	/// <summary>A collection of Title objects.</summary>
-	public class TitleCollection : TitleData<Title>, IMessageSource
+	public class TitleCollection : TitleData<ITitle>, IMessageSource
 	{
 		#region Constructors
 
@@ -26,8 +25,9 @@
 		public TitleCollection(Site site, IEnumerable<string> titles)
 			: base(site)
 		{
+			ArgumentNullException.ThrowIfNull(titles);
 			this.LimitationType = LimitationType.None;
-			foreach (var item in titles.NotNull())
+			foreach (var item in titles)
 			{
 				var newTitle = TitleFactory.FromUnvalidated(site, item);
 				this.TryAdd(newTitle);
@@ -49,8 +49,9 @@
 		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
 			: base(site)
 		{
+			ArgumentNullException.ThrowIfNull(titles);
 			this.LimitationType = LimitationType.None;
-			this.AddRange(ns, titles.NotNull());
+			this.AddRange(ns, titles);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
@@ -66,11 +67,27 @@
 		/// <param name="site">The site.</param>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
+		public TitleCollection(Site site, IEnumerable<ITitle> titles)
+			: base(site)
+		{
+			ArgumentNullException.ThrowIfNull(titles);
+			this.LimitationType = LimitationType.None;
+			foreach (var title in titles)
+			{
+				this.TryAdd(title);
+			}
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="titles">The original Title collection.</param>
+		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
 		public TitleCollection(Site site, IEnumerable<Title> titles)
 			: base(site)
 		{
+			ArgumentNullException.ThrowIfNull(titles);
 			this.LimitationType = LimitationType.None;
-			foreach (var title in titles.NotNull())
+			foreach (var title in titles)
 			{
 				this.TryAdd(title);
 			}
@@ -84,7 +101,7 @@
 		public void Add(string name)
 		{
 			ArgumentException.ThrowIfNullOrEmpty(name);
-			this.Add(TitleFactory.FromUnvalidated(this.Site, name).ToTitle());
+			this.Add(TitleFactory.FromUnvalidated(this.Site, name));
 		}
 
 		/// <summary>Adds titles with the given names to the list.</summary>
@@ -270,9 +287,6 @@
 		/// <param name="revisionIds">The revision IDs.</param>
 		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 
-		/// <inheritdoc/>
-		public override void Sort() => this.Sort(SimpleTitleComparer.Instance);
-
 		/// <summary>Attempts to add a title with the given name to the list, gracefully skipping the item if it's already present.</summary>
 		/// <param name="title">The name of the title to try to add.</param>
 		/// <returns><see langword="true"/> if the item was added; otherwise, <see langword="false"/>.</returns>
@@ -280,13 +294,7 @@
 		{
 			ArgumentException.ThrowIfNullOrEmpty(title);
 			var realTitle = TitleFactory.FromUnvalidated(this.Site, title);
-			if (this.Contains(realTitle))
-			{
-				return false;
-			}
-
-			this.Add(realTitle);
-			return true;
+			return this.TryAdd(realTitle);
 		}
 
 		/// <summary>Attempts to add titles with the given names to the list, gracefully skipping them if they're already present.</summary>
@@ -343,13 +351,13 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
+				var mainTitle = TitleFactory.CoValidate(this.Site, item.Namespace, item.Title);
 				this.TryAdd(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						var title = TitleFactory.FromUnvalidated(this.Site, redirectedItem.FullPageName);
+						var title = TitleFactory.FromUnvalidated(this.Site, redirectedItem.Title);
 						this.TryAdd(new Backlink(title, mainTitle));
 					}
 				}
@@ -390,7 +398,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -411,10 +419,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
-
-		/// <inheritdoc/>
-		protected override Title GetKeyForItem(Title item) => item;
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -427,17 +432,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinks(LinksInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -458,12 +463,12 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -590,7 +595,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.Title));
 			}
 		}
 
@@ -598,8 +603,8 @@
 		{
 			foreach (var item in result)
 			{
-				item.FullPageName.PropertyThrowNull(nameof(item));
-				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
+				item.Title.PropertyThrowNull(nameof(item));
+				this.TryAdd(TitleFactory.FromUnvalidated(this.Site, item.Title));
 			}
 		}
 
@@ -615,14 +620,14 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				item.FullPageName.PropertyThrowNull(nameof(item));
-				var title = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
-				if (input.Type.HasAnyFlag(item.Type))
+				item.Title.PropertyThrowNull(nameof(item));
+				var title = TitleFactory.CoValidate(this.Site, item.Namespace, item.Title);
+				if (input.Type.HasFlag(item.Type))
 				{
 					this.TryAdd(title);
 				}
 
-				if (item.Type == CategoryMemberTypes.Subcat && item.FullPageName is string itemTitle)
+				if (item.Type == CategoryMemberTypes.Subcat && item.Title is string itemTitle)
 				{
 					var originalTitle = input.Title;
 					input.ChangeTitle(itemTitle);

@@ -27,11 +27,11 @@
 		{
 			if (template.Find("titlename") != null)
 			{
-				Debug.WriteLine(parser.Page.FullPageName);
+				Debug.WriteLine(parser.Page.Title.FullPageName());
 			}
 			else if (string.Equals(
 				template.GetValue("imgdesc"),
-				parser.Page.LabelName(),
+				parser.Page.Title.LabelName(),
 				StringComparison.Ordinal))
 			{
 				template.Remove("imgdesc");

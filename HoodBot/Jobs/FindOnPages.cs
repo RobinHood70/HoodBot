@@ -32,7 +32,7 @@
 					if (page.Text.Contains(":image", StringComparison.OrdinalIgnoreCase) ||
 						page.Text.Contains(":width", StringComparison.OrdinalIgnoreCase))
 					{
-						Debug.WriteLine(page.FullPageName);
+						Debug.WriteLine(page.Title.FullPageName());
 						found = true;
 					}
 				}

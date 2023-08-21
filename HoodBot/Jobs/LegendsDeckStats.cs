@@ -94,7 +94,7 @@
 			{
 				if (page is VariablesPage varPage && varPage.MainSet != null)
 				{
-					this.cardPowers.Add(page.PageName, int.TryParse(varPage.GetVariable(mtCostName), NumberStyles.Integer, CultureInfo.InvariantCulture, out var power) ? power : 0);
+					this.cardPowers.Add(page.Title.PageName, int.TryParse(varPage.GetVariable(mtCostName), NumberStyles.Integer, CultureInfo.InvariantCulture, out var power) ? power : 0);
 				}
 			}
 		}

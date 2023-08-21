@@ -112,7 +112,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				List<string> returnedNames = new();
 				foreach (var title in pages)
 				{
-					returnedNames.Add(title.FullPageName);
+					returnedNames.Add(title.Title);
 				}
 
 				if (input.ListType == ListType.Titles)

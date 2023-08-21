@@ -17,7 +17,7 @@
 		/// <summary>Initializes a new instance of the <see cref="UserTalkResultHandler"/> class.</summary>
 		/// <param name="user">The user whose talk page should be added to.</param>
 		public UserTalkResultHandler(User user)
-			: base(user.NotNull().Site.Culture)
+			: base(user.NotNull().Title.Site.Culture)
 		{
 			this.user = user;
 			this.botTalkSummary = this.ResourceManager.GetString("BotJobNotice", this.Culture) ?? this.DefaultText;

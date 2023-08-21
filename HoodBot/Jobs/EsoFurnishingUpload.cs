@@ -95,7 +95,7 @@
 						var icon = varPage.GetVariable("icon");
 						if (string.IsNullOrEmpty(icon))
 						{
-							icon = Furnishing.IconName(page.PageName);
+							icon = Furnishing.IconName(page.Title.PageName);
 						}
 
 						var iconInfo = new IconInfo(id, "File:" + icon);
@@ -104,14 +104,14 @@
 							this.Warn("Quote in title: " + icon);
 						}
 
-						items.Add(page.PageName, iconInfo);
+						items.Add(page.Title.PageName, iconInfo);
 						if (retvalIds.TryAdd(id, iconInfo))
 						{
 							retvalDupes.Add(id, page);
 						}
 						else
 						{
-							Debug.WriteLine($"Duplicate id: {id} on {retvalDupes[id]} => {page.PageName}");
+							Debug.WriteLine($"Duplicate id: {id} on {retvalDupes[id]} => {page.Title.PageName}");
 						}
 					}
 				}

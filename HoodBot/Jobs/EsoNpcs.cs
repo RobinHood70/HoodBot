@@ -19,7 +19,7 @@
 	{
 		#region Fields
 		private readonly NpcCollection npcCollection = new();
-		private readonly Dictionary<Title, NpcData> pageNpcs = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<ITitle, NpcData> pageNpcs = new(TitleComparer.Instance);
 		private readonly bool allowUpdates;
 		#endregion
 
@@ -53,7 +53,7 @@
 			// TODO: Update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
 			this.StatusWriteLine("Getting NPC data");
 			this.GetNpcPages();
-			this.npcCollection.GetLocations();
+			this.npcCollection.GetLocations(this.Site);
 
 			this.StatusWriteLine("Getting place data");
 			var places = EsoSpace.GetPlaces(this.Site);
@@ -108,7 +108,13 @@
 
 		#region Private Static Methods
 
-		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => SimpleTitleComparer.Instance.Compare(x.Npc.Title, y.Npc.Title);
+		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => x.Npc.Title is Title xTitle
+				? y.Npc.Title is Title yTitle
+					? Title.Compare(xTitle, yTitle)
+					: 1
+				: y.Npc.Title is null
+					? 0
+					: -1;
 
 		private static string NpcToWikiText(NpcData npc)
 		{
@@ -241,7 +247,7 @@
 					continue;
 				}
 
-				npc.Title = page;
+				npc.Title = page.Title;
 				var issue = page switch
 				{
 					Page when page.IsDisambiguation == true => "is a disambiguation with no clear NPC link",
@@ -314,7 +320,7 @@
 				var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], npc.DataName);
 				if (checkPages.TitleMap.TryGetValue(title.FullPageName, out var redirect))
 				{
-					npc.Name = redirect.PageName;
+					npc.Name = redirect.Title.PageName;
 				}
 				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation == true)
 				{
@@ -324,7 +330,7 @@
 						var disambig = SiteLink.FromLinkNode(this.Site, linkNode);
 						if (existingTitles.TryGetValue(disambig, out var disambigPage))
 						{
-							npc.Name = disambigPage.PageName;
+							npc.Name = disambigPage.Title.PageName;
 							break;
 						}
 					}
