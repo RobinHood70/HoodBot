@@ -100,10 +100,10 @@
 			parser.ThrowNull();
 			foreach (var title in this.Titles)
 			{
-				if (!this.results.TryGetValue(title.Title, out var section))
+				if (!this.results.TryGetValue(title, out var section))
 				{
 					section = new PageLinkList();
-					this.results.Add(title.Title, section);
+					this.results.Add(title, section);
 				}
 
 				if (!section.TryGetValue(parser.Page.Title, out var links))
@@ -112,7 +112,7 @@
 					section.Add(parser.Page.Title, links);
 				}
 
-				foreach (var link in parser.FindSiteLinks(title.Title))
+				foreach (var link in parser.FindSiteLinks(title))
 				{
 					if (this.CheckLink(link) &&
 						WikiTextVisitor.Raw(link) is var textTitle &&

@@ -8,7 +8,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A collection of Title objects.</summary>
-	public class TitleCollection : TitleData<ITitle>, IMessageSource
+	public class TitleCollection : TitleData<Title>, IMessageSource
 	{
 		#region Constructors
 
@@ -68,30 +68,12 @@
 		/// <param name="site">The site.</param>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public TitleCollection(Site site, IEnumerable<ITitle> titles)
-			: base(site)
-		{
-			ArgumentNullException.ThrowIfNull(titles);
-			this.LimitationType = LimitationType.None;
-			foreach (var title in titles)
-			{
-				this.TryAdd(title);
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="titles">The original Title collection.</param>
-		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
 		public TitleCollection(Site site, IEnumerable<Title> titles)
 			: base(site)
 		{
 			ArgumentNullException.ThrowIfNull(titles);
 			this.LimitationType = LimitationType.None;
-			foreach (var title in titles)
-			{
-				this.TryAdd(title);
-			}
+			this.AddRange(titles);
 		}
 		#endregion
 
@@ -359,7 +341,7 @@
 					foreach (var redirectedItem in item.Redirects)
 					{
 						var title = TitleFactory.FromUnvalidated(this.Site, redirectedItem.Title);
-						this.TryAdd(new Backlink(title, mainTitle));
+						this.TryAdd(title);
 					}
 				}
 			}
@@ -399,7 +381,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -420,7 +402,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -433,17 +415,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -464,12 +446,12 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

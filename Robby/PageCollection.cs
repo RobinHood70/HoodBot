@@ -109,7 +109,7 @@
 		/// <param name="site">The site.</param>
 		/// <param name="other">The collection to initialize this instance from.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		public static PageCollection CreateEmptyPages(Site site, IEnumerable<ITitle> other)
+		public static PageCollection CreateEmptyPages(Site site, IEnumerable<Title> other)
 		{
 			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var retval = UnlimitedDefault(site);
@@ -122,11 +122,12 @@
 		/// <param name="recursive">Set to <see langword="true"/> to get the entire call tree.</param>
 		/// <param name="subjectSpaceOnly">Set to <see langword="true"/> to only allow pages from subject space.</param>
 		/// <returns>A collection of pages that transclude the listed pages.</returns>
-		public static PageCollection FromTransclusions(IEnumerable<ITitle> titles, bool recursive, bool subjectSpaceOnly)
+		public static PageCollection FromTransclusions(IEnumerable<Title> titles, bool recursive, bool subjectSpaceOnly)
 		{
-			var first = Enumerable.First(titles.NotNullOrEmpty());
-			var fullSet = Unlimited(first.Title.Site, PageModules.Info | PageModules.TranscludedIn, true);
-			var nextTitles = new TitleCollection(first.Title.Site, titles);
+			ArgumentNullException.ThrowIfNull(titles);
+			var first = Enumerable.First(titles);
+			var fullSet = Unlimited(first.Site, PageModules.Info | PageModules.TranscludedIn, true);
+			var nextTitles = new TitleCollection(first.Site, titles);
 			do
 			{
 				var loadPages = nextTitles.Load(PageModules.Info | PageModules.TranscludedIn);
@@ -178,14 +179,14 @@
 		/// <param name="method">The type of purge to perform.</param>
 		/// <param name="batchSize">The number of purges to send with each request. Lower this value if purge returns errors.</param>
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
-		public static PageCollection Purge(Site site, IEnumerable<ITitle> titles, PurgeMethod method, int batchSize)
+		public static PageCollection Purge(Site site, IEnumerable<Title> titles, PurgeMethod method, int batchSize)
 		{
 			titles.ThrowNull();
 			var retval = UnlimitedDefault(site);
 			var subTitles = new List<string>();
 			foreach (var title in titles)
 			{
-				subTitles.Add(title.Title.FullPageName());
+				subTitles.Add(title.FullPageName());
 				if (subTitles.Count >= batchSize)
 				{
 					var input = new PurgeInput(subTitles, method);
@@ -252,15 +253,13 @@
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="title">The title to create the page with.</param>
-		public void Create(ITitle title) => this.Create(title, string.Empty);
+		public void Create(Title title) => this.Create(title, string.Empty);
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="title">The title to create the page with.</param>
 		/// <param name="text">The text to add to the page.</param>
-		public void Create(ITitle title, string text)
+		public void Create(Title title, string text)
 		{
-			ArgumentNullException.ThrowIfNull(title);
-
 			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var page = this.pageCreator.CreatePage(title);
 			page.Text = text;
@@ -269,12 +268,12 @@
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="titles">The collection to initialize this instance from.</param>
-		public void CreateRange(IEnumerable<ITitle> titles) => this.CreateRange(titles, string.Empty);
+		public void CreateRange(IEnumerable<Title> titles) => this.CreateRange(titles, string.Empty);
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="titles">The collection to initialize this instance from.</param>
 		/// <param name="text">The text to add to each page.</param>
-		public void CreateRange(IEnumerable<ITitle> titles, string text)
+		public void CreateRange(IEnumerable<Title> titles, string text)
 		{
 			ArgumentNullException.ThrowIfNull(titles);
 			foreach (var title in titles.NotNull())
@@ -313,11 +312,11 @@
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(params ITitle[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+		public void GetTitles(params Title[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<ITitle> titles) => this.LoadPages(new QueryPageSetInput(titles.Select(title => title.Title.FullPageName())), this.IsTitleInLimits);
+		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()), this.IsTitleInLimits);
 
 		/// <summary>Merges the current PageCollection with another, including all <see cref="TitleMap"/> entries.</summary>
 		/// <param name="other">The PageCollection to merge with.</param>
@@ -454,7 +453,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -467,7 +466,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -476,17 +475,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose backlinks should be loaded.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -495,12 +494,12 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ITitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -597,10 +596,10 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator, IEnumerable<ITitle> titles) => this.LoadPages(
+		private void LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(
 			new QueryPageSetInput(
 				generator,
-				titles.Select(title => title.Title.FullPageName())),
+				titles.ToFullPageNames()),
 			this.IsTitleInLimits);
 
 		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>

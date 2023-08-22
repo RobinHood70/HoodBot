@@ -7,16 +7,33 @@
 	{
 		#region IEnumerable<ITitle> Extensions
 
-		/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
+		/// <summary>Convert a collection of <see cref="ITitle"/>s to <see cref="Title"/>s.</summary>
 		/// <param name="titles">The titles to convert.</param>
 		/// <returns>An enumeration of the titles converted to their full page names.</returns>
-		public static IEnumerable<string> ToFullPageNames(this IEnumerable<ITitle> titles)
+		public static IEnumerable<Title> ToTitles(this IEnumerable<ITitle> titles)
 		{
 			if (titles != null)
 			{
 				foreach (var title in titles)
 				{
-					yield return title.Title.FullPageName();
+					yield return title.Title;
+				}
+			}
+		}
+		#endregion
+
+		#region IEnumerable<Title> Extensions
+
+		/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
+		/// <param name="titles">The titles to convert.</param>
+		/// <returns>An enumeration of the titles converted to their full page names.</returns>
+		public static IEnumerable<string> ToFullPageNames(this IEnumerable<Title> titles)
+		{
+			if (titles != null)
+			{
+				foreach (var title in titles)
+				{
+					yield return title.FullPageName();
 				}
 			}
 		}

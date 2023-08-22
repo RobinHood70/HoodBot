@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
-	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -31,13 +30,9 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override Page CreatePage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return this.GameSpaceOnly && title.Title.Namespace.Id < 100
-				? this.FallbackCreator.CreatePage(title, options, apiItem)
-				: new VariablesPage(title, options, apiItem);
-		}
+		public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.Namespace.Id < 100
+			? this.FallbackCreator.CreatePage(title, options, apiItem)
+			: new VariablesPage(title, options, apiItem);
 
 		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);
 		#endregion

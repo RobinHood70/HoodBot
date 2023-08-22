@@ -18,7 +18,7 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		public VariablesPage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
+		public VariablesPage(Title title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title, options, apiItem)
 		{
 			if (apiItem is VariablesPageItem varItem)

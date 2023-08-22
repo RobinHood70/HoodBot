@@ -19,7 +19,7 @@
 	{
 		#region Fields
 		private readonly NpcCollection npcCollection = new();
-		private readonly Dictionary<ITitle, NpcData> pageNpcs = new(TitleComparer.Instance);
+		private readonly Dictionary<Title, NpcData> pageNpcs = new();
 		private readonly bool allowUpdates;
 		#endregion
 
@@ -82,13 +82,13 @@
 		{
 			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 			{
-				page.Text = this.NewPageText(this.pageNpcs[page]);
+				page.Text = this.NewPageText(this.pageNpcs[page.Title]);
 				page.SetMinimalStartTimestamp();
 			}
 
 			if (this.allowUpdates)
 			{
-				var npc = this.pageNpcs[page];
+				var npc = this.pageNpcs[page.Title];
 				var placeInfo = EsoSpace.PlaceInfo;
 
 				var parser = new ContextualParser(page);
@@ -292,7 +292,7 @@
 				}
 				else
 				{
-					this.pageNpcs.Add(page, npc);
+					this.pageNpcs.Add(page.Title, npc);
 				}
 			}
 
@@ -330,7 +330,7 @@
 						var disambig = SiteLink.FromLinkNode(this.Site, linkNode);
 						if (existingTitles.TryGetValue(disambig, out var disambigPage))
 						{
-							npc.Name = disambigPage.Title.PageName;
+							npc.Name = disambigPage.PageName;
 							break;
 						}
 					}
@@ -352,9 +352,9 @@
 			TitleCollection loadTitles = new(this.Site);
 			foreach (var npc in loadNpcs)
 			{
-				if (npc.Title is not null)
+				if (npc.Title is Title title)
 				{
-					loadTitles.Add(npc.Title);
+					loadTitles.Add(title);
 				}
 			}
 

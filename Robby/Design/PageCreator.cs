@@ -20,7 +20,7 @@
 		/// <summary>Creates a page.</summary>
 		/// <param name="title">An IHasTitle object representing the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public Page CreatePage(ITitle title) => this.CreatePage(title, PageLoadOptions.None, null);
+		public Page CreatePage(Title title) => this.CreatePage(title, PageLoadOptions.None, null);
 
 		/// <summary>Gets regular and custom property inputs.</summary>
 		/// <param name="options">Page load options.</param>
@@ -144,7 +144,7 @@
 		/// <param name="apiItem">The API item to populate page data from.</param>
 		/// <returns>A fully populated Page object.</returns>
 		// Changed apiItem to IApiTitle instead of object as a primitive means of ensuring we're dealing with API stuff and not some random item. Not sure if this is necessary or relevant, though, considering the constructors with this signature all have to do type checking anyway.
-		public abstract Page CreatePage(ITitle title, PageLoadOptions options, IApiTitle? apiItem);
+		public abstract Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem);
 		#endregion
 
 		#region Public Virtual Methods

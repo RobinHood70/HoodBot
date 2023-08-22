@@ -247,7 +247,7 @@
 			this.StatusWriteLine("Loading Current Protection Levels");
 			var pageLoadOptions = new PageLoadOptions(PageModules.Info, true) { InfoGetProtection = true };
 			var currentProtectionPages = PageCollection.Unlimited(this.Site, pageLoadOptions);
-			currentProtectionPages.GetTitles(titlesToProtect);
+			currentProtectionPages.GetTitles(titlesToProtect.ToTitles());
 			currentProtectionPages.RemoveExists(false);
 			foreach (var protectedTitle in titlesToProtect)
 			{
@@ -598,9 +598,9 @@
 				{
 					foreach (var si in this.searchList)
 					{
-						if (si.Namespaces.Contains(title.Title.Namespace.Id) && si.SearchPattern.IsMatch(title.Title.PageName))
+						if (si.Namespaces.Contains(title.Namespace.Id) && si.SearchPattern.IsMatch(title.PageName))
 						{
-							titlesToProtect.Add(new ProtectedTitle(title.Title, si.PageProtection));
+							titlesToProtect.Add(new ProtectedTitle(title, si.PageProtection));
 							break;
 						}
 					}

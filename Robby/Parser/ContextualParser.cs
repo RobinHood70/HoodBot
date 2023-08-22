@@ -191,7 +191,7 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="find">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public SiteTemplateNode? FindSiteTemplate(ITitle find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
@@ -201,11 +201,7 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(ITitle findName)
-		{
-			ArgumentNullException.ThrowIfNull(findName);
-			return this.FindSiteTemplates(new[] { findName.Title.FullPageName() });
-		}
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName) => this.FindSiteTemplates(new[] { findName.FullPageName() });
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findNames">The templates to find.</param>
@@ -220,7 +216,7 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findNames">The templates to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<ITitle> findNames)
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
 		{
 			ArgumentNullException.ThrowIfNull(findNames);
 			foreach (var templateNode in this.TemplateNodes)
@@ -229,7 +225,7 @@
 				{
 					foreach (var find in findNames)
 					{
-						if (siteTemplate.TitleValue == find.Title)
+						if (siteTemplate.TitleValue == find)
 						{
 							yield return siteTemplate;
 						}

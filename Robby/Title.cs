@@ -9,7 +9,7 @@ namespace RobinHood70.Robby
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A structure to hold page Title information.</summary>
-	public readonly struct Title : IComparable<Title>, IEquatable<Title>, ITitle // Struct will be renamed Title once Title itself is gone.
+	public readonly struct Title : IComparable<Title>, IEquatable<Title>, ITitle
 	{
 		#region Private Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.

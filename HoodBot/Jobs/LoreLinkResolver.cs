@@ -72,7 +72,7 @@
 				var parser = new ContextualParser(page);
 				foreach (var linkTemplate in parser.FindSiteTemplates("Lore Link"))
 				{
-					var ns = this.GetNamespace(linkTemplate, page);
+					var ns = this.GetNamespace(linkTemplate, page.Title);
 					string term;
 					if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
 					{
@@ -192,7 +192,7 @@
 			return fullSet;
 		}
 
-		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, ITitle title)
+		private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, Title title)
 		{
 			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
 			{
@@ -201,7 +201,7 @@
 					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
 			}
 
-			return this.nsList.FromTitle(title.Title);
+			return this.nsList.FromTitle(title);
 		}
 
 		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
@@ -214,7 +214,7 @@
 
 			var page = parser.Page;
 			var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.Title.FullPageName()}.");
-			var ns = this.GetNamespace(linkTemplate, page);
+			var ns = this.GetNamespace(linkTemplate, page.Title);
 
 			// If link doesn't resolve to anything, do nothing.
 			if (this.ResolveTemplate(linkTemplate, ns) is not Title link)

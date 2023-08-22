@@ -150,13 +150,13 @@
 		/// <summary>Removes a series of items from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="titles">The titless to remove.</param>
 		/// <returns><see langword="true" /> if any of the <paramref name="titles" /> were removed; otherwise, <see langword="false" />.</returns>
-		public bool Remove(IEnumerable<ITitle> titles)
+		public bool Remove(IEnumerable<Title> titles)
 		{
 			titles.ThrowNull();
 			var removed = false;
 			foreach (var item in titles)
 			{
-				removed |= this.Remove(item.Title);
+				removed |= this.Remove(item);
 			}
 
 			return removed;

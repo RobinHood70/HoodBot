@@ -139,10 +139,10 @@
 		}
 
 		/// <inheritdoc/>
-		public void GetDuplicateFiles(IEnumerable<ITitle> titles) => this.GetDuplicateFiles(titles, false);
+		public void GetDuplicateFiles(IEnumerable<Title> titles) => this.GetDuplicateFiles(titles, false);
 
 		/// <inheritdoc/>
-		public void GetDuplicateFiles(IEnumerable<ITitle> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
+		public void GetDuplicateFiles(IEnumerable<Title> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
 
 		/// <inheritdoc/>
 		public void GetFiles(string user) => this.GetFiles(new AllImagesInput { User = user });
@@ -163,13 +163,13 @@
 		public void GetFileUsage(string from, string to) => this.GetFileUsage(new AllFileUsagesInput { From = from, To = to, Unique = true });
 
 		/// <inheritdoc/>
-		public void GetFileUsage(IEnumerable<ITitle> titles) => this.GetFileUsage(new FileUsageInput(), titles);
+		public void GetFileUsage(IEnumerable<Title> titles) => this.GetFileUsage(new FileUsageInput(), titles);
 
 		/// <inheritdoc/>
-		public void GetFileUsage(IEnumerable<ITitle> titles, Filter redirects) => this.GetFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
+		public void GetFileUsage(IEnumerable<Title> titles, Filter redirects) => this.GetFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
 
 		/// <inheritdoc/>
-		public void GetFileUsage(IEnumerable<ITitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.GetFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
+		public void GetFileUsage(IEnumerable<Title> titles, Filter redirects, IEnumerable<int> namespaces) => this.GetFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
 
 		/// <inheritdoc/>
 		public void GetLinksToNamespace(int ns) => this.GetLinksToNamespace(new AllLinksInput { Namespace = ns });
@@ -193,28 +193,28 @@
 		public void GetNamespace(int ns, Filter redirects, string from, string to) => this.GetPages(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
 
 		/// <inheritdoc/>
-		public void GetPageCategories(IEnumerable<ITitle> titles) => this.GetPageCategories(new CategoriesInput(), titles);
+		public void GetPageCategories(IEnumerable<Title> titles) => this.GetPageCategories(new CategoriesInput(), titles);
 
 		/// <inheritdoc/>
-		public void GetPageCategories(IEnumerable<ITitle> titles, Filter hidden) => this.GetPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
+		public void GetPageCategories(IEnumerable<Title> titles, Filter hidden) => this.GetPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
 
 		/// <inheritdoc/>
-		public void GetPageCategories(IEnumerable<ITitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.GetPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
+		public void GetPageCategories(IEnumerable<Title> titles, Filter hidden, IEnumerable<string> limitTo) => this.GetPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
 
 		/// <inheritdoc/>
-		public void GetPageLinks(IEnumerable<ITitle> titles) => this.GetPageLinks(titles, null);
+		public void GetPageLinks(IEnumerable<Title> titles) => this.GetPageLinks(titles, null);
 
 		/// <inheritdoc/>
-		public void GetPageLinks(IEnumerable<ITitle> titles, IEnumerable<int>? namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
+		public void GetPageLinks(IEnumerable<Title> titles, IEnumerable<int>? namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
 
 		/// <inheritdoc/>
-		public void GetPageLinksHere(IEnumerable<ITitle> titles) => this.GetPageLinksHere(new LinksHereInput(), titles);
+		public void GetPageLinksHere(IEnumerable<Title> titles) => this.GetPageLinksHere(new LinksHereInput(), titles);
 
 		/// <inheritdoc/>
 		public void GetPagesWithProperty(string property) => this.GetPagesWithProperty(new PagesWithPropertyInput(property));
 
 		/// <inheritdoc/>
-		public void GetPageTranscludedIn(IEnumerable<ITitle> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
+		public void GetPageTranscludedIn(IEnumerable<Title> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
 
 		/// <inheritdoc/>
 		public void GetPageTranscludedIn(IEnumerable<string> titles) => this.GetPageTranscludedIn(new TitleCollection(this.Site, titles));
@@ -223,13 +223,13 @@
 		public void GetPageTranscludedIn(params string[] titles) => this.GetPageTranscludedIn(titles as IEnumerable<string>);
 
 		/// <inheritdoc/>
-		public void GetPageTransclusions(IEnumerable<ITitle> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
 
 		/// <inheritdoc/>
-		public void GetPageTransclusions(IEnumerable<ITitle> titles, IEnumerable<string> limitTo) => this.GetPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<string> limitTo) => this.GetPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
 
 		/// <inheritdoc/>
-		public void GetPageTransclusions(IEnumerable<ITitle> titles, IEnumerable<int> namespaces) => this.GetPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<int> namespaces) => this.GetPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
 
 		/// <inheritdoc/>
 		public void GetPrefixSearchResults(string prefix) => this.GetPrefixSearchResults(new PrefixSearchInput(prefix));
@@ -409,7 +409,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected abstract void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -422,7 +422,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetFileUsage(FileUsageInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -435,17 +435,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void GetPageCategories(CategoriesInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void GetPageLinks(LinksInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetPageLinks(LinksInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that link to the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetPageLinksHere(LinksHereInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -454,12 +454,12 @@
 		/// <summary>Adds pages that transclude the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected abstract void GetPageTransclusions(TemplatesInput input, IEnumerable<ITitle> titles);
+		protected abstract void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

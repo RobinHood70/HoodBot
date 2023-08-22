@@ -43,7 +43,7 @@
 				titles.GetCategoryMembers(cat, CategoryMemberTypes.All, false);
 				foreach (var title in titles)
 				{
-					hashes.Add(title.Title);
+					hashes.Add(title);
 				}
 
 				this.Progress++;

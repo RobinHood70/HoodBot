@@ -404,14 +404,14 @@
 							if (newNode is ILinkNode link)
 							{
 								var siteLink = SiteLink.FromLinkNode(usedList.Site, link);
-								if (usedList.Contains(siteLink) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
+								if (usedList.Contains(siteLink.Title) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
 								{
 									retval.AddRange(valueNode);
 								}
 								else
 								{
 									retval.Add(link);
-									usedList.Add(siteLink);
+									usedList.Add(siteLink.Title);
 								}
 							}
 							else

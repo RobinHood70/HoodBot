@@ -26,12 +26,11 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		protected internal Page([NotNull, ValidatedNotNull] ITitle title, PageLoadOptions options, IApiTitle? apiItem)
+		protected internal Page([NotNull, ValidatedNotNull] Title title, PageLoadOptions options, IApiTitle? apiItem)
 		{
 			// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
-			ArgumentNullException.ThrowIfNull(title);
 			this.LoadOptions = options;
-			this.Title = title.Title;
+			this.Title = title;
 			switch (apiItem)
 			{
 				case null:
@@ -330,28 +329,6 @@
 		/// <param name="text">The text of the page.</param>
 		/// <returns>A new page based on the title.</returns>
 		public static Page FromTitle(Title title, string text) => title.Site.CreatePage(title, text);
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>Creates a new page from a <see cref="Title"/> object.</summary>
-		/// <param name="title">The title to use.</param>
-		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(ITitle title)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return title.Title.Site.CreatePage(title);
-		}
-
-		/// <summary>Creates a new page from a <see cref="ITitle"/> object, filled with the supplied text.</summary>
-		/// <param name="title">The title to use.</param>
-		/// <param name="text">The text of the page.</param>
-		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(ITitle title, string text)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return title.Title.Site.CreatePage(title.Title, text);
-		}
 		#endregion
 
 		#region Public Methods

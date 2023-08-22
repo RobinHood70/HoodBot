@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<ITitle, SetData> sets = new(TitleComparer.Instance);
+		private readonly Dictionary<Title, SetData> sets = new();
 		#endregion
 
 		#region Constructors
@@ -88,9 +88,9 @@
 		protected override void LoadPages()
 		{
 			TitleCollection titles = new(this.Site);
-			foreach (var (page, _) in this.sets)
+			foreach (var (title, _) in this.sets)
 			{
-				titles.Add(page);
+				titles.Add(title);
 			}
 
 			this.Pages.GetTitles(titles);
@@ -105,7 +105,7 @@
 
 		protected override void PageMissing(Page page)
 		{
-			var set = this.sets[page];
+			var set = this.sets[page.Title];
 			StringBuilder sb = new();
 			sb
 				.Append("{{Trail|Sets}}{{Online Update}}{{Minimal}}\n")
@@ -131,7 +131,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var setData = this.sets[page];
+			var setData = this.sets[page.Title];
 			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
 			if (oldPage.Count < 2 || !(
 					oldPage[0] is IIgnoreNode firstNode &&
@@ -200,19 +200,19 @@
 		#region Private Methods
 		private void GenerateReport()
 		{
-			var sorted = new SortedDictionary<ITitle, string>(TitleComparer.Instance);
-			foreach (var (page, set) in this.sets)
+			var sorted = new SortedDictionary<Title, string>();
+			foreach (var (title, set) in this.sets)
 			{
 				StringBuilder sb = new();
 				if (set.IsNonTrivial)
 				{
 					sb
 						.Append("* {{Pl|")
-						.Append(page.Title.FullPageName())
+						.Append(title.FullPageName())
 						.Append('|')
 						.Append(set.Name)
 						.Append("|diff=cur}}");
-					sorted.Add(page, sb.ToString());
+					sorted.Add(title, sb.ToString());
 				}
 			}
 
@@ -226,14 +226,15 @@
 			}
 		}
 
-		private SortedSet<string> ResolveDisambiguations(Dictionary<ITitle, SetData> notFound)
+		private SortedSet<string> ResolveDisambiguations(Dictionary<Title, SetData> notFound)
 		{
 			var unresolved = new SortedSet<string>(StringComparer.Ordinal);
 			var titles = new TitleCollection(this.Site, notFound.Keys);
 			var pages = titles.Load(PageModules.Info | PageModules.Links | PageModules.Properties, true);
 			foreach (var page in pages)
 			{
-				var set = notFound[page];
+				var title = page.Title;
+				var set = notFound[title];
 				if (page.IsDisambiguation == true && unresolved.Contains(set.Name))
 				{
 					var resolved = false;
@@ -241,7 +242,7 @@
 					{
 						if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 						{
-							this.sets.Add(page, set);
+							this.sets.Add(title, set);
 							resolved = true;
 							break;
 						}
@@ -252,14 +253,14 @@
 						unresolved.Add(set.Name);
 					}
 				}
-				else if (page.Exists && page.Title.PageName.EndsWith(" (set)", StringComparison.Ordinal))
+				else if (page.Exists && title.PageName.EndsWith(" (set)", StringComparison.Ordinal))
 				{
 					unresolved.Add(set.Name);
 				}
 				else
 				{
 					// Unless it's a (set) page, add it to the list. If missing, it'll get created.
-					this.sets.Add(page, set);
+					this.sets.Add(title, set);
 				}
 			}
 
@@ -268,7 +269,7 @@
 
 		private SortedSet<string> UpdateSetPages(PageCollection setMembers, List<SetData> sets)
 		{
-			var notFound = new Dictionary<ITitle, SetData>(TitleComparer.Instance);
+			var notFound = new Dictionary<Title, SetData>();
 			foreach (var set in sets)
 			{
 				if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
@@ -301,7 +302,7 @@
 
 					if (foundPage is not null)
 					{
-						this.sets.Add(foundPage, set);
+						this.sets.Add(foundPage.Title, set);
 						break;
 					}
 				}

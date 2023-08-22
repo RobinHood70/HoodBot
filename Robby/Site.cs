@@ -293,11 +293,7 @@
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="title">The title containing the name of the page to create.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(ITitle title)
-		{
-			ArgumentNullException.ThrowIfNull(title);
-			return this.CreatePage(title.Title.FullPageName(), string.Empty);
-		}
+		public Page CreatePage(Title title) => this.CreatePage(title.FullPageName(), string.Empty);
 
 		/// <summary>Creates a new page with the specified text.</summary>
 		/// <param name="fullPageName">The full name of the page to create.</param>
@@ -316,7 +312,7 @@
 		/// <param name="title">The <see cref="Title"/> of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(ITitle title, string text)
+		public Page CreatePage(Title title, string text)
 		{
 			var retval = this.PageCreator.CreatePage(title);
 			retval.Text = text;

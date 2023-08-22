@@ -223,7 +223,7 @@
 			copyrightTemplates.Remove("Template:Zenimage");
 			foreach (var template in copyrightTemplates)
 			{
-				this.licenseTemplates.Add(template.Title);
+				this.licenseTemplates.Add(template);
 			}
 		}
 

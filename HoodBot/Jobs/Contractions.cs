@@ -53,7 +53,7 @@
 			}
 
 			this.Progress = 0;
-			var hash = new HashSet<ITitle>(titles);
+			var hash = new HashSet<Title>(titles);
 			hash.ExceptWith(ignore);
 			this.StatusWriteLine($"Loading {hash.Count} pages");
 

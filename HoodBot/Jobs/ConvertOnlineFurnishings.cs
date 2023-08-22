@@ -129,7 +129,7 @@
 			if (index != -1)
 			{
 				var template = (SiteTemplateNode)originalParser[index];
-				var parser = new ContextualParser(this.Site.CreatePage(page, string.Empty))
+				var parser = new ContextualParser(this.Site.CreatePage(page.Title, string.Empty))
 				{
 					template
 				};

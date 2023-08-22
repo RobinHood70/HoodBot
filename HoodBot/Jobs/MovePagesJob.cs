@@ -324,7 +324,7 @@
 					if ((page.Backlinks.Count > 1 && !page.Backlinks.ContainsKey(page.Title)) || page.Backlinks.Count > 1)
 					{
 						// We no longer care about which pages link back to the moved page; this time, we want the pages that still have backlinks.
-						leftovers.Add(page);
+						leftovers.Add(page.Title);
 					}
 				}
 
@@ -596,7 +596,7 @@
 			TitleCollection doNotDelete = new(this.Site);
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
-				doNotDelete.GetBacklinks(template.Title.FullPageName(), BacklinksTypes.EmbeddedIn, true);
+				doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
 			}
 
 			foreach (var linkUpdate in this.linkUpdates)
@@ -610,14 +610,14 @@
 				}
 
 				var action = this.actions[linkUpdate.Key];
-				if (doNotDelete.Contains(fromPage))
+				if (doNotDelete.Contains(fromPage.Title))
 				{
 					if (this.MoveAction != MoveAction.None)
 					{
 						action.SetMoveActions(ReplacementActions.Skip, "no links, but marked to not be deleted");
 					}
 				}
-				else if (deletions.Contains(fromPage))
+				else if (deletions.Contains(fromPage.Title))
 				{
 					action.SetMoveActions(ReplacementActions.Skip, "no links, but already proposed for deletion");
 				}
@@ -917,7 +917,7 @@
 				{
 					if (this.actions[move.Key].HasAction(ReplacementActions.Move))
 					{
-						toTitles.Add(move.Value);
+						toTitles.Add(move.Value.Title);
 					}
 				}
 
@@ -933,7 +933,7 @@
 			TitleCollection deleted = new(this.Site);
 			foreach (var title in this.Site.DeletionCategories)
 			{
-				deleted.GetCategoryMembers(title.Title.PageName);
+				deleted.GetCategoryMembers(title.PageName);
 			}
 
 			return deleted;
@@ -980,21 +980,22 @@
 
 		private void ValidateMoves()
 		{
-			Dictionary<ITitle, Title> unique = new();
+			Dictionary<Title, Title> unique = new();
 			foreach (var move in this.moves)
 			{
+				var title = move.Value.Title;
 				var current = this.actions[move.Key];
 				if (current.HasAction(ReplacementActions.Move))
 				{
-					if (unique.TryGetValue(move.Value, out var existing))
+					if (unique.TryGetValue(title, out var existing))
 					{
 						this.Warn($"Duplicate To title. All related entries will be skipped. [[{existing}]] and [[{move.Key}]] both moving to [[{move.Value}]]");
-						this.actions[move.Value.Title].SetMoveActions(ReplacementActions.Skip, "duplicate To page");
+						this.actions[title].SetMoveActions(ReplacementActions.Skip, "duplicate To page");
 						current.SetMoveActions(ReplacementActions.Skip, "duplicate To page");
 					}
 					else
 					{
-						unique.Add(move.Value, move.Key);
+						unique.Add(title, move.Key);
 					}
 				}
 			}

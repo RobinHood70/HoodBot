@@ -41,7 +41,7 @@
 			TitleCollection allTitles = new(this.Site);
 			foreach (var page in furnishingFiles)
 			{
-				allTitles.Add(PageFromFile(page.Title));
+				allTitles.Add(PageFromFile(page));
 			}
 
 			var allPages = PageCollection.Unlimited(this.Site);

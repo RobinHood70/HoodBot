@@ -23,10 +23,10 @@
 		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		internal FilePage(ITitle title, PageLoadOptions options, IApiTitle? apiItem)
+		internal FilePage(Title title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title, options, apiItem)
 		{
-			if (title.Title.Namespace.Id != MediaWikiNamespaces.File)
+			if (title.Namespace.Id != MediaWikiNamespaces.File)
 			{
 				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Title.Site[MediaWikiNamespaces.File].Name));
 			}
@@ -109,7 +109,7 @@
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
 			TitleCollection titles = new(this.Title.Site);
-			titles.GetFileUsage(new[] { this }, filterRedirects, namespaces);
+			titles.GetFileUsage(new[] { this.Title }, filterRedirects, namespaces);
 
 			return titles;
 		}
@@ -124,7 +124,7 @@
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
 			TitleCollection titles = new(this.Title.Site);
-			titles.GetDuplicateFiles(new[] { this }, localOnly);
+			titles.GetDuplicateFiles(new[] { this.Title }, localOnly);
 
 			return titles;
 		}

@@ -42,9 +42,9 @@
 				this.FilterPages.Remove(user.Title.FullPageName() + "/Results");
 			}
 
-			if (this.LogTitle is not null)
+			if (this.LogTitle.HasValue)
 			{
-				this.FilterPages.Remove(this.LogTitle);
+				this.FilterPages.Remove(this.LogTitle.Value);
 				this.LogTitle = null;
 			}
 
@@ -88,8 +88,7 @@
 			this.FilterPages.Add(resultPage);
 
 			this.LogTitle = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.Title.PageName + "/Log");
-			this.FilterPages.Add(this.LogTitle);
-			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
+			this.FilterPages.Add(this.LogTitle.Value);
 		}
 
 		protected override void ParseInternalSiteInfo()
