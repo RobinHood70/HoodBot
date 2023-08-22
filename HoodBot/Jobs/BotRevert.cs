@@ -64,11 +64,11 @@
 				}
 				catch (WikiException we) when (string.Equals(we.Code, "undofailure", StringComparison.Ordinal))
 				{
-					this.WriteLine($"* {undo.Key.AsLink()} - {we.Info}");
+					this.WriteLine($"* {SiteLink.ToText(undo.Key)} - {we.Info}");
 				}
 				catch (WikiException we) when (string.Equals(we.Code, "nosuchrevid", StringComparison.Ordinal))
 				{
-					this.WriteLine($"* {undo.Key.AsLink()} - only one edit, can't undo");
+					this.WriteLine($"* {SiteLink.ToText(undo.Key)} - only one edit, can't undo");
 				}
 
 				this.Progress++;

@@ -78,9 +78,6 @@
 
 		#region Public Methods
 
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
-
 		/// <summary>Blocks the specified user.</summary>
 		/// <param name="reason">The reason for the block.</param>
 		/// <param name="flags">The block flags.</param>
@@ -231,9 +228,6 @@
 
 			return retval;
 		}
-
-		/// <inheritdoc/>
-		public string LinkName() => this.Title.LinkName();
 
 		/// <summary>Loads all user information. This is necessary for any User object not provided by one of the <see cref="Site"/>.LoadUserInformation() methods.</summary>
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>

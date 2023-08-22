@@ -117,24 +117,6 @@ namespace RobinHood70.Robby
 
 		#region Public Methods
 
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain)
-		{
-			var text = linkFormat switch
-			{
-				LinkFormat.LabelName => this.PageName.Length == 0
-					? this.PageName
-					: LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1),
-				LinkFormat.PipeTrick =>
-					LabelParenthesesRemover.Replace(
-					LabelCommaRemover.Replace(this.PageName, string.Empty, 1, 1), string.Empty, 1, 1),
-				LinkFormat.Plain => this.FullPageName(),
-				_ => throw new ArgumentOutOfRangeException(nameof(linkFormat)),
-			};
-
-			return $"[[{this.LinkName()}|{text}]]";
-		}
-
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
 		/// <returns>The name of the base page.</returns>
 		public string BasePageName() => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
@@ -167,8 +149,9 @@ namespace RobinHood70.Robby
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		public string LabelName() => this.PageName.Length == 0 ? this.PageName : ToLabelName(this.PageName);
 
-		/// <inheritdoc/>
-		public string LinkName() => this.Namespace.LinkName() + this.PageName;
+		/// <summary>Returns the full wikitext of the link target without surrounding braces.</summary>
+		/// <returns>The title, formatted as a link target.</returns>
+		public string LinkTarget() => this.Namespace.LinkName() + this.PageName;
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="other">The title to compare to.</param>

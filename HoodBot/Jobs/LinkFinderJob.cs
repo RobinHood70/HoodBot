@@ -53,7 +53,7 @@
 				{
 					if (title.Value.Count > 0)
 					{
-						this.WriteLine($"|-\n| {title.Key.AsLink()}");
+						this.WriteLine($"|-\n| {SiteLink.ToText(title.Key)}");
 						this.Write("| ");
 						this.WriteLine(string.Join("<br>", title.Value));
 					}

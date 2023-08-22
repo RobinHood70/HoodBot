@@ -93,7 +93,7 @@
 
 		public override int GetHashCode() => this.Key.GetHashCode(StringComparison.Ordinal);
 
-		public override string? ToString() => this.Title.Namespace is null ? this.TitleName : this.Title.AsLink(LinkFormat.LabelName);
+		public override string? ToString() => this.Title.Namespace is null ? this.TitleName : SiteLink.ToText(this.Title, LinkFormat.LabelName);
 		#endregion
 	}
 }

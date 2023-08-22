@@ -22,7 +22,7 @@
 				{
 					this.WriteLine(string.Create(
 						CultureInfo.InvariantCulture,
-						$"* {file.AsLink(LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
+						$"* {SiteLink.ToText(file, LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
 				}
 			}
 		}

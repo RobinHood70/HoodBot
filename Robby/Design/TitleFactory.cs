@@ -234,15 +234,6 @@
 		public static TitleFactory FromUnvalidated(Namespace ns, string pageName) => new(ns.NotNull().Site, ns.Id, WikiTextUtilities.DecodeAndNormalize(pageName.NotNull()));
 		#endregion
 
-		#region Public Methods
-
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => new SiteLink((ILinkTitle)this).AsLink(linkFormat);
-
-		/// <inheritdoc/>
-		public string LinkName() => new SiteLink((ILinkTitle)this).AsLink();
-		#endregion
-
 		#region Public Override Methods
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>

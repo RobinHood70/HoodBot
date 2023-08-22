@@ -13,6 +13,19 @@
 
 	#region Public Enumerations
 
+	/// <summary>The format to use for the link text.</summary>
+	public enum LinkFormat
+	{
+		/// <summary>Plain link with no text.</summary>
+		Plain,
+
+		/// <summary>Link text should follow "pipe trick" rules.</summary>
+		PipeTrick,
+
+		/// <summary>Link text should strip paranthetical text only.</summary>
+		LabelName
+	}
+
 	/// <summary>The parameter type of a given value.</summary>
 	public enum ParameterType
 	{
@@ -327,6 +340,30 @@
 
 		#region Public Static Methods
 
+		/// <summary>Returns all the links in a gallery node.</summary>
+		/// <param name="factory">The factory to use to create internal links.</param>
+		/// <param name="tag">The gallery tag to work on.</param>
+		/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
+		public static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
+		{
+			if (tag is not null &&
+				tag.InnerText?.Trim() is string innerText &&
+				innerText.Length > 0)
+			{
+				var ns = factory.NotNull().Site[MediaWikiNamespaces.File];
+				var lines = innerText.Split(TextArrays.LineFeed);
+				foreach (var line in lines)
+				{
+					if (line.Trim() is var trimmedLine && trimmedLine.Length > 0)
+					{
+						var linkNode = factory.LinkNodeFromWikiText("[[" + trimmedLine + " ]]");
+						TrimTrailingSpace(linkNode);
+						yield return FromLinkNode(ns, linkNode);
+					}
+				}
+			}
+		}
+
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
@@ -368,30 +405,6 @@
 			return retval;
 		}
 
-		/// <summary>Returns all the links in a gallery node.</summary>
-		/// <param name="factory">The factory to use to create internal links.</param>
-		/// <param name="tag">The gallery tag to work on.</param>
-		/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
-		public static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
-		{
-			if (tag is not null &&
-				tag.InnerText?.Trim() is string innerText &&
-				innerText.Length > 0)
-			{
-				var ns = factory.NotNull().Site[MediaWikiNamespaces.File];
-				var lines = innerText.Split(TextArrays.LineFeed);
-				foreach (var line in lines)
-				{
-					if (line.Trim() is var trimmedLine && trimmedLine.Length > 0)
-					{
-						var linkNode = factory.LinkNodeFromWikiText("[[" + trimmedLine + " ]]");
-						TrimTrailingSpace(linkNode);
-						yield return FromLinkNode(ns, linkNode);
-					}
-				}
-			}
-		}
-
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
@@ -402,12 +415,62 @@
 			var linkNode = CreateLinkNode(site, link.NotNull());
 			return FromLinkNode(site, linkNode);
 		}
+
+		/// <summary>Creates a new SiteLink instance from the provided <see cref="Title"/>.</summary>
+		/// <param name="title">The <see cref="Title"/> to use.</param>
+		public static SiteLink FromTitle(Title title) => new(title);
+
+		/// <summary>Converts the specified title to a SiteLink and then displays the text of that link.</summary>
+		/// <param name="title">The title to display.</param>
+		/// <param name="format">The format of the link.</param>
+		/// <returns>A string with the wiki-formatted text of the link.</returns>
+		public static string ToText(Title title, LinkFormat format = LinkFormat.Plain) => new SiteLink(title).AsLink(format);
+
+		/// <summary>Converts the specified title to a SiteLink and then displays the text of that link.</summary>
+		/// <param name="title">The title to display.</param>
+		/// <param name="format">The format of the link.</param>
+		/// <returns>A string with the wiki-formatted text of the link.</returns>
+		public static string ToText(ITitle title, LinkFormat format = LinkFormat.Plain)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return new SiteLink(title.Title).AsLink(format);
+		}
+
+		/// <summary>Converts the specified title to a SiteLink and then displays the text of that link.</summary>
+		/// <param name="title">The title to display.</param>
+		/// <param name="format">The format of the link.</param>
+		/// <returns>A string with the wiki-formatted text of the link.</returns>
+		public static string ToText(IFullTitle title, LinkFormat format = LinkFormat.Plain)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return new SiteLink(title).AsLink(format);
+		}
+
+		/// <summary>Converts the specified title to a SiteLink and then displays the text of that link.</summary>
+		/// <param name="title">The title to display.</param>
+		/// <returns>A string with the wiki-formatted text of the link.</returns>
+		public static string ToText(ILinkTitle title) => new SiteLink(title).AsLink();
 		#endregion
 
 		#region Public Methods
 
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => WikiTextVisitor.Raw(this.ToLinkNode());
+		/// <summary>Returns the current object as link text.</summary>
+		/// <param name="format">The default text to use when adding a caption.</param>
+		/// <returns>The current title, formatted as a link.</returns>
+		public string AsLink(LinkFormat format = LinkFormat.Plain)
+		{
+			var link = this.Text is not null
+				? this
+				: format switch
+				{
+					LinkFormat.Plain => this,
+					LinkFormat.PipeTrick => new SiteLink(this) { Text = this.Title.PipeTrick() },
+					LinkFormat.LabelName => new SiteLink(this) { Text = this.Title.LabelName() },
+					_ => this
+				};
+
+			return WikiTextVisitor.Raw(link.ToLinkNode());
+		}
 
 		/// <summary>Gets the image size.</summary>
 		/// <returns>The image height and width. If either value is missing, a zero will be returned for that value.</returns>
@@ -428,20 +491,23 @@
 			return (0, 0);
 		}
 
-		/// <inheritdoc/>
-		public string LinkName()
+		/// <summary>Returns the full wikitext of the link target without surrounding braces.</summary>
+		/// <returns>The current link target.</returns>
+		public string LinkTarget()
 		{
 			var sb = new StringBuilder()
 				.Append(this.TitleWhitespaceBefore)
 				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
 				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
-				.Append(this.Title.LinkName());
+				.Append(this.Title.LinkTarget());
 			if (this.Fragment != null)
 			{
 				sb
 					.Append('#')
 					.Append(this.Fragment);
 			}
+
+			sb.Append(this.TitleWhitespaceAfter);
 
 			return sb.ToString();
 		}
@@ -479,7 +545,7 @@
 				values.Add(text);
 			}
 
-			return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.TitleWhitespaceBefore + this.LinkName() + this.TitleWhitespaceAfter, values);
+			return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.LinkTarget(), values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
@@ -524,7 +590,7 @@
 
 		/// <summary>Returns the full text of the link.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => this.LinkName();
+		public override string ToString() => this.AsLink();
 		#endregion
 
 		#region Private Static Methods

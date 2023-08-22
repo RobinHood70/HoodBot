@@ -45,31 +45,6 @@
 		public Title Title { get; }
 		#endregion
 
-		#region Public Override Properties
-
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain)
-		{
-			var link = this.LinkName();
-
-			return link;
-		}
-
-		/// <inheritdoc/>
-		public string LinkName()
-		{
-			var retval = this.Interwiki is not null
-				? this.Interwiki.Prefix + ':'
-				: this.Title.Namespace.LinkName();
-			retval += this.Title.FullPageName();
-			retval += this.Fragment is null
-				? string.Empty
-				: '#' + this.Fragment;
-
-			return retval;
-		}
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>

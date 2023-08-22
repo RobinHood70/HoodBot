@@ -88,7 +88,7 @@
 
 			if (text.Count > 0)
 			{
-				this.WriteLine($"* {page.AsLink()}");
+				this.WriteLine($"* {SiteLink.ToText(page)}");
 				this.WriteLine(':' + string.Join(", ", text));
 			}
 		}

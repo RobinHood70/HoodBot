@@ -211,7 +211,7 @@
 				}
 				else if (skill.Value.ChangeType == ChangeType.Minor)
 				{
-					trivialList.Add(title.AsLink(LinkFormat.LabelName));
+					trivialList.Add(SiteLink.ToText(title, LinkFormat.LabelName));
 				}
 			}
 

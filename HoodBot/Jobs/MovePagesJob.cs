@@ -359,7 +359,7 @@
 				}
 				else if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
 				{
-					actionsList.Add("move to " + this.moves[from].AsLink());
+					actionsList.Add("move to " + SiteLink.ToText(this.moves[from]));
 					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 					{
 						actionsList.Add("update links");
@@ -367,7 +367,7 @@
 				}
 				else if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 				{
-					actionsList.Add("update links to " + this.linkUpdates[from].LinkName());
+					actionsList.Add("update links to " + SiteLink.ToText(this.linkUpdates[from]));
 				}
 
 				if (action.HasAction(ReplacementActions.Edit) && !action.HasAction(ReplacementActions.Skip))
@@ -463,7 +463,7 @@
 		protected virtual DetailedActions HandleConflict(Title from, ITitle to)
 		{
 			var action = this.actions[from];
-			return new(action.Actions & ~ReplacementActions.Move, $"{to.AsLink()} exists");
+			return new(action.Actions & ~ReplacementActions.Move, $"{SiteLink.ToText(to)} exists");
 		}
 
 		protected virtual ITitle? LinkUpdateMatch(SiteLink from) =>
@@ -716,12 +716,12 @@
 					var to = this.linkUpdates[from.Title];
 					if (from is IFullTitle fullTitle)
 					{
-						return fullTitle.FullEquals(newTitle) ? to.LinkName() : null;
+						return fullTitle.FullEquals(newTitle) ? to.Title.LinkTarget() : null;
 					}
 
 					if (from == newTitle)
 					{
-						return to.LinkName();
+						return to.Title.LinkTarget();
 					}
 
 					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdatePageNameCaption))
@@ -777,13 +777,13 @@
 					if (fromPages.GetMapped(move.Key) is Page fromPage && !fromPage.Exists)
 					{
 						// From title does not exist. Should still have an entry in linkUpdates, if appropriate.
-						this.actions[move.Key] = new(ReplacementActions.Skip, $"{fromPage.AsLink()} doesn't exist");
+						this.actions[move.Key] = new(ReplacementActions.Skip, $"{SiteLink.ToText(fromPage)} doesn't exist");
 					}
 					else if (toPages.Contains(move.Value.Title))
 					{
 						this.actions[move.Key] = action.Actions.HasAnyFlag(ReplacementActions.Propose)
 							? this.HandleConflict(move.Key, move.Value)
-							: new(ReplacementActions.Skip, $"{move.Value.AsLink()} exists");
+							: new(ReplacementActions.Skip, $"{SiteLink.ToText(move.Value)} exists");
 					}
 				}
 			}
@@ -960,7 +960,7 @@
 						newLink.Text = newText;
 					}
 
-					return newLink.LinkName();
+					return newLink.LinkTarget();
 				}
 			}
 

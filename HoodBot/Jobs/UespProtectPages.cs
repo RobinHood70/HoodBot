@@ -225,7 +225,7 @@
 				{
 					this.WriteLine("|-");
 					this.WriteLine("| " + protection.FriendlyName);
-					this.WriteLine("| " + page.AsLink());
+					this.WriteLine("| " + SiteLink.ToText(page));
 					this.WriteLine("| " + CombinedProtectionString(
 						ProtectionFromPage(page, "edit"),
 						ProtectionFromPage(page, "move")));
@@ -682,12 +682,6 @@
 			public PageProtection Protection { get; }
 
 			public Title Title { get; }
-			#endregion
-
-			#region Public Methods
-			public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
-
-			public string LinkName() => this.Title.LinkName();
 			#endregion
 		}
 

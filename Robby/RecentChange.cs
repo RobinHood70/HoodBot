@@ -97,14 +97,5 @@
 		/// <value>The user who made the change.</value>
 		public User? User { get; }
 		#endregion
-
-		#region Public Methods
-
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
-
-		/// <inheritdoc/>
-		public string LinkName() => this.Title.LinkName();
-		#endregion
 	}
 }

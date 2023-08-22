@@ -33,7 +33,7 @@
 				var titles = new TitleCollection(this.Site, page.Templates);
 				if (titles.Contains(this.Title2))
 				{
-					Debug.WriteLine($"* {page.AsLink(LinkFormat.LabelName)}");
+					Debug.WriteLine($"* {SiteLink.ToText(page.Title, LinkFormat.LabelName)}");
 				}
 			}
 		}

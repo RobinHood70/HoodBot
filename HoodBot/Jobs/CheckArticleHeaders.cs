@@ -44,7 +44,7 @@
 					var header = node.GetTitle(true);
 					if (BadHeaders.Contains(header) && !this.IsException(page, header))
 					{
-						this.WriteLine($"* {page.AsLink()} has a {header} header.");
+						this.WriteLine($"* {SiteLink.ToText(page)} has a {header} header.");
 					}
 				}
 			}

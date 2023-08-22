@@ -21,7 +21,7 @@
 			{
 				if (page.Backlinks.Count > 0)
 				{
-					this.WriteLine("* " + page.AsLink());
+					this.WriteLine("* " + SiteLink.ToText(page));
 				}
 			}
 		}

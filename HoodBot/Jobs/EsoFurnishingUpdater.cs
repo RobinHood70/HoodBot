@@ -223,7 +223,7 @@
 
 			if (!string.Equals(oldTitle.LabelName(), newTitle.LabelName(), StringComparison.Ordinal))
 			{
-				this.fileMessages.Add($"{oldTitle.AsLink(LinkFormat.LabelName)} on {link} ''should be''<br>\n{newTitle.PageName}");
+				this.fileMessages.Add($"{SiteLink.ToText(oldTitle, LinkFormat.LabelName)} on {link} ''should be''<br>\n{newTitle.PageName}");
 
 				var noItem1 = oldTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
 				var noItem2 = newTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
@@ -273,11 +273,11 @@
 				string.IsNullOrEmpty(idText) ||
 				!long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
 			{
-				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
+				Debug.WriteLine($"Furnishing ID on {SiteLink.ToText(page)} is missing or nonsensical.");
 			}
 			else if (!this.furnishings.TryGetValue(id, out furnishing) && !this.collectibles.TryGetValue(id, out furnishing))
 			{
-				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
+				Debug.WriteLine($"Furnishing ID {id} not found on page {SiteLink.ToText(page)}.");
 			}
 
 			if (furnishing is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
@@ -372,7 +372,7 @@
 				return;
 			}
 
-			this.CheckImage(template, name, page.AsLink(LinkFormat.LabelName));
+			this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
 			this.CheckTitle(page.Title, labelName, furnishing);
 
 			template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);

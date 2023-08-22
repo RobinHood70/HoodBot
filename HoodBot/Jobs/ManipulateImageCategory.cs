@@ -41,7 +41,7 @@
 				{
 					this.WriteLine(string.Create(
 						CultureInfo.InvariantCulture,
-						$"* {image.AsLink(LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
+						$"* {SiteLink.ToText(image, LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
 				}
 			}
 		}

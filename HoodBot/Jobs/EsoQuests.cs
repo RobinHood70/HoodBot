@@ -516,7 +516,7 @@
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
 					Title title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], stage.Zone);
-					locs.Add(title.AsLink(LinkFormat.LabelName));
+					locs.Add(SiteLink.ToText(title, LinkFormat.LabelName));
 				}
 
 				var stageText = $"|{stage.FinishText}|{stage.Text}@{Visibilities[stage.Visibility]}";
@@ -545,7 +545,7 @@
 				this.WriteLine("The following quests were ignored because there is an existing, identically named quest which is assumed to be the parent quest. Information may need to be moved to the correct page by hand or the quest may need separate pages created to allow for faction or region differences.");
 				foreach (var (title, questData) in ignoredQuests)
 				{
-					this.WriteLine($"* {title.AsLink()} (Log: [http://esolog.uesp.net/viewlog.php?action=view&record=uniqueQuest&id={questData.Id} {questData}])");
+					this.WriteLine($"* {SiteLink.ToText(title)} (Log: [http://esolog.uesp.net/viewlog.php?action=view&record=uniqueQuest&id={questData.Id} {questData}])");
 				}
 			}
 		}

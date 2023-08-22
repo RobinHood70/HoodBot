@@ -333,12 +333,6 @@
 
 		#region Public Methods
 
-		/// <inheritdoc/>
-		public string AsLink(LinkFormat linkFormat = LinkFormat.Plain) => this.Title.AsLink(linkFormat);
-
-		/// <inheritdoc/>
-		public string LinkName() => this.Title.LinkName();
-
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 		/// <param name="module">The module to check.</param>
 		/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>

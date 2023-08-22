@@ -225,7 +225,7 @@
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 				? displayNode.Value.ToRaw()
 				: Title.ToLabelName(linkNode.Value.ToRaw());
-			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkName(), displayText));
+			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText));
 		}
 
 		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)

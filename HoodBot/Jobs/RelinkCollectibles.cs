@@ -42,7 +42,7 @@
 
 				if (newTitle.Namespace is null)
 				{
-					this.WriteLine($"* Match not found for {from} on page {page.AsLink(LinkFormat.Plain)}.");
+					this.WriteLine($"* Match not found for {from} on page {SiteLink.ToText(page, LinkFormat.Plain)}.");
 					return from;
 				}
 
