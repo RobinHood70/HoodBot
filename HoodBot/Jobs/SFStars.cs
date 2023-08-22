@@ -25,9 +25,9 @@
 		protected override void LoadPages()
 		{
 			var fileName = LocalConfig.BotDataSubPath("stars.csv");
-			var stars = new CsvFile();
-			stars.ReadFile(fileName, true);
-			foreach (var star in stars)
+			var starsFile = new CsvFile();
+			starsFile.ReadFile(fileName, true);
+			foreach (var star in starsFile)
 			{
 				this.stars.Add(star["proper"], star);
 			}

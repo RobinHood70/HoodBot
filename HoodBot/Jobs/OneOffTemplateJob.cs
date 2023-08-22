@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	public class OneOffTemplateJob : TemplateJob
 	{
@@ -21,14 +22,18 @@
 		#region Protected Override Properties
 		protected override string EditSummary => "Update remaining Future Links to Lore Links";
 
-		protected override string TemplateName => "Future Link";
+		protected override string TemplateName => "System Infobox";
 		#endregion
 
 		#region Protected Override Methods
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			template.Title.Clear();
-			template.Title.AddText("Lore Link");
+			template.AddIfNotExists("image", string.Empty, ParameterFormat.OnePerLine);
+			template.AddIfNotExists("level", string.Empty, ParameterFormat.OnePerLine);
+			template.AddIfNotExists("mass", string.Empty, ParameterFormat.OnePerLine);
+			template.AddIfNotExists("moon", string.Empty, ParameterFormat.OnePerLine);
+			template.AddIfNotExists("planet", string.Empty, ParameterFormat.OnePerLine);
+			template.AddIfNotExists("radius", string.Empty, ParameterFormat.OnePerLine);
 		}
 		#endregion
 	}
