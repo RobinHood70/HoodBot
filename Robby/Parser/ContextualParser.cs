@@ -12,7 +12,7 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>This is a higher-level parser that works on a NodeCollection, but adds functionality to resolve magic words and templates within the context of the page.</summary>
-	public class ContextualParser : NodeCollection
+	public class ContextualParser : NodeCollection, ITitle
 	{
 		#region Constructors
 
@@ -77,6 +77,9 @@
 		/// <summary>Gets a set of functions to evaluate templates (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
 		/// <value>The template resolvers.</value>
 		public IDictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+
+		/// <inheritdoc/>
+		public Title Title => this.Page.Title;
 		#endregion
 
 		#region Public Methods
