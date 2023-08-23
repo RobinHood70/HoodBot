@@ -10,9 +10,14 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<AnalysisMode>Default</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<Copyright>Copyright © Robert Morley 2023</Copyright>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG</DefineConstants>
+		<Deterministic>False</Deterministic>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <Deterministic>False</Deterministic>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
