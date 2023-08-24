@@ -46,7 +46,7 @@
 			var fileName = LocalConfig.BotDataSubPath("QuestLanguageDatabase.txt");
 			Dictionary<string, string> translation = new(StringComparer.Ordinal);
 			CsvFile langFile = new();
-			langFile.ReadFile(fileName, true);
+			langFile.Load(fileName, true);
 			foreach (var entry in langFile)
 			{
 				translation.Add(entry["ID"], entry["en-US"]);

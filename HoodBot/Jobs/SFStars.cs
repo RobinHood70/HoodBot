@@ -26,7 +26,7 @@
 		{
 			var fileName = LocalConfig.BotDataSubPath("stars.csv");
 			var starsFile = new CsvFile();
-			starsFile.ReadFile(fileName, true);
+			starsFile.Load(fileName, true);
 			foreach (var star in starsFile)
 			{
 				this.stars.Add(star["proper"], star);
