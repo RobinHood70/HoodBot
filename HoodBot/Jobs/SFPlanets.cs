@@ -1,0 +1,88 @@
+﻿namespace RobinHood70.HoodBot.Jobs
+{
+	using System;
+	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
+
+	internal sealed class SFPlanets : CreateOrUpdateJob<CsvRow>
+	{
+		#region Fields
+		private readonly Dictionary<string, string> stars = new(StringComparer.Ordinal);
+		#endregion
+
+		#region Constructors
+		[JobInfo("SF Planets")]
+		public SFPlanets(JobManager jobManager)
+			: base(jobManager)
+		{
+		}
+		#endregion
+
+		#region Protected Override Properties
+		protected override string EditSummary => "Create planet page";
+		#endregion
+
+		#region Protected Override Methods
+		protected override bool IsValid(ContextualParser parser, CsvRow data) => parser.FindSiteTemplate("Planet Infobox") is not null;
+
+		protected override IDictionary<Title, CsvRow> LoadItems()
+		{
+			var csv = new CsvFile
+			{
+				SkipLines = 1
+			};
+			csv.Load(LocalConfig.BotDataSubPath("stars.csv"), true);
+			foreach (var row in csv)
+			{
+				this.stars.Add(row["id"], row["proper"]);
+			}
+
+			var items = new Dictionary<Title, CsvRow>();
+			csv.Load(LocalConfig.BotDataSubPath("galaxy.csv"), true);
+			foreach (var item in csv)
+			{
+				var name = "Starfield:" + item["Name"];
+				items.Add(TitleFactory.FromUnvalidated(this.Site, name), item);
+			}
+
+			return items;
+		}
+
+		protected override string NewPageText(Title title, CsvRow item)
+		{
+			var starName = this.stars[item["Star ID"]];
+			var starType = item["Type"]
+				.Replace("G.", "Giant", StringComparison.Ordinal)
+				.Replace("Aster.", "Asteroid", StringComparison.Ordinal);
+			var magnetosphere = item["Mag. Field"];
+			if (string.IsNullOrWhiteSpace(magnetosphere))
+			{
+				magnetosphere = "Unknown";
+			}
+
+			return "{{Planet Infobox\n" +
+			"|image=\n" +
+			$"|system={starName}\n" +
+			$"|type={starType}\n" +
+			$"|gravity={item["Gravity"]}\n" +
+			"|temp=\n" +
+			"|atmosphere=\n" +
+			$"|magnetosphere={magnetosphere}\n" +
+			"|fauna=\n" +
+			"|flora=\n" +
+			"|water=\n" +
+			"|resource=\n" +
+			"|trait=\n" +
+			"}}\n\n{{Stub|Planet}}";
+		}
+
+		protected override void PageLoaded(ContextualParser parser, CsvRow item)
+		{
+		}
+		#endregion
+	}
+}
