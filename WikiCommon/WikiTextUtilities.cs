@@ -11,7 +11,7 @@
 	{
 		#region Static Fields
 		private static readonly Regex BidiText = new(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled, Globals.DefaultRegexTimeout); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
-		private static readonly Regex TitleSpaceText = new(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
+		private static readonly Regex TitleSpaceText = new(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
 		private static readonly Regex SpaceTextHtml = new(@"(&(#32|#x20|nbsp);|[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000])", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout); // as above, but already Unicode in MW code, modified to add HTML spaces
 		#endregion
 
