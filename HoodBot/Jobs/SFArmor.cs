@@ -50,13 +50,13 @@
 			return items;
 		}
 
-		protected override string NewPageText(Title title, List<CsvRow> itemList)
+		protected override string NewPageText(Title title, List<CsvRow> item)
 		{
 			var sb = new StringBuilder();
 			string? firstType = null;
-			foreach (var item in itemList)
+			foreach (var armor in item)
 			{
-				var nameEdid = item["Name"] + '/' + item["EditorID"].Trim();
+				var nameEdid = armor["Name"] + '/' + armor["EditorID"].Trim();
 				var itemType =
 					nameEdid.Contains("Clothes", StringComparison.Ordinal) ? "Apparel" :
 					nameEdid.Contains("Spacesuit", StringComparison.Ordinal) ? "Spacesuit" :
@@ -73,13 +73,13 @@
 				sb
 					.Append("{{NewLine}}\n")
 					.Append("{{Item Summary\n")
-					.Append($"|objectid={item["FormID"][2..]}\n")
-					.Append($"|editorid={item["EditorID"].Trim()}\n")
+					.Append($"|objectid={armor["FormID"][2..]}\n")
+					.Append($"|editorid={armor["EditorID"].Trim()}\n")
 					.Append($"|type={itemType}\n")
 					.Append("|image=\n")
 					.Append("|imgdesc=\n")
-					.Append($"|weight={item["Weight"]}\n")
-					.Append($"|value={item["Value"]}\n")
+					.Append($"|weight={armor["Weight"]}\n")
+					.Append($"|value={armor["Value"]}\n")
 					.Append("|physical={{Huh}}\n")
 					.Append("|energy={{Huh}}\n")
 					.Append("|electromagnetic={{Huh}}\n")
