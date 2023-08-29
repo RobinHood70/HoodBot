@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -16,6 +17,7 @@
 		public SFStars(JobManager jobManager)
 			: base(jobManager)
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		}
 		#endregion
 
@@ -24,12 +26,13 @@
 
 		protected override void LoadPages()
 		{
-			var fileName = LocalConfig.BotDataSubPath("stars.csv");
+			var fileName = LocalConfig.BotDataSubPath("Starfield/stars.csv");
 			var starsFile = new CsvFile();
-			starsFile.Load(fileName, true);
+			starsFile.Load(fileName, true, Encoding.GetEncoding(1252));
 			foreach (var star in starsFile)
 			{
-				this.stars.Add(star["proper"], star);
+				var name = star["Name"];
+				this.stars.Add(name, star);
 			}
 		}
 
@@ -37,8 +40,8 @@
 		{
 			var star = this.stars[page.Title.PageName];
 			page.Text = $"{{{{System Infobox\n" +
-			$"|eid={star["id"]}\n" +
-			$"|name={star["proper"]}\n" +
+			$"|eid={star["FormID"]}\n" +
+			$"|name={star["Name"]}\n" +
 			$"|class={star["spect"]}\n" +
 			$"|id={star["gl"]}\n" +
 			$"|temp={star["Temp"]}\n" +

@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -23,6 +24,7 @@
 		public SFBooks(JobManager jobManager)
 			: base(jobManager)
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		}
 		#endregion
 
@@ -35,10 +37,11 @@
 
 		protected override IDictionary<Title, Book> LoadItems()
 		{
+			var ns = this.Site["Starfield"];
 			var retval = new Dictionary<Title, Book>();
 			var books = LoadBooks();
 			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Books.csv"), true);
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Books.csv"), true, Encoding.GetEncoding(1252));
 			foreach (var row in csv)
 			{
 				var formId = row["FormID"][2..];
@@ -96,7 +99,7 @@
 		private static Dictionary<string, Book> LoadBooks()
 		{
 			var retval = new Dictionary<string, Book>(StringComparer.Ordinal);
-			var fileText = File.ReadAllText(LocalConfig.BotDataSubPath("Books.txt"), System.Text.Encoding.ASCII);
+			var fileText = File.ReadAllText(LocalConfig.BotDataSubPath("Starfield/Books.txt"), Encoding.GetEncoding(1252));
 			var matches = BookMatcher.Matches(fileText) as IEnumerable<Match>;
 
 			// In-file replacements prior to bot run:
@@ -106,6 +109,7 @@
 			foreach (var item in matches)
 			{
 				var formId = item.Groups["formid"].Value[2..];
+
 				// This is a horrible way to replace things, but it's simple and speed is not a factor for the relatively small number of books.
 				var orig = item.Groups["text"].Value
 					.Trim()

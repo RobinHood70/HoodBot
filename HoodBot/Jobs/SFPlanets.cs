@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -19,6 +20,7 @@
 		public SFPlanets(JobManager jobManager)
 			: base(jobManager)
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		}
 		#endregion
 
@@ -31,18 +33,19 @@
 
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
-			var csv = new CsvFile
+			var csv = new CsvFile();
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/stars.csv"), true, Encoding.GetEncoding(1252));
+			foreach (var row in csv)
+			{
+				this.stars.Add(row["FormID"], row["Name"]);
+			}
+
+			csv = new CsvFile()
 			{
 				SkipLines = 1
 			};
-			csv.Load(LocalConfig.BotDataSubPath("stars.csv"), true);
-			foreach (var row in csv)
-			{
-				this.stars.Add(row["id"], row["proper"]);
-			}
-
 			var items = new Dictionary<Title, CsvRow>();
-			csv.Load(LocalConfig.BotDataSubPath("galaxy.csv"), true);
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/galaxy.csv"), true, Encoding.GetEncoding(1252));
 			foreach (var item in csv)
 			{
 				var name = "Starfield:" + item["Name"];
