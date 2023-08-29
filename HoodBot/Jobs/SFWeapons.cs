@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -21,7 +20,9 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Create Weapon page";
+		protected override string? Disambiguator => "weapon";
+
+		protected override string EditSummary => "Create weapon page";
 		#endregion
 
 		#region Protected Override Methods
@@ -38,7 +39,6 @@
 				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 				if (name.Length > 0)
 				{
-					Debug.WriteLine(name);
 					var itemList = items.TryGetValue(title, out var list) ? list : new List<CsvRow>();
 					itemList.Add(row);
 					items[title] = itemList;
@@ -74,20 +74,6 @@
 			}
 
 			return "{{Trail|Items|Weapons}}" + sb.ToString()[12..] + $"The [[Starfield:{title.PageName}|]] is a [[Starfield:Weapons|weapon]].\n\n{{{{Stub|Weapon}}}}";
-		}
-
-		protected override void PageLoaded(ContextualParser parser, List<CsvRow> item)
-		{
-		}
-		#endregion
-
-		#region Internal Record Structs
-		internal record struct Npc(string FormID, string EditorID, string Name, string Race, bool Female, bool Dead, IReadOnlyList<string> Factions);
-		#endregion
-
-		#region Internal Classes
-		internal sealed class Npcs : List<Npc>
-		{
 		}
 		#endregion
 	}

@@ -21,6 +21,8 @@
 		#endregion
 
 		#region Protected Override Properties
+		protected override string? Disambiguator => "npc";
+
 		protected override string EditSummary => "Create Npc page";
 		#endregion
 
@@ -86,10 +88,6 @@
 
 			var npcs = sb.ToString()[12..];
 			return npcs + "\n\n{{Stub|NPC}}";
-		}
-
-		protected override void PageLoaded(ContextualParser parser, Npcs item)
-		{
 		}
 		#endregion
 

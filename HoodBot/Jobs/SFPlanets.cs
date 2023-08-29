@@ -25,6 +25,8 @@
 		#endregion
 
 		#region Protected Override Properties
+		protected override string? Disambiguator => "planet";
+
 		protected override string EditSummary => "Create planet page";
 		#endregion
 
@@ -81,10 +83,6 @@
 			"|resource=\n" +
 			"|trait=\n" +
 			"}}\n\n{{Stub|Planet}}";
-		}
-
-		protected override void PageLoaded(ContextualParser parser, CsvRow item)
-		{
 		}
 		#endregion
 	}

@@ -18,8 +18,10 @@
 
 		#region Protected Properties
 		protected bool Clobber { get; set; }
+		#endregion
 
-		protected string? Disambiguator { get; set; }
+		#region Protected Abstract Properties
+		protected abstract string? Disambiguator { get; }
 		#endregion
 
 		#region Protected Abstract Methods
@@ -28,8 +30,12 @@
 		protected abstract bool IsValid(ContextualParser parser, T item);
 
 		protected abstract string NewPageText(Title title, T item);
+		#endregion
 
-		protected abstract void PageLoaded(ContextualParser parser, T item);
+		#region Protected Virtual Methods
+		protected virtual void PageLoaded(ContextualParser parser, T item)
+		{
+		}
 		#endregion
 
 		#region Protected Override Methods

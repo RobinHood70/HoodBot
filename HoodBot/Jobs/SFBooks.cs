@@ -29,6 +29,8 @@
 		#endregion
 
 		#region Protected Override Properties
+		protected override string? Disambiguator => "book";
+
 		protected override string EditSummary => "Create book page";
 		#endregion
 
@@ -37,7 +39,6 @@
 
 		protected override IDictionary<Title, Book> LoadItems()
 		{
-			var ns = this.Site["Starfield"];
 			var retval = new Dictionary<Title, Book>();
 			var books = LoadBooks();
 			var csv = new CsvFile();
@@ -88,10 +89,6 @@
 				"{{Book End}}";
 
 			return text;
-		}
-
-		protected override void PageLoaded(ContextualParser parser, Book item)
-		{
 		}
 		#endregion
 

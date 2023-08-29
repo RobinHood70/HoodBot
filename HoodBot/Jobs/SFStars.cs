@@ -5,13 +5,11 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 
-	internal sealed class SFStars : EditJob
+	internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	{
-		#region Fields
-		private readonly Dictionary<string, CsvRow> stars = new(System.StringComparer.Ordinal);
-		#endregion
-
 		#region Constructors
 		[JobInfo("SF Stars")]
 		public SFStars(JobManager jobManager)
@@ -21,31 +19,38 @@
 		}
 		#endregion
 
-		#region Protected Override Methods
-		protected override string EditSummary => "Create star";
+		#region Protected Override Properties
+		protected override string? Disambiguator => "star";
 
-		protected override void LoadPages()
+		protected override string EditSummary => "Create star";
+		#endregion
+
+		#region Protected Override Methods
+		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
+			var items = new Dictionary<Title, CsvRow>();
 			var fileName = LocalConfig.BotDataSubPath("Starfield/stars.csv");
 			var starsFile = new CsvFile();
 			starsFile.Load(fileName, true, Encoding.GetEncoding(1252));
 			foreach (var star in starsFile)
 			{
-				var name = star["Name"];
-				this.stars.Add(name, star);
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + star["Name"]);
+				items.Add(title, star);
 			}
+
+			return items;
 		}
 
-		protected override void PageMissing(Page page)
-		{
-			var star = this.stars[page.Title.PageName];
-			page.Text = $"{{{{System Infobox\n" +
-			$"|eid={star["FormID"]}\n" +
-			$"|name={star["Name"]}\n" +
-			$"|class={star["spect"]}\n" +
-			$"|id={star["gl"]}\n" +
-			$"|temp={star["Temp"]}\n" +
-			$"|magnitude={star["absmag"]}\n" +
+		protected override bool IsValid(ContextualParser parser, CsvRow item) => parser.FindSiteTemplate("System Infobox") is not null;
+
+		protected override string NewPageText(Title title, CsvRow item) =>
+			$"{{{{System Infobox\n" +
+			$"|eid={item["FormID"]}\n" +
+			$"|name={item["Name"]}\n" +
+			$"|class={item["spect"]}\n" +
+			$"|id={item["gl"]}\n" +
+			$"|temp={item["Temp"]}\n" +
+			$"|magnitude={item["absmag"]}\n" +
 			"|image=\n" +
 			"|level=\n" +
 			"|mass=\n" +
@@ -53,11 +58,6 @@
 			"|planet=\n" +
 			"|radius=\n" +
 			$"}}}}";
-		}
-
-		protected override void PageLoaded(Page page)
-		{
-		}
 		#endregion
 	}
 }
