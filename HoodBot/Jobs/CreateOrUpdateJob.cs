@@ -71,10 +71,11 @@
 		{
 			foreach (var title in remaining)
 			{
-				var text = this.NewPageText(title, items[title]);
+				var item = items[title];
+				var text = this.NewPageText(title, item);
 				var page = this.Site.CreatePage(title, text);
 				var parser = new ContextualParser(page);
-				if (this.IsValid(parser, items[title]))
+				if (this.IsValid(parser, item))
 				{
 					parsedPages.Add(parser);
 				}
@@ -99,14 +100,16 @@
 					{
 						parsedPages.Add(parser);
 						remaining.Remove(title);
-						continue;
 					}
-				}
-
-				if (this.Disambiguator is not null)
-				{
-					remaining.Remove(title);
-					remaining.Add(title.FullPageName() + " (" + this.Disambiguator + ")");
+					else if (this.Disambiguator is not null)
+					{
+						var disambig = TitleFactory.FromValidated(title.Namespace, title.PageName + " (" + this.Disambiguator + ")");
+						remaining.Remove(title);
+						remaining.Add(disambig);
+						var item = items[title];
+						items.Remove(title);
+						items.Add(disambig, item);
+					}
 				}
 			}
 		}
@@ -117,15 +120,18 @@
 			found.GetTitles(remaining);
 			foreach (var page in found)
 			{
+				var title = page.Title;
 				if (page.Exists)
 				{
 					var parser = new ContextualParser(page);
-					var title = page.Title;
-					var trimmed = TitleFactory.FromValidated(title.Namespace, title.PageName[..^(this.Disambiguator!.Length - 3)]);
-					if (this.IsValid(parser, items[trimmed]))
+					if (this.IsValid(parser, items[title]))
 					{
 						parsedPages.Add(parser);
 						remaining.Remove(title);
+					}
+					else
+					{
+						throw new InvalidOperationException("Disambiguated page found but it fails validity check.");
 					}
 				}
 			}
