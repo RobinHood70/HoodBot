@@ -17,6 +17,8 @@
 		#endregion
 
 		#region Protected Properties
+		protected bool Clobber { get; set; }
+
 		protected string? Disambiguator { get; set; }
 		#endregion
 
@@ -37,10 +39,14 @@
 			var parsedPages = new List<ContextualParser>();
 			var remaining = new TitleCollection(this.Site);
 			remaining.AddRange(items.Keys);
-			this.GetBasePages(items, parsedPages, remaining);
-			if (this.Disambiguator is not null && remaining.Count > 0)
+
+			if (!this.Clobber)
 			{
-				this.GetDisambiguatedPages(items, parsedPages, remaining);
+				this.GetBasePages(items, parsedPages, remaining);
+				if (this.Disambiguator is not null && remaining.Count > 0)
+				{
+					this.GetDisambiguatedPages(items, parsedPages, remaining);
+				}
 			}
 
 			if (remaining.Count > 0)
