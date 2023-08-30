@@ -294,7 +294,11 @@
 		#region Public Abstract Methods
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
-		public void Sort() => ((List<T>)this.Items).Sort();
+		public void Sort()
+		{
+			var list = (List<T>)this.Items;
+			list.Sort((x, y) => x.Title.CompareTo(y.Title));
+		}
 		#endregion
 
 		#region Public Virtual Methods
