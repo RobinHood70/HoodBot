@@ -21,7 +21,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string? Disambiguator => "npc";
+		protected override string? Disambiguator => "NPC";
 
 		protected override string EditSummary => "Create Npc page";
 		#endregion
