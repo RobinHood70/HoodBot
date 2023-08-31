@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -11,10 +12,6 @@
 
 	internal sealed class SFPlanets : CreateOrUpdateJob<CsvRow>
 	{
-		#region Fields
-		private readonly Dictionary<string, string> stars = new(StringComparer.Ordinal);
-		#endregion
-
 		#region Constructors
 		[JobInfo("SF Planets")]
 		public SFPlanets(JobManager jobManager)
@@ -35,19 +32,9 @@
 
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
-			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/stars.csv"), true, Encoding.GetEncoding(1252));
-			foreach (var row in csv)
-			{
-				this.stars.Add(row["FormID"], row["Name"]);
-			}
-
-			csv = new CsvFile()
-			{
-				SkipLines = 1
-			};
 			var items = new Dictionary<Title, CsvRow>();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/galaxy.csv"), true, Encoding.GetEncoding(1252));
+			var csv = new CsvFile();
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets.csv"), true, Encoding.GetEncoding(1252));
 			foreach (var item in csv)
 			{
 				var name = "Starfield:" + item["Name"];
@@ -59,11 +46,12 @@
 
 		protected override string NewPageText(Title title, CsvRow item)
 		{
-			var starName = this.stars[item["Star ID"]];
-			var starType = item["Type"]
+			var starName = item["StarName"];
+			var planetType = item["Type"]
 				.Replace("G.", "Giant", StringComparison.Ordinal)
 				.Replace("Aster.", "Asteroid", StringComparison.Ordinal);
-			var magnetosphere = item["Mag. Field"];
+			var gravityText = double.TryParse(item["Gravity"], CultureInfo.CurrentCulture, out var grav) ? grav.ToStringInvariant() : string.Empty;
+			var magnetosphere = item["MagField"];
 			if (string.IsNullOrWhiteSpace(magnetosphere))
 			{
 				magnetosphere = "Unknown";
@@ -72,8 +60,8 @@
 			return "{{Planet Infobox\n" +
 			"|image=\n" +
 			$"|system={starName}\n" +
-			$"|type={starType}\n" +
-			$"|gravity={item["Gravity"]}\n" +
+			$"|type={planetType}\n" +
+			$"|gravity={gravityText}\n" +
 			"|temp=\n" +
 			"|atmosphere=\n" +
 			$"|magnetosphere={magnetosphere}\n" +
