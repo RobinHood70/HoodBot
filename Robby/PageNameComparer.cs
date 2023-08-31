@@ -7,7 +7,7 @@
 	/// <summary>A <see cref="StringComparer"/> class that compares page names in a given <see cref="Namespace">namespace</see>, respecting the rules for that namespace.</summary>
 	public class PageNameComparer : StringComparer
 	{
-		#region FIelds
+		#region Fields
 		private readonly CultureInfo culture;
 		private readonly bool caseSensitive;
 		#endregion
