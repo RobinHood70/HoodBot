@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
-	using System.Net;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
@@ -269,8 +268,7 @@
 
 		private IMediaWikiClient CreateClient()
 		{
-			var credentials = new NetworkCredential("betasfwiki", "wegothereearly");
-			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, this.CancelToken);
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), null, this.CancelToken);
 			if (this.wikiInfo.ReadThrottling > 0 || this.wikiInfo.WriteThrottling > 0)
 			{
 				client = new ThrottledClient(
