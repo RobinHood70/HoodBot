@@ -187,8 +187,8 @@
 		{
 			var siteCulture = this.Site.Culture;
 			return this.CaseSensitive
-				? string.Compare(x, y, true, siteCulture)
-				: string.Compare(x.UpperFirst(siteCulture), y.UpperFirst(siteCulture), true, siteCulture);
+				? string.Compare(x, y, false, siteCulture)
+				: string.Compare(x.UpperFirst(siteCulture), y.UpperFirst(siteCulture), false, siteCulture);
 		}
 
 		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>
