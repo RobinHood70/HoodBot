@@ -31,8 +31,8 @@
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()
 		{
 			var items = new Dictionary<Title, List<CsvRow>>();
-			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Weapons.csv"), true, Encoding.GetEncoding(1252));
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Weapons.csv"), true);
 			foreach (var row in csv)
 			{
 				var name = row["Name"];

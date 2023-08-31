@@ -41,8 +41,8 @@
 		{
 			var retval = new Dictionary<Title, Book>();
 			var books = LoadBooks();
-			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Books.csv"), true, Encoding.GetEncoding(1252));
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Books.csv"), true);
 			foreach (var row in csv)
 			{
 				var formId = row["FormID"][2..];

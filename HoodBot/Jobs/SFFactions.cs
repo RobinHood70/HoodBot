@@ -128,8 +128,8 @@
 			var npcs = new TitleCollection(this.Site);
 			npcs.GetCategoryMembers("Starfield-NPCs");
 			var members = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
-			var npcsFile = new CsvFile();
-			npcsFile.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true, Encoding.GetEncoding(1252));
+			var npcsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			npcsFile.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true);
 			{
 				foreach (var row in npcsFile)
 				{

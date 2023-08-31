@@ -30,8 +30,8 @@
 		{
 			var items = new Dictionary<Title, CsvRow>();
 			var fileName = LocalConfig.BotDataSubPath("Starfield/stars.csv");
-			var starsFile = new CsvFile();
-			starsFile.Load(fileName, true, Encoding.GetEncoding(1252));
+			var starsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			starsFile.Load(fileName, true);
 			foreach (var star in starsFile)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + star["Name"]);

@@ -32,8 +32,8 @@
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
 			var items = new Dictionary<Title, Npcs>();
-			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true, Encoding.GetEncoding(1252));
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true);
 			foreach (var row in csv)
 			{
 				if (row["Name"].Length > 0)

@@ -133,7 +133,7 @@
 
 			var type = isLoadCall ? "Loaded" : "Saved";
 			Debug.WriteLine($"{type}: {csvFile.Count} rows");
-			csvFile.WriteFile(LocalConfig.BotDataSubPath(type + " Variables.txt"));
+			csvFile.Save(LocalConfig.BotDataSubPath(type + " Variables.txt"));
 		}
 		#endregion
 

@@ -33,8 +33,8 @@
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
 			var items = new Dictionary<Title, CsvRow>();
-			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets.csv"), true, Encoding.GetEncoding(1252));
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets.csv"), true);
 			foreach (var item in csv)
 			{
 				var name = "Starfield:" + item["Name"];

@@ -175,7 +175,7 @@
 				}
 			}
 
-			csvFile.WriteFile(location);
+			csvFile.Save(location);
 		}
 		#endregion
 	}
