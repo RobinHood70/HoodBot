@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Net;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
@@ -268,7 +269,9 @@
 
 		private IMediaWikiClient CreateClient()
 		{
-			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), null, this.CancelToken);
+			// TODO: Below is a quick hack. Should probably be integrated into the UI at some point.
+			NetworkCredential? credentials = null; // new NetworkCredential("user", "password");
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, this.CancelToken);
 			if (this.wikiInfo.ReadThrottling > 0 || this.wikiInfo.WriteThrottling > 0)
 			{
 				client = new ThrottledClient(
