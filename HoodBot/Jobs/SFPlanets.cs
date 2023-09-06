@@ -9,6 +9,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class SFPlanets : CreateOrUpdateJob<CsvRow>
 	{
@@ -24,7 +25,7 @@
 		#region Protected Override Properties
 		protected override string? Disambiguator => "planet";
 
-		protected override string EditSummary => "Create planet page";
+		protected override string EditSummary => "Create/update planet";
 		#endregion
 
 		#region Protected Override Methods
@@ -44,7 +45,22 @@
 			return items;
 		}
 
-		protected override string NewPageText(Title title, CsvRow item)
+		protected override string NewPageText(Title title, CsvRow item) => "{{Planet Infobox\n" +
+			"|image=\n" +
+			$"|system=\n" +
+			$"|type=\n" +
+			$"|gravity=\n" +
+			"|temp=\n" +
+			"|atmosphere=\n" +
+			$"|magnetosphere=\n" +
+			"|fauna=\n" +
+			"|flora=\n" +
+			"|water=\n" +
+			"|resource=\n" +
+			"|trait=\n" +
+			"}}\n\n{{Stub|Planet}}";
+
+		protected override void PageLoaded(ContextualParser parser, CsvRow item)
 		{
 			var starName = item["StarName"];
 			var planetType = item["Type"]
@@ -57,20 +73,11 @@
 				magnetosphere = "Unknown";
 			}
 
-			return "{{Planet Infobox\n" +
-			"|image=\n" +
-			$"|system={starName}\n" +
-			$"|type={planetType}\n" +
-			$"|gravity={gravityText}\n" +
-			"|temp=\n" +
-			"|atmosphere=\n" +
-			$"|magnetosphere={magnetosphere}\n" +
-			"|fauna=\n" +
-			"|flora=\n" +
-			"|water=\n" +
-			"|resource=\n" +
-			"|trait=\n" +
-			"}}\n\n{{Stub|Planet}}";
+			var template = parser.FindSiteTemplate("Planet Infobox") ?? throw new InvalidOperationException();
+			template.Update("system", starName);
+			template.Update("type", planetType);
+			template.Update("gravity", gravityText);
+			template.Update("magnetosphere", magnetosphere);
 		}
 		#endregion
 	}
