@@ -16,7 +16,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("SF Galaxy")]
+		[JobInfo("SF Galaxy", "Starfield")]
 		public SFGalaxy_Old(JobManager jobManager)
 			: base(jobManager)
 		{

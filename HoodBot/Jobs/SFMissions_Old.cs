@@ -12,7 +12,7 @@
 	internal sealed class SFMissions_Old : CreateOrUpdateJob<List<CsvRow>>
 	{
 		#region Constructors
-		[JobInfo("SF Missions (Old)")]
+		[JobInfo("SF Missions (Old)", "Starfield")]
 		public SFMissions_Old(JobManager jobManager)
 			: base(jobManager)
 		{

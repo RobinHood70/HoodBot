@@ -13,7 +13,7 @@
 	internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	{
 		#region Constructors
-		[JobInfo("SF Factions")]
+		[JobInfo("SF Factions", "Starfield")]
 		public SFFactions(JobManager jobManager)
 			: base(jobManager)
 		{

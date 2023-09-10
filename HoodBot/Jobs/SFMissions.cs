@@ -14,7 +14,7 @@
 	internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
 		#region Constructors
-		[JobInfo("SF Missions")]
+		[JobInfo("SF Missions", "Starfield")]
 		public SFMissions(JobManager jobManager)
 			: base(jobManager)
 		{

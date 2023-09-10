@@ -12,7 +12,7 @@
 	internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	{
 		#region Constructors
-		[JobInfo("SF NPCs")]
+		[JobInfo("SF NPCs", "Starfield")]
 		public SFNpcs(JobManager jobManager)
 			: base(jobManager)
 		{

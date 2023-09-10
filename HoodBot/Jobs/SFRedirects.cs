@@ -10,7 +10,7 @@
 	internal sealed class SFRedirects : CreateOrUpdateJob<string>
 	{
 		#region Constructors
-		[JobInfo("SF Redirects")]
+		[JobInfo("SF Redirects", "Starfield")]
 		public SFRedirects(JobManager jobManager)
 			: base(jobManager)
 		{
