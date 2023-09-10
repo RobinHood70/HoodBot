@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WallE.Test
 {
-#pragma warning disable MA0025 // Implement the functionality instead of throwing NotImplementedException
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
@@ -489,5 +488,4 @@
 			unreadText: null);
 		#endregion
 	}
-#pragma warning restore MA0025 // Implement the functionality instead of throwing NotImplementedException
 }
