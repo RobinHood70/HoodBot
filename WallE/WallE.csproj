@@ -24,7 +24,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.63">
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.84">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
