@@ -38,8 +38,8 @@
 	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+	  <PackageReference Include="Microsoft.Playwright" Version="1.37.1" />
 	  <PackageReference Include="MySql.Data" Version="8.1.0" />
-	  <PackageReference Include="PuppeteerSharp" Version="11.0.5" />
 	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
