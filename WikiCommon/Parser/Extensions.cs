@@ -815,19 +815,28 @@
 		/// <param name="name">The name of the parameter to update.</param>
 		/// <param name="value">The value to update the parameter to.</param>
 		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-		public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value)
+		public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.NoChange);
+
+		/// <summary>Updates a parameter with the specified value if it is blank or does not exist.</summary>
+		/// <param name="template">The template to update.</param>
+		/// <param name="name">The name of the parameter to update.</param>
+		/// <param name="value">The value to update the parameter to.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
+		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
+		public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
 		{
-			if (template.Find(name) is IParameterNode parameter)
+			var param = template.Find(name);
+			if (param is IParameterNode parameter)
 			{
 				if (parameter.Value.ToValue().Trim().Length == 0)
 				{
-					Update(template, name, value);
+					parameter.SetValue(value, paramFormat);
 				}
 
 				return parameter;
 			}
 
-			return template.Add(name, value);
+			return template.Add(name, value, paramFormat);
 		}
 
 		/// <summary>Returns the value of a template parameter or the default value.</summary>
