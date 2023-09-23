@@ -36,17 +36,18 @@
 			"minedSkills.rank,\n" +
 			"minedSkills.morph,\n" +
 			"minedSkills.coefDescription,\n" +
-			"minedSkills.type1, minedSkills.a1, minedSkills.b1, minedSkills.c1,\n" +
-			"minedSkills.type2, minedSkills.a2, minedSkills.b2, minedSkills.c2,\n" +
-			"minedSkills.type3, minedSkills.a3, minedSkills.b3, minedSkills.c3,\n" +
-			"minedSkills.type4, minedSkills.a4, minedSkills.b4, minedSkills.c4,\n" +
-			"minedSkills.type5, minedSkills.a5, minedSkills.b5, minedSkills.c5,\n" +
-			"minedSkills.type6, minedSkills.a6, minedSkills.b6, minedSkills.c6\n" +
+			"minedSkills.type1, minedSkills.a1, minedSkills.b1, minedSkills.c1, minedSkills.R1,\n" +
+			"minedSkills.type2, minedSkills.a2, minedSkills.b2, minedSkills.c2, minedSkills.R2,\n" +
+			"minedSkills.type3, minedSkills.a3, minedSkills.b3, minedSkills.c3, minedSkills.R3,\n" +
+			"minedSkills.type4, minedSkills.a4, minedSkills.b4, minedSkills.c4, minedSkills.R4,\n" +
+			"minedSkills.type5, minedSkills.a5, minedSkills.b5, minedSkills.c5, minedSkills.R5,\n" +
+			"minedSkills.type6, minedSkills.a6, minedSkills.b6, minedSkills.c6, minedSkills.R6\n" +
 		"FROM\n" +
 			"skillTree\n" +
 		"INNER JOIN\n" +
 			"minedSkills ON skillTree.abilityId = minedSkills.id\n" +
 		"WHERE\n" +
+			/* "skillTree.baseName = 'Dragonknight Standard' AND\n" + */
 			"minedSkills.isPlayer AND\n" +
 			"minedSkills.morph >= 0 AND\n" +
 			"minedSkills.skillLine != 'Emperor'\n" +
@@ -96,8 +97,8 @@
 				prevVersion = new EsoVersion(this.version.Version - 1, false);
 			}
 
-			var prevSkills = GetSkillList(prevVersion);
 			this.skills = GetSkillList(null);
+			var prevSkills = GetSkillList(prevVersion);
 			foreach (var (key, skill) in this.skills)
 			{
 				if (prevSkills.TryGetValue(key, out var prevSkill))

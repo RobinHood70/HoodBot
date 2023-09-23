@@ -11,7 +11,7 @@
 		#region Static Fields
 		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
-		private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		////private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
 		#endregion
 
@@ -22,8 +22,14 @@
 			this.Id = (int)row["id"];
 			this.RankNum = (sbyte)row["rank"];
 
-			var leadText = LeadText.Match((string)row["coefDescription"]);
-			var description = leadText.Value + (string)row["description"];
+			//// var leadText = LeadText.Match((string)row["coefDescription"]);
+			//// var description = leadText.Value + (string)row["description"];
+			var description = (string)row["coefDescription"];
+			if (string.IsNullOrWhiteSpace(description))
+			{
+				description = (string)row["description"];
+			}
+
 			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
 			{
 				description = description.Replace(partial.From, partial.To, StringComparison.Ordinal);

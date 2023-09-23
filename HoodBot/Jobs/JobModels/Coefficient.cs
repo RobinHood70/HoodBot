@@ -38,6 +38,7 @@
 			{
 				this.B = (float)data["b" + num];
 				this.C = (float)data["c" + num];
+				this.R = (float)data["R" + num];
 				this.Mechanic = (sbyte)data["type" + num];
 				if (this.Mechanic == -1)
 				{
@@ -68,7 +69,7 @@
 		// Type, or mechanic if type not defined. Called Mechanic to make it obvious that they serve the same purpose.
 		public int Mechanic { get; }
 
-		//// public float R { get; }
+		public float R { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -106,22 +107,42 @@
 		#region Public Methods
 
 		// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
-		public string SkillDamageText() => this.Mechanic >= 0 ? this.BitFieldDamage() :
-			this.Mechanic < -1 ? this.IndexedDamage() :
-			throw new InvalidOperationException("Mechanic is invalid.");
+		public string SkillDamageText() => this.Mechanic switch
+		{
+			> -1 => this.BitFieldDamage(),
+			< -1 => this.IndexedDamage(),
+			_ => throw new InvalidOperationException("Mechanic is invalid."),
+		};
 		#endregion
 
 		#region Private Methods
-		private string BitFieldDamage()
+		private static double ToPrecision(double num, int digits)
 		{
-			float CappedStat()
+			if (num == 0)
 			{
-				var value = this.A * Stat;
-				var maxValue = this.B * Health;
-				return value > maxValue ? maxValue : value;
+				return 0;
 			}
 
-			string ToText(float result) => ((int)Math.Round(result)).ToStringInvariant();
+			var unsig = Math.Floor(Math.Log10(Math.Abs(num))) + 1;
+			var scale = Math.Pow(10, unsig);
+			return scale * Math.Round(num / scale, digits);
+		}
+
+		private string BitFieldDamage()
+		{
+			var a = this.A; // ToPrecision(this.A, 5);
+			var b = this.B; // ToPrecision(this.B, 5);
+			var c = this.C; // ToPrecision(this.C, 5);
+			var r = this.R; // ToPrecision(this.R, 5);
+
+			double CappedStat()
+			{
+				var value = a * Stat;
+				var maxValue = b * Damage;
+				return value + maxValue + c;
+			}
+
+			string ToText(double result) => ((int)Math.Round(result)).ToStringInvariant();
 
 			var resultList = new List<string>();
 			switch (this.Mechanic)
@@ -129,8 +150,8 @@
 				case 0: // Old Magicka
 				case 6: // Old Stamina
 				case 10: // Old Ultimate
-					var value = this.A * Stat;
-					var maxValue = this.B * Health;
+					var value = a * Stat;
+					var maxValue = b * Health;
 					//// Debug.WriteLine("Old stamina/ultimate (mechanic = 0/6/10) used!");
 					resultList.Add(ToText(value > maxValue ? maxValue : value));
 					break;
@@ -141,13 +162,13 @@
 						var result = mechanicType switch
 						{
 							MechanicTypes.None => throw new InvalidOperationException("No bits were set."),
-							MechanicTypes.Magicka => this.A * Stat,
-							MechanicTypes.Werewolf => this.A * Damage, // Werewolf
-							MechanicTypes.Stamina => this.A * Stat,
+							MechanicTypes.Magicka => a * Stat,
+							MechanicTypes.Werewolf => a * Damage, // Werewolf
+							MechanicTypes.Stamina => a * Stat,
 							MechanicTypes.Ultimate => CappedStat(),
 							MechanicTypes.MountStamina => 0, // Mount Stamina
 							MechanicTypes.Health =>
-								this.A * Health + this.C,
+								a * Health + c,
 							MechanicTypes.Daedric => 0, // Daedric
 							_ => throw new InvalidOperationException("A bit was specified that has no current value."),
 						};
@@ -170,43 +191,48 @@
 
 			int value;
 			int maxValue;
+			var a = ToPrecision(this.A, 5);
+			var b = ToPrecision(this.B, 5);
+			var c = ToPrecision(this.C, 5);
+			var r = ToPrecision(this.R, 5);
+
 			var sb = new StringBuilder();
 			switch (this.Mechanic)
 			{
 				case -2: // Health
-					sb.Append((int)Math.Round(this.A * Health + this.C));
+					sb.Append((int)Math.Round(a * Health + c));
 					break;
 				case -56: // Spell + Weapon Damage
 				case -50: // Ultimate (no weapon damage)
 				case -68: // Magicka with Health Cap
-					value = (int)Math.Round(this.A * Stat);
-					maxValue = (int)Math.Round(this.B * Health);
+					value = (int)Math.Round(a * Stat);
+					maxValue = (int)Math.Round(b * Health);
 					sb.Append(value > maxValue ? maxValue : value);
 					break;
 				case -71: // Spell Damage Capped
-					value = (int)Math.Round(this.A * Damage + this.B);
-					maxValue = (int)this.C;
+					value = (int)Math.Round(a * Damage + b);
+					maxValue = (int)c;
 					sb.Append(value > maxValue ? maxValue : value);
 					break;
 				case -72: // Magicka and Weapon Damage
-					sb.Append((int)Math.Round(this.A * Stat + this.B * Damage + this.C));
+					sb.Append((int)Math.Round(a * Stat + b * Damage + c));
 					break;
 				case -73: // Magicka and Spell Damage
-					var halfMax = this.C / 2;
-					var statDamage = this.A * Stat;
+					var halfMax = c / 2;
+					var statDamage = a * Stat;
 					if (statDamage > halfMax)
 					{
 						statDamage = halfMax;
 					}
 
-					var dmgDamage = this.B * Damage;
+					var dmgDamage = b * Damage;
 					if (dmgDamage > halfMax)
 					{
 						dmgDamage = halfMax;
 					}
 
 					value = (int)Math.Round(statDamage + dmgDamage);
-					maxValue = (int)this.C;
+					maxValue = (int)c;
 					sb.Append(value > maxValue ? maxValue : value);
 					break;
 				case -74: // Weapon Power
@@ -216,7 +242,7 @@
 				case -79: // Health or Weapon/Spell Damage
 					throw new InvalidOperationException("Formula unknown");
 				case -77: // Max Resistance
-					sb.Append((int)Math.Round(this.A * Resist + this.C));
+					sb.Append((int)Math.Round(a * Resist + c));
 					break;
 				case -51: // Light Armor #
 				case -52: // Medium Armor #
@@ -236,10 +262,9 @@
 				case -67: // Winter's Embrace Slotted
 				case -69: // Bone Tyrant Slotted
 				case -70: // Grave Lord Slotted
-					var roundA = ((double)this.A).RoundSignificant(3);
 					sb
 						.Append('(')
-						.Append(roundA)
+						.Append(((double)this.A).RoundSignificant(3))
 						.Append(" × ")
 						.Append(EsoLog.MechanicNames[this.Mechanic])
 						.Append(')');
