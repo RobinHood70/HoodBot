@@ -406,7 +406,7 @@
 					continue;
 				}
 
-				var add = !existing.Contains(questTitle) && !existing.Contains(checkPage);
+				var add = !existing.Contains(questTitle) && !existing.Contains(checkPage.Title);
 				if (add && (checkPage.IsRedirect || checkPage.IsDisambiguation == true))
 				{
 					foreach (var link in checkPage.Links)
