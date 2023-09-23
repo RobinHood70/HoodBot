@@ -25,9 +25,9 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract IDictionary<Title, T> LoadItems();
-
 		protected abstract bool IsValid(ContextualParser parser, T item);
+
+		protected abstract IDictionary<Title, T> LoadItems();
 
 		protected abstract string NewPageText(Title title, T item);
 		#endregion
