@@ -38,7 +38,7 @@
 			{
 				this.B = (float)data["b" + num];
 				this.C = (float)data["c" + num];
-				this.R = (float)data["R" + num];
+				//// this.R = (float)data["R" + num];
 				this.Mechanic = (sbyte)data["type" + num];
 				if (this.Mechanic == -1)
 				{
@@ -69,7 +69,7 @@
 		// Type, or mechanic if type not defined. Called Mechanic to make it obvious that they serve the same purpose.
 		public int Mechanic { get; }
 
-		public float R { get; }
+		//// public float R { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -133,7 +133,8 @@
 			var a = this.A; // ToPrecision(this.A, 5);
 			var b = this.B; // ToPrecision(this.B, 5);
 			var c = this.C; // ToPrecision(this.C, 5);
-			var r = this.R; // ToPrecision(this.R, 5);
+
+			//// var r = this.R; // ToPrecision(this.R, 5);
 
 			double CappedStat()
 			{
@@ -194,7 +195,7 @@
 			var a = ToPrecision(this.A, 5);
 			var b = ToPrecision(this.B, 5);
 			var c = ToPrecision(this.C, 5);
-			var r = ToPrecision(this.R, 5);
+			//// var r = ToPrecision(this.R, 5);
 
 			var sb = new StringBuilder();
 			switch (this.Mechanic)
