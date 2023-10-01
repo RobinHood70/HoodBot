@@ -11,7 +11,7 @@
 	internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	{
 		#region Constructors
-		[JobInfo("SF Weapons", "Starfield")]
+		[JobInfo("Weapons", "Starfield")]
 		public SFWeapons(JobManager jobManager)
 			: base(jobManager)
 		{

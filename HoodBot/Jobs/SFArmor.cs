@@ -13,7 +13,7 @@
 	internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 	{
 		#region Constructors
-		[JobInfo("SF Armor", "Starfield")]
+		[JobInfo("Armor", "Starfield")]
 		public SFArmor(JobManager jobManager)
 			: base(jobManager)
 		{

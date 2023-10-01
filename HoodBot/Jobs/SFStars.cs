@@ -11,7 +11,7 @@
 	internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	{
 		#region Constructors
-		[JobInfo("SF Stars", "Starfield")]
+		[JobInfo("Stars", "Starfield")]
 		public SFStars(JobManager jobManager)
 			: base(jobManager)
 		{

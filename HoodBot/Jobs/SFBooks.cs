@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("SF Books", "Starfield")]
+		[JobInfo("Books", "Starfield")]
 		public SFBooks(JobManager jobManager)
 			: base(jobManager)
 		{
