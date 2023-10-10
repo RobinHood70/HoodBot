@@ -262,3 +262,4 @@ __pycache__/
 /HoodBot/connections.config
 /HoodBotOld
 /HoodBot/connectionStrings.json
+/HoodBot/UserSettings.json
