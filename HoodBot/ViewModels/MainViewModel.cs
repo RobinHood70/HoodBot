@@ -180,6 +180,7 @@
 				if (this.SetProperty(ref this.eta, value))
 				{
 					this.OnPropertyChanged();
+					this.OnPropertyChanged(nameof(this.eta));
 				}
 			}
 		}
