@@ -10,7 +10,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
+	internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	{
 		#region Constructors
 		[JobInfo("Creatures", "Starfield")]
@@ -23,7 +23,7 @@
 		#region Protected Override Properties
 		protected override string? Disambiguator => "creature";
 
-		protected override string EditSummary => "Create/update creature page";
+		protected override string EditSummary => "Create variant redirect"; // "Create/update creature page";
 		#endregion
 
 		#region Protected Override Methods
@@ -41,7 +41,7 @@
 		protected override void PageLoaded(ContextualParser parser, Creature item)
 		{
 			var cs = parser.FindSiteTemplate("Creature Summary");
-			if (cs is not null)
+			if (false && cs is not null)
 			{
 				cs.Remove("resp");
 				cs.Remove("typenamesp");
@@ -58,7 +58,7 @@
 				if (item.Variants.Count < 2)
 				{
 					this.UpdateLoc(cs, item);
-					this.UpdateTemplate(cs, item.Variants[0]);
+					UpdateTemplate(cs, item.Variants[0]);
 				}
 				else
 				{
@@ -72,9 +72,20 @@
 				}
 			}
 
-			if (parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
+			if (false && parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
 			{
-				this.AddVariants(parser, item);
+				AddVariants(parser, item);
+			}
+
+			foreach (var variant in item.Variants)
+			{
+				var resource = variant["Resource"].Split(" (", 2, StringSplitOptions.None)[0];
+				var redirectText =
+					$"#REDIRECT [[Starfield:{variant["Name"]}#{variant["Planet"]}]]\n" +
+					$"[[Category:Starfield-Creatures-{resource}]]\n" +
+					"[[Category:Redirects to Broader Subjects]]";
+				var redirect = this.Site.CreatePage($"Starfield:{variant["Name"]} ({variant["Planet"]})", redirectText);
+				this.Pages.Add(redirect);
 			}
 
 			parser.UpdatePage();
@@ -110,10 +121,37 @@
 				template.Update(key, value);
 			}
 		}
+
+		private static void UpdateTemplate(SiteTemplateNode template, CsvRow row)
+		{
+			template.Update("baseid", row["FormID"]);
+			//// template.Update("species", row["Race"]);
+			template.Update("planet", row["Planet"]);
+			template.Update("biomes", "\n* " + row["Biomes"].Replace(", ", "\n* ", StringComparison.Ordinal));
+			template.Update("resource", row["Resource"].Split(" (", 2, StringSplitOptions.None)[0]);
+			template.Update("temperament", row["Temperament"]);
+			template.Update("harvest", row["Harvestable"]);
+			template.Update("domesticable", row["Domesticable"]);
+			template.Update("predation", row["Type"]);
+			template.Update("difficulty", row["Difficulty"]);
+			if (row["Health Mult"].Length > 0)
+			{
+				template.Update("health", row["Health Mult"][1..]);
+			}
+
+			template.Update("size", row["size"]);
+			template.Update("diet", row["Diet"]);
+			template.Update("schedule", row["Schedule"]);
+			template.Update("combatstyle", row["Combat Style"]);
+			NoNone(template, "abilities", row["Abilities"]);
+			NoNone(template, "resistances", row["Resistances"]);
+			NoNone(template, "weaknesses", row["Weaknesses"]);
+			NoNone(template, "behavior", row["Behaviors"]);
+		}
 		#endregion
 
 		#region Private Methods
-		private void AddVariants(ContextualParser parser, Creature item)
+		private static void AddVariants(ContextualParser parser, Creature item)
 		{
 			var newNodes = new NodeCollection(parser.Factory);
 			var insertPos = parser.FindIndex<IHeaderNode>(0);
@@ -134,7 +172,7 @@
 			foreach (var variant in item.Variants)
 			{
 				var template = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Creature Variant");
-				this.UpdateTemplate(template, variant);
+				UpdateTemplate(template, variant);
 				newNodes.Add(template);
 				newNodes.AddText("\n");
 			}
@@ -184,33 +222,6 @@
 			}
 		}
 
-		private void UpdateTemplate(SiteTemplateNode template, CsvRow row)
-		{
-			template.Update("baseid", row["FormID"]);
-			// template.Update("species", row["Race"]);
-			template.Update("planet", row["Planet"]);
-			template.Update("biomes", "\n* " + row["Biomes"].Replace(", ", "\n* ", StringComparison.Ordinal));
-			template.Update("resource", row["Resource"].Split(" (", 2, StringSplitOptions.None)[0]);
-			template.Update("temperament", row["Temperament"]);
-			template.Update("harvest", row["Harvestable"]);
-			template.Update("domesticable", row["Domesticable"]);
-			template.Update("predation", row["Type"]);
-			template.Update("difficulty", row["Difficulty"]);
-			if (row["Health Mult"].Length > 0)
-			{
-				template.Update("health", row["Health Mult"][1..]);
-			}
-
-			template.Update("size", row["size"]);
-			template.Update("diet", row["Diet"]);
-			template.Update("schedule", row["Schedule"]);
-			template.Update("combatstyle", row["Combat Style"]);
-			NoNone(template, "abilities", row["Abilities"]);
-			NoNone(template, "resistances", row["Resistances"]);
-			NoNone(template, "weaknesses", row["Weaknesses"]);
-			NoNone(template, "behavior", row["Behaviors"]);
-		}
-
 		private void UpdateLoc(SiteTemplateNode template, Creature item)
 		{
 			// Remove loc if it's a link and duplicates planet
@@ -234,7 +245,7 @@
 		#endregion
 
 		#region Internal Records
-		internal record Creature(List<CsvRow> Variants);
+		internal sealed record Creature(List<CsvRow> Variants);
 		#endregion
 	}
 }
