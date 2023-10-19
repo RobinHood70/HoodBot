@@ -27,81 +27,13 @@
 		protected override string? Disambiguator => "planet";
 		#endregion
 
-		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => "Create/update planet";
-
-		protected override bool IsValid(ContextualParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
-
-		protected override IDictionary<Title, Planet> LoadItems()
-		{
-			var biomes = GetBiomes();
-
-			return GetPlanets_NewCsv(biomes);
-			// Uncomment to retain access to import old csv
-			// return GetPlanets(biomes);
-		}
-
-		/// <summary>
-		/// Retrieves dictionary of biomes from biomedata.csv
-		/// </summary>
-		private static Dictionary<int, ICollection<string>> GetBiomes()
-		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			var biomes = new Dictionary<int, ICollection<string>>();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/biomedata.csv"), true, 1);
-			foreach (var row in csv)
-			{
-				var id = CombineId(row["Star ID"], row["Planet ID"]);
-				if (!biomes.TryGetValue(id, out var biome))
-				{
-					biome = new SortedSet<string>(StringComparer.Ordinal);
-					biomes.Add(id, biome);
-				}
-
-				biome.Add(row["Biome Name"]);
-			}
-			csv.Clear();
-
-			return biomes;
-		}
-
-		/// <summary>
-		/// Original code for getting planets from Planets.csv
-		/// </summary>
-		private Dictionary<Title, Planet> GetPlanets(Dictionary<int, ICollection<string>> biomes)
-		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			var items = new Dictionary<Title, Planet>();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets.csv"), true, 0);
-			foreach (var row in csv)
-			{
-				var id = CombineId(row["StarId"], row["PlanetId"]);
-				var biome = biomes.TryGetValue(id, out var val) ? val : Array.Empty<string>();
-				var itemType = row["Type"]
-					.Replace("G.", "Giant", StringComparison.Ordinal)
-					.Replace("Aster.", "Asteroid", StringComparison.Ordinal);
-				var gravity = double.TryParse(row["Gravity"], CultureInfo.CurrentCulture, out var grav)
-					? grav
-					: (double?)null;
-				var magnetosphere = row["MagField"];
-				if (string.IsNullOrWhiteSpace(magnetosphere))
-				{
-					magnetosphere = "Unknown";
-				}
-
-				var planet = new Planet(row["Name"], row["StarName"], row["Orbits"], itemType, gravity, string.Empty, string.Empty, magnetosphere, string.Empty, string.Empty, string.Empty, Array.Empty<string>(), biome, int.Parse(row["Primary"], CultureInfo.CurrentCulture));
-				var name = "Starfield:" + planet.Name;
-				items.Add(TitleFactory.FromUnvalidated(this.Site, name), planet);
-			}
-
-			return items;
-		}
+		#region Internal Methods
 
 		/// <summary>
 		/// Planets_infobox.csv
-		/// https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951
+		/// Per https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951.
 		/// </summary>
-		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits</remarks>
+		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits.</remarks>
 		internal Dictionary<Title, Planet> GetPlanets_NewCsv(Dictionary<int, ICollection<string>> biomes)
 		{
 			var csv = new CsvFile();
@@ -115,7 +47,9 @@
 					? grav
 					: (double?)null;
 				var traits = row["Traits"].Split(":", StringSplitOptions.RemoveEmptyEntries).ToArray();
-				var pressure = row["Atmosphere_Pressure"].Replace("Std", "Standard").Replace("Extr", "Extreme");
+				var pressure = row["Atmosphere_Pressure"]
+					.Replace("Std", "Standard", StringComparison.Ordinal)
+					.Replace("Extr", "Extreme", StringComparison.Ordinal);
 
 				var planet = new Planet(
 					row["Name"],
@@ -139,8 +73,22 @@
 
 			return items;
 		}
+		#endregion
 
-		private static int CombineId(string star, string planet) => (int.Parse(star, CultureInfo.CurrentCulture) << 8) + int.Parse(planet, CultureInfo.CurrentCulture);
+		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create/update planet";
+
+		protected override bool IsValid(ContextualParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
+
+		protected override IDictionary<Title, Planet> LoadItems()
+		{
+			var biomes = GetBiomes();
+
+			return this.GetPlanets_NewCsv(biomes);
+
+			// Uncomment to retain access to import old csv
+			// return GetPlanets(biomes);
+		}
 
 		protected override string NewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
 			"|image=\n" +
@@ -192,6 +140,35 @@
 			}
 
 			template.AddIfNotExists("biomes", biomes + "\n", ParameterFormat.NoChange);
+		}
+		#endregion
+
+		#region Private Methods
+		private static int CombineId(string star, string planet) => (int.Parse(star, CultureInfo.CurrentCulture) << 8) + int.Parse(planet, CultureInfo.CurrentCulture);
+
+		/// <summary>
+		/// Retrieves dictionary of biomes from biomedata.csv.
+		/// </summary>
+		private static Dictionary<int, ICollection<string>> GetBiomes()
+		{
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			var biomes = new Dictionary<int, ICollection<string>>();
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/biomedata.csv"), true, 1);
+			foreach (var row in csv)
+			{
+				var id = CombineId(row["Star ID"], row["Planet ID"]);
+				if (!biomes.TryGetValue(id, out var biome))
+				{
+					biome = new SortedSet<string>(StringComparer.Ordinal);
+					biomes.Add(id, biome);
+				}
+
+				biome.Add(row["Biome Name"]);
+			}
+
+			csv.Clear();
+
+			return biomes;
 		}
 		#endregion
 
