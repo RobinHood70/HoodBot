@@ -61,8 +61,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary { get; } = "Update info from ESO database";
-
 		protected override string TemplateName { get; } = "Online Furnishing Summary";
 		#endregion
 
@@ -120,6 +118,8 @@
 			this.FindDupes(this.collectibles, dupes);
 			this.FindDupes(this.furnishings, dupes);
 		}
+
+		protected override string GetEditSummary(Page page) => "Update info from ESO database";
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{

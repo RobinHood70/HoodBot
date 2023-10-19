@@ -31,10 +31,6 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Update LoreLink";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -99,6 +95,8 @@
 			//// If the next line is uncommented, it allows altering red links as well
 			// this.targetPages.RemoveExists(false);
 		}
+
+		protected override string GetEditSummary(Page page) => "Update LoreLink";
 
 		protected override void LoadPages()
 		{

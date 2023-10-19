@@ -30,11 +30,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "book";
-
-		protected override string EditSummary => "Create book page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create book page";
+
 		protected override bool IsValid(ContextualParser parser, Book item) => parser.FindSiteTemplate("Game Book") is not null;
 
 		protected override IDictionary<Title, Book> LoadItems()

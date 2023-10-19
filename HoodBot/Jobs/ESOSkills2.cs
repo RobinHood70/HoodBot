@@ -19,11 +19,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "skill";
-
-		protected override string EditSummary => "Create/update skill";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create/update skill";
+
 		protected override bool IsValid(ContextualParser parser, Skill item) => throw new NotImplementedException();
 
 		protected override IDictionary<Title, Skill> LoadItems()

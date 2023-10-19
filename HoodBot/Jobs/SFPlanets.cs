@@ -25,11 +25,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "planet";
-
-		protected override string EditSummary => "Create/update planet";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create/update planet";
+
 		protected override bool IsValid(ContextualParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
 
 		protected override IDictionary<Title, Planet> LoadItems()
@@ -38,12 +38,12 @@
 
 			return GetPlanets_NewCsv(biomes);
 			// Uncomment to retain access to import old csv
-			//return GetPlanets(biomes);
+			// return GetPlanets(biomes);
 		}
 
 		/// <summary>
 		/// Retrieves dictionary of biomes from biomedata.csv
-		/// </summary>		
+		/// </summary>
 		private static Dictionary<int, ICollection<string>> GetBiomes()
 		{
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
 	public class CategorizeUncatFiles : ParsedPageJob
@@ -28,10 +29,6 @@
 		public override string LogName => "Categorize Uncategorized Files";
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Add category";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -41,6 +38,8 @@
 				this.nsIds.Add(ns.Id, ns);
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => "Add category";
 
 		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
 

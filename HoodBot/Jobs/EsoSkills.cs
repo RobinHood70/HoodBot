@@ -65,7 +65,6 @@
 			: base(jobManager)
 		{
 			//// this.JobManager.ShowDiffs = false;
-			this.MinorEdit = false;
 			if (this.Results is PageResultHandler pageResults)
 			{
 				var title = pageResults.Title;
@@ -76,11 +75,6 @@
 
 		#region Public Override Properties
 		public override string LogName => "Update ESO Skills";
-		#endregion
-
-		#region Protected Override Properties
-		protected override string EditSummary => this.LogName;
-
 		#endregion
 
 		#region Protected Override Methods
@@ -107,6 +101,10 @@
 				}
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => this.LogName;
+
+		protected override bool GetIsMinorEdit(Page page) => true;
 
 		protected override void JobCompleted()
 		{

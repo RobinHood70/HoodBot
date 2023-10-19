@@ -9,6 +9,10 @@
 
 	internal sealed class BotRevert : EditJob
 	{
+		#region Private Constants
+		private const string EditSummary = "Revert Future/Lore Link edits";
+		#endregion
+
 		#region Fields
 		private readonly SortedDictionary<Title, long> undos = new();
 		#endregion
@@ -25,11 +29,9 @@
 		public override string LogName => "Bot Self-Revert";
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Revert Future/Lore Link edits";
-		#endregion
-
 		#region Protected OVerride Methods
+		protected override string GetEditSummary(Page page) => EditSummary;
+
 		protected override void LoadPages()
 		{
 			this.Site.User.PropertyThrowNull(nameof(this.Site), nameof(this.Site.User));
@@ -60,7 +62,7 @@
 			{
 				try
 				{
-					this.Site.Undo(undo.Key, undo.Value, this.EditSummary);
+					this.Site.Undo(undo.Key, undo.Value, EditSummary);
 				}
 				catch (WikiException we) when (string.Equals(we.Code, "undofailure", StringComparison.Ordinal))
 				{

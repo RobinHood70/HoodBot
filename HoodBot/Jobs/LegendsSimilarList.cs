@@ -30,12 +30,11 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Add \"Card art\" to unlabeled gallery images";
-
 		protected override string TemplateName => "Legends Card Summary";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Add \"Card art\" to unlabeled gallery images";
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{

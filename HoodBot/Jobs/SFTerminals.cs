@@ -30,11 +30,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "terminal";
-
-		protected override string EditSummary => "Create terminal page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create terminal page";
+
 		protected override bool IsValid(ContextualParser parser, Terminal item) => parser.FindSiteTemplate("Terminal Summary") is not null;
 
 		protected override IDictionary<Title, Terminal> LoadItems()

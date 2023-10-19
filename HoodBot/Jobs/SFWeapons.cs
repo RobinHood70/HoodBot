@@ -21,11 +21,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "weapon";
-
-		protected override string EditSummary => "Create weapon page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create weapon page";
+
 		protected override bool IsValid(ContextualParser parser, List<CsvRow> item) => parser.FindSiteTemplate("Item Summary") is not null;
 
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()

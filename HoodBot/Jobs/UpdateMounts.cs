@@ -24,10 +24,6 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Update mount ID";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void AfterLoadPages()
 		{
@@ -37,6 +33,8 @@
 				this.WriteLine("* " + dbMount.Key);
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => "Update mount ID";
 
 		protected override void LoadPages()
 		{

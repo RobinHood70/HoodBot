@@ -22,11 +22,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "creature";
-
-		protected override string EditSummary => "Create variant redirect"; // "Create/update creature page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create variant redirect"; // "Create/update creature page";
+
 		protected override bool IsValid(ContextualParser parser, Creature item) => parser.FindSiteTemplate("Creature Summary") is not null;
 
 		protected override IDictionary<Title, Creature> LoadItems()

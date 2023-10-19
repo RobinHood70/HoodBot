@@ -31,11 +31,9 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Update list";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Update list";
+
 		protected override void LoadPages()
 		{
 			var loreBookPages = new PageCollection(this.Site);

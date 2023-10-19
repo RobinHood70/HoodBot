@@ -21,8 +21,10 @@
 			: base(jobManager)
 		{
 		}
+		#endregion
 
-		protected override string EditSummary => "Update Chinese card art";
+		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Update Chinese card art";
 
 		protected override void LoadPages()
 		{

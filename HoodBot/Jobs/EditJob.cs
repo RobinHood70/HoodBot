@@ -19,36 +19,20 @@
 		#region Protected Properties
 		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
-		protected bool MinorEdit { get; set; } = true;
-
-		protected bool RecreateIfDeleted { get; set; } = true;
-
 		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
 		protected PageCollection Pages { get; set; }
+
+		protected bool RecreateIfDeleted { get; set; } = true;
 
 		protected bool SaveOverDeleted { get; set; } = true;
 
 		protected bool Shuffle { get; set; }
 		#endregion
 
-		#region Protected Abstract Properties
-
-		/// <summary>Gets the edit summary to use by default for all edits.</summary>
-		protected abstract string EditSummary { get; }
-		#endregion
-
-		#region Protected Virtual Properties
-
-		/// <summary>Gets the edit conflict action.</summary>
-		/// <value>The edit conflict action.</value>
-		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
-		protected virtual Action<EditJob, Page>? EditConflictAction { get; }
-		#endregion
-
 		#region Protected Methods
-		protected void SavePage(Page page) => this.SavePage(page.NotNull(), this.EditSummary, this.MinorEdit, this.EditConflictAction);
+		protected void SavePage(Page page) => this.SavePage(page.NotNull(), this.GetEditSummary(page), this.GetIsMinorEdit(page));
 
-		protected void SavePage(Page page, string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
+		protected void SavePage(Page page, string editSummary, bool isMinor)
 		{
 			page.ThrowNull();
 			var saved = false;
@@ -59,7 +43,7 @@
 					page.Save(editSummary, isMinor, this.CreateOnly, this.RecreateIfDeleted);
 					saved = true;
 				}
-				catch (EditConflictException) when (editConflictAction != null)
+				catch (EditConflictException)
 				{
 					page = page.Title.Load();
 					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
@@ -67,7 +51,11 @@
 						this.PageMissing(page);
 					}
 
-					editConflictAction(this, page);
+					this.PageLoaded(page);
+					if (!this.OnEditConflict(page))
+					{
+						throw;
+					}
 				}
 				catch (WikiException we) when (!this.SaveOverDeleted && string.Equals(we.Code, "pagedeleted", StringComparison.Ordinal))
 				{
@@ -77,12 +65,10 @@
 			}
 		}
 
-		protected void SavePages() => this.SavePages(this.Pages, this.EditSummary, this.MinorEdit, this.EditConflictAction);
-
-		protected void SavePages(PageCollection pages, string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction)
+		protected void SavePages()
 		{
-			pages.NotNull().RemoveChanged(false);
-			if (pages.Count == 0)
+			this.Pages.RemoveChanged(false);
+			if (this.Pages.Count == 0)
 			{
 				this.StatusWriteLine("No pages to save!");
 				return;
@@ -91,18 +77,18 @@
 			this.StatusWriteLine("Saving pages");
 			if (this.Shuffle && !this.Site.EditingEnabled)
 			{
-				pages.Shuffle();
+				this.Pages.Shuffle();
 			}
 			else
 			{
-				pages.Sort(NaturalTitleComparer.Instance);
+				this.Pages.Sort(NaturalTitleComparer.Instance);
 			}
 
 			this.Progress = 0;
-			this.ProgressMaximum = pages.Count;
-			foreach (var page in pages)
+			this.ProgressMaximum = this.Pages.Count;
+			foreach (var page in this.Pages)
 			{
-				this.SavePage(page, defaultSummary, defaultIsMinor, editConflictAction);
+				this.SavePage(page, this.GetEditSummary(page), this.GetIsMinorEdit(page));
 				this.Progress++;
 			}
 		}
@@ -126,6 +112,10 @@
 		#endregion
 
 		#region Protected Abstract Methods
+
+		/// <summary>Gets the edit summary to use for the given page.</summary>
+		protected abstract string GetEditSummary(Page page);
+
 		protected abstract void LoadPages();
 
 		protected abstract void PageLoaded(Page page);
@@ -139,6 +129,13 @@
 		protected virtual void BeforeLoadPages()
 		{
 		}
+
+		protected virtual bool GetIsMinorEdit(Page page) => !page.IsNew;
+
+		/// <summary>The action to take when there's an edit conflict on a page.</summary>
+		/// <returns><see langword="true"/> if the handler handled the conflict; otherwise, <see langword="false"/>.</returns>
+		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed. If the method returns false, an error will be thrown.</remarks>
+		protected virtual bool OnEditConflict(Page page) => true; // Assumes OnLoad/OnMissing have sufficiently handled required edits.
 
 		protected virtual void PageMissing(Page page)
 		{

@@ -23,11 +23,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "faction";
-
-		protected override string EditSummary => "Create faction page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create faction page";
+
 		protected override bool IsValid(ContextualParser parser, Redirect item) => parser.Page.Text.StartsWith("#REDIRECT", StringComparison.Ordinal);
 
 		protected override IDictionary<Title, Redirect> LoadItems()

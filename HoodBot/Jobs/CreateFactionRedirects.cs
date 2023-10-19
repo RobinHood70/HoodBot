@@ -27,11 +27,9 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Create faction redirect";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create faction redirect";
+
 		protected override void LoadPages()
 		{
 			var searchTitle = TitleFactory.FromUnvalidated(this.Site, SearchPrefix);

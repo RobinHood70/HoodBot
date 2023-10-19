@@ -34,13 +34,9 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => "Create Effects Page";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create Effects Page";
+
 		protected override void LoadPages()
 		{
 			var fileName = LocalConfig.BotDataSubPath("QuestLanguageDatabase.txt");

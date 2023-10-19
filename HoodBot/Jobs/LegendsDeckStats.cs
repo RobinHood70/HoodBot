@@ -25,12 +25,10 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Add magicka stats";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages() => this.GetCardPowers();
+
+		protected override string GetEditSummary(Page page) => "Add magicka stats";
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 

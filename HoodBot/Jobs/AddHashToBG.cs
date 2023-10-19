@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -16,9 +15,7 @@
 		{
 		}
 
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => "Add hash to BG value";
+		protected override string GetEditSummary(Page page) => "Add hash to BG value";
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 

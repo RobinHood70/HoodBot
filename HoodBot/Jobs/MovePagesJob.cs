@@ -164,10 +164,6 @@
 		protected bool SuppressRedirects { get; set; } = true;
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => this.EditSummaryUpdateLinks;
-		#endregion
-
 		#region Protected Methods
 
 		protected void AddLinkUpdate(string from, string to) => this.AddLinkUpdate(
@@ -228,6 +224,8 @@
 				this.ValidateMoves();
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => this.EditSummaryUpdateLinks;
 
 		protected override void LoadPages()
 		{
@@ -523,7 +521,7 @@
 					if (actionValue.HasAction(ReplacementActions.Edit))
 					{
 						editSummary = this.EditSummaryEditMovedPage;
-						isMinor = this.MinorEdit;
+						isMinor = this.GetIsMinorEdit(editPage);
 						this.CustomEdit(parser, action.Key);
 					}
 

@@ -43,7 +43,6 @@
 			: base(jobManager)
 		{
 			//// jobManager.ShowDiffs = false;
-			this.MinorEdit = false;
 			if (this.Results is PageResultHandler results)
 			{
 				var title = results.Title;
@@ -54,10 +53,6 @@
 
 		#region Public Override Properties
 		public override string LogName => "Update ESO Item Sets";
-		#endregion
-
-		#region Protected Override Properties
-		protected override string EditSummary => this.LogName;
 		#endregion
 
 		#region Protected Override Methods
@@ -78,6 +73,10 @@
 				this.Warn($"A page for {setName} could not be determined. Please check this and add the title to {nameof(TitleOverrides)}.");
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => this.LogName;
+
+		protected override bool GetIsMinorEdit(Page page) => false;
 
 		protected override void JobCompleted()
 		{

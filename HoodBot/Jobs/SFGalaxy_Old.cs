@@ -26,11 +26,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "planet";
-
-		protected override string EditSummary => "Create planet page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create planet page";
+
 		protected override bool IsValid(ContextualParser parser, CsvRow data) => parser.FindSiteTemplate("Planet Infobox") is not null;
 
 		protected override IDictionary<Title, CsvRow> LoadItems()

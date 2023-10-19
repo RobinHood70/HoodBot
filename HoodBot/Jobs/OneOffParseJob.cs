@@ -2,6 +2,7 @@
 {
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -17,16 +18,14 @@
 		#endregion
 
 		#region Public Override Properties
-		public override string? LogDetails => this.EditSummary;
+		public override string LogDetails => "Remove scrollboxes on short entries";
 
 		public override string LogName => "One-Off Parse Job";
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Remove scrollboxes on short entries";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => this.LogDetails;
+
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Scrollbox", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 
 		protected override void ParseText(ContextualParser parser)

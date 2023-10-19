@@ -45,11 +45,6 @@
 		public override string LogName => "ESO Collectibles";
 		#endregion
 
-		#region Protected Override Properties
-
-		protected override string EditSummary => "Create collectible page";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -80,6 +75,8 @@
 			this.StatusWriteLine("Getting crown crates");
 			this.GetCrownCrates();
 		}
+
+		protected override string GetEditSummary(Page page) => "Create collectible page";
 
 		protected override void LoadPages()
 		{

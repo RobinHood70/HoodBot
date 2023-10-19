@@ -21,11 +21,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "star";
-
-		protected override string EditSummary => "Create star";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create star";
+
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
 			var items = new Dictionary<Title, CsvRow>();

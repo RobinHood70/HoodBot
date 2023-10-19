@@ -104,11 +104,8 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Convert to full text";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Convert to full text";
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Online Furnishing Summary");
 		/* protected override void LoadPages() => this.Pages.GetTitles(

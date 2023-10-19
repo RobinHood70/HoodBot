@@ -40,11 +40,9 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Use House Furnishings template";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Use House Furnishings template";
+
 		protected override void LoadPages()
 		{
 			var titles = new TitleCollection(this.Site, "Template:ESO Houses");

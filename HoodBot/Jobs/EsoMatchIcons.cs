@@ -46,10 +46,6 @@
 		public override string LogName => "Match ON-icons with log viewer";
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => this.LogName;
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -62,6 +58,8 @@
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
 		}
+
+		protected override string GetEditSummary(Page page) => this.LogName;
 
 		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
 

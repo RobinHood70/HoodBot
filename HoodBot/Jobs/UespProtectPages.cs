@@ -199,12 +199,6 @@
 		public override string LogName => "Protect Pages";
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => "Add/update templates";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void AfterLoadPages()
 		{
@@ -269,6 +263,8 @@
 				this.StatusWriteLine("No pages needed to be changed.");
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => "Add/update templates";
 
 		protected override void PageLoaded(Page page) => this.UpdatePage(page);
 

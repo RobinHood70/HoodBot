@@ -25,8 +25,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Comment out missing images";
-
 		protected override string TemplateName => "NPC Summary";
 		#endregion
 
@@ -37,6 +35,8 @@
 			this.StatusWriteLine("Getting file names");
 			this.allFiles.GetNamespace(MediaWikiNamespaces.File);
 		}
+
+		protected override string GetEditSummary(Page page) => "Comment out missing images";
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{

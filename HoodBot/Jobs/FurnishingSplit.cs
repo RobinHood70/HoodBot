@@ -29,10 +29,6 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Create furniture page";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -49,6 +45,8 @@
 			allPages.RemoveExists(false);
 			this.existingPages = allPages;
 		}
+
+		protected override string GetEditSummary(Page page) => "Create furniture page";
 
 		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, FurnishingPrefix);
 

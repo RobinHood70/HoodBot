@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -21,13 +20,9 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => "Fix double redirect";
-		#endregion
-
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Fix double redirect";
+
 		protected override void LoadPages()
 		{
 			var doubles = PageCollection.Unlimited(this.Site, PageModules.Default, true);

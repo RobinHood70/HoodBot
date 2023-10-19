@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -20,12 +21,12 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Update remaining Future Links to Lore Links";
-
 		protected override string TemplateName => "System Infobox";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Update remaining Future Links to Lore Links";
+
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			template.AddIfNotExists("image", string.Empty, ParameterFormat.OnePerLine);

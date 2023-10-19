@@ -12,11 +12,6 @@
 		}
 		#endregion
 
-		#region Protected Abstract Override Properties
-		protected abstract override string EditSummary { get; }
-
-		#endregion
-
 		#region Protected Abstract Methods
 		protected abstract void ParseText(ContextualParser parser);
 		#endregion

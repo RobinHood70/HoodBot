@@ -28,13 +28,13 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override string EditSummary => "Found links";
-
+		#region Protected Properties
 		protected TitleCollection Titles { get; }
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Found links";
+
 		protected override void Main()
 		{
 			base.Main();

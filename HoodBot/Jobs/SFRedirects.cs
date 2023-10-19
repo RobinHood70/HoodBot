@@ -19,11 +19,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => null;
-
-		protected override string EditSummary => "Create redirect";
 		#endregion
 
-		#region Protected Methods
+		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create redirect";
+
 		protected override bool IsValid(ContextualParser parser, string item) => true;
 
 		protected override IDictionary<Title, string> LoadItems()

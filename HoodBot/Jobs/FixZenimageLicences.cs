@@ -15,12 +15,12 @@
 		}
 
 		#region Protected Override Properties
-		protected override string EditSummary { get; } = "Fix licencing";
-
 		protected override string TemplateName { get; } = "Uespimage";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Fix licencing";
+
 		protected override void LoadPages()
 		{
 			HashSet<string> prefixes = new(StringComparer.OrdinalIgnoreCase) { "card", "concept", "crown store", "icon", "load", "map", "mapicon", "prerelease", "render" };

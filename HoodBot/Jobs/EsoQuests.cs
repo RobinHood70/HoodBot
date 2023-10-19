@@ -138,12 +138,6 @@
 		public override string LogName => "Create Missing ESO Quests";
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => this.LogName;
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -188,6 +182,8 @@
 
 			this.GetPlaces();
 		}
+
+		protected override string GetEditSummary(Page page) => this.LogName;
 
 		protected override void LoadPages()
 		{

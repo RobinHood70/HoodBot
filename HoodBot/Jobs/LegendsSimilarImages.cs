@@ -26,12 +26,6 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => null;
-
-		protected override string EditSummary => "Add Similar Images";
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -62,6 +56,8 @@
 				}
 			}
 		}
+
+		protected override string GetEditSummary(Page page) => "Add Similar Images";
 
 		protected override void LoadPages() => this.Pages.GetTitles(this.allTitles);
 

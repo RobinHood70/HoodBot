@@ -22,11 +22,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "mission";
-
-		protected override string EditSummary => "Create mission page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create mission page";
+
 		protected override bool IsValid(ContextualParser parser, List<CsvRow> item) => parser.FindSiteTemplate("Mission Header") is not null;
 
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()

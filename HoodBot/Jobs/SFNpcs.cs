@@ -22,11 +22,11 @@
 
 		#region Protected Override Properties
 		protected override string? Disambiguator => "NPC";
-
-		protected override string EditSummary => "Create Npc page";
 		#endregion
 
 		#region Protected Override Methods
+		protected override string GetEditSummary(Page page) => "Create NPC page";
+
 		protected override bool IsValid(ContextualParser parser, Npcs item) => parser.FindSiteTemplate("NPC Summary") is not null;
 
 		protected override IDictionary<Title, Npcs> LoadItems()
