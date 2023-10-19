@@ -6,7 +6,7 @@
 		/// <summary>Initializes a new instance of the <see cref="LogInfo"/> class.</summary>
 		/// <param name="title">The title for the log entry.</param>
 		/// <param name="details">The details for the log entry (typically, job parameters or notes).</param>
-		public LogInfo(string title, string? details)
+		public LogInfo(string title, string details)
 		{
 			this.Title = title;
 			this.Details = details;
@@ -14,7 +14,7 @@
 
 		/// <summary>Gets any additional details about the log entry.</summary>
 		/// <value>The additional details.</value>
-		public string? Details { get; }
+		public string Details { get; }
 
 		/// <summary>Gets the log title.</summary>
 		/// <value>The title.</value>

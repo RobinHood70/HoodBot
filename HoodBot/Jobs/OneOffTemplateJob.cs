@@ -15,7 +15,7 @@
 		#endregion
 
 		#region Public Override Properties
-		public override string? LogDetails => "Update " + this.TemplateName;
+		public override string LogDetails => "Update " + this.TemplateName;
 
 		public override string LogName => "One-Off Template Job";
 		#endregion
