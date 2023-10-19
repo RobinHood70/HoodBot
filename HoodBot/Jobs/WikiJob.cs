@@ -76,7 +76,7 @@
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual string LogDetails { get; }
+		public virtual string LogDetails => string.Empty;
 
 		public virtual string LogName => this.logName;
 		#endregion
