@@ -41,7 +41,7 @@
 		protected override void PageLoaded(ContextualParser parser, Creature item)
 		{
 			var cs = parser.FindSiteTemplate("Creature Summary");
-			if (false && cs is not null)
+			if (cs is not null)
 			{
 				cs.Remove("resp");
 				cs.Remove("typenamesp");
@@ -72,7 +72,7 @@
 				}
 			}
 
-			if (false && parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
+			if (parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
 			{
 				AddVariants(parser, item);
 			}
