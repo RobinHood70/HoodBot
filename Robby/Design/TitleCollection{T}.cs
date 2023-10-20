@@ -204,6 +204,27 @@
 		/// <remarks>Limitations apply only to the current collection; result collections will inherently be unfiltered to allow for cross-namespace redirection. Filtering can be added to result collections after they are returned.</remarks>
 		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
 
+		public void Shuffle()
+		{
+			var random = new Random();
+			var list = (List<T>)this.Items;
+			var num = list.Count - 1;
+			if (num > 0)
+			{
+				while (num >= 0)
+				{
+					var num2 = random.Next(list.Count);
+					var index = num2;
+					var index2 = num;
+					var value = list[num];
+					var value2 = list[num2];
+					list[index] = value;
+					list[index2] = value2;
+					num--;
+				}
+			}
+		}
+
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>
 		public void Sort(Comparison<T> comparison)
