@@ -15,7 +15,7 @@
 	internal sealed class SFPlanets : CreateOrUpdateJob<SFPlanets.Planet>
 	{
 		#region Constructors
-		[JobInfo("SF Planets", "Starfield")]
+		[JobInfo("Planets", "Starfield")]
 		public SFPlanets(JobManager jobManager)
 			: base(jobManager)
 		{
