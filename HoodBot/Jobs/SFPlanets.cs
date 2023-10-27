@@ -5,6 +5,7 @@
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -14,6 +15,13 @@
 
 	internal sealed class SFPlanets : CreateOrUpdateJob<SFPlanets.Planet>
 	{
+		#region Static Fields
+		private static readonly Regex BiomeFinder = new(
+			@".*?\: BIOM - .*? ""(?<type>.*?)"" Chance: (?<chance>\d+)%.*?( <(?<fauna>\d+) fauna>)?( <(?<flora>\d+) flora>)?\Z",
+			RegexOptions.ExplicitCapture,
+			Globals.DefaultRegexTimeout);
+		#endregion
+
 		#region Constructors
 		[JobInfo("Planets", "Starfield")]
 		public SFPlanets(JobManager jobManager)
@@ -34,14 +42,14 @@
 		/// Per https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951.
 		/// </summary>
 		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits.</remarks>
-		internal Dictionary<Title, Planet> GetPlanets_NewCsv(Dictionary<int, ICollection<string>> biomes)
+		internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 		{
 			var csv = new CsvFile();
 			var items = new Dictionary<Title, Planet>();
 			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets_Infobox.csv"), true, 0);
 			foreach (var row in csv)
 			{
-				var id = CombineId(row["StarId"], row["PlanetId"]);
+				var id = row["Name"];
 				var biome = biomes.TryGetValue(id, out var val) ? val : Array.Empty<string>();
 				var gravity = double.TryParse(row["Gravity"], CultureInfo.CurrentCulture, out var grav)
 					? grav
@@ -60,12 +68,15 @@
 					$"{row["Temperature_Class"]} ({row["Temperature_Degrees"]}°)",
 					$"{pressure} {row["Atmosphere_Type"]}",
 					row["Magnetosphere"],
-					row["Fauna"],
-					row["Flora"],
 					row["Water"],
 					traits,
 					biome,
-					string.IsNullOrEmpty(row["Orbits"]) ? 0 : 1);
+					string.IsNullOrEmpty(row["Orbits"]) ? 0 : 1)
+				{
+					Fauna = row["Fauna"],
+					Flora = row["Flora"]
+				};
+
 
 				var name = "Starfield:" + planet.Name;
 				items.Add(TitleFactory.FromUnvalidated(this.Site, name), planet);
@@ -83,11 +94,10 @@
 		protected override IDictionary<Title, Planet> LoadItems()
 		{
 			var biomes = GetBiomes();
+			var items = this.ReadEchelar(biomes);
+			this.ReadWip3(items);
 
-			return this.GetPlanets_NewCsv(biomes);
-
-			// Uncomment to retain access to import old csv
-			// return GetPlanets(biomes);
+			return items;
 		}
 
 		protected override string NewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
@@ -117,18 +127,19 @@
 			var gravityText = item.Gravity == 0
 				? string.Empty
 				: item.Gravity?.ToStringInvariant() ?? string.Empty;
+			/*
 			template.UpdateIfEmpty("system", item.StarName);
 			template.UpdateIfEmpty("type", item.Type);
 			template.UpdateIfEmpty("gravity", gravityText);
 			template.Update("magnetosphere", item.Magnetosphere); // Because original CSV was wrong we want to full replace
 			template.Update("temp", item.Temperature); // Because we have degrees we want to full replace
 			template.Update("atmosphere", item.Atmosphere);
-			template.UpdateIfEmpty("flora", item.Flora);
-			template.UpdateIfEmpty("fauna", item.Fauna);
+			template.UpdateIfEmpty("flora", item.Flora ?? string.Empty);
+			template.UpdateIfEmpty("fauna", item.Fauna ?? string.Empty);
 			template.UpdateIfEmpty("water", item.Water);
 
 			// I expect many planets to have incomplete traits, or to reference gravitational anomaly, which is not set in stone, so full replace
-			template.Update("trait", string.Join(Environment.NewLine, item.Traits.Select(t => "{{Trait|" + t + "}}")));
+			template.Update("trait", string.Join('\n', item.Traits.Select(t => "{{Trait|" + t + "}}")));
 			if (item.Primary > 0)
 			{
 				template.Update("orbits", item.Orbits);
@@ -138,8 +149,12 @@
 			{
 				template.Remove("orbits");
 			}
+			*/
 
-			template.AddIfNotExists("biomes", biomes + "\n", ParameterFormat.NoChange);
+			if (biomes.Length > 0)
+			{
+				template.Update("biomes", biomes, ParameterFormat.OnePerLine, false);
+			}
 		}
 		#endregion
 
@@ -149,32 +164,96 @@
 		/// <summary>
 		/// Retrieves dictionary of biomes from biomedata.csv.
 		/// </summary>
-		private static Dictionary<int, ICollection<string>> GetBiomes()
+		private static Dictionary<string, ICollection<string>> GetBiomes()
 		{
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			var biomes = new Dictionary<int, ICollection<string>>();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/biomedata.csv"), true, 1);
+			var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/biomesplanets.csv"), false);
+
+			string? planet = null;
+			var biomeList = new List<string>();
 			foreach (var row in csv)
 			{
-				var id = CombineId(row["Star ID"], row["Planet ID"]);
-				if (!biomes.TryGetValue(id, out var biome))
+				var word = row[0].Trim()[..4];
+				if (string.Equals(word, "FULL", StringComparison.Ordinal))
 				{
-					biome = new SortedSet<string>(StringComparer.Ordinal);
-					biomes.Add(id, biome);
-				}
+					if (planet is not null)
+					{
+						biomes.Add(planet, biomeList);
+					}
 
-				biome.Add(row["Biome Name"]);
+					var line = row[0].Split(TextArrays.Colon, 2);
+					planet = line[1].Trim();
+					biomeList = new List<string>();
+				}
+				else
+				{
+					var biomeData = BiomeFinder.Match(row[0]);
+					var groups = biomeData.Groups;
+					var value = $"{groups["chance"]}% {groups["type"]}";
+					var floraFauna = new List<string>();
+					if (groups["fauna"].Success)
+					{
+						floraFauna.Add(groups["fauna"].Value + " fauna");
+					}
+
+					if (groups["flora"].Success)
+					{
+						floraFauna.Add(groups["flora"].Value + " flora");
+					}
+
+					if (floraFauna.Count > 0)
+					{
+						value += " (" + string.Join(", ", floraFauna) + ")";
+					}
+
+					biomeList.Add(value);
+				}
 			}
 
-			csv.Clear();
+			if (planet is not null)
+			{
+				biomes.Add(planet, biomeList);
+			}
 
 			return biomes;
+		}
+
+		private void ReadWip3(Dictionary<Title, Planet> items)
+		{
+			var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/sfcreatures_-_wip3.csv"), true);
+			foreach (var row in csv)
+			{
+				var planetName = row["Planet"];
+				if (!faunaCounts.ContainsKey(planetName))
+				{
+					faunaCounts[planetName] = 1;
+				}
+				else
+				{
+					faunaCounts[planetName]++;
+				}
+			}
+
+			foreach (var fauna in faunaCounts)
+			{
+				var title = TitleFactory.FromUnvalidated(this.Site, $"Starfield:{fauna.Key}");
+				var planet = items[title];
+				planet.Fauna += $" ({fauna.Value})";
+			}
 		}
 		#endregion
 
 		#region Internal Records
 		internal sealed record Planet(string Name, string StarName, string Orbits, string Type, double? Gravity, string Temperature,
-			string Atmosphere, string Magnetosphere, string Fauna, string Flora, string Water, ICollection<string> Traits, ICollection<string> Biomes, int Primary);
+			string Atmosphere, string Magnetosphere, string Water, ICollection<string> Traits, ICollection<string> Biomes, int Primary)
+		{
+			public string? Fauna { get; set; }
+
+			public string? Flora { get; set; }
+		}
 		#endregion
 	}
 }
