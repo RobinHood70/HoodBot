@@ -61,10 +61,10 @@
 
 		#region Constructors
 		[JobInfo("Skills", "ESO Update")]
-		public EsoSkills(JobManager jobManager)
+		public EsoSkills(JobManager jobManager, bool hideDiffs)
 			: base(jobManager)
 		{
-			//// this.JobManager.ShowDiffs = false;
+			jobManager.ShowDiffs = !hideDiffs;
 			if (this.Results is PageResultHandler pageResults)
 			{
 				var title = pageResults.Title;

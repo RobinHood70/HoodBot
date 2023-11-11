@@ -39,10 +39,10 @@
 
 		#region Constructors
 		[JobInfo("Item Sets", "ESO Update")]
-		public EsoItemSets(JobManager jobManager)
+		public EsoItemSets(JobManager jobManager, bool hideDiffs)
 			: base(jobManager)
 		{
-			//// jobManager.ShowDiffs = false;
+			jobManager.ShowDiffs = !hideDiffs;
 			if (this.Results is PageResultHandler results)
 			{
 				var title = results.Title;
