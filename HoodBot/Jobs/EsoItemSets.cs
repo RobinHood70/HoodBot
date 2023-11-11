@@ -31,6 +31,8 @@
 			["Dro'Zakar's Claws"] = "Dro'zakar's Claws",
 			["Roksa the Warped"] = "Roksa the Warped (set)"
 		};
+
+		private static string? blankText;
 		#endregion
 
 		#region Fields
@@ -65,12 +67,23 @@
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
 			var allSets = GetSetData();
+
 			PageCollection catPages = new(this.Site, PageModules.Info, true);
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
 			var unresolved = this.UpdateSetPages(catPages, allSets);
 			foreach (var setName in unresolved)
 			{
 				this.Warn($"A page for {setName} could not be determined. Please check this and add the title to {nameof(TitleOverrides)}.");
+			}
+
+			blankText = this.Site.LoadUserSubPageText("Blank Set");
+			if (blankText is not null)
+			{
+				var index = blankText.IndexOf("-->", StringComparison.Ordinal);
+				if (index != -1)
+				{
+					blankText = blankText[(index + 3)..].TrimStart();
+				}
 			}
 		}
 
@@ -102,31 +115,8 @@
 			EsoSpace.SetBotUpdateVersion(this, "botitemset", version);
 		}
 
-		protected override void PageMissing(Page page)
-		{
-			var set = this.sets[page.Title];
-			StringBuilder sb = new();
-			sb
-				.Append("{{Trail|Sets}}{{Online Update}}{{Minimal}}\n")
-				.Append("'''")
-				.Append(set.Name)
-				.Append("''' is a {{huh}}-rank [[Online:Sets|item set]] found in {{huh}}.\n\n")
-				.Append("Set pieces are {{huh}} style in {{huh}}.\n\n")
-				.Append("===Bonuses===\n")
-				.Append("<onlyinclude>\n")
-				.Append("</onlyinclude>\n")
-				.Append("===Pieces===\n")
-				.Append("The set consists of {{huh}}. For detailed weapon stats and set values, see individual item pages by clicking on the links below.\n")
-				.Append("<!--\n")
-				.Append("* {{Item Link|id=|}}\n")
-				.Append("* {{Item Link|id=|}}\n")
-				.Append("-->\n")
-				.Append("===Notes===\n\n")
-				.Append("{{Online Sets}}\n")
-				.Append("{{ESO Sets With|subtype=|source=}}\n")
-				.Append("{{Stub|Item Set}}");
-			page.Text = sb.ToString();
-		}
+		protected override void PageMissing(Page page) => page.Text = blankText?
+			.Replace("«Set»", this.sets[page.Title].Name, StringComparison.Ordinal);
 
 		protected override void PageLoaded(Page page)
 		{
