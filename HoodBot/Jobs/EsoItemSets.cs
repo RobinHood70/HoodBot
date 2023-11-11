@@ -189,10 +189,12 @@
 		#region Private Methods
 		private void GenerateReport()
 		{
-			var sorted = new SortedDictionary<Title, string>();
+			var nonTrivial = new SortedDictionary<Title, string>();
+			var trivial = new SortedDictionary<Title, string>();
+			StringBuilder sb = new();
 			foreach (var (title, set) in this.sets)
 			{
-				StringBuilder sb = new();
+				sb.Clear();
 				if (set.IsNonTrivial)
 				{
 					sb
@@ -201,17 +203,33 @@
 						.Append('|')
 						.Append(set.Name)
 						.Append("|diff=cur}}");
-					sorted.Add(title, sb.ToString());
+					nonTrivial.Add(title, sb.ToString());
+				}
+				else
+				{
+					trivial.Add(title, SiteLink.ToText(title, LinkFormat.LabelName));
 				}
 			}
 
-			if (sorted.Count > 0)
+			if (nonTrivial.Count > 0)
 			{
 				this.WriteLine("== Item Sets With Non-Trivial Updates ==");
-				foreach (var (_, text) in sorted)
+				foreach (var (_, text) in nonTrivial)
 				{
 					this.WriteLine(text);
 				}
+			}
+
+			if (trivial.Count > 0)
+			{
+				if (nonTrivial.Count > 0)
+				{
+					this.WriteLine();
+					this.WriteLine();
+				}
+
+				this.WriteLine("== Item Sets With Trivial Updates==");
+				this.WriteLine(string.Join(", ", trivial.Values));
 			}
 		}
 
