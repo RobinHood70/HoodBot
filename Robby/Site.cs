@@ -639,6 +639,28 @@
 		/// <returns>A list of <see cref="User"/> objects for users in the specified groups.</returns>
 		public IReadOnlyList<User> LoadUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
 
+		/// <summary>This is a convenience method to quickly get the text of a single subpage in the user's space.</summary>
+		/// <param name="subPageName">Name of the user subpage.</param>
+		/// <returns>The text of the page.</returns>
+		public Page? LoadUserSubPage(string subPageName)
+		{
+			ArgumentException.ThrowIfNullOrEmpty(subPageName);
+			return this.User is not User user
+				? throw new InvalidOperationException("Not logged in.")
+				: this.LoadPage(user.Title, subPageName);
+		}
+
+		/// <summary>This is a convenience method to quickly get the text of a single subpage in the user's space.</summary>
+		/// <param name="subPageName">Name of the user subpage.</param>
+		/// <returns>The text of the page.</returns>
+		public string? LoadUserSubPageText(string subPageName)
+		{
+			ArgumentException.ThrowIfNullOrEmpty(subPageName);
+			return this.User is not User user
+				? throw new InvalidOperationException("Not logged in.")
+				: this.LoadPageText(user.Title, subPageName);
+		}
+
 		/// <summary>Gets users that have the specified rights.</summary>
 		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be retrieved.</param>
 		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be retrieved.</param>
