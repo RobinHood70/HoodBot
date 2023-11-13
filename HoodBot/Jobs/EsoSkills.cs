@@ -22,6 +22,7 @@
 			"minedSkills.id,\n" +
 			"minedSkills.name,\n" +
 			"minedSkills.description,\n" +
+			"minedSkills.descHeader,\n" +
 			"minedSkills.target,\n" +
 			"minedSkills.effectLines,\n" +
 			"minedSkills.duration,\n" +
@@ -47,7 +48,7 @@
 		"INNER JOIN\n" +
 			"minedSkills ON skillTree.abilityId = minedSkills.id\n" +
 		"WHERE\n" +
-			/* "skillTree.baseName = 'Dragonknight Standard' AND\n" + */
+			/* "skillTree.baseName = 'Blood Scion' AND\n" + */
 			"minedSkills.isPlayer AND\n" +
 			"minedSkills.morph >= 0 AND\n" +
 			"minedSkills.skillLine != 'Emperor'\n" +
@@ -206,7 +207,7 @@
 				var title = (Title)TitleFactory.FromUnvalidated(this.Site, skill.Key);
 				if (skill.Value.ChangeType == ChangeType.Major)
 				{
-					this.WriteLine($"* {{{{Pl|{title.FullPageName}|{title.PipeTrick()}|diff=cur}}}}");
+					this.WriteLine($"* {{{{Pl|{title.FullPageName()}|{title.PipeTrick()}|diff=cur}}}}");
 				}
 				else if (skill.Value.ChangeType == ChangeType.Minor)
 				{

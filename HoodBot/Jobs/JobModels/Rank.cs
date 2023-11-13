@@ -11,8 +11,7 @@
 		#region Static Fields
 		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
-		////private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-
+		private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Constructors
@@ -36,6 +35,15 @@
 			}
 
 			description = BonusFinder.Replace(description, string.Empty);
+			if (!LeadText.Match(description).Success)
+			{
+				var descHeader = (string)row["descHeader"];
+				if (descHeader.Length > 0)
+				{
+					description = $"|cffffff{descHeader}|r " + description;
+				}
+			}
+
 			this.Description = RegexLibrary.WhitespaceToSpace(description);
 			this.Id = (int)row["id"];
 			this.Coefficients = Coefficient.GetCoefficientList(row);
