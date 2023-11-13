@@ -42,16 +42,40 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => "Add planet order";
-
-		protected override void LoadPages() => this.Pages.GetCategoryMembers("Category:Starfield-Planets");
+		protected override string GetEditSummary(Page page) => "Simplify resource/traits";
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			var lastWord = parser.Page.Title.PageName.Split(' ')[^1];
-			if (RomanToNum.TryGetValue(lastWord, out var orderNum))
+			var list = new List<string>();
+			if (template.Find("resource") is IParameterNode resource)
 			{
-				template.AddIfNotExists("order", orderNum, ParameterFormat.OnePerLine);
+				list.Clear();
+				foreach (var resourceTemplate in resource.Value.TemplateNodes)
+				{
+					list.Add(resourceTemplate.Title.ToRaw().Replace("Resource ", string.Empty, System.StringComparison.Ordinal));
+				}
+
+				if (list.Count > 0)
+				{
+					resource.SetValue(string.Join(',', list), ParameterFormat.OnePerLine);
+				}
+			}
+
+			if (template.Find("trait") is IParameterNode trait)
+			{
+				list.Clear();
+				foreach (var traitTemplate in trait.Value.TemplateNodes)
+				{
+					if (traitTemplate.Find(1) is IParameterNode value)
+					{
+						list.Add(value.Value.ToRaw());
+					}
+				}
+
+				if (list.Count > 0)
+				{
+					trait.SetValue(string.Join(',', list), ParameterFormat.OnePerLine);
+				}
 			}
 		}
 		#endregion
