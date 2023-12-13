@@ -42,39 +42,27 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => "Simplify resource/traits";
+		protected override string GetEditSummary(Page page) => "Use orbital_position instead of order";
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			var list = new List<string>();
-			if (template.Find("resource") is IParameterNode resource)
+			var op = template.Find("orbital_position");
+			if (op is not null && op.Value.ToRaw().Trim().Length > 0)
 			{
-				list.Clear();
-				foreach (var resourceTemplate in resource.Value.TemplateNodes)
-				{
-					list.Add(resourceTemplate.Title.ToRaw().Replace("Resource ", string.Empty, System.StringComparison.Ordinal));
-				}
-
-				if (list.Count > 0)
-				{
-					resource.SetValue(string.Join(',', list), ParameterFormat.OnePerLine);
-				}
+				template.Remove("order");
 			}
-
-			if (template.Find("trait") is IParameterNode trait)
+			else
 			{
-				list.Clear();
-				foreach (var traitTemplate in trait.Value.TemplateNodes)
+				var order = template.Find("order");
+				if (op is not null && order is not null)
 				{
-					if (traitTemplate.Find(1) is IParameterNode value)
-					{
-						list.Add(value.Value.ToRaw());
-					}
+					op.Value.Clear();
+					op.Value.AddRange(order.Value);
+					template.Remove("order");
 				}
-
-				if (list.Count > 0)
+				else
 				{
-					trait.SetValue(string.Join(',', list), ParameterFormat.OnePerLine);
+					template.RenameParameter("order", "orbital_position");
 				}
 			}
 		}
