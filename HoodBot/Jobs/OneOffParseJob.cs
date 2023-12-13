@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Diagnostics;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Public Override Properties
-		public override string LogDetails => "Remove Endless Archive header";
+		public override string LogDetails => "Add System Table";
 
 		public override string LogName => "One-Off Parse Job";
 		#endregion
@@ -28,36 +28,36 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => this.LogDetails;
 
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Mod Header", BacklinksTypes.EmbeddedIn, true, Filter.Exclude, UespNamespaces.Online);
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:System Infobox", BacklinksTypes.EmbeddedIn, true, Filter.Exclude, UespNamespaces.Online);
+
+		protected override void PageLoaded(Page page)
+		{
+			base.PageLoaded(page);
+			page.Text = Regex.Replace(page.Text, @"\s+\n\{\{System Table\}\}", "\n{{System Table}}", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			page.Text = page.Text.TrimEnd();
+		}
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			for (var templateOffset = parser.Count - 1; templateOffset >= 0; templateOffset--)
+			if (parser.FindSiteTemplate("System Table") is not null)
 			{
-				if (parser[templateOffset] is SiteTemplateNode template &&
-					template.TitleValue.PageNameEquals("Mod Header") &&
-				string.Equals(template.GetValue(1), "Endless Archive", StringComparison.Ordinal))
+				return;
+			}
+
+			var sections = parser.ToSections(2);
+			int sectionNum;
+			for (sectionNum = 1; sectionNum < sections.Count; sectionNum++)
+			{
+				var section = sections[sectionNum];
+				if (string.Equals(section.Header?.GetTitle(true), "Planets", StringComparison.OrdinalIgnoreCase))
 				{
-					// var archive = ((SiteTemplateNode)parser[templateOffset]).GetValue(1);
-					Debug.WriteLine(parser.Page.Title.FullPageName());
-					parser.RemoveAt(templateOffset);
-					if (parser.Count >= templateOffset && parser[templateOffset] is ITextNode textNode)
-					{
-						textNode.Text = textNode.Text.TrimStart(' ');
-						if (textNode.Text.Length > 0 && textNode.Text[0] == '\n')
-						{
-							if (textNode.Text.Length > 1)
-							{
-								textNode.Text = textNode.Text[1..];
-							}
-							else
-							{
-								parser.RemoveAt(templateOffset);
-							}
-						}
-					}
+					sections.RemoveAt(sectionNum);
+					break;
 				}
 			}
+
+			sections[sectionNum - 1].Content.AddText("\n{{System Table}}\n\n");
+			parser.FromSections(sections);
 		}
 		#endregion
 	}
