@@ -319,7 +319,7 @@
 			foreach (var npc in npcs)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], npc.DataName);
-				if (checkPages.TitleMap.TryGetValue(title.FullPageName, out var redirect))
+				if (checkPages.TitleMap.TryGetValue(title.FullPageName(), out var redirect))
 				{
 					npc.Name = redirect.Title.PageName;
 				}

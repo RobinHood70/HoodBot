@@ -49,7 +49,7 @@
 			var galleryEntries = new List<SiteLink>();
 			if (template.GetValue("image") is string image)
 			{
-				image = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.File], image).FullPageName;
+				image = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.File], image).FullPageName();
 				image = $"[[{image}|upright=0.5|thumb|Main Image]]";
 			}
 			else

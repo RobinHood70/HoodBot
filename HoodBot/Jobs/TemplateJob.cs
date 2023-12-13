@@ -22,7 +22,7 @@
 		protected override void LoadPages()
 		{
 			var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], this.TemplateName);
-			this.Pages.GetBacklinks(title.FullPageName, BacklinksTypes.EmbeddedIn);
+			this.Pages.GetBacklinks(title.FullPageName(), BacklinksTypes.EmbeddedIn);
 		}
 
 		protected override void ParseText(ContextualParser parser)

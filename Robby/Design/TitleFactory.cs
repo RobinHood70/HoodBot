@@ -146,10 +146,6 @@
 		/// <inheritdoc/>
 		public string? Fragment { get; }
 
-		/// <summary>Gets the full page name of a title.</summary>
-		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
-		public string FullPageName => this.Namespace.DecoratedName() + this.PageName;
-
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
 		public InterwikiEntry? Interwiki { get; }
@@ -234,6 +230,13 @@
 		public static TitleFactory FromUnvalidated(Namespace ns, string pageName) => new(ns.NotNull().Site, ns.Id, WikiTextUtilities.DecodeAndNormalize(pageName.NotNull()));
 		#endregion
 
+		#region Public Methods
+
+		/// <summary>Gets the full page name of a title.</summary>
+		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
+		public string FullPageName() => this.Namespace.DecoratedName() + this.PageName;
+		#endregion
+
 		#region Public Override Methods
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
@@ -245,7 +248,7 @@
 			var nsColon = this.ForcedNamespaceLink ? ":" : string.Empty;
 			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
 
-			return iwColon + interwiki + nsColon + this.FullPageName + fragment;
+			return iwColon + interwiki + nsColon + this.FullPageName() + fragment;
 		}
 
 		/// <summary>Converts the current title to a <see cref="FullTitle"/>.</summary>
