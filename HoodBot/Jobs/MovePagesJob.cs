@@ -26,7 +26,6 @@
 		UpdateCaption = 1 << 3,
 		ProposeUnused = 1 << 4,
 		UpdateCategoryMembers = 1 << 5,
-		UpdatePageNameCaption = 1 << 6,
 		AffectsBacklinks = FixLinks | ProposeUnused | UpdateCategoryMembers,
 		NeedsCategoryMembers = ProposeUnused | UpdateCategoryMembers,
 		Default = CheckLinksRemaining | EmitReport | FixLinks,
@@ -89,7 +88,7 @@
 			{
 				if (this.logDetails == null)
 				{
-					List<string> list = new();
+					List<string> list = [];
 					if (this.MoveAction == MoveAction.MoveOverExisting)
 					{
 						list.Add("move pages over existing pages");
@@ -251,6 +250,7 @@
 				this.Results?.Save(); // Save prematurely so results are not lost in the event of a later problem.
 			}
 
+			this.StatusWriteLine("Getting linked pages");
 			this.Pages.GetTitles(loadTitles);
 		}
 
@@ -350,7 +350,7 @@
 			{
 				this.WriteLine("|-");
 				this.Write(string.Create(CultureInfo.InvariantCulture, $"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
-				List<string> actionsList = new();
+				List<string> actionsList = [];
 				if (action.HasAction(ReplacementActions.Skip))
 				{
 					actionsList.Add("skip");
@@ -464,14 +464,24 @@
 			return new(action.Actions & ~ReplacementActions.Move, $"{SiteLink.ToText(to)} exists");
 		}
 
-		protected virtual ITitle? LinkUpdateMatch(SiteLink from) =>
-			this.linkUpdates.TryGetValue(from.Title, out var to) &&
-				(from.ForcedNamespaceLink ||
-				from.Title.Namespace != MediaWikiNamespaces.Category ||
-				to.Title.Namespace != from.Title.Namespace ||
-				this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
-					? to
-					: null;
+		protected virtual ITitle? LinkUpdateMatch(SiteLink from)
+		{
+			var outFound = this.linkUpdates.TryGetValue(from.Title, out var to);
+			if (to is not null)
+			{
+				var doRename =
+					from.ForcedNamespaceLink ||
+					from.Title.Namespace != MediaWikiNamespaces.Category ||
+					to.Title.Namespace != from.Title.Namespace ||
+					this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers);
+				if (outFound && doRename)
+				{
+					return to;
+				}
+			}
+
+			return null;
+		}
 
 		protected virtual void MovePages()
 		{
@@ -679,10 +689,10 @@
 			page.ThrowNull();
 			node.ThrowNull();
 			var from = SiteLink.FromLinkNode(this.Site, node);
-			if (this.LinkUpdateMatch(from) is Title to)
+			if (this.LinkUpdateMatch(from) is ITitle to)
 			{
 				this
-					.GetToLink(page, isRedirectTarget, from, to)
+					.GetToLink(page, isRedirectTarget, from, to.Title)
 					.UpdateLinkNode(node);
 			}
 
@@ -710,29 +720,15 @@
 					page.Title.Namespace != MediaWikiNamespaces.User &&
 					!page.Title.IsDiscussionPage())
 				{
-					var newTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Main], toLink.Text);
 					var to = this.linkUpdates[from.Title];
-					if (from is IFullTitle fullTitle)
+					if (string.Equals(from.Title.FullPageName(), toLink.Text, StringComparison.Ordinal))
 					{
-						return fullTitle.FullEquals(newTitle) ? to.Title.LinkTarget() : null;
+						return to.Title.FullPageName();
 					}
 
-					if (from == newTitle)
+					if (string.Equals(from.Title.PageName, toLink.Text, StringComparison.Ordinal))
 					{
-						return to.Title.LinkTarget();
-					}
-
-					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdatePageNameCaption))
-					{
-						if (string.Equals(from.Title.FullPageName(), toLink.Text, StringComparison.Ordinal))
-						{
-							return to.Title.FullPageName();
-						}
-
-						if (string.Equals(from.Title.PageName, toLink.Text, StringComparison.Ordinal))
-						{
-							return to.Title.PageName;
-						}
+						return to.Title.PageName;
 					}
 				}
 			}
