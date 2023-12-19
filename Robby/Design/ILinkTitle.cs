@@ -4,7 +4,7 @@
 	/// <seealso cref="Title" />
 	public interface ILinkTitle : IFullTitle
 	{
-		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
+		/// <summary>Gets a value indicating whether the title was coerced into its namespace (e.g., {{Example}} is in Template space).</summary>
 		/// <value><see langword="true"/> if coerced into the indicated namespace; otherwise, <see langword="false"/>.</value>
 		bool Coerced { get; }
 
