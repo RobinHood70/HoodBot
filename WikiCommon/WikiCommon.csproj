@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<DocumentationFile>bin\WikiCommon.xml</DocumentationFile>
 		<Description>Common elements for the entire project</Description>
 		<RootNamespace>RobinHood70.WikiCommon</RootNamespace>
@@ -9,6 +9,8 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<SignAssembly>False</SignAssembly>
+		<AssemblyOriginatorKeyFile />
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <DefineConstants>DEBUG;TRACE</DefineConstants>
