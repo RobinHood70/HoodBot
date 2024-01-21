@@ -54,9 +54,9 @@
 	public abstract class MovePagesJob : EditJob
 	{
 		#region Fields
-		private readonly IDictionary<Title, DetailedActions> actions = new SortedDictionary<Title, DetailedActions>();
-		private readonly IDictionary<Title, ITitle> linkUpdates = new Dictionary<Title, ITitle>();
-		private readonly IDictionary<Title, ITitle> moves = new Dictionary<Title, ITitle>();
+		private readonly SortedDictionary<Title, DetailedActions> actions = [];
+		private readonly Dictionary<Title, Title> linkUpdates = [];
+		private readonly Dictionary<Title, Title> moves = [];
 		private readonly ParameterReplacers parameterReplacers;
 
 		private bool isRedirectLink;
@@ -150,7 +150,7 @@
 
 		protected FollowUpActions FollowUpActions { get; set; } = FollowUpActions.Default;
 
-		protected IReadOnlyDictionary<Title, ITitle> LinkUpdates => this.linkUpdates.AsReadOnly();
+		protected IReadOnlyDictionary<Title, ITitle> LinkUpdates => (IReadOnlyDictionary<Title, ITitle>)this.linkUpdates.AsReadOnly();
 
 		protected MoveAction MoveAction { get; set; } = MoveAction.MoveSafely;
 
@@ -169,17 +169,17 @@
 			TitleFactory.FromUnvalidated(this.Site, from),
 			TitleFactory.FromUnvalidated(this.Site, to));
 
-		protected void AddLinkUpdate(Title from, ITitle to) => this.AddReplacement(from, to, ReplacementActions.None, null);
+		protected void AddLinkUpdate(Title from, Title to) => this.AddReplacement(from, to, ReplacementActions.None, null);
 
 		protected void AddMove(string from, string to) => this.AddMove(
 			TitleFactory.FromUnvalidated(this.Site, from),
 			TitleFactory.FromUnvalidated(this.Site, to));
 
-		protected void AddMove(Title from, ITitle to) => this.AddReplacement(from, to, ReplacementActions.Move, null);
+		protected void AddMove(Title from, Title to) => this.AddReplacement(from, to, ReplacementActions.Move, null);
 
-		protected void AddReplacement(Title from, ITitle to, ReplacementActions initialActions, string? reason)
+		protected void AddReplacement(Title from, Title to, ReplacementActions initialActions, string? reason)
 		{
-			if (!this.AllowFromEqualsTo && from == to.Title)
+			if (!this.AllowFromEqualsTo && from == to)
 			{
 				throw new InvalidOperationException($"From and To titles cannot be the same: {from}");
 			}
@@ -425,7 +425,7 @@
 				foreach (var replacement in this.linkUpdates)
 				{
 					if (replacement.Key.Namespace == MediaWikiNamespaces.Category &&
-						replacement.Value.Title.Namespace == MediaWikiNamespaces.Category)
+						replacement.Value.Namespace == MediaWikiNamespaces.Category)
 					{
 						categoryReplacements.Add(replacement.Key, replacement.Value);
 					}
@@ -464,17 +464,19 @@
 			return new(action.Actions & ~ReplacementActions.Move, $"{SiteLink.ToText(to)} exists");
 		}
 
-		protected virtual ITitle? LinkUpdateMatch(SiteLink from)
+		protected virtual Title? LinkUpdateMatch(SiteLink from)
 		{
-			var outFound = this.linkUpdates.TryGetValue(from.Title, out var to);
-			if (to is not null)
+			// This whole function could be reduced to a one-liner but is separated out for easier reading/debugging.
+			var toFound = this.linkUpdates.TryGetValue(from.Title, out var to);
+			if (toFound)
 			{
+				// If this is a category tag, make the change conditional on UpdateCategoryMembers flag.
+				var isCategoryUpdate = from.Title.Namespace == MediaWikiNamespaces.Category && to.Namespace == MediaWikiNamespaces.Category;
 				var doRename =
-					from.ForcedNamespaceLink ||
-					from.Title.Namespace != MediaWikiNamespaces.Category ||
-					to.Title.Namespace != from.Title.Namespace ||
-					this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers);
-				if (outFound && doRename)
+					!isCategoryUpdate ||
+					this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers) ||
+					from.ForcedNamespaceLink;
+				if (doRename)
 				{
 					return to;
 				}
@@ -517,7 +519,7 @@
 					this.MoveExtra.HasAnyFlag(MoveOptions.MoveSubPages);
 				this.Site.Move(
 					action.Key,
-					to.Title,
+					to,
 					this.EditSummaryMove,
 					moveTalkPage,
 					moveSubPages,
@@ -549,7 +551,7 @@
 					}
 
 					parser.UpdatePage();
-					editPage.SaveAs(to.Title.FullPageName(), editSummary, isMinor, Tristate.False, false, true);
+					editPage.SaveAs(to.FullPageName(), editSummary, isMinor, Tristate.False, false, true);
 				}
 
 				this.Progress++;
@@ -689,10 +691,10 @@
 			page.ThrowNull();
 			node.ThrowNull();
 			var from = SiteLink.FromLinkNode(this.Site, node);
-			if (this.LinkUpdateMatch(from) is ITitle to)
+			if (this.LinkUpdateMatch(from) is Title to)
 			{
 				this
-					.GetToLink(page, isRedirectTarget, from, to.Title)
+					.GetToLink(page, isRedirectTarget, from, to)
 					.UpdateLinkNode(node);
 			}
 
@@ -702,34 +704,37 @@
 				if (this.linkUpdates.TryGetValue(key, out var toMedia))
 				{
 					this
-						.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia!.Title.PageName))
+						.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia!.PageName))
 						.UpdateLinkNode(node);
 				}
 			}
 		}
 
-		protected virtual string? GetLinkText(ITitle page, ITitle from, SiteLink toLink, bool addCaption)
+		protected virtual string? GetLinkText(ITitle page, SiteLink from, SiteLink toLink, bool addCaption)
 		{
 			page.ThrowNull();
 			from.ThrowNull();
 			toLink.ThrowNull();
 			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCaption))
 			{
-				// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
 				if (toLink.Text != null &&
 					page.Title.Namespace != MediaWikiNamespaces.User &&
 					!page.Title.IsDiscussionPage())
 				{
 					var to = this.linkUpdates[from.Title];
+
+					// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
 					if (string.Equals(from.Title.FullPageName(), toLink.Text, StringComparison.Ordinal))
 					{
-						return to.Title.FullPageName();
+						return to.FullPageName();
 					}
 
 					if (string.Equals(from.Title.PageName, toLink.Text, StringComparison.Ordinal))
 					{
-						return to.Title.PageName;
+						return to.PageName;
 					}
+
+					return to.LinkTarget();
 				}
 			}
 			else if (addCaption &&
@@ -751,9 +756,9 @@
 			var fullTitle = new FullTitle(template.TitleValue);
 			if (this.linkUpdates.TryGetValue(fullTitle.Title, out var to))
 			{
-				var nameText = to.Title.Namespace == MediaWikiNamespaces.Template
-					? to.Title.PageName
-					: to.Title.Namespace.DecoratedName() + to.Title.PageName;
+				var nameText = to.Namespace == MediaWikiNamespaces.Template
+					? to.PageName
+					: to.Namespace.DecoratedName() + to.PageName;
 				template.SetTitle(nameText);
 			}
 
@@ -773,7 +778,7 @@
 						// From title does not exist. Should still have an entry in linkUpdates, if appropriate.
 						this.actions[move.Key] = new(ReplacementActions.Skip, $"{SiteLink.ToText(fromPage)} doesn't exist");
 					}
-					else if (toPages.Contains(move.Value.Title))
+					else if (toPages.Contains(move.Value))
 					{
 						this.actions[move.Key] = action.Actions.HasAnyFlag(ReplacementActions.Propose)
 							? this.HandleConflict(move.Key, move.Value)
@@ -911,7 +916,7 @@
 				{
 					if (this.actions[move.Key].HasAction(ReplacementActions.Move))
 					{
-						toTitles.Add(move.Value.Title);
+						toTitles.Add(move.Value);
 					}
 				}
 
@@ -938,16 +943,16 @@
 			var link = SiteLink.FromGalleryText(this.Site, line);
 			if (this.linkUpdates.TryGetValue(link.Title, out var toTitle))
 			{
-				if (toTitle.Title.Namespace != MediaWikiNamespaces.File)
+				if (toTitle.Namespace != MediaWikiNamespaces.File)
 				{
-					this.Warn($"{link.Title.PageName} to non-File {toTitle.Title.FullPageName()} move skipped in gallery on page: {page.Title.FullPageName()}.");
+					this.Warn($"{link.Title.PageName} to non-File {toTitle.FullPageName()} move skipped in gallery on page: {page.Title.FullPageName()}.");
 				}
 				else
 				{
 					var newNamespace = (link.Title.Namespace == MediaWikiNamespaces.File && link.Coerced)
 						? this.Site[MediaWikiNamespaces.Main]
-						: toTitle.Title.Namespace;
-					var newTitle = TitleFactory.FromValidated(newNamespace, toTitle.Title.PageName);
+						: toTitle.Namespace;
+					var newTitle = TitleFactory.FromValidated(newNamespace, toTitle.PageName);
 					var newLink = link.WithTitle(newTitle);
 					if (this.GetLinkText(page, link, newLink, false) is string newText)
 					{
@@ -977,8 +982,8 @@
 			Dictionary<Title, Title> unique = new();
 			foreach (var move in this.moves)
 			{
-				var title = move.Value.Title;
-				var current = this.actions[move.Key];
+				var title = move.Key;
+				var current = this.actions[title];
 				if (current.HasAction(ReplacementActions.Move))
 				{
 					if (unique.TryGetValue(title, out var existing))
@@ -989,7 +994,7 @@
 					}
 					else
 					{
-						unique.Add(title, move.Key);
+						unique.Add(title, move.Value);
 					}
 				}
 			}

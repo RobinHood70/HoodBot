@@ -171,7 +171,7 @@
 		{
 			foreach (var title in collections)
 			{
-				this.AddReplacement(title.Title, title, ReplacementActions.None, "dummy update");
+				this.AddReplacement(title.Title, title.Title, ReplacementActions.None, "dummy update");
 			}
 		}
 		#endregion

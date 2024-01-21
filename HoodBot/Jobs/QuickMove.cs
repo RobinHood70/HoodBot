@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using RobinHood70.Robby;
+
 	public class QuickMove : MovePagesJob
 	{
 		#region Constructors
@@ -7,7 +9,7 @@
 		public QuickMove(JobManager jobManager, string from, string to, bool renameOnly)
 				: base(jobManager, false)
 		{
-			this.Pages.SetLimitations(Robby.LimitationType.None);
+			this.Pages.SetLimitations(LimitationType.None);
 			this.MoveAction = renameOnly ? MoveAction.None : MoveAction.MoveSafely;
 			this.EditSummaryMove = $"Move to [[{to}]]";
 			this.AddMove(from, to);
