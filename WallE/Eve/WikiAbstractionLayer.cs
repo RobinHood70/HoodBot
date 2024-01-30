@@ -412,9 +412,13 @@
 				ShowNumberInGroup = eventArgs.ShowNumberInGroup,
 			};
 
+			// Don't check talk page during login.
+			var stopChecks = this.StopCheckMethods;
+			this.StopCheckMethods &= ~StopCheckMethods.TalkChecks;
 			MetaSiteInfo infoModule = new(this, siteInfoInput);
 			MetaUserInfo userModule = new(this, DefaultUserInformation);
 			this.RunQuery(infoModule, userModule);
+			this.StopCheckMethods = stopChecks;
 
 			if (userModule.Output is not UserInfoResult userInfo ||
 				infoModule.Output is not SiteInfoResult siteInfo ||
