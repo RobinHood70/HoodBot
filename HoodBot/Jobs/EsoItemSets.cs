@@ -20,7 +20,7 @@
 		#region Private Constants
 		private const string Query =
 			"SELECT id, setName, setBonusDesc1, setBonusDesc2, setBonusDesc3, setBonusDesc4, setBonusDesc5, setBonusDesc6, setBonusDesc7, setBonusDesc8, setBonusDesc9, setBonusDesc10, setBonusDesc11, setBonusDesc12\n" +
-			"FROM setSummary\n";
+			"FROM setSummary";
 		#endregion
 
 		#region Static Fields
@@ -29,6 +29,7 @@
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 			["Camonna Tong"] = "Camonna Tong (set)",
 			["Dro'Zakar's Claws"] = "Dro'zakar's Claws",
+			["Knight-errant's Mail"] = "Knight-Errant's Mail",
 			["Roksa the Warped"] = "Roksa the Warped (set)"
 		};
 
@@ -36,7 +37,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, SetData> sets = new();
+		private readonly Dictionary<Title, SetData> sets = [];
 		#endregion
 
 		#region Constructors
@@ -66,10 +67,11 @@
 		{
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
-			var allSets = GetSetData();
 
 			PageCollection catPages = new(this.Site, PageModules.Info, true);
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
+
+			var allSets = GetSetData();
 			var unresolved = this.UpdateSetPages(catPages, allSets);
 			foreach (var setName in unresolved)
 			{
@@ -306,15 +308,14 @@
 							break;
 						}
 					}
-
-					if (foundPage is not null)
-					{
-						this.sets.Add(foundPage.Title, set);
-						break;
-					}
 				}
 
-				if (foundPage is null)
+
+				if (foundPage is not null)
+				{
+					this.sets.Add(foundPage.Title, set);
+				}
+				else
 				{
 					var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], set.Name);
 					notFound.Add(title, set);
