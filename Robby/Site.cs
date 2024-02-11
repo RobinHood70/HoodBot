@@ -680,7 +680,17 @@
 		/// <param name="password">The password.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the <paramref name="userName" /> parameter.</remarks>
-		public void Login(string userName, string password) => this.Login(new LoginInput(userName, password));
+		public void Login(string? userName, string? password)
+		{
+			if (userName is null)
+			{
+				this.Login(null);
+			}
+			else
+			{
+				this.Login(new LoginInput(userName, password ?? string.Empty));
+			}
+		}
 
 		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
 		/// <param name="userName">Name of the user. This can be null if you wish to edit anonymously.</param>
@@ -1355,18 +1365,26 @@
 		/// <param name="input">The input parameters.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
-		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput input)
+		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput? input)
 		{
 			// Always log in in case permissions are needed.
-			var result = this.AbstractionLayer.Login(input.NotNull());
-			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
+			if (input is null)
 			{
-				this.Clear();
-				throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason ?? string.Empty));
+				this.AbstractionLayer.Initialize();
+				this.User = null;
 			}
+			else
+			{
+				var result = this.AbstractionLayer.Login(input);
+				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
+				{
+					this.Clear();
+					throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason ?? string.Empty));
+				}
 
-			var name = result.User;
-			this.User = name == null ? null : new User(this, name);
+				var name = result.User;
+				this.User = name == null ? null : new User(this, name);
+			}
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
