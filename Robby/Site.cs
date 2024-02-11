@@ -377,7 +377,7 @@
 		/// <param name="temporary">Filter temporary blocks.</param>
 		/// <returns>Active blocks filtered by the date when they were placed or last update and the specified set of attributes.</returns>
 		/// <remarks>Filters intersect with one another, so <c>account := Filter.Only, temporary := Filter.Only</c> gives all temporary account blocks, while <c>account := Filter.Only, temporary := Filter.Exclude</c> gives all permanent account blocks. Note: there is no checking for nonsensical filters, so filters such as <c>account := Filter.Only, ip := Filter.Only</c> will succeed but won't return any results. By contrast, <c>account := Filter.Exclude, ip := Filter.Exclude</c> returns the same results as <c>range := Filter.Only</c>.</remarks>
-		public IReadOnlyList<Block> LoadBlocks(DateTime start, DateTime end, Filter account, Filter ip, Filter range, Filter temporary) => this.LoadBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = account, FilterIP = ip, FilterRange = range, FilterTemporary = temporary });
+		public IReadOnlyList<Block> LoadBlocks(DateTime? start, DateTime? end, Filter account, Filter ip, Filter range, Filter temporary) => this.LoadBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = account, FilterIP = ip, FilterRange = range, FilterTemporary = temporary });
 
 		/// <summary>Gets active blocks for the specified set of users.</summary>
 		/// <param name="users">The users.</param>
