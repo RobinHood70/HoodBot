@@ -84,7 +84,7 @@
 		/// <param name="expiry">The date and time the block should expire.</param>
 		/// <param name="reblock">if set to <see langword="true"/>, reblocks the user with the new block settings.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
-		public ChangeStatus Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
+		public ChangeStatus Block(string reason, BlockFlags flags, DateTime? expiry, bool reblock)
 		{
 			BlockInput input = new(this.Name)
 			{
