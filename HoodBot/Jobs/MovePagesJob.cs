@@ -609,9 +609,9 @@
 				doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
 			}
 
-			foreach (var linkUpdate in this.linkUpdates)
+			foreach (var title in this.linkUpdates.Keys)
 			{
-				if (fromPages.GetMapped(linkUpdate.Key) is not Page fromPage ||
+				if (fromPages.GetMapped(title) is not Page fromPage ||
 					!fromPage.Exists ||
 					fromPage.Backlinks.Count != 0 ||
 					catMembers.ContainsKey(fromPage.Title))
@@ -619,7 +619,7 @@
 					continue;
 				}
 
-				var action = this.actions[linkUpdate.Key];
+				var action = this.actions[title];
 				if (doNotDelete.Contains(fromPage.Title))
 				{
 					if (this.MoveAction != MoveAction.None)
