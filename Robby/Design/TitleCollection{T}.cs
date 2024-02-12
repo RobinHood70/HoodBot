@@ -30,22 +30,15 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the site for the collection.</summary>
-		/// <value>The site.</value>
-		public Site Site { get; }
-		#endregion
-
-		#region Protected Properties
-
 		/// <summary>Gets or sets a value indicating whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
 		/// <value>The type of the namespace limitation.</value>
 		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		protected LimitationType LimitationType { get; set; } = LimitationType.Disallow;
+		public LimitationType LimitationType { get; set; } = LimitationType.Disallow;
 
 		/// <summary>Gets the namespace limitations.</summary>
 		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
 		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		protected ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
+		public ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
 		{
 			MediaWikiNamespaces.Media,
 			MediaWikiNamespaces.MediaWiki,
@@ -53,6 +46,10 @@
 			MediaWikiNamespaces.Template,
 			MediaWikiNamespaces.User,
 		};
+
+		/// <summary>Gets the site for the collection.</summary>
+		/// <value>The site.</value>
+		public Site Site { get; }
 		#endregion
 
 		#region Public Indexers
