@@ -1,18 +1,18 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.CommonCode;
+	using System;
 	using RobinHood70.Robby.Design;
 
 	public class LinkFinder : LinkFinderJob
 	{
 		#region Constructors
 		[JobInfo("Link Finder")]
-		public LinkFinder(JobManager jobManager, string searches, [JobParameter(DefaultValue = true)] bool sectionLinksOnly)
+		public LinkFinder(JobManager jobManager, string searches, [JobParameter(DefaultValue = false)] bool sectionLinksOnly)
 			: base(jobManager, sectionLinksOnly)
 		{
 			if (!string.IsNullOrWhiteSpace(searches))
 			{
-				foreach (var search in searches.Split(TextArrays.Pipe))
+				foreach (var search in searches.Split(Environment.NewLine))
 				{
 					this.Titles.Add(TitleFactory.FromUnvalidated(this.Site, search));
 				}

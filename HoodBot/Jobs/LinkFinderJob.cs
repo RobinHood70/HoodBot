@@ -12,7 +12,7 @@
 	public abstract class LinkFinderJob : ParsedPageJob
 	{
 		#region Fields
-		private readonly IDictionary<Title, PageLinkList> results = new SortedDictionary<Title, PageLinkList>();
+		private readonly SortedDictionary<Title, PageLinkList> results = [];
 		private readonly bool sectionLinksOnly;
 		#endregion
 
@@ -54,8 +54,9 @@
 					if (title.Value.Count > 0)
 					{
 						this.WriteLine($"|-\n| {SiteLink.ToText(title.Key)}");
-						this.Write("| ");
-						this.WriteLine(string.Join("<br>", title.Value));
+						this.Write("| <code><nowiki>");
+						this.Write(string.Join("</nowiki><br><nowiki>", title.Value));
+						this.WriteLine("</nowiki></code>");
 					}
 				}
 
@@ -118,7 +119,7 @@
 						WikiTextVisitor.Raw(link) is var textTitle &&
 						!links.Contains(textTitle, StringComparer.Ordinal))
 					{
-						links.Add(link.Title.ToRaw().Trim());
+						links.Add(textTitle.Trim());
 					}
 				}
 			}
