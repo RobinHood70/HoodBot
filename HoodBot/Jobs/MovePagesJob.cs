@@ -23,12 +23,13 @@
 		CheckLinksRemaining = 1,
 		EmitReport = 1 << 1,
 		FixLinks = 1 << 2,
-		UpdateCaption = 1 << 3,
-		ProposeUnused = 1 << 4,
-		UpdateCategoryMembers = 1 << 5,
+		RetainDirectLinkText = 1 << 3,
+		UpdateSameNamedText = 1 << 4,
+		ProposeUnused = 1 << 5,
+		UpdateCategoryMembers = 1 << 6,
 		AffectsBacklinks = FixLinks | ProposeUnused | UpdateCategoryMembers,
 		NeedsCategoryMembers = ProposeUnused | UpdateCategoryMembers,
-		Default = CheckLinksRemaining | EmitReport | FixLinks,
+		Default = CheckLinksRemaining | EmitReport | FixLinks | RetainDirectLinkText | UpdateSameNamedText,
 	}
 
 	public enum MoveAction
@@ -70,12 +71,7 @@
 			this.parameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
 			if (updateUserSpace)
 			{
-				this.Pages.SetLimitations(
-					LimitationType.Disallow,
-					MediaWikiNamespaces.Media,
-					MediaWikiNamespaces.MediaWiki,
-					MediaWikiNamespaces.Special,
-					MediaWikiNamespaces.Template);
+				this.Pages.NamespaceLimitations.Remove(MediaWikiNamespaces.User);
 			}
 		}
 		#endregion
@@ -150,7 +146,7 @@
 
 		protected FollowUpActions FollowUpActions { get; set; } = FollowUpActions.Default;
 
-		protected IReadOnlyDictionary<Title, ITitle> LinkUpdates => (IReadOnlyDictionary<Title, ITitle>)this.linkUpdates.AsReadOnly();
+		protected IReadOnlyDictionary<Title, Title> LinkUpdates => this.linkUpdates;
 
 		protected MoveAction MoveAction { get; set; } = MoveAction.MoveSafely;
 
@@ -678,11 +674,7 @@
 		protected virtual SiteLink GetToLink(Page page, bool isRedirectTarget, SiteLink from, Title to)
 		{
 			var retval = from.WithTitle(to);
-			if (this.GetLinkText(page, from, retval, !isRedirectTarget) is string linkText)
-			{
-				retval.Text = linkText;
-			}
-
+			this.UpdateLinkText(page, from, retval, !isRedirectTarget);
 			return retval;
 		}
 
@@ -710,43 +702,39 @@
 			}
 		}
 
-		protected virtual string? GetLinkText(ITitle page, SiteLink from, SiteLink toLink, bool addCaption)
+		protected virtual void UpdateLinkText(ITitle page, SiteLink from, SiteLink toLink, bool addCaption)
 		{
-			page.ThrowNull();
-			from.ThrowNull();
-			toLink.ThrowNull();
-			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCaption))
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(from);
+			ArgumentNullException.ThrowIfNull(toLink);
+			if (addCaption &&
+				toLink.Text is null &&
+				from.OriginalTitle is not null &&
+				this.FollowUpActions.HasAnyFlag(FollowUpActions.RetainDirectLinkText))
 			{
-				if (toLink.Text != null &&
-					page.Title.Namespace != MediaWikiNamespaces.User &&
-					!page.Title.IsDiscussionPage())
+				// If there's no link text then we want to preserve the previous display text for any caption-less links by adding a new caption. Logic further up sets addCaption appropriately so this won't occur for a redirect target or in galleries.
+				toLink.Text = from.OriginalTitle.TrimStart(TextArrays.Colon);
+			}
+
+			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateSameNamedText) && from.Text is not null)
+			{
+				// Parse the original text and see if it matches either FullPageName or PageName. If so, update it, retaining interwiki text and anchors, if present.
+				var textLink = TitleFactory.FromUnvalidated(this.Site, from.Text).ToSiteLink();
+				if (textLink.Title.PageNameEquals(from.Title.PageName))
 				{
-					var to = this.linkUpdates[from.Title];
-
-					// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
-					if (string.Equals(from.Title.FullPageName(), toLink.Text, StringComparison.Ordinal))
+					if (textLink.Title.Namespace == from.Title.Namespace)
 					{
-						return to.FullPageName();
+						var retitled = textLink.WithTitle(toLink.Title);
+						toLink.Text = retitled.AsLink()[2..^2];
 					}
-
-					if (string.Equals(from.Title.PageName, toLink.Text, StringComparison.Ordinal))
+					else if (textLink.Title.Namespace == MediaWikiNamespaces.Main)
 					{
-						return to.PageName;
+						var title = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Main], toLink.Title.PageName);
+						var retitled = textLink.WithTitle(title);
+						toLink.Text = retitled.AsLink()[2..^2];
 					}
-
-					return to.LinkTarget();
 				}
 			}
-			else if (addCaption &&
-				toLink.Text == null &&
-				toLink.OriginalTitle != null &&
-				(toLink.ForcedNamespaceLink || !toLink.Title.Namespace.IsForcedLinkSpace))
-			{
-				// if UpdateCaption is false, then we want to preserve the previous display text for any caption-less links by adding a new caption. Logic further up sets addCaption appropriately so this won't occur for a redirect target or in galleries.
-				return toLink.OriginalTitle.TrimStart(':');
-			}
-
-			return null;
 		}
 
 		protected virtual void UpdateTemplateNode(Page page, SiteTemplateNode template)
@@ -954,10 +942,7 @@
 						: toTitle.Namespace;
 					var newTitle = TitleFactory.FromValidated(newNamespace, toTitle.PageName);
 					var newLink = link.WithTitle(newTitle);
-					if (this.GetLinkText(page, link, newLink, false) is string newText)
-					{
-						newLink.Text = newText;
-					}
+					this.UpdateLinkText(page, link, newLink, false);
 
 					return newLink.LinkTarget();
 				}

@@ -48,10 +48,7 @@
 
 				var retval = from.WithTitle(TitleFactory.FromUnvalidated(to.Namespace, newTitle.PageName));
 				retval.Fragment = null;
-				if (this.GetLinkText(page, from, retval, !isRedirectTarget) is string newText)
-				{
-					retval.Text = newText;
-				}
+				this.UpdateLinkText(page, from, retval, !isRedirectTarget);
 
 				return retval;
 			}
@@ -91,7 +88,7 @@
 				Title key = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], from.Title.PageName);
 				if (this.LinkUpdates.TryGetValue(key, out var toMedia))
 				{
-					var toLink = this.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.Title.PageName));
+					var toLink = this.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.PageName));
 					if (!from.FullEquals(toLink))
 					{
 						toLink.UpdateLinkNode(node);

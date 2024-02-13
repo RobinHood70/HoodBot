@@ -18,19 +18,20 @@
 	{
 		#region Fields
 		private readonly Site site;
-		private readonly List<ParameterReplacer> generalReplacers = new();
-		private readonly IReadOnlyDictionary<Title, ITitle> globalUpdates;
-		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = new();
+		private readonly List<ParameterReplacer> generalReplacers = [];
+		private readonly IReadOnlyDictionary<Title, Title> globalUpdates;
+		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = [];
 		private UespNamespaceList? nsList;
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
-		internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, ITitle> linkUpdates)
+		internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, Title> linkUpdates)
 		{
-			this.site = site.NotNull();
-			this.globalUpdates = linkUpdates.NotNull();
-
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(linkUpdates);
+			this.site = site;
+			this.globalUpdates = linkUpdates;
 			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
 			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
 			this.AddTemplateReplacers("Book Link", this.LoreFirst);
@@ -78,7 +79,7 @@
 			var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.Template], name);
 			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
-				currentReplacers = new List<ParameterReplacer>();
+				currentReplacers = [];
 				this.templateReplacers.Add(title, currentReplacers);
 			}
 
@@ -138,8 +139,8 @@
 			}
 
 			link.Value.Clear();
-			link.SetValue(toTitle.Title.PageName, ParameterFormat.Copy);
-			if (this.NamespaceList.FromTitle(toTitle.Title) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
+			link.SetValue(toTitle.PageName, ParameterFormat.Copy);
+			if (this.NamespaceList.FromTitle(toTitle) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -153,7 +154,7 @@
 				nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
 			}
 
-			if (toTitle.Title == newNs.MainPage)
+			if (toTitle == newNs.MainPage)
 			{
 				template.Add("altname", oldTitle);
 			}
@@ -200,7 +201,7 @@
 				var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
 				if (this.globalUpdates.TryGetValue(title, out var toTitle))
 				{
-					var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.Title.PageName);
+					var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.PageName);
 					if (template.Find(1) is IParameterNode param1 &&
 						template.Find(2) is IParameterNode param2)
 					{
@@ -246,7 +247,7 @@
 				&& TitleFactory.FromUnvalidated(page.Site, param.Value.ToValue()) is var from
 				&& this.globalUpdates.TryGetValue(from, out var to))
 			{
-				param.SetValue(to.Title.Namespace.DecoratedName() + to.Title.PageName, ParameterFormat.Copy);
+				param.SetValue(to.Namespace.DecoratedName() + to.PageName, ParameterFormat.Copy);
 			}
 		}
 
@@ -287,9 +288,9 @@
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
 				Title from = TitleFactory.FromUnvalidated(page.Title.Namespace, param.Value.ToValue());
-				if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Title.Namespace)
+				if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Namespace)
 				{
-					param.SetValue(to.Title.PageName, ParameterFormat.Copy);
+					param.SetValue(to.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
@@ -302,9 +303,9 @@
 			if (param != null)
 			{
 				if (this.globalUpdates.TryGetValue(TitleFactory.FromUnvalidated(ns, param.Value.ToValue().Trim()), out var target) &&
-					target.Title.Namespace == ns)
+					target.Namespace == ns)
 				{
-					param.SetValue(target.Title.PageName, ParameterFormat.Copy);
+					param.SetValue(target.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
