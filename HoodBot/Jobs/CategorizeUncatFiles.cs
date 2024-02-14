@@ -7,22 +7,16 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
-	public class CategorizeUncatFiles : ParsedPageJob
+	[method: JobInfo("Categorize Uncategorized Files", "Maintenance")]
+	public class CategorizeUncatFiles(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Static Fields
-		private static readonly char[] Dash = new[] { '-' };
+		private static readonly char[] Dash = ['-'];
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<string, UespNamespace> nsIds = new(StringComparer.OrdinalIgnoreCase);
-		#endregion
 
-		#region Constructors
-		[JobInfo("Categorize Uncategorized Files", "Maintenance")]
-		public CategorizeUncatFiles(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties
@@ -32,7 +26,8 @@
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			UespNamespaceList nsList = new(this.Site);
+			// UespNamespaceList nsList = new(this.Site);
+			UespNamespaceList nsList = new(this.Site, "Sitenamespacelist");
 			foreach (var ns in nsList)
 			{
 				this.nsIds.Add(ns.Id, ns);
@@ -74,7 +69,7 @@
 
 					nodes.Add(factory.HeaderNodeFromParts(2, " Licensing "));
 					nodes.AddText("\n");
-					nodes.Add(factory.TemplateNodeFromParts("Nolicense"));
+					nodes.Add(factory.TemplateNodeFromParts("Sfwimage"));
 				}
 
 				// Debug.WriteLine($"*{cat}: [[:{parsedPage.Context.FullPageName}|]]");
@@ -101,6 +96,7 @@
 				itemCat = itemCat.ToLowerInvariant();
 				var cat = itemCat switch
 				{
+					/*
 					"armor" or "icon-armor" => "Icons-Armor",
 					"clothing" or "icon-clothing" => "Icons-Clothing",
 					"ing" or "icon-ingredient" => "Icons-Ingredients",
@@ -111,6 +107,8 @@
 					"weapon" or "icon-weapon" => "Icons-Weapons",
 					"place" => "Place Images",
 					"interior" => "Interior Images",
+					*/
+					"item" => "Item Images",
 					_ => null,
 				};
 

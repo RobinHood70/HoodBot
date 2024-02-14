@@ -15,9 +15,14 @@
 
 		#region Constructors
 		public UespNamespaceList(Site site)
+			: this(site, "Uespnamespacelist")
+		{
+		}
+
+		public UespNamespaceList(Site site, string messageName)
 		{
 			// Add defined namespaces
-			if (site.NotNull().LoadMessage("Uespnamespacelist") is string message)
+			if (site.NotNull().LoadMessage(messageName) is string message)
 			{
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
