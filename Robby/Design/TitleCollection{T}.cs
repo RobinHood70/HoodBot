@@ -365,7 +365,7 @@
 		/// <param name="title">The title.</param>
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the <see cref="LimitationType"/> is not one of the recognized values.</exception>
-		protected bool IsTitleInLimits(T title) =>
+		protected virtual bool IsTitleInLimits(T title) =>
 			title != null &&
 			this.LimitationType switch
 			{

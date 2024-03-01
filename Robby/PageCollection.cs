@@ -81,6 +81,9 @@
 
 		#region Public Properties
 
+		/// <summary>Gets or sets whether redirects should be allowed in the results when loading pages.</summary>
+		public Filter AllowRedirects { get; set; } = Filter.Any;
+
 		/// <summary>Gets the options used by <see cref="LoadPages(QueryPageSetInput, Func{Page, bool})"/>.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; }
@@ -545,6 +548,26 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
+
+		/// <inheritdoc/>
+		protected override bool IsTitleInLimits(Page title)
+		{
+			if (title is null)
+			{
+				return false;
+			}
+
+			var redirOkay = this.AllowRedirects switch
+			{
+				Filter.Any => true,
+				Filter.Only => title.IsRedirect,
+				Filter.Exclude => !title.IsRedirect,
+				_ => true,
+			};
+
+			return redirOkay && base.IsTitleInLimits(title);
+		}
+
 		#endregion
 
 		#region Protected Virtual Methods
