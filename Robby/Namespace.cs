@@ -32,7 +32,6 @@
 			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
 			this.subjectSpaceId = this.CanTalk ? ns.Id & 0x7ffffffe : ns.Id;
 			this.talkSpaceId = this.CanTalk ? ns.Id | 1 : null;
-			this.PageNameComparer = new PageNameComparer(site.Culture, this.CaseSensitive);
 		}
 		#endregion
 
@@ -90,10 +89,6 @@
 		/// <summary>Gets the primary name of the namespace.</summary>
 		/// <value>The primary name of the namespace.</value>
 		public string Name { get; }
-
-		/// <summary>Gets the StringComparer in use to compare page names within this namespace.</summary>
-		/// <value>A StringComparer that can be used to compare page names outside this class, if needed.</value>
-		public PageNameComparer PageNameComparer { get; }
 
 		/// <summary>Gets the site to which this namespace belongs.</summary>
 		/// <value>The site.</value>
@@ -237,7 +232,8 @@
 				pageName2 = WikiTextUtilities.DecodeAndNormalize(pageName2);
 			}
 
-			return this.PageNameComparer.Compare(pageName1, pageName2) == 0;
+			var comparer = this.Site.GetPageNameComparer(this.CaseSensitive);
+			return comparer.Compare(pageName1, pageName2) == 0;
 		}
 		#endregion
 

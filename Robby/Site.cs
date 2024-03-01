@@ -71,13 +71,14 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly string[] DefaultRedirect = { "#REDIRECT" };
-
+		private static readonly string[] DefaultRedirect = ["#REDIRECT"];
 		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
+		private readonly PageNameComparer[] pageNameComparers = new PageNameComparer[2];
+
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private TitleCollection? deletePreventionTemplates;
@@ -144,7 +145,12 @@
 		public CultureInfo Culture
 		{
 			get => this.culture ?? throw NoSite();
-			set => this.culture = value;
+			set
+			{
+				this.culture = value;
+				this.pageNameComparers[0] = new PageNameComparer(value, false);
+				this.pageNameComparers[1] = new PageNameComparer(value, true);
+			}
 		}
 
 		/// <summary>Gets or sets the default load options.</summary>
@@ -349,6 +355,11 @@
 		/// <returns>A full Uri to the article.</returns>
 		public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
 
+		/// <summary>Gets the page-name comparer with the specified sensitivity.</summary>
+		/// <param name="caseSensitive">Whether the comparer should have first-letter case sensitivity.</param>
+		/// <returns>The specified <see cref="PageNameComparer"/>.</returns>
+		public PageNameComparer GetPageNameComparer(bool caseSensitive) => this.pageNameComparers[caseSensitive ? 1 : 0];
+
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
 		public IReadOnlyList<Block> LoadBlocks() => this.LoadBlocks(new BlocksInput());
@@ -401,7 +412,9 @@
 		/// <returns>The text of the message.</returns>
 		public string? LoadMessage([Localizable(false)] string message, IEnumerable<string> arguments)
 		{
-			var messages = this.LoadMessages(new[] { message.NotNull() }, arguments.NotNull());
+			ArgumentNullException.ThrowIfNull(message);
+			ArgumentNullException.ThrowIfNull(arguments);
+			var messages = this.LoadMessages([message], arguments);
 			return messages.TryGetValue(message, out var retval) ? retval.Text : string.Empty;
 		}
 
@@ -512,7 +525,9 @@
 		/// <returns>The text of the message.</returns>
 		public string? LoadParsedMessage(string msg, IEnumerable<string> arguments, Title? title)
 		{
-			var messages = this.LoadParsedMessages(new[] { msg }, arguments, title);
+			ArgumentNullException.ThrowIfNull(msg);
+			ArgumentNullException.ThrowIfNull(arguments);
+			var messages = this.LoadParsedMessages([msg], arguments, title);
 			return messages.TryGetValue(msg, out var retval) ? retval.Text : null;
 		}
 
@@ -1365,9 +1380,9 @@
 		/// <param name="input">The input parameters.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
-		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput? input)
+		protected virtual void Login(LoginInput? input)
 		{
-			// Always log in in case permissions are needed.
+			this.Clear();
 			if (input is null)
 			{
 				this.AbstractionLayer.Initialize();
@@ -1378,7 +1393,6 @@
 				var result = this.AbstractionLayer.Login(input);
 				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 				{
-					this.Clear();
 					throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason ?? string.Empty));
 				}
 
@@ -1404,7 +1418,7 @@
 			// General
 			var general = siteInfo.General;
 			var server = general.Server; // Used to help determine if interwiki is local
-			this.culture = Globals.GetCulture(general.Language);
+			this.Culture = Globals.GetCulture(general.Language);
 			this.siteName = general.SiteName;
 			this.serverName = general.ServerName;
 			this.version = general.Generator;
@@ -1438,7 +1452,7 @@
 				}
 			}
 
-			List<InterwikiEntry> interwikiList = new();
+			List<InterwikiEntry> interwikiList = [];
 			foreach (var item in siteInfo.InterwikiMap)
 			{
 				InterwikiEntry entry = new(this, item);
