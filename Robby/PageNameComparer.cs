@@ -5,23 +5,14 @@
 	using RobinHood70.CommonCode;
 
 	/// <summary>A <see cref="StringComparer"/> class that compares page names in a given <see cref="Namespace">namespace</see>, respecting the rules for that namespace.</summary>
-	public class PageNameComparer : StringComparer
+	/// <remarks>Initializes a new instance of the <see cref="PageNameComparer"/> class.</remarks>
+	/// <param name="culture">The culture to use for the comparison.</param>
+	/// <param name="caseSensitive">Whether the first character of the page name is case-sensitive.</param>
+	public class PageNameComparer(CultureInfo culture, bool caseSensitive) : StringComparer
 	{
 		#region Fields
-		private readonly CultureInfo culture;
-		private readonly bool caseSensitive;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="PageNameComparer"/> class.</summary>
-		/// <param name="culture">The culture to use for the comparison.</param>
-		/// <param name="caseSensitive">Whether the first character of the page name is case-sensitive.</param>
-		public PageNameComparer(CultureInfo culture, bool caseSensitive)
-		{
-			this.culture = culture;
-			this.caseSensitive = caseSensitive;
-		}
+		private readonly CultureInfo culture = culture;
+		private readonly bool caseSensitive = caseSensitive;
 		#endregion
 
 		#region Public Override Methods
