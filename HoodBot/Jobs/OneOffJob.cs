@@ -1,44 +1,26 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using System.Collections.Generic;
 	using System.IO;
-	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	[method: JobInfo("One-Off Job")]
-	internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
+	internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
 		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => "Create redirect";
-
-		protected override void LoadPages()
+		protected override void Main()
 		{
-			var fileName = LocalConfig.BotDataSubPath("RedirectList.txt");
-			var pageNames = File.ReadAllLines(fileName);
-			var unique = new HashSet<string>(StringComparer.Ordinal);
-			foreach (var pageName in pageNames)
+			File.Delete("D:\\AllBooks.txt");
+			var books = new PageCollection(this.Site, PageModules.Info | PageModules.Revisions | PageModules.Properties);
+			books.GetCategoryMembers("Lore-Books");
+			foreach (var book in books)
 			{
-				unique.Add("Starfield:" + pageName);
-			}
-
-			this.Pages.GetTitles(unique);
-		}
-
-		protected override void PageLoaded(Page page)
-		{
-			if (page.Exists)
-			{
-				if (!page.Text.Contains("Starfield-Items-Keys", StringComparison.Ordinal))
+				if (!book.IsRedirect && (!book.IsDisambiguation ?? false))
 				{
-					this.Warn($"Page {page.Title.FullPageName()} exists!");
+					var bookText = $"= {book.Title.PageName} =\n" + book.Text + "\n\n\n";
+					File.AppendAllText("D:\\AllBooks.txt", bookText);
 				}
 			}
-			else
-			{
-				page.Text = $"#REDIRECT [[Starfield:Keys#{page.Title.PageName}]] [[Category:Redirects to Broader Subjects]] [[Category:Starfield-Items-Keys]]";
-			}
-
 		}
 		#endregion
 	}
