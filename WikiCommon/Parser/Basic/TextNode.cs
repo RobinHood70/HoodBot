@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
-	using System;
 	using System.ComponentModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
@@ -8,34 +7,20 @@
 	/// <summary>Represents a block of text.</summary>
 	public class TextNode : ITextNode
 	{
-		#region Fields
-		private string text;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
 		/// <param name="text">The text.</param>
 		public TextNode([Localizable(false)] string text)
 		{
-			this.text = text;
+			this.Text = text;
 		}
 		#endregion
 
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public string Text
-		{
-			get => this.text;
-			set
-			{
-				if (!string.Equals(value, this.text, StringComparison.Ordinal))
-				{
-					this.text = value;
-				}
-			}
-		}
+		public string Text { get; set; }
 		#endregion
 
 		#region Public Methods
