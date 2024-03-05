@@ -160,9 +160,9 @@
 			return isBook;
 		}
 
-		private static ICollection<SiteLink> ParseCatgories(Site site, ContextualParser parser)
+		private static List<SiteLink> ParseCatgories(Site site, ContextualParser parser)
 		{
-			List<SiteLink> retval = new();
+			List<SiteLink> retval = [];
 			for (var i = 0; i < parser.Count; i++)
 			{
 				if (parser[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
