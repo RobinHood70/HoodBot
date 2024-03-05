@@ -13,21 +13,9 @@
 		protected override void Main()
 		{
 			var namesPages = new TitleCollection(
-				  this.Site,
-				  this.Site[UespNamespaces.Lore].Id,
-				  "Names",
-				  "Altmer Names",
-				  "Argonian Names",
-				  "Bosmer Names",
-				  "Breton Names",
-				  "Daedra Names",
-				  "Dunmer Names",
-				  "Imperial Names",
-				  "Khajiit Names",
-				  "Nord Names",
-				  "Orc Names",
-				  "Reachman Names",
-				  "Redguard Names");
+				this.Site,
+				UespNamespaces.Lore,
+				UespFunctions.LoreNames);
 			var namePages = new PageCollection(this.Site, PageModules.Links);
 			namePages.GetTitles(namesPages);
 			var nameLinks = new TitleCollection(this.Site);
