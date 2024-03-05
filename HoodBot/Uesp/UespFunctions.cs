@@ -8,6 +8,23 @@
 
 	public static class UespFunctions
 	{
+		public static string[] LoreNames { get; } =
+		[
+			"Names",
+			"Altmer Names",
+			"Argonian Names",
+			"Bosmer Names",
+			"Breton Names",
+			"Daedra Names",
+			"Dunmer Names",
+			"Imperial Names",
+			"Khajiit Names",
+			"Nord Names",
+			"Orc Names",
+			"Reachman Names",
+			"Redguard Names"
+		];
+
 		public static string IconAbbreviation(string nsId, SiteTemplateNode template)
 		{
 			var templateTitle = template.TitleValue;
