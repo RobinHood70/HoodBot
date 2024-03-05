@@ -41,9 +41,17 @@
 		/// <param name="header">The header text.</param>
 		/// <param name="content">The body text.</param>
 		/// <returns>THe new Section.</returns>
-		public static Section FromText(IWikiNodeFactory factory, string header, string content)
+		public static Section FromText(IWikiNodeFactory factory, string header, string content) => FromText(factory, 2, header, content);
+
+		/// <summary>Formats the provided text into a <see cref="Section"/>.</summary>
+		/// <param name="factory">The factory to use to parse the request.</param>
+		/// <param name="level">The level of the header if not 2.</param>
+		/// <param name="header">The header text.</param>
+		/// <param name="content">The body text.</param>
+		/// <returns>THe new Section.</returns>
+		public static Section FromText(IWikiNodeFactory factory, int level, string header, string content)
 		{
-			var headerNode = factory.NotNull().HeaderNodeFromParts(2, header);
+			var headerNode = factory.NotNull().HeaderNodeFromParts(level, header);
 			var bodyNodes = factory.Parse('\n' + content, factory.InclusionType, factory.StrictInclusion);
 
 			return new Section(headerNode, bodyNodes);
