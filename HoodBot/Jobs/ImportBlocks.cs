@@ -170,7 +170,7 @@
 
 		private void GetGlobalBlocks(List<CommonBlock> blocks, DateTime? lastRun)
 		{
-			this.StatusWriteLine("Getting global blocks");
+			this.StatusWriteLine("Getting WMF global blocks");
 			var api = (WikiAbstractionLayer)this.Site.AbstractionLayer;
 			var client = api.Client;
 			var uri = new Uri("https://meta.wikimedia.org/w/api.php");
