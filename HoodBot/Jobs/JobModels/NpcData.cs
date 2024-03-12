@@ -64,12 +64,12 @@
 		public NpcData(IDataRecord row)
 		{
 			this.Id = (long)row["id"];
-			var nameField = (string)row["name"];
+			var nameField = EsoLog.ConvertEncoding((string)row["name"]);
 			var gender = (sbyte)row["gender"];
 			this.Difficulty = (sbyte)row["difficulty"];
 			this.Difficulty--;
 			this.PickpocketDifficulty = (PickpocketDifficulty)(sbyte)row["ppDifficulty"];
-			this.LootType = (string)row["ppClass"];
+			this.LootType = EsoLog.ConvertEncoding((string)row["ppClass"]);
 			var reaction = (sbyte)row["reaction"];
 			this.Reaction = reaction == -1
 				? this.LootType switch

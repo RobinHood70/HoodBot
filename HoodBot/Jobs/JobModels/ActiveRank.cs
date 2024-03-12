@@ -28,12 +28,12 @@
 			if (costField is string costText)
 			{
 				costValues = costText.Split(TextArrays.Comma);
-				mechanicValues = ((string)row["mechanic"]).Split(TextArrays.Comma);
+				mechanicValues = EsoLog.ConvertEncoding((string)row["mechanic"]).Split(TextArrays.Comma);
 			}
 			else
 			{
-				costValues = new string[] { ((int)costField).ToStringInvariant() };
-				mechanicValues = new string[] { ((int)mechanicField).ToStringInvariant() };
+				costValues = [((int)costField).ToStringInvariant()];
+				mechanicValues = [((int)mechanicField).ToStringInvariant()];
 			}
 
 			if (costValues.Length != mechanicValues.Length)

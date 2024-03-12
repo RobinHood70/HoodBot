@@ -133,10 +133,10 @@
 				var id = (long)row["id"];
 				if (!NameFixes.TryGetValue(id, out var name))
 				{
-					name = (string)row["name"];
+					name = EsoLog.ConvertEncoding((string)row["name"]);
 				}
 
-				var icon = (string)row["icon"];
+				var icon = EsoLog.ConvertEncoding((string)row["icon"]);
 				iconLookup.Add(name, (id, icon[RemoteIconPath.Length..].Replace(".dds", ".png", StringComparison.Ordinal)));
 			}
 

@@ -41,7 +41,7 @@
 			var query = "SELECT id, name FROM uesp_esolog.collectibles WHERE categoryType = 2 AND furnCategory = 'Mounts'";
 			foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 			{
-				this.ids.Add((string)row["name"], (int)(long)row["id"]);
+				this.ids.Add(EsoLog.ConvertEncoding((string)row["name"]), (int)(long)row["id"]);
 			}
 
 			this.Pages.GetCategoryMembers("Online-Mounts", CategoryMemberTypes.Page, false);

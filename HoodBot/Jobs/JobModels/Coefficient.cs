@@ -31,21 +31,21 @@
 		#endregion
 
 		#region Constructors
-		public Coefficient(IDataRecord data, char num)
+		public Coefficient(IDataRecord row, char num)
 		{
-			this.A = (float)data["a" + num];
+			this.A = (float)row["a" + num];
 			if (this.IsValid)
 			{
-				this.B = (float)data["b" + num];
-				this.C = (float)data["c" + num];
-				//// this.R = (float)data["R" + num];
-				this.Mechanic = (sbyte)data["type" + num];
+				this.B = (float)row["b" + num];
+				this.C = (float)row["c" + num];
+				//// this.R = (float)row["R" + num];
+				this.Mechanic = (sbyte)row["type" + num];
 				if (this.Mechanic == -1)
 				{
-					var mechanicType = data.GetDataTypeName(data.GetOrdinal("mechanic"));
+					var mechanicType = row.GetDataTypeName(row.GetOrdinal("mechanic"));
 					var mechanicText = string.Equals(mechanicType, "INT", StringComparison.Ordinal)
-						? ((int)data["mechanic"]).ToStringInvariant()
-						: (string)data["mechanic"];
+						? ((int)row["mechanic"]).ToStringInvariant()
+						: EsoLog.ConvertEncoding((string)row["mechanic"]);
 					if (mechanicText.Contains(',', StringComparison.Ordinal))
 					{
 						throw new InvalidOperationException("Type == -1 and Mechanic is split. It's unclear how this should be handled.");
@@ -87,12 +87,12 @@
 			return null;
 		}
 
-		public static List<Coefficient> GetCoefficientList(IDataRecord data)
+		public static List<Coefficient> GetCoefficientList(IDataRecord row)
 		{
 			var coefficients = new List<Coefficient>(6);
 			for (var num = '1'; num <= '6'; num++)
 			{
-				Coefficient coefficient = new(data, num);
+				Coefficient coefficient = new(row, num);
 				if (coefficient.IsValid)
 				{
 					coefficients.Add(coefficient);

@@ -34,8 +34,8 @@
 		#region Constructors
 		protected Skill(IDataRecord row)
 		{
-			this.Name = (string)row["baseName"];
-			var classLine = ((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
+			this.Name = EsoLog.ConvertEncoding((string)row["baseName"]);
+			var classLine = EsoLog.ConvertEncoding((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
 			var classValue = classLine[0];
 			this.Class = string.Equals(classValue, "Craft", StringComparison.Ordinal)
 				? classValue

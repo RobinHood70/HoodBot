@@ -124,7 +124,7 @@
 			var dbItems = EsoLog.EsoDb.RunQuery(query);
 			foreach (var row in dbItems)
 			{
-				var icon = (string)row["icon"];
+				var icon = EsoLog.ConvertEncoding((string)row["icon"]);
 				icon = icon
 					.Replace("/esoui/art/icons/", string.Empty, StringComparison.Ordinal)
 					.Replace(".dds", ".png", StringComparison.Ordinal);

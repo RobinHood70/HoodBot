@@ -11,10 +11,10 @@
 		#region Constructors
 		public Morph(IDataRecord row)
 		{
-			this.Name = (string)row["name"];
+			this.Name = EsoLog.ConvertEncoding((string)row["name"]);
 			this.CastingTime = EsoSpace.TimeToText((int)row["castTime"]);
-			this.EffectLine = (string)row["effectLines"];
-			this.Target = (string)row["target"];
+			this.EffectLine = EsoLog.ConvertEncoding((string)row["effectLines"]);
+			this.Target = EsoLog.ConvertEncoding((string)row["target"]);
 		}
 		#endregion
 

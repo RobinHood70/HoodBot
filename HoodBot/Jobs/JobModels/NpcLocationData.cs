@@ -7,7 +7,7 @@
 		public NpcLocationData(IDataRecord row)
 		{
 			this.Id = (long)row["npcId"];
-			this.Zone = (string)row["zone"];
+			this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
 			this.LocCount = (int)row["locCount"];
 		}
 

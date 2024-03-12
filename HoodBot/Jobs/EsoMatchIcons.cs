@@ -297,9 +297,12 @@
 					"INT" => (int)row["id"],
 					_ => throw new InvalidCastException(),
 				};
-				this.IconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
+				var iconName = EsoLog.ConvertEncoding((string)row["icon"]);
+				this.IconName = iconName
+					.Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase)
+					.Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
 				this.Id = id;
-				this.ItemName = (string)row["name"];
+				this.ItemName = EsoLog.ConvertEncoding((string)row["name"]);
 				this.Type = type;
 			}
 

@@ -23,7 +23,7 @@
 			: base(row)
 		{
 			this.learnedLevel = (int)row["learnedLevel"];
-			this.skillType = (string)row["type"];
+			this.skillType = EsoLog.ConvertEncoding((string)row["type"]);
 		}
 		#endregion
 

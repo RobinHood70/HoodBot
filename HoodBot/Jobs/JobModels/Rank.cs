@@ -23,10 +23,10 @@
 
 			//// var leadText = LeadText.Match((string)row["coefDescription"]);
 			//// var description = leadText.Value + (string)row["description"];
-			var description = (string)row["coefDescription"];
+			var description = EsoLog.ConvertEncoding((string)row["coefDescription"]);
 			if (string.IsNullOrWhiteSpace(description))
 			{
-				description = (string)row["description"];
+				description = EsoLog.ConvertEncoding((string)row["description"]);
 			}
 
 			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
@@ -37,7 +37,7 @@
 			description = BonusFinder.Replace(description, string.Empty);
 			if (!LeadText.Match(description).Success)
 			{
-				var descHeader = (string)row["descHeader"];
+				var descHeader = EsoLog.ConvertEncoding((string)row["descHeader"]);
 				if (descHeader.Length > 0)
 				{
 					description = $"|cffffff{descHeader}|r " + description;

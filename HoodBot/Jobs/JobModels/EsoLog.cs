@@ -189,9 +189,9 @@
 			var query = "SELECT zoneName, subZoneName, mapName, description, mapType, mapContentType, mapFilterType, isDungeon FROM uesp_esolog.zones";
 			foreach (var row in Database.RunQuery(Connection, query))
 			{
-				var mapName = (string)row["mapName"];
-				var subZoneName = (string)row["subZoneName"];
-				var zoneName = (string)row["zoneName"];
+				var mapName = EsoLog.ConvertEncoding((string)row["mapName"]);
+				var subZoneName = EsoLog.ConvertEncoding((string)row["subZoneName"]);
+				var zoneName = EsoLog.ConvertEncoding((string)row["zoneName"]);
 				var name = subZoneName.Length > 0
 						? subZoneName
 						: zoneName;

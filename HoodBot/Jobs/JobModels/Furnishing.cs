@@ -54,11 +54,11 @@
 		#endregion
 
 		#region Constructors
-		public Furnishing(IDataRecord record, Site site, bool collectible)
+		public Furnishing(IDataRecord row, Site site, bool collectible)
 		{
 			this.Collectible = collectible;
-			this.Id = collectible ? (long)record["itemId"] : (int)record["itemId"];
-			var titleName = (string)record["name"];
+			this.Id = collectible ? (long)row["itemId"] : (int)row["itemId"];
+			var titleName = EsoLog.ConvertEncoding((string)row["name"]);
 			titleName = titleName.TrimEnd(',');
 			titleName = site.SanitizePageName(titleName);
 			this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
@@ -67,7 +67,7 @@
 				this.TitleName = titleName;
 			}
 
-			var desc = (string)record["description"];
+			var desc = EsoLog.ConvertEncoding((string)row["description"]);
 			var sizeMatch = SizeFinder.Match(desc);
 			this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
 			desc = desc
@@ -77,19 +77,19 @@
 			this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length
 				? null
 				: desc;
-			var furnCategory = (string)record["furnCategory"];
-			this.Behavior = ((string)record["tags"])
+			var furnCategory = EsoLog.ConvertEncoding((string)row["furnCategory"]);
+			this.Behavior = (EsoLog.ConvertEncoding((string)row["tags"]))
 				.Replace(",,", ",", StringComparison.Ordinal)
 				.Trim(',');
 			if (collectible)
 			{
 				this.FurnishingCategory = furnCategory;
-				this.FurnishingSubcategory = (string)record["furnSubCategory"];
-				this.NickName = (string)record["nickname"];
+				this.FurnishingSubcategory = EsoLog.ConvertEncoding((string)row["furnSubCategory"]);
+				this.NickName = EsoLog.ConvertEncoding((string)row["nickname"]);
 			}
 			else
 			{
-				var bindType = (int)record["bindType"];
+				var bindType = (int)row["bindType"];
 				this.BindType = bindType switch
 				{
 					-1 => null,
@@ -112,12 +112,12 @@
 					}
 				}
 
-				var quality = (string)record["quality"];
+				var quality = EsoLog.ConvertEncoding((string)row["quality"]);
 				this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
 					? "nfsel".Substring(qualityNum - 1, 1)
 					: quality;
-				this.Type = (ItemType)record["type"];
-				var abilityDesc = (string)record["abilityDesc"];
+				this.Type = (ItemType)row["type"];
+				var abilityDesc = EsoLog.ConvertEncoding((string)row["abilityDesc"]);
 				var ingrMatch = IngredientsFinder.Match(abilityDesc);
 				if (ingrMatch.Success)
 				{
@@ -144,8 +144,8 @@
 			}
 
 			var furnishingLimitType = collectible
-				? (FurnishingType)(sbyte)record["furnLimitType"]
-				: (FurnishingType)record["furnLimitType"];
+				? (FurnishingType)(sbyte)row["furnLimitType"]
+				: (FurnishingType)row["furnLimitType"];
 			if (furnishingLimitType == FurnishingType.None)
 			{
 				furnishingLimitType = (
@@ -160,7 +160,7 @@
 			}
 
 			this.FurnishingLimitType = furnishingLimitType;
-			var itemLink = (string)record["resultitemLink"];
+			var itemLink = EsoLog.ConvertEncoding((string)row["resultitemLink"]);
 			this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
 		}
 		#endregion

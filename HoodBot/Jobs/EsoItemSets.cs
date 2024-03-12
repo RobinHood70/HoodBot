@@ -332,10 +332,10 @@
 			#region Constructors
 			public SetData(IDataRecord row)
 			{
-				this.Name = (string)row.NotNull()["setName"];
+				this.Name = EsoLog.ConvertEncoding((string)row.NotNull()["setName"]);
 				for (var i = 1; i <= 12; i++)
 				{
-					var bonusDesc = (string)row[$"setBonusDesc{i}"];
+					var bonusDesc = EsoLog.ConvertEncoding((string)row[$"setBonusDesc{i}"]);
 					if (!string.IsNullOrEmpty(bonusDesc))
 					{
 						var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.None);
