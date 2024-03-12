@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
@@ -10,7 +11,7 @@
 
 	internal static class EsoLog
 	{
-		#region Static Fields
+		#region Fields
 		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 		private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static Database? database;
@@ -109,6 +110,15 @@
 		#endregion
 
 		#region Public Methods
+
+		public static string ConvertEncoding(string text)
+		{
+			var fromEncoding = Encoding.GetEncoding(1252) ?? throw new InvalidOperationException();
+			var toEncoding = Encoding.UTF8;
+			var bgBytes = fromEncoding.GetBytes(text);
+			return toEncoding.GetString(bgBytes);
+
+		}
 
 		public static string? ExtractItemId(string itemLinkText)
 		{
