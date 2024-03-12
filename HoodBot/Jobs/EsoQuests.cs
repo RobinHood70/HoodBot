@@ -549,29 +549,18 @@
 		#endregion
 
 		#region Private Classes
-		private sealed class Condition : IEquatable<Condition>
+		private sealed class Condition(IDataRecord row) : IEquatable<Condition>
 		{
-			#region Constructors
-			public Condition(IDataRecord row)
-			{
-				this.IsComplete = (sbyte)row["isComplete"] == 1;
-				this.IsFail = (sbyte)row["isFail"] == 1;
-				this.QuestId = (long)row["questId"];
-				this.StepId = (long)row["questStepId"];
-				this.Text = (string)row["text"];
-			}
-			#endregion
-
 			#region Public Properties
-			public bool IsComplete { get; }
+			public bool IsComplete { get; } = (sbyte)row["isComplete"] == 1;
 
-			public bool IsFail { get; }
+			public bool IsFail { get; } = (sbyte)row["isFail"] == 1;
 
-			public long QuestId { get; }
+			public long QuestId { get; } = (long)row["questId"];
 
-			public long StepId { get; }
+			public long StepId { get; } = (long)row["questStepId"];
 
-			public string Text { get; }
+			public string Text { get; } = EsoLog.ConvertEncoding((string)row["text"]);
 
 			public bool Equals(Condition? other) =>
 				other != null &&
@@ -596,17 +585,10 @@
 			#region Constructors
 			public QuestData(IDataRecord row)
 			{
-				var fromEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252) ?? throw new InvalidOperationException();
-				var toEncoding = Encoding.UTF8;
-				var bgText = (string)row["backgroundText"];
-
-				// Fix UTF8 stored as CP-1252
-				var bgBytes = fromEncoding.GetBytes(bgText);
-				this.BackgroundText = toEncoding.GetString(bgBytes);
-
+				this.BackgroundText = EsoLog.ConvertEncoding((string)row["backgroundText"]);
 				this.Id = (long)row["id"];
 				this.InternalId = (int)row["internalId"];
-				var name = (string)row["name"];
+				var name = EsoLog.ConvertEncoding((string)row["name"]);
 				var offset = name.IndexOf('\n', StringComparison.Ordinal);
 				if (offset != -1)
 				{
@@ -620,21 +602,21 @@
 				}
 
 				this.Name = name;
-				this.Objective = (string)row["objective"];
+				this.Objective = EsoLog.ConvertEncoding((string)row["objective"]);
 				this.RepeatType = (short)row["repeatType"];
 				this.Type = (short)row["type"];
 				this.Level = (sbyte)row["level"];
-				this.ConfirmText = (string)row["confirmtext"];
-				this.DeclineText = (string)row["declinetext"];
-				this.EndBackgroundText = (string)row["endbackgroundtext"];
-				this.EndDialogueText = (string)row["enddialogtext"];
-				this.EndJournalText = (string)row["endjournaltext"];
-				this.GoalText = (string)row["goaltext"];
+				this.ConfirmText = EsoLog.ConvertEncoding((string)row["confirmtext"]);
+				this.DeclineText = EsoLog.ConvertEncoding((string)row["declinetext"]);
+				this.EndBackgroundText = EsoLog.ConvertEncoding((string)row["endbackgroundtext"]);
+				this.EndDialogueText = EsoLog.ConvertEncoding((string)row["enddialogtext"]);
+				this.EndJournalText = EsoLog.ConvertEncoding((string)row["endjournaltext"]);
+				this.GoalText = EsoLog.ConvertEncoding((string)row["goaltext"]);
 
-				var zone = (string)row["zone"];
+				var zone = EsoLog.ConvertEncoding((string)row["zone"]);
 				if (zone.Length == 0 || string.Equals(zone, "Tamriel", StringComparison.Ordinal))
 				{
-					zone = (string)row["locationZone"];
+					zone = EsoLog.ConvertEncoding((string)row["locationZone"]);
 					if (string.Equals(zone, "Tamriel", StringComparison.Ordinal))
 					{
 						zone = string.Empty;
@@ -752,7 +734,7 @@
 				this.CollectId = (int)row["collectId"];
 				this.ItemId = (int)row["itemId"];
 				this.RewardType = (short)row["type"];
-				this.Name = (string)row["name"];
+				this.Name = EsoLog.ConvertEncoding((string)row["name"]);
 				this.Quality = (sbyte)row["quality"];
 				this.Quantity = (int)row["quantity"];
 				this.QuestId = (long)row["questId"];
@@ -779,9 +761,9 @@
 			public Stage(IDataRecord row)
 			{
 				this.Id = (long)row["id"];
-				this.Text = (string)row["text"];
+				this.Text = EsoLog.ConvertEncoding((string)row["text"]);
 				this.Visibility = (Visibility)(sbyte)row["visibility"];
-				this.Zone = (string)row["zone"];
+				this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
 				this.QuestId = (long)row["questId"];
 			}
 			#endregion

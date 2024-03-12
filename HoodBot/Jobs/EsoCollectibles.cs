@@ -67,7 +67,7 @@
 
 			this.blankText.ThrowNull();
 			var allTitles = new TitleCollection(this.Site);
-			allTitles.GetNamespace(UespNamespaces.Online);
+			allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 			var pages = this.GetBacklinks();
 			var knownIds = this.GetKnown(pages);
 			this.GetCollectibles(allTitles, pages, knownIds);
@@ -175,9 +175,13 @@
 			{
 				if (allTitles.Contains(title))
 				{
-					title = !allTitles.Contains(titleDisambig)
-						? titleDisambig
-						: throw new InvalidOperationException($"Couldn't find a usable page for {item.Name}.");
+					if (allTitles.Contains(titleDisambig))
+					{
+						this.StatusWriteLine($"Couldn't find a usable page for {item.Name}.");
+						return;
+					}
+
+					title = titleDisambig;
 				}
 
 				this.collectibles.Add(title, item);
@@ -276,11 +280,11 @@
 				this.Id = (long)row["id"];
 				this.Name = this.Id == 6117
 					? "Honor Guard Jack"
-					: (string)row["name"];
-				this.NickName = (string)row["nickname"];
-				this.Description = (string)row["description"];
-				this.CollectibleType = (string)row["categoryName"];
-				this.Type = (string)row["subCategoryName"];
+					: EsoLog.ConvertEncoding((string)row["name"]);
+				this.NickName = EsoLog.ConvertEncoding((string)row["nickname"]);
+				this.Description = EsoLog.ConvertEncoding((string)row["description"]);
+				this.CollectibleType = EsoLog.ConvertEncoding((string)row["categoryName"]);
+				this.Type = EsoLog.ConvertEncoding((string)row["subCategoryName"]);
 				var colTypeSingular = CategorySingular(this.CollectibleType);
 				var typeSingular = CategorySingular(this.Type);
 				var fileCategory = colTypeSingular switch
