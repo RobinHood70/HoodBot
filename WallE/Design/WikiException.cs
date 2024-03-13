@@ -2,14 +2,11 @@
 {
 	using System;
 	using System.ComponentModel;
-	using System.Runtime.Serialization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
 
 	/// <summary>The exception thrown when the wiki returns an error instead of the expected result.</summary>
 	/// <seealso cref="Exception" />
-	/// <seealso cref="ISerializable" />
-	[Serializable]
 	public class WikiException : Exception
 	{
 		#region Constructors
@@ -44,19 +41,6 @@
 			: base(message, innerException)
 		{
 		}
-
-		/// <summary>Initializes a new instance of the <see cref="WikiException" /> class.</summary>
-		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
-		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
-		protected WikiException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			if (info != null)
-			{
-				this.Code = info.GetString("ErrorCode");
-				this.Info = info.GetString("ErrorInfo");
-			}
-		}
 		#endregion
 
 		#region Public Properties
@@ -77,19 +61,6 @@
 		/// <param name="info">The error's <c>info</c> value.</param>
 		/// <returns>A new WikiException instance with a general error message.</returns>
 		public static WikiException General(string code, [Localizable(true)] string info) => new(Globals.CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
-		#endregion
-
-		#region Public Override Methods
-
-		/// <summary>Sets the <see cref="SerializationInfo" /> with information about the exception.</summary>
-		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
-		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info.NotNull(), context);
-			info.AddValue("ErrorCode", this.Code);
-			info.AddValue("ErrorInfo", this.Info);
-		}
 		#endregion
 	}
 }

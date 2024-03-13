@@ -1,14 +1,12 @@
 ﻿namespace RobinHood70.WallE.Design
 {
 	using System;
-	using System.Runtime.Serialization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
 
 	/// <summary>The exception that is thrown when a stop has been requested via the wiki.</summary>
 	/// <remarks>Typical sources of this exception are a change to the logged-in user's talk page, the user changing or being logged out unexpectedly, or via a custom stop check method.</remarks>
 	/// <seealso cref="Exception" />
-	[Serializable]
 	public class StopException : Exception
 	{
 		#region Constructors
@@ -31,14 +29,6 @@
 		/// <param name="innerException">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
 		public StopException(string message, Exception? innerException)
 			: base(Globals.CurrentCulture(Messages.StopRequested, message), innerException)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="StopException" /> class.</summary>
-		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
-		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
-		protected StopException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 		#endregion
