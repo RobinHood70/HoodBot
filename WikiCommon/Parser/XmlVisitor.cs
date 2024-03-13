@@ -10,22 +10,14 @@
 	/// <summary>Builds the XML parse tree for the nodes, similar to that of Special:ExpandTemplates.</summary>
 	/// <remarks>While highly similar, the XML representation from this method does not precisely match Special:ExpandTemplates. This is intentional, arising from the different purposes of each.</remarks>
 	/// <seealso cref="IWikiNodeVisitor"/>
-	public class XmlVisitor : IWikiNodeVisitor
+	/// <remarks>Initializes a new instance of the <see cref="XmlVisitor"/> class.</remarks>
+	/// <param name="prettyPrint">if set to <c>true</c> pretty printing is enabled, providing text that is indented and on separate lines, as needed.</param>
+	public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder = new();
-		private readonly bool prettyPrint;
+		private readonly bool prettyPrint = prettyPrint;
 		private int indent;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="XmlVisitor"/> class.</summary>
-		/// <param name="prettyPrint">if set to <c>true</c> pretty printing is enabled, providing text that is indented and on separate lines, as needed.</param>
-		public XmlVisitor(bool prettyPrint)
-		{
-			this.prettyPrint = prettyPrint;
-		}
 		#endregion
 
 		#region Public Methods

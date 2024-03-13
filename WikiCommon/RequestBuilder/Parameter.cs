@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 
 	/// <summary>Base class which represents a parameter with a generic value.</summary>
@@ -10,9 +12,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
-		protected Parameter(string name)
+		protected Parameter([NotNull, ValidatedNotNull] string name)
 		{
-			this.Name = name.NotNull();
+			ArgumentNullException.ThrowIfNull(name);
+			this.Name = name;
 		}
 		#endregion
 

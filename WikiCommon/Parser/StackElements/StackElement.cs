@@ -2,17 +2,10 @@
 {
 	using System.Collections.Generic;
 
-	internal abstract class StackElement
+	internal abstract class StackElement(WikiStack stack)
 	{
 		#region Protected Constants
 		protected const string SearchBase = "[{<\n";
-		#endregion
-
-		#region Constructors
-		protected StackElement(WikiStack stack)
-		{
-			this.Stack = stack;
-		}
 		#endregion
 
 		#region Internal Abstract Properties
@@ -25,7 +18,7 @@
 		#endregion
 
 		#region Protected Properties
-		protected WikiStack Stack { get; }
+		protected WikiStack Stack { get; } = stack;
 		#endregion
 
 		#region Public Abstract Methods

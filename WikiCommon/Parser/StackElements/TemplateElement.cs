@@ -2,7 +2,7 @@
 {
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class TemplateElement : OpenCloseElement
+	internal sealed class TemplateElement(WikiStack stack, int braceLength) : OpenCloseElement(stack, '{', braceLength)
 	{
 		#region Private Constants
 		private const string SearchTitle = SearchBase + "|}";
@@ -10,19 +10,10 @@
 		#endregion
 
 		#region Fields
-		//// private readonly bool atLineStart;
-		private int braceLength;
-		#endregion
 
-		#region Constructors
-		public TemplateElement(WikiStack stack, int length)
-			: base(stack, '{', length)
-		{
-			// this.atLineStart = atLineStart;
+		// Brace braceLength is stored separately from the parent class' braceLength because the parent modifies the value as it parses. This also allows the parent class' braceLength to be private.
+		private int braceLength = braceLength;
 
-			// Brace length is stored separately from the parent class' length because the parent modifies the value as it parses. This also allows the parent class' length to be private.
-			this.braceLength = length;
-		}
 		#endregion
 
 		#region Internal Override Properties

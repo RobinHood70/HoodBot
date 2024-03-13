@@ -4,30 +4,20 @@
 
 	/// <summary>Represents a parameter with file information.</summary>
 	/// <seealso cref="Parameter" />
-	public class FileParameter : Parameter
+	/// <remarks>Initializes a new instance of the <see cref="FileParameter" /> class.</remarks>
+	/// <param name="name">The parameter name.</param>
+	/// <param name="fileName">The name of the file.</param>
+	/// <param name="fileData">The file data.</param>
+	public class FileParameter(string name, string fileName, byte[] fileData) : Parameter(name)
 	{
 		#region Fields
-		private readonly byte[] fileData;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="FileParameter" /> class.</summary>
-		/// <param name="name">The parameter name.</param>
-		/// <param name="fileName">The name of the file.</param>
-		/// <param name="fileData">The file data.</param>
-		public FileParameter(string name, string fileName, byte[] fileData)
-			: base(name.NotNull())
-		{
-			this.FileName = fileName.NotNull();
-			this.fileData = fileData.NotNull();
-		}
+		private readonly byte[] fileData = fileData.NotNull();
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets the file name.</summary>
-		public string FileName { get; }
+		public string FileName { get; } = fileName.NotNull();
 		#endregion
 
 		#region Public Methods

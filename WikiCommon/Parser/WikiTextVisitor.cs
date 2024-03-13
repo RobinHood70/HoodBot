@@ -6,7 +6,12 @@
 
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
-	public class WikiTextVisitor : IWikiNodeVisitor
+	/// <remarks>Initializes a new instance of the <see cref="WikiTextVisitor"/> class.</remarks>
+	/// <param name="raw"><list type="bullet">
+	/// <item>If set to <see langword="true"/>, returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
+	/// <item>If set to false, returns all nodes in the collection. This is most useful for editing the collection.</item>
+	/// </list></param>
+	public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	{
 		#region Static Fields
 		private static readonly WikiTextVisitor RawVisitor = new(true);
@@ -15,20 +20,7 @@
 
 		#region Fields
 		private readonly StringBuilder builder = new();
-		private readonly bool raw;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="WikiTextVisitor"/> class.</summary>
-		/// <param name="raw"><list type="bullet">
-		/// <item>If set to <see langword="true"/>, returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
-		/// <item>If set to false, returns all nodes in the collection. This is most useful for editing the collection.</item>
-		/// </list></param>
-		public WikiTextVisitor(bool raw)
-		{
-			this.raw = raw;
-		}
+		private readonly bool raw = raw;
 		#endregion
 
 		#region Public Static Methods

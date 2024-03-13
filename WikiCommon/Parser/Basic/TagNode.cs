@@ -5,29 +5,18 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents an unparsed tag, such as pre or nowiki.</summary>
-	public class TagNode : ITagNode
+	/// <remarks>Initializes a new instance of the <see cref="TagNode"/> class.</remarks>
+	/// <param name="name">The name.</param>
+	/// <param name="attributes">The attributes.</param>
+	/// <param name="innerText">The inner text.</param>
+	/// <param name="close">The close.</param>
+	public class TagNode(string name, string? attributes, string? innerText, string? close) : ITagNode
 	{
 		#region Fields
-		private string? attributes;
-		private string? close;
-		private string? innerText;
-		private string name;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="TagNode"/> class.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="attributes">The attributes.</param>
-		/// <param name="innerText">The inner text.</param>
-		/// <param name="close">The close.</param>
-		public TagNode(string name, string? attributes, string? innerText, string? close)
-		{
-			this.name = name;
-			this.attributes = attributes;
-			this.innerText = innerText;
-			this.close = close;
-		}
+		private string? attributes = attributes;
+		private string? close = close;
+		private string? innerText = innerText;
+		private string name = name;
 		#endregion
 
 		#region Public Properties

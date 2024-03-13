@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
+	using System;
 	using RobinHood70.CommonCode;
 
 	/// <summary>Houses the information for a page section.</summary>
@@ -12,7 +13,8 @@
 		/// <param name="content">The <see cref="NodeCollection"/> representing the content of the section.</param>
 		public Section(IHeaderNode? header, NodeCollection content)
 		{
-			this.Content = content.NotNull();
+			ArgumentNullException.ThrowIfNull(content);
+			this.Content = content;
 			this.Header = header;
 		}
 

@@ -1,14 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
-	internal sealed class LinkElement : OpenCloseElement
+	internal sealed class LinkElement(WikiStack stack, int length) : OpenCloseElement(stack, '[', length)
 	{
-		#region Constructors
-		public LinkElement(WikiStack stack, int length)
-			: base(stack, '[', length)
-		{
-		}
-		#endregion
-
 		#region Internal Override Properties
 		internal override string SearchString { get; } = SearchBase + "|]";
 		#endregion

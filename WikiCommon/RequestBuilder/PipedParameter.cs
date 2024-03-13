@@ -6,24 +6,15 @@
 
 	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter" />
-	public class PipedParameter : Parameter
+	/// <remarks>Initializes a new instance of the <see cref="PipedParameter" /> class.</remarks>
+	/// <param name="name">The parameter name.</param>
+	/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
+	public class PipedParameter(string name, ICollection<string> values) : Parameter(name)
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="PipedParameter" /> class.</summary>
-		/// <param name="name">The parameter name.</param>
-		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
-		public PipedParameter(string name, ICollection<string> values)
-			: base(name)
-		{
-			this.Values = values.NotNull();
-		}
-		#endregion
-
 		#region Public Abstract Properties
 
 		/// <summary>Gets the collection of values.</summary>
-		public ICollection<string> Values { get; }
+		public ICollection<string> Values { get; } = values.NotNull();
 		#endregion
 
 		#region Public Methods

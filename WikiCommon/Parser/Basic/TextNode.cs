@@ -5,22 +5,14 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a block of text.</summary>
-	public class TextNode : ITextNode
+	/// <remarks>Initializes a new instance of the <see cref="TextNode"/> class.</remarks>
+	/// <param name="text">The text.</param>
+	public class TextNode([Localizable(false)] string text) : ITextNode
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
-		/// <param name="text">The text.</param>
-		public TextNode([Localizable(false)] string text)
-		{
-			this.Text = text;
-		}
-		#endregion
-
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public string Text { get; set; }
+		public string Text { get; set; } = text;
 		#endregion
 
 		#region Public Methods

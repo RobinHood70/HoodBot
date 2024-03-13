@@ -40,7 +40,8 @@
 		/// <param name="supportsUnitSeparator">if set to <see langword="true" /> [supports unit separator].</param>
 		public Request(Uri baseUri, RequestType requestType, bool supportsUnitSeparator)
 		{
-			this.Uri = baseUri.NotNull();
+			ArgumentNullException.ThrowIfNull(baseUri);
+			this.Uri = baseUri;
 			this.Type = requestType;
 			this.SupportsUnitSeparator = supportsUnitSeparator;
 		}

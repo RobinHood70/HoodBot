@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
+	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a header.</summary>
@@ -18,10 +18,12 @@
 		/// <param name="comment">Any text that came after the close ==.</param>
 		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment)
 		{
-			this.Factory = factory.NotNull();
+			ArgumentNullException.ThrowIfNull(factory);
+			ArgumentNullException.ThrowIfNull(text);
+			this.Factory = factory;
 			this.Level = level;
-			this.Title = new NodeCollection(factory, text.NotNull());
-			this.Comment = comment is null ? null : new NodeCollection(factory, comment.NotNull());
+			this.Title = new NodeCollection(factory, text);
+			this.Comment = comment is null ? null : new NodeCollection(factory, comment);
 		}
 		#endregion
 

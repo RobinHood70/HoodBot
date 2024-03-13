@@ -5,32 +5,22 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
-	public class ParameterNode : IParameterNode
+	/// <remarks>Initializes a new instance of the <see cref="ParameterNode"/> class.</remarks>
+	/// <param name="factory">The factory to use when creating new nodes.</param>
+	/// <param name="name">The name.</param>
+	/// <param name="value">The value.</param>
+	public class ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) : IParameterNode
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="factory">The factory to use when creating new nodes.</param>
-		/// <param name="name">The name.</param>
-		/// <param name="value">The value.</param>
-		public ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value)
-		{
-			this.Factory = factory.NotNull();
-			this.Name = name == null ? null : new NodeCollection(factory, name);
-			this.Value = new NodeCollection(factory, value.NotNull());
-		}
-		#endregion
-
 		#region Public Properties
 
 		/// <inheritdoc/>
 		public bool Anonymous => this.Name == null;
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory { get; }
+		public IWikiNodeFactory Factory { get; } = factory.NotNull();
 
 		/// <inheritdoc/>
-		public NodeCollection? Name { get; private set; }
+		public NodeCollection? Name { get; private set; } = name == null ? null : new NodeCollection(factory, name);
 
 		/// <inheritdoc/>
 		public IEnumerable<NodeCollection> NodeCollections
@@ -47,7 +37,7 @@
 		}
 
 		/// <inheritdoc/>
-		public NodeCollection Value { get; }
+		public NodeCollection Value { get; } = new NodeCollection(factory, value.NotNull());
 		#endregion
 
 		#region Public Methods

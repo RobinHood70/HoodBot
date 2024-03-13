@@ -20,7 +20,12 @@
 
 	/// <summary>Represents a string parameter.</summary>
 	/// <seealso cref="Parameter" />
-	public class StringParameter : Parameter
+	/// <remarks>Initializes a new instance of the <see cref="StringParameter" /> class.</remarks>
+	/// <param name="name">The parameter name.</param>
+	/// <param name="value">The parameter value.</param>
+	/// <param name="type">The type of data stored in the value.</param>
+	/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
+	public class StringParameter(string name, string? value, ValueType type) : Parameter(name)
 	{
 		#region Constructors
 
@@ -32,27 +37,15 @@
 			: this(name, value, ValueType.Normal)
 		{
 		}
-
-		/// <summary>Initializes a new instance of the <see cref="StringParameter" /> class.</summary>
-		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value.</param>
-		/// <param name="type">The type of data stored in the value.</param>
-		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
-		public StringParameter(string name, string? value, ValueType type)
-			: base(name.NotNull())
-		{
-			this.Value = value ?? string.Empty;
-			this.ValueType = type;
-		}
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets the value of the parameter.</summary>
-		public string Value { get; }
+		public string Value { get; } = value ?? string.Empty;
 
 		/// <summary>Gets the type of string stored in <see cref="Value"/>.</summary>
-		public ValueType ValueType { get; }
+		public ValueType ValueType { get; } = type;
 		#endregion
 
 		#region Public Override Methods

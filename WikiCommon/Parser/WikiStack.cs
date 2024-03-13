@@ -495,20 +495,13 @@
 
 		#region Private Structures
 		[StructLayout(LayoutKind.Auto)]
-		private readonly struct Comment
+		private readonly struct Comment(int start, int end, int wsLength)
 		{
-			public Comment(int start, int end, int wsLength)
-			{
-				this.Start = start;
-				this.End = end;
-				this.WhiteSpaceLength = wsLength;
-			}
+			public int End { get; } = end;
 
-			public int End { get; }
+			public int Start { get; } = start;
 
-			public int Start { get; }
-
-			public int WhiteSpaceLength { get; }
+			public int WhiteSpaceLength { get; } = wsLength;
 		}
 		#endregion
 	}
