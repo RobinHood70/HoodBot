@@ -246,18 +246,6 @@ namespace RobinHood70.WallE.Clients
 				}
 				catch (FileNotFoundException)
 				{
-					/*
-					var oldFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HoodBot", "cookies.dat");
-					if (File.Exists(oldFile))
-					{
-						using var stream = File.OpenRead(oldFile);
-						var formatter = new BinaryFormatter() { Binder = new CookieBinder() };
-						if (formatter.Deserialize(stream) is CookieContainer cookies)
-						{
-							this.cookieContainer = cookies;
-						}
-					}
-					*/
 				}
 			}
 		}
