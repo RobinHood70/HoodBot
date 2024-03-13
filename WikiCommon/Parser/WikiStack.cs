@@ -82,19 +82,19 @@
 					this.includeIgnores = !strictInclusion;
 					this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
 					this.findOnlyinclude = this.enableOnlyInclude;
-					this.ignoredTags.UnionWith(new[] { IncludeOnlyTag, "/" + IncludeOnlyTag });
+					this.ignoredTags.UnionWith([IncludeOnlyTag, "/" + IncludeOnlyTag]);
 					this.ignoredElements.Add(NoIncludeTag);
 					allTags.Add(NoIncludeTag);
 					break;
 				case InclusionType.CurrentPage:
 					this.includeIgnores = !strictInclusion;
-					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag });
+					this.ignoredTags.UnionWith([NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag]);
 					this.ignoredElements.Add(IncludeOnlyTag);
 					allTags.Add(IncludeOnlyTag);
 					break;
 				default:
 					this.includeIgnores = true;
-					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag });
+					this.ignoredTags.UnionWith([NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag]);
 					break;
 			}
 
