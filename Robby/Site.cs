@@ -415,7 +415,12 @@
 			ArgumentNullException.ThrowIfNull(message);
 			ArgumentNullException.ThrowIfNull(arguments);
 			var messages = this.LoadMessages([message], arguments);
-			return messages.TryGetValue(message, out var retval) ? retval.Text : string.Empty;
+			messages.TryGetValue(message, out var retval);
+			return retval is null
+				? null
+				: retval.IsMissing
+					? null
+					: retval.Text;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
