@@ -50,7 +50,7 @@
 
 	// TODO: Split out ProposeUnused code into a separate job; have this one only check, not change.
 
-	/// <summary>Underlying job to move pages. This partial class contains the job logic, while the other one contains the parameter replacer methods.</summary>
+	/// <summary>Underlying job to move pages.</summary>
 	/// <seealso cref="EditJob" />
 	public abstract class MovePagesJob : EditJob
 	{
