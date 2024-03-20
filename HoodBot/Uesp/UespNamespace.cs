@@ -1,17 +1,25 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
-	using RobinHood70.CommonCode;
+	using System.Collections.Generic;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
 	public sealed class UespNamespace : IEquatable<UespNamespace>
 	{
+		#region Fields
+		private static readonly string[] FieldSeparator = ["||", "\n|"];
+		private static readonly HashSet<string> PhpTrue = new(StringComparer.OrdinalIgnoreCase) { "1", "yes", "true", "on" };
+		private readonly Site site;
+		#endregion
+
 		#region Constructors
 		internal UespNamespace(Site site, string line)
 		{
-			this.Site = site.NotNull();
-			var nsData = string.Concat(line.NotNull(), ";;;;;;").Split(TextArrays.Semicolon);
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentException.ThrowIfNullOrEmpty(line);
+			this.site = site;
+			var nsData = line.Split(FieldSeparator, StringSplitOptions.None);
 			for (var i = 0; i < nsData.Length; i++)
 			{
 				nsData[i] = nsData[i].Trim();
@@ -26,14 +34,29 @@
 				: baseName;
 			this.BaseNamespace = site[baseNamespace];
 			this.Full = baseName + (this.IsPseudoNamespace ? "/" : ":");
-			this.Id = nsData[1].Length == 0 ? baseName.ToUpperInvariant() : nsData[1];
-			var parentName = nsData[2].Length == 0 ? baseName : nsData[2];
+			this.Id = nsData[1].Length == 0
+				? baseName.ToUpperInvariant()
+				: nsData[1];
+			var parentName = nsData[2].Length == 0
+				? baseName
+				: nsData[2];
 			this.Parent = site[parentName];
-			this.Name = nsData[3].Length == 0 ? baseName : nsData[3];
-			this.MainPage = TitleFactory.FromUnvalidated(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
-			this.Category = nsData[5].Length == 0 ? baseName : nsData[5];
-			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
-			this.IsGameSpace = UespNamespaces.IsGamespace(this.BaseNamespace.Id);
+			this.Name = nsData[3].Length == 0
+				? baseName
+				: nsData[3];
+			var pageName = nsData[4].Length == 0
+				? this.Full + this.Name
+				: nsData[4];
+			this.MainPage = TitleFactory.FromUnvalidated(site, pageName);
+			this.Category = nsData[5].Length == 0
+				? baseName
+				: nsData[5];
+			this.Trail = nsData[6].Length == 0
+				? string.Concat($"[[{this.MainPage}|{this.Name}]]")
+				: nsData[6];
+			this.IsGameSpace = nsData[7].Length == 0
+				? this.BaseNamespace.Id is (>= 100 and <= 199) or (>= 3000 and <= 4999)
+				: PhpTrue.Contains(nsData[7]);
 		}
 		#endregion
 
@@ -58,8 +81,6 @@
 
 		public Namespace Parent { get; }
 
-		public Site Site { get; }
-
 		public string Trail { get; }
 		#endregion
 
@@ -68,7 +89,7 @@
 			other is not null &&
 			string.Equals(this.Base, other.Base, StringComparison.Ordinal);
 
-		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site, this.Full + pageName);
+		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.site, this.Full + pageName);
 		#endregion
 
 		#region Public Override Methods

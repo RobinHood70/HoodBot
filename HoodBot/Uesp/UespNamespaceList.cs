@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
@@ -15,21 +16,20 @@
 
 		#region Constructors
 		public UespNamespaceList(Site site)
-			: this(site, "Uespnamespacelist")
-		{
-		}
-
-		public UespNamespaceList(Site site, string messageName)
 		{
 			// Add defined namespaces
-			if (site.NotNull().LoadMessage(messageName) is string message)
+			ArgumentNullException.ThrowIfNull(site);
+			if (site.LoadMessage("nsinfo-namespacelist") is string message)
 			{
-				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
+				var idTag = Regex.Match(message, @"{\|.*?\bid=(?<delim>['""]?)nsinfo-table\k<delim>\b(.|\n)*?\|-(?<text>(.|\n)*?)\|}", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+				var lines = idTag.Groups["text"].Value.Split("\n|-", StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
 				{
-					if (line[0] is not '<' and not '#')
+					var row = line.Split(TextArrays.NewLineChars, 2)[^1];
+					if (row.Length > 0 && row[0] == '|')
 					{
-						var nsData = new UespNamespace(site, line);
+						row = row[1..];
+						var nsData = new UespNamespace(site, row);
 						this.Add(nsData);
 						this.nsIds.Add(nsData.Id, nsData);
 					}
@@ -41,7 +41,8 @@
 			{
 				if (!this.Contains(ns.Name))
 				{
-					this.Add(new UespNamespace(site, ns.Name));
+					// Second ns.Name is to ensure mixed case for backwards compatibility
+					this.Add(new UespNamespace(site, $"{ns.Name} || {ns.Name} || || || || || ||"));
 				}
 			}
 		}

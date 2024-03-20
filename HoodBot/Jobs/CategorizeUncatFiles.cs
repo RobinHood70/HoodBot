@@ -27,7 +27,7 @@
 		protected override void BeforeLoadPages()
 		{
 			// UespNamespaceList nsList = new(this.Site);
-			UespNamespaceList nsList = new(this.Site, "Sitenamespacelist");
+			UespNamespaceList nsList = new(this.Site);
 			foreach (var ns in nsList)
 			{
 				this.nsIds.Add(ns.Id, ns);
