@@ -36,7 +36,7 @@
 				throw new InvalidOperationException();
 			}
 
-			var extension = template.GetValue(3) ?? "png";
+			var extension = template.GetValue(4) ?? "png";
 
 			return IconAbbreviation(nsId, iconType, iconName, extension);
 		}
