@@ -85,7 +85,8 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.GetIcons("37", true);
+			var patchVersion = this.GetPatchVersion("botitemset");
+			this.GetIcons(patchVersion.Text, false);
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
@@ -152,6 +153,7 @@
 			foreach (var style in this.styles)
 			{
 				this.WriteLine($"==[[Online:{style} Style|]]==");
+				this.WriteLine("<gallery mode=nolines widths=64>");
 				foreach (var part in Parts)
 				{
 					var dbName = $"{style} {part.Name}";
@@ -159,7 +161,7 @@
 					{
 						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
 						var exists = fileTitles.Contains("File:" + upload.DestinationName);
-						this.Write($"* [[:File:{upload.DestinationName}|{part.Name}]]");
+						this.Write($"{upload.DestinationName}|{part.Name}");
 						if (exists)
 						{
 							this.WriteLine(" (already exists)");
@@ -211,9 +213,8 @@
 				this.Id = id;
 				this.Style = style;
 				this.Part = part;
-				var name = string.Equals(part.Name, "Battle Axe", StringComparison.Ordinal) ? "Battleaxe" : part.Name;
 				var partType = string.Equals(part.Type, "weapons", StringComparison.Ordinal) ? "weapon" : part.Type;
-				this.DestinationName = $"ON-icon-{partType}-{name}-{style}.png";
+				this.DestinationName = $"ON-icon-{partType}-{part.Name}-{style}.png";
 			}
 
 			public string DestinationName { get; }
