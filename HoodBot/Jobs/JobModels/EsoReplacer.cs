@@ -21,10 +21,10 @@
 		private static readonly Regex NumberStripper = new(@"[0-9]+(-[0-9]+)?%?\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex ReplacementFinder = new(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex SpaceStripper = new(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		private static readonly List<EsoReplacement> ReplaceAllList = new();
-		private static readonly List<EsoReplacement> ReplaceFirstList = new();
+		private static readonly List<EsoReplacement> ReplaceAllList = [];
+		private static readonly List<EsoReplacement> ReplaceFirstList = [];
 		private static readonly ICollection<string> UnreplacedList = new SortedSet<string>(StringComparer.Ordinal);
-		private static readonly string[] ResistanceSplit = new[] { " Resistance" };
+		private static readonly string[] ResistanceSplit = [" Resistance"];
 
 		private static bool initialized;
 		#endregion
@@ -36,7 +36,8 @@
 		#region Constructors
 		public EsoReplacer(Site site)
 		{
-			this.site = site.NotNull();
+			ArgumentNullException.ThrowIfNull(site);
+			this.site = site;
 			this.RemoveableTemplates = new TitleCollection(
 				site,
 				MediaWikiNamespaces.Template,
@@ -308,7 +309,7 @@
 
 		public ICollection<Title> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<Title> oldLinks = new();
+			HashSet<Title> oldLinks = [];
 			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
@@ -326,7 +327,7 @@
 
 		public ICollection<Title> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<Title> oldTemplates = new();
+			HashSet<Title> oldTemplates = [];
 			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(TitleFactory.FromBacklinkNode(this.site, node));
