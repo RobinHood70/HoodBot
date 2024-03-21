@@ -312,7 +312,6 @@
 					}
 				}
 
-
 				if (foundPage is not null)
 				{
 					this.sets.Add(foundPage.Title, set);

@@ -77,7 +77,6 @@
 					Flora = row["Flora"]
 				};
 
-
 				var name = "Starfield:" + planet.Name;
 				items.Add(TitleFactory.FromUnvalidated(this.Site, name), planet);
 			}

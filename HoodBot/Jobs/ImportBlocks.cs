@@ -138,7 +138,7 @@
 			var client = api.Client;
 			var uri = new Uri("https://en.wikipedia.org/w/api.php");
 			var wmApi = new WikiAbstractionLayer(client, uri);
-			// wmApi.SendingRequest += DebugRequest;
+			//// wmApi.SendingRequest += DebugRequest;
 			var wmSite = new Site(wmApi);
 			wmSite.Login(null, null);
 			var input = new BlocksInput
@@ -174,9 +174,9 @@
 			var api = (WikiAbstractionLayer)this.Site.AbstractionLayer;
 			var client = api.Client;
 			var uri = new Uri("https://meta.wikimedia.org/w/api.php");
-			// var uri = new Uri("https://en.wikipedia.org/w/api.php");
+			//// var uri = new Uri("https://en.wikipedia.org/w/api.php");
 			var wmApi = new WikiAbstractionLayer(client, uri);
-			// wmApi.SendingRequest += DebugRequest;
+			//// wmApi.SendingRequest += DebugRequest;
 			var input = new GlobalBlocksInput
 			{
 				Start = lastRun,
