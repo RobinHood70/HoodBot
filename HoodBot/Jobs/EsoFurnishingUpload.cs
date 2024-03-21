@@ -29,7 +29,8 @@
 
 		protected override void Main()
 		{
-			this.GetIcons("38", false);
+			var patchVersion = this.GetPatchVersion("botitemset");
+			this.GetIcons(patchVersion.Text, false);
 			var uesp = (UespSite)this.Site;
 			var pages = uesp.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id", "transcluded");
 			pages.GetBacklinks("Template:Online Furnishing Summary", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
