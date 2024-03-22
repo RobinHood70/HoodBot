@@ -161,17 +161,29 @@
 
 		#region Protected Methods
 
-		protected void AddLinkUpdate(string from, string to) => this.AddLinkUpdate(
-			TitleFactory.FromUnvalidated(this.Site, from),
-			TitleFactory.FromUnvalidated(this.Site, to));
+		protected void AddLinkUpdate(string from, string to) => this.AddReplacement(from, to, ReplacementActions.None, null);
+
+		protected void AddLinkUpdate(Title from, string to) => this.AddReplacement(from, to, ReplacementActions.None, null);
 
 		protected void AddLinkUpdate(Title from, Title to) => this.AddReplacement(from, to, ReplacementActions.None, null);
 
-		protected void AddMove(string from, string to) => this.AddMove(
-			TitleFactory.FromUnvalidated(this.Site, from),
-			TitleFactory.FromUnvalidated(this.Site, to));
+		protected void AddMove(string from, string to) => this.AddReplacement(from, to, ReplacementActions.Move, null);
+
+		protected void AddMove(Title from, string to) => this.AddReplacement(from, to, ReplacementActions.Move, null);
 
 		protected void AddMove(Title from, Title to) => this.AddReplacement(from, to, ReplacementActions.Move, null);
+
+		protected void AddReplacement(string from, string to, ReplacementActions initialActions, string? reason) => this.AddReplacement(
+			TitleFactory.FromUnvalidated(this.Site, from),
+			TitleFactory.FromUnvalidated(this.Site, to),
+			initialActions,
+			reason);
+
+		protected void AddReplacement(Title from, string to, ReplacementActions initialActions, string? reason) => this.AddReplacement(
+			from,
+			TitleFactory.FromUnvalidated(this.Site, to),
+			initialActions,
+			reason);
 
 		protected void AddReplacement(Title from, Title to, ReplacementActions initialActions, string? reason)
 		{
