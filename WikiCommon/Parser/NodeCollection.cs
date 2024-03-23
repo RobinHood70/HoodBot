@@ -13,7 +13,7 @@
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
 	/// <returns>A LinkedListNode&lt;IWikiNode>.</returns>
-	public delegate NodeCollection? NodeReplacer(IWikiNode node);
+	public delegate ICollection<IWikiNode>? NodeReplacer(IWikiNode node);
 
 	/// <summary>A collection of <see cref="IWikiNode"/>s representing wiki text. Implemented as a linked list.</summary>
 	/// <seealso cref="LinkedList{T}" />
