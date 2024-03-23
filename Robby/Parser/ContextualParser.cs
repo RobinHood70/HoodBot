@@ -238,7 +238,7 @@
 		}
 
 		/// <summary>Updates the <see cref="Page"/>'s <see cref="Page.Text">text</see> to the parser's contents.</summary>
-		public void UpdatePage() => this.Page.Text = this.ToRaw();
+		public void UpdatePage() => this.Page.Text = this.ToRaw().TrimEnd();
 		#endregion
 	}
 }
