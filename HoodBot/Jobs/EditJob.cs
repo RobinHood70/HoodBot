@@ -130,7 +130,7 @@
 		{
 		}
 
-		protected virtual bool GetIsMinorEdit(Page page) => !page.IsNew;
+		protected virtual bool GetIsMinorEdit(Page page) => page.Exists;
 
 		/// <summary>The action to take when there's an edit conflict on a page.</summary>
 		/// <returns><see langword="true"/> if the handler handled the conflict; otherwise, <see langword="false"/>.</returns>
