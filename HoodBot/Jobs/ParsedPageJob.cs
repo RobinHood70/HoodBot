@@ -3,15 +3,8 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
-	public abstract class ParsedPageJob : EditJob
+	public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 	{
-		#region Constructors
-		protected ParsedPageJob(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Abstract Methods
 		protected abstract void ParseText(ContextualParser parser);
 		#endregion

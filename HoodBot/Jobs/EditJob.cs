@@ -6,21 +6,13 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 
-	public abstract class EditJob : WikiJob
+	public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
-		#region Constructors
-		protected EditJob(JobManager jobManager)
-			: base(jobManager, JobType.Write)
-		{
-			this.Pages = new PageCollection(this.Site);
-		}
-		#endregion
-
 		#region Protected Properties
 		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
 		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
-		protected PageCollection Pages { get; set; }
+		protected PageCollection Pages { get; set; } = new PageCollection(jobManager.Site);
 
 		protected bool RecreateIfDeleted { get; set; } = true;
 
