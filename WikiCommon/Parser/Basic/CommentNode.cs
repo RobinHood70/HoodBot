@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
-	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
@@ -29,14 +28,7 @@
 		public string Comment
 		{
 			get => this.comment;
-			set
-			{
-				value ??= string.Empty;
-				if (!string.Equals(this.comment, value, StringComparison.Ordinal))
-				{
-					this.comment = value;
-				}
-			}
+			set => this.comment = value ?? string.Empty;
 		}
 		#endregion
 
