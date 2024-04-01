@@ -461,21 +461,36 @@
 		/// <remarks>Note that this is a naive implementation that only looks at the first and last nodes of the collection. It is therefore recommended that you use <see cref="MergeText(bool)"/> first. This implementation also does not recurse, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
 		public void Trim()
 		{
+			this.TrimStart();
+			this.TrimEnd();
+		}
+
+		/// <summary>Trims whitespace from the end of the collection.</summary>
+		/// <remarks>This implementation does not examine non-text nodes, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
+		public void TrimEnd()
+		{
 			if (this.Count > 0 && this[^1] is ITextNode endText)
 			{
 				endText.Text = endText.Text.TrimEnd();
 				if (endText.Text.Length == 0)
 				{
 					this.RemoveAt(this.Count - 1);
+					this.TrimEnd();
 				}
 			}
+		}
 
+		/// <summary>Trims whitespace from the beginning of the collection.</summary>
+		/// <remarks>This implementation does not examine non-text nodes, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
+		public void TrimStart()
+		{
 			if (this.Count > 0 && this[0] is ITextNode text)
 			{
 				text.Text = text.Text.TrimStart();
 				if (text.Text.Length == 0)
 				{
 					this.RemoveAt(0);
+					this.TrimStart();
 				}
 			}
 		}
