@@ -76,13 +76,8 @@
 
 		/// <summary>Adds a full line of text to the end of the Nodes collection.</summary>
 		/// <param name="text">The text.</param>
-		/// <seealso cref="AppendText(string)"/>
+		/// <seealso cref="AddText(string)"/>
 		public void AppendLine(string text) => this.AddText(text + '\n');
-
-		/// <summary>Adds text to the end of the Nodes collection.</summary>
-		/// <param name="text">The text.</param>
-		/// <remarks>Adds text to the final node in the Nodes collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the Nodes collection.</remarks>
-		public void AppendText(string text) => this.AddText(text);
 
 		/// <summary>Replaces all current content with the content of the sections provided.</summary>
 		/// <param name="sections">The new sections for the page.</param>
@@ -365,6 +360,25 @@
 		/// <returns><see langword="true"/> if any nodes of the specified type were found that satisfied the specified condition; otherwise, <see langword="false"/>.</returns>
 		public bool Has<T>(Predicate<T>? condition)
 			where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
+
+		/// <summary>Adds text to the end of the collection.</summary>
+		/// <param name="index">This index at which to insert the text.</param>
+		/// <param name="text">The text.</param>
+		/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
+		public void InsertText(int index, [Localizable(false)] string text)
+		{
+			if (!string.IsNullOrEmpty(text))
+			{
+				if (index > 0 && this.Count >= index && this[index - 1] is ITextNode node)
+				{
+					node.Text += text;
+				}
+				else
+				{
+					this.Insert(index, this.Factory.TextNode(text));
+				}
+			}
+		}
 
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>
