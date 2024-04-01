@@ -466,32 +466,58 @@
 		}
 
 		/// <summary>Trims whitespace from the end of the collection.</summary>
-		/// <remarks>This implementation does not examine non-text nodes, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
 		public void TrimEnd()
 		{
-			if (this.Count > 0 && this[^1] is ITextNode endText)
+			if (this.Count == 0)
 			{
-				endText.Text = endText.Text.TrimEnd();
-				if (endText.Text.Length == 0)
-				{
-					this.RemoveAt(this.Count - 1);
-					this.TrimEnd();
-				}
+				return;
+			}
+
+			switch (this[^1])
+			{
+				case ICommentNode comment:
+					comment.Comment = comment.Comment.TrimEnd();
+					break;
+				case IHeaderNode header:
+					header.Comment?.TrimStart();
+					break;
+				case ITextNode text:
+					text.Text = text.Text.TrimEnd();
+					if (text.Text.Length == 0)
+					{
+						this.RemoveAt(this.Count - 1);
+						this.TrimEnd();
+					}
+
+					break;
 			}
 		}
 
 		/// <summary>Trims whitespace from the beginning of the collection.</summary>
-		/// <remarks>This implementation does not examine non-text nodes, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
 		public void TrimStart()
 		{
-			if (this.Count > 0 && this[0] is ITextNode text)
+			if (this.Count == 0)
 			{
-				text.Text = text.Text.TrimStart();
-				if (text.Text.Length == 0)
-				{
-					this.RemoveAt(0);
-					this.TrimStart();
-				}
+				return;
+			}
+
+			switch (this[0])
+			{
+				case ICommentNode comment:
+					comment.Comment = comment.Comment.TrimStart();
+					break;
+				case IHeaderNode header:
+					header.Comment?.TrimStart();
+					break;
+				case ITextNode text:
+					text.Text = text.Text.TrimStart();
+					if (text.Text.Length == 0)
+					{
+						this.RemoveAt(0);
+						this.TrimStart();
+					}
+
+					break;
 			}
 		}
 		#endregion
