@@ -46,15 +46,15 @@
 			input.ThrowNull();
 			request.NotNull()
 				.Add("var", input.Variables)
-				.Add("subset", input.Subsets)
+				.Add("set", input.Sets)
 				.Add("limit", this.Limit);
 		}
 
 		protected override VariableItem GetItem(JToken result, PageItem page)
 		{
 			var vars = result.NotNull()["vars"].GetStringDictionary<string>();
-			var subset = (string?)result["subset"];
-			return new VariableItem(vars, subset);
+			var set = (string?)result["set"];
+			return new VariableItem(vars, set);
 		}
 
 		protected override ICollection<VariableItem> GetMutableList(PageItem page)

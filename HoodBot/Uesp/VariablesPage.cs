@@ -9,7 +9,7 @@
 	public class VariablesPage : Page
 	{
 		#region Fields
-		private readonly Dictionary<string, IDictionary<string, string>> subsets = new(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, IDictionary<string, string>> sets = new(System.StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -25,16 +25,16 @@
 			{
 				foreach (var item in varItem.Variables)
 				{
-					var subsetName = item.Subset ?? string.Empty;
-					if (!this.subsets.TryGetValue(subsetName, out var subset))
+					var setName = item.Set ?? string.Empty;
+					if (!this.sets.TryGetValue(setName, out var set))
 					{
-						subset = new Dictionary<string, string>(System.StringComparer.Ordinal);
-						this.subsets.Add(subsetName, subset);
+						set = new Dictionary<string, string>(System.StringComparer.Ordinal);
+						this.sets.Add(setName, set);
 					}
 
 					foreach (var entry in item.Dictionary)
 					{
-						subset[entry.Key] = entry.Value;
+						set[entry.Key] = entry.Value;
 					}
 				}
 			}
@@ -42,13 +42,13 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyDictionary<string, string> MainSet => this.subsets.TryGetValue(string.Empty, out var mainSet)
+		public IReadOnlyDictionary<string, string> MainSet => this.sets.TryGetValue(string.Empty, out var mainSet)
 			? mainSet.AsReadOnly()
 			: ImmutableDictionary<string, string>.Empty;
 		#endregion
 
 		#region Public Methods
-		public IDictionary<string, string> GetSet(string setName) => this.subsets.TryGetValue(setName, out var set)
+		public IDictionary<string, string> GetSet(string setName) => this.sets.TryGetValue(setName, out var set)
 			? set
 			: ImmutableDictionary<string, string>.Empty;
 
@@ -58,7 +58,7 @@
 				: default;
 
 		public string? GetVariable(string setName, string name) =>
-			this.subsets.TryGetValue(setName ?? string.Empty, out var set) &&
+			this.sets.TryGetValue(setName ?? string.Empty, out var set) &&
 			set.TryGetValue(name, out var retval)
 				? retval
 				: null;

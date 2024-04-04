@@ -10,19 +10,12 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
-	internal sealed class VariableUsage : WikiJob
+	[method: JobInfo("Variable Usage")]
+	internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
 		#region Fields
-		private readonly List<LoadSaveCall> loadCalls = new();
-		private readonly List<LoadSaveCall> saveCalls = new();
-		#endregion
-
-		#region Constructors
-		[JobInfo("Variable Usage")]
-		public VariableUsage(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
+		private readonly List<LoadSaveCall> loadCalls = [];
+		private readonly List<LoadSaveCall> saveCalls = [];
 		#endregion
 
 		#region Protected Override Methods
@@ -82,7 +75,7 @@
 
 		private void WriteFile(bool isLoadCall)
 		{
-			CsvFile csvFile = new();
+			var csvFile = new CsvFile();
 			//// csvFile.EmptyFieldText = " ";
 
 			var list = isLoadCall ? this.loadCalls : this.saveCalls;
@@ -105,7 +98,7 @@
 				header.Add("Load Page");
 			}
 
-			header.Add("Subset");
+			header.Add("Set");
 
 			for (var i = 1; i <= maxCount; i++)
 			{
@@ -126,7 +119,7 @@
 					cells.Add(call.LoadPage);
 				}
 
-				cells.Add(call.Subset);
+				cells.Add(call.Set);
 				cells.AddRange(call.Variables);
 				csvFile.Add(cells);
 			}
@@ -142,7 +135,7 @@
 		{
 			public LoadSaveCall(Title page, ITemplateNode loadSave)
 			{
-				List<string> variables = new();
+				List<string> variables = [];
 				this.Page = page;
 				var title = loadSave.Title.ToRaw();
 				var split = title.Split(TextArrays.Colon, 2);
@@ -164,8 +157,8 @@
 						case null:
 							variables.Add(param.Value.ToRaw());
 							break;
-						case "subset":
-							this.Subset = param.Value.ToRaw();
+						case "set":
+							this.Set = param.Value.ToRaw();
 							break;
 						case "if":
 						case "ifnot":
@@ -188,7 +181,7 @@
 
 			public Title Page { get; }
 
-			public string Subset { get; } = string.Empty;
+			public string Set { get; } = string.Empty;
 
 			public IReadOnlyList<string> Variables { get; }
 		}

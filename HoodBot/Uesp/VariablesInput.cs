@@ -10,7 +10,7 @@
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<string>? Subsets { get; set; }
+		public IEnumerable<string>? Sets { get; set; }
 
 		public IEnumerable<string>? Variables { get; set; }
 		#endregion
