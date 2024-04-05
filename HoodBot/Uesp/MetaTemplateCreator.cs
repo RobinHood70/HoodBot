@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -12,9 +13,10 @@
 		#region Constructors
 		public MetaTemplateCreator(PageCreator fallbackCreator, params string[] variables)
 		{
+			ArgumentNullException.ThrowIfNull(fallbackCreator);
 			this.FallbackCreator = fallbackCreator;
 			this.VariableNames = variables == null
-				? new List<string>()
+				? []
 				: new List<string>(variables);
 		}
 		#endregion
