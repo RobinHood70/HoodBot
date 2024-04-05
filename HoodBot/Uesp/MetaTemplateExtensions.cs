@@ -6,11 +6,16 @@
 
 	internal static class MetaTemplateExtensions
 	{
-		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables)
+		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables) => CreateMetaPageCollection(site, pageModules, followRedirects, true, variables);
+
+		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, bool gameSpaceOnly, params string[] variables)
 		{
 			PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
 			{
 				PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
+				{
+					GameSpaceOnly = gameSpaceOnly
+				}
 			};
 
 			return new PageCollection(site.NotNull(), pageLoadOptions);
