@@ -851,7 +851,9 @@
 				[nameof(pageText)] = pageText,
 			};
 
-			return this.PublishChange(this, parameters, ChangeFunc);
+			return !this.EditingEnabled && !File.Exists(fileName)
+				? ChangeStatus.Failure
+				: this.PublishChange(this, parameters, ChangeFunc);
 
 			ChangeStatus ChangeFunc()
 			{
