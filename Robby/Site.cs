@@ -855,7 +855,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				using FileStream upload = new(fileName, FileMode.Open);
+				using FileStream upload = new(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				UploadInput uploadInput = new(destinationName!, upload)
 				{
 					IgnoreWarnings = true,
