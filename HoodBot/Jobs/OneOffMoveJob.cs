@@ -10,27 +10,22 @@
 		#region Protected Override Methods
 		protected override void BeforeMain()
 		{
-			//// this.MoveAction = MoveAction.MoveSafely;
+			this.MoveAction = MoveAction.None;
 			//// this.SuppressRedirects = false;
-			//// this.FollowUpActions = FollowUpActions.FixLinks | FollowUpActions.RetainDirectLinkText;
+			this.FollowUpActions = FollowUpActions.FixLinks | FollowUpActions.UpdateCategoryMembers;
 			this.Site.WaitForJobQueue();
 			base.BeforeMain();
 		}
 
-		protected override string GetEditSummary(Page page) => "Harmonize Battle Axe spelling";
+		protected override string GetEditSummary(Page page) => "Fix incorrect category";
 
 		protected override void PopulateMoves()
 		{
-			var titles = new TitleCollection(this.Site);
-			titles.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-weapon-Battleaxe");
-			foreach (var title in titles)
-			{
-				var newName = title.FullPageName().Replace("Battleaxe", "Battle Axe", false, this.Site.Culture);
-				this.AddMove(title, newName);
-			}
+			this.AddLinkUpdate("Category:Redirects to Alternate Names", "Category:Redirects from Alternate Names");
 		}
 
 		//// this.AddLinkUpdate("Category:Online-Furnishings", "Category:Online-Furnishing Images");
+		//// this.AddMove(title, newName);
 		//// this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
 		//// this.LoadReplacementsFromFile(LocalConfig.BotDataSubPath("Replacements5.txt"));
 		#endregion
