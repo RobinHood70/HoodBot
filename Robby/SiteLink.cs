@@ -499,7 +499,8 @@
 				.Append(this.TitleWhitespaceBefore)
 				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
 				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
-				.Append(this.Title.LinkTarget());
+				.Append(this.Title.Namespace.DecoratedName())
+				.Append(this.Title.PageName);
 			if (this.Fragment != null)
 			{
 				sb
