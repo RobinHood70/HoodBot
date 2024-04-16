@@ -42,9 +42,9 @@
 
 		#region Fields
 		private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>();
-		private readonly List<ProtectionInfo> searchList = new()
-		{
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AJavascript/.*?\.js", new PageProtection(
+		private readonly List<ProtectionInfo> searchList =
+		[
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\AJavascript/.*?\.js", new PageProtection(
 				"Javascript",
 				ProtectionLevel.Full,
 				ProtectionLevel.Full,
@@ -53,7 +53,7 @@
 				string.Empty,
 				false,
 				"highly vulnerable to vandalism")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\ASite Support/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\ASite Support/", new PageProtection(
 				"Site Support",
 				ProtectionLevel.Full,
 				ProtectionLevel.Full,
@@ -62,7 +62,7 @@
 				string.Empty,
 				false,
 				"site financial data")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\A(Dev|Upgrade) History/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\A(Dev|Upgrade) History/", new PageProtection(
 				"Upgrade History Archives",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -71,7 +71,7 @@
 				"{{Archive Footer}}",
 				false,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\A(Administrator Noticeboard|Community Portal)/Archives\Z", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\A(Administrator Noticeboard|Community Portal)/Archives\Z", new PageProtection(
 				"Archive Index",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -80,7 +80,7 @@
 				string.Empty,
 				false,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\A(Administrator Noticeboard|Community Portal)/Archive [0-9]+\Z", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\A(Administrator Noticeboard|Community Portal)/Archive [0-9]+\Z", new PageProtection(
 				"AN/CP Archives",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -89,7 +89,7 @@
 				"{{Archive Footer}}",
 				false,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AAdministrator Noticeboard/Vandalism\Z", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\AAdministrator Noticeboard/Vandalism\Z", new PageProtection(
 				"Non-archive AN Subpages",
 				ProtectionLevel.None,
 				ProtectionLevel.None,
@@ -98,7 +98,7 @@
 				string.Empty,
 				true,
 				"page should not be protected")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AAdministrator Noticeboard/Block Notifications\Z", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\AAdministrator Noticeboard/Block Notifications\Z", new PageProtection(
 				"Non-archive AN Subpages",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -107,7 +107,7 @@
 				string.Empty,
 				true,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\ACommunity Portal/Templates\Z", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\ACommunity Portal/Templates\Z", new PageProtection(
 				"Non-archive CP Subpages",
 				ProtectionLevel.None,
 				ProtectionLevel.None,
@@ -116,7 +116,7 @@
 				string.Empty,
 				true,
 				"page should not be protected")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\A(Archive|Administrator Noticeboard|Community Portal)/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\A(Archive|Administrator Noticeboard|Community Portal)/", new PageProtection(
 				"Site Discussions",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -125,7 +125,7 @@
 				string.Empty,
 				true,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\ADeletion Review/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\ADeletion Review/", new PageProtection(
 				"Deletion Review",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -134,7 +134,7 @@
 				string.Empty,
 				false,
 				"archive protection policy")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AMessages/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\AMessages/", new PageProtection(
 				"Messages",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -143,7 +143,7 @@
 				string.Empty,
 				false,
 				"highly vulnerable to vandalism")),
-			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AReference Desk/", new PageProtection(
+			new ProtectionInfo([MediaWikiNamespaces.Project], @"\AReference Desk/", new PageProtection(
 				"Reference Desk",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -152,7 +152,7 @@
 				"{{Archive Footer}}",
 				false,
 				"archive protection policy")),
-		};
+		];
 		#endregion
 
 		#region Constructors
@@ -161,7 +161,7 @@
 			: base(jobManager)
 		{
 			this.Pages.SetLimitations(LimitationType.None);
-			List<int> talkSpaces = new();
+			List<int> talkSpaces = [];
 			foreach (var ns in this.Site.Namespaces)
 			{
 				if (ns.Id == MediaWikiNamespaces.Project || (ns.IsTalkSpace && ns.Id != MediaWikiNamespaces.UserTalk))
@@ -407,11 +407,11 @@
 				protectionTemplate.Add(ProtectionString[protection.MoveProtection].ToLowerInvariant());
 			}
 
-			parser.InsertRange(insertPos, new IWikiNode[]
-			{
+			parser.InsertRange(insertPos,
+			[
 				parser.Factory.TextNode("// "),
 				protectionTemplate
-			});
+			]);
 
 			return insertPos + 2;
 		}
@@ -506,10 +506,10 @@
 			if (page.IsRedirect)
 			{
 				insertPos = nodes.FindIndex<ILinkNode>(0) + 1;
-				nodes.InsertRange(insertPos, new IWikiNode[]
-				{
+				nodes.InsertRange(insertPos,
+				[
 					nodes.Factory.TextNode("\n"),
-				});
+				]);
 				insertPos++;
 			}
 			else if (protection.NoInclude && (
@@ -531,12 +531,12 @@
 				if (insertPos == nodes.Count || nodes[insertPos] is ITextNode)
 				{
 					insertPos = 1;
-					nodes.InsertRange(0, new IWikiNode[]
-					{
+					nodes.InsertRange(0,
+					[
 						nodes.Factory.IgnoreNode("<noinclude>"),
 						nodes.Factory.IgnoreNode("</noinclude>"),
 						nodes.Factory.TextNode("\n")
-					});
+					]);
 				}
 				else
 				{
@@ -574,7 +574,7 @@
 		#region Private Methods
 		private List<ProtectedTitle> LoadPageNames(ICollection<int> spacesToLoad)
 		{
-			List<ProtectedTitle> titlesToProtect = new();
+			List<ProtectedTitle> titlesToProtect = [];
 			UespNamespaceList uespNamespaceList = new(this.Site);
 			foreach (var ns in uespNamespaceList)
 			{
@@ -611,7 +611,7 @@
 
 		private ICollection<int> NamespacesInSearchList()
 		{
-			HashSet<int> retval = new();
+			HashSet<int> retval = [];
 			foreach (var search in this.searchList)
 			{
 				foreach (var ns in search.Namespaces)

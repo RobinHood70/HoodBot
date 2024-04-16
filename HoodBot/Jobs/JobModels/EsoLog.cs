@@ -132,7 +132,7 @@
 
 		public static IEnumerable<NpcLocationData> GetNpcLocations(List<long> npcIds)
 		{
-			List<NpcLocationData> retval = new();
+			List<NpcLocationData> retval = [];
 			var query = $"SELECT npcId, zone, locCount FROM npcLocations WHERE npcId IN ({string.Join(", ", npcIds)}) AND zone != 'Tamriel'";
 			for (var retries = 2; retries >= 0; retries--)
 			{
@@ -161,7 +161,7 @@
 		public static NpcCollection GetNpcs()
 		{
 			// Note: for now, it's assumed that the collection should be the same across all jobs, so all filtering is done here in the query (e.g., Reaction != 6 for companions). If this becomes untrue at some point, filtering will have to be shifted to the individual jobs or we could add a query string to the call.
-			NpcCollection retval = new();
+			NpcCollection retval = [];
 			HashSet<string> nameClash = new(StringComparer.Ordinal);
 			var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
 			foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))

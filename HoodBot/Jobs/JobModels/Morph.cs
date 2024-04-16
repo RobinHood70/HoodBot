@@ -150,7 +150,7 @@
 				return string.Empty;
 			}
 
-			List<string> descriptions = new();
+			List<string> descriptions = [];
 			for (var i = 0; i < text.Count; i++)
 			{
 				// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every odd-numbered value with bold instead.
@@ -177,7 +177,7 @@
 		{
 			var valueList = values.AsReadOnlyList();
 			return valueList.Count == 1 || (valueList.Count > 1 && AllEqual())
-				? new List<T>(1) { valueList[0] }
+				? [valueList[0]]
 				: valueList;
 
 			bool AllEqual()
@@ -213,7 +213,7 @@
 		private List<string> ParseRankDescriptions(List<string[]> splitDescriptions, int i)
 		{
 			var descriptor = string.Empty;
-			List<string> retval = new();
+			List<string> retval = [];
 			try
 			{
 				for (var j = 0; j < this.Ranks.Count; j++)

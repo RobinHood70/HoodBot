@@ -21,15 +21,15 @@
 		#endregion
 
 		#region Public Properties
-		public static IReadOnlyList<PlaceInfo> PlaceInfo { get; } = new PlaceInfo[]
-		{
+		public static IReadOnlyList<PlaceInfo> PlaceInfo { get; } =
+		[
 			new PlaceInfo(PlaceType.City, "city", "Online-Places-Cities", 5),
 			new PlaceInfo(PlaceType.Settlement, "settlement", "Online-Places-Settlements", 5),
 			new PlaceInfo(PlaceType.House, "house", "Online-Places-Homes", 1),
 			new PlaceInfo(PlaceType.Ship, "ship", "Online-Places-Ships", 1),
 			new PlaceInfo(PlaceType.Store, "store", "Online-Places-Stores", 1),
 			new PlaceInfo(PlaceType.Unknown, "loc", null, 10),
-		};
+		];
 		#endregion
 
 		#region Public Methods

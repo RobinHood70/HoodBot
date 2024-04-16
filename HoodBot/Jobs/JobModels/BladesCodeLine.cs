@@ -9,7 +9,7 @@
 	public class BladesCodeLine : BladesCodeLineCollection
 	{
 		#region Static Fields
-		private static readonly char[] Quote = new[] { '"' };
+		private static readonly char[] Quote = ['"'];
 		#endregion
 
 		#region Constructors

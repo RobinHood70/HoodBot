@@ -72,7 +72,7 @@
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new(StringComparer.Ordinal);
-		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new();
+		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = [];
 		private static readonly Dictionary<string, ParameterType> ImageWords = new(StringComparer.Ordinal)
 		{
 			["img_baseline"] = ParameterType.Valign, // no params
@@ -102,8 +102,8 @@
 		};
 
 		private static readonly InvalidOperationException NonNumeric = new(Resources.SizeInvalid);
-		private static readonly Dictionary<ParameterType, string> PreferredWords = new();
-		private static readonly char[] SplitX = new[] { 'x' };
+		private static readonly Dictionary<ParameterType, string> PreferredWords = [];
+		private static readonly char[] SplitX = ['x'];
 		#endregion
 
 		#region Constructors
@@ -539,7 +539,7 @@
 		/// <returns>A <see cref="ILinkNode"/> containing the parsed link text.</returns>
 		public ILinkNode ToLinkNode()
 		{
-			List<string> values = new();
+			List<string> values = [];
 			foreach (var parameter in this.Parameters)
 			{
 				var text = parameter.Value.ToString();

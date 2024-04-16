@@ -28,7 +28,7 @@
 				this.Warn($"Warning: an NPC with the name \"{dupe.DataName}\" exists more than once in the database!");
 			}
 
-			List<string> allNames = new();
+			List<string> allNames = [];
 			foreach (var npc in unfilteredNpcList)
 			{
 				allNames.Add(npc.DataName);

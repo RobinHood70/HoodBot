@@ -18,8 +18,8 @@
 	internal sealed class EsoNpcs : EditJob
 	{
 		#region Fields
-		private readonly NpcCollection npcCollection = new();
-		private readonly Dictionary<Title, NpcData> pageNpcs = new();
+		private readonly NpcCollection npcCollection = [];
+		private readonly Dictionary<Title, NpcData> pageNpcs = [];
 		private readonly bool allowUpdates;
 		#endregion
 
@@ -238,7 +238,7 @@
 			var loadNpcs = this.GetNpcsToLoad(npcs);
 			var loadPages = this.GetPages(loadNpcs);
 
-			List<(NpcData, string)> issues = new();
+			List<(NpcData, string)> issues = [];
 			foreach (var npc in loadNpcs)
 			{
 				if (npc.Title is null || !loadPages.TryGetValue(npc.Title, out var page))
@@ -315,7 +315,7 @@
 		{
 			var existingTitles = this.GetExistingTitles();
 			var checkPages = this.GetCheckPages(npcs);
-			NpcCollection loadNpcs = new();
+			NpcCollection loadNpcs = [];
 			foreach (var npc in npcs)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], npc.DataName);
@@ -367,8 +367,8 @@
 
 		private string NewPageText(NpcData npc)
 		{
-			List<(string?, string)> parameters = new()
-			{
+			List<(string?, string)> parameters =
+			[
 				("id", npc.Id.ToStringInvariant()),
 				("image", string.Empty),
 				("imgdesc", string.Empty),
@@ -379,7 +379,7 @@
 				("pickpocket", npc.PickpocketDifficulty > PickpocketDifficulty.Unknown ? npc.PickpocketDifficultyText : string.Empty),
 				("loottype", npc.LootType),
 				("faction", string.Empty)
-			};
+			];
 
 			WikiNodeFactory factory = new();
 			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);

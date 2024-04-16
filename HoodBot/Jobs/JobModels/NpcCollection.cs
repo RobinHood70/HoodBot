@@ -10,7 +10,7 @@
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
 		#region Public Properties
-		public IList<NpcData> Duplicates { get; } = new List<NpcData>();
+		public IList<NpcData> Duplicates { get; } = [];
 		#endregion
 
 		#region Public Methods

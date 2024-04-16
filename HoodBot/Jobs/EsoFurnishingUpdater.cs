@@ -33,10 +33,10 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<long, Furnishing> collectibles = new();
-		private readonly Dictionary<long, Furnishing> furnishings = new();
-		private readonly List<string> fileMessages = new();
-		private readonly List<string> pageMessages = new();
+		private readonly Dictionary<long, Furnishing> collectibles = [];
+		private readonly Dictionary<long, Furnishing> furnishings = [];
+		private readonly List<string> fileMessages = [];
+		private readonly List<string> pageMessages = [];
 		private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
 
 		//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new();

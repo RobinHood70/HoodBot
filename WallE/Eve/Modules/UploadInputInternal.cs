@@ -18,7 +18,7 @@
 			{
 				this.Stash = true;
 				this.FileSize = input.FileData.Length;
-				this.FileData = Array.Empty<byte>(); // TODO: This is just to satisfy the null-checking, which doesn't flow into methods called from constructors. Remove if they implement that.
+				this.FileData = []; // TODO: This is just to satisfy the null-checking, which doesn't flow into methods called from constructors. Remove if they implement that.
 				this.NextChunk(input.FileData, input.ChunkSize);
 			}
 			else
@@ -74,7 +74,7 @@
 		public void FinalChunk(UploadInput input)
 		{
 			this.Comment = input.NotNull().Comment;
-			this.FileData = Array.Empty<byte>();
+			this.FileData = [];
 			this.FileSize = 0;
 			this.IgnoreWarnings = input.IgnoreWarnings;
 			this.Offset = 0;

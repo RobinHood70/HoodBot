@@ -8,15 +8,15 @@
 	internal sealed class MetaTemplateTotal : WikiJob
 	{
 		#region Static Fields
-		private static readonly string[] MetaTemplateCategories = new[]
-		{
+		private static readonly string[] MetaTemplateCategories =
+		[
 			"MetaTemplate-Data",
 			"MetaTemplate-Include",
 			"MetaTemplate-Listsaved",
 			"MetaTemplate-Split Arguments",
 			"MetaTemplate-Stack",
 			"MetaTemplate-Variables"
-		};
+		];
 		#endregion
 
 		#region Constructors

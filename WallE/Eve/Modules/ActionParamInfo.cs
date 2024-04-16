@@ -14,7 +14,7 @@
 	{
 		#region Static Fields
 		private static readonly HashSet<string> FormatModuleValues = new(StringComparer.Ordinal) { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
-		private static readonly string[] ModuleTypes125 = { "querymodules", "formatmodules", "mainmodule", "pagesetmodule" };
+		private static readonly string[] ModuleTypes125 = ["querymodules", "formatmodules", "mainmodule", "pagesetmodule"];
 		#endregion
 
 		#region Constructors
@@ -48,11 +48,11 @@
 				return;
 			}
 
-			List<string> modules = new();
-			List<string> queryModules = new();
+			List<string> modules = [];
+			List<string> queryModules = [];
 			var mainModule = false;
 			var pagesetModule = false;
-			List<string> formatModules = new();
+			List<string> formatModules = [];
 
 			foreach (var module in input.Modules)
 			{
@@ -91,7 +91,7 @@
 		{
 			result.ThrowNull();
 			Dictionary<string, ParameterInfoItem> output = new(StringComparer.Ordinal);
-			List<string> moduleTypes = new() { "modules" };
+			List<string> moduleTypes = ["modules"];
 			if (this.SiteVersion < 125)
 			{
 				moduleTypes.AddRange(ModuleTypes125);
@@ -144,13 +144,13 @@
 
 		private static IReadOnlyDictionary<string, ParametersItem> GetParameters(JToken? token)
 		{
-			List<ParametersItem> parametersList = new();
+			List<ParametersItem> parametersList = [];
 			if (token != null)
 			{
 				foreach (var parameterNode in token)
 				{
 					var dflt = parameterNode["default"] is JValue defaultNode ? defaultNode.Value : null;
-					IReadOnlyList<string> typeValues = ImmutableList<string>.Empty;
+					IReadOnlyList<string> typeValues = [];
 					string? type = null;
 					IReadOnlyDictionary<string, string> subModules = new Dictionary<string, string>(StringComparer.Ordinal);
 					string? subModuleParamPrefix = null;
@@ -169,7 +169,7 @@
 						}
 					}
 
-					List<InformationItem> newInfoList = new();
+					List<InformationItem> newInfoList = [];
 					var infoArrayNode = parameterNode["info"];
 					if (infoArrayNode != null)
 					{
@@ -212,7 +212,7 @@
 
 		private static List<ExamplesItem> GetExamples(JToken? module)
 		{
-			List<ExamplesItem> examplesList = new();
+			List<ExamplesItem> examplesList = [];
 			if (module != null)
 			{
 				foreach (var example in module)
@@ -229,7 +229,7 @@
 		#region Private Static Methods
 		private static RawMessageInfo GetMessages(JToken? node)
 		{
-			List<MessageItem> messageList = new();
+			List<MessageItem> messageList = [];
 			if (node != null)
 			{
 				if (node.Type == JTokenType.String)
@@ -250,7 +250,7 @@
 		private static MessageItem GetMessage(JToken message)
 		{
 			// TODO: Perhaps add functionality to handle cases of parameter substitution (parameterList => num=1, comma-separated list, parameters) and perhaps even other advanced outputs, if any.
-			List<string> parameterList = new();
+			List<string> parameterList = [];
 			var parameters = message["params"];
 			if (parameters != null)
 			{
@@ -269,7 +269,7 @@
 								System.Diagnostics.Debug.WriteLine("Array: " + parameter.ToString());
 								break;
 							case JTokenType.Object:
-								List<string> mergeList = new();
+								List<string> mergeList = [];
 								foreach (var kvp in parameter.Children<JProperty>())
 								{
 									mergeList.Add(kvp.Name + '=' + kvp.Value);

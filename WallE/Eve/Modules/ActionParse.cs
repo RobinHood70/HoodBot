@@ -118,7 +118,7 @@
 
 		private static List<ParseCategoriesItem> DeserializeCategories(JToken? subResult)
 		{
-			List<ParseCategoriesItem> categories = new();
+			List<ParseCategoriesItem> categories = [];
 			if (subResult != null)
 			{
 				foreach (var catResult in subResult)
@@ -138,7 +138,7 @@
 
 		private static IReadOnlyList<LanguageLinksItem> DeserializeLanguageLinks(JToken? subResult)
 		{
-			List<LanguageLinksItem> langLinks = new();
+			List<LanguageLinksItem> langLinks = [];
 			if (subResult != null)
 			{
 				foreach (var link in subResult)
@@ -161,7 +161,7 @@
 				foreach (var entry in subResult)
 				{
 					var name = entry.MustHaveString("name");
-					List<string> limits = new();
+					List<string> limits = [];
 					foreach (var limitResult in entry.Children<JProperty>())
 					{
 						if (!string.Equals(limitResult.Name, "name", StringComparison.Ordinal) && (string?)limitResult.Value is string value)
@@ -179,7 +179,7 @@
 
 		private static List<ParseLinksItem> DeserializeLinks(JToken? linkResults)
 		{
-			List<ParseLinksItem> links = new();
+			List<ParseLinksItem> links = [];
 			if (linkResults != null)
 			{
 				foreach (var result in linkResults)
@@ -193,7 +193,7 @@
 
 		private static IReadOnlyList<SectionsItem> DeserializeSections(JToken? subResult)
 		{
-			List<SectionsItem> sections = new();
+			List<SectionsItem> sections = [];
 			if (subResult != null)
 			{
 				foreach (var secResult in subResult)

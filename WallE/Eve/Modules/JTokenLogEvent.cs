@@ -45,7 +45,7 @@
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
 
-		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? [];
 		#endregion
 
 		#region Private Classes
@@ -196,7 +196,7 @@
 
 					if (this.parms[new string(valOffset, 1)] is JToken logIdsNode && (string?)logIdsNode is string ids)
 					{
-						List<long> logIds = new();
+						List<long> logIds = [];
 						foreach (var commaSplit in ids.Split(TextArrays.Comma))
 						{
 							logIds.Add(long.Parse(commaSplit, CultureInfo.InvariantCulture));
@@ -262,7 +262,7 @@
 				}
 				else if (!string.Equals(this.logAction, "unprotect", StringComparison.Ordinal))
 				{
-					List<ProtectionsItem> protections = new();
+					List<ProtectionsItem> protections = [];
 					if ((string?)this.parms["0"] is string parm0)
 					{
 						IEnumerable<Match> matches = ProtectionFinder.Matches(parm0);

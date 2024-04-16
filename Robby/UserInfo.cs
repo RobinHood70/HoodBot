@@ -28,7 +28,7 @@
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = userItem.EditCount;
-			List<string> groups = new();
+			List<string> groups = [];
 			if (userItem.Groups != null)
 			{
 				groups.AddRange(userItem.Groups);
@@ -41,7 +41,7 @@
 
 			this.Groups = groups;
 			this.Registration = userItem.Registration ?? DateTime.MinValue;
-			this.Rights = userItem.Rights ?? Array.Empty<string>();
+			this.Rights = userItem.Rights ?? [];
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="UserInfo"/> class.</summary>
@@ -56,7 +56,7 @@
 			this.EditCount = userItem.EditCount;
 			this.Emailable = userItem.Flags.HasAnyFlag(UserFlags.Emailable);
 			this.Gender = userItem.Gender;
-			List<string> groups = new();
+			List<string> groups = [];
 			if (userItem.Groups != null)
 			{
 				groups.AddRange(userItem.Groups);
@@ -69,7 +69,7 @@
 
 			this.Groups = groups;
 			this.Registration = userItem.Registration ?? DateTime.MinValue;
-			this.Rights = userItem.Rights ?? Array.Empty<string>();
+			this.Rights = userItem.Rights ?? [];
 		}
 		#endregion
 

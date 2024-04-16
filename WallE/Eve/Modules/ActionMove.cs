@@ -51,7 +51,7 @@
 		{
 			// Errors occur at multiple levels during a move operation and can represent partial success, so instead of throwing them, we gather them into the result and let the user figure out what to do.
 			result.ThrowNull();
-			List<MoveItem> list = new();
+			List<MoveItem> list = [];
 			DeserializeMove(result, list, string.Empty);
 			DeserializeMove(result, list, "talk");
 			DeserializeSubpages(result["subpages"], list);

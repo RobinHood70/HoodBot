@@ -43,7 +43,7 @@
 				Debug.WriteLine(ce.Message);
 			}
 
-			this.All ??= Array.Empty<Lazy<IPlugin, IPluginMetadata>>(); // Should have been filled in in try block, but if not, set it to empty.
+			this.All ??= []; // Should have been filled in in try block, but if not, set it to empty.
 			Dictionary<string, IDiffViewer> diffViewers = new(StringComparer.Ordinal);
 			foreach (var plugin in this.All)
 			{

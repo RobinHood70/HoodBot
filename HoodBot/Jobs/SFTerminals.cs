@@ -17,7 +17,7 @@
 	internal sealed class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
 	{
 		#region Fields
-		private readonly MenuList menus = new();
+		private readonly MenuList menus = [];
 		#endregion
 
 		#region Constructors
@@ -55,7 +55,7 @@
 					}
 
 					lastId = edid;
-					entries = new SortedDictionary<int, Entry>();
+					entries = [];
 					menu = new Menu(row["EditorID"], row["Full"], GlobalReplace(row["BTXT"]), entries);
 				}
 

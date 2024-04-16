@@ -141,7 +141,7 @@
 		// Currently unused - intended for later development because newer versions of the API can return multiple errors in a single response.
 		public static IReadOnlyList<ErrorItem> GetErrors(this JToken? token)
 		{
-			List<ErrorItem> list = new();
+			List<ErrorItem> list = [];
 			if (token != null)
 			{
 				foreach (var node in token)
@@ -182,7 +182,7 @@
 		/// <returns>A list containing the interwiki links.</returns>
 		public static IReadOnlyList<InterwikiTitleItem> GetInterwikiLinks(this JToken? token)
 		{
-			List<InterwikiTitleItem> output = new();
+			List<InterwikiTitleItem> output = [];
 			if (token != null)
 			{
 				foreach (var item in token)
@@ -213,7 +213,7 @@
 		/// <returns>An <see cref="IReadOnlyList{T}"/> of the specified type.</returns>
 		public static IReadOnlyList<T> GetList<T>(this JToken? token)
 		{
-			List<T> retval = new();
+			List<T> retval = [];
 			if (token != null)
 			{
 				foreach (var value in token.Values<T>())
@@ -347,7 +347,7 @@
 		/// <returns>A list of <see cref="RevisionItem"/>s.</returns>
 		public static IReadOnlyList<RevisionItem> GetRevisions(this JToken? token)
 		{
-			List<RevisionItem> revisions = new();
+			List<RevisionItem> revisions = [];
 			if (token?["revisions"] is JToken resultNode)
 			{
 				foreach (var revisionNode in resultNode)
@@ -425,7 +425,7 @@
 		/// <returns>System.Collections.Generic.IReadOnlyList&lt;RobinHood70.WallE.Base.WarningsItem&gt;.</returns>
 		public static IReadOnlyList<WarningsItem> GetWarnings(this JToken? token)
 		{
-			List<WarningsItem> list = new();
+			List<WarningsItem> list = [];
 			if (token != null)
 			{
 				foreach (var item in token)

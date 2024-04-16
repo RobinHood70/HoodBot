@@ -15,7 +15,7 @@
 		#endregion
 
 		#region Fields
-		private readonly List<Block> reblocks = new();
+		private readonly List<Block> reblocks = [];
 		#endregion
 
 		#region Constructors

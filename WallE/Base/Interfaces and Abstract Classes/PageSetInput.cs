@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Base
 		protected PageSetInput(IGeneratorInput generatorInput)
 		{
 			this.GeneratorInput = generatorInput.NotNull();
-			this.Values = Array.Empty<string>();
+			this.Values = [];
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
@@ -57,7 +57,7 @@ namespace RobinHood70.WallE.Base
 		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
 			this.ListType = listType;
-			List<string> list = new();
+			List<string> list = [];
 			foreach (var id in ids.NotNull())
 			{
 				list.Add(id.ToString(CultureInfo.InvariantCulture));

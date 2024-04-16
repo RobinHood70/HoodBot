@@ -59,7 +59,7 @@
 			}
 
 			ProtectInputItem protection = new("create", createProtection) { Expiry = expiry };
-			return Protect(title, reason, new[] { protection });
+			return Protect(title, reason, [protection]);
 		}
 
 		/// <summary>Protects a non-existent page from being created.</summary>
@@ -83,7 +83,7 @@
 		public static ChangeStatus CreateProtect(this Title title, string reason, string createProtection, string duration)
 		{
 			ProtectInputItem protection = new("create", createProtection.NotNull()) { ExpiryRelative = duration };
-			return Protect(title, reason, new[] { protection });
+			return Protect(title, reason, [protection]);
 		}
 
 		/// <summary>Unprotects the title.</summary>
@@ -93,7 +93,7 @@
 		public static ChangeStatus CreateUnprotect(this Title title, string reason)
 		{
 			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.None)!);
-			return Protect(title, reason, new[] { protection });
+			return Protect(title, reason, [protection]);
 		}
 
 		/// <summary>Deletes the title for the specified reason.</summary>

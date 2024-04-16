@@ -246,7 +246,7 @@
 		/// <inheritdoc/>
 		public void GetProtectedPages(ProtectionTypes protectionTypes, ProtectionLevels protectionLevels)
 		{
-			List<string> typeList = new();
+			List<string> typeList = [];
 			foreach (var protType in protectionTypes.GetUniqueFlags())
 			{
 				if (Enum.GetName(typeof(ProtectionTypes), protType) is string name)
@@ -255,7 +255,7 @@
 				}
 			}
 
-			List<string> levelList = new();
+			List<string> levelList = [];
 			foreach (var protLevel in protectionLevels.GetUniqueFlags())
 			{
 				if (Enum.GetName(typeof(ProtectionTypes), protLevel) is string name)

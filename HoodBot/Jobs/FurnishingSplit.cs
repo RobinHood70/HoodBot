@@ -17,7 +17,7 @@
 		#endregion
 
 		#region Fields
-		private readonly List<string> issues = new();
+		private readonly List<string> issues = [];
 		private PageCollection? existingPages;
 		#endregion
 
@@ -65,7 +65,7 @@
 		{
 			parser.ThrowNull();
 			parser.Page.PropertyThrowNull(nameof(parser));
-			List<string> pageIssues = new();
+			List<string> pageIssues = [];
 			if (!parser.Page.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");

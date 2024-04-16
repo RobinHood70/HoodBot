@@ -145,10 +145,10 @@
 		{
 			if (parent["dbrepllag"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoLag>();
+				return [];
 			}
 
-			List<SiteInfoLag> retval = new();
+			List<SiteInfoLag> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLag(result.MustHaveString("host"), (int)result.MustHave("lag")));
@@ -159,16 +159,16 @@
 
 		private static IReadOnlyDictionary<string, object> GetDefaultOptions(JToken parent) => parent["defaultoptions"] is JToken node ? node.GetStringDictionary<object>() : ImmutableDictionary<string, object>.Empty;
 
-		private static IReadOnlyList<string> GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.GetList<string>() : Array.Empty<string>();
+		private static IReadOnlyList<string> GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.GetList<string>() : [];
 
 		private static IReadOnlyList<string> GetFileExtensions(JToken parent)
 		{
 			if (parent["fileextensions"] is not JToken node)
 			{
-				return Array.Empty<string>();
+				return [];
 			}
 
-			List<string> retval = new();
+			List<string> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(result.MustHaveString("ext"));
@@ -177,16 +177,16 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<string> GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.GetList<string>() : Array.Empty<string>();
+		private static IReadOnlyList<string> GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.GetList<string>() : [];
 
 		private static IReadOnlyList<SiteInfoInterwikiMap> GetInterwikiMap(JToken parent)
 		{
 			if (parent["interwikimap"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoInterwikiMap>();
+				return [];
 			}
 
-			List<SiteInfoInterwikiMap> retval = new();
+			List<SiteInfoInterwikiMap> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoInterwikiMap(
@@ -212,10 +212,10 @@
 		{
 			if (parent["languages"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoLanguage>();
+				return [];
 			}
 
-			List<SiteInfoLanguage> retval = new();
+			List<SiteInfoLanguage> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLanguage(result.MustHaveString("code"), result.MustHaveBCString("name")));
@@ -228,10 +228,10 @@
 		{
 			if (parent["libraries"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoLibrary>();
+				return [];
 			}
 
-			List<SiteInfoLibrary> retval = new();
+			List<SiteInfoLibrary> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLibrary(
@@ -246,10 +246,10 @@
 		{
 			if (parent["magicwords"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoMagicWord>();
+				return [];
 			}
 
-			List<SiteInfoMagicWord> retval = new();
+			List<SiteInfoMagicWord> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoMagicWord(
@@ -265,10 +265,10 @@
 		{
 			if (parent["namespacealiases"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoNamespaceAlias>();
+				return [];
 			}
 
-			List<SiteInfoNamespaceAlias> retval = new();
+			List<SiteInfoNamespaceAlias> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoNamespaceAlias(
@@ -283,10 +283,10 @@
 		{
 			if (parent["namespaces"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoNamespace>();
+				return [];
 			}
 
-			List<SiteInfoNamespace> retval = new();
+			List<SiteInfoNamespace> retval = [];
 			foreach (var resultNode in node)
 			{
 				if (resultNode.First is JToken result)
@@ -319,7 +319,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<string> GetProtocols(JToken parent) => parent["protocols"] is JToken node ? node.GetList<string>() : Array.Empty<string>();
+		private static IReadOnlyList<string> GetProtocols(JToken parent) => parent["protocols"] is JToken node ? node.GetList<string>() : [];
 
 		private static SiteInfoRestriction? GetRestrictions(JToken parent) => parent["restrictions"] is JToken node
 			? new SiteInfoRestriction(
@@ -335,11 +335,11 @@
 		{
 			if (parent["skins"] is not JToken node)
 			{
-				return (null, Array.Empty<SiteInfoSkin>());
+				return (null, []);
 			}
 
 			SiteInfoSkin? defaultSkin = null;
-			List<SiteInfoSkin>? retval = new();
+			List<SiteInfoSkin>? retval = [];
 			foreach (var result in node)
 			{
 				SiteInfoSkin item = new(
@@ -361,10 +361,10 @@
 		{
 			if (parent["specialpagealiases"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoSpecialPageAlias>();
+				return [];
 			}
 
-			List<SiteInfoSpecialPageAlias> retval = new();
+			List<SiteInfoSpecialPageAlias> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoSpecialPageAlias(
@@ -392,16 +392,16 @@
 		{
 			if (parent["showhooks"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoSubscribedHook>();
+				return [];
 			}
 
-			List<SiteInfoSubscribedHook> retval = new();
+			List<SiteInfoSubscribedHook> retval = [];
 			foreach (var result in node)
 			{
 				// See https://phabricator.wikimedia.org/T117022 for details on the Scribunto check.
 				var subscribersNode = result.MustHave("subscribers");
 				var subscribers = subscribersNode.Type == JTokenType.Object && subscribersNode["scribunto"] is JToken scribuntoNode
-					? new List<string> { (string?)scribuntoNode ?? string.Empty }
+					? [(string?)scribuntoNode ?? string.Empty]
 					: subscribersNode.GetList<string>();
 
 				retval.Add(new SiteInfoSubscribedHook(
@@ -416,10 +416,10 @@
 		{
 			if (parent["usergroups"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoUserGroup>();
+				return [];
 			}
 
-			List<SiteInfoUserGroup> retval = new();
+			List<SiteInfoUserGroup> retval = [];
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoUserGroup(
@@ -435,7 +435,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<string> GetVariables(JToken parent) => parent["variables"] is JToken node ? node.GetList<string>() : Array.Empty<string>();
+		private static IReadOnlyList<string> GetVariables(JToken parent) => parent["variables"] is JToken node ? node.GetList<string>() : [];
 		#endregion
 
 		#region Private Methods
@@ -443,10 +443,10 @@
 		{
 			if (parent["extensions"] is not JToken node)
 			{
-				return Array.Empty<SiteInfoExtensions>();
+				return [];
 			}
 
-			List<SiteInfoExtensions> retval = new();
+			List<SiteInfoExtensions> retval = [];
 			foreach (var result in node)
 			{
 				var name = (string?)result["name"];
@@ -490,7 +490,7 @@
 				return null;
 			}
 
-			List<string> fallback = new();
+			List<string> fallback = [];
 			var fallbacksNode = node["fallback"];
 			if (fallbacksNode != null)
 			{
@@ -538,7 +538,7 @@
 				variantArticlePath = variantArticlePathNode.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
 			}
 
-			List<string> variants = new();
+			List<string> variants = [];
 			if (node["variants"] is JToken variantsNode)
 			{
 				foreach (var token in variantsNode)

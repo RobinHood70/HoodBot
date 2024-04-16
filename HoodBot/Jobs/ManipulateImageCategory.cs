@@ -25,7 +25,7 @@
 			PageCollection list = new(this.Site, PageModules.FileInfo);
 			list.GetCategoryMembers("Online-Icons", true);
 
-			List<FilePage> smallImages = new();
+			List<FilePage> smallImages = [];
 			foreach (var result in list)
 			{
 				if (result is FilePage image && image.LatestFileRevision is FileRevision imageInfo && imageInfo.Height < 64 && imageInfo.Width < 64)

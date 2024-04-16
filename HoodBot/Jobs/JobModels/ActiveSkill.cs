@@ -156,7 +156,7 @@
 		private void UpdateMorph(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter)
 		{
 			var baseRank = baseMorph.Ranks[^1];
-			List<string> descriptions = new();
+			List<string> descriptions = [];
 			var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
 			var morph = this.morphs[morphCounter];
 			if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, StringComparison.Ordinal))

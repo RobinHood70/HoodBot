@@ -38,14 +38,14 @@
 		/// <summary>Gets the namespace limitations.</summary>
 		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
 		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		public ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
-		{
+		public ICollection<int> NamespaceLimitations { get; } =
+		[
 			MediaWikiNamespaces.Media,
 			MediaWikiNamespaces.MediaWiki,
 			MediaWikiNamespaces.Special,
 			MediaWikiNamespaces.Template,
 			MediaWikiNamespaces.User,
-		};
+		];
 
 		/// <summary>Gets the site for the collection.</summary>
 		/// <value>The site.</value>
@@ -174,7 +174,7 @@
 		{
 			if (namespaces is not HashSet<int> hash)
 			{
-				hash = new(namespaces ?? Array.Empty<int>());
+				hash = new(namespaces ?? []);
 			}
 
 			for (var i = this.Count - 1; i >= 0; i--)

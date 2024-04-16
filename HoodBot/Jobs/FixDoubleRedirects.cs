@@ -8,7 +8,7 @@
 	public class FixDoubleRedirects : ParsedPageJob
 	{
 		#region Fields
-		private readonly Dictionary<Title, SiteLink> lookup = new();
+		private readonly Dictionary<Title, SiteLink> lookup = [];
 		#endregion
 
 		#region Constructors

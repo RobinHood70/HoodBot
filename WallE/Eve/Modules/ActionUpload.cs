@@ -53,7 +53,7 @@
 		{
 			result.ThrowNull();
 			var resultText = result.MustHaveString("result");
-			IReadOnlyList<string> duplicates = new List<string>();
+			IReadOnlyList<string> duplicates = [];
 			Dictionary<string, string> outputWarnings = new(System.StringComparer.Ordinal);
 			if (result["warnings"] is JToken warnings)
 			{

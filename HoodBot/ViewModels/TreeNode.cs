@@ -7,7 +7,7 @@
 	public class TreeNode : ObservableObject
 	{
 		#region Fields
-		private readonly List<TreeNode> children = new();
+		private readonly List<TreeNode> children = [];
 		private bool? isChecked = false;
 		private bool isSelected;
 		private TreeNode? selectedItem;

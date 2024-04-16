@@ -6,7 +6,7 @@
 	internal class Piece
 	{
 		#region Public Properties
-		public List<IWikiNode> Nodes { get; } = new List<IWikiNode>();
+		public List<IWikiNode> Nodes { get; } = [];
 		#endregion
 
 		#region Public Methods

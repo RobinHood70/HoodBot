@@ -12,7 +12,7 @@
 		public EsoBlankNpcImages(JobManager jobManager)
 			: base(
 				  jobManager,
-				  new string[] { "Online NPC Summary" },
+				  ["Online NPC Summary"],
 				  true,
 				  LocalConfig.BotDataSubPath("ESO NPCs No Images.txt"),
 				  false)

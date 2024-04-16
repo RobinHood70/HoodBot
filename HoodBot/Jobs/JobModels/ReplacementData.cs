@@ -66,8 +66,8 @@
 			["Woodworking"] = "Woodworking (skill)",
 		};
 
-		public static IReadOnlyList<Synergy> Synergies { get; } = new List<Synergy>
-		{
+		public static IReadOnlyList<Synergy> Synergies { get; } =
+		[
 			/* Do not re-sort this into alphabetical order or it will screw things up (e.g., "Blood Funnel" getting replaced multiple times) */
 			new Synergy("Blood Altar", "Blood Funnel", "{{ESO Synergy Link|Blood Funnel}}"),
 			new Synergy("Blood Altar", "Blood Feast", "{{ESO Synergy Link|Blood Feast|Blood Funnel}}"),
@@ -92,7 +92,7 @@
 			new Synergy("Trapping Webs", "Spawn Broodlings", "{{ESO Synergy Link|Spawn Broodlings}}"),
 			new Synergy("Trapping Webs", "Arachnophobia", "{{ESO Synergy Link|Arachnophobia|Spawn Broodlings}}"),
 			new Synergy("Trapping Webs", "Black Widows", "{{ESO Synergy Link|Black Widows|Spawn Broodlings}}"),
-		};
+		];
 		#endregion
 	}
 }

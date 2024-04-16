@@ -39,7 +39,7 @@
 				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 				if (name.Length > 0)
 				{
-					var itemList = items.TryGetValue(title, out var list) ? list : new List<CsvRow>();
+					var itemList = items.TryGetValue(title, out var list) ? list : [];
 					itemList.Add(row);
 					items[title] = itemList;
 				}

@@ -200,7 +200,7 @@
 		#region Private Methods
 		private void GenerateReport()
 		{
-			List<string> trivialList = new();
+			List<string> trivialList = [];
 			this.WriteLine($"== Skills With Non-Trivial Updates ==");
 			foreach (var skill in this.skills)
 			{

@@ -43,11 +43,11 @@
 					var dead = (acbs & 0x200000) != 0;
 					var factionText = row["Factions"];
 					var factions = factionText.Length == 0
-						? Array.Empty<string>()
+						? []
 						: factionText.Split(TextArrays.Comma);
 					var npc = new Npc(row["FormID"][2..], row["EditorID"].Trim(), row["Name"], row["Race"], female, dead, factions);
 					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"]);
-					var list = items.TryGetValue(title, out var npcs) ? npcs : new Npcs();
+					var list = items.TryGetValue(title, out var npcs) ? npcs : [];
 					list.Add(npc);
 					items[title] = list;
 				}

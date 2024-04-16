@@ -16,7 +16,7 @@
 	{
 		#region Fields
 		private readonly PageCreator pageCreator;
-		private readonly List<string> recurseCategories = new();
+		private readonly List<string> recurseCategories = [];
 		private readonly Dictionary<string, FullTitle> titleMap = new(StringComparer.Ordinal);
 		#endregion
 

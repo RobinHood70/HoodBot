@@ -14,7 +14,7 @@
 	public sealed class FilePage : Page
 	{
 		#region Fields
-		private readonly List<FileRevision> fileRevisions = new();
+		private readonly List<FileRevision> fileRevisions = [];
 		#endregion
 
 		#region Constructors
@@ -109,7 +109,7 @@
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
 			TitleCollection titles = new(this.Title.Site);
-			titles.GetFileUsage(new[] { this.Title }, filterRedirects, namespaces);
+			titles.GetFileUsage([this.Title], filterRedirects, namespaces);
 
 			return titles;
 		}
@@ -124,7 +124,7 @@
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
 			TitleCollection titles = new(this.Title.Site);
-			titles.GetDuplicateFiles(new[] { this.Title }, localOnly);
+			titles.GetDuplicateFiles([this.Title], localOnly);
 
 			return titles;
 		}

@@ -148,7 +148,7 @@
 		{
 			if (values != null)
 			{
-				List<string> newList = new();
+				List<string> newList = [];
 				foreach (var value in values)
 				{
 					newList.Add(value.ToMediaWiki());

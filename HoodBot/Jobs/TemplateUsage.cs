@@ -16,7 +16,7 @@
 		#region Fields
 		private readonly string saveLocation;
 		private readonly bool respectRedirects;
-		private readonly List<string> headerOrder = new();
+		private readonly List<string> headerOrder = [];
 		private readonly bool checkAllTemplates;
 		private readonly TitleCollection allTemplateNames;
 		#endregion
@@ -34,7 +34,7 @@
 			location.ThrowNull();
 			this.respectRedirects = respectRedirects;
 			this.checkAllTemplates = checkAllTemplates;
-			List<string> allNames = new();
+			List<string> allNames = [];
 			foreach (var templateName in templateNames.NotNull())
 			{
 				allNames.AddRange(templateName.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries));
@@ -139,7 +139,7 @@
 
 		private List<(Title Page, ITemplateNode Template)> ExtractTemplates(PageCollection pages)
 		{
-			List<(Title Page, ITemplateNode Template)> templates = new();
+			List<(Title Page, ITemplateNode Template)> templates = [];
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
@@ -156,12 +156,12 @@
 		private void WriteFile(List<(Title Page, ITemplateNode Template)> results, string location)
 		{
 			CsvFile csvFile = new() { EmptyFieldText = " " };
-			List<string> output = new(this.headerOrder.Count + 2)
-			{
+			List<string> output =
+			[
 				"Page",
-				"Template Name"
-			};
-			output.AddRange(this.headerOrder);
+				"Template Name",
+				.. this.headerOrder,
+			];
 			csvFile.Header = output;
 
 			foreach (var template in results)

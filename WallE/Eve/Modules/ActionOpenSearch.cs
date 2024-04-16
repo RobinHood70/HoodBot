@@ -49,7 +49,7 @@
 			{
 				if (array.Count == 0)
 				{
-					return Array.Empty<OpenSearchItem>();
+					return [];
 				}
 
 				if (array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)

@@ -86,7 +86,7 @@
 			}
 
 			// Protection can apply even when there's no page
-			List<ProtectionsItem> protections = new();
+			List<ProtectionsItem> protections = [];
 			if (parent["protection"] is JToken protectionNode)
 			{
 				foreach (var result in protectionNode)

@@ -115,11 +115,11 @@
 
 		/// <summary>Gets the list of tags which should be parsed as ignored ITagNodes (i.e., where there's valid wikitext inside of them).</summary>
 		/// <value>The tags.</value>
-		public static IList<string> ParsedTags { get; } = new List<string>();
+		public static IList<string> ParsedTags { get; } = [];
 
 		/// <summary>Gets the list of tags which are not parsed into wikitext.</summary>
 		/// <value>The unparsed tags.</value>
-		public static IList<string> UnparsedTags { get; } = new List<string> { "pre", "nowiki", "gallery", "indicator" };
+		public static IList<string> UnparsedTags { get; } = ["pre", "nowiki", "gallery", "indicator"];
 		#endregion
 
 		#region Internal Properties
@@ -326,7 +326,7 @@
 
 		private (int NewEnd, List<Comment> Comments) GetComments(int closing, int wsEnd)
 		{
-			List<Comment> comments = new();
+			List<Comment> comments = [];
 			do
 			{
 				var length = this.Text.Span(HeaderElement.CommentWhiteSpace, closing);

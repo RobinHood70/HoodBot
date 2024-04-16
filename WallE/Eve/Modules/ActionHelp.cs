@@ -74,7 +74,7 @@
 		{
 			result.ThrowNull();
 			return new HelpResult(
-				help: new List<string> { result },
+				help: [result],
 				mime: "text/html");
 		}
 
@@ -84,7 +84,7 @@
 			result.ThrowNull();
 			return result.Type == JTokenType.Array
 				? new HelpResult(result.GetList<string>(), "text/html")
-				: new HelpResult(new List<string> { result.MustHaveString("help") }, result.MustHaveString("mime"));
+				: new HelpResult([result.MustHaveString("help")], result.MustHaveString("mime"));
 		}
 		#endregion
 	}

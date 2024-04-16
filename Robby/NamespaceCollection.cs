@@ -27,10 +27,10 @@
 			var comparer = StringComparer.Create(site.NotNull().Culture, true);
 
 			// NamespaceAliases
-			Dictionary<int, HashSet<string>> aliasesById = new();
+			Dictionary<int, HashSet<string>> aliasesById = [];
 			foreach (var ns in namespaces)
 			{
-				aliasesById.Add(ns.Id, new HashSet<string>(new[] { ns.CanonicalName, ns.Name }, comparer));
+				aliasesById.Add(ns.Id, new HashSet<string>([ns.CanonicalName, ns.Name], comparer));
 			}
 
 			foreach (var item in namespaceAliases)

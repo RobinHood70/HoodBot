@@ -138,7 +138,7 @@
 					{
 						var factionText = row["Factions"];
 						var factions = factionText.Length == 0
-							? Array.Empty<string>()
+							? []
 							: factionText.Split(TextArrays.Comma);
 						var title =
 							npcs.TryGetValue("Starfield:" + name + " (NPC)", out var page) ? page :
@@ -192,7 +192,7 @@
 				var factionMembers = npcs.TryGetValue(edid, out var membs) ? membs : new TitleCollection(this.Site);
 				var entry = new Entry(edid, row["FormID"][2..], edid, factionMembers);
 				var prefName = name.Length > 0 ? name : edid;
-				var entryList = entries.TryGetValue(prefName, out var list) ? list : new List<Entry>();
+				var entryList = entries.TryGetValue(prefName, out var list) ? list : [];
 				entryList.Add(entry);
 				entries[prefName] = entryList;
 			}

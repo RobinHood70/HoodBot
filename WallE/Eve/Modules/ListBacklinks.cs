@@ -75,7 +75,7 @@
 				return null;
 			}
 
-			List<IApiTitle> redirects = new();
+			List<IApiTitle> redirects = [];
 			if (result["redirlinks"] is JToken redirLinks)
 			{
 				if (redirLinks.Type == JTokenType.Array)

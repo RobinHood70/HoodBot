@@ -73,7 +73,7 @@
 
 		public WikiJob Instantiate(JobManager jobManager)
 		{
-			List<object?> objectList = new() { jobManager.NotNull() };
+			List<object?> objectList = [jobManager.NotNull()];
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
 				foreach (var param in jobParams)
@@ -82,7 +82,7 @@
 				}
 			}
 
-			return (WikiJob)this.Constructor.Invoke(objectList.ToArray());
+			return (WikiJob)this.Constructor.Invoke([.. objectList]);
 		}
 		#endregion
 

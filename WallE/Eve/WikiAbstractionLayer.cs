@@ -42,8 +42,8 @@
 
 		#region Fields
 		private readonly HashSet<string> interwikiPrefixes = new(StringComparer.Create(CultureInfo.InvariantCulture, true));
-		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new();
-		private readonly List<ErrorItem> warnings = new();
+		private readonly Dictionary<int, SiteInfoNamespace> namespaces = [];
+		private readonly List<ErrorItem> warnings = [];
 		private readonly WikiException notInitialized = new(Globals.CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
 		private ITokenManager? tokenManager;
 		private int userTalkChecksIgnored;
@@ -496,7 +496,7 @@
 
 			try
 			{
-				new ActionQuery(this, Array.Empty<IQueryModule>()).Submit();
+				new ActionQuery(this, []).Submit();
 
 				return true;
 			}
@@ -576,7 +576,7 @@
 		public IReadOnlyList<BacklinksItem> Backlinks(BacklinksInput input)
 		{
 			input.ThrowNull();
-			List<ListBacklinks> modules = new();
+			List<ListBacklinks> modules = [];
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
 				modules.Add(new ListBacklinks(this, new BacklinksInput(input, type)));
@@ -994,7 +994,7 @@
 			// Set input Token, even though it's not used directly, so this behaves like other routines.
 			input.ThrowNull();
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			List<string> change = new();
+			List<string> change = [];
 			OptionsInputInternal internalInput = new(input.Token, change);
 			if (input.Change != null)
 			{
@@ -1275,12 +1275,12 @@
 			}
 
 			// Watch each page individually, then merge the individual result into a constructed PageSetResult.
-			List<WatchItem> list = new();
+			List<WatchItem> list = [];
 			if (input.Values != null)
 			{
 				foreach (var title in input.Values)
 				{
-					WatchInput newInput = new(new[] { title }) { Token = input.Token, Unwatch = input.Unwatch };
+					WatchInput newInput = new([title]) { Token = input.Token, Unwatch = input.Unwatch };
 					var result = this.SubmitPageSet(new ActionWatch(this), newInput);
 					foreach (var item in result)
 					{

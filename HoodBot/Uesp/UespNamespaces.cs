@@ -128,8 +128,8 @@
 		#endregion
 
 		#region Public Properties
-		public static ICollection<int> Gamespaces { get; } = new HashSet<int>
-		{
+		public static ICollection<int> Gamespaces { get; } =
+		[
 			Arena,
 			Daggerfall,
 			Battlespire,
@@ -170,7 +170,7 @@
 			BetterCities,
 			MorrowindRebirth,
 			BeyondSkyrim,
-		};
+		];
 		#endregion
 
 		#region Public Functions

@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		internal RawMessageInfo(string? text)
 		{
-			this.RawMessages = new List<MessageItem>();
+			this.RawMessages = [];
 			this.Text = text;
 		}
 

@@ -21,9 +21,9 @@
 			basePage: string.Empty,
 			dbType: string.Empty,
 			dbVersion: string.Empty,
-			externalImages: new List<string>(),
+			externalImages: [],
 			fallback8BitEncoding: "windows-1252",
-			fallbackLanguages: new List<string>(),
+			fallbackLanguages: [],
 			favicon: null,
 			flags: SiteInfoFlags.WriteApi,
 			generator: "MediaWiki 1.30.0",
@@ -59,11 +59,11 @@
 			timeOffset: TimeSpan.Zero,
 			timeZone: "UTC",
 			variantArticlePath: null,
-			variants: new List<string>(),
+			variants: [],
 			wikiId: string.Empty);
 
-		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces = new()
-		{
+		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces =
+		[
 			new SiteInfoNamespace(-2, "Media", null, NamespaceFlags.None, "Media"),
 			new SiteInfoNamespace(-1, "Special", null, NamespaceFlags.None, "Special"),
 			new SiteInfoNamespace(0, string.Empty, null, NamespaceFlags.ContentSpace, string.Empty),
@@ -82,23 +82,23 @@
 			new SiteInfoNamespace(13, "Help talk", null, NamespaceFlags.AllowsSubpages, "Help talk"),
 			new SiteInfoNamespace(14, "Category", null, NamespaceFlags.AllowsSubpages, "Category"),
 			new SiteInfoNamespace(15, "Category talk", null, NamespaceFlags.AllowsSubpages, "Category talk"),
-		};
+		];
 
-		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases = new()
-		{
+		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases =
+		[
 			new SiteInfoNamespaceAlias(6, "Image"),
 			new SiteInfoNamespaceAlias(7, "Image talk"),
-		};
+		];
 
-		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap = new()
-		{
+		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap =
+		[
 			new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
 			new SiteInfoInterwikiMap("mediawikiwiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
-		};
+		];
 		#endregion
 
 		#region Fields
-		private readonly List<ErrorItem> warnings = new();
+		private readonly List<ErrorItem> warnings = [];
 		#endregion
 
 		#region Public Events
@@ -278,26 +278,26 @@
 				general: SiteInfoGeneral,
 				defaultOptions: ImmutableDictionary<string, object>.Empty,
 				defaultSkin: null,
-				extensions: Array.Empty<SiteInfoExtensions>(),
-				extensionTags: Array.Empty<string>(),
-				fileExtensions: Array.Empty<string>(),
-				functionHooks: Array.Empty<string>(),
+				extensions: [],
+				extensionTags: [],
+				fileExtensions: [],
+				functionHooks: [],
 				interwikiMap: SiteInfoInterwikiMap,
-				lagInfo: Array.Empty<SiteInfoLag>(),
-				languages: Array.Empty<SiteInfoLanguage>(),
-				libraries: Array.Empty<SiteInfoLibrary>(),
-				magicWords: new List<SiteInfoMagicWord>(),
+				lagInfo: [],
+				languages: [],
+				libraries: [],
+				magicWords: [],
 				namespaces: SiteInfoNamespaces,
 				namespaceAliases: SiteInfoNamespaceAliases,
-				protocols: Array.Empty<string>(),
+				protocols: [],
 				restrictions: null,
 				rights: null,
-				subscribedHooks: Array.Empty<SiteInfoSubscribedHook>(),
-				skins: Array.Empty<SiteInfoSkin>(),
-				specialPageAliases: Array.Empty<SiteInfoSpecialPageAlias>(),
+				subscribedHooks: [],
+				skins: [],
+				specialPageAliases: [],
 				statistics: null,
-				userGroups: Array.Empty<SiteInfoUserGroup>(),
-				variables: Array.Empty<string>());
+				userGroups: [],
+				variables: []);
 
 			this.AllSiteInfo = siteInfo;
 			this.CurrentUserInfo ??= GetUser(0, "192.0.2.1");

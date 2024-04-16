@@ -14,7 +14,7 @@
 		#endregion
 
 		#region Fields
-		private readonly SortedDictionary<Title, long> undos = new();
+		private readonly SortedDictionary<Title, long> undos = [];
 		#endregion
 
 		#region Constructors

@@ -25,7 +25,7 @@
 
 		#region Protected Properties
 
-		protected List<DividerPiece> DividerPieces { get; } = new List<DividerPiece>();
+		protected List<DividerPiece> DividerPieces { get; } = [];
 		#endregion
 
 		#region Public Override Methods
@@ -60,7 +60,7 @@
 				return count;
 			}
 
-			List<IParameterNode> parameters = new();
+			List<IParameterNode> parameters = [];
 			var pieceCount = this.DividerPieces.Count;
 			var matchingCount = (found == ']' || count == 2) ? 2 : 3;
 			var factory = this.Stack.NodeFactory;

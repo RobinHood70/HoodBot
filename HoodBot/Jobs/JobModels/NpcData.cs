@@ -127,14 +127,14 @@
 
 		public string PickpocketDifficultyText => PIckpocketDifficulties[this.PickpocketDifficulty];
 
-		public Dictionary<Place, int> Places { get; } = new Dictionary<Place, int>();
+		public Dictionary<Place, int> Places { get; } = [];
 
 		public string Reaction { get; }
 
 		public Title? Title { get; set; }
 
 		// TODO: This is really just a Dictionary<string, int> but converted to Place in hopes of doing something a little better with Places, cuz it's a mess right now.
-		public Dictionary<Place, int> UnknownLocations { get; } = new Dictionary<Place, int>();
+		public Dictionary<Place, int> UnknownLocations { get; } = [];
 		#endregion
 
 		#region Public Methods
@@ -142,7 +142,7 @@
 		{
 			void Remove(Func<Place, int, bool> condition)
 			{
-				List<Place> remove = new();
+				List<Place> remove = [];
 				foreach (var kvp in this.Places)
 				{
 					if (condition(kvp.Key, kvp.Value))
@@ -179,7 +179,7 @@
 					return false;
 				});
 
-			Dictionary<PlaceType, List<Place>> showPlaces = new();
+			Dictionary<PlaceType, List<Place>> showPlaces = [];
 			foreach (var kvp in this.Places)
 			{
 				var placeType = kvp.Key.PlaceType;
@@ -187,7 +187,7 @@
 				{
 					if (!showPlaces.TryGetValue(placeType, out var list))
 					{
-						list = new List<Place>();
+						list = [];
 						showPlaces.Add(placeType, list);
 					}
 
@@ -221,7 +221,7 @@
 				return "Varies";
 			}
 
-			List<string> list = new();
+			List<string> list = [];
 			switch (placeType)
 			{
 				case PlaceType.City:
@@ -255,7 +255,7 @@
 		#region Private Methods
 		private List<Place> Subset(PlaceType placeType)
 		{
-			List<Place> list = new();
+			List<Place> list = [];
 			foreach (var place in this.Places.Keys)
 			{
 				if (place.PlaceType == placeType)

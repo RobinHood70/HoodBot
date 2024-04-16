@@ -20,7 +20,7 @@
 		{
 			TitleCollection titles = new(this.Site);
 			titles.GetQueryPage("Wantedpages");
-			List<string> sorted = new();
+			List<string> sorted = [];
 			foreach (var title in titles)
 			{
 				if (title.Namespace == MediaWikiNamespaces.Main)

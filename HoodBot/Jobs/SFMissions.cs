@@ -58,7 +58,7 @@
 					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 					if (!items.TryGetValue(title, out var mission))
 					{
-						mission = new Mission(edid, baseName, disambig, new List<Stage>());
+						mission = new Mission(edid, baseName, disambig, []);
 						items.Add(title, mission);
 					}
 

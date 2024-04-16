@@ -21,8 +21,8 @@
 			[6117] = "Honor Guard Jack",
 		};
 
-		private static readonly List<Part> Parts = new()
-		{
+		private static readonly List<Part> Parts =
+		[
 			new("Hat", "armor", "Head"),
 			new("Epaulets", "armor", "Shoulder"),
 			new("Jerkin", "armor", "Chest"),
@@ -55,7 +55,7 @@
 			new("Maul", "weapons", "Mauls"),
 			new("Bow", "weapons", "Bows"),
 			new("Staff", "weapons", "Staves"),
-		};
+		];
 
 		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 

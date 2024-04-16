@@ -22,7 +22,7 @@
 			: base(jobManager)
 		{
 			this.allTitles = new TitleCollection(this.Site);
-			this.primaryLookup = new Dictionary<Title, Title>();
+			this.primaryLookup = [];
 		}
 		#endregion
 

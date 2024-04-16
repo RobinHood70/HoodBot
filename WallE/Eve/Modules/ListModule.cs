@@ -34,7 +34,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override void DeserializeResult(JToken? result)
 		{
 			result.ThrowNull();
-			this.Output ??= new List<TItem>();
+			this.Output ??= [];
 			using var enumerator = result.Children().GetEnumerator();
 			while (this.ItemsRemaining > 0 && enumerator.MoveNext())
 			{

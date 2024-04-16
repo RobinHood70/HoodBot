@@ -106,7 +106,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			if (result["debuginfo"] is JToken debugInfo)
 			{
-				List<DebugInfoInclude> includes = new();
+				List<DebugInfoInclude> includes = [];
 				foreach (var include in debugInfo.MustHave("includes"))
 				{
 					includes.Add(new DebugInfoInclude(
@@ -114,7 +114,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						size: include.MustHaveString("size")));
 				}
 
-				List<DebugInfoLog> logs = new();
+				List<DebugInfoLog> logs = [];
 				foreach (var log in debugInfo.MustHave("log"))
 				{
 					logs.Add(new DebugInfoLog(
@@ -123,7 +123,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						message: log.MustHaveString("msg")));
 				}
 
-				List<DebugInfoQuery> queries = new();
+				List<DebugInfoQuery> queries = [];
 				foreach (var query in debugInfo.MustHave("queries"))
 				{
 					queries.Add(new DebugInfoQuery(

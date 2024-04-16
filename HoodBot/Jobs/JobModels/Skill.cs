@@ -27,8 +27,8 @@
 
 		#region Static Fields
 		private static readonly HashSet<string> DestructionExceptions = new(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
-		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
-		private static readonly string[] DoubleColonSplit = new[] { "::" };
+		private static readonly string[] DestructionTypes = ["Frost", "Shock", "Fire"];
+		private static readonly string[] DoubleColonSplit = ["::"];
 		#endregion
 
 		#region Constructors

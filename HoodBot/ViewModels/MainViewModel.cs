@@ -209,7 +209,7 @@
 		{
 			this.parameterFetcher?.SetParameters();
 
-			List<JobInfo> jobList = new();
+			List<JobInfo> jobList = [];
 			foreach (var node in this.JobTree.CheckedChildren<JobNode>())
 			{
 				jobList.Add(node.JobInfo);

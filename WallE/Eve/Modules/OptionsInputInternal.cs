@@ -7,7 +7,7 @@
 	{
 		#region Constructors
 		public OptionsInputInternal(string token, string name, string? value)
-			: this(token, Array.Empty<string>())
+			: this(token, [])
 		{
 			this.OptionName = name;
 			this.OptionValue = value;

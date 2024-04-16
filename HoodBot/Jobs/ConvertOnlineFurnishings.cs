@@ -12,8 +12,8 @@
 	internal sealed class ConvertOnlineFurnishings : EditJob
 	{
 		#region Static Fields
-		private static readonly string[] AntiquityNames = new[]
-		{
+		private static readonly string[] AntiquityNames =
+		[
 			string.Empty,
 			"id",
 			"quality",
@@ -26,10 +26,10 @@
 			"codex2",
 			"antiquarian3",
 			"codex3"
-		};
+		];
 
-		private static readonly string[] AntiquityFormatting = new[]
-		{
+		private static readonly string[] AntiquityFormatting =
+		[
 			"\n  |name=",
 			"\n  |id=",
 			"\n  |quality=",
@@ -42,10 +42,10 @@
 			"\n  |codex2=",
 			"\n  |antiquarian3=",
 			"\n  |codex3="
-		};
+		];
 
-		private static readonly string[] CraftingParameters = new[]
-		{
+		private static readonly string[] CraftingParameters =
+		[
 			"craft",
 			"document",
 			"folio",
@@ -56,7 +56,7 @@
 			"planquality",
 			"planvendorwv",
 			"skills"
-		};
+		];
 
 		private static readonly HashSet<string> NonHouseCats = new(StringComparer.Ordinal)
 		{
@@ -66,8 +66,8 @@
 			"Services"
 		};
 
-		private static readonly string[] PurchaseParameters = new[]
-		{
+		private static readonly string[] PurchaseParameters =
+		[
 			"priceap",
 			"pricecg",
 			"pricecrowns",
@@ -92,7 +92,7 @@
 			"vendorother3",
 			"vendortv",
 			"vendorwv"
-		};
+		];
 		#endregion
 
 		#region Constructors

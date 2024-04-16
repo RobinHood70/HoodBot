@@ -68,7 +68,7 @@
 			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 			if (first != -1)
 			{
-				List<IWikiNode> newNodes = new();
+				List<IWikiNode> newNodes = [];
 				parser.RemoveRange(first, last + 1 - first);
 				var letter = page.Title.PageName[6..];
 				var entries = this.pageBooks[letter];
@@ -128,7 +128,7 @@
 		{
 			var listBooks = this.Site.CreateMetaPageCollection(PageModules.Info, false, "listbook");
 			listBooks.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Lore);
-			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
+			listBooks.GetCustomGenerator(new VariablesInput() { Variables = ["listbook"] });
 			for (var i = listBooks.Count - 1; i >= 0; i--)
 			{
 				var varPage = (VariablesPage)listBooks[i];
@@ -177,7 +177,7 @@
 
 				if (!this.pageBooks.TryGetValue(letter, out var titles))
 				{
-					titles = new List<string>();
+					titles = [];
 					this.pageBooks.Add(letter, titles);
 					loreBookTitles.Add("Lore:Books " + letter);
 				}

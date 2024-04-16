@@ -29,7 +29,7 @@
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
 			var whatToLoad = options.NotNull().Modules;
-			List<IPropertyInput> propertyInputs = new();
+			List<IPropertyInput> propertyInputs = [];
 			if (whatToLoad.HasAnyFlag(PageModules.Categories))
 			{
 				propertyInputs.Add(new CategoriesInput());

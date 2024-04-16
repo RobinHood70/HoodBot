@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Base
 	public class ImportInput
 	{
 		#region Fields
-		private byte[] xmlData = Array.Empty<byte>();
+		private byte[] xmlData = [];
 		#endregion
 
 		#region Constructors

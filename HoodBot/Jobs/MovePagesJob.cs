@@ -426,7 +426,7 @@
 		protected virtual IReadOnlyDictionary<Title, TitleCollection> GetCategoryMembers(PageCollection fromPages)
 		{
 			this.StatusWriteLine("Getting category members");
-			Dictionary<Title, TitleCollection> retval = new();
+			Dictionary<Title, TitleCollection> retval = [];
 			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.NeedsCategoryMembers))
 			{
 				var categoryReplacements = new Dictionary<Title, ITitle>();
@@ -976,7 +976,7 @@
 
 		private void ValidateMoves()
 		{
-			Dictionary<Title, Title> unique = new();
+			Dictionary<Title, Title> unique = [];
 			foreach (var move in this.moves)
 			{
 				var title = move.Key;

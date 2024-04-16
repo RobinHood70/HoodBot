@@ -39,9 +39,9 @@ namespace RobinHood70.WallE.Base
 		#region Internal Properties
 		internal bool GetInterwikiUrls { get; set; }
 
-		internal List<IPropertyModule> PropertyModules { get; } = new List<IPropertyModule>();
+		internal List<IPropertyModule> PropertyModules { get; } = [];
 
-		internal List<IQueryModule> QueryModules { get; } = new List<IQueryModule>();
+		internal List<IQueryModule> QueryModules { get; } = [];
 		#endregion
 	}
 }

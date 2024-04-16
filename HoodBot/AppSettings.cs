@@ -10,7 +10,7 @@
 	public class AppSettings : IJsonSettings<AppSettings>
 	{
 		#region Public Properties
-		public IList<WikiInfo> DefaultWikis { get; } = new List<WikiInfo>();
+		public IList<WikiInfo> DefaultWikis { get; } = [];
 
 		public string FileName => Path.Combine(App.AppFolder, nameof(AppSettings) + ".json");
 		#endregion
@@ -30,7 +30,7 @@
 
 		public JToken ToJson()
 		{
-			JArray wikis = new();
+			JArray wikis = [];
 			foreach (var wiki in this.DefaultWikis)
 			{
 				wikis.Add(wiki.ToJson());

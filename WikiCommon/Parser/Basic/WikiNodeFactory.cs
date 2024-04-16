@@ -136,7 +136,7 @@
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
 			var titleNodes = this.Parse(title.NotNull());
-			List<IParameterNode> paramEntries = new();
+			List<IParameterNode> paramEntries = [];
 			if (parameters != null)
 			{
 				foreach (var parameter in parameters)

@@ -209,7 +209,7 @@
 				var name = row["Name"];
 				if (!string.Equals(creature?.Variants[0]["Name"], name, StringComparison.Ordinal))
 				{
-					creature = new Creature(new List<CsvRow>());
+					creature = new Creature([]);
 					if (!titleMap.TryGetValue(name, out var title))
 					{
 						title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);

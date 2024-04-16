@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
-		private readonly HashSet<long> badRevisionIds = new();
+		private readonly HashSet<long> badRevisionIds = [];
 		private readonly Dictionary<string, string> converted = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string> normalized = new(StringComparer.Ordinal);
@@ -109,7 +109,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				while (this.ContinueModule.Continues && this.Continues);
 
 				// Because pages may have returned less than we asked for (e.g., due to limits being surpassed), we remove all the pages we got back from our input set and continue from there.
-				List<string> returnedNames = new();
+				List<string> returnedNames = [];
 				foreach (var title in pages)
 				{
 					returnedNames.Add(title.Title);
@@ -241,7 +241,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual IList<TOutput> CreatePageList() => new List<TOutput>();
+		protected virtual IList<TOutput> CreatePageList() => [];
 
 		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{

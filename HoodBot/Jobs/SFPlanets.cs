@@ -50,7 +50,7 @@
 			foreach (var row in csv)
 			{
 				var id = row["Name"];
-				var biome = biomes.TryGetValue(id, out var val) ? val : Array.Empty<string>();
+				var biome = biomes.TryGetValue(id, out var val) ? val : [];
 				var gravity = double.TryParse(row["Gravity"], CultureInfo.CurrentCulture, out var grav)
 					? grav
 					: (double?)null;
@@ -183,7 +183,7 @@
 
 					var line = row[0].Split(TextArrays.Colon, 2);
 					planet = line[1].Trim();
-					biomeList = new List<string>();
+					biomeList = [];
 				}
 				else
 				{

@@ -362,7 +362,7 @@
 
 			#region Public Properties
 
-			public List<(string ItemCount, string Text)> BonusDescriptions { get; } = new();
+			public List<(string ItemCount, string Text)> BonusDescriptions { get; } = [];
 
 			public bool IsNonTrivial { get; set; }
 

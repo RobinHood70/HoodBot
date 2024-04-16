@@ -13,8 +13,8 @@
 	public class RelinkCollectibles : MovePagesJob
 	{
 		#region Fields
-		private readonly List<Title> esoTitles = new();
-		private readonly Dictionary<Title, string> disambigs = new();
+		private readonly List<Title> esoTitles = [];
+		private readonly Dictionary<Title, string> disambigs = [];
 		#endregion
 
 		#region Constructors
@@ -63,7 +63,6 @@
 			allTitles.Sort();
 			this.esoTitles.AddRange(allTitles.Titles());
 
-			// var collectionTitles = this.GetCollectionTitles();
 			var collectionTitles = GetTitles();
 			var collectionPages = this.GetPages(collectionTitles);
 			this.PopulateFromCollections(collectionPages);
@@ -116,7 +115,7 @@
 		}
 		*/
 
-		private static IEnumerable<string> GetTitles() => new List<string> { "Online:Antiquity Furnishings", "Online:Antique Maps" }; // GetCollectionTitles();
+		private static IEnumerable<string> GetTitles() => ["Online:Antiquity Furnishings", "Online:Antique Maps"]; // GetCollectionTitles();
 		#endregion
 
 		#region Private Methods

@@ -61,13 +61,13 @@
 			Dictionary<string, List<JobInfo>> retval = new(StringComparer.Ordinal);
 			foreach (var job in jobList)
 			{
-				var jobGroups = job.Groups.Count == 0 ? new string[] { string.Empty } : job.Groups;
+				var jobGroups = job.Groups.Count == 0 ? [string.Empty] : job.Groups;
 				foreach (var groupName in jobGroups)
 				{
 					var name = groupName.Length == 0 ? string.Empty : groupName;
 					if (!retval.TryGetValue(name, out var children))
 					{
-						children = new List<JobInfo>();
+						children = [];
 						retval.Add(name, children);
 					}
 

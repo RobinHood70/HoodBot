@@ -196,7 +196,7 @@
 			ArgumentNullException.ThrowIfNull(tag);
 			if (string.IsNullOrEmpty(tag.Attributes))
 			{
-				return Array.Empty<KeyValuePair<string, string?>>();
+				return [];
 			}
 
 			var attribs = new List<KeyValuePair<string, string?>>();
@@ -447,7 +447,7 @@
 		/// <returns>A read-only dictionary of the parameters.</returns>
 		public static IReadOnlyDictionary<int, IParameterNode> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
 		{
-			SortedDictionary<int, IParameterNode> retval = new();
+			SortedDictionary<int, IParameterNode> retval = [];
 			var highest = 0;
 			foreach (var (index, parameter) in GetNumericParameters(template))
 			{
@@ -535,7 +535,7 @@
 		{
 			var parameters = template.NotNull().GetNumericParametersSorted(true);
 			var i = 1;
-			List<IParameterNode> retval = new();
+			List<IParameterNode> retval = [];
 			while (i < parameters.Count)
 			{
 				for (var j = 0; j < length; j++)
@@ -544,7 +544,7 @@
 				}
 
 				yield return retval;
-				retval = new List<IParameterNode>();
+				retval = [];
 				i += length;
 			}
 
@@ -725,7 +725,7 @@
 			}
 
 			var sorted = new IParameterNode?[indeces.Count];
-			List<IParameterNode> unsorted = new();
+			List<IParameterNode> unsorted = [];
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{
 				var index = indeces.GetValueOrDefault(name, -1);

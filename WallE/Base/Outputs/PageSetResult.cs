@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 		internal PageSetResult(IEnumerable<T> titles)
 			: this(
 				  titles,
-				  Array.Empty<long>(),
+				  [],
 				  ImmutableDictionary<string, string>.Empty,
 				  ImmutableDictionary<string, InterwikiTitleItem>.Empty,
 				  ImmutableDictionary<string, string>.Empty,

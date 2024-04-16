@@ -187,7 +187,7 @@
 
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
-		public IReadOnlyList<Category> Categories { get; } = new List<Category>();
+		public IReadOnlyList<Category> Categories { get; } = [];
 
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
@@ -265,7 +265,7 @@
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
-		public IReadOnlyList<Title> Links { get; } = new List<Title>();
+		public IReadOnlyList<Title> Links { get; } = [];
 
 		/// <summary>Gets the information that was loaded for this page.</summary>
 		/// <value>The load options.</value>
@@ -285,7 +285,7 @@
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
-		public IReadOnlyList<Revision> Revisions { get; } = new List<Revision>();
+		public IReadOnlyList<Revision> Revisions { get; } = [];
 
 		/// <summary>Gets or sets the timestamp when the page was loaded. Used for edit conflict detection.</summary>
 		/// <value>The start timestamp.</value>
@@ -293,7 +293,7 @@
 
 		/// <summary>Gets the templates used on the page, if they were requested in the last load operation.</summary>
 		/// <value>The templates used on the page.</value>
-		public IReadOnlyCollection<Title> Templates { get; } = new List<Title>();
+		public IReadOnlyCollection<Title> Templates { get; } = [];
 
 		/// <summary>Gets or sets the text, if revisions were requested in the last load operation.</summary>
 		/// <value>The page text.</value>

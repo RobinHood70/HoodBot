@@ -51,7 +51,7 @@
 
 		public string? SelectedName { get; set; }
 
-		public ObservableCollection<WikiInfoViewModel> Wikis { get; } = new ObservableCollection<WikiInfoViewModel>();
+		public ObservableCollection<WikiInfoViewModel> Wikis { get; } = [];
 		#endregion
 
 		#region Public Methods
@@ -131,13 +131,13 @@
 
 		public JToken ToJson()
 		{
-			JArray wikis = new();
+			JArray wikis = [];
 			foreach (var wiki in this.Wikis)
 			{
 				wikis.Add(wiki.WikiInfo.ToJson());
 			}
 
-			JObject connectionStrings = new();
+			JObject connectionStrings = [];
 			foreach (var connectionString in this.ConnectionStrings)
 			{
 				connectionStrings.Add(connectionString.Key, Settings.Encrypter.Encrypt(connectionString.Value));

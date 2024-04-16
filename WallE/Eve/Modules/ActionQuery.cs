@@ -22,7 +22,7 @@
 		public ActionQuery(WikiAbstractionLayer wal, IEnumerable<IQueryModule> queryModules)
 			: base(wal)
 		{
-			this.queryModules = new List<IQueryModule>(queryModules ?? Array.Empty<IQueryModule>());
+			this.queryModules = new List<IQueryModule>(queryModules ?? []);
 			var props =
 				((wal.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
 				| (wal.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.TalkCheckQuery) ? UserInfoProperties.HasMsg : UserInfoProperties.None);

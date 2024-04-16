@@ -108,7 +108,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, QuestData> quests = new();
+		private readonly Dictionary<Title, QuestData> quests = [];
 		#endregion
 
 		#region Constructors
@@ -324,7 +324,7 @@
 		#region Private Static Methods
 		private static List<string> GetJournalEntries(Dictionary<string, List<Condition>> mergedStages)
 		{
-			List<string> journalEntries = new();
+			List<string> journalEntries = [];
 			foreach (var kvp in mergedStages)
 			{
 				var split = kvp.Key.Split(TextArrays.At);
@@ -371,7 +371,7 @@
 
 		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
 		{
-			List<string> retval = new();
+			List<string> retval = [];
 			foreach (var condition in conditions)
 			{
 				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
@@ -518,7 +518,7 @@
 				var stageText = $"|{stage.FinishText}|{stage.Text}@{Visibilities[stage.Visibility]}";
 				if (!mergedStages.TryGetValue(stageText, out var list))
 				{
-					list = new List<Condition>();
+					list = [];
 					mergedStages.Add(stageText, list);
 				}
 
@@ -579,7 +579,7 @@
 		private sealed class QuestData
 		{
 			#region Fields
-			private readonly List<Reward> rewards = new();
+			private readonly List<Reward> rewards = [];
 			#endregion
 
 			#region Constructors
@@ -660,7 +660,7 @@
 
 			public int RepeatType { get; }
 
-			public List<Stage> Stages { get; } = new List<Stage>();
+			public List<Stage> Stages { get; } = [];
 
 			public int Type { get; }
 
@@ -674,7 +674,7 @@
 
 			public string GetRewardText()
 			{
-				List<string> rewardList = new();
+				List<string> rewardList = [];
 				foreach (var reward in this.rewards)
 				{
 					switch (reward.RewardType)
@@ -769,7 +769,7 @@
 			#endregion
 
 			#region Public Properties
-			public List<Condition> Conditions { get; } = new List<Condition>();
+			public List<Condition> Conditions { get; } = [];
 
 			public string FinishText
 			{

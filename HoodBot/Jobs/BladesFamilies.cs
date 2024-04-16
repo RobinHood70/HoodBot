@@ -12,8 +12,8 @@
 	internal sealed class BladesFamilies : WikiJob
 	{
 		#region Fields
-		private readonly List<BladesEnemy> enemies = new();
-		private readonly List<BladesFamily> families = new();
+		private readonly List<BladesEnemy> enemies = [];
+		private readonly List<BladesFamily> families = [];
 		#endregion
 
 		#region Constructors
@@ -232,7 +232,7 @@
 
 			public double BackswingTime { get; }
 
-			public List<DamageTypeInfo> BaseDamageTypes { get; } = new();
+			public List<DamageTypeInfo> BaseDamageTypes { get; } = [];
 
 			public double BlockRatingIncrement { get; }
 
@@ -572,7 +572,7 @@
 
 			public string Sort { get; }
 
-			public List<ValueRange<int>> Variants { get; } = new List<ValueRange<int>>();
+			public List<ValueRange<int>> Variants { get; } = [];
 			#endregion
 
 			#region Public Methods
@@ -591,8 +591,8 @@
 
 		private sealed class DamageTypeInfo
 		{
-			public static readonly string[] DamageTypes = new[]
-			{
+			public static readonly string[] DamageTypes =
+			[
 				"weapon",
 				"slashing",
 				"cleaving",
@@ -601,7 +601,7 @@
 				"frost",
 				"shock",
 				"poison"
-			};
+			];
 
 			public DamageTypeInfo(JToken token)
 			{

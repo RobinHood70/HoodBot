@@ -134,7 +134,7 @@
 				}
 			}
 
-			List<(string?, string)> parms = new() { (null, this.logInfo.Title) };
+			List<(string?, string)> parms = [(null, this.logInfo.Title)];
 			if (!string.IsNullOrEmpty(this.logInfo.Details))
 			{
 				parms.Add(("info", this.logInfo.Details));
@@ -143,12 +143,12 @@
 			AddDateTime(parms, this.start);
 			AddDateTime(parms, this.end);
 
-			parser.InsertRange(firstEntry, new IWikiNode[]
-			{
-						factory.TemplateNodeFromParts("/Entry", false, parms),
-						factory.TextNode("\n")
-			});
-
+			List<IWikiNode> nodes =
+				[
+					factory.TemplateNodeFromParts("/Entry", false, parms),
+					factory.TextNode("\n")
+				];
+			parser.InsertRange(firstEntry, nodes);
 			parser.UpdatePage();
 		}
 

@@ -13,7 +13,7 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyList<VariableItem> Variables { get; } = new List<VariableItem>();
+		public IReadOnlyList<VariableItem> Variables { get; } = [];
 		#endregion
 	}
 }

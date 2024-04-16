@@ -22,7 +22,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<Title, Collectible> collectibles = new();
+		private readonly Dictionary<Title, Collectible> collectibles = [];
 		private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
 		private string? blankText;
 		#endregion
@@ -259,7 +259,7 @@
 						var title = parameter[0].Value.ToRaw();
 						if (!this.crateTiers.TryGetValue(title, out var allTiers))
 						{
-							allTiers = new List<string>();
+							allTiers = [];
 							this.crateTiers.Add(title, allTiers);
 						}
 
@@ -323,7 +323,7 @@
 			#region Public Properties
 			public string CollectibleType { get; }
 
-			public List<string> Crates { get; } = new List<string>();
+			public List<string> Crates { get; } = [];
 
 			public string Description { get; }
 

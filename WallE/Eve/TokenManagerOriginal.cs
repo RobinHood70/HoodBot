@@ -8,7 +8,7 @@
 	internal class TokenManagerOriginal : ITokenManager
 	{
 		#region Static Fields
-		private static readonly string[] DummyPage = { ":" }; // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
+		private static readonly string[] DummyPage = [":"]; // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
 		#endregion
 
 		#region Constructors
@@ -38,9 +38,9 @@
 
 		public string? LoginToken() => null;
 
-		public string? RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new[] { pageId }));
+		public string? RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds([pageId]));
 
-		public string? RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new[] { title }));
+		public string? RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput([title]));
 
 		public virtual string? SessionToken(string type)
 		{
@@ -48,7 +48,7 @@
 			if (this.SessionTokens.Count == 0)
 			{
 				QueryPageSetInput pageSetInput = new(DummyPage);
-				InfoInput propInfoInput = new() { Tokens = new[] { TokensInput.Edit, TokensInput.Watch } };
+				InfoInput propInfoInput = new() { Tokens = [TokensInput.Edit, TokensInput.Watch] };
 				RecentChangesInput input = new() { GetPatrolToken = true, MaxItems = 1 };
 				ListRecentChanges recentChanges = new(this.Wal, input);
 				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });

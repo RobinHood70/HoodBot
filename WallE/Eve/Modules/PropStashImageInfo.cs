@@ -50,7 +50,7 @@
 		protected override void DeserializeResult(JToken? result)
 		{
 			result.ThrowNull();
-			this.Output = new List<ImageInfoItem>();
+			this.Output = [];
 			foreach (var item in result)
 			{
 				var imageInfo = JTokenImageInfo.ParseImageInfo(item, new ImageInfoItem());

@@ -29,42 +29,42 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public long AnonContributors { get; internal set; }
 
-		public IReadOnlyList<CategoriesItem> Categories { get; } = new List<CategoriesItem>();
+		public IReadOnlyList<CategoriesItem> Categories { get; } = [];
 
 		public CategoryInfoResult? CategoryInfo { get; internal set; }
 
-		public IReadOnlyList<ContributorItem> Contributors { get; } = new List<ContributorItem>();
+		public IReadOnlyList<ContributorItem> Contributors { get; } = [];
 
 		/// <summary>Gets custom module results. This collection is unused by the framework and exists for any custom property modules the user might implement.</summary>
 		/// <value>The custom page information.</value>
 		/// <remarks>Module results can be added here as needed, then unboxed again when they reach the caller. Pages can, of course, also be inherited with custom property module results added, but this will likely be a far easier method in the long run.</remarks>
-		public IList<object> CustomPageInfo { get; } = new List<object>();
+		public IList<object> CustomPageInfo { get; } = [];
 
-		public IReadOnlyList<RevisionItem> DeletedRevisions { get; } = new List<RevisionItem>();
+		public IReadOnlyList<RevisionItem> DeletedRevisions { get; } = [];
 
-		public IReadOnlyList<DuplicateFileItem> DuplicateFiles { get; } = new List<DuplicateFileItem>();
+		public IReadOnlyList<DuplicateFileItem> DuplicateFiles { get; } = [];
 
-		public IReadOnlyList<string> ExternalLinks { get; } = new List<string>();
+		public IReadOnlyList<string> ExternalLinks { get; } = [];
 
-		public IReadOnlyList<FileUsageItem> FileUsages { get; } = new List<FileUsageItem>();
+		public IReadOnlyList<FileUsageItem> FileUsages { get; } = [];
 
 		public PageFlags Flags { get; internal set; }
 
-		public IReadOnlyList<ImageInfoItem> ImageInfoEntries { get; } = new List<ImageInfoItem>();
+		public IReadOnlyList<ImageInfoItem> ImageInfoEntries { get; } = [];
 
-		public IReadOnlyList<IApiTitle> Images { get; } = new List<IApiTitle>();
+		public IReadOnlyList<IApiTitle> Images { get; } = [];
 
 		public string? ImageRepository { get; internal set; }
 
 		public PageInfo? Info { get; internal set; }
 
-		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks { get; } = new List<InterwikiTitleItem>();
+		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks { get; } = [];
 
-		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; } = new List<LanguageLinksItem>();
+		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; } = [];
 
-		public IReadOnlyList<IApiTitle> Links { get; } = new List<IApiTitle>();
+		public IReadOnlyList<IApiTitle> Links { get; } = [];
 
-		public IReadOnlyList<LinksHereItem> LinksHere { get; } = new List<LinksHereItem>();
+		public IReadOnlyList<LinksHereItem> LinksHere { get; } = [];
 
 		public int Namespace { get; }
 
@@ -72,15 +72,15 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public IReadOnlyList<RedirectItem> Redirects { get; } = new List<RedirectItem>();
+		public IReadOnlyList<RedirectItem> Redirects { get; } = [];
 
-		public IReadOnlyList<RevisionItem> Revisions { get; } = new List<RevisionItem>();
+		public IReadOnlyList<RevisionItem> Revisions { get; } = [];
 
-		public IReadOnlyList<IApiTitle> Templates { get; } = new List<IApiTitle>();
+		public IReadOnlyList<IApiTitle> Templates { get; } = [];
 
 		public string Title { get; }
 
-		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; } = new List<TranscludedInItem>();
+		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; } = [];
 		#endregion
 
 		#region Public Override Methods

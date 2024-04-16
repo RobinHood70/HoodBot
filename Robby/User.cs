@@ -160,7 +160,7 @@
 		{
 			UserContributionsInput input = new(this.Name);
 			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
-			List<Contribution> retval = new();
+			List<Contribution> retval = [];
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Title.Site, item));
@@ -176,7 +176,7 @@
 		{
 			UserContributionsInput input = new(this.Name) { Namespaces = namespaces };
 			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
-			List<Contribution> retval = new();
+			List<Contribution> retval = [];
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Title.Site, item));
@@ -193,7 +193,7 @@
 		{
 			UserContributionsInput input = new(this.Name) { Start = from, End = to, SortAscending = (from ?? DateTime.MinValue) < (to ?? DateTime.MaxValue) };
 			var result = this.Title.Site.AbstractionLayer.UserContributions(input);
-			List<Contribution> retval = new();
+			List<Contribution> retval = [];
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Title.Site, item));
@@ -220,7 +220,7 @@
 				Namespaces = namespaces
 			};
 			var result = this.Title.Site.AbstractionLayer.WatchlistRaw(input);
-			List<Title> retval = new();
+			List<Title> retval = [];
 			foreach (var item in result)
 			{
 				retval.Add(TitleFactory.CoValidate(this.Title.Site, item.Namespace, item.Title));

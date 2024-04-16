@@ -55,7 +55,7 @@
 		#region Public Properties
 		public string ChannelTime { get; }
 
-		public IList<Cost> Costs { get; } = new List<Cost>();
+		public IList<Cost> Costs { get; } = [];
 
 		public string Duration { get; }
 

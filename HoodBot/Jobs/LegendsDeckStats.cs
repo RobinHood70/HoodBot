@@ -34,7 +34,7 @@
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			SortedDictionary<int, int> powerCount = new();
+			SortedDictionary<int, int> powerCount = [];
 			if (parser.NotNull().FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
