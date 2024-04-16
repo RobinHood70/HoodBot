@@ -183,7 +183,11 @@
 				.Replace("esoui/art/", string.Empty, StringComparison.OrdinalIgnoreCase)
 				.Replace('/', '\\');
 			var fileName = LocalConfig.BotDataSubPath(iconName + ".png");
-			this.Site.Upload(fileName, lead.FileTitle, "Upload antiquity lead", page.Text);
+			if (this.Site.Upload(fileName, lead.FileTitle, "Upload antiquity lead", page.Text) == ChangeStatus.Failure)
+			{
+				this.StatusWriteLine("File not found: " + fileName);
+			}
+
 			this.originalFileNames.Add(lead.Icon, page);
 		}
 		#endregion
