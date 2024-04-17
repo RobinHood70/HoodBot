@@ -44,7 +44,7 @@
 
 		protected override string? GetItem(JToken result, PageItem page) => result.MustHaveBCString("url");
 
-		protected override ICollection<string> GetMutableList(PageItem page) => (ICollection<string>)page.ExternalLinks;
+		protected override IList<string> GetMutableList(PageItem page) => page.ExternalLinks;
 		#endregion
 	}
 }

@@ -49,7 +49,7 @@
 			? null
 			: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title")!, (Uri?)result["url"]);
 
-		protected override ICollection<InterwikiTitleItem> GetMutableList(PageItem page) => (ICollection<InterwikiTitleItem>)page.InterwikiLinks;
+		protected override IList<InterwikiTitleItem> GetMutableList(PageItem page) => page.InterwikiLinks;
 		#endregion
 	}
 }

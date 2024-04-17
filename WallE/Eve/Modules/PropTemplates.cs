@@ -46,7 +46,7 @@
 			base.BuildRequestLocal(request, input);
 		}
 
-		protected override ICollection<IApiTitle> GetMutableList(PageItem page) => (ICollection<IApiTitle>)page.Templates;
+		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Templates;
 		#endregion
 	}
 }

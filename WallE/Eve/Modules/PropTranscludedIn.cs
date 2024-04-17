@@ -57,7 +57,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override ICollection<TranscludedInItem> GetMutableList(PageItem page) => (ICollection<TranscludedInItem>)page.TranscludedIn;
+		protected override IList<TranscludedInItem> GetMutableList(PageItem page) => page.TranscludedIn;
 		#endregion
 	}
 }

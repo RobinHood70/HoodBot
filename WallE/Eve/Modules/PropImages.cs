@@ -51,7 +51,7 @@
 
 		protected override IApiTitle GetItem(JToken result, PageItem page) => result.GetWikiTitle();
 
-		protected override ICollection<IApiTitle> GetMutableList(PageItem page) => (ICollection<IApiTitle>)page.Images;
+		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Images;
 		#endregion
 	}
 }

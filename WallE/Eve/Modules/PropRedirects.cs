@@ -56,7 +56,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				fragment: (string?)result["fragment"]);
 
-		protected override ICollection<RedirectItem> GetMutableList(PageItem page) => (ICollection<RedirectItem>)page.Redirects;
+		protected override IList<RedirectItem> GetMutableList(PageItem page) => page.Redirects;
 		#endregion
 	}
 }

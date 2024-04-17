@@ -47,7 +47,7 @@
 
 		protected override LanguageLinksItem? GetItem(JToken result, PageItem page) => result.GetLanguageLink();
 
-		protected override ICollection<LanguageLinksItem> GetMutableList(PageItem page) => (ICollection<LanguageLinksItem>)page.LanguageLinks;
+		protected override IList<LanguageLinksItem> GetMutableList(PageItem page) => page.LanguageLinks;
 		#endregion
 	}
 }

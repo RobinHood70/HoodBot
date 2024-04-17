@@ -14,6 +14,12 @@
 	public class Page : ITitle
 	{
 		#region Fields
+		private readonly Dictionary<Title, BacklinksTypes> backlinks = new();
+		private readonly List<Category> categories = [];
+		private readonly List<Title> links = [];
+		private readonly Dictionary<string, string> properties = new(StringComparer.Ordinal);
+		private readonly List<Revision> revisions = [];
+		private readonly List<Title> templates = [];
 		private Uri? canonicalPath;
 		private Revision? currentRevision;
 		private Uri? editPath;
@@ -61,38 +67,36 @@
 
 			void PopulateBacklinks(PageItem pageItem)
 			{
-				var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
-				backlinks.Clear();
-				PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
-				PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
-				PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
+				this.backlinks.Clear();
+				PopulateBacklinksType(pageItem.FileUsages, BacklinksTypes.ImageUsage);
+				PopulateBacklinksType(pageItem.LinksHere, BacklinksTypes.Backlinks);
+				PopulateBacklinksType(pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
 			}
 
-			void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<IApiTitleOptional> list, BacklinksTypes type)
+			void PopulateBacklinksType(IEnumerable<IApiTitleOptional> list, BacklinksTypes type)
 			{
 				foreach (var link in list)
 				{
 					link.Title.PropertyThrowNull(nameof(link));
 					Title title = TitleFactory.FromUnvalidated(this.Title.Site, link.Title);
-					if (backlinks.ContainsKey(title))
+					if (this.backlinks.ContainsKey(title))
 					{
-						backlinks[title] |= type;
+						this.backlinks[title] |= type;
 					}
 					else
 					{
-						backlinks[title] = type;
+						this.backlinks[title] = type;
 					}
 				}
 			}
 
 			void PopulateCategories(PageItem pageItem)
 			{
-				var categories = (List<Category>)this.Categories;
-				categories.Clear();
+				this.categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
 					var factory = TitleFactory.CoValidate(this.Site, category.Namespace, category.Title);
-					categories.Add(new Category(factory, category.SortKey, category.Hidden));
+					this.categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
 
@@ -128,43 +132,38 @@
 
 			void PopulateLinks(PageItem pageItem)
 			{
-				var links = (List<Title>)this.Links;
-				links.Clear();
+				this.links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
+					this.links.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
 				}
 			}
 
 			void PopulateProperties(PageItem pageItem)
 			{
-				var properties = (Dictionary<string, string>)this.Properties;
-				properties.Clear();
+				this.properties.Clear();
 				if (pageItem.Properties?.Count > 0)
 				{
-					properties.Clear();
-					properties.AddRange(pageItem.Properties);
+					this.properties.AddRange(pageItem.Properties);
 				}
 			}
 
 			void PopulateRevisions(PageItem pageItem)
 			{
-				var revs = (List<Revision>)this.Revisions;
-				revs.Clear();
+				this.revisions.Clear();
 				this.currentRevision = null;
 				foreach (var rev in pageItem.Revisions)
 				{
-					revs.Add(new Revision(rev));
+					this.revisions.Add(new Revision(rev));
 				}
 			}
 
 			void PopulateTemplates(PageItem pageItem)
 			{
-				var templates = (List<Title>)this.Templates;
-				templates.Clear();
+				this.templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
+					this.templates.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
 				}
 			}
 		}
@@ -175,7 +174,7 @@
 		/// <summary>Gets the backlinks on the page if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
 		/// <remarks>This includes links, transclusions, and file usage.</remarks>
-		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks { get; } = new Dictionary<Title, BacklinksTypes>();
+		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks => this.backlinks;
 
 		/// <summary>Gets or sets the canonical article path.</summary>
 		/// <value>The canonical article path.</value>
@@ -187,7 +186,7 @@
 
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
-		public IReadOnlyList<Category> Categories { get; } = [];
+		public IReadOnlyList<Category> Categories => this.categories;
 
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
@@ -196,10 +195,10 @@
 			? null
 			: this.currentRevision ??= ((List<Revision>)this.Revisions).Find(item => this.CurrentRevisionId > 0 && item.Id == this.CurrentRevisionId);
 
-		/// <summary>Gets the ID of the current revision.</summary>
+		/// <summary>Gets or sets the ID of the current revision.</summary>
 		/// <value>The ID of the current revision.</value>
 		/// <remarks>Even if this is populated, the current revision isn't guaranteed to be.</remarks>
-		public long CurrentRevisionId { get; internal set; }
+		public long CurrentRevisionId { get; protected set; }
 
 		/// <summary>Gets or sets the URI to edit the article in a browser.</summary>
 		/// <value>The edit path.</value>
@@ -217,7 +216,7 @@
 		public bool Exists => !this.IsMissing && !this.IsInvalid;
 
 		/// <summary>Gets a value indicating whether the page represents a disambiguation page.</summary>
-		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />. On wikis where the Disambiguator extension isn't in use, this will fall back to a template-based approach. In that event, this can also return <see langword="null"/> if the <see cref="Templates"/> for the page aren't loaded or if there are no disambiguation templates.</returns>
+		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />. On wikis where the Disambiguator extension isn't in use, this will fall back to a template-based approach. In that event, this can also return <see langword="null"/> if the <see cref="Templates"/> for the page aren't loaded or if there are no disambiguation templatesHash.</returns>
 		public bool? IsDisambiguation
 		{
 			get
@@ -236,10 +235,10 @@
 					return null;
 				}
 
-				HashSet<Title> templates = new(this.Templates);
-				templates.IntersectWith(site.DisambiguationTemplates);
+				HashSet<Title> templatesHash = new(this.Templates);
+				templatesHash.IntersectWith(site.DisambiguationTemplates);
 
-				return templates.Count > 0;
+				return templatesHash.Count > 0;
 			}
 		}
 
@@ -249,7 +248,7 @@
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
 		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
-		public bool IsLoaded { get; }
+		public bool IsLoaded { get; protected set; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
 		/// <value><see langword="true" /> if the page is missing; otherwise, <see langword="false" />.</value>
@@ -265,7 +264,7 @@
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
-		public IReadOnlyList<Title> Links { get; } = [];
+		public IReadOnlyList<Title> Links => this.links;
 
 		/// <summary>Gets the information that was loaded for this page.</summary>
 		/// <value>The load options.</value>
@@ -277,7 +276,7 @@
 
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
-		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+		public IReadOnlyDictionary<string, string> Properties => this.properties;
 
 		/// <summary>Gets the protection entries for the page.</summary>
 		/// <value>The protection entries.</value>
@@ -285,15 +284,15 @@
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
-		public IReadOnlyList<Revision> Revisions { get; } = [];
+		public IReadOnlyList<Revision> Revisions => this.revisions;
 
 		/// <summary>Gets or sets the timestamp when the page was loaded. Used for edit conflict detection.</summary>
 		/// <value>The start timestamp.</value>
 		public DateTime? StartTimestamp { get; protected set; }
 
-		/// <summary>Gets the templates used on the page, if they were requested in the last load operation.</summary>
-		/// <value>The templates used on the page.</value>
-		public IReadOnlyCollection<Title> Templates { get; } = [];
+		/// <summary>Gets the templatesHash used on the page, if they were requested in the last load operation.</summary>
+		/// <value>The templatesHash used on the page.</value>
+		public IReadOnlyList<Title> Templates => this.templates;
 
 		/// <summary>Gets or sets the text, if revisions were requested in the last load operation.</summary>
 		/// <value>The page text.</value>

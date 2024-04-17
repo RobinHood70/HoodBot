@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract TItem? GetItem(JToken result, PageItem page);
 
-		protected abstract ICollection<TItem> GetMutableList(PageItem page);
+		protected abstract IList<TItem> GetMutableList(PageItem page);
 		#endregion
 
 		#region Protected Override Methods

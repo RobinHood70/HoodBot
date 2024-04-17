@@ -61,7 +61,7 @@
 				sortkeyPrefix: (string?)result["sortkeyprefix"],
 				timestamp: (DateTime?)result["timestamp"]);
 
-		protected override ICollection<CategoriesItem> GetMutableList(PageItem page) => (ICollection<CategoriesItem>)page.Categories;
+		protected override IList<CategoriesItem> GetMutableList(PageItem page) => page.Categories;
 		#endregion
 	}
 }

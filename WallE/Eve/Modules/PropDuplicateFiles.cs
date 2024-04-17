@@ -56,7 +56,7 @@
 				timestamp: result.MustHaveDate("timestamp"),
 				user: result.MustHaveString("user"));
 
-		protected override ICollection<DuplicateFileItem> GetMutableList(PageItem page) => (ICollection<DuplicateFileItem>)page.DuplicateFiles;
+		protected override IList<DuplicateFileItem> GetMutableList(PageItem page) => page.DuplicateFiles;
 		#endregion
 	}
 }

@@ -57,7 +57,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override ICollection<LinksHereItem> GetMutableList(PageItem page) => (ICollection<LinksHereItem>)page.LinksHere;
+		protected override IList<LinksHereItem> GetMutableList(PageItem page) => page.LinksHere;
 		#endregion
 	}
 }

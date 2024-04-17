@@ -57,10 +57,10 @@
 			return new VariableItem(vars, set);
 		}
 
-		protected override ICollection<VariableItem> GetMutableList(PageItem page)
+		protected override IList<VariableItem> GetMutableList(PageItem page)
 		{
 			var varPage = page as VariablesPageItem ?? throw new InvalidOperationException();
-			return (ICollection<VariableItem>)varPage.Variables;
+			return varPage.Variables;
 		}
 		#endregion
 	}

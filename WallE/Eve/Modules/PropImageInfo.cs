@@ -62,7 +62,7 @@
 
 		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 
-		protected override ICollection<ImageInfoItem> GetMutableList(PageItem page) => (ICollection<ImageInfoItem>)page.ImageInfoEntries;
+		protected override IList<ImageInfoItem> GetMutableList(PageItem page) => page.ImageInfoEntries;
 		#endregion
 	}
 }

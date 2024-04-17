@@ -49,7 +49,7 @@
 			? null
 			: new ContributorItem(result.MustHaveString("name"), (long)result.MustHave("userid"));
 
-		protected override ICollection<ContributorItem> GetMutableList(PageItem page) => (ICollection<ContributorItem>)page.Contributors;
+		protected override IList<ContributorItem> GetMutableList(PageItem page) => page.Contributors;
 		#endregion
 	}
 }

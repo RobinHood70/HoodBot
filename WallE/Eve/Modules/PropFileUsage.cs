@@ -58,7 +58,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override ICollection<FileUsageItem> GetMutableList(PageItem page) => (ICollection<FileUsageItem>)page.FileUsages;
+		protected override IList<FileUsageItem> GetMutableList(PageItem page) => page.FileUsages;
 		#endregion
 	}
 }

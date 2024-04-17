@@ -58,7 +58,7 @@
 
 		protected override RevisionItem GetItem(JToken result, PageItem page) => result.GetRevision();
 
-		protected override ICollection<RevisionItem> GetMutableList(PageItem page) => (ICollection<RevisionItem>)page.DeletedRevisions;
+		protected override IList<RevisionItem> GetMutableList(PageItem page) => page.DeletedRevisions;
 		#endregion
 	}
 }

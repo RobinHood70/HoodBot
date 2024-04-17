@@ -45,7 +45,7 @@
 			base.BuildRequestLocal(request, input);
 		}
 
-		protected override ICollection<IApiTitle> GetMutableList(PageItem page) => (ICollection<IApiTitle>)page.Links;
+		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Links;
 		#endregion
 	}
 }
