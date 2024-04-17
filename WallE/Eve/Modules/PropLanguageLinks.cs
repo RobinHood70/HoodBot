@@ -45,7 +45,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override LanguageLinksItem? GetItem(JToken result, PageItem page) => result.GetLanguageLink();
+		protected override LanguageLinksItem? GetItem(JToken result) => result.GetLanguageLink();
 
 		protected override IList<LanguageLinksItem> GetMutableList(PageItem page) => page.LanguageLinks;
 		#endregion

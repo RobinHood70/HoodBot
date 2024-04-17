@@ -49,7 +49,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override LinksHereItem? GetItem(JToken result, PageItem page) => result == null
+		protected override LinksHereItem? GetItem(JToken result) => result == null
 			? null
 			: new LinksHereItem(
 				ns: (int?)result["ns"],

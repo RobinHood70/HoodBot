@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract TItem? GetItem(JToken result, PageItem page);
+		protected abstract TItem? GetItem(JToken result);
 
 		protected abstract IList<TItem> GetMutableList(PageItem page);
 		#endregion
@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var list = this.GetMutableList(page.NotNull()) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
-				if (this.GetItem(enumeration.Current, page) is TItem item)
+				if (this.GetItem(enumeration.Current) is TItem item)
 				{
 					list.Add(item);
 					if (this.ItemsRemaining != int.MaxValue)

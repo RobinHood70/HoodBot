@@ -45,7 +45,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiTitleItem? GetItem(JToken result, PageItem page) => result == null
+		protected override InterwikiTitleItem? GetItem(JToken result) => result == null
 			? null
 			: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title")!, (Uri?)result["url"]);
 

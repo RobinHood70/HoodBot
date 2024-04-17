@@ -50,7 +50,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override FileUsageItem? GetItem(JToken result, PageItem page) => result == null
+		protected override FileUsageItem? GetItem(JToken result) => result == null
 			? null
 			: new FileUsageItem(
 				ns: (int?)result["ns"],

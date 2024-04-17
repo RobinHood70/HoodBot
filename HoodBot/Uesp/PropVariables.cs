@@ -50,7 +50,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override VariableItem GetItem(JToken result, PageItem page)
+		protected override VariableItem GetItem(JToken result)
 		{
 			var vars = result.NotNull()["vars"].GetStringDictionary<string>();
 			var set = (string?)result["set"];

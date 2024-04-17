@@ -34,7 +34,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override IApiTitle GetItem(JToken result, PageItem page) => result.NotNull().GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result) => result.NotNull().GetWikiTitle();
 		#endregion
 	}
 }

@@ -48,7 +48,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override RedirectItem? GetItem(JToken result, PageItem page) => result == null
+		protected override RedirectItem? GetItem(JToken result) => result == null
 			? null
 			: new RedirectItem(
 				ns: (int?)result["ns"],

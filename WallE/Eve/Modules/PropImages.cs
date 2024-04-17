@@ -49,7 +49,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override IApiTitle GetItem(JToken result, PageItem page) => result.GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result) => result.GetWikiTitle();
 
 		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Images;
 		#endregion

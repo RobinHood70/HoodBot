@@ -45,7 +45,7 @@
 			.AnonContributors = (int?)parent
 				.NotNull()["anoncontributors"] ?? 0;
 
-		protected override ContributorItem? GetItem(JToken result, PageItem page) => result == null
+		protected override ContributorItem? GetItem(JToken result) => result == null
 			? null
 			: new ContributorItem(result.MustHaveString("name"), (long)result.MustHave("userid"));
 

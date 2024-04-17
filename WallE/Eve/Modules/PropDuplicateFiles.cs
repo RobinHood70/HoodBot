@@ -48,7 +48,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override DuplicateFileItem? GetItem(JToken result, PageItem page) => result == null
+		protected override DuplicateFileItem? GetItem(JToken result) => result == null
 			? null
 			: new DuplicateFileItem(
 				name: result.MustHaveString("name"),

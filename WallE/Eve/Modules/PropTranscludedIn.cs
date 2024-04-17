@@ -49,7 +49,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override TranscludedInItem? GetItem(JToken result, PageItem page) => result == null
+		protected override TranscludedInItem? GetItem(JToken result) => result == null
 			? null
 			: new TranscludedInItem(
 				ns: (int?)result["ns"],

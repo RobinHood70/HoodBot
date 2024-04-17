@@ -68,7 +68,7 @@ input.EndId > 0;
 				.AddIf("limit", this.Limit, (input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange) && !string.Equals(this.Limit, "0", System.StringComparison.Ordinal)); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
-		protected override RevisionItem GetItem(JToken result, PageItem page) => result.GetRevision();
+		protected override RevisionItem GetItem(JToken result) => result.GetRevision();
 
 		protected override IList<RevisionItem> GetMutableList(PageItem page) => page.Revisions;
 		#endregion

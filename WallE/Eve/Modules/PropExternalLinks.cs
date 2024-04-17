@@ -42,7 +42,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override string? GetItem(JToken result, PageItem page) => result.MustHaveBCString("url");
+		protected override string? GetItem(JToken result) => result.MustHaveBCString("url");
 
 		protected override IList<string> GetMutableList(PageItem page) => page.ExternalLinks;
 		#endregion

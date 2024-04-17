@@ -56,7 +56,7 @@
 				.AddIf("limit", this.Limit, input.Limit > 0 || input.MaxItems > 1); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
-		protected override RevisionItem GetItem(JToken result, PageItem page) => result.GetRevision();
+		protected override RevisionItem GetItem(JToken result) => result.GetRevision();
 
 		protected override IList<RevisionItem> GetMutableList(PageItem page) => page.DeletedRevisions;
 		#endregion

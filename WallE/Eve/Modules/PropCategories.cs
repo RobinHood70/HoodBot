@@ -51,7 +51,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override CategoriesItem? GetItem(JToken result, PageItem page) => result == null
+		protected override CategoriesItem? GetItem(JToken result) => result == null
 			? null
 			: new CategoriesItem(
 				ns: (int)result.MustHave("ns"),

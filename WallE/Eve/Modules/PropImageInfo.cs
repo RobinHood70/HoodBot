@@ -60,7 +60,7 @@
 			.ImageRepository = (string?)parent
 				.NotNull()["imagerepository"];
 
-		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
+		protected override ImageInfoItem GetItem(JToken result) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 
 		protected override IList<ImageInfoItem> GetMutableList(PageItem page) => page.ImageInfoEntries;
 		#endregion
