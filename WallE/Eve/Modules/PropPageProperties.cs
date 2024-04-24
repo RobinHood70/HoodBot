@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
@@ -39,8 +40,9 @@
 
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			result.ThrowNull();
-			if (page.NotNull().Properties is Dictionary<string, string?> dictionary)
+			ArgumentNullException.ThrowIfNull(result);
+			ArgumentNullException.ThrowIfNull(page);
+			if (page.Properties is Dictionary<string, string?> dictionary)
 			{
 				dictionary.Clear();
 				foreach (var item in result.Children<JProperty>())
