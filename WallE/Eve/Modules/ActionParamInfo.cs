@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -10,18 +9,11 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.28
-	internal sealed class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
+	internal sealed class ActionParamInfo(WikiAbstractionLayer wal) : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>(wal)
 	{
 		#region Static Fields
 		private static readonly HashSet<string> FormatModuleValues = new(StringComparer.Ordinal) { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
 		private static readonly string[] ModuleTypes125 = ["querymodules", "formatmodules", "mainmodule", "pagesetmodule"];
-		#endregion
-
-		#region Constructors
-		public ActionParamInfo(WikiAbstractionLayer wal)
-				: base(wal)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties

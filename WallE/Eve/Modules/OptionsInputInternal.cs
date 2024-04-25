@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Collections.Generic;
 
 	internal sealed class OptionsInputInternal

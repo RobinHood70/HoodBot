@@ -1,8 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
 
 	[method: JobInfo("One-Off Move Job")]
 	public class OneOffMoveJob(JobManager jobManager, bool updateUserSpace) : MovePagesJob(jobManager, updateUserSpace)
