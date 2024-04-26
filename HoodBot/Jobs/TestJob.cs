@@ -2,19 +2,13 @@
 {
 	using System;
 	using System.Threading;
+	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 
-	internal sealed class TestJob : WikiJob
+	[method: JobInfo("Test Job")]
+	internal sealed class TestJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		#region Constructors
-		[JobInfo("Test Job")]
-		public TestJob(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void Main()
 		{
