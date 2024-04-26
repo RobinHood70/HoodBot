@@ -1152,7 +1152,9 @@
 			ListSearch module = new(this, input);
 			this.RunQuery(module);
 
-			return module.AsSearchResult();
+			return module.Output is SearchResult result
+				? result
+				: throw new WikiException(EveMessages.SearchFailed);
 		}
 
 		/// <summary>Sets the notification timestamp for watched pages, marking revisions as being read/unread using the <see href="https://www.mediawiki.org/wiki/API:Setnotificationtimestamp">Setnotificationtimestamp</see> API module.</summary>

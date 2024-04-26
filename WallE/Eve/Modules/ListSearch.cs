@@ -9,21 +9,11 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.25
-	internal sealed class ListSearch : ListModule<SearchInput, SearchResultItem>, IGeneratorModule
+	internal sealed class ListSearch(WikiAbstractionLayer wal, SearchInput input, IPageSetGenerator? pageSetGenerator) : ListModule<SearchInput, SearchResultItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
-		#region Fields
-		private string? suggestion;
-		private int totalHits;
-		#endregion
-
 		#region Constructors
 		public ListSearch(WikiAbstractionLayer wal, SearchInput input)
-			: base(wal, input, null)
-		{
-		}
-
-		public ListSearch(WikiAbstractionLayer wal, SearchInput input, IPageSetGenerator pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
+			: this(wal, input, null)
 		{
 		}
 		#endregion
@@ -42,13 +32,6 @@
 
 		#region Public Static Methods
 		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (SearchInput)input, pageSetGenerator);
-		#endregion
-
-		#region Public Methods
-		public SearchResult AsSearchResult() => new(
-			list: this.Output ?? [],
-			suggestion: this.suggestion,
-			totalHits: this.totalHits);
 		#endregion
 
 		#region Public Override Methods
@@ -73,12 +56,11 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
-			parent.ThrowNull();
-			if (parent["searchinfo"] is JToken infoNode)
-			{
-				this.suggestion = (string?)infoNode["suggestion"];
-				this.totalHits = (int?)infoNode["totalhits"] ?? 0;
-			}
+			ArgumentNullException.ThrowIfNull(parent);
+			var infoNode = parent["searchinfo"];
+			var suggestion = infoNode is null ? null : (string?)infoNode["suggestion"];
+			var totalHits = infoNode is null ? 0 : (int?)infoNode["totalhits"] ?? 0;
+			this.Output = new SearchResult(suggestion, totalHits);
 		}
 
 		protected override SearchResultItem? GetItem(JToken result)

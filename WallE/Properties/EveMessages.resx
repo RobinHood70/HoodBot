@@ -204,4 +204,7 @@
   <data name="ParameterInvalid" xml:space="preserve">
     <value>The parameter passed to {0} had an invalid value of {1}.</value>
   </data>
+  <data name="SearchFailed" xml:space="preserve">
+    <value>The search module failed to return a result.</value>
+  </data>
 </root>

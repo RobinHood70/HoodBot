@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class EveMessages {
@@ -264,6 +264,15 @@ namespace RobinHood70.WallE.Properties {
         internal static string RevisionSha1Failed {
             get {
                 return ResourceManager.GetString("RevisionSha1Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The search module failed to return a result..
+        /// </summary>
+        internal static string SearchFailed {
+            get {
+                return ResourceManager.GetString("SearchFailed", resourceCulture);
             }
         }
         
