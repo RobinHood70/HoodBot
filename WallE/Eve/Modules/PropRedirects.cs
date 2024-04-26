@@ -1,21 +1,15 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class PropRedirects : PropListModule<RedirectsInput, RedirectItem>, IGeneratorModule
+	internal sealed class PropRedirects(WikiAbstractionLayer wal, RedirectsInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<RedirectsInput, RedirectsResult, RedirectsItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -48,15 +42,15 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override RedirectItem? GetItem(JToken result) => result == null
+		protected override RedirectsItem? GetItem(JToken result) => result == null
 			? null
-			: new RedirectItem(
+			: new RedirectsItem(
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				pageId: (long?)result["pageid"] ?? 0,
 				fragment: (string?)result["fragment"]);
 
-		protected override IList<RedirectItem> GetMutableList(PageItem page) => page.Redirects;
+		protected override RedirectsResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

@@ -1,20 +1,13 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropCategoryInfo : PropModule<CategoryInfoInput>
+	internal sealed class PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input) : PropModule<CategoryInfoInput, CategoryInfoResult>(wal, input, null)
 	{
-		#region Constructors
-		public PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 113;
 
@@ -34,10 +27,10 @@
 		{
 		}
 
-		protected override void DeserializeToPage(JToken result, PageItem page)
+		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
-			page.CategoryInfo = new CategoryInfoResult(
+			ArgumentNullException.ThrowIfNull(result);
+			this.Output = new CategoryInfoResult(
 				files: (int)result.MustHave("files"),
 				pages: (int)result.MustHave("pages"),
 				size: (int)result.MustHave("size"),

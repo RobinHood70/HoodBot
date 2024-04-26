@@ -15,8 +15,9 @@
 	/// <param name="ns">The namespace.</param>
 	/// <param name="title">The page title.</param>
 	/// <param name="pageId">The page identifier.</param>
+	/// <param name="flags">The flags that apply to the page.</param>
 	/// <returns>An <see cref="IApiTitle"/> object. In external use, this will normally be a <see cref="PageItem"/> or derivative.</returns>
-	public delegate T TitleCreator<out T>(int ns, string title, long pageId)
+	public delegate T TitleCreator<out T>(int ns, string title, long pageId, PageFlags flags)
 		where T : IApiTitle;
 	#endregion
 

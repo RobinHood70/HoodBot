@@ -278,8 +278,9 @@
 		/// <param name="ns">The namespace.</param>
 		/// <param name="title">The title.</param>
 		/// <param name="pageId">The page identifier.</param>
+		/// <param name="flags">The flags that apply to the page.</param>
 		/// <returns>A factory methods which creates a new PageItem.</returns>
-		public static PageItem DefaultPageFactory(int ns, string title, long pageId) => new(ns, title, pageId);
+		public static PageItem DefaultPageFactory(int ns, string title, long pageId, PageFlags flags) => new(ns, title, pageId, flags);
 		#endregion
 
 		#region Public Methods

@@ -1,23 +1,17 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropImages : PropListModule<ImagesInput, IApiTitle>, IGeneratorModule
+	internal sealed class PropImages(WikiAbstractionLayer wal, ImagesInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<ImagesInput, ImagesResult, IApiTitle>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropImages(WikiAbstractionLayer wal, ImagesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropImages(WikiAbstractionLayer wal, ImagesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -41,9 +35,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImagesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull()
 				.AddIf("images", input.Images, this.SiteVersion >= 118)
 				.AddIf("dir", "descending", input.SortDescending && this.SiteVersion >= 119)
 				.Add("limit", this.Limit);
@@ -51,7 +45,7 @@
 
 		protected override IApiTitle GetItem(JToken result) => result.GetWikiTitle();
 
-		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Images;
+		protected override ImagesResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

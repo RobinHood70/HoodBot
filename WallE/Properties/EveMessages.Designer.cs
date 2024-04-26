@@ -196,6 +196,24 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Output property for the {0} module has not been initialized..
+        /// </summary>
+        internal static string OutputNotInitialized {
+            get {
+                return ResourceManager.GetString("OutputNotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A module returned a result type that isn&apos;t handled: {0}..
+        /// </summary>
+        internal static string OutputTypeNotHandled {
+            get {
+                return ResourceManager.GetString("OutputTypeNotHandled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The page factory for the query has not been set..
         /// </summary>
         internal static string PageFactoryNotSet {

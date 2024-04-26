@@ -142,9 +142,9 @@
 			void PopulateProperties(PageItem pageItem)
 			{
 				this.properties.Clear();
-				if (pageItem.Properties?.Count > 0)
+				foreach (var property in pageItem.Properties)
 				{
-					this.properties.AddRange(pageItem.Properties);
+					this.properties[property.Name] = property.Value;
 				}
 			}
 

@@ -1,21 +1,14 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
+	using System;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropLanguageLinks : PropListModule<LanguageLinksInput, LanguageLinksItem>
+	internal sealed class PropLanguageLinks(WikiAbstractionLayer wal, LanguageLinksInput input) : PropListModule<LanguageLinksInput, LanguageLinksResult, LanguageLinksItem>(wal, input, null)
 	{
-		#region Constructors
-		public PropLanguageLinks(WikiAbstractionLayer wal, LanguageLinksInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
@@ -33,9 +26,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LanguageLinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull()
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 123)
 				.AddIf("url", input.Properties.HasAnyFlag(LanguageLinksProperties.Url), this.SiteVersion is >= 117 and < 123)
 				.AddIfNotNull("lang", input.Language)
@@ -47,7 +40,7 @@
 
 		protected override LanguageLinksItem? GetItem(JToken result) => result.GetLanguageLink();
 
-		protected override IList<LanguageLinksItem> GetMutableList(PageItem page) => page.LanguageLinks;
+		protected override LanguageLinksResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

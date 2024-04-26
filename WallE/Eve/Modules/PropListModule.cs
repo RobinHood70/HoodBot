@@ -6,37 +6,37 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Properties;
 
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	// See ListModuleBase for comments on methods they have in common.
-	public abstract class PropListModule<TInput, TItem> : PropModule<TInput>
+	public abstract class PropListModule<TInput, TOutput, TItem>(WikiAbstractionLayer wal, TInput input, IPageSetGenerator? pageSetGenerator) : PropModule<TInput, TOutput>(wal, input, pageSetGenerator)
 		where TInput : class, IPropertyInput
+		where TOutput : class, IList<TItem>
 		where TItem : class
 	{
-		#region Constructors
-		protected PropListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
-		{
-		}
-		#endregion
-
 		#region Protected Abstract Methods
 		protected abstract TItem? GetItem(JToken result);
 
-		protected abstract IList<TItem> GetMutableList(PageItem page);
+		protected abstract TOutput GetNewList(JToken parent);
 		#endregion
 
 		#region Protected Override Methods
-		protected override void DeserializeToPage(JToken result, PageItem page)
+		protected override void DeserializeParent(JToken parent) => this.Output = this.GetNewList(parent);
+
+		protected override void DeserializeResult(JToken? result)
 		{
 			ArgumentNullException.ThrowIfNull(result);
-			ArgumentNullException.ThrowIfNull(page);
-			var list = this.GetMutableList(page) ?? throw new InvalidOperationException();
+			if (this.Output is null)
+			{
+				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.OutputNotInitialized, this.GetType().Name));
+			}
+
 			foreach (var value in result)
 			{
 				if (this.GetItem(value) is TItem item)
 				{
-					list.Add(item);
+					this.Output.Add(item);
 				}
 
 				if (this.ItemsRemaining != int.MaxValue && --this.ItemsRemaining < 0)

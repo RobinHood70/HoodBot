@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -139,6 +140,7 @@
 		// Written this way just to make it obvious that in this case, the input is not being used, since this.input is the correct "parameter".
 		protected override void BuildRequestPageSet(Request request, QueryInput input) => this.BuildRequestPageSet(request);
 
+		[SuppressMessage("Usage", "IDE0028:Simplify collection initialization", Justification = "We want to create a KeyedPages here, not a generic list.")]
 		protected override IList<PageItem> CreatePageList() => new KeyedPages();
 
 		protected override void DeserializeActionExtra(JToken result)
@@ -184,15 +186,13 @@
 			}
 
 			// Invalid titles can be missing a namespace. Since the page factory requires one, we use 0.
-			var page = this.pageFactory(
+			return this.pageFactory(
 				ns: (int?)result["ns"] ?? 0,
 				title: result.MustHaveString("title"),
-				pageId: (long?)result["pageid"] ?? 0);
-			page.Flags = result.GetFlags(
-				("invalid", PageFlags.Invalid),
-				("missing", PageFlags.Missing));
-
-			return page;
+				pageId: (long?)result["pageid"] ?? 0,
+				flags: result.GetFlags(
+					("invalid", PageFlags.Invalid),
+					("missing", PageFlags.Missing)));
 		}
 
 		protected override bool HandleWarning(string from, string text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
@@ -247,7 +247,11 @@
 					{
 						foreach (var module in propModules)
 						{
-							module.Deserialize(innerResult, item);
+							module.Deserialize(innerResult);
+							if (module.OutputObject is object output)
+							{
+								item.ParseModuleOutput(output);
+							}
 						}
 					}
 				}

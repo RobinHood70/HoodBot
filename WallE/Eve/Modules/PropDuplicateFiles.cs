@@ -1,22 +1,16 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropDuplicateFiles : PropListModule<DuplicateFilesInput, DuplicateFileItem>, IGeneratorModule
+	internal sealed class PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<DuplicateFilesInput, DuplicateFilesResult, DuplicateFilesItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -48,15 +42,15 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override DuplicateFileItem? GetItem(JToken result) => result == null
+		protected override DuplicateFilesItem? GetItem(JToken result) => result == null
 			? null
-			: new DuplicateFileItem(
+			: new DuplicateFilesItem(
 				name: result.MustHaveString("name"),
 				shared: result["shared"].GetBCBool(),
 				timestamp: result.MustHaveDate("timestamp"),
 				user: result.MustHaveString("user"));
 
-		protected override IList<DuplicateFileItem> GetMutableList(PageItem page) => page.DuplicateFiles;
+		protected override DuplicateFilesResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

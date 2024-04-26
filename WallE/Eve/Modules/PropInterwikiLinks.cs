@@ -1,22 +1,14 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropInterwikiLinks : PropListModule<InterwikiLinksInput, InterwikiTitleItem>
+	internal sealed class PropInterwikiLinks(WikiAbstractionLayer wal, InterwikiLinksInput input) : PropListModule<InterwikiLinksInput, InterwikiLinksResult, InterwikiTitleItem>(wal, input, null)
 	{
-		#region Constructors
-		public PropInterwikiLinks(WikiAbstractionLayer wal, InterwikiLinksInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 117;
 
@@ -34,9 +26,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InterwikiLinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull()
 				.AddIf("url", input.Properties.HasAnyFlag(InterwikiLinksProperties.Url), this.SiteVersion < 124)
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 124)
 				.AddIfNotNull("prefix", input.Prefix)
@@ -49,7 +41,7 @@
 			? null
 			: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title")!, (Uri?)result["url"]);
 
-		protected override IList<InterwikiTitleItem> GetMutableList(PageItem page) => page.InterwikiLinks;
+		protected override InterwikiLinksResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

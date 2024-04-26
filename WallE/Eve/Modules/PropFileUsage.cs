@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -8,16 +7,11 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// For the time being, the complexity involved in implementing FileUsage, LinksHere, Redirects, and TranscludedIn as derived modules is just not worth it in C#. MediaWiki gets away with it much more easily due to the fact that it's mostly working with strings, along with PHP's looser type system. It may become more worthwhile to implement these modules as inherited in the future, however, or do it like the Revisions classes do and have a static base builder/deserializer but remain otherwise uninherited.
-	internal sealed class PropFileUsage : PropListModule<FileUsageInput, FileUsageItem>, IGeneratorModule
+	internal sealed class PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<FileUsageInput, FileUsageResult, FileUsageItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -58,7 +52,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override IList<FileUsageItem> GetMutableList(PageItem page) => page.FileUsages;
+		protected override FileUsageResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

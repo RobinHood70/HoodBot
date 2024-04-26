@@ -1,8 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve;
@@ -10,22 +9,12 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropRevisions : PropListModule<RevisionsInput, RevisionItem>, IGeneratorModule
+	internal sealed class PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<RevisionsInput, RevisionsResult, RevisionItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input)
 			: this(wal, input, null)
 		{
-		}
-
-		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
-		{
-			this.IsRevisionRange =
-input.Start != null ||
-input.End != null ||
-input.StartId > 0 ||
-input.EndId > 0;
 		}
 		#endregion
 
@@ -36,7 +25,11 @@ input.EndId > 0;
 		#endregion
 
 		#region Internal Properties
-		internal bool IsRevisionRange { get; }
+		internal bool IsRevisionRange { get; } =
+			input.Start != null ||
+			input.End != null ||
+			input.StartId > 0 ||
+			input.EndId > 0;
 		#endregion
 
 		#region Protected Override Properties
@@ -57,20 +50,20 @@ input.EndId > 0;
 				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull()
 				.BuildRevisions(input, this.SiteVersion)
 				.AddIfPositive("startid", input.StartId)
 				.AddIfPositive("endid", input.EndId)
 				.AddIf("token", TokensInput.Rollback, input.GetRollbackToken)
 				.AddIfNotNull("tag", input.Tag)
-				.AddIf("limit", this.Limit, (input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange) && !string.Equals(this.Limit, "0", System.StringComparison.Ordinal)); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
+				.AddIf("limit", this.Limit, (input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange) && !string.Equals(this.Limit, "0", StringComparison.Ordinal)); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
 		protected override RevisionItem GetItem(JToken result) => result.GetRevision();
 
-		protected override IList<RevisionItem> GetMutableList(PageItem page) => page.Revisions;
+		protected override RevisionsResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

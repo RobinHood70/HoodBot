@@ -153,8 +153,9 @@
 		/// <param name="ns">The namespace.</param>
 		/// <param name="title">The title.</param>
 		/// <param name="pageId">The page identifier.</param>
+		/// <param name="flags">The flags that apply to the page.</param>
 		/// <returns>A new PageItem for use by WallE.</returns>
-		public virtual PageItem CreatePageItem(int ns, string title, long pageId) => new(ns, title, pageId);
+		public virtual PageItem CreatePageItem(int ns, string title, long pageId, PageFlags flags) => new(ns, title, pageId, flags);
 		#endregion
 
 		#region Protected Abstract Methods

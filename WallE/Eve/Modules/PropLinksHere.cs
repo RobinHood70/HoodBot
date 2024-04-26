@@ -1,22 +1,16 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropLinksHere : PropListModule<LinksHereInput, LinksHereItem>, IGeneratorModule
+	internal sealed class PropLinksHere(WikiAbstractionLayer wal, LinksHereInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<LinksHereInput, LinksHereResult, LinksHereItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropLinksHere(WikiAbstractionLayer wal, LinksHereInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropLinksHere(WikiAbstractionLayer wal, LinksHereInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -57,7 +51,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override IList<LinksHereItem> GetMutableList(PageItem page) => page.LinksHere;
+		protected override LinksHereResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

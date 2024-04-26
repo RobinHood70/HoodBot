@@ -1,22 +1,16 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropTranscludedIn : PropListModule<TranscludedInInput, TranscludedInItem>, IGeneratorModule
+	internal sealed class PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<TranscludedInInput, TranscludedInResult, TranscludedInItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -57,7 +51,7 @@
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].GetBCBool());
 
-		protected override IList<TranscludedInItem> GetMutableList(PageItem page) => page.TranscludedIn;
+		protected override TranscludedInResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

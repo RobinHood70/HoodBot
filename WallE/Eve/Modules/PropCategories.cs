@@ -1,23 +1,16 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropCategories : PropListModule<CategoriesInput, CategoriesItem>, IGeneratorModule
+	internal sealed class PropCategories(WikiAbstractionLayer wal, CategoriesInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<CategoriesInput, CategoriesResult, CategoriesItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -41,9 +34,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoriesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull()
 				.AddFlags("prop", input.Properties)
 				.AddFilterPiped("show", "hidden", input.FilterHidden)
 				.Add("categories", input.Categories)
@@ -61,7 +54,7 @@
 				sortkeyPrefix: (string?)result["sortkeyprefix"],
 				timestamp: (DateTime?)result["timestamp"]);
 
-		protected override IList<CategoriesItem> GetMutableList(PageItem page) => page.Categories;
+		protected override CategoriesResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

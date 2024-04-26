@@ -1,20 +1,18 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class ContributorItem
+	using System;
+
+	public class DuplicateFilesItem(string name, bool? shared, DateTime timestamp, string user)
 	{
-		#region Constructors
-		internal ContributorItem(string name, long userId)
-		{
-			this.Name = name;
-			this.UserId = userId;
-		}
-		#endregion
-
 		#region Public Properties
-		public string Name { get; }
+		public string Name => name;
 
-		public long UserId { get; }
+		public bool? Shared => shared;
+
+		public DateTime Timestamp => timestamp;
+
+		public string User => user;
 		#endregion
 
 		#region Public Override Methods

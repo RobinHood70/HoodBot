@@ -1,21 +1,13 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropExternalLinks : PropListModule<ExternalLinksInput, string>
+	internal sealed class PropExternalLinks(WikiAbstractionLayer wal, ExternalLinksInput input) : PropListModule<ExternalLinksInput, ExternalLinksResult, string>(wal, input, null)
 	{
-		#region Constructors
-		public PropExternalLinks(WikiAbstractionLayer wal, ExternalLinksInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
@@ -44,7 +36,7 @@
 
 		protected override string? GetItem(JToken result) => result.MustHaveBCString("url");
 
-		protected override IList<string> GetMutableList(PageItem page) => page.ExternalLinks;
+		protected override ExternalLinksResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

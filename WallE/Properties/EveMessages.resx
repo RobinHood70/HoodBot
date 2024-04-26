@@ -207,4 +207,10 @@
   <data name="SearchFailed" xml:space="preserve">
     <value>The search module failed to return a result.</value>
   </data>
+  <data name="OutputNotInitialized" xml:space="preserve">
+    <value>The Output property for the {0} module has not been initialized.</value>
+  </data>
+  <data name="OutputTypeNotHandled" xml:space="preserve">
+    <value>A module returned a result type that isn't handled: {0}.</value>
+  </data>
 </root>

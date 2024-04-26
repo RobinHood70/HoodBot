@@ -3,21 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 
-	public class VariableItem
+	public class VariableItem(IReadOnlyDictionary<string, string> dictionary, string? set)
 	{
-		#region Constructors
-		public VariableItem(IReadOnlyDictionary<string, string> dictionary, string? set)
-		{
-			ArgumentNullException.ThrowIfNull(dictionary);
-			this.Dictionary = dictionary;
-			this.Set = set;
-		}
-		#endregion
-
 		#region Public Properties
-		public IReadOnlyDictionary<string, string> Dictionary { get; }
+		public IReadOnlyDictionary<string, string> Dictionary { get; } = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
 
-		public string? Set { get; }
+		public string? Set { get; } = set;
 		#endregion
 	}
 }

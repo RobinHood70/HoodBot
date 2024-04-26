@@ -1,21 +1,16 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
+	using System;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon.RequestBuilder;
+	using static RobinHood70.WallE.Eve.Exceptions;
 
-	internal sealed class PropImageInfo : PropListModule<ImageInfoInput, ImageInfoItem>
+	internal sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
 	{
-		#region Constructors
-		public PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
@@ -55,14 +50,15 @@
 				.AddIf("limit", this.Limit, input.Limit > 1);
 		}
 
-		protected override void DeserializeParentToPage(JToken parent, PageItem page) => page
-			.NotNull()
-			.ImageRepository = (string?)parent
-				.NotNull()["imagerepository"];
-
 		protected override ImageInfoItem GetItem(JToken result) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 
-		protected override IList<ImageInfoItem> GetMutableList(PageItem page) => page.ImageInfoEntries;
+		protected override ImageInfoResult GetNewList(JToken parent)
+		{
+			ArgumentNullException.ThrowIfNull(parent);
+			return (string?)parent["imagerepository"] is string repo
+				? new ImageInfoResult(repo)
+				: throw MalformedTypeException(this.ResultName, parent);
+		}
 		#endregion
 	}
 }

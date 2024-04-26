@@ -3,17 +3,20 @@
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 
-	public class VariablesPageItem : PageItem
+	public class VariablesPageItem(int ns, string title, long pageId, PageFlags flags) : PageItem(ns, title, pageId, flags)
 	{
-		#region Constructors
-		internal VariablesPageItem(int ns, string title, long pageId)
-			: base(ns, title, pageId)
-		{
-		}
+		#region Public Properties
+		public IReadOnlyList<VariableItem> Variables { get; private set; } = [];
 		#endregion
 
-		#region Public Properties
-		public IList<VariableItem> Variables { get; } = [];
+		#region Public Override Methods
+		protected override void ParseCustomResult(object output)
+		{
+			if (output is VariablesResult result)
+			{
+				this.Variables = result;
+			}
+		}
 		#endregion
 	}
 }

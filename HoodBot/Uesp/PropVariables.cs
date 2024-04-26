@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
-	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -10,16 +8,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	public class PropVariables : PropListModule<VariablesInput, VariableItem>, IGeneratorModule
+	public class PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<VariablesInput, VariablesResult, VariableItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropVariables(WikiAbstractionLayer wal, VariablesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -57,11 +50,7 @@
 			return new VariableItem(vars, set);
 		}
 
-		protected override IList<VariableItem> GetMutableList(PageItem page)
-		{
-			var varPage = page as VariablesPageItem ?? throw new InvalidOperationException();
-			return varPage.Variables;
-		}
+		protected override VariablesResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

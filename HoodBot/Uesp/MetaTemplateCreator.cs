@@ -36,7 +36,7 @@
 			? this.FallbackCreator.CreatePage(title, options, apiItem)
 			: new VariablesPage(title, options, apiItem);
 
-		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);
+		public override PageItem CreatePageItem(int ns, string title, long pageId, PageFlags flags) => new VariablesPageItem(ns, title, pageId, flags);
 		#endregion
 
 		#region Protected Override Methods

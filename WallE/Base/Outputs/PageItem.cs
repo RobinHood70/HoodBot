@@ -3,6 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
@@ -15,76 +17,165 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class PageItem : IApiTitle
+	// Flags are part of the base info provided with the page info, so are included here in addition to the title info.
+	public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApiTitle
 	{
-		#region Constructors
-		public PageItem(int ns, string title, long pageId)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.PageId = pageId;
-		}
+		#region Fields
+		private List<ContributorsItem> contributors = [];
+		private List<CategoriesItem> categories = [];
+		private List<RevisionItem> deletedRevisions = [];
+		private List<DuplicateFilesItem> duplicateFiles = [];
+		private List<string> externalLinks = [];
+		private List<FileUsageItem> fileUsages = [];
+		private List<ImageInfoItem> imageInfoEntries = [];
+		private List<IApiTitle> images = [];
+		private List<InterwikiTitleItem> interwikiLinks = [];
+		private List<LanguageLinksItem> languageLinks = [];
+		private List<IApiTitle> links = [];
+		private List<LinksHereItem> linksHere = [];
+		private List<PagePropertiesItem> properties = [];
+		private List<RedirectsItem> redirects = [];
+		private List<RevisionItem> revisions = [];
+		private List<IApiTitle> templates = [];
+		private List<TranscludedInItem> transcludedIn = [];
 		#endregion
 
 		#region Public Properties
-		public long AnonContributors { get; internal set; }
+		public long AnonContributors { get; private set; }
 
-		public IList<CategoriesItem> Categories { get; } = [];
+		public IReadOnlyList<CategoriesItem> Categories => this.categories;
 
-		public CategoryInfoResult? CategoryInfo { get; internal set; }
+		public CategoryInfoResult? CategoryInfo { get; private set; }
 
-		public IList<ContributorItem> Contributors { get; } = [];
+		public IReadOnlyList<ContributorsItem> Contributors => this.contributors;
 
-		/// <summary>Gets custom module results. This collection is unused by the framework and exists for any custom property modules the user might implement.</summary>
-		/// <value>The custom page information.</value>
-		/// <remarks>Module results can be added here as needed, then unboxed again when they reach the caller. Pages can, of course, also be inherited with custom property module results added, but this will likely be a far easier method in the long run.</remarks>
-		public IList<object> CustomPageInfo { get; } = [];
+		public IReadOnlyList<RevisionItem> DeletedRevisions => this.deletedRevisions;
 
-		public IList<RevisionItem> DeletedRevisions { get; } = [];
+		public IReadOnlyList<DuplicateFilesItem> DuplicateFiles => this.duplicateFiles;
 
-		public IList<DuplicateFileItem> DuplicateFiles { get; } = [];
+		public IReadOnlyList<string> ExternalLinks => this.externalLinks;
 
-		public IList<string> ExternalLinks { get; } = [];
+		public IReadOnlyList<FileUsageItem> FileUsages => this.fileUsages;
 
-		public IList<FileUsageItem> FileUsages { get; } = [];
+		public PageFlags Flags { get; } = flags;
 
-		public PageFlags Flags { get; internal set; }
+		public IReadOnlyList<ImageInfoItem> ImageInfoEntries => this.imageInfoEntries;
 
-		public IList<ImageInfoItem> ImageInfoEntries { get; } = [];
+		public IReadOnlyList<IApiTitle> Images => this.images;
 
-		public IList<IApiTitle> Images { get; } = [];
+		public string? ImageRepository { get; private set; }
 
-		public string? ImageRepository { get; internal set; }
+		public PageInfo? Info { get; private set; }
 
-		public PageInfo? Info { get; internal set; }
+		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks => this.interwikiLinks;
 
-		public IList<InterwikiTitleItem> InterwikiLinks { get; } = [];
+		public IReadOnlyList<LanguageLinksItem> LanguageLinks => this.languageLinks;
 
-		public IList<LanguageLinksItem> LanguageLinks { get; } = [];
+		public IReadOnlyList<IApiTitle> Links => this.links;
 
-		public IList<IApiTitle> Links { get; } = [];
+		public IReadOnlyList<LinksHereItem> LinksHere => this.linksHere;
 
-		public IList<LinksHereItem> LinksHere { get; } = [];
+		public int Namespace { get; } = ns;
 
-		public int Namespace { get; }
+		public IReadOnlyList<PagePropertiesItem> Properties => this.properties;
 
-		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+		public long PageId { get; } = pageId;
 
-		public long PageId { get; }
+		public IReadOnlyList<RedirectsItem> Redirects => this.redirects;
 
-		public IList<RedirectItem> Redirects { get; } = [];
+		public IReadOnlyList<RevisionItem> Revisions => this.revisions;
 
-		public IList<RevisionItem> Revisions { get; } = [];
+		public IReadOnlyList<IApiTitle> Templates => this.templates;
 
-		public IList<IApiTitle> Templates { get; } = [];
+		public string Title { get; } = title;
 
-		public string Title { get; }
+		public IReadOnlyList<TranscludedInItem> TranscludedIn => this.transcludedIn;
+		#endregion
 
-		public IList<TranscludedInItem> TranscludedIn { get; } = [];
+		#region Public Methods
+		public void ParseModuleOutput(object output)
+		{
+			// TODO: This is almost certainly not the best way to handle this, but it's better for separation of concerns than the previous method and allows read-only properties. Should re-examine later to see if there's some better method.
+			switch (output)
+			{
+				case CategoriesResult result:
+					this.categories = result;
+					break;
+				case CategoryInfoResult result:
+					this.CategoryInfo = result;
+					break;
+				case ContributorsResult result:
+					this.AnonContributors = result.AnonymousContributors;
+					this.contributors = [.. result];
+					break;
+				case DuplicateFilesResult result:
+					this.duplicateFiles = result;
+					break;
+				case ExternalLinksResult result:
+					this.externalLinks = result;
+					break;
+				case FileUsageResult result:
+					this.fileUsages = result;
+					break;
+				case ImageInfoResult result:
+					this.ImageRepository = result.Repository;
+					this.imageInfoEntries = result;
+					break;
+				case ImagesResult result:
+					this.images = result;
+					break;
+				case InterwikiLinksResult result:
+					this.interwikiLinks = result;
+					break;
+				case LanguageLinksResult result:
+					this.languageLinks = result;
+					break;
+				case LinksHereResult result:
+					this.linksHere = result;
+					break;
+				case LinksResult result:
+					this.links = result;
+					break;
+				case PageInfo result:
+					this.Info = result;
+					break;
+				case PagePropertiesResult result:
+					this.properties = result;
+					break;
+				case PropDeletedRevisionsResult result:
+					this.deletedRevisions = result;
+					break;
+				case RedirectsResult result:
+					this.redirects = result;
+					break;
+				case RevisionsResult result:
+					this.revisions = result;
+					break;
+				case TemplatesResult result:
+					this.templates = result;
+					break;
+				case TranscludedInResult result:
+					this.transcludedIn = result;
+					break;
+				default:
+					this.ParseCustomResult(output);
+					break;
+			}
+		}
 		#endregion
 
 		#region Public Override Methods
 		public override string ToString() => this.Title;
+		#endregion
+
+		#region Public Virtual Methods
+		protected virtual void ParseCustomResult(object output)
+		{
+			if (output is not null)
+			{
+				throw new NotSupportedException(Globals.CurrentCulture(EveMessages.OutputTypeNotHandled, output.GetType().Name));
+			}
+		}
 		#endregion
 	}
 }

@@ -9,17 +9,10 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropInfo : PropModule<InfoInput>
+	internal sealed class PropInfo(WikiAbstractionLayer wal, InfoInput input) : PropModule<InfoInput, PageInfo>(wal, input, null)
 	{
 		#region Fields
 		private readonly Dictionary<string, bool> baseActions = new(StringComparer.Ordinal);
-		#endregion
-
-		#region Constructors
-		public PropInfo(WikiAbstractionLayer wal, InfoInput input)
-			: base(wal, input, null)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties
@@ -39,7 +32,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InfoInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			if (input.TestActions != null)
 			{
 				this.baseActions.Clear();
@@ -55,21 +49,14 @@
 				.FilterBefore(120, InfoProperties.NotificationTimestamp)
 				.Value;
 			request
-				.NotNull()
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
 				.Add("token", input.Tokens.IsEmpty() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
 		}
 
-		protected override void DeserializeParentToPage(JToken parent, PageItem page)
+		protected override void DeserializeParent(JToken parent)
 		{
-			if (page.NotNull().Info != null)
-			{
-				// We already have an Info from a previous query - do not overwrite it, as the results would be empty and produce invalid information. If needed, this could also be converted to check presense of each response field individually.
-				return;
-			}
-
 			var counter = -1L;
 			if (parent.NotNull()["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
 			{
@@ -117,7 +104,7 @@
 				this.Wal.CurrentTimestamp = startTimestamp;
 			}
 
-			page.Info = new PageInfo(
+			this.Output = new PageInfo(
 				canonicalUrl: (Uri?)parent["canonicalurl"],
 				contentModel: (string?)parent["contentmodel"],
 				counter: counter,
@@ -145,7 +132,7 @@
 				watchers: (long?)parent["watchers"] ?? 0);
 		}
 
-		protected override void DeserializeToPage(JToken result, PageItem page)
+		protected override void DeserializeResult(JToken? result)
 		{
 		}
 		#endregion

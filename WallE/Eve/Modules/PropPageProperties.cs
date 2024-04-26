@@ -1,21 +1,12 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class PropPageProperties : PropModule<PagePropertiesInput>
+	internal sealed class PropPageProperties(WikiAbstractionLayer wal, PagePropertiesInput input) : PropListModule<PagePropertiesInput, PagePropertiesResult, PagePropertiesItem>(wal, input, null)
 	{
-		#region Constructors
-		public PropPageProperties(WikiAbstractionLayer wal, PagePropertiesInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 117;
 
@@ -33,24 +24,20 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagePropertiesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull().Add("prop", input.Properties);
+				.Add("prop", input.Properties);
 		}
 
-		protected override void DeserializeToPage(JToken result, PageItem page)
+		protected override PagePropertiesItem? GetItem(JToken result)
 		{
 			ArgumentNullException.ThrowIfNull(result);
-			ArgumentNullException.ThrowIfNull(page);
-			if (page.Properties is Dictionary<string, string?> dictionary)
-			{
-				dictionary.Clear();
-				foreach (var item in result.Children<JProperty>())
-				{
-					dictionary.Add(item.Name, (string?)item.Value);
-				}
-			}
+			var prop = (JProperty)result;
+			return new PagePropertiesItem(prop.Name, (string?)prop.Value ?? string.Empty);
 		}
+
+		protected override PagePropertiesResult GetNewList(JToken parent) => [];
 		#endregion
 	}
 }

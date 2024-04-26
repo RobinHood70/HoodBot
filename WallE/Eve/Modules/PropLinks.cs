@@ -1,21 +1,17 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
+	using System;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class PropLinks : PropListLinks<LinksInput>, IGeneratorModule
+	internal sealed class PropLinks(WikiAbstractionLayer wal, LinksInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<LinksInput, LinksResult, IApiTitle>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public PropLinks(WikiAbstractionLayer wal, LinksInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public PropLinks(WikiAbstractionLayer wal, LinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -39,13 +35,18 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
-				.NotNull().Add("titles", input.Titles);
-			base.BuildRequestLocal(request, input);
+				.Add("titles", input.Titles)
+				.Add("namespace", input.Namespaces)
+				.Add("dir", input.SortDescending)
+				.Add("limit", this.Limit);
 		}
 
-		protected override IList<IApiTitle> GetMutableList(PageItem page) => page.Links;
-		#endregion
+		protected override IApiTitle GetItem(JToken result) => result.NotNull().GetWikiTitle();
+
+		protected override LinksResult GetNewList(JToken parent) => [];
 	}
+	#endregion
 }
