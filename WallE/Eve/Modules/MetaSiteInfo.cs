@@ -14,13 +14,10 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling", Justification = "SiteInfo is inherently complex.")]
-	internal sealed class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>, IContinuableQueryModule
+	internal sealed class MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input) : QueryModule<SiteInfoInput, SiteInfoResult>(wal, input, null), IContinuableQueryModule
 	{
+
 		#region Constructors
-		public MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input)
-			: base(wal, input, null)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties
@@ -81,7 +78,7 @@
 		protected override void DeserializeParent(JToken parent)
 		{
 			var (defaultSkin, skins) = GetSkins(parent.NotNull());
-			SiteInfoResult output = new(
+			this.Output = new(
 				general: this.GetGeneral(parent),
 				defaultOptions: GetDefaultOptions(parent),
 				defaultSkin: defaultSkin,
@@ -105,8 +102,6 @@
 				statistics: GetStatistics(parent),
 				userGroups: GetUserGroups(parent),
 				variables: GetVariables(parent));
-
-			this.Output = output;
 		}
 
 		protected override void DeserializeResult(JToken? result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
@@ -141,7 +136,7 @@
 			}
 		}
 
-		private static IReadOnlyList<SiteInfoLag> GetDbReplLag(JToken parent)
+		private static List<SiteInfoLag> GetDbReplLag(JToken parent)
 		{
 			if (parent["dbrepllag"] is not JToken node)
 			{
@@ -161,7 +156,7 @@
 
 		private static IReadOnlyList<string> GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.GetList<string>() : [];
 
-		private static IReadOnlyList<string> GetFileExtensions(JToken parent)
+		private static List<string> GetFileExtensions(JToken parent)
 		{
 			if (parent["fileextensions"] is not JToken node)
 			{
@@ -179,7 +174,7 @@
 
 		private static IReadOnlyList<string> GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.GetList<string>() : [];
 
-		private static IReadOnlyList<SiteInfoInterwikiMap> GetInterwikiMap(JToken parent)
+		private static List<SiteInfoInterwikiMap> GetInterwikiMap(JToken parent)
 		{
 			if (parent["interwikimap"] is not JToken node)
 			{
@@ -208,7 +203,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoLanguage> GetLanguages(JToken parent)
+		private static List<SiteInfoLanguage> GetLanguages(JToken parent)
 		{
 			if (parent["languages"] is not JToken node)
 			{
@@ -224,7 +219,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoLibrary> GetLibraries(JToken parent)
+		private static List<SiteInfoLibrary> GetLibraries(JToken parent)
 		{
 			if (parent["libraries"] is not JToken node)
 			{
@@ -242,7 +237,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoMagicWord> GetMagicWords(JToken parent)
+		private static List<SiteInfoMagicWord> GetMagicWords(JToken parent)
 		{
 			if (parent["magicwords"] is not JToken node)
 			{
@@ -261,7 +256,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoNamespaceAlias> GetNamespaceAliases(JToken parent)
+		private static List<SiteInfoNamespaceAlias> GetNamespaceAliases(JToken parent)
 		{
 			if (parent["namespacealiases"] is not JToken node)
 			{
@@ -279,7 +274,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoNamespace> GetNamespaces(JToken parent)
+		private static List<SiteInfoNamespace> GetNamespaces(JToken parent)
 		{
 			if (parent["namespaces"] is not JToken node)
 			{
@@ -357,7 +352,7 @@
 			return (defaultSkin, retval);
 		}
 
-		private static IReadOnlyList<SiteInfoSpecialPageAlias> GetSpecialPageAliases(JToken parent)
+		private static List<SiteInfoSpecialPageAlias> GetSpecialPageAliases(JToken parent)
 		{
 			if (parent["specialpagealiases"] is not JToken node)
 			{
@@ -388,7 +383,7 @@
 				views: (long?)node["views"] ?? -1)
 			: null;
 
-		private static IReadOnlyList<SiteInfoSubscribedHook> GetSubscribedHooks(JToken parent)
+		private static List<SiteInfoSubscribedHook> GetSubscribedHooks(JToken parent)
 		{
 			if (parent["showhooks"] is not JToken node)
 			{
@@ -412,7 +407,7 @@
 			return retval;
 		}
 
-		private static IReadOnlyList<SiteInfoUserGroup> GetUserGroups(JToken parent)
+		private static List<SiteInfoUserGroup> GetUserGroups(JToken parent)
 		{
 			if (parent["usergroups"] is not JToken node)
 			{
@@ -439,7 +434,7 @@
 		#endregion
 
 		#region Private Methods
-		private IReadOnlyList<SiteInfoExtensions> GetExtensions(JToken parent)
+		private List<SiteInfoExtensions> GetExtensions(JToken parent)
 		{
 			if (parent["extensions"] is not JToken node)
 			{

@@ -45,7 +45,9 @@
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
 
-		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? [];
+		private static IReadOnlyList<string> ParseRights(string? value) => value is null
+			? []
+			: value.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries).AsReadOnlyList();
 		#endregion
 
 		#region Private Classes

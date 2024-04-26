@@ -136,7 +136,7 @@
 			return categories;
 		}
 
-		private static IReadOnlyList<LanguageLinksItem> DeserializeLanguageLinks(JToken? subResult)
+		private static List<LanguageLinksItem> DeserializeLanguageLinks(JToken? subResult)
 		{
 			List<LanguageLinksItem> langLinks = [];
 			if (subResult != null)
@@ -150,7 +150,7 @@
 				}
 			}
 
-			return langLinks.AsReadOnly();
+			return langLinks;
 		}
 
 		private static Dictionary<string, IReadOnlyList<string>> DeserializeLimitReportData(JToken? subResult)
@@ -191,7 +191,7 @@
 			return links;
 		}
 
-		private static IReadOnlyList<SectionsItem> DeserializeSections(JToken? subResult)
+		private static List<SectionsItem> DeserializeSections(JToken? subResult)
 		{
 			List<SectionsItem> sections = [];
 			if (subResult != null)

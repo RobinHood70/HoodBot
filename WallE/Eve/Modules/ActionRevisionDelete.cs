@@ -67,7 +67,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static IReadOnlyList<string> GetRenderedMessages(JToken? messages)
+		private static List<string> GetRenderedMessages(JToken? messages)
 		{
 			List<string> output = [];
 			if (messages != null)
@@ -79,7 +79,7 @@
 				}
 			}
 
-			return output.AsReadOnly();
+			return output;
 		}
 		#endregion
 	}

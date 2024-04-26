@@ -134,7 +134,7 @@
 			return output;
 		}
 
-		private static IReadOnlyDictionary<string, ParametersItem> GetParameters(JToken? token)
+		private static ReadOnlyKeyedCollection<string, ParametersItem> GetParameters(JToken? token)
 		{
 			List<ParametersItem> parametersList = [];
 			if (token != null)
