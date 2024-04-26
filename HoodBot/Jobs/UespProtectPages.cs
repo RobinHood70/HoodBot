@@ -609,7 +609,7 @@
 			return titlesToProtect;
 		}
 
-		private ICollection<int> NamespacesInSearchList()
+		private HashSet<int> NamespacesInSearchList()
 		{
 			HashSet<int> retval = [];
 			foreach (var search in this.searchList)

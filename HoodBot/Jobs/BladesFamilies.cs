@@ -220,7 +220,7 @@
 			#endregion
 
 			#region Public Properties
-			public IDictionary<string, int> Abilities { get; } = new SortedDictionary<string, int>(StringComparer.Ordinal);
+			public SortedDictionary<string, int> Abilities { get; } = new SortedDictionary<string, int>(StringComparer.Ordinal);
 
 			public double ArmorRatingIncrement { get; }
 

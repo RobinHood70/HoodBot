@@ -36,8 +36,8 @@
 			csv.Load(LocalConfig.BotDataSubPath("Starfield/Factions.csv"), true);
 			var items = this.ParseFactions(csv);
 			var entries = this.GetFactionEntries(csv);
-			var first = entries.First();
-			var letter = char.ToUpper(first.Key[0], CultureInfo.CurrentCulture);
+			var first = entries.Keys.First() ?? " ";
+			var letter = char.ToUpper(first[0], CultureInfo.CurrentCulture);
 			var pageName = TitleFactory.FromUnvalidated(this.Site, "Starfield:Factions " + letter);
 			var page = this.Site.CreatePage(pageName);
 			foreach (var kvp in entries)
@@ -123,7 +123,7 @@
 		#endregion
 
 		#region Private Classes
-		private IReadOnlyDictionary<string, TitleCollection> GetNPCs()
+		private Dictionary<string, TitleCollection> GetNPCs()
 		{
 			var npcs = new TitleCollection(this.Site);
 			npcs.GetCategoryMembers("Starfield-NPCs");
@@ -157,7 +157,7 @@
 			return members;
 		}
 
-		private IDictionary<Title, Redirect> ParseFactions(CsvFile csv)
+		private Dictionary<Title, Redirect> ParseFactions(CsvFile csv)
 		{
 			var items = new Dictionary<Title, Redirect>();
 			foreach (var row in csv)
@@ -179,7 +179,7 @@
 			return items;
 		}
 
-		private IReadOnlyDictionary<string, List<Entry>> GetFactionEntries(CsvFile csv)
+		private SortedDictionary<string, List<Entry>> GetFactionEntries(CsvFile csv)
 		{
 			var npcs = this.GetNPCs();
 			var entries = new SortedDictionary<string, List<Entry>>(StringComparer.OrdinalIgnoreCase);

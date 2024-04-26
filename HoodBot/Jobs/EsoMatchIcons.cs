@@ -354,7 +354,7 @@
 
 			public ICollection<string> UnmatchedNames { get; } = new SortedSet<string>(StringComparer.Ordinal);
 
-			public IDictionary<string, ICollection<string>> UsedFor { get; } = new SortedDictionary<string, ICollection<string>>(StringComparer.Ordinal);
+			public SortedDictionary<string, ICollection<string>> UsedFor { get; } = new SortedDictionary<string, ICollection<string>>(StringComparer.Ordinal);
 			#endregion
 
 			#region Public Methods

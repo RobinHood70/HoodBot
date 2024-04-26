@@ -13,8 +13,9 @@
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
 	public sealed class NamespaceCollection : IReadOnlyCollection<Namespace>
 	{
-		private readonly IDictionary<int, Namespace> idsDictionary;
-		private readonly IDictionary<string, Namespace> namesDictionary;
+		private readonly SortedList<int, Namespace> idsDictionary;
+		private readonly Dictionary<string, Namespace> namesDictionary;
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="NamespaceCollection" /> class.</summary>

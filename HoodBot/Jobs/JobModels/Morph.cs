@@ -195,7 +195,7 @@
 			}
 		}
 
-		private static IReadOnlyList<string> Same<T>(IEnumerable<T> values)
+		private static List<string> Same<T>(IEnumerable<T> values)
 			where T : IEquatable<T>, IFormattable
 		{
 			var valueList = SameString(values);

@@ -42,7 +42,7 @@
 		private DateTime jobStarted;
 		private double overallProgress;
 		private double overallProgressMax = 1;
-		private IParameterFetcher? parameterFetcher;
+		private MainWindowParameterFetcher? parameterFetcher; // was IParameterFetcher?
 		private string? password;
 		private Brush progressBarColor = ProgressBarGreen;
 		private WikiInfoViewModel? selectedItem;
