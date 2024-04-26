@@ -161,7 +161,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract void BuildRequestLocal(Request request, TInput input);
 
-		protected abstract void DeserializeResult(JToken? result);
+		protected abstract void DeserializeResult(JToken result);
 		#endregion
 
 		#region Protected Virtual Methods
