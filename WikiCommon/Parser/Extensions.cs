@@ -921,7 +921,7 @@
 			}
 
 			var baseOffset = offset;
-			while (offset < limit && mask.IndexOf(text[offset], StringComparison.Ordinal) != -1)
+			while (offset < limit && mask.Contains(text[offset], StringComparison.Ordinal))
 			{
 				offset++;
 			}
@@ -984,7 +984,7 @@
 			// Decrement offset because we're going in the reverse direction, so want to look at the character *before* the current one.
 			offset--;
 			var baseOffset = offset;
-			while (offset >= limit && mask.IndexOf(text[offset], StringComparison.Ordinal) != -1)
+			while (offset >= limit && mask.Contains(text[offset], StringComparison.Ordinal))
 			{
 				offset--;
 			}
