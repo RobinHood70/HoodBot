@@ -16,10 +16,6 @@
 	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling", Justification = "SiteInfo is inherently complex.")]
 	internal sealed class MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input) : QueryModule<SiteInfoInput, SiteInfoResult>(wal, input, null), IContinuableQueryModule
 	{
-
-		#region Constructors
-		#endregion
-
 		#region Public Override Properties
 		public override string ContinueName => "prop";
 

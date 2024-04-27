@@ -6,18 +6,10 @@ namespace RobinHood70.WallE.Base
 	using System.IO;
 	using RobinHood70.WallE.Properties;
 
-	public class UploadInput
+	public class UploadInput(string remoteName, Stream fileData)
 	{
 		#region Fields
-		private WatchlistOption watchlist;
-		#endregion
-
-		#region Constructors
-		public UploadInput(string remoteName, Stream fileData)
-		{
-			this.FileData = fileData;
-			this.RemoteFileName = remoteName;
-		}
+		private WatchlistOption watchlist = WatchlistOption.Preferences;
 		#endregion
 
 		#region Public Properties
@@ -25,11 +17,11 @@ namespace RobinHood70.WallE.Base
 
 		public string? Comment { get; set; }
 
-		public Stream FileData { get; }
+		public Stream FileData { get; } = fileData;
 
 		public bool IgnoreWarnings { get; set; }
 
-		public string RemoteFileName { get; }
+		public string RemoteFileName { get; } = remoteName;
 
 		[Localizable(false)]
 		public string? Text { get; set; }

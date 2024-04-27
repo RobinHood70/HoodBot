@@ -3,23 +3,14 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WikiCommon;
 
-	public class WikiTitleItem : IApiTitle
+	public class WikiTitleItem(int ns, string title, long pageId) : IApiTitle
 	{
-		#region Constructors
-		public WikiTitleItem(int ns, string title, long pageId)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.PageId = pageId;
-		}
-		#endregion
-
 		#region Public Properties
-		public int Namespace { get; }
+		public int Namespace { get; } = ns;
 
-		public long PageId { get; }
+		public long PageId { get; } = pageId;
 
-		public string Title { get; }
+		public string Title { get; } = title;
 		#endregion
 
 		#region Public Override Methods
