@@ -301,9 +301,9 @@
 			foreach (var (npc, issue) in issues)
 			{
 				this.WriteLine("|-");
-				this.WriteLine(npc.Title is null
-					? "|"
-					: $"| {SiteLink.ToText(npc.Title, LinkFormat.LabelName)}");
+				this.WriteLine(npc.Title is Title title
+					? $"| {SiteLink.ToText(title, LinkFormat.LabelName)}"
+					: "|");
 				this.WriteLine($"| {issue}");
 				this.WriteLine("| " + NpcToWikiText(npc));
 			}
