@@ -419,10 +419,6 @@
 			return FromLinkNode(site, linkNode);
 		}
 
-		/// <summary>Creates a new SiteLink instance from the provided <see cref="Title"/>.</summary>
-		/// <param name="title">The <see cref="Title"/> to use.</param>
-		public static SiteLink FromTitle(Title title) => new(title);
-
 		/// <summary>Converts the specified title to a SiteLink and then displays the text of that link.</summary>
 		/// <param name="title">The title to display.</param>
 		/// <param name="format">The format of the link.</param>
