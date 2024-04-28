@@ -16,6 +16,9 @@
 	/// <summary>The format to use for the link text.</summary>
 	public enum LinkFormat
 	{
+		/// <summary>Forces link format if the Title represented is in Category or File space.</summary>
+		ForcedLink,
+
 		/// <summary>Plain link with no text.</summary>
 		Plain,
 
@@ -459,17 +462,37 @@
 		/// <returns>The current title, formatted as a link.</returns>
 		public string AsLink(LinkFormat format = LinkFormat.Plain)
 		{
-			var link = this.Text is not null
-				? this
-				: format switch
-				{
-					LinkFormat.Plain => this,
-					LinkFormat.PipeTrick => new SiteLink(this) { Text = this.Title.PipeTrick() },
-					LinkFormat.LabelName => new SiteLink(this) { Text = this.Title.LabelName() },
-					_ => this
-				};
+			// Manually constructed so we have better control over the construction, as opposed to converting it to a LinkNode and sending it through the raw WikiText formatter.
+			// Initialize StringBuilder with a rough starting size so we don't have to expand it much, if at all.
+			var sb = new StringBuilder(this.Parameters.Count * 10 + 30);
+			sb
+				.Append("[[")
+				.Append(this.LinkTarget(format == LinkFormat.ForcedLink && this.Title.Namespace.IsForcedLinkSpace));
+			foreach (var parameter in this.Parameters)
+			{
+				sb
+					.Append('|')
+					.Append(parameter.Value);
+			}
 
-			return WikiTextVisitor.Raw(link.ToLinkNode());
+			if (this.Text is null)
+			{
+				if (format == LinkFormat.PipeTrick)
+				{
+					sb
+						.Append('|')
+						.Append(this.Title.PipeTrick());
+				}
+				else if (format == LinkFormat.LabelName)
+				{
+					sb
+						.Append('|')
+						.Append(this.Title.LabelName());
+				}
+			}
+
+			sb.Append("]]");
+			return sb.ToString();
 		}
 
 		/// <summary>Gets the image size.</summary>
@@ -492,13 +515,15 @@
 		}
 
 		/// <summary>Returns the full wikitext of the link target without surrounding braces.</summary>
+		/// <param name="forcedNsOverride">If <see langword="true"/>, overrides ForcedNamespaceLink to <see langword="true"/>.</param>
 		/// <returns>The current link target.</returns>
-		public string LinkTarget()
+		public string LinkTarget(bool forcedNsOverride)
 		{
 			var sb = new StringBuilder()
 				.Append(this.TitleWhitespaceBefore)
 				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
 				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
+				.Append((forcedNsOverride || this.ForcedNamespaceLink) ? ":" : string.Empty)
 				.Append(this.Title.Namespace.DecoratedName())
 				.Append(this.Title.PageName);
 			if (this.Fragment != null)
@@ -546,7 +571,7 @@
 				values.Add(text);
 			}
 
-			return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.LinkTarget(), values);
+			return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.LinkTarget(false), values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
