@@ -184,7 +184,7 @@
 
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
 
-		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Title.Namespace, template.Find("icon"));
+		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.File], template.Find("icon"));
 
 		protected void GenericImage(Page page, SiteTemplateNode template)
 		{
