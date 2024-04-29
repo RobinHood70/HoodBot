@@ -879,7 +879,7 @@
 		/// <remarks>Waits for 10 seconds between each request.</remarks>
 		public void WaitForJobQueue() => this.WaitForJobQueue(TimeSpan.FromSeconds(10), 0);
 
-		/// <summary>Waits for the job queue to reach zero.</summary>
+		/// <summary>If editing is enabled, waits for the job queue to reach zero.</summary>
 		/// <param name="timeBetweenChecks">The amount of time to wait between requests for the number of jobs remaining.</param>
 		/// <param name="atOrBelow">Wait until the job queue is at or below this value.</param>
 		public void WaitForJobQueue(TimeSpan timeBetweenChecks, int atOrBelow)
