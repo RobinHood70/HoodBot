@@ -7,6 +7,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Properties;
 
 	#region Public Enumerations
@@ -121,7 +122,7 @@
 					_ = title.Site.AbstractionLayer.Delete(input);
 					return ChangeStatus.Success;
 				}
-				catch (NotImplementedException)
+				catch (WikiException)
 				{
 					return ChangeStatus.Failure;
 				}
