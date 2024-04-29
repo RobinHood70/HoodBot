@@ -227,23 +227,32 @@
 		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <returns>The added parameter.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode Add(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
+		public static IParameterNode Add(this ITemplateNode template, string? name, string value, ParameterFormat paramFormat)
 		{
 			template.ThrowNull();
 			IParameterNode retval;
-			value = TrimValue(value, paramFormat);
-
-			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
-			if (index != -1)
+			if (name is not null && template.Find(name) is not null)
 			{
-				if (template.Find(name) != null)
-				{
-					throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
-				}
+				throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
+			}
 
+			value = TrimValue(value, paramFormat);
+			if (paramFormat == ParameterFormat.Copy &&
+				template.FindCopyParameter(false) is var index &&
+				index != -1)
+			{
 				var previous = template.Parameters[index];
 				retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 				template.Parameters.Insert(index + 1, retval);
+				var copyNode = index == 0
+					? template.Title
+					: template.Parameters[index - 1].Value;
+				if (copyNode.ToValue().GetTrailingWhitespace() is string trailingSpace)
+				{
+					// In the event that parameters are indented but trailing }} isn't, this will ensure that the formatting is as expected instead of added parameters being flush with the }}.
+					previous.Value.TrimEnd();
+					previous.Value.AddText(trailingSpace);
+				}
 			}
 			else
 			{
@@ -265,27 +274,7 @@
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <returns>The added parameter.</returns>
-		public static IParameterNode Add(this ITemplateNode template, string value, ParameterFormat paramFormat)
-		{
-			template.ThrowNull();
-			IParameterNode retval;
-			value = TrimValue(value, paramFormat);
-
-			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(true) : -1;
-			if (index != -1)
-			{
-				var previous = template.Parameters[index];
-				retval = template.Factory.ParameterNodeFromOther(previous, value);
-				template.Parameters.Insert(index + 1, retval);
-			}
-			else
-			{
-				retval = template.Factory.ParameterNodeFromParts(value);
-				template.Parameters.Add(retval);
-			}
-
-			return retval;
-		}
+		public static IParameterNode Add(this ITemplateNode template, string value, ParameterFormat paramFormat) => Add(template, null, value, paramFormat);
 
 		/// <summary>Adds a parameter with the specified value if it does not already exist.</summary>
 		/// <param name="template">The template to work on.</param>
@@ -646,6 +635,20 @@
 
 				if (string.Equals(name, parameterName, StringComparison.Ordinal))
 				{
+					if (i == template.Parameters.Count - 1)
+					{
+						var lastParam = template.Parameters[i];
+						var trailing = lastParam.Value.ToValue();
+						trailing = trailing.GetTrailingWhitespace();
+
+						var newLast = template.Parameters[^2];
+						newLast.Value.Trim();
+						if (trailing is not null)
+						{
+							newLast.Value.AddText(trailing);
+						}
+					}
+
 					template.Parameters.RemoveAt(i);
 					retval = true;
 				}
@@ -859,6 +862,84 @@
 		#endregion
 
 		#region String Extensions
+
+		/// <summary>Gets the leading whitespace from a string.</summary>
+		/// <param name="value">The value to check.</param>
+		/// <returns>The leading whitespace.</returns>
+		public static string? GetLeadingWhitespace(this string? value)
+		{
+			if (value is null)
+			{
+				return null;
+			}
+
+			var startPos = 0;
+			while (startPos < value.Length && char.IsWhiteSpace(value[startPos]))
+			{
+				startPos++;
+			}
+
+			return startPos == 0
+				? string.Empty
+				: value[0..startPos];
+		}
+
+		/// <summary>Gets the surrounding whitespace from a string.</summary>
+		/// <param name="value">The value to check.</param>
+		/// <returns>The surrounding whitespace.</returns>
+		/// <remarks>If <paramref name="value"/> is entirely whitespace, it will be placed into Trailing and Leading will be empty. If <paramref name="value"/> is null, null will be returned in both Leading and Trailing.</remarks>
+		public static (string? Leading, string? Trailing) GetSurroundingWhitespace(this string? value)
+		{
+			if (value is null)
+			{
+				return (null, null);
+			}
+
+			var endPos = value.Length - 1;
+			while (endPos >= 0 && char.IsWhiteSpace(value[endPos]))
+			{
+				endPos--;
+			}
+
+			endPos++;
+			var end = endPos >= value.Length
+				? string.Empty
+				: value[endPos..];
+
+			var startPos = 0;
+			while (startPos < endPos && char.IsWhiteSpace(value[startPos]))
+			{
+				startPos++;
+			}
+
+			var start = startPos == 0
+				? string.Empty
+				: value[0..startPos];
+
+			return (start, end);
+		}
+
+		/// <summary>Gets the trailing whitespace from a string.</summary>
+		/// <param name="value">The value to check.</param>
+		/// <returns>The trailing whitespace.</returns>
+		public static string? GetTrailingWhitespace(this string? value)
+		{
+			if (value is null)
+			{
+				return null;
+			}
+
+			var endPos = value.Length - 1;
+			while (endPos >= 0 && char.IsWhiteSpace(value[endPos]))
+			{
+				endPos--;
+			}
+
+			endPos++;
+			return endPos >= value.Length
+				? string.Empty
+				: value[endPos..];
+		}
 
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="text">The text to scan.</param>

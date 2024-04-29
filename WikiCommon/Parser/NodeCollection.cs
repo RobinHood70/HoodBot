@@ -180,32 +180,8 @@
 		/// <returns>The value with the same surrounding whitespace as the provided NodeCollection.</returns>
 		public string CopyFormatTo(string? value)
 		{
-			var textValue = this.ToValue();
-			var endPos = textValue.Length - 1;
-			value = value is null ? string.Empty : value.Trim();
-			while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
-			{
-				endPos--;
-			}
-
-			endPos++;
-			if (endPos < textValue.Length)
-			{
-				value += textValue[endPos..];
-			}
-
-			var startLength = 0;
-			while (startLength < endPos && char.IsWhiteSpace(textValue[startLength]))
-			{
-				startLength++;
-			}
-
-			if (startLength > 0)
-			{
-				value = string.Concat(textValue.AsSpan(0, startLength), value);
-			}
-
-			return value;
+			var (leading, trailing) = this.ToValue().GetSurroundingWhitespace();
+			return leading + value + trailing;
 		}
 
 		/// <summary>Finds the first node of the specified type.</summary>
