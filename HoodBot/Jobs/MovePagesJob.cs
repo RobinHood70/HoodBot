@@ -293,6 +293,8 @@
 
 		protected virtual void CheckRemaining()
 		{
+			// Since links to either moved pages or the source of updated links are probably undesirable, we add both to the list to check.
+			this.StatusWriteLine("Waiting for job queue to clear");
 			this.Site.WaitForJobQueue();
 			this.StatusWriteLine("Checking remaining pages");
 			TitleCollection backlinkTitles = new(this.Site);
@@ -301,11 +303,22 @@
 				backlinkTitles.Add(replacement.Key);
 			}
 
+			foreach (var replacement in this.moves)
+			{
+				backlinkTitles.Add(replacement.Key);
+			}
+
 			TitleCollection leftovers = new(this.Site);
 			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			allBacklinks.GetTitles(backlinkTitles);
+			this.ResetProgress(allBacklinks.Count);
 			foreach (var page in allBacklinks)
 			{
+				if (IsPageOrphaned(page))
+				{
+					this.OnFromPageOrphaned(page);
+				}
+
 				foreach (var leftover in page.Backlinks)
 				{
 					if (page.Title != leftover.Key)
@@ -314,24 +327,36 @@
 						leftovers.TryAdd(leftover.Key);
 					}
 				}
+
+				this.Progress++;
 			}
 
 			if (leftovers.Count > 0)
 			{
 				PageCollection.Purge(this.Site, leftovers, PurgeMethod.LinkUpdate, 5);
 				Thread.Sleep(15); // Arbitrary wait to roughly ensure that job queue has started.
+				this.StatusWriteLine("Waiting for job queue to clear");
 				this.Site.WaitForJobQueue();
 
+				this.StatusWriteLine("Double-checking leftover remaining pages");
 				leftovers.Clear();
 				allBacklinks.Clear();
 				allBacklinks.GetTitles(backlinkTitles);
+				this.ResetProgress(allBacklinks.Count);
 				foreach (var page in allBacklinks)
 				{
-					if ((page.Backlinks.Count > 1 && !page.Backlinks.ContainsKey(page.Title)) || page.Backlinks.Count > 1)
+					var isOrphaned = IsPageOrphaned(page);
+					if (isOrphaned)
+					{
+						this.OnFromPageOrphaned(page);
+					}
+					else
 					{
 						// We no longer care about which pages link back to the moved page; this time, we want the pages that still have backlinks.
 						leftovers.Add(page.Title);
 					}
+
+					this.Progress++;
 				}
 
 				if (leftovers.Count > 0)
@@ -365,7 +390,7 @@
 				}
 				else if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
 				{
-					actionsList.Add("move to " + SiteLink.ToText(this.moves[from]));
+					actionsList.Add("move to " + SiteLink.ToText(this.moves[from], LinkFormat.ForcedLink));
 					if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 					{
 						actionsList.Add("update links");
@@ -373,7 +398,7 @@
 				}
 				else if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 				{
-					actionsList.Add("update links to " + SiteLink.ToText(this.linkUpdates[from]));
+					actionsList.Add("update links to " + SiteLink.ToText(this.linkUpdates[from], LinkFormat.ForcedLink));
 				}
 
 				if (action.HasAction(ReplacementActions.Edit) && !action.HasAction(ReplacementActions.Skip))
@@ -564,6 +589,10 @@
 
 				this.Progress++;
 			}
+		}
+
+		protected virtual void OnFromPageOrphaned(Page page)
+		{
 		}
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
@@ -790,6 +819,14 @@
 		#endregion
 
 		#region Private Static Methods
+		private static void GetBacklinkTitles(PageCollection pageInfo, TitleCollection backlinkTitles)
+		{
+			foreach (var page in pageInfo)
+			{
+				backlinkTitles.AddRange(page.Backlinks.Keys);
+			}
+		}
+
 		private static void FilterTemplatesExceptDocs(TitleCollection titles)
 		{
 			for (var i = titles.Count - 1; i >= 0; i--)
@@ -801,6 +838,12 @@
 					titles.RemoveAt(i);
 				}
 			}
+		}
+
+		private static bool IsPageOrphaned(Page page)
+		{
+			var unique = new SortedSet<Title>(page.Backlinks.Keys);
+			return unique.Count == 0 || (unique.Count == 1 && unique.Contains(page.Title));
 		}
 
 		private static void ProposeForDeletion(ContextualParser parser, string deletionText)
@@ -844,24 +887,6 @@
 		#endregion
 
 		#region Private Methods
-		private void GetBacklinkTitles(PageCollection pageInfo, TitleCollection backlinkTitles)
-		{
-			foreach (var linkUpdate in this.linkUpdates)
-			{
-				if (pageInfo.TryGetValue(linkUpdate.Key, out var fromPage))
-				{
-					foreach (var backlink in fromPage.Backlinks)
-					{
-						backlinkTitles.TryAdd(backlink.Key);
-					}
-				}
-				else
-				{
-					this.StatusWriteLine("Key not found: " + linkUpdate.Key);
-				}
-			}
-		}
-
 		private PageCollection GetFromPages()
 		{
 			var modules = this.PageInfoExtraModules | PageModules.Info;
@@ -888,7 +913,7 @@
 			TitleCollection backlinkTitles = new(this.Site);
 			if (this.FollowUpActions.HasAnyFlag(FollowUpActions.AffectsBacklinks))
 			{
-				this.GetBacklinkTitles(fromPages, backlinkTitles);
+				GetBacklinkTitles(fromPages, backlinkTitles);
 				if (categoryMembers.Count > 0 && this.FollowUpActions.HasAnyFlag(FollowUpActions.UpdateCategoryMembers))
 				{
 					foreach (var catTitles in categoryMembers)
@@ -956,7 +981,7 @@
 					var newLink = link.WithTitle(newTitle);
 					this.UpdateLinkText(page, link, newLink, false);
 
-					return newLink.LinkTarget();
+					return newLink.LinkTarget(false);
 				}
 			}
 
