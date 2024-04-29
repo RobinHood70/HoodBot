@@ -434,6 +434,12 @@
 		public void SetMinimalStartTimestamp() => this.StartTimestamp = new DateTime(2000, 1, 1);
 		#endregion
 
+		#region Public Override Methods
+
+		/// <inheritdoc/>
+		public override string ToString() => this.Title.FullPageName();
+		#endregion
+
 		#region Protected Virtual Methods
 
 		/// <summary>When overridden in a derived class, allows custom property inputs to be specified as necessary.</summary>
