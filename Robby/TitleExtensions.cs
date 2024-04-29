@@ -106,6 +106,7 @@
 			var site = title.Namespace.Site;
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
+				[nameof(title)] = title,
 				[nameof(reason)] = reason,
 			};
 
@@ -114,10 +115,16 @@
 			ChangeStatus ChangeFunc()
 			{
 				DeleteInput input = new(title.FullPageName()) { Reason = reason };
-				var retval = title.Site.AbstractionLayer.Delete(input);
-				return retval.LogId == 0
-					? ChangeStatus.Failure
-					: ChangeStatus.Success;
+				try
+				{
+					// Failure always throws and the return value has nothing else of interest in it.
+					_ = title.Site.AbstractionLayer.Delete(input);
+					return ChangeStatus.Success;
+				}
+				catch (NotImplementedException)
+				{
+					return ChangeStatus.Failure;
+				}
 			}
 		}
 
