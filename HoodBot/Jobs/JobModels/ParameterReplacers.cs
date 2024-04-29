@@ -53,6 +53,7 @@
 			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
 			this.AddTemplateReplacers("Multiple Images", this.MultipleImages);
 			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
+			this.AddTemplateReplacers("Online Furnishing Antiquity/Row", this.AntiquityRow);
 			this.AddTemplateReplacers("Online Furnishing Summary", this.GenericImage);
 			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
 			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
@@ -108,6 +109,15 @@
 		#endregion
 
 		#region Protected Methods
+		protected void AntiquityRow(Page page, SiteTemplateNode template)
+		{
+			var nameParam = template.Find("name", "1");
+			var name = nameParam is null
+				? page.Title.PageName
+				: nameParam.Value.ToValue().Trim();
+			this.GenericIconWithDefault(page, template, $"ON-icon-lead-{name}.png");
+		}
+
 		protected void BasicNpc(Page page, SiteTemplateNode template)
 		{
 			if (this.NamespaceList.FromTitle(page.Title) is UespNamespace nsPage)
@@ -185,6 +195,24 @@
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
 
 		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.File], template.Find("icon"));
+
+		protected void GenericIconWithDefault(Page page, SiteTemplateNode template, string defaultValue)
+		{
+			var param = template.Find("icon");
+			var addedDefault = false;
+			if (param is null)
+			{
+				defaultValue = defaultValue.Replace("{{PAGENAME}}", page.Title.PageName, StringComparison.Ordinal);
+				param = template.Add("icon", defaultValue);
+				addedDefault = true;
+			}
+
+			this.PageNameReplace(this.site[MediaWikiNamespaces.File], param);
+			if (addedDefault && string.Equals(param.Value.ToRaw().Trim(), defaultValue, StringComparison.Ordinal))
+			{
+				template.Remove("icon");
+			}
+		}
 
 		protected void GenericImage(Page page, SiteTemplateNode template)
 		{
@@ -302,7 +330,9 @@
 			var ns2 = rep2 ? replacement2.To.Namespace : null; */
 			if (param != null)
 			{
-				if (this.globalUpdates.TryGetValue(TitleFactory.FromUnvalidated(ns, param.Value.ToValue().Trim()), out var target) &&
+				var paramValue = param.Value.ToValue().Trim();
+				var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
+				if (this.globalUpdates.TryGetValue(findTitle, out var target) &&
 					target.Namespace == ns)
 				{
 					param.SetValue(target.PageName, ParameterFormat.Copy);
