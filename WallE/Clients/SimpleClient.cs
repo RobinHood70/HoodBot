@@ -3,13 +3,11 @@ namespace RobinHood70.WallE.Clients
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Net;
 	using System.Net.Http;
 	using System.Net.Http.Headers;
 	using System.Security;
-	// using System.Text.Json;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
@@ -24,6 +22,7 @@ namespace RobinHood70.WallE.Clients
 		private readonly string? cookiesLocation;
 		private readonly SimpleClientRetryHandler retryHandler;
 		private readonly HttpClient httpClient;
+		private readonly JsonSerializerSettings jsonSettings = new();
 		private readonly HttpClientHandler webHandler;
 		private bool disposed;
 		private DateTime cookiesLastUpdated = DateTime.MinValue;
@@ -44,6 +43,12 @@ namespace RobinHood70.WallE.Clients
 		{
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
+			var resolver = new DefaultContractResolver
+			{
+				// Instructs Json to use fields instead of properties while (de-)serializing. This is necessary so that cookies retain their Timestamp property which is get-only, backed by a private field.
+				IgnoreSerializableAttribute = false
+			};
+			this.jsonSettings.ContractResolver = resolver;
 			this.cookiesLocation = cookiesLocation;
 			this.LoadCookies();
 			this.cancellationToken = cancellationToken;
@@ -82,22 +87,6 @@ namespace RobinHood70.WallE.Clients
 		public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
 		private string UserAgent { get; }
-		#endregion
-
-		#region Public Static Methods
-		private static DateTime LatestCookie(IReadOnlyCollection<Cookie> cookies)
-		{
-			var latest = DateTime.MinValue;
-			foreach (var cookie in cookies)
-			{
-				if (cookie.TimeStamp > latest)
-				{
-					latest = cookie.TimeStamp;
-				}
-			}
-
-			return latest;
-		}
 		#endregion
 
 		#region Public Methods
@@ -238,6 +227,22 @@ namespace RobinHood70.WallE.Clients
 		protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 		#endregion
 
+		#region Private Static Methods
+		private static DateTime LatestCookie(IReadOnlyCollection<Cookie> cookies)
+		{
+			var latest = DateTime.MinValue;
+			foreach (var cookie in cookies)
+			{
+				if (cookie.TimeStamp > latest)
+				{
+					latest = cookie.TimeStamp;
+				}
+			}
+
+			return latest;
+		}
+		#endregion
+
 		#region Private Methods
 
 		private static string GetResponseText(HttpResponseMessage response)
@@ -253,20 +258,12 @@ namespace RobinHood70.WallE.Clients
 			{
 				try
 				{
-					var settings = new JsonSerializerSettings();
-					var resolver = new DefaultContractResolver
-					{
-						IgnoreSerializableAttribute = false
-					};
-					settings.ContractResolver = resolver;
-
 					var cookieText = File.ReadAllText(this.cookiesLocation);
-					if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, settings) is CookieCollection cookies)
+					if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
 					{
 						this.cookieContainer.Add(cookies);
 						this.cookiesLastUpdated = LatestCookie(cookies);
 					}
-
 				}
 				catch (NullReferenceException)
 				{
