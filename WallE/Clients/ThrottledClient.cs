@@ -77,7 +77,7 @@
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
-		public bool DownloadFile(Uri uri, string fileName)
+		public bool DownloadFile(Uri uri, string? fileName)
 		{
 			this.Throttle();
 			var retval = this.baseClient.DownloadFile(uri, fileName);

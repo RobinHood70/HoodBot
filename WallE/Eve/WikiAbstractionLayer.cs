@@ -693,10 +693,10 @@
 		/// <summary>Downloads the specified resource (typically, a Uri) to a file.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly. No stop checks are performed when using this method, since this could be downloading from anywhere.</remarks>
-		public void Download(DownloadInput input)
+		public bool Download(DownloadInput input)
 		{
 			Uri uri = new(input.NotNull().Resource);
-			this.Client.DownloadFile(uri, input.FileName);
+			return this.Client.DownloadFile(uri, input.FileName);
 		}
 
 		/// <summary>Edits a page using the <see href="https://www.mediawiki.org/wiki/API:Edit">Edit</see> API module.</summary>

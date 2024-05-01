@@ -102,51 +102,48 @@ namespace RobinHood70.WallE.Clients
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
-		public bool DownloadFile(Uri uri, string fileName)
+		public bool DownloadFile(Uri uri, string? fileName)
 		{
 			uri.ThrowNull();
-			fileName.ThrowNull();
 			using HttpRequestMessage request = new(HttpMethod.Get, uri);
 			var maxLag = this.HonourMaxLag;
 			this.HonourMaxLag = false;
 			using var response = this.httpClient.Send(request, this.cancellationToken);
-			{
-				var data = GetResponseData(response);
-				if (data.Length > 0)
-				{
-					try
-					{
-						File.WriteAllBytes(fileName, data);
-						return true;
-					}
-					catch (IOException)
-					{
-					}
-					catch (UnauthorizedAccessException)
-					{
-					}
-					catch (NotSupportedException)
-					{
-					}
-					catch (SecurityException)
-					{
-					}
-					finally
-					{
-						this.HonourMaxLag = maxLag;
-					}
-				}
-			}
-
 			this.SaveCookies();
 			this.HonourMaxLag = maxLag;
+			if (!response.IsSuccessStatusCode)
+			{
+				return false;
+			}
+
+			try
+			{
+				using var outStream = fileName is null
+					? Stream.Null
+					: File.OpenWrite(fileName);
+				response.Content.CopyTo(outStream, null, this.cancellationToken);
+				return true;
+			}
+			catch (IOException)
+			{
+			}
+			catch (UnauthorizedAccessException)
+			{
+			}
+			catch (NotSupportedException)
+			{
+			}
+			catch (SecurityException)
+			{
+			}
+
 			return false;
 		}
 
 		/// <inheritdoc/>
 		public void ExpireAll()
 		{
-#if NET6_0
+#if NET6_0_OR_GREATER
 			foreach (var cookie in (IEnumerable<Cookie>)this.cookieContainer.GetAllCookies())
 			{
 				cookie.Expired = true;
@@ -213,14 +210,6 @@ namespace RobinHood70.WallE.Clients
 		#endregion
 
 		#region Private Methods
-
-		private static byte[] GetResponseData(HttpResponseMessage response)
-		{
-			using var respStream = response.Content.ReadAsStream();
-			using MemoryStream mem = new();
-			respStream.CopyTo(mem);
-			return mem.ToArray();
-		}
 
 		private static string GetResponseText(HttpResponseMessage response)
 		{

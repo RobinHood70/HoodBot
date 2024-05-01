@@ -36,9 +36,9 @@
 
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
-		/// <param name="fileName">The filename to save to.</param>
+		/// <param name="fileName">The filename to save to. If <see langword="null"/>, the data will be retrieved but not saved.</param>
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
-		bool DownloadFile(Uri uri, string fileName);
+		bool DownloadFile(Uri uri, string? fileName);
 
 		/// <summary>Expires all cookies.</summary>
 		void ExpireAll();

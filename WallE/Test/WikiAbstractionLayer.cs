@@ -221,7 +221,7 @@
 		public IReadOnlyList<DeletedRevisionsItem> DeletedRevisions(ListDeletedRevisionsInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
-		public void Download(DownloadInput input) => throw new NotImplementedException();
+		public bool Download(DownloadInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
 		public EditResult Edit(EditInput input)

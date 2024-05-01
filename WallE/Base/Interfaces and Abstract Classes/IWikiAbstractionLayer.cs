@@ -245,7 +245,8 @@
 
 		/// <summary>Downloads the specified resource (usually a URI) to a file.</summary>
 		/// <param name="input">The input parameters.</param>
-		void Download(DownloadInput input);
+		/// <returns><see langword="true"/> if the download was successful; otherwise, <see langword="false"/>.</returns>
+		bool Download(DownloadInput input);
 
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Deletedrevisions">Deletedrevisions</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>

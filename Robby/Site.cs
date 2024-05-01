@@ -329,7 +329,7 @@
 		/// <param name="resource">The location of the resource (typically, the a Uri path). This does <em>not</em> have to be located on the wiki.</param>
 		/// <param name="fileName">Name of the file.</param>
 		/// <remarks><paramref name="resource"/> is not a <see cref="Uri"/> in order to satisfy <see cref="IWikiAbstractionLayer"/>'s agnosticism. In practice, however, it will almost certainly always be one.</remarks>
-		public void Download(string resource, string fileName) => this.Download(new DownloadInput(resource, fileName));
+		public bool Download(string resource, string? fileName) => this.Download(new DownloadInput(resource, fileName));
 
 		/// <summary>Downloads the most recent version of a file from the wiki.</summary>
 		/// <param name="pageName">Name of the page. You do not have to specify the File namespace, but you may if it's convenient.</param>
@@ -1251,7 +1251,7 @@
 
 		/// <summary>Downloads a file.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected virtual void Download(DownloadInput input) => this.AbstractionLayer.Download(input);
+		protected virtual bool Download(DownloadInput input) => this.AbstractionLayer.Download(input);
 
 		/// <summary>Gets active blocks as specified by the input parameters.</summary>
 		/// <param name="input">The input parameters.</param>
