@@ -3,14 +3,17 @@ namespace RobinHood70.WallE.Clients
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Net;
 	using System.Net.Http;
 	using System.Net.Http.Headers;
 	using System.Security;
+	// using System.Text.Json;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
+	using Newtonsoft.Json.Serialization;
 	using RobinHood70.CommonCode;
 
 	public class SimpleClient : IMediaWikiClient, IDisposable
@@ -23,6 +26,7 @@ namespace RobinHood70.WallE.Clients
 		private readonly HttpClient httpClient;
 		private readonly HttpClientHandler webHandler;
 		private bool disposed;
+		private DateTime cookiesLastUpdated = DateTime.MinValue;
 		#endregion
 
 		#region Constructors
@@ -78,6 +82,22 @@ namespace RobinHood70.WallE.Clients
 		public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
 		private string UserAgent { get; }
+		#endregion
+
+		#region Public Static Methods
+		private static DateTime LatestCookie(IReadOnlyCollection<Cookie> cookies)
+		{
+			var latest = DateTime.MinValue;
+			foreach (var cookie in cookies)
+			{
+				if (cookie.TimeStamp > latest)
+				{
+					latest = cookie.TimeStamp;
+				}
+			}
+
+			return latest;
+		}
 		#endregion
 
 		#region Public Methods
@@ -189,6 +209,15 @@ namespace RobinHood70.WallE.Clients
 
 			return true;
 		}
+
+		/// <inheritdoc/>
+		public bool UriExists(Uri uri)
+		{
+			using HttpRequestMessage request = new(HttpMethod.Head, uri);
+			using var response = this.httpClient.Send(request, this.cancellationToken);
+			this.SaveCookies();
+			return response.IsSuccessStatusCode;
+		}
 		#endregion
 
 		#region Protected Virtual Methods
@@ -224,11 +253,23 @@ namespace RobinHood70.WallE.Clients
 			{
 				try
 				{
+					var settings = new JsonSerializerSettings();
+					var resolver = new DefaultContractResolver
+					{
+						IgnoreSerializableAttribute = false
+					};
+					settings.ContractResolver = resolver;
+
 					var cookieText = File.ReadAllText(this.cookiesLocation);
-					if (JsonConvert.DeserializeObject<CookieCollection>(cookieText) is CookieCollection cookies)
+					if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, settings) is CookieCollection cookies)
 					{
 						this.cookieContainer.Add(cookies);
+						this.cookiesLastUpdated = LatestCookie(cookies);
 					}
+
+				}
+				catch (NullReferenceException)
+				{
 				}
 				catch (DirectoryNotFoundException)
 				{
@@ -244,8 +285,21 @@ namespace RobinHood70.WallE.Clients
 		{
 			if (this.cookiesLocation is not null)
 			{
-				var jsonCookies = JsonConvert.SerializeObject(this.cookieContainer.GetAllCookies());
-				File.WriteAllText(this.cookiesLocation, jsonCookies);
+				var cookies = this.cookieContainer.GetAllCookies();
+				var newLatestCookie = LatestCookie(cookies);
+				if (newLatestCookie > this.cookiesLastUpdated)
+				{
+					this.cookiesLastUpdated = newLatestCookie;
+					var settings = new JsonSerializerSettings();
+					var resolver = new DefaultContractResolver
+					{
+						IgnoreSerializableAttribute = false
+					};
+					settings.ContractResolver = resolver;
+
+					var jsonCookies = JsonConvert.SerializeObject(cookies, settings);
+					File.WriteAllText(this.cookiesLocation, jsonCookies);
+				}
 			}
 		}
 		#endregion

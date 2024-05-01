@@ -95,9 +95,7 @@
 			new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
 			new SiteInfoInterwikiMap("mediawikiwiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
 		];
-		#endregion
 
-		#region Fields
 		private readonly List<ErrorItem> warnings = [];
 		#endregion
 
@@ -420,6 +418,9 @@
 
 		/// <inheritdoc/>
 		public UploadResult Upload(UploadInput input) => throw new NotImplementedException();
+
+		/// <inheritdoc/>
+		public bool UriExists(Uri uri) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
 		public IReadOnlyList<UserContributionsItem> UserContributions(UserContributionsInput input) => throw new NotImplementedException();

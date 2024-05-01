@@ -60,6 +60,11 @@
 		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
 		bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description);
+
+		/// <summary>Checks if a Uri currently exists.</summary>
+		/// <param name="uri">The Uri to check.</param>
+		/// <returns><see langword="true"/> if the Uri is currently accessible; otherwise, <see langword="false"/>.</returns>
+		bool UriExists(Uri uri);
 		#endregion
 	}
 }

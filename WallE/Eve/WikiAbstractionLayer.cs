@@ -1227,6 +1227,9 @@
 			return this.SubmitValueAction(new ActionUpload(this), uploadInput);
 		}
 
+		/// <inheritdoc/>
+		public bool UriExists(Uri uri) => this.Client.UriExists(uri);
+
 		/// <summary>Retrieves a user's contributions using the <see href="https://www.mediawiki.org/wiki/API:Usercontribs">Usercontribs</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of the user's contributions.</returns>

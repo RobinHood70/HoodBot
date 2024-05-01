@@ -514,6 +514,11 @@
 		/// <returns>Information about the uploaded file.</returns>
 		UploadResult Upload(UploadInput input);
 
+		/// <summary>Checks if a Uri currently exists.</summary>
+		/// <param name="uri">The Uri to check.</param>
+		/// <returns><see langword="true"/> if the Uri is currently accessible; otherwise, <see langword="false"/>.</returns>
+		bool UriExists(Uri uri);
+
 		/// <summary>Retrieves a user's contributions. Corresponds to the <see href="https://www.mediawiki.org/wiki/API:Usercontribs">Usercontribs</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of the user's contributions.</returns>

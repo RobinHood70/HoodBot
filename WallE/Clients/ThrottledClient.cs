@@ -117,6 +117,17 @@
 		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
 		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => this.baseClient.RequestDelay(delayTime, reason, description);
+
+		/// <inheritdoc/>
+		public bool UriExists(Uri uri)
+		{
+			this.Throttle();
+			var retval = this.baseClient.UriExists(uri);
+			this.stopwatch.Restart();
+			this.LastWasPost = false;
+
+			return retval;
+		}
 		#endregion
 
 		#region Public Override Methods
