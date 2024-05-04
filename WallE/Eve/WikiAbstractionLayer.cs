@@ -361,11 +361,24 @@
 			using HttpContent content = request.Type == RequestType.PostMultipart
 				? RequestVisitorHttpContentMultipart.Build(request)
 				: RequestVisitorHttpContentUrl.Build(request);
-			var response = request.Type == RequestType.Get &&
-				new UriBuilder(request.Uri) { Query = content.ReadAsStringAsync().Result } is var urib &&
-				urib.Query.Length < 4096
-					? this.Client.Get(urib.Uri)
-					: this.Client.Post(request.Uri, content);
+			string? response = null;
+			var didGet = false; // A response of null is possible, so we track whether we did a get with a separate variable.
+			if (request.Type == RequestType.Get)
+			{
+				var query = content.ReadAsStringAsync().Result;
+				var urib = new UriBuilder(request.Uri) { Query = query };
+				if (urib.Query.Length < 4096)
+				{
+					didGet = true;
+					response = this.Client.Get(urib.Uri);
+				}
+			}
+
+			if (!didGet)
+			{
+				response = this.Client.Post(request.Uri, content);
+			}
+
 			if (response is not null)
 			{
 				this.OnResponseReceived(new ResponseEventArgs(response));
