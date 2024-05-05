@@ -5,39 +5,84 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using RobinHood70.CommonCode;
-	using RobinHood70.WallE.Properties;
+
+	#region Public Enumerations
+	public enum EditTextType
+	{
+		Normal,
+		Prepend,
+		Append
+	}
+	#endregion
 
 	public class EditInput
 	{
 		#region Constructors
 		public EditInput(string title, [Localizable(false)] string text)
+			: this(title, text, EditTextType.Normal)
 		{
-			this.Title = title.NotNullOrWhiteSpace();
-			this.Text = text.NotNull();
+		}
+
+		public EditInput(string title, [Localizable(false)] string text, EditTextType textType)
+		{
+			ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			ArgumentNullException.ThrowIfNull(text);
+			this.Title = title;
+			switch (textType)
+			{
+				case EditTextType.Normal:
+					this.Text = text;
+					break;
+				case EditTextType.Prepend:
+					this.PrependText = text;
+					break;
+				case EditTextType.Append:
+					this.AppendText = text;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(textType));
+			}
 		}
 
 		public EditInput(long pageId, [Localizable(false)] string text)
+			: this(pageId, text, EditTextType.Normal)
 		{
+		}
+
+		public EditInput(long pageId, [Localizable(false)] string text, EditTextType textType)
+		{
+			ArgumentNullException.ThrowIfNull(text);
 			this.PageId = pageId;
-			this.Text = text.NotNull();
+			switch (textType)
+			{
+				case EditTextType.Normal:
+					this.Text = text;
+					break;
+				case EditTextType.Prepend:
+					this.PrependText = text;
+					break;
+				case EditTextType.Append:
+					this.AppendText = text;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(textType));
+			}
 		}
 
 		public EditInput(string title, string prependText, string appendText)
 		{
-			this.Title = title.NotNullOrWhiteSpace();
-			(prependText ?? appendText)
-				.ThrowNull(nameof(prependText) + " or " + nameof(appendText));
+			ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			ArgumentException.ThrowIfNullOrWhiteSpace(prependText);
+			ArgumentException.ThrowIfNullOrWhiteSpace(appendText);
+			this.Title = title;
 			this.PrependText = prependText;
 			this.AppendText = appendText;
 		}
 
 		public EditInput(long pageId, string prependText, string appendText)
 		{
-			if (string.IsNullOrEmpty(prependText ?? appendText))
-			{
-				throw new InvalidOperationException(EveMessages.PrependAppend);
-			}
-
+			ArgumentException.ThrowIfNullOrWhiteSpace(prependText);
+			ArgumentException.ThrowIfNullOrWhiteSpace(appendText);
 			this.PageId = pageId;
 			this.PrependText = prependText;
 			this.AppendText = appendText;
@@ -45,7 +90,8 @@ namespace RobinHood70.WallE.Base
 
 		public EditInput(string title, long undoRevision)
 		{
-			this.Title = title.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			this.Title = title;
 			this.UndoRevision = undoRevision;
 		}
 

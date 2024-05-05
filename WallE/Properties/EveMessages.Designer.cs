@@ -232,15 +232,6 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At least one of prependText or appendText must be a string of one or more characters..
-        /// </summary>
-        internal static string PrependAppend {
-            get {
-                return ResourceManager.GetString("PrependAppend", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The query page {0} is disabled on this wiki..
         /// </summary>
         internal static string QueryPageDisabled {

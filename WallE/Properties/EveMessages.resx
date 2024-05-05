@@ -165,9 +165,6 @@
   <data name="WatchNotSupported" xml:space="preserve">
     <value>MediaWiki 1.22 and below support watching titles only. Please do not use a generator, page IDs, or revision IDs.</value>
   </data>
-  <data name="PrependAppend" xml:space="preserve">
-    <value>At least one of prependText or appendText must be a string of one or more characters.</value>
-  </data>
   <data name="ApiDisabled" xml:space="preserve">
     <value>The API is disabled on this wiki.</value>
   </data>
