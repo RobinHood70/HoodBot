@@ -31,11 +31,12 @@
 			bool checkAllTemplates)
 			: base(jobManager, JobType.ReadOnly)
 		{
-			location.ThrowNull();
+			ArgumentNullException.ThrowIfNull(templateNames);
+			ArgumentNullException.ThrowIfNull(location);
 			this.respectRedirects = respectRedirects;
 			this.checkAllTemplates = checkAllTemplates;
 			List<string> allNames = [];
-			foreach (var templateName in templateNames.NotNull())
+			foreach (var templateName in templateNames)
 			{
 				allNames.AddRange(templateName.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries));
 			}

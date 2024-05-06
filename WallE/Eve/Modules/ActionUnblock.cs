@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UnblockInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfPositive("id", input.Id)
 				.AddIfPositive("userid", input.UserId)
 				.AddIfNotNull("user", input.User)
@@ -42,9 +42,11 @@
 
 		protected override UnblockResult DeserializeResult(JToken? result)
 		{
+			ArgumentNullException.ThrowIfNull(result);
+
 			string user;
 			long userId;
-			var userNode = result.NotNull().MustHave("user");
+			var userNode = result.MustHave("user");
 			if (userNode.Type == JTokenType.Object)
 			{
 				// Deals with https://phabricator.wikimedia.org/T45518 in MW 1.18 and early versions of 1.19/1.20

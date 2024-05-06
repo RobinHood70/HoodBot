@@ -349,11 +349,12 @@
 		/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
 		public static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
 		{
-			if (tag is not null &&
-				tag.InnerText?.Trim() is string innerText &&
+			ArgumentNullException.ThrowIfNull(factory);
+			ArgumentNullException.ThrowIfNull(tag);
+			if (tag.InnerText?.Trim() is string innerText &&
 				innerText.Length > 0)
 			{
-				var ns = factory.NotNull().Site[MediaWikiNamespaces.File];
+				var ns = factory.Site[MediaWikiNamespaces.File];
 				var lines = innerText.Split(TextArrays.LineFeed);
 				foreach (var line in lines)
 				{
@@ -374,9 +375,10 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
-			link.ThrowNull();
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(link);
 			link = WikiTextUtilities.DecodeAndNormalize(link);
-			var linkNode = CreateLinkNode(site.NotNull(), link);
+			var linkNode = CreateLinkNode(site, link);
 			return FromLinkNode(site[MediaWikiNamespaces.File], linkNode);
 		}
 
@@ -384,7 +386,12 @@
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The link node.</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, ILinkNode link) => FromLinkNode(site.NotNull()[MediaWikiNamespaces.Main], link);
+		public static SiteLink FromLinkNode(Site site, ILinkNode link)
+		{
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(link);
+			return FromLinkNode(site[MediaWikiNamespaces.Main], link);
+		}
 
 		/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
 		/// <param name="ns">The default namespace. Main for most; File for gallery links.</param>
@@ -392,8 +399,9 @@
 		/// <returns>A new SiteLink.</returns>
 		public static SiteLink FromLinkNode(Namespace ns, ILinkNode link)
 		{
-			ns.ThrowNull();
-			var titleText = link.NotNull().Title.ToRaw();
+			ArgumentNullException.ThrowIfNull(ns);
+			ArgumentNullException.ThrowIfNull(link);
+			var titleText = link.Title.ToRaw();
 			var valueSplit = SplitWhitespace(titleText);
 			SiteLink retval = TitleFactory.FromUnvalidated(ns, valueSplit.Value);
 			retval.OriginalTitle = titleText;
@@ -415,7 +423,9 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromText(Site site, string link)
 		{
-			var linkNode = CreateLinkNode(site, link.NotNull());
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(link);
+			var linkNode = CreateLinkNode(site, link);
 			return FromLinkNode(site, linkNode);
 		}
 
@@ -575,7 +585,8 @@
 		public void UpdateLinkNode(ILinkNode node)
 		{
 			var thisNode = this.ToLinkNode();
-			node.NotNull().Title.Clear();
+			ArgumentNullException.ThrowIfNull(node);
+			node.Title.Clear();
 			node.Title.AddRange(thisNode.Title);
 			node.Parameters.Clear();
 			node.Parameters.AddRange(thisNode.Parameters);
@@ -722,7 +733,8 @@
 
 		private void InitValue(string value)
 		{
-			var parameter = SplitWhitespace(value.NotNull());
+			ArgumentNullException.ThrowIfNull(value);
+			var parameter = SplitWhitespace(value);
 			if (!DirectValues.TryGetValue(parameter.Value, out var parameterType))
 			{
 				parameterType = ParameterType.Caption;

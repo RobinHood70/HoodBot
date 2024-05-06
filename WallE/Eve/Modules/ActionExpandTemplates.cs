@@ -31,14 +31,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ExpandTemplatesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(126, ExpandTemplatesProperties.Modules | ExpandTemplatesProperties.JsConfigVars)
 				.FilterBefore(125, ExpandTemplatesProperties.Properties)
 				.Value;
 			request
-				.NotNull()
 				.AddIfNotNull("text", input.Text)
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("revid", input.RevisionId)
@@ -49,7 +49,7 @@
 
 		protected override ExpandTemplatesResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			return new ExpandTemplatesResult(
 				categories: result["categories"].GetList<string>(),
 				javaScriptConfigVars: result["jsconfigvars"].GetStringDictionary<string>(),

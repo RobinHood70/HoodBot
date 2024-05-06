@@ -123,7 +123,7 @@
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			parser.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parser);
 			if (this.GenericTemplateFixes(template))
 			{
 				this.Warn("Template problem on " + parser.Page.Title.FullPageName());
@@ -363,7 +363,7 @@
 
 		private void FurnishingFixes(SiteTemplateNode template, Page? page)
 		{
-			page.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
 			var labelName = page.Title.LabelName();
 			var name = CheckName(template, labelName);
 			CheckIcon(template, labelName);

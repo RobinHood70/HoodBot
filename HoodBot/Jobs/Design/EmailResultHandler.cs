@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 
@@ -20,7 +19,8 @@
 		public EmailResultHandler(User user)
 			: base(user?.Title.Site.Culture)
 		{
-			user.NotNull().LoadUserInfo();
+			ArgumentNullException.ThrowIfNull(user);
+			user.LoadUserInfo();
 			if (user.Info?.Emailable == false)
 			{
 				throw new InvalidOperationException(Resources.UserEmailDisabled);

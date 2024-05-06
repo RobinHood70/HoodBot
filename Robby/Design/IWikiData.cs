@@ -254,7 +254,7 @@
 		/// <param name="protectionTypes">The protection types to retrieve.</param>
 		/// <param name="protectionLevels">The levels to retrieve.</param>
 		/// <exception cref="InvalidOperationException">Thrown when there are no valid values for <paramref name="protectionLevels"/>.</exception>
-		void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string>? protectionLevels);
+		void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string> protectionLevels);
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="page">The query-page-compatible module.</param>

@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Represents a MediaWiki magic word.</summary>
@@ -11,9 +11,11 @@
 		/// <param name="word">The <see cref="SiteInfoMagicWord"/> to initialize from.</param>
 		protected internal MagicWord(SiteInfoMagicWord word)
 		{
+			ArgumentNullException.ThrowIfNull(word);
+
 			// Assumes dictionary will hold Id.
-			this.CaseSensitive = word.NotNull().CaseSensitive;
-			this.Aliases = new HashSet<string>(word.Aliases, System.StringComparer.Ordinal);
+			this.CaseSensitive = word.CaseSensitive;
+			this.Aliases = new HashSet<string>(word.Aliases, StringComparer.Ordinal);
 		}
 
 		/// <summary>Gets any aliases for the word.</summary>

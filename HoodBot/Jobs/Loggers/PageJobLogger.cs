@@ -30,14 +30,17 @@
 		#region Constructors
 		public PageJobLogger(Site site, string pageName)
 		{
-			this.logTitle = TitleFactory.FromUnvalidated(site.NotNull(), pageName.NotNull());
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(pageName);
+			this.logTitle = TitleFactory.FromUnvalidated(site, pageName);
 		}
 		#endregion
 
 		#region Public Override Methods
 		public override void AddLogEntry(LogInfo info)
 		{
-			this.logInfo = info.NotNull();
+			ArgumentNullException.ThrowIfNull(info);
+			this.logInfo = info;
 			this.start = DateTime.UtcNow;
 			this.end = null;
 			this.status = info.Title;

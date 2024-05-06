@@ -1,26 +1,38 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
+	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
-	/// <remarks>Initializes a new instance of the <see cref="ParameterNode"/> class.</remarks>
-	/// <param name="factory">The factory to use when creating new nodes.</param>
-	/// <param name="name">The name.</param>
-	/// <param name="value">The value.</param>
-	public class ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) : IParameterNode
+	public class ParameterNode : IParameterNode
 	{
+		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
+		/// <param name="factory">The factory to use when creating new nodes.</param>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
+		public ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value)
+		{
+			ArgumentNullException.ThrowIfNull(factory);
+			ArgumentNullException.ThrowIfNull(value);
+			this.Factory = factory;
+			this.Name = name == null ? null : new NodeCollection(factory, name);
+			this.Value = new NodeCollection(factory, value);
+		}
+		#endregion
+
 		#region Public Properties
 
 		/// <inheritdoc/>
 		public bool Anonymous => this.Name == null;
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory { get; } = factory.NotNull();
+		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
-		public NodeCollection? Name { get; private set; } = name == null ? null : new NodeCollection(factory, name);
+		public NodeCollection? Name { get; private set; }
 
 		/// <inheritdoc/>
 		public IEnumerable<NodeCollection> NodeCollections
@@ -37,7 +49,7 @@
 		}
 
 		/// <inheritdoc/>
-		public NodeCollection Value { get; } = new NodeCollection(factory, value.NotNull());
+		public NodeCollection Value { get; }
 		#endregion
 
 		#region Public Methods
@@ -47,8 +59,11 @@
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		/// <inheritdoc/>
-		public void AddName(IEnumerable<IWikiNode> name) => this.Name =
-			new NodeCollection(this.Factory, name.NotNull());
+		public void AddName(IEnumerable<IWikiNode> name)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			this.Name = new NodeCollection(this.Factory, name);
+		}
 
 		/// <inheritdoc/>
 		public void Anonymize() => this.Name = null;

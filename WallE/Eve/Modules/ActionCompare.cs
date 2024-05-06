@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -27,9 +27,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CompareInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfPositive("fromid", input.FromId)
 				.AddIfPositive("fromrev", input.FromRevision)
 				.AddIfNotNull("fromtitle", input.FromTitle)
@@ -40,7 +40,7 @@
 
 		protected override CompareResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			return new CompareResult(
 				body: (string?)result["body"],
 				fromId: (int?)result["fromid"] ?? 0,

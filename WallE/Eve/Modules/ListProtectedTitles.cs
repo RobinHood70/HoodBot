@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -39,13 +38,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ProtectedTitlesInput input)
 		{
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull().Properties)
+				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(117, ProtectedTitlesProperties.UserId)
 				.FilterBefore(116, ProtectedTitlesProperties.ParsedComment)
 				.Value;
 			request
-				.NotNull()
 				.Add("namespace", input.Namespaces)
 				.Add("level", input.Levels)
 				.AddIf("dir", "newer", input.SortAscending)

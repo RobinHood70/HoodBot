@@ -70,8 +70,8 @@
 
 		protected override void UpdateLinkNode(Page page, ILinkNode node, bool isRedirectTarget)
 		{
-			page.ThrowNull();
-			node.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(node);
 			var from = SiteLink.FromLinkNode(this.Site, node);
 			if (this.LinkUpdateMatch(from) is Title to)
 			{

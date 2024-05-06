@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
@@ -27,7 +28,7 @@
 		#region Public Override Methods
 		public override void BuildRequest(Request request)
 		{
-			request.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
 
 			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
 			if (this.Continues)

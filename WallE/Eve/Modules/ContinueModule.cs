@@ -1,9 +1,9 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
 	public abstract class ContinueModule : IModule
@@ -46,11 +46,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Methods
-		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet) => this.GeneratorContinue = pageSet
-			.NotNull()
-			.Generator is IGeneratorModule generator
+		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet)
+		{
+			ArgumentNullException.ThrowIfNull(pageSet);
+			this.GeneratorContinue = pageSet.Generator is IGeneratorModule generator
 				? generator.FullPrefix + generator.ContinueName
 				: null;
+		}
 		#endregion
 	}
 }

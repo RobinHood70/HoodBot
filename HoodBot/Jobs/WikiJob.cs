@@ -28,7 +28,8 @@
 		#region Constructors
 		protected WikiJob(JobManager jobManager, JobType jobType)
 		{
-			this.JobManager = jobManager.NotNull();
+			ArgumentNullException.ThrowIfNull(jobManager);
+			this.JobManager = jobManager;
 			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 			this.logName = this.GetType().Name.UnCamelCase();
 			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.

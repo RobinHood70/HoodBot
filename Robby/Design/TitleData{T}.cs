@@ -268,9 +268,10 @@
 		}
 
 		/// <inheritdoc/>
-		public void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string>? protectionLevels)
+		public void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string> protectionLevels)
 		{
-			if (protectionTypes.NotNull().IsEmpty())
+			ArgumentNullException.ThrowIfNull(protectionTypes);
+			if (protectionTypes.IsEmpty())
 			{
 				throw new InvalidOperationException("You must specify at least one value for protectionTypes");
 			}
@@ -318,7 +319,11 @@
 		public void GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesInput { User = user, ExcludeUser = exclude });
 
 		/// <inheritdoc/>
-		public void GetRecentChanges(RecentChangesOptions options) => this.GetRecentChanges(options.NotNull().ToWallEInput);
+		public void GetRecentChanges(RecentChangesOptions options)
+		{
+			ArgumentNullException.ThrowIfNull(options);
+			this.GetRecentChanges(options.ToWallEInput);
+		}
 
 		/// <inheritdoc/>
 		public void GetRedirectsToNamespace(int ns) => this.GetRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });

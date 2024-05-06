@@ -22,11 +22,15 @@
 		#endregion
 
 		#region Protected Methods
-		protected void SavePage(Page page) => this.SavePage(page.NotNull(), this.GetEditSummary(page), this.GetIsMinorEdit(page));
+		protected void SavePage(Page page)
+		{
+			ArgumentNullException.ThrowIfNull(page);
+			this.SavePage(page, this.GetEditSummary(page), this.GetIsMinorEdit(page));
+		}
 
 		protected void SavePage(Page page, string editSummary, bool isMinor)
 		{
-			page.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
 			var saved = false;
 			while (!saved)
 			{

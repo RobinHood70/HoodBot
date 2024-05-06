@@ -158,7 +158,7 @@
 
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
 			{
 				foreach (var module in this.queryModules)
@@ -199,7 +199,7 @@
 			return request;
 		}
 
-		private void ParseResponse(string? response)
+		private void ParseResponse(string response)
 		{
 			if (string.IsNullOrWhiteSpace(response))
 			{
@@ -208,7 +208,7 @@
 
 			try
 			{
-				var result = ToJson(response.NotNull());
+				var result = ToJson(response);
 				if (result.Type == JTokenType.Object)
 				{
 					this.DeserializeAction(result);

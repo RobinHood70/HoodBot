@@ -15,7 +15,8 @@
 		#region Constructors
 		public BladesCodeLine(string line)
 		{
-			var textSplit = line.NotNull().Split(TextArrays.EqualsSign, 2);
+			ArgumentNullException.ThrowIfNull(line);
+			var textSplit = line.Split(TextArrays.EqualsSign, 2);
 			if (textSplit.Length == 2)
 			{
 				this.Value = textSplit[1].Trim().Trim(Quote);
@@ -44,8 +45,9 @@
 		#region Public Static Methods
 		public static BladesCodeLine Parse(IList<string> lines)
 		{
+			ArgumentNullException.ThrowIfNull(lines);
 			List<IndentedLine> codeLines = new(lines.Count);
-			foreach (var line in lines.NotNull())
+			foreach (var line in lines)
 			{
 				codeLines.Add(SplitTabs(line));
 			}

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 
@@ -89,7 +88,8 @@
 		/// <param name="modules">The set of modules to be loaded.</param>
 		public PageLoadOptions(PageLoadOptions copy, PageModules modules)
 		{
-			this.ConvertTitles = copy.NotNull().ConvertTitles;
+			ArgumentNullException.ThrowIfNull(copy);
+			this.ConvertTitles = copy.ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
 			this.Modules = modules;
 			this.PageCreator = copy.PageCreator;

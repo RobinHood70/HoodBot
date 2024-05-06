@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -31,7 +31,7 @@
 
 		protected override CustomResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			return new CustomResult((string?)result ?? string.Empty);
 		}
 		#endregion

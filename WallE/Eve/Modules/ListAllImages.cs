@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -37,11 +37,11 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllImagesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			request
 				//// .AddIf("dir", "newer", input.SortDescending && input.SortBy == AllImagesSort.Timestamp);
 				//// does not seem to be necessary, as module appears to handle either term correctly, even though inline comments in it would suggest otherwise.
-				.NotNull()
 				.AddIfPositive("sort", input.SortBy)
 				.AddIf("dir", "descending", input.SortDescending) // && input.SortBy != AllImagesSort.Timestamp
 				.AddIfNotNull("from", input.From)

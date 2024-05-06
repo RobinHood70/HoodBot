@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
@@ -21,7 +22,8 @@ namespace RobinHood70.WallE.Base
 
 		public BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
 		{
-			this.FilterRedirects = input.NotNull().FilterRedirects;
+			ArgumentNullException.ThrowIfNull(input);
+			this.FilterRedirects = input.FilterRedirects;
 			this.Limit = input.Limit;
 			this.MaxItems = input.MaxItems;
 			this.PageId = input.PageId;

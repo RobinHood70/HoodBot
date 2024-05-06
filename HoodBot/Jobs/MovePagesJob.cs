@@ -289,7 +289,11 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks(parser.NotNull().Page, parser);
+		protected virtual void BacklinkPageLoaded(ContextualParser parser)
+		{
+			ArgumentNullException.ThrowIfNull(parser);
+			this.ReplaceBacklinks(parser.Page, parser);
+		}
 
 		protected virtual void CheckRemaining()
 		{
@@ -572,7 +576,7 @@
 
 					if (actionValue.HasAction(ReplacementActions.Propose))
 					{
-						var reason = action.Value.Reason.NotNull();
+						var reason = action.Value.Reason.PropertyNotNullOrWhiteSpace(nameof(DetailedActions), nameof(DetailedActions.Reason));
 						ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
 						editSummary = this.EditSummaryPropose;
 						isMinor = false;
@@ -597,8 +601,8 @@
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
 		{
-			page.ThrowNull();
-			nodes.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(nodes);
 
 			// Possibly better as a visitor class?
 			this.isRedirectLink = page.IsRedirect;
@@ -721,8 +725,8 @@
 
 		protected virtual void UpdateLinkNode(Page page, ILinkNode node, bool isRedirectTarget)
 		{
-			page.ThrowNull();
-			node.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(node);
 			var from = SiteLink.FromLinkNode(this.Site, node);
 			if (this.LinkUpdateMatch(from) is Title to)
 			{
@@ -780,8 +784,8 @@
 
 		protected virtual void UpdateTemplateNode(Page page, SiteTemplateNode template)
 		{
-			page.ThrowNull();
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(template);
 			var fullTitle = new FullTitle(template.TitleValue);
 			if (this.linkUpdates.TryGetValue(fullTitle.Title, out var to))
 			{
@@ -848,10 +852,11 @@
 
 		private static void ProposeForDeletion(ContextualParser parser, string deletionText)
 		{
-			deletionText.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parser);
+			ArgumentNullException.ThrowIfNull(deletionText);
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			var page = parser.NotNull().Page;
+			var page = parser.Page;
 			var noinclude = page.Title.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{

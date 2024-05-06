@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RollbackInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositiveIf("pageid", input.PageId, this.SiteVersion >= 124)
 				.AddIf("tags", input.Tags, this.SiteVersion >= 127)
@@ -43,7 +43,7 @@
 
 		protected override RollbackResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			var title = result.MustHaveString("title");
 			return new RollbackResult(
 				ns: this.FindRequiredNamespace(title),

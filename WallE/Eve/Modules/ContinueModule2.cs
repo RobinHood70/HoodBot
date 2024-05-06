@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.Exceptions;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -40,7 +40,7 @@
 		#region Protected Override Methods
 		public override void BuildRequest(Request request)
 		{
-			request.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
 			if (this.Continues)
 			{
 				foreach (var entry in this.ContinueEntries)

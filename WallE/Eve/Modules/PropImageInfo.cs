@@ -28,14 +28,15 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImageInfoInput input)
 		{
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull().Properties)
+				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(123, ImageProperties.CanonicalTitle | ImageProperties.CommonMetadata | ImageProperties.ExtMetadata)
 				.FilterBefore(118, ImageProperties.MediaType)
 				.FilterBefore(117, ImageProperties.ParsedComment | ImageProperties.ThumbMime | ImageProperties.UserId)
 				.Value;
 			request
-				.NotNull()
 				.AddFlags("prop", prop)
 				.Add("start", input.Start)
 				.Add("end", input.End)

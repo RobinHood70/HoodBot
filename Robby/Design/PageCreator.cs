@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -28,7 +29,8 @@
 		/// <seealso cref="AddCustomPropertyInputs" />
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
-			var whatToLoad = options.NotNull().Modules;
+			ArgumentNullException.ThrowIfNull(options);
+			var whatToLoad = options.Modules;
 			List<IPropertyInput> propertyInputs = [];
 			if (whatToLoad.HasAnyFlag(PageModules.Categories))
 			{

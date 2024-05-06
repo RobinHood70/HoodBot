@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -33,19 +33,20 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UserInfoInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(124, UserInfoProperties.UnreadCount)
 				.FilterBefore(118, UserInfoProperties.ImplicitGroups | UserInfoProperties.RegistrationDate)
 				.FilterBefore(117, UserInfoProperties.AcceptLang)
 				.Value;
-			request.NotNull().AddFlags("prop", prop);
+			ArgumentNullException.ThrowIfNull(request);
+			request.AddFlags("prop", prop);
 		}
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			var token = result["changeablegroups"];
 			var changeableGroups = token == null ? null : new ChangeableGroupsInfo(
 				add: token.MustHave("add").GetList<string>(),

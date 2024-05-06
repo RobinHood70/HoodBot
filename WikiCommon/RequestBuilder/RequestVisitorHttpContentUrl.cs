@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Net.Http;
-	using RobinHood70.CommonCode;
 
 	/// <summary>Formats a Request object as <see cref="FormUrlEncodedContent"/>.</summary>
 	public sealed class RequestVisitorHttpContentUrl : IParameterVisitor
@@ -26,7 +25,7 @@
 		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static FormUrlEncodedContent Build(Request request)
 		{
-			request.ThrowNull();
+			ArgumentNullException.ThrowIfNull(request);
 			RequestVisitorHttpContentUrl visitor = new()
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
@@ -49,13 +48,18 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			var value = parameter.NotNull().BuildPipedValue(this.supportsUnitSeparator);
+			ArgumentNullException.ThrowIfNull(parameter);
+			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.parameters.Add(parameter.Name, value);
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
-		public void Visit(StringParameter parameter) => this.parameters.Add(parameter.NotNull().Name, parameter.Value);
+		public void Visit(StringParameter parameter)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			this.parameters.Add(parameter.Name, parameter.Value);
+		}
 		#endregion
 	}
 }

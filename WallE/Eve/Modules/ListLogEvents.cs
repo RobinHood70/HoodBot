@@ -57,9 +57,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LogEventsInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddFlags("prop", input.Properties)
 				.AddIfNotNull("type", input.Type)
 				.AddIfNotNull("action", input.Action)

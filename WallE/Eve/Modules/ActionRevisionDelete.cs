@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RevisionDeleteInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.Add("type", input.Type)
 				.AddIfNotNull("target", input.Target)
 				.Add("ids", input.Ids)
@@ -44,7 +44,7 @@
 
 		protected override RevisionDeleteResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			List<RevisionDeleteItem> list = [];
 			foreach (var item in result.MustHave("items"))
 			{

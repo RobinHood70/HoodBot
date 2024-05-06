@@ -34,7 +34,7 @@
 		[STAThread]
 		public void Compare(DiffContent diff)
 		{
-			diff.ThrowNull();
+			ArgumentNullException.ThrowIfNull(diff);
 			diff.EditPath.PropertyThrowNull(nameof(IeDiff), nameof(diff.EditPath));
 			const int empty = 0;
 			const string headers = "Content-Type: application/x-www-form-urlencoded";

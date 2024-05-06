@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
-	using RobinHood70.CommonCode;
+	using System;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
@@ -10,6 +10,7 @@
 
 		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, bool gameSpaceOnly, params string[] variables)
 		{
+			ArgumentNullException.ThrowIfNull(site);
 			PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
 			{
 				PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
@@ -18,7 +19,7 @@
 				}
 			};
 
-			return new PageCollection(site.NotNull(), pageLoadOptions);
+			return new PageCollection(site, pageLoadOptions);
 		}
 	}
 }

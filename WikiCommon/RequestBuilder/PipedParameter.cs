@@ -2,19 +2,28 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 
 	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter" />
-	/// <remarks>Initializes a new instance of the <see cref="PipedParameter" /> class.</remarks>
-	/// <param name="name">The parameter name.</param>
-	/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
-	public class PipedParameter(string name, ICollection<string> values) : Parameter(name)
+	public class PipedParameter : Parameter
 	{
+		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="PipedParameter" /> class.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
+		public PipedParameter(string name, ICollection<string> values)
+			: base(name)
+		{
+			ArgumentNullException.ThrowIfNull(values);
+			this.Values = values;
+		}
+		#endregion
+
 		#region Public Abstract Properties
 
 		/// <summary>Gets the collection of values.</summary>
-		public ICollection<string> Values { get; } = values.NotNull();
+		public ICollection<string> Values { get; }
 		#endregion
 
 		#region Public Methods
@@ -47,7 +56,11 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override void Accept(IParameterVisitor visitor) => visitor.NotNull().Visit(this);
+		public override void Accept(IParameterVisitor visitor)
+		{
+			ArgumentNullException.ThrowIfNull(visitor);
+			visitor.Visit(this);
+		}
 
 		/// <inheritdoc/>
 		public override string ToString() => this.Name + "=" + string.Join('|', this.Values);

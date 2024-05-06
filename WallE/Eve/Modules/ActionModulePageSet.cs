@@ -38,7 +38,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			: base(wal)
 		{
 			this.ContinueModule = wal.ModuleFactory.CreateContinue();
-			this.MaximumListSize = this.Wal.MaximumPageSetSize;
+			this.MaximumListSize = wal.MaximumPageSetSize;
 		}
 		#endregion
 
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public virtual PageSetResult<TOutput> Submit(TInput input)
 		{
 			this.Wal.ClearWarnings();
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			if (input.GeneratorInput is IGeneratorInput genInput)
 			{
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(genInput, this);
@@ -143,7 +143,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void GetPageSetNodes(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			if (result["badrevids"] is JToken node)
 			{
 				foreach (var item in node)
@@ -174,9 +174,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		/// <exception cref="WikiException">Thrown when the Json data is valid but the expected result tag could not be found.</exception>
 		protected void ParseResponse(string? response, IList<TOutput> pages)
 		{
+			ArgumentNullException.ThrowIfNull(response);
+			ArgumentNullException.ThrowIfNull(pages);
 			try
 			{
-				var result = ToJson(response.NotNull());
+				var result = ToJson(response);
 				if (result.Type == JTokenType.Object)
 				{
 					this.DeserializeAction(result);
@@ -215,7 +217,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			if (this.ContinueModule != null)
 			{
 				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, result);
@@ -226,7 +228,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override bool HandleWarning(string from, string text)
 		{
-			text.ThrowNull();
+			ArgumentNullException.ThrowIfNull(text);
 			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
@@ -245,8 +247,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{
-			pages.ThrowNull();
-			foreach (var item in result.NotNull())
+			ArgumentNullException.ThrowIfNull(result);
+			ArgumentNullException.ThrowIfNull(pages);
+			foreach (var item in result)
 			{
 				pages.Add(this.GetItem(item));
 			}
@@ -269,7 +272,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private Request CreateRequest(TInput input, IEnumerable<string> currentGroup)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			if (this.Generator != null)

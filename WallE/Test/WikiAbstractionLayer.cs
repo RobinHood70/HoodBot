@@ -224,7 +224,7 @@
 		/// <inheritdoc/>
 		public EditResult Edit(EditInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			return new EditResult("Success", input.PageId, input.Title ?? "Test Page", EditFlags.NoChange, input.ContentModel, 1, 1, this.CurrentTimestamp, new Dictionary<string, string>(StringComparer.Ordinal));
 		}
 
@@ -323,7 +323,8 @@
 		/// <inheritdoc/>
 		public LoginResult Login(LoginInput input)
 		{
-			this.CurrentUserInfo = GetUser(1, input.NotNull().UserName);
+			ArgumentNullException.ThrowIfNull(input);
+			this.CurrentUserInfo = GetUser(1, input.UserName);
 			this.Initialize();
 
 			return LoginResult.AlreadyLoggedIn(this.CurrentUserInfo.UserId, this.CurrentUserInfo.Name);

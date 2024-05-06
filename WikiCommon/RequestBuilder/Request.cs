@@ -136,7 +136,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request Add(string name, string? value)
 		{
-			this.Add(new StringParameter(this.Prefix + name.NotNull(), value));
+			ArgumentNullException.ThrowIfNull(name);
+			this.Add(new StringParameter(this.Prefix + name, value));
 			return this;
 		}
 
@@ -229,7 +230,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFilterPiped(string name, string trueValue, Filter filter)
 		{
-			trueValue.ThrowNull();
+			ArgumentNullException.ThrowIfNull(trueValue);
 			return filter switch
 			{
 				Filter.Only => this.AddToPiped(name, trueValue),
@@ -271,7 +272,7 @@
 		public Request AddFlags<T>(string name, T values)
 			where T : struct, Enum
 		{
-			values.ThrowNull();
+			ArgumentNullException.ThrowIfNull(values);
 			var type = values.GetType();
 			foreach (var prop in values.GetUniqueFlags())
 			{
@@ -298,7 +299,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFormat(string value)
 		{
-			this.Add(new StringParameter("format", value.NotNull(), ValueType.Modify));
+			ArgumentNullException.ThrowIfNull(value);
+			this.Add(new StringParameter("format", value, ValueType.Modify));
 			return this;
 		}
 
@@ -308,8 +310,10 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddHidden(string name, string? value)
 		{
+			ArgumentNullException.ThrowIfNull(name);
+
 			// Unlike regular Add, there is no condition in which value should be null.
-			this.Add(new StringParameter(this.Prefix + name.NotNull(), value.NotNull(), ValueType.Hidden));
+			this.Add(new StringParameter(this.Prefix + name, value, ValueType.Hidden));
 			return this;
 		}
 
@@ -427,17 +431,25 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, int value) => value > 0
-			? this.Add(name.NotNull(), value)
-			: this;
+		public Request AddIfPositive(string name, int value)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			return value > 0
+				? this.Add(name, value)
+				: this;
+		}
 
 		/// <summary>Adds a long integer parameter if the value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, long value) => value > 0
-			? this.Add(name.NotNull(), value)
-			: this;
+		public Request AddIfPositive(string name, long value)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			return value > 0
+				? this.Add(name, value)
+				: this;
+		}
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero and the condition is true.</summary>
 		/// <typeparam name="T">The enumeration type.</typeparam>
@@ -453,16 +465,26 @@
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, int value, bool condition) => (condition && value > 0)
-			? this.Add(name.NotNull(), value)
-			: this;
+		public Request AddIfPositiveIf(string name, int value, bool condition)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			return (condition && value > 0)
+				? this.Add(name, value)
+				: this;
+		}
 
 		/// <summary>Adds a long integer parameter if the value is greater than zero and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, long value, bool condition) => (condition && value > 0) ? this.Add(name.NotNull(), value) : this;
+		public Request AddIfPositiveIf(string name, long value, bool condition)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			return (condition && value > 0)
+				? this.Add(name, value)
+				: this;
+		}
 
 		/// <summary>Adds or changes a string parameter if the value is non-null.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -488,8 +510,9 @@
 		/// <exception cref="InvalidOperationException">Thrown when the named parameter does not exist.</exception>
 		public Request AddToPiped(string name, string value)
 		{
-			value.ThrowNull();
-			var newKey = this.Prefix + name.NotNull();
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(value);
+			var newKey = this.Prefix + name;
 			if (this.TryGetValue(newKey, out var param))
 			{
 				if (param is PipedParameter piped)
@@ -526,7 +549,7 @@
 		/// <param name="visitor">The visitor.</param>
 		public void Build(IParameterVisitor visitor)
 		{
-			visitor.ThrowNull();
+			ArgumentNullException.ThrowIfNull(visitor);
 			foreach (var param in this)
 			{
 				param.Accept(visitor);
@@ -571,7 +594,11 @@
 		/// <param name="item">The item.</param>
 		/// <returns>The key corresponding to the item.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when the parameter is null.</exception>
-		protected override string GetKeyForItem(Parameter item) => item.NotNull().Name;
+		protected override string GetKeyForItem(Parameter item)
+		{
+			ArgumentNullException.ThrowIfNull(item);
+			return item.Name;
+		}
 		#endregion
 
 		#region Private Methods
@@ -583,8 +610,10 @@
 		/// <remarks>Values added by this method can be modified using the source collection.</remarks>
 		private Request AddPiped(string name, ICollection<string> values)
 		{
-			var newKey = this.Prefix + name.NotNull();
-			this.Add(new PipedParameter(newKey, values.NotNull()));
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(values);
+			var newKey = this.Prefix + name;
+			this.Add(new PipedParameter(newKey, values));
 
 			return this;
 		}

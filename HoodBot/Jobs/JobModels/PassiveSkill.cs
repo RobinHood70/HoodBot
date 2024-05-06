@@ -83,7 +83,7 @@
 		#region Protected Override Methods
 		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			UpdateParameter(factory, template, "type", "Passive");
 			UpdateParameter(factory, template, "id", this.ranks[^1].Id.ToStringInvariant());
 			TitleCollection usedList = new(factory.Site);

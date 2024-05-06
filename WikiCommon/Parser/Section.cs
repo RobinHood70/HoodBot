@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	/// <summary>Houses the information for a page section.</summary>
 	public class Section
@@ -53,7 +52,8 @@
 		/// <returns>THe new Section.</returns>
 		public static Section FromText(IWikiNodeFactory factory, int level, string header, string content)
 		{
-			var headerNode = factory.NotNull().HeaderNodeFromParts(level, header);
+			ArgumentNullException.ThrowIfNull(factory);
+			var headerNode = factory.HeaderNodeFromParts(level, header);
 			var bodyNodes = factory.Parse('\n' + content, factory.InclusionType, factory.StrictInclusion);
 
 			return new Section(headerNode, bodyNodes);

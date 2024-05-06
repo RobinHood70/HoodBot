@@ -1,15 +1,16 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 
 	public class FeedContributionsInput
 	{
 		#region Constructors
 		public FeedContributionsInput(string user)
 		{
-			this.User = user.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(user);
+			this.User = user;
 		}
 		#endregion
 

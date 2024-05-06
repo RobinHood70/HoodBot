@@ -66,12 +66,14 @@
 		#region Public Static Methods
 		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<Title> titles, string warningType)
 		{
-			titles.ThrowNull();
-			warningType.ThrowNull();
-			var nodes = oldPage.NotNull().Clone();
+			ArgumentNullException.ThrowIfNull(oldPage);
+			ArgumentNullException.ThrowIfNull(newPage);
+			ArgumentNullException.ThrowIfNull(titles);
+			ArgumentNullException.ThrowIfNull(warningType);
+			var nodes = oldPage.Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var oldText = nodes.ToRaw().Trim();
-			nodes = newPage.NotNull().Clone();
+			nodes = newPage.Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var newText = nodes.ToRaw().Trim();
 			var warning = new StringBuilder()
@@ -214,7 +216,9 @@
 
 		public static void ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
 		{
-			for (var i = 0; i < nodes.NotNull().Count; i++)
+			ArgumentNullException.ThrowIfNull(nodes);
+			ArgumentNullException.ThrowIfNull(usedList);
+			for (var i = 0; i < nodes.Count; i++)
 			{
 				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is NodeCollection newNodes)
 				{
@@ -383,10 +387,9 @@
 
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
-			usedList.ThrowNull();
 			HashSet<string> foundReplacements = new(StringComparer.Ordinal);
 			var textLength = text.Length;
-			NodeCollection retval = new(factory.NotNull());
+			NodeCollection retval = new(factory);
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{

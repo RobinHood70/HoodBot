@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Globalization;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
@@ -29,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CreateAccountInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfNotNull("name", input.Name)
 				.AddIfNotNull("password", input.Password)
 				.AddIfNotNull("domain", input.Domain)
@@ -46,7 +47,7 @@
 
 		protected override CreateAccountResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			var resultText = result.MustHaveString("result");
 			resultText = string.Equals(resultText, "needtoken", System.StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(

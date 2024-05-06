@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
-	using RobinHood70.CommonCode;
+	using System;
 
 	#region Public Enumerations
 
@@ -53,7 +53,11 @@
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
 		/// <remarks>See Wikipedia's <see href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</see> article if you are not familiar with this pattern.</remarks>
-		public override void Accept(IParameterVisitor visitor) => visitor.NotNull().Visit(this);
+		public override void Accept(IParameterVisitor visitor)
+		{
+			ArgumentNullException.ThrowIfNull(visitor);
+			visitor.Visit(this);
+		}
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>

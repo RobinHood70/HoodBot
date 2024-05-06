@@ -3,7 +3,6 @@
 	using System;
 	using System.ComponentModel;
 	using CommunityToolkit.Mvvm.ComponentModel;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 
 	// TODO: Spit into separate model and viewmodel. Model should take care of saving/loading data (or use HostBuilder in App).
@@ -30,7 +29,8 @@
 
 		public WikiInfoViewModel(WikiInfo wikiInfo)
 		{
-			this.WikiInfo = wikiInfo.NotNull();
+			ArgumentNullException.ThrowIfNull(wikiInfo);
+			this.WikiInfo = wikiInfo;
 			this.CancelEdit();
 		}
 		#endregion

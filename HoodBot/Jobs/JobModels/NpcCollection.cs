@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
@@ -90,7 +89,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override long GetKeyForItem(NpcData item) => item.NotNull().Id;
+		protected override long GetKeyForItem(NpcData item)
+		{
+			ArgumentNullException.ThrowIfNull(item);
+			return item.Id;
+		}
 		#endregion
 	}
 }

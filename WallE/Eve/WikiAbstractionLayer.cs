@@ -57,12 +57,14 @@
 		[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "As above.")]
 		public WikiAbstractionLayer(IMediaWikiClient client, Uri apiUri)
 		{
-			if (!apiUri.NotNull().AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
+			ArgumentNullException.ThrowIfNull(client);
+			ArgumentNullException.ThrowIfNull(apiUri);
+			if (!apiUri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
 			{
 				throw new InvalidOperationException(EveMessages.InvalidApi);
 			}
 
-			this.Client = client.NotNull();
+			this.Client = client;
 			this.EntryPoint = apiUri;
 			this.ModuleFactory = new ModuleFactory(this)
 				.RegisterGenerator<CategoriesInput>(PropCategories.CreateInstance)
@@ -240,7 +242,11 @@
 				_ => new TokenManagerOriginal(this)
 			};
 
-			set => this.tokenManager = value.NotNull(nameof(this.TokenManager));
+			set
+			{
+				ArgumentNullException.ThrowIfNull(value);
+				this.tokenManager = value;
+			}
 		}
 
 		/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
@@ -292,8 +298,9 @@
 		/// <exception cref="WikiException">Thrown when <see cref="ArticlePath"/> is not initialized.</exception>
 		public Uri GetFullArticlePath(string pageName)
 		{
+			ArgumentNullException.ThrowIfNull(pageName);
 			var articlePath = this.ArticlePath ?? throw this.notInitialized;
-			return new Uri(articlePath.Replace("$1", pageName.NotNull().Replace(' ', '_'), StringComparison.Ordinal));
+			return new Uri(articlePath.Replace("$1", pageName.Replace(' ', '_'), StringComparison.Ordinal));
 		}
 
 		/// <summary>Makes the URI secure.</summary>
@@ -333,7 +340,8 @@
 			where TInput : class
 			where TOutput : class
 		{
-			this.RunQuery(module.NotNull());
+			ArgumentNullException.ThrowIfNull(module);
+			this.RunQuery(module);
 			return module.Output ?? throw WikiException.General("null-result", module.Name + " was found in the results, but the deserializer returned null.");
 		}
 
@@ -344,7 +352,9 @@
 		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
 		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, TitleCreator<PageItem> pageFactory)
 		{
-			ActionQueryPageSet query = new(this, input.NotNull(), pageFactory.NotNull());
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(pageFactory);
+			ActionQueryPageSet query = new(this, input, pageFactory);
 			var retval = query.Submit();
 			this.DoStopCheck(query.UserInfo);
 
@@ -356,8 +366,8 @@
 		/// <returns>The site's response to the request.</returns>
 		public string? SendRequest(Request request)
 		{
-			request.ThrowNull();
-			this.OnSendingRequest(new RequestEventArgs(request.NotNull()));
+			ArgumentNullException.ThrowIfNull(request);
+			this.OnSendingRequest(new RequestEventArgs(request));
 			using HttpContent content = request.Type == RequestType.PostMultipart
 				? RequestVisitorHttpContentMultipart.Build(request)
 				: RequestVisitorHttpContentUrl.Build(request);
@@ -589,7 +599,7 @@
 		/// <returns>A list of links.</returns>
 		public IReadOnlyList<BacklinksItem> Backlinks(BacklinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			List<ListBacklinks> modules = [];
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
@@ -614,7 +624,8 @@
 		/// <returns>Information about the block.</returns>
 		public BlockResult Block(BlockInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionBlock(this), input);
 		}
 
@@ -665,8 +676,9 @@
 		/// <returns>Information about the account created.</returns>
 		public CreateAccountResult CreateAccount(CreateAccountInput input)
 		{
+			ArgumentNullException.ThrowIfNull(input);
 			ActionCreateAccount create = new(this);
-			var retval = create.Submit(input.NotNull());
+			var retval = create.Submit(input);
 			if (input.Token == null)
 			{
 				input.Token = retval.Token;
@@ -694,7 +706,8 @@
 		/// <returns>Information about the deletion.</returns>
 		public DeleteResult Delete(DeleteInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionDelete(this), input);
 		}
 
@@ -708,7 +721,8 @@
 		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly. No stop checks are performed when using this method, since this could be downloading from anywhere.</remarks>
 		public bool Download(DownloadInput input)
 		{
-			Uri uri = new(input.NotNull().Resource);
+			ArgumentNullException.ThrowIfNull(input);
+			Uri uri = new(input.Resource);
 			return this.Client.DownloadFile(uri, input.FileName);
 		}
 
@@ -717,7 +731,8 @@
 		/// <returns>Information about the edit.</returns>
 		public EditResult Edit(EditInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			ActionEdit edit = new(this);
 			var retval = edit.Submit(input);
 			if (retval.CaptchaData.Count > 0)
@@ -739,7 +754,8 @@
 		/// <returns>Information about the e-mail that was sent.</returns>
 		public EmailUserResult EmailUser(EmailUserInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionEmailUser(this), input);
 		}
 
@@ -783,7 +799,8 @@
 		/// <returns>Information about the file reversion.</returns>
 		public FileRevertResult FileRevert(FileRevertInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionFileRevert(this), input);
 		}
 
@@ -797,7 +814,8 @@
 		/// <returns>A list of page titles with image rotation information.</returns>
 		public PageSetResult<ImageRotateItem> ImageRotate(ImageRotateInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitPageSet(new ActionImageRotate(this), input);
 		}
 
@@ -806,7 +824,8 @@
 		/// <returns>A list of page titles with import information.</returns>
 		public IReadOnlyList<ImportItem> Import(ImportInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionImport(this), input);
 		}
 
@@ -835,10 +854,13 @@
 		/// <returns>A list of pages based on the <paramref name="pageSetInput" /> parameter with the information determined by each of the property inputs.</returns>
 		public PageSetResult<PageItem> LoadPages(QueryPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, TitleCreator<PageItem> pageFactory)
 		{
-			var propertyModules = this.ModuleFactory.CreateModules(propertyInputs.NotNull());
+			ArgumentNullException.ThrowIfNull(pageSetInput);
+			ArgumentNullException.ThrowIfNull(propertyInputs);
+			ArgumentNullException.ThrowIfNull(pageFactory);
+			var propertyModules = this.ModuleFactory.CreateModules(propertyInputs);
 			return this.RunPageSetQuery(
-				new QueryInput(pageSetInput.NotNull(), propertyModules),
-				pageFactory.NotNull());
+				new QueryInput(pageSetInput, propertyModules),
+				pageFactory);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Logevents">Logevents</see> API module.</summary>
@@ -852,7 +874,7 @@
 		/// <remarks>No stop checking is performed when logging in.</remarks>
 		public LoginResult Login(LoginInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			if (this.SiteVersion == 0)
 			{
 				this.Initialize();
@@ -970,7 +992,8 @@
 		/// <returns>Information about the altered tag.</returns>
 		public ManageTagsResult ManageTags(ManageTagsInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionManageTags(this), input);
 		}
 
@@ -979,7 +1002,8 @@
 		/// <returns>Information about the merge.</returns>
 		public MergeHistoryResult MergeHistory(MergeHistoryInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionMergeHistory(this), input);
 		}
 
@@ -989,7 +1013,8 @@
 		/// <remarks>Due to the fact that this method can generate multiple errors, any errors returned here will not be raised as exceptions. Results should instead be scanned for errors, and acted upon accordingly.</remarks>
 		public IReadOnlyList<MoveItem> Move(MoveInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionMove(this), input);
 		}
 
@@ -998,7 +1023,11 @@
 		/// <returns>A list of open search results.</returns>
 		/// <seealso cref="PrefixSearch" />
 		/// <seealso cref="Search" />
-		public IReadOnlyList<OpenSearchItem> OpenSearch(OpenSearchInput input) => this.SubmitValueAction(new ActionOpenSearch(this), input.NotNull());
+		public IReadOnlyList<OpenSearchItem> OpenSearch(OpenSearchInput input)
+		{
+			ArgumentNullException.ThrowIfNull(input);
+			return this.SubmitValueAction(new ActionOpenSearch(this), input);
+		}
 
 		/// <summary>Sets one or more options using the <see href="https://www.mediawiki.org/wiki/API:Options">Options</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1006,7 +1035,7 @@
 		public void Options(OptionsInput input)
 		{
 			// Set input Token, even though it's not used directly, so this behaves like other routines.
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			List<string> change = [];
 			OptionsInputInternal internalInput = new(input.Token, change);
@@ -1069,7 +1098,8 @@
 		/// <returns>The patrolled page information along with the Recent Changes ID.</returns>
 		public PatrolResult Patrol(PatrolInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Patrol);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Patrol);
 			return this.SubmitValueAction(new ActionPatrol(this), input);
 		}
 
@@ -1085,7 +1115,8 @@
 		/// <returns>Information about the protection applied.</returns>
 		public ProtectResult Protect(ProtectInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionProtect(this), input);
 		}
 
@@ -1125,7 +1156,8 @@
 		/// <returns>Information about the attempt to reset the password.</returns>
 		public ResetPasswordResult ResetPassword(ResetPasswordInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionResetPassword(this), input);
 		}
 
@@ -1134,7 +1166,8 @@
 		/// <returns>Information about the deleted revisions.</returns>
 		public RevisionDeleteResult RevisionDelete(RevisionDeleteInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionRevisionDelete(this), input);
 		}
 
@@ -1143,7 +1176,8 @@
 		/// <returns>Information about the rollback.</returns>
 		public RollbackResult Rollback(RollbackInput input)
 		{
-			input.NotNull().Token ??= CheckToken(
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= CheckToken(
 					input.Title == null
 					? this.TokenManager.RollbackToken(input.PageId)
 					: this.TokenManager.RollbackToken(input.Title),
@@ -1176,7 +1210,8 @@
 		/// <returns>A list of page titles along with various informaiton about the change.</returns>
 		public PageSetResult<SetNotificationTimestampItem> SetNotificationTimestamp(SetNotificationTimestampInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitPageSet(new ActionSetNotificationTimestamp(this), input);
 		}
 
@@ -1195,7 +1230,8 @@
 		/// <returns>Information about the tag/untag.</returns>
 		public IReadOnlyList<TagItem> Tag(TagInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionTag(this), input);
 		}
 
@@ -1209,7 +1245,8 @@
 		/// <returns>Information about the unblock operation and the user affected.</returns>
 		public UnblockResult Unblock(UnblockInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionUnblock(this), input);
 		}
 
@@ -1218,7 +1255,8 @@
 		/// <returns>Information about the undeleted page.</returns>
 		public UndeleteResult Undelete(UndeleteInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			return this.SubmitValueAction(new ActionUndelete(this), input);
 		}
 
@@ -1228,7 +1266,8 @@
 		/// <remarks>Unlike the <see cref="Download(DownloadInput)"/> method, this method performs stop checking after every upload, since it can only upload to the current wiki.</remarks>
 		public UploadResult Upload(UploadInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Csrf);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			if (input.ChunkSize > 0
 				&& (this.SiteVersion >= 126
 				|| (this.SiteVersion >= 120 && !input.RemoteFileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))))
@@ -1259,7 +1298,8 @@
 		/// <exception cref="InvalidOperationException">Thrown when the site in use is on MediaWiki 1.23 and a user ID is provided rather than a user name.</exception>
 		public UserRightsResult UserRights(UserRightsInput input)
 		{
-			if (input.NotNull().Token == null)
+			ArgumentNullException.ThrowIfNull(input);
+			if (input.Token == null)
 			{
 				var tokenUser = input.User ?? (this.SiteVersion >= 124
 					? string.Empty // Name is unnecessary for 1.24+
@@ -1281,7 +1321,8 @@
 		/// <exception cref="InvalidOperationException">Thrown when the site in use is MediaWiki 1.22 or lower and a generator or list of page/revision IDs is provided.</exception>
 		public PageSetResult<WatchItem> Watch(WatchInput input)
 		{
-			input.NotNull().Token ??= this.GetSessionToken(TokensInput.Watch);
+			ArgumentNullException.ThrowIfNull(input);
+			input.Token ??= this.GetSessionToken(TokensInput.Watch);
 
 			if (this.SiteVersion >= 123)
 			{

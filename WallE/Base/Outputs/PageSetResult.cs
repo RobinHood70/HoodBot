@@ -29,7 +29,14 @@ namespace RobinHood70.WallE.Base
 			IReadOnlyDictionary<string, InterwikiTitleItem> interwiki,
 			IReadOnlyDictionary<string, string> normalized,
 			IReadOnlyDictionary<string, PageSetRedirectItem> redirects)
-			: base((item) => item.NotNull().Title, titles, StringComparer.Ordinal)
+			: base(
+				(item) =>
+				{
+					ArgumentNullException.ThrowIfNull(item);
+					return item.Title;
+				},
+				titles,
+				StringComparer.Ordinal)
 		{
 			this.BadRevisionIds = badRevisionIds;
 			this.Converted = converted;

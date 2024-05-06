@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Parser
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
@@ -20,7 +20,8 @@
 		/// <param name="site">The site to use when resolving link nodes.</param>
 		public WikiPlainTextVisitor(Site site)
 		{
-			this.site = site.NotNull();
+			ArgumentNullException.ThrowIfNull(site);
+			this.site = site;
 		}
 		#endregion
 
@@ -32,7 +33,8 @@
 		public string Build(IWikiNode node)
 		{
 			this.builder.Clear();
-			node.NotNull().Accept(this);
+			ArgumentNullException.ThrowIfNull(node);
+			node.Accept(this);
 			return this.builder.ToString();
 		}
 
@@ -65,7 +67,11 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node) => node.NotNull().Title.Accept(this);
+		public void Visit(IHeaderNode node)
+		{
+			ArgumentNullException.ThrowIfNull(node);
+			node.Title.Accept(this);
+		}
 
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
@@ -82,7 +88,8 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			foreach (var node in nodes.NotNull())
+			ArgumentNullException.ThrowIfNull(nodes);
+			foreach (var node in nodes)
 			{
 				node.Accept(this);
 			}
@@ -91,9 +98,10 @@
 		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
+			ArgumentNullException.ThrowIfNull(node);
+
 			// It would rarely make sense to resolve a parameter node in this context, but code is left unadulterated for special purposes like manually iterating through parameters in a link.
 			this.builder.Append('|');
-			node.ThrowNull();
 			if (node.Name is not null)
 			{
 				node.Name.Accept(this);
@@ -114,7 +122,11 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node) => this.builder.Append(node.NotNull().Text);
+		public void Visit(ITextNode node)
+		{
+			ArgumentNullException.ThrowIfNull(node);
+			this.builder.Append(node.Text);
+		}
 		#endregion
 	}
 }

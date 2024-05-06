@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Globalization;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
@@ -21,7 +21,8 @@
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			foreach (var template in parser.NotNull().TemplateNodes)
+			ArgumentNullException.ThrowIfNull(parser);
+			foreach (var template in parser.TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1 &&
 					template.Find(1) is IParameterNode parameter &&

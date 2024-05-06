@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Text;
-	using RobinHood70.CommonCode;
 
 	/// <summary>Represents a string with optional text before and after it, such as a value surrounded by whitespace or delimiters.</summary>
 	public sealed class EmbeddedValue : IEquatable<EmbeddedValue>
@@ -38,7 +37,8 @@
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
 		private EmbeddedValue(EmbeddedValue copy)
 		{
-			this.Before = copy.NotNull().Before;
+			ArgumentNullException.ThrowIfNull(copy);
+			this.Before = copy.Before;
 			this.After = copy.After;
 			this.Value = copy.Value;
 		}
@@ -118,11 +118,14 @@
 		/// <summary>Builds the full text of the value, including surrounding text, into the provided StringBuilder.</summary>
 		/// <param name="builder">The StringBuilder to append to.</param>
 		/// <returns>The original StringBuilder.</returns>
-		public StringBuilder Build(StringBuilder builder) => builder
-			.NotNull()
-			.Append(this.Before)
-			.Append(this.Value)
-			.Append(this.After);
+		public StringBuilder Build(StringBuilder builder)
+		{
+			ArgumentNullException.ThrowIfNull(builder);
+			return builder
+				.Append(this.Before)
+				.Append(this.Value)
+				.Append(this.After);
+		}
 
 		/// <summary>Clones this instance.</summary>
 		/// <returns>A copy of this instance.</returns>
@@ -133,7 +136,8 @@
 		/// <param name="source">The source.</param>
 		public void CopyFrom(EmbeddedValue source)
 		{
-			this.CopySurroundingText(source.NotNull());
+			ArgumentNullException.ThrowIfNull(source);
+			this.CopySurroundingText(source);
 			this.Value = source.Value;
 		}
 
@@ -141,7 +145,8 @@
 		/// <param name="source">The source.</param>
 		public void CopySurroundingText(EmbeddedValue source)
 		{
-			this.Before = source.NotNull().Before;
+			ArgumentNullException.ThrowIfNull(source);
+			this.Before = source.Before;
 			this.After = source.After;
 		}
 

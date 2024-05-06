@@ -165,16 +165,24 @@
 		#endregion
 
 		#region Protected Static Methods
-		protected static string FormatMeters(string? value) => string.Equals(value.NotNull(), "1", StringComparison.Ordinal)
-			? "1 meter"
-			: $"{value} meters";
-
-		protected static string FormatSeconds(string? value) => value.NotNull() switch
+		protected static string FormatMeters(string value)
 		{
-			"0" => "Instant",
-			"1" => "1 second",
-			_ => $"{value} seconds"
-		};
+			ArgumentNullException.ThrowIfNull(value);
+			return string.Equals(value, "1", StringComparison.Ordinal)
+				? "1 meter"
+				: $"{value} meters";
+		}
+
+		protected static string FormatSeconds(string? value)
+		{
+			ArgumentNullException.ThrowIfNull(value);
+			return value switch
+			{
+				"0" => "Instant",
+				"1" => "1 second",
+				_ => $"{value} seconds"
+			};
+		}
 
 		protected static string IconValueFixup(IParameterNode? parameter, string newValue)
 		{
@@ -219,7 +227,7 @@
 
 		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value, bool removeCondition)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			if (removeCondition)
 			{
 				template.Remove(name);

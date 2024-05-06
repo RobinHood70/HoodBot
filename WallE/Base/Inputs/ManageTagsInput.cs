@@ -1,7 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	using RobinHood70.CommonCode;
+	using System;
 
 	#region Public Enumerations
 	public enum TagOperation
@@ -18,8 +18,9 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public ManageTagsInput(TagOperation operation, string tag)
 		{
+			ArgumentException.ThrowIfNullOrWhiteSpace(tag);
 			this.Operation = operation;
-			this.Tag = tag.NotNullOrWhiteSpace();
+			this.Tag = tag;
 		}
 		#endregion
 

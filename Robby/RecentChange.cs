@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
@@ -16,7 +15,7 @@
 		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
-			recentChange.ThrowNull();
+			ArgumentNullException.ThrowIfNull(recentChange);
 			this.Title = TitleFactory.CoValidate(site, recentChange.Namespace, recentChange.Title);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;

@@ -38,9 +38,10 @@
 		#endregion
 
 		#region Private Static Classes
-		private static RevisionDeleteTypes LogEventGetRDType(string? param)
+		private static RevisionDeleteTypes LogEventGetRDType(string param)
 		{
-			var info = param.NotNull().Split(TextArrays.EqualsSign);
+			ArgumentNullException.ThrowIfNull(param);
+			var info = param.Split(TextArrays.EqualsSign);
 			var type = info[^1];
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
@@ -65,7 +66,7 @@
 			// hasUserIdFlag only necessary for list=logevents bug fix, can presumably be removed when we get to Json2 format.
 			public ExtraDataParser(JToken result, LogEvent le, string? logType, string? logAction, ICollection<string> knownProps, bool hasUserIdFlag)
 			{
-				result.ThrowNull();
+				ArgumentNullException.ThrowIfNull(result);
 				this.logAction = logAction;
 
 				bool doBugFix;

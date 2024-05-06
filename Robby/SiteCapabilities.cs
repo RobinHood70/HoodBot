@@ -45,7 +45,8 @@
 		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
 		public SiteCapabilities([NotNull] IMediaWikiClient? client)
 		{
-			this.client = client.NotNull();
+			ArgumentNullException.ThrowIfNull(client);
+			this.client = client;
 		}
 		#endregion
 
@@ -96,9 +97,11 @@
 		/// <remarks>This can be called multiple times with different URIs to get information for different wikis. Previous information will be cleared with each new call.</remarks>
 		public bool Get(Uri anyPage)
 		{
+			ArgumentNullException.ThrowIfNull(anyPage);
+
 			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
 			this.Clear();
-			var fullHost = new UriBuilder(anyPage.NotNull().Scheme, anyPage.Host).Uri;
+			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
 			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);

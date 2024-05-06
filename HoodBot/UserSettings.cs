@@ -6,7 +6,6 @@
 	using System.IO;
 	using System.Security.Cryptography;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.ViewModels;
@@ -76,7 +75,8 @@
 
 		public void FromJson(JToken json)
 		{
-			this.BotDataFolder = (string?)json.NotNull()[nameof(this.BotDataFolder)] is string botFolder && IsPathValid(botFolder)
+			ArgumentNullException.ThrowIfNull(json);
+			this.BotDataFolder = (string?)json[nameof(this.BotDataFolder)] is string botFolder && IsPathValid(botFolder)
 				? botFolder
 				: DefaultBotDataFolder;
 			if (json[nameof(this.ConnectionStrings)] is JObject connectionStrings)
@@ -116,7 +116,8 @@
 
 		public void RemoveWiki(WikiInfoViewModel item)
 		{
-			var index = this.Wikis.IndexOf(item.NotNull());
+			ArgumentNullException.ThrowIfNull(item);
+			var index = this.Wikis.IndexOf(item);
 			if (index >= 0)
 			{
 				if (string.Equals(this.SelectedName, item.DisplayName, StringComparison.Ordinal))

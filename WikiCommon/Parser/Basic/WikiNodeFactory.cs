@@ -84,7 +84,8 @@
 		/// <returns>A new argument node.</returns>
 		public IArgumentNode ArgumentNodeFromParts(string name, string? defaultValue)
 		{
-			var text = "{{{" + name.NotNull();
+			ArgumentNullException.ThrowIfNull(name);
+			var text = "{{{" + name;
 			if (defaultValue != null)
 			{
 				text += '|' + defaultValue;
@@ -135,7 +136,8 @@
 		/// <returns>A new link node.</returns>
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
-			var titleNodes = this.Parse(title.NotNull());
+			ArgumentNullException.ThrowIfNull(title);
+			var titleNodes = this.Parse(title);
 			List<IParameterNode> paramEntries = [];
 			if (parameters != null)
 			{
@@ -223,7 +225,7 @@
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public void ParseInto(NodeCollection nodes, string text, InclusionType inclusionType, bool strictInclusion)
 		{
-			nodes.ThrowNull();
+			ArgumentNullException.ThrowIfNull(nodes);
 			this.InclusionType = inclusionType;
 			this.StrictInclusion = strictInclusion;
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
@@ -263,7 +265,7 @@
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<string>? parameters)
 		{
-			title.ThrowNull();
+			ArgumentNullException.ThrowIfNull(title);
 			StringBuilder sb = new();
 			sb
 				.Append("{{")
@@ -337,7 +339,7 @@
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<(string? Name, string Value)> parameters)
 		{
-			title.ThrowNull();
+			ArgumentNullException.ThrowIfNull(title);
 			StringBuilder sb = new();
 			sb
 				.Append("{{")

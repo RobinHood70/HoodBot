@@ -45,7 +45,8 @@
 		/// <returns>The title.</returns>
 		public static string GetTitleText(this IBacklinkNode backlink)
 		{
-			var retval = backlink.NotNull().Title.ToValue();
+			ArgumentNullException.ThrowIfNull(backlink);
+			var retval = backlink.Title.ToValue();
 			retval = WikiTextUtilities.DecodeAndNormalize(retval);
 			return retval.Trim();
 		}
@@ -58,7 +59,7 @@
 		/// <returns>An enumeration of key/value strings. The key string is nullable.</returns>
 		public static IEnumerable<(string? Key, string Value)> ToKeyValue(this IEnumerable<IParameterNode> parameters)
 		{
-			parameters.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parameters);
 			foreach (var param in parameters)
 			{
 				var value = param.Value.ToRaw();
@@ -104,17 +105,20 @@
 		/// <summary>Sets the name to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
 		/// <param name="name">The name.</param>
-		public static void SetName(this IParameterNode parameter, string name) => parameter
-			.NotNull()
-			.SetName(parameter.Factory.Parse(name.NotNull()));
+		public static void SetName(this IParameterNode parameter, string name)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			ArgumentNullException.ThrowIfNull(name);
+			parameter.SetName(parameter.Factory.Parse(name));
+		}
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
 		/// <param name="name">The name.</param>
 		public static void SetName(this IParameterNode parameter, IEnumerable<IWikiNode> name)
 		{
-			parameter.ThrowNull();
-			name.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parameter);
+			ArgumentNullException.ThrowIfNull(name);
 			if (parameter.Name is null)
 			{
 				parameter.AddName(name);
@@ -132,7 +136,7 @@
 		/// <param name="format">The desired parameter format.</param>
 		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat format)
 		{
-			parameter.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parameter);
 			var paramValue = parameter.Value;
 			value ??= string.Empty;
 			if (format is ParameterFormat.Copy or ParameterFormat.NoChange)
@@ -152,9 +156,13 @@
 
 		/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
 		/// <param name="parameter">The parameter to convert.</param>
-		public static string ToKeyValue(this IParameterNode parameter) => parameter.NotNull().Name is NodeCollection name
-			? name.ToRaw() + '=' + parameter.Value.ToRaw()
-			: parameter.Value.ToRaw();
+		public static string ToKeyValue(this IParameterNode parameter)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			return parameter.Name is NodeCollection name
+				? name.ToRaw() + '=' + parameter.Value.ToRaw()
+				: parameter.Value.ToRaw();
+		}
 
 		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
 		/// <param name="parameter">The parameter.</param>
@@ -229,7 +237,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
 		public static IParameterNode Add(this ITemplateNode template, string? name, string value, ParameterFormat paramFormat)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			IParameterNode retval;
 			if (name is not null && template.Find(name) is not null)
 			{
@@ -293,7 +301,7 @@
 		/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
 		public static int FindNumberedIndex(this ITemplateNode template, int number)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			var retval = -1;
 			var i = 0;
 			var name = number.ToStringInvariant();
@@ -374,7 +382,9 @@
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
 		public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 		{
-			HashSet<string> nameSet = new(parameterNames.NotNull(), ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(parameterNames);
+			HashSet<string> nameSet = new(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{
 				if (nameSet.Contains(name))
@@ -390,9 +400,11 @@
 		/// <returns>The index of the requested parameter or -1 if not found.</returns>
 		public static int FindIndex(this ITemplateNode template, string name)
 		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(name);
 			var retval = -1;
 			var anonIndex = 0;
-			for (var i = 0; i < template.NotNull().Parameters.Count; i++)
+			for (var i = 0; i < template.Parameters.Count; i++)
 			{
 				var paramName = template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
 				if (string.Equals(paramName, name, StringComparison.Ordinal))
@@ -411,8 +423,9 @@
 		/// <returns>A tuple containing the parameter number as well as the parameter itself.</returns>
 		public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(this ITemplateNode template)
 		{
+			ArgumentNullException.ThrowIfNull(template);
 			var i = 0;
-			foreach (var parameter in template.NotNull().Parameters)
+			foreach (var parameter in template.Parameters)
 			{
 				if (parameter.Anonymous)
 				{
@@ -466,21 +479,30 @@
 		/// <param name="template">The template to work on.</param>
 		/// <param name="number">The numbered parameter to search for.</param>
 		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
-		public static string? GetRaw(this ITemplateNode template, int number) => template.NotNull().Find(number)?.Value.ToRaw().Trim();
+		public static string? GetRaw(this ITemplateNode template, int number)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			return template.Find(number)?.Value.ToRaw().Trim();
+		}
 
 		/// <summary>Get the raw value of a parameter or null.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to search for.</param>
 		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
-		public static string? GetRaw(this ITemplateNode template, string name) => template.NotNull().Find(name)?.Value.ToRaw().Trim();
+		public static string? GetRaw(this ITemplateNode template, string name)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			return template.Find(name)?.Value.ToRaw().Trim();
+		}
 
 		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <returns>A tuple containing the parameter name as well as the parameter itself.</returns>
 		public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)
 		{
+			ArgumentNullException.ThrowIfNull(template);
 			var anonIndex = 0;
-			foreach (var parameter in template.NotNull().Parameters)
+			foreach (var parameter in template.Parameters)
 			{
 				var name = parameter.Name?.ToValue().Trim() ?? (++anonIndex).ToStringInvariant();
 				yield return (name, parameter);
@@ -491,20 +513,29 @@
 		/// <param name="template">The template to work on.</param>
 		/// <param name="number">The numbered parameter to search for.</param>
 		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
-		public static string? GetValue(this ITemplateNode template, int number) => template.NotNull().Find(number)?.Value.ToValue().Trim();
+		public static string? GetValue(this ITemplateNode template, int number)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			return template.Find(number)?.Value.ToValue().Trim();
+		}
 
 		/// <summary>Get the value of a parameter or null.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to search for.</param>
 		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
-		public static string? GetValue(this ITemplateNode template, string name) => template.NotNull().Find(name)?.Value.ToValue().Trim();
+		public static string? GetValue(this ITemplateNode template, string name)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			return template.Find(name)?.Value.ToValue().Trim();
+		}
 
 		/// <summary>Determines whether any parameters have numeric names.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <returns><see langword="true"/> if the parameter collection has any names which are valid integers; otherwise, <see langword="false"/>.</returns>
 		public static bool HasNumericNames(this ITemplateNode template)
 		{
-			foreach (var param in template.NotNull().Parameters)
+			ArgumentNullException.ThrowIfNull(template);
+			foreach (var param in template.Parameters)
 			{
 				if (!param.Anonymous && int.TryParse(param.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
 				{
@@ -522,7 +553,8 @@
 		/// <example>Using <c>ParameterCluster(2)</c> on <c>{{MyTemplate|A|1|B|2|C|2=0}}</c> would return three lists: { "A", "0" }, { "B", "2" }, and { "C", null }. In the first case, "0" is returned because of the overridden parameter <c>2=0</c>. In the last case, <see langword="null"/> is returned because the parameter has no pairing within the template call. </example>
 		public static IEnumerable<IList<IParameterNode>> ParameterCluster(this ITemplateNode template, int length)
 		{
-			var parameters = template.NotNull().GetNumericParametersSorted(true);
+			ArgumentNullException.ThrowIfNull(template);
+			var parameters = template.GetNumericParametersSorted(true);
 			var i = 1;
 			List<IParameterNode> retval = [];
 			while (i < parameters.Count)
@@ -561,8 +593,8 @@
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
 		public static IParameterNode? PrioritizedFind(this ITemplateNode template, bool ignoreCase, params string[] parameterNames)
 		{
-			template.ThrowNull();
-			parameterNames.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(parameterNames);
 
 			var paramList = new List<(string Name, IParameterNode Value)>(template.GetResolvedParameters());
 			foreach (var param in parameterNames)
@@ -584,7 +616,7 @@
 		/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
 		public static void RemoveDuplicates(this ITemplateNode template)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			Dictionary<string, int> nameList = new(StringComparer.Ordinal);
 			var removals = new List<int>();
 			var anonIndex = 0;
@@ -621,10 +653,12 @@
 		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
 		public static bool Remove(this ITemplateNode template, string parameterName)
 		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(parameterName);
 			var retval = false;
 			var anonIndex = 0;
 			var i = 0;
-			while (i < template.NotNull().Parameters.Count)
+			while (i < template.Parameters.Count)
 			{
 				var name = template.Parameters[i].Name?.ToValue();
 				if (string.IsNullOrEmpty(name))
@@ -667,7 +701,13 @@
 		/// <param name="condition">The condition for the parameter to be removed.</param>
 		/// <returns><see langword="true"/>if any parameters were removed.</returns>
 		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-		public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<NodeCollection?> condition) => condition.NotNull()(template.Find("parameterName")?.Value) && Remove(template, parameterName);
+		public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<NodeCollection?> condition)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(parameterName);
+			ArgumentNullException.ThrowIfNull(condition);
+			return condition(template.Find("parameterName")?.Value) && Remove(template, parameterName);
+		}
 
 		/// <summary>Finds the parameters with the given name and removes it.</summary>
 		/// <param name="template">The template to work on.</param>
@@ -701,7 +741,9 @@
 		/// <param name="newTitle">The new title.</param>
 		public static void SetTitle(this ITemplateNode template, string newTitle)
 		{
-			var (leading, trailing) = GetSurroundingSpace(template.NotNull().Title.ToValue());
+			ArgumentNullException.ThrowIfNull(template);
+			newTitle ??= string.Empty;
+			var (leading, trailing) = GetSurroundingSpace(template.Title.ToValue());
 			template.Title.Clear();
 			template.Title.AddText(leading + newTitle + trailing);
 		}
@@ -718,10 +760,11 @@
 		/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
 		public static void Sort(this ITemplateNode template, IEnumerable<string> sortOrder)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(sortOrder);
 			Dictionary<string, int> indeces = new(StringComparer.Ordinal);
 			var i = 0;
-			foreach (var value in sortOrder.NotNull())
+			foreach (var value in sortOrder)
 			{
 				indeces.Add(value, i);
 				i++;
@@ -783,8 +826,8 @@
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
 		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat format, bool removeIfEmpty)
 		{
-			template.ThrowNull();
-			name.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(name);
 			IParameterNode retval;
 			if (value == null || (removeIfEmpty && value.Length == 0))
 			{
@@ -971,8 +1014,8 @@
 		/// <returns>The matching character count.</returns>
 		public static int Span([Localizable(false)] this string text, string mask, int offset, int limit)
 		{
-			text.ThrowNull();
-			mask.ThrowNull();
+			ArgumentNullException.ThrowIfNull(text);
+			ArgumentNullException.ThrowIfNull(mask);
 			if (offset < 0)
 			{
 				offset += text.Length;
@@ -1040,8 +1083,8 @@
 		/// <returns>The matching character count.</returns>
 		public static int SpanReverse([Localizable(false)] this string text, string mask, int offset, int limit)
 		{
-			text.ThrowNull();
-			mask.ThrowNull();
+			ArgumentNullException.ThrowIfNull(text);
+			ArgumentNullException.ThrowIfNull(mask);
 			if (offset < 0)
 			{
 				offset += text.Length;

@@ -91,7 +91,8 @@
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category, bool newLineBefore)
 		{
-			var catTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category.NotNull());
+			ArgumentNullException.ThrowIfNull(category);
+			var catTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category);
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Count; i++)
 			{

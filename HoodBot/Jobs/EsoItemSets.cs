@@ -333,7 +333,8 @@
 			#region Constructors
 			public SetData(IDataRecord row)
 			{
-				this.Name = EsoLog.ConvertEncoding((string)row.NotNull()["setName"]);
+				ArgumentNullException.ThrowIfNull(row);
+				this.Name = EsoLog.ConvertEncoding((string)row["setName"]);
 				for (var i = 1; i <= 12; i++)
 				{
 					var bonusDesc = EsoLog.ConvertEncoding((string)row[$"setBonusDesc{i}"]);

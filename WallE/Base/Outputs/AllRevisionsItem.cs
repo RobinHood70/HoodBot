@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
 	public class AllRevisionsItem : IApiTitle
@@ -10,8 +10,10 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		internal AllRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionItem> revisions)
 		{
+			ArgumentNullException.ThrowIfNull(title);
+			ArgumentNullException.ThrowIfNull(revisions);
 			this.Namespace = ns;
-			this.Title = title.NotNull();
+			this.Title = title;
 			this.PageId = pageId;
 			this.Revisions = revisions;
 		}

@@ -40,12 +40,13 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UserContributionsInput input)
 		{
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull().Properties)
+				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(120, UserContribsProperties.SizeDiff)
 				.Value;
 			request
-				.NotNull()
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.Add("user", input.Users)

@@ -14,7 +14,8 @@
 		/// <param name="contributionItem">The <see cref="UserContributionsItem"/>.</param>
 		protected internal Revision(UserContributionsItem contributionItem)
 		{
-			this.Anonymous = contributionItem.NotNull().UserId == 0;
+			ArgumentNullException.ThrowIfNull(contributionItem);
+			this.Anonymous = contributionItem.UserId == 0;
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
 			this.Minor = contributionItem.Flags.HasAnyFlag(UserContributionFlags.Minor);

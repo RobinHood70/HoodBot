@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
+	using System;
 	using System.Collections.Generic;
 	using CommunityToolkit.Mvvm.ComponentModel;
 	using RobinHood70.CommonCode;
@@ -16,8 +17,9 @@
 		#region Constructors
 		public TreeNode(TreeNode? parent, string displayText)
 		{
+			ArgumentNullException.ThrowIfNull(displayText);
 			this.Parent = parent;
-			this.DisplayText = displayText.NotNull();
+			this.DisplayText = displayText;
 		}
 		#endregion
 
@@ -83,7 +85,11 @@
 		#endregion
 
 		#region Public Methods
-		public void AddChild(TreeNode child) => this.children.Add(child.NotNull());
+		public void AddChild(TreeNode child)
+		{
+			ArgumentNullException.ThrowIfNull(child);
+			this.children.Add(child);
+		}
 
 		public IEnumerable<TreeNode> CheckedChildren()
 		{
@@ -148,7 +154,7 @@
 		#region Protected Methods
 		protected void OnSelectionChange(SelectedItemChangedEventArgs eventArgs)
 		{
-			eventArgs.ThrowNull();
+			ArgumentNullException.ThrowIfNull(eventArgs);
 			if (this.Parent == null)
 			{
 				this.SelectionChanged?.Invoke(this, eventArgs);

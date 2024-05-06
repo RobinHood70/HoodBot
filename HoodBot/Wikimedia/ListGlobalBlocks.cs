@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Wikimedia
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Eve.Modules;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -25,9 +25,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, GlobalBlocksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.AddIf("dir", "newer", input.SortAscending)

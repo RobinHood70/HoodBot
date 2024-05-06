@@ -62,7 +62,8 @@
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string text, InclusionType inclusionType, bool strictInclusion)
 		{
-			this.NodeFactory = factory.NotNull();
+			ArgumentNullException.ThrowIfNull(factory);
+			this.NodeFactory = factory;
 
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];

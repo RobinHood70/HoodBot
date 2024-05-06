@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
@@ -15,11 +16,17 @@
 		/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
-		public LinkNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
+		public LinkNode(
+			[NotNull, ValidatedNotNull] IWikiNodeFactory factory,
+			[NotNull, ValidatedNotNull] IEnumerable<IWikiNode> title,
+			[NotNull, ValidatedNotNull] IList<IParameterNode> parameters)
 		{
-			this.Factory = factory.NotNull();
-			this.Title = new NodeCollection(factory, title.NotNull());
-			this.Parameters = parameters.NotNull();
+			ArgumentNullException.ThrowIfNull(factory);
+			ArgumentNullException.ThrowIfNull(title);
+			ArgumentNullException.ThrowIfNull(parameters);
+			this.Factory = factory;
+			this.Title = new NodeCollection(factory, title);
+			this.Parameters = parameters;
 			foreach (var parameter in parameters)
 			{
 				if (parameter.Factory != factory)

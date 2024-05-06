@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
@@ -32,7 +31,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public CategoryMembersInput(string title)
 		{
-			this.Title = title.NotNull();
+			ArgumentNullException.ThrowIfNull(title);
+			this.Title = title;
 		}
 
 		public CategoryMembersInput(long pageId)
@@ -74,7 +74,11 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Methods
-		public void ChangeTitle(string newTitle) => this.Title = newTitle.NotNull();
+		public void ChangeTitle(string newTitle)
+		{
+			ArgumentNullException.ThrowIfNull(newTitle);
+			this.Title = newTitle;
+		}
 		#endregion
 	}
 }

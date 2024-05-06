@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -17,9 +18,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	public abstract class ActionModule : IModule
 	{
 		#region Constructors
-		protected ActionModule(WikiAbstractionLayer wal)
+		protected ActionModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal)
 		{
-			this.Wal = wal.NotNull();
+			ArgumentNullException.ThrowIfNull(wal);
+			this.Wal = wal;
 		}
 		#endregion
 
@@ -52,7 +54,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Static Methods
 		protected static JToken ToJson(string response)
 		{
-			using StringReader responseReader = new(response.NotNull());
+			ArgumentNullException.ThrowIfNull(response);
+			using StringReader responseReader = new(response);
 			using JsonTextReader reader = new(responseReader) { DateParseHandling = DateParseHandling.None };
 			return JToken.Load(reader); // using JToken.Load instead of .Parse so we can ignore date parsing.
 		}
@@ -76,7 +79,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void DeserializeAction(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 
 			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
 			if (result["error"].GetError() is ErrorItem error)
@@ -166,7 +169,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected int FindRequiredNamespace(string title)
 		{
-			var nsSplit = title.NotNull().Split(TextArrays.Colon, 2);
+			ArgumentNullException.ThrowIfNull(title);
+			var nsSplit = title.Split(TextArrays.Colon, 2);
 			if (nsSplit.Length == 2)
 			{
 				var nsText = nsSplit[0];
@@ -206,11 +210,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
-		protected virtual bool HandleWarning(string from, string text) =>
-			text
-				.NotNull()
-				.StartsWith("Action '", StringComparison.Ordinal) &&
-			text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
+		protected virtual bool HandleWarning(string from, string text)
+		{
+			ArgumentNullException.ThrowIfNull(text);
+			return
+				text.StartsWith("Action '", StringComparison.Ordinal) &&
+				text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
+		}
 		#endregion
 	}
 }

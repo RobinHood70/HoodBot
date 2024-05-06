@@ -30,7 +30,6 @@
 			: this(site, userInfo.NotNull().Name)
 		{
 			ArgumentNullException.ThrowIfNull(site);
-			ArgumentNullException.ThrowIfNull(userInfo);
 			this.Title = GetTitle(site, userInfo.Name);
 			this.Info = new UserInfo(site, userInfo);
 		}
@@ -121,8 +120,8 @@
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{
-			subject.ThrowNull();
-			body.ThrowNull();
+			ArgumentNullException.ThrowIfNull(subject);
+			ArgumentNullException.ThrowIfNull(body);
 			if (this.Info?.Emailable == false)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them.
@@ -252,7 +251,9 @@
 		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
-			msg = msg.NotNull().Trim();
+			ArgumentNullException.ThrowIfNull(msg);
+			editSummary ??= string.Empty;
+			msg = msg.Trim();
 			if (this.Title.TalkPage() is not Title talkPage)
 			{
 				throw new InvalidOperationException(Resources.TitleInvalid);

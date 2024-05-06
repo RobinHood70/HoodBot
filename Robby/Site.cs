@@ -101,7 +101,8 @@
 		/// <param name="wiki">The <see cref="IWikiAbstractionLayer"/> to use. This controls whether the API is used or some other access method.</param>
 		public Site(IWikiAbstractionLayer wiki)
 		{
-			this.AbstractionLayer = wiki.NotNull();
+			ArgumentNullException.ThrowIfNull(wiki);
+			this.AbstractionLayer = wiki;
 			wiki.Initializing += AbstractionLayer_Initializing;
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
@@ -281,7 +282,7 @@
 		/// <param name="identifiers">The identifier(s) associated with the class. This can be any value at all except null or <see cref="string.Empty"/> (both of which return the default <see cref="Site"/> object if used). This is done to allow user-friendly naming instead of lengthy type names (or shorter but potentially conflicting ones).</param>
 		public static void RegisterSiteClass(SiteFactoryMethod factoryMethod, params string[] identifiers)
 		{
-			identifiers.ThrowNull();
+			ArgumentNullException.ThrowIfNull(identifiers);
 			foreach (var id in identifiers)
 			{
 				SiteClasses[id] = factoryMethod;
@@ -442,7 +443,11 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public Page? LoadPage(string pageName) => this.LoadPage(TitleFactory.FromUnvalidated(this, pageName.NotNull()));
+		public Page? LoadPage(string pageName)
+		{
+			ArgumentNullException.ThrowIfNull(pageName);
+			return this.LoadPage(TitleFactory.FromUnvalidated(this, pageName));
+		}
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
@@ -478,7 +483,11 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName) => this.LoadPageText(TitleFactory.FromUnvalidated(this, pageName.NotNull()));
+		public string? LoadPageText(string pageName)
+		{
+			ArgumentNullException.ThrowIfNull(pageName);
+			return this.LoadPageText(TitleFactory.FromUnvalidated(this, pageName));
+		}
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
@@ -612,7 +621,11 @@
 		/// <summary>Gets recent changes according to a customized set of filter options.</summary>
 		/// <param name="options">The filter options to apply.</param>
 		/// <returns>A read-only list of recent changes that conform to the options specified.</returns>
-		public virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesOptions options) => this.LoadRecentChanges(options.NotNull().ToWallEInput);
+		public virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesOptions options)
+		{
+			ArgumentNullException.ThrowIfNull(options);
+			return this.LoadRecentChanges(options.ToWallEInput);
+		}
 
 		/// <summary>Gets public information about the specified users.</summary>
 		/// <param name="users">The users.</param>
@@ -771,8 +784,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus Undo(Title title, long revisionId, string editSummary)
 		{
-			title.ThrowNull();
-			editSummary.ThrowNull();
+			ArgumentNullException.ThrowIfNull(editSummary);
 
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
@@ -834,10 +846,11 @@
 		/// <returns>A value indicating the change status of the upload.</returns>
 		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText)
 		{
-			editSummary.NotNull();
+			ArgumentNullException.ThrowIfNull(fileName);
+			ArgumentNullException.ThrowIfNull(editSummary);
 
 			// Always access this, even if we don't need it, as a means of checking validity.
-			var checkedName = Path.GetFileName(fileName.NotNull());
+			var checkedName = Path.GetFileName(fileName);
 			if (string.IsNullOrWhiteSpace(destinationName))
 			{
 				destinationName = checkedName;
@@ -1020,7 +1033,7 @@
 		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
 		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
-			text.ThrowNull();
+			ArgumentNullException.ThrowIfNull(text);
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
 			var nodes = new SiteNodeFactory(this).Parse(text);
@@ -1082,9 +1095,9 @@
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(Title from, Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
-			from.ThrowNull();
-			to.ThrowNull();
-			reason.ThrowNull();
+			ArgumentNullException.ThrowIfNull(from);
+			ArgumentNullException.ThrowIfNull(to);
+			ArgumentNullException.ThrowIfNull(reason);
 			const string subPageName = "/SubPage";
 			Dictionary<string, string> disabledResult = new(StringComparer.Ordinal);
 			if (!this.EditingEnabled)
@@ -1163,7 +1176,7 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
-			changeFunction.ThrowNull();
+			ArgumentNullException.ThrowIfNull(changeFunction);
 			ChangeArgs changeArgs = new(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -1185,7 +1198,7 @@
 			where T : class
 		{
 			// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
-			changeFunction.ThrowNull();
+			ArgumentNullException.ThrowIfNull(changeFunction);
 			ChangeArgs changeArgs = new(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -1200,8 +1213,8 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
-			changeArgs.ThrowNull();
-			changeFunction.ThrowNull();
+			ArgumentNullException.ThrowIfNull(changeArgs);
+			ArgumentNullException.ThrowIfNull(changeFunction);
 			this.PageTextChanging?.Invoke(this, changeArgs);
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
@@ -1258,7 +1271,8 @@
 		/// <returns>A read-only list of <see cref="Block"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<Block> LoadBlocks(BlocksInput input)
 		{
-			input.NotNull().Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
+			ArgumentNullException.ThrowIfNull(input);
+			input.Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
 			var result = this.AbstractionLayer.Blocks(input);
 			List<Block> retval = new(result.Count);
 			foreach (var item in result)
@@ -1372,7 +1386,8 @@
 		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<User> LoadUsers(AllUsersInput input)
 		{
-			input.NotNull().Properties = AllUsersProperties.None;
+			ArgumentNullException.ThrowIfNull(input);
+			input.Properties = AllUsersProperties.None;
 			var result = this.AbstractionLayer.AllUsers(input);
 			List<User> retval = new(result.Count);
 			foreach (var item in result)
@@ -1471,7 +1486,14 @@
 				interwikiList.Add(entry);
 			}
 
-			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => item.NotNull().Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
+			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(
+				item =>
+				{
+					ArgumentNullException.ThrowIfNull(item);
+					return item.Prefix;
+				},
+				interwikiList,
+				StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>

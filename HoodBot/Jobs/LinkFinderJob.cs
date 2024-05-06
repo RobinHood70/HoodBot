@@ -98,7 +98,7 @@
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			parser.ThrowNull();
+			ArgumentNullException.ThrowIfNull(parser);
 			foreach (var title in this.Titles)
 			{
 				if (!this.results.TryGetValue(title, out var section))

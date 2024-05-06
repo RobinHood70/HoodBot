@@ -140,7 +140,8 @@
 		/// <returns><see langword="true" /> if and item with the specified <paramref name="key" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if an item with the specified <paramref name="key" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
 		public bool Remove(string key)
 		{
-			var title = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
+			ArgumentNullException.ThrowIfNull(key);
+			var title = TitleFactory.FromUnvalidated(this.Site, key);
 			return this.Remove(title);
 		}
 
@@ -149,7 +150,7 @@
 		/// <returns><see langword="true" /> if any of the <paramref name="titles" /> were removed; otherwise, <see langword="false" />.</returns>
 		public bool Remove(IEnumerable<Title> titles)
 		{
-			titles.ThrowNull();
+			ArgumentNullException.ThrowIfNull(titles);
 			var removed = false;
 			foreach (var item in titles)
 			{

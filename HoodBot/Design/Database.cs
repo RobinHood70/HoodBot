@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using MySql.Data.MySqlClient;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 
 	// This is a quick conversion from a static class to a standard class. This can probably be converted to use (or inherit from) ADO.NET classes at some point, but for now, I'm leaving this as close to the original code as possible for an easy changeover.
@@ -13,7 +12,8 @@
 		#region Constructors
 		public Database(string connectionString)
 		{
-			this.ConnectionString = connectionString.NotNull();
+			ArgumentNullException.ThrowIfNull(connectionString);
+			this.ConnectionString = connectionString;
 		}
 		#endregion
 

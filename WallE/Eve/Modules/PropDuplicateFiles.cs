@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -34,9 +34,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DuplicateFilesInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.Add("localonly", input.LocalOnly)
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("limit", this.Limit);

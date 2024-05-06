@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -44,7 +43,11 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override IApiTitle GetItem(JToken result) => result.NotNull().GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result)
+		{
+			ArgumentNullException.ThrowIfNull(result);
+			return result.GetWikiTitle();
+		}
 
 		protected override LinksResult GetNewList(JToken parent) => [];
 	}

@@ -7,7 +7,6 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -35,7 +34,8 @@
 		#region Public Methods
 		public static PlaceCollection GetPlaces(Site site)
 		{
-			var places = site.NotNull().CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
+			ArgumentNullException.ThrowIfNull(site);
+			var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
 			places.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 

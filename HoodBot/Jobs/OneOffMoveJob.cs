@@ -3,7 +3,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
 	[method: JobInfo("One-Off Move Job")]

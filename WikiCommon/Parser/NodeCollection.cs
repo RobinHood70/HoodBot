@@ -8,7 +8,6 @@
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Linq;
-	using RobinHood70.CommonCode;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
@@ -25,7 +24,8 @@
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		public NodeCollection(IWikiNodeFactory factory)
 		{
-			this.Factory = factory.NotNull();
+			ArgumentNullException.ThrowIfNull(factory);
+			this.Factory = factory;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
@@ -42,7 +42,8 @@
 		public NodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
 			: base(nodes)
 		{
-			this.Factory = factory.NotNull();
+			ArgumentNullException.ThrowIfNull(factory);
+			this.Factory = factory;
 		}
 		#endregion
 
@@ -83,7 +84,7 @@
 		/// <param name="sections">The new sections for the page.</param>
 		public void FromSections(IEnumerable<Section> sections)
 		{
-			sections.ThrowNull();
+			ArgumentNullException.ThrowIfNull(sections);
 			this.Clear();
 			foreach (var section in sections)
 			{
@@ -403,7 +404,7 @@
 		/// </remarks>
 		public void Replace(NodeReplacer replaceMethod, bool searchReplacements)
 		{
-			replaceMethod.ThrowNull();
+			ArgumentNullException.ThrowIfNull(replaceMethod);
 			for (var i = 0; i < this.Count; i++)
 			{
 				var currentNode = this[i];

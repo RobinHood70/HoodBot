@@ -235,7 +235,7 @@
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
 		public static string? GetNullableBCString(this JToken token, string name)
 		{
-			token.ThrowNull();
+			ArgumentNullException.ThrowIfNull(token);
 			var node = token[name] ?? token["*"];
 			return (string?)node;
 		}
@@ -257,8 +257,8 @@
 			const string toFragmentName = "tofragment";
 			const string toInterwikiName = "tointerwiki";
 
-			redirects.ThrowNull();
-			interwikiPrefixes.ThrowNull();
+			ArgumentNullException.ThrowIfNull(redirects);
+			ArgumentNullException.ThrowIfNull(interwikiPrefixes);
 			if (token != null)
 			{
 				foreach (var item in token)
@@ -299,7 +299,8 @@
 		/// <exception cref="ChecksumException">Thrown when the SHA-1 checksum does not match the text of the revision.</exception>
 		public static RevisionItem GetRevision(this JToken token)
 		{
-			var content = token.NotNull().GetNullableBCString("content");
+			ArgumentNullException.ThrowIfNull(token);
+			var content = token.GetNullableBCString("content");
 			var revId = (long?)token["revid"] ?? 0;
 			var sha1 = (string?)token["sha1"];
 			if (sha1 != null)
@@ -386,9 +387,11 @@
 		/// <exception cref="WikiException">Thrown when the user rights token is not in either of the expected formats.</exception>
 		public static UserItem GetUser(this JToken token)
 		{
+			ArgumentNullException.ThrowIfNull(token);
+
 			// Somewhere prior to 1.22, rights lists could be returned as a numbered key-value pair instead of a straight-forward string array, so this handles that situation and converts it to the expected type.
 			IReadOnlyList<string>? userRights = null;
-			if (token.NotNull()["rights"] is JToken rights)
+			if (token["rights"] is JToken rights)
 			{
 				if (rights.Type == JTokenType.Array)
 				{
@@ -443,10 +446,14 @@
 		/// <returns>A <see cref="WikiTitleItem"/>.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
 		/// <exception cref="ArgumentNullException">Thrown when the token is null.</exception>
-		public static WikiTitleItem GetWikiTitle(this JToken token) => new(
-			ns: (int)token.NotNull().MustHave("ns"),
-			title: token.MustHaveString("title"),
-			pageId: (long?)token["pageid"] ?? 0);
+		public static WikiTitleItem GetWikiTitle(this JToken token)
+		{
+			ArgumentNullException.ThrowIfNull(token);
+			return new(
+				ns: (int)token.MustHave("ns"),
+				title: token.MustHaveString("title"),
+				pageId: (long?)token["pageid"] ?? 0);
+		}
 
 		/// <summary>Ignores a token if it is boolean and evaluates to <see langword="false"/>.</summary>
 		/// <param name="token">The token.</param>
@@ -480,7 +487,7 @@
 		/// <exception cref="WikiException">Thrown when the token does not have a string value at either the named location or in the "*" entry.</exception>
 		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName] string caller = Globals.Unknown)
 		{
-			token.ThrowNull();
+			ArgumentNullException.ThrowIfNull(token);
 			var node = token[name] ?? token["*"] ?? throw MalformedException(name, token, caller);
 			return (string?)node ?? throw MalformedException(name, token, caller);
 		}
@@ -493,7 +500,8 @@
 		/// <exception cref="WikiException">Thrown when the token does not have a date value at the named location.</exception>
 		public static DateTime MustHaveDate(this JToken token, string name, [CallerMemberName] string caller = Globals.Unknown)
 		{
-			var node = token.NotNull()[name] ?? throw MalformedException(name, token, caller);
+			ArgumentNullException.ThrowIfNull(token);
+			var node = token[name] ?? throw MalformedException(name, token, caller);
 			return GetDate(node, caller);
 		}
 
@@ -513,7 +521,8 @@
 		/// <exception cref="WikiException">Thrown when the token does not have a string value at the named location.</exception>
 		public static string MustHaveString(this JToken token, string name, [CallerMemberName] string caller = Globals.Unknown)
 		{
-			var node = token.NotNull()[name] ?? throw MalformedException(name, token, caller);
+			ArgumentNullException.ThrowIfNull(token);
+			var node = token[name] ?? throw MalformedException(name, token, caller);
 			return (string?)node ?? throw MalformedException(name, token, caller);
 		}
 		#endregion
@@ -544,9 +553,9 @@
 		/// <returns>The original <see cref="Request"/>.</returns>
 		public static Request BuildRevisions(this Request request, IRevisionsInput input, int siteVersion)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddFlags("prop", input.Properties)
 				.Add("expandtemplates", input.ExpandTemplates)
 				.Add("generatexml", input.GenerateXml)

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Parser
 {
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -21,7 +20,7 @@
 		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(nodeFactory, title, parameters)
 		{
-			this.TitleValue = TitleFactory.FromUnvalidated(nodeFactory.NotNull().Site, this.GetTitleText());
+			this.TitleValue = TitleFactory.FromUnvalidated(nodeFactory.Site, this.GetTitleText());
 		}
 		#endregion
 

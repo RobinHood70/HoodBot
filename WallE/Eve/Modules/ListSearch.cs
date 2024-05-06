@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -37,13 +36,14 @@
 		#region Public Override Methods
 		protected override void BuildRequestLocal(Request request, SearchInput input)
 		{
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull().Properties)
+				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(117, SearchProperties.Score | SearchProperties.TitleSnippet | SearchProperties.RedirectTitle | SearchProperties.RedirectSnippet | SearchProperties.SectionTitle | SearchProperties.SectionSnippet | SearchProperties.HasRelated)
 				.FilterFrom(124, SearchProperties.HasRelated | SearchProperties.Score)
 				.Value;
 			request
-				.NotNull()
 				.AddIfNotNull("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.AddIfPositiveIf("what", input.What, this.SiteVersion >= 117)

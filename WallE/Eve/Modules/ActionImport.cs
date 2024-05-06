@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -29,14 +29,15 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImportInput input)
 		{
-			if (input.NotNull().GetXmlData() is byte[] xmlData)
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
+			if (input.GetXmlData() is byte[] xmlData)
 			{
 				request.Type = RequestType.PostMultipart;
 				request.Add("xml", "dummyName", xmlData);
 			}
 
 			request
-				.NotNull()
 				.AddIfNotNull("summary", input.Summary)
 				.AddIfNotNull("interwikisource", input.InterwikiSource)
 				.AddIfNotNull("interwikipage", input.InterwikiPage)
@@ -49,7 +50,7 @@
 
 		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			List<ImportItem> output = [];
 			foreach (var item in result)
 			{

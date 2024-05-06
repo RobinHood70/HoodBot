@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
@@ -70,9 +69,11 @@
 		#region Public Static Methods
 		public static Place Copy(string titleName, Place other)
 		{
-			Place retval = new(titleName.NotNull())
+			ArgumentNullException.ThrowIfNull(titleName);
+			ArgumentNullException.ThrowIfNull(other);
+			Place retval = new(titleName)
 			{
-				Alliance = other.NotNull().Alliance,
+				Alliance = other.Alliance,
 				Settlement = other.Settlement,
 				Title = other.Title,
 				PlaceType = other.PlaceType,

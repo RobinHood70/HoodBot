@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Parser
 {
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -22,7 +21,6 @@
 		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(factory, title, parameters)
 		{
-			factory.ThrowNull();
 			this.TitleValue = TitleFactory.FromUnvalidated(factory.Site[MediaWikiNamespaces.Template], this.GetTitleText());
 		}
 		#endregion

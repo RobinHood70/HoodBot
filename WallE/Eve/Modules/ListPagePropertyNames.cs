@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -25,9 +25,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BuildRequestLocal(Request request, PagePropertyNamesInput input) => request
-			.NotNull()
-			.Add("limit", this.Limit);
+		protected override void BuildRequestLocal(Request request, PagePropertyNamesInput input)
+		{
+			ArgumentNullException.ThrowIfNull(request);
+			request.Add("limit", this.Limit);
+		}
 
 		protected override string? GetItem(JToken result) => (string?)result?["propname"];
 		#endregion

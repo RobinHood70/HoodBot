@@ -82,11 +82,13 @@
 
 		public async Task Run(IEnumerable<JobInfo> jobList)
 		{
+			ArgumentNullException.ThrowIfNull(jobList);
+
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
 			var editingEnabledMaster = this.Site.EditingEnabled;
 			var allJobsTimer = Stopwatch.StartNew();
-			foreach (var jobInfo in jobList.NotNull())
+			foreach (var jobInfo in jobList)
 			{
 				var abort = this.OnStartingJob(jobInfo);
 				if (abort)

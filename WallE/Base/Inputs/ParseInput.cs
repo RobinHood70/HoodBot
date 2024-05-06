@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -97,7 +96,11 @@ namespace RobinHood70.WallE.Base
 		#region Public Static Methods
 		public static ParseInput FromOldId(long oldId) => new() { OldId = oldId };
 
-		public static ParseInput FromPage(string page) => new() { Page = page.NotNull() };
+		public static ParseInput FromPage(string page)
+		{
+			ArgumentNullException.ThrowIfNull(page);
+			return new() { Page = page };
+		}
 
 		public static ParseInput FromPageId(long pageId) => new() { PageId = pageId };
 

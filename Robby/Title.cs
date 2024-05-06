@@ -112,7 +112,11 @@ namespace RobinHood70.Robby
 		/// <param name="pageName">The page name to modify.</param>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		/// <remarks>No other string processing is done, making this useful when case or embedded invisible characters must be preserved.</remarks>
-		public static string ToLabelName(string pageName) => LabelParenthesesRemover.Replace(pageName.NotNull(), string.Empty, 1, 1);
+		public static string ToLabelName(string pageName)
+		{
+			ArgumentNullException.ThrowIfNull(pageName);
+			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
+		}
 		#endregion
 
 		#region Public Methods

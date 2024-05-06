@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -37,7 +36,8 @@ namespace RobinHood70.WallE.Base
 
 		public LogEventsInput(string title)
 		{
-			this.Title = title.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			this.Title = title;
 		}
 		#endregion
 
@@ -70,10 +70,11 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static LogEventsInput FromPrefix(string prefix) => new()
+		public static LogEventsInput FromPrefix(string prefix)
 		{
-			Prefix = prefix.NotNullOrWhiteSpace()
-		};
+			ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
+			return new() { Prefix = prefix };
+		}
 		#endregion
 	}
 }

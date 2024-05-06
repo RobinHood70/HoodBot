@@ -1,13 +1,49 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
-	using RobinHood70.CommonCode;
+	using System.Collections.Generic;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
 	public static class UespFunctions
 	{
+		private static Dictionary<string, string> IconAbbreviations = new(StringComparer.Ordinal)
+		{
+			[string.Empty] = string.Empty,
+			["a"] = "armor-",
+			["ach"] = "achievement-",
+			["b"] = "book-",
+			["c"] = "clothing-",
+			["d"] = "dish-",
+			["e"] = "effect-",
+			["f"] = "food-",
+			["fi"] = "fish-",
+			["furn"] = "furniture-",
+			["g"] = "glyph-",
+			["i"] = "ingredient-",
+			["j"] = "jewelry-",
+			["m"] = "misc-",
+			["pm"] = "processed material-",
+			["poi"] = "poison-",
+			["pot"] = "potion-",
+			["q"] = "quest-",
+			["r"] = "runestone-",
+			["re"] = "reagent-",
+			["rm"] = "raw material-",
+			["sc"] = "Scroll-",
+			["sk"] = "skill-",
+			["sm"] = "shadowmark-",
+			["so"] = "solvent-",
+			["sp"] = "spell-",
+			["st"] = "stolen-",
+			["sty"] = "style material-",
+			["sy"] = "synergy-",
+			["t"] = "tool-",
+			["tr"] = "trait material-",
+			["w"] = "weapon-",
+		};
+
 		public static string[] LoreNames { get; } =
 		[
 			"Names",
@@ -43,12 +79,18 @@
 
 		public static string IconAbbreviation(string nsId, string iconType, string icon) => IconAbbreviation(nsId, iconType, icon, "png");
 
-		public static string IconAbbreviation(string nsId, string iconType, string icon, string extension) =>
-			nsId + "-icon-" + IconNameFromAbbreviation(iconType) + icon.NotNull() + '.' + extension;
+		public static string IconAbbreviation(string nsId, string iconType, string icon, string extension)
+		{
+			ArgumentNullException.ThrowIfNull(nsId);
+			ArgumentNullException.ThrowIfNull(iconType);
+			ArgumentNullException.ThrowIfNull(icon);
+			ArgumentNullException.ThrowIfNull(extension);
+			return nsId + "-icon-" + IconNameFromAbbreviation(iconType) + icon + '.' + extension;
+		}
 
 		public static (UespNamespace? Ns, string? Abbr, string? Name, string? Ext) AbbreviationFromIconName(UespNamespaceList nsList, string iconName)
 		{
-			iconName.ThrowNull();
+			ArgumentNullException.ThrowIfNull(iconName);
 			var nsNameSplit = iconName.Split("-icon-", 2);
 			if (nsNameSplit.Length == 2)
 			{
@@ -112,41 +154,15 @@
 			return (null, null, null, null);
 		}
 
-		public static string IconNameFromAbbreviation(string iconType) => iconType.NotNull() switch
+		public static string IconNameFromAbbreviation(string iconType)
 		{
-			"" => string.Empty,
-			"a" => "armor-",
-			"ach" => "achievement-",
-			"b" => "book-",
-			"c" => "clothing-",
-			"d" => "dish-",
-			"e" => "effect-",
-			"f" => "food-",
-			"fi" => "fish-",
-			"furn" => "furniture-",
-			"g" => "glyph-",
-			"i" => "ingredient-",
-			"j" => "jewelry-",
-			"m" => "misc-",
-			"pm" => "processed material-",
-			"poi" => "poison-",
-			"pot" => "potion-",
-			"q" => "quest-",
-			"r" => "runestone-",
-			"re" => "reagent-",
-			"rm" => "raw material-",
-			"sc" => "Scroll-",
-			"sk" => "skill-",
-			"sm" => "shadowmark-",
-			"so" => "solvent-",
-			"sp" => "spell-",
-			"st" => "stolen-",
-			"sty" => "style material-",
-			"sy" => "synergy-",
-			"t" => "tool-",
-			"tr" => "trait material-",
-			"w" => "weapon-",
-			_ => iconType + '-'
-		};
+			ArgumentNullException.ThrowIfNull(iconType);
+			if (!IconAbbreviations.TryGetValue(iconType, out var retval))
+			{
+				retval = iconType + '-';
+			}
+
+			return retval;
+		}
 	}
 }

@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -30,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FeedWatchlistInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfNotNull("feedformat", input.FeedFormat)
 				.AddIfPositive("hours", input.Hours > 72 ? 72 : input.Hours)
 				.Add("linktosections", input.LinkToSections)

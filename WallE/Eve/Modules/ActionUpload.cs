@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
@@ -31,9 +32,9 @@
 		protected override void BuildRequestLocal(Request request, UploadInputInternal input)
 		{
 			// Upload by URL is not implemented due to rarity of use and the level of complexity it adds to the code.
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfNotNull("filename", input.FileName)
 				.AddIfNotNull("comment", input.Comment)
 				.AddIfNotNull("text", input.Text)
@@ -51,7 +52,7 @@
 
 		protected override UploadResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			var resultText = result.MustHaveString("result");
 			IReadOnlyList<string> duplicates = [];
 			Dictionary<string, string> outputWarnings = new(System.StringComparer.Ordinal);

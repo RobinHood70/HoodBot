@@ -83,7 +83,8 @@
 		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(Title, string, ProtectionLevel, string)"/> version of title call.</remarks>
 		public static ChangeStatus CreateProtect(this Title title, string reason, string createProtection, string duration)
 		{
-			ProtectInputItem protection = new("create", createProtection.NotNull()) { ExpiryRelative = duration };
+			ArgumentNullException.ThrowIfNull(createProtection);
+			ProtectInputItem protection = new("create", createProtection) { ExpiryRelative = duration };
 			return Protect(title, reason, [protection]);
 		}
 
@@ -103,7 +104,7 @@
 		/// <returns>A value indicating the change status of the block.</returns>
 		public static ChangeStatus Delete(this Title title, string reason)
 		{
-			reason.ThrowNull();
+			ArgumentNullException.ThrowIfNull(reason);
 			var site = title.Namespace.Site;
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
@@ -255,7 +256,7 @@
 		/// <returns><see langword="true"/> if all protections were set to the specified values.</returns>
 		private static bool Protect(Site site, ProtectInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			input.Protections.PropertyThrowNull(nameof(input), nameof(input.Protections));
 			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
 			var result = site.AbstractionLayer.Protect(input);
@@ -266,8 +267,8 @@
 
 		private static ChangeStatus Protect([NotNull][ValidatedNotNull] Title title, string reason, ICollection<ProtectInputItem> protections)
 		{
-			title.ThrowNull();
-			reason.ThrowNull();
+			ArgumentNullException.ThrowIfNull(reason);
+			ArgumentNullException.ThrowIfNull(protections);
 			if (protections.Count == 0)
 			{
 				return ChangeStatus.NoEffect;

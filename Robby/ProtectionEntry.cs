@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Contains information about page protections.</summary>
@@ -12,7 +11,8 @@
 		/// <param name="item">The <see cref="ProtectionsItem"/> to copy information from.</param>
 		public ProtectionEntry(ProtectionsItem item)
 		{
-			this.Expiry = item.NotNull().Expiry;
+			ArgumentNullException.ThrowIfNull(item);
+			this.Expiry = item.Expiry;
 			this.Level = item.Level;
 		}
 

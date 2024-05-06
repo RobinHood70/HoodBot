@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -34,8 +35,10 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllMessagesInput input)
 		{
-			this.languageCode = input.NotNull().LanguageCode;
-			request.NotNull()
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
+			this.languageCode = input.LanguageCode;
+			request
 				.Add("messages", input.Messages)
 				.AddFlags("prop", input.Properties)
 				.Add("enableparser", input.EnableParser)

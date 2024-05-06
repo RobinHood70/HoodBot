@@ -32,7 +32,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ParseInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(126, ParseProperties.JsConfigVars | ParseProperties.ParseTree)
@@ -44,7 +45,6 @@
 				.FilterFrom(124, ParseProperties.LanguagesHtml)
 				.Value;
 			request
-				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfNotNull("text", input.Text)
 				.AddIfNotNull("summary", input.Summary)
@@ -72,7 +72,7 @@
 
 		protected override ParseResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			Dictionary<string, PageSetRedirectItem> redirects = new(StringComparer.Ordinal);
 			result["redirects"].GetRedirects(redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 			return new ParseResult(
@@ -107,11 +107,13 @@
 		}
 
 		// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
-		protected override bool HandleWarning(string from, string? text) =>
-			text
-				.NotNull()
-				.StartsWith("modulemessages", StringComparison.Ordinal) ||
-			base.HandleWarning(from, text);
+		protected override bool HandleWarning(string from, string text)
+		{
+			ArgumentNullException.ThrowIfNull(text);
+			return
+				text.StartsWith("modulemessages", StringComparison.Ordinal) ||
+				base.HandleWarning(from, text);
+		}
 		#endregion
 
 		#region Private Static Methods

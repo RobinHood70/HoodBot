@@ -10,7 +10,8 @@
 		#region Constructors
 		public ConstructorParameter(ParameterInfo parameter)
 		{
-			var attributes = parameter.NotNull().GetCustomAttributes(typeof(JobParameterAttribute), true);
+			ArgumentNullException.ThrowIfNull(parameter);
+			var attributes = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
 			if (attributes.Length > 1)
 			{
 				throw new InvalidOperationException($"Multiple JobParameterAttribute derivatives specified on parameter \"{parameter.Name}\" in constructor: {FormatMember(parameter)}");

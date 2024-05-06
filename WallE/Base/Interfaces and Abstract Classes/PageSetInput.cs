@@ -27,7 +27,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		protected PageSetInput(PageSetInput input)
 		{
-			this.ConvertTitles = input.NotNull().ConvertTitles;
+			ArgumentNullException.ThrowIfNull(input);
+			this.ConvertTitles = input.ConvertTitles;
 			this.GeneratorInput = input.GeneratorInput;
 			this.ListType = input.ListType;
 			this.Redirects = input.Redirects;
@@ -36,29 +37,37 @@ namespace RobinHood70.WallE.Base
 
 		protected PageSetInput(IEnumerable<string> titles)
 		{
+			ArgumentNullException.ThrowIfNull(titles);
+			foreach (var title in titles)
+			{
+				ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			}
+
 			this.ListType = ListType.Titles;
-			titles = titles.NotNullOrWhiteSpace();
 			var values = titles.AsReadOnlyList();
 			this.Values = values;
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput)
 		{
-			this.GeneratorInput = generatorInput.NotNull();
+			ArgumentNullException.ThrowIfNull(generatorInput);
+			this.GeneratorInput = generatorInput;
 			this.Values = [];
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
 			: this(titles)
 		{
-			this.GeneratorInput = generatorInput.NotNull();
+			ArgumentNullException.ThrowIfNull(generatorInput);
+			this.GeneratorInput = generatorInput;
 		}
 
 		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
+			ArgumentNullException.ThrowIfNull(ids);
 			this.ListType = listType;
 			List<string> list = [];
-			foreach (var id in ids.NotNull())
+			foreach (var id in ids)
 			{
 				list.Add(id.ToString(CultureInfo.InvariantCulture));
 			}

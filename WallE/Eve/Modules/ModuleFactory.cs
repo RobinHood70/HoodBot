@@ -69,7 +69,8 @@
 		public IModuleFactory RegisterGenerator<T>(GeneratorFactoryMethod generatorFactoryMethod)
 			where T : IGeneratorInput
 		{
-			this.generators[typeof(T)] = generatorFactoryMethod.NotNull();
+			ArgumentNullException.ThrowIfNull(generatorFactoryMethod);
+			this.generators[typeof(T)] = generatorFactoryMethod;
 			return this;
 		}
 
@@ -80,7 +81,8 @@
 		public IModuleFactory RegisterProperty<T>(PropertyFactoryMethod propertyFactoryMethod)
 			where T : IPropertyInput
 		{
-			this.properties[typeof(T)] = propertyFactoryMethod.NotNull();
+			ArgumentNullException.ThrowIfNull(propertyFactoryMethod);
+			this.properties[typeof(T)] = propertyFactoryMethod;
 			return this;
 		}
 		#endregion

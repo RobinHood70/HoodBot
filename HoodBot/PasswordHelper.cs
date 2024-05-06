@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.HoodBot
 {
+	using System;
 	using System.Windows;
 	using System.Windows.Controls;
-	using RobinHood70.CommonCode;
 
 	// Taken from https://www.wpftutorial.net/PasswordBox.html
 	public static class PasswordHelper
@@ -21,13 +21,29 @@
 		#endregion
 
 		#region Public Methods
-		public static bool GetAttach(DependencyObject dp) => (bool)dp.NotNull().GetValue(AttachProperty);
+		public static bool GetAttach(DependencyObject dp)
+		{
+			ArgumentNullException.ThrowIfNull(dp);
+			return (bool)dp.GetValue(AttachProperty);
+		}
 
-		public static string GetPassword(DependencyObject dp) => (string)dp.NotNull().GetValue(PasswordProperty);
+		public static string GetPassword(DependencyObject dp)
+		{
+			ArgumentNullException.ThrowIfNull(dp);
+			return (string)dp.GetValue(PasswordProperty);
+		}
 
-		public static void SetAttach(DependencyObject dp, bool value) => dp.NotNull().SetValue(AttachProperty, value);
+		public static void SetAttach(DependencyObject dp, bool value)
+		{
+			ArgumentNullException.ThrowIfNull(dp);
+			dp.SetValue(AttachProperty, value);
+		}
 
-		public static void SetPassword(DependencyObject dp, string value) => dp.NotNull().SetValue(PasswordProperty, value);
+		public static void SetPassword(DependencyObject dp, string value)
+		{
+			ArgumentNullException.ThrowIfNull(dp);
+			dp.SetValue(PasswordProperty, value);
+		}
 		#endregion
 
 		#region Private Methods

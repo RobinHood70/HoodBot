@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
@@ -34,12 +35,13 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, StashImageInfoInput input)
 		{
+			ArgumentNullException.ThrowIfNull(request);
+			ArgumentNullException.ThrowIfNull(input);
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull().Properties)
+				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(123, StashImageProperties.CanonicalTitle | StashImageProperties.CommonMetadata | StashImageProperties.ExtMetadata)
 				.Value;
 			request
-				.NotNull()
 				.AddFlags("prop", prop)
 				.Add(this.SiteVersion < 118 ? "sessionkey" : "filekey", input.FileKeys)
 				.AddIf("urlwidth", input.UrlWidth, prop.HasAnyFlag(StashImageProperties.Url) && input.UrlWidth > 0)
@@ -49,7 +51,7 @@
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			this.Output = [];
 			foreach (var item in result)
 			{

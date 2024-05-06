@@ -57,8 +57,9 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
+			ArgumentNullException.ThrowIfNull(parent);
 			var counter = -1L;
-			if (parent.NotNull()["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
+			if (parent["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
 			{
 				counter = (long)counterNode;
 			}

@@ -305,7 +305,7 @@
 		public void TryAddRange(int defaultNamespace, IEnumerable<string> titles)
 		{
 			ArgumentNullException.ThrowIfNull(titles);
-			foreach (var title in titles.NotNull())
+			foreach (var title in titles)
 			{
 				this.TryAdd(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
 			}
@@ -323,7 +323,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasAnyFlag(BacklinksTypes.ImageUsage))
@@ -363,7 +363,8 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			var originalProps = input.NotNull().Properties;
+			ArgumentNullException.ThrowIfNull(input);
+			var originalProps = input.Properties;
 			input.Properties |= CategoryMembersProperties.Title;
 			if (recurse)
 			{
@@ -560,7 +561,8 @@
 		/// <param name="pageSetInput">The pageset inputs.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
 		{
-			if (pageSetInput.NotNull().IsEmpty)
+			ArgumentNullException.ThrowIfNull(pageSetInput);
+			if (pageSetInput.IsEmpty)
 			{
 				return;
 			}
@@ -593,7 +595,7 @@
 
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{

@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -24,16 +24,16 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, ImageRotateInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.Add("rotation", (input.Rotation % 360 + 360) % 360) // Automatically adjusts negative and out-of-range values
 				.AddHidden("token", input.Token);
 		}
 
 		protected override ImageRotateItem GetItem(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			return new ImageRotateItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),

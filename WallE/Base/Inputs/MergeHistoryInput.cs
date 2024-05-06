@@ -2,27 +2,30 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	public class MergeHistoryInput
 	{
 		#region Constructors
 		public MergeHistoryInput(string from, string to)
 		{
-			this.From = from.NotNullOrWhiteSpace();
-			this.To = to.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(from);
+			ArgumentException.ThrowIfNullOrWhiteSpace(to);
+			this.From = from;
+			this.To = to;
 		}
 
 		public MergeHistoryInput(string from, long toId)
 		{
-			this.From = from.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(from);
+			this.From = from;
 			this.ToId = toId;
 		}
 
 		public MergeHistoryInput(long fromId, string to)
 		{
+			ArgumentException.ThrowIfNullOrWhiteSpace(to);
 			this.FromId = fromId;
-			this.To = to.NotNullOrWhiteSpace();
+			this.To = to;
 		}
 
 		public MergeHistoryInput(long fromId, long toId)

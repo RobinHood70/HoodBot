@@ -40,8 +40,9 @@
 
 		protected override void ParseText(ContextualParser parser)
 		{
+			ArgumentNullException.ThrowIfNull(parser);
 			var headerFound = false;
-			foreach (var header in parser.NotNull().HeaderNodes)
+			foreach (var header in parser.HeaderNodes)
 			{
 				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
 				if (string.Equals(title, "Licensing", StringComparison.Ordinal))

@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
@@ -40,7 +39,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public SearchInput(string search)
 		{
-			this.Search = search.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(search);
+			this.Search = search;
 		}
 		#endregion
 

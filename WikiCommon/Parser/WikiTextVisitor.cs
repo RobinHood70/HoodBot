@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using RobinHood70.CommonCode;
 
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
@@ -54,7 +54,8 @@
 		public string Build(IWikiNode node)
 		{
 			this.builder.Clear();
-			node.NotNull().Accept(this);
+			ArgumentNullException.ThrowIfNull(node);
+			node.Accept(this);
 			return this.builder.ToString();
 		}
 
@@ -81,7 +82,7 @@
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
-			node.ThrowNull();
+			ArgumentNullException.ThrowIfNull(node);
 			if (this.raw || node.DefaultValue == null)
 			{
 				this.builder.Append("{{{");
@@ -111,16 +112,17 @@
 		/// <inheritdoc/>
 		public void Visit(ICommentNode node)
 		{
+			ArgumentNullException.ThrowIfNull(node);
 			if (this.raw)
 			{
-				this.builder.Append(node.NotNull().Comment);
+				this.builder.Append(node.Comment);
 			}
 		}
 
 		/// <inheritdoc/>
 		public void Visit(IHeaderNode node)
 		{
-			node.ThrowNull();
+			ArgumentNullException.ThrowIfNull(node);
 			var equalsSigns = new string('=', node.Level);
 			this.builder.Append(equalsSigns);
 			node.Title.Accept(this);
@@ -131,47 +133,46 @@
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
+			ArgumentNullException.ThrowIfNull(node);
 			if (this.raw)
 			{
-				this.builder.Append(node.NotNull().Value);
+				this.builder.Append(node.Value);
 			}
 		}
 
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			if (node != null)
+			ArgumentNullException.ThrowIfNull(node);
+			if (this.raw)
 			{
-				if (this.raw)
+				this.builder.Append("[[");
+				node.Title.Accept(this);
+				foreach (var param in node.Parameters)
 				{
-					this.builder.Append("[[");
-					node.NotNull().Title.Accept(this);
-					foreach (var param in node.Parameters)
-					{
-						param.Accept(this);
-					}
+					param.Accept(this);
+				}
 
-					this.builder.Append("]]");
+				this.builder.Append("]]");
+			}
+			else
+			{
+				if (node.Parameters.Count > 0)
+				{
+					foreach (var parameter in node.Parameters)
+					{
+						if (parameter.Name is not null)
+						{
+							parameter.Name.Accept(this);
+							this.builder.Append('=');
+						}
+
+						parameter.Value.Accept(this);
+					}
 				}
 				else
 				{
-					if (node.Parameters.Count > 0)
-					{
-						foreach (var parameter in node.Parameters)
-						{
-							if (parameter.Name is not null)
-							{
-								parameter.Name.Accept(this);
-								this.builder.Append('=');
-							}
-
-							parameter.Value.Accept(this);
-						}
-					}
-					else
-					{
-						node.Title.Accept(this);
-					}
+					node.Title.Accept(this);
 				}
 			}
 		}
@@ -179,7 +180,8 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			foreach (var node in nodes.NotNull())
+			ArgumentNullException.ThrowIfNull(nodes);
+			foreach (var node in nodes)
 			{
 				node.Accept(this);
 			}
@@ -188,8 +190,8 @@
 		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
+			ArgumentNullException.ThrowIfNull(node);
 			this.builder.Append('|');
-			node.ThrowNull();
 			if (node.Name is not null)
 			{
 				node.Name.Accept(this);
@@ -202,7 +204,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
-			node.ThrowNull();
+			ArgumentNullException.ThrowIfNull(node);
 			if (this.raw)
 			{
 				this.builder
@@ -228,7 +230,8 @@
 		public void Visit(ITemplateNode node)
 		{
 			this.builder.Append("{{");
-			node.NotNull().Title.Accept(this);
+			ArgumentNullException.ThrowIfNull(node);
+			node.Title.Accept(this);
 			foreach (var param in node.Parameters)
 			{
 				param.Accept(this);
@@ -238,7 +241,11 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node) => this.builder.Append(node.NotNull().Text);
+		public void Visit(ITextNode node)
+		{
+			ArgumentNullException.ThrowIfNull(node);
+			this.builder.Append(node.Text);
+		}
 		#endregion
 	}
 }

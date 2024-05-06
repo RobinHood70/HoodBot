@@ -15,8 +15,10 @@
 		/// <param name="item">The <see cref="SiteInfoInterwikiMap"/> item to initialize from.</param>
 		protected internal InterwikiEntry(Site site, SiteInfoInterwikiMap item)
 		{
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(item);
 			this.Site = site;
-			this.Language = item.NotNull().Language;
+			this.Language = item.Language;
 			this.LocalFarm = item.Flags.HasAnyFlag(InterwikiMapFlags.Local);
 			this.LocalWiki = item.Flags.HasAnyFlag(InterwikiMapFlags.LocalInterwiki);
 			this.Path = item.Url;

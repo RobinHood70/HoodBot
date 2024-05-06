@@ -65,7 +65,7 @@
 				}
 			}
 
-			this.blankText.ThrowNull();
+			this.CheckBlankText();
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 			var pages = this.GetBacklinks();
@@ -80,10 +80,10 @@
 
 		protected override void LoadPages()
 		{
-			this.blankText.ThrowNull();
+			this.CheckBlankText();
 			foreach (var collectible in this.collectibles)
 			{
-				var page = this.Site.CreatePage(collectible.Key, this.blankText);
+				var page = this.Site.CreatePage(collectible.Key, this.blankText!);
 				this.Pages.Add(page);
 				this.PageLoaded(page);
 			}
@@ -185,6 +185,14 @@
 				}
 
 				this.collectibles.Add(title, item);
+			}
+		}
+
+		private void CheckBlankText()
+		{
+			if (this.blankText is null)
+			{
+				throw new InvalidOperationException("blankText is null");
 			}
 		}
 

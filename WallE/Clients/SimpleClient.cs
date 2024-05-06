@@ -113,7 +113,7 @@ namespace RobinHood70.WallE.Clients
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
 		public bool DownloadFile(Uri uri, string? fileName)
 		{
-			uri.ThrowNull();
+			ArgumentNullException.ThrowIfNull(uri);
 			using HttpRequestMessage request = new(HttpMethod.Get, uri);
 			var maxLag = this.HonourMaxLag;
 			this.HonourMaxLag = false;

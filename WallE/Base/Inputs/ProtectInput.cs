@@ -1,15 +1,16 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 
 	public class ProtectInput
 	{
 		#region Constructors
 		public ProtectInput(string title)
 		{
-			this.Title = title.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(title);
+			this.Title = title;
 		}
 
 		public ProtectInput(long pageId)

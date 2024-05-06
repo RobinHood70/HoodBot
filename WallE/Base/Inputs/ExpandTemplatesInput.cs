@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.CommonCode;
 
 	[Flags]
 	public enum ExpandTemplatesProperties
@@ -25,7 +24,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public ExpandTemplatesInput(string text)
 		{
-			this.Text = text.NotNullOrWhiteSpace();
+			ArgumentException.ThrowIfNullOrWhiteSpace(text);
+			this.Text = text;
 		}
 		#endregion
 

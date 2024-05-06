@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
@@ -17,7 +18,7 @@
 		protected internal Contribution(Site site, UserContributionsItem contribution)
 			: base(contribution)
 		{
-			contribution.ThrowNull();
+			ArgumentNullException.ThrowIfNull(contribution);
 			this.Title = TitleFactory.CoValidate(site, contribution.Namespace, contribution.Title ?? string.Empty);
 			this.New = contribution.Flags.HasAnyFlag(UserContributionFlags.New);
 			this.Patrolled = contribution.Flags.HasAnyFlag(UserContributionFlags.Patrolled);

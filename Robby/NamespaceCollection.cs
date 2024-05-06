@@ -4,7 +4,6 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
@@ -25,7 +24,7 @@
 		internal NamespaceCollection(Site site, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases)
 		{
 			// From Language->getNsIndeix(), creates a case-insensitive comparer for the wiki's culture.
-			var comparer = StringComparer.Create(site.NotNull().Culture, true);
+			var comparer = StringComparer.Create(site.Culture, true);
 
 			// NamespaceAliases
 			Dictionary<int, HashSet<string>> aliasesById = [];

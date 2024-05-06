@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -29,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, OpenSearchInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.Add("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.AddIfPositive("limit", input.Limit)
@@ -42,7 +41,7 @@
 
 		protected override IReadOnlyList<OpenSearchItem> DeserializeCustom(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 
 			// 0th term is the search term, so we ignore that.
 			if (result is JArray array)

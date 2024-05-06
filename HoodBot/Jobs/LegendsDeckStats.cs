@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -34,8 +33,9 @@
 
 		protected override void ParseText(ContextualParser parser)
 		{
+			ArgumentNullException.ThrowIfNull(parser);
 			SortedDictionary<int, int> powerCount = [];
-			if (parser.NotNull().FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
+			if (parser.FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}

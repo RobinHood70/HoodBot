@@ -63,7 +63,7 @@
 			{
 				if (galleryNode.InnerText is not null)
 				{
-					var ns = factory.NotNull().Site[MediaWikiNamespaces.File];
+					var ns = factory.Site[MediaWikiNamespaces.File];
 					var lines = galleryNode.InnerText.Split(TextArrays.LineFeed);
 					var newLines = new List<string>();
 					foreach (var line in lines)

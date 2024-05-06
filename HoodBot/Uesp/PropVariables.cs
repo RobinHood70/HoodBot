@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Eve.Modules;
@@ -36,8 +36,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, VariablesInput input)
 		{
-			input.ThrowNull();
-			request.NotNull()
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
+			request
 				.Add("var", input.Variables)
 				.Add("set", input.Sets)
 				.Add("limit", this.Limit);
@@ -45,7 +46,8 @@
 
 		protected override VariableItem GetItem(JToken result)
 		{
-			var vars = result.NotNull()["vars"].GetStringDictionary<string>();
+			ArgumentNullException.ThrowIfNull(result);
+			var vars = result["vars"].GetStringDictionary<string>();
 			var set = (string?)result["set"];
 			return new VariableItem(vars, set);
 		}

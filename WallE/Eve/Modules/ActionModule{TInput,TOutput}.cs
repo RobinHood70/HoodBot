@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -60,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private Request CreateRequest(TInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			this.BuildRequestLocal(request, input);
@@ -71,7 +70,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private TOutput ParseResponse(string? response)
 		{
-			response.ThrowNull();
+			ArgumentNullException.ThrowIfNull(response);
 			if (this.ForceCustomDeserialization)
 			{
 				return this.DeserializeCustom(response);

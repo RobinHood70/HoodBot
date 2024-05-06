@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
@@ -28,14 +28,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TokensInput input)
 		{
-			input.ThrowNull();
-			request
-				.NotNull().Add("type", input.Types);
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
+			request.Add("type", input.Types);
 		}
 
 		protected override IReadOnlyDictionary<string, string> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			return result.GetStringDictionary<string>();
 		}
 		#endregion

@@ -5,7 +5,6 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -51,9 +50,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoryMembersInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			request
-				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.AddFlags("prop", input.Properties)
@@ -74,7 +73,7 @@
 
 		protected override CategoryMembersItem GetItem(JToken result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			var typeText = (string?)result["type"];
 			if (typeText == null || !TypeLookup.TryGetValue(typeText, out var itemType))
 			{

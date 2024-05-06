@@ -25,7 +25,7 @@
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		public PageCollection(Site site)
-			: this(site, site.NotNull().DefaultLoadOptions)
+			: this(site, options: null)
 		{
 		}
 
@@ -48,11 +48,12 @@
 
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
-		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
-		public PageCollection(Site site, PageLoadOptions options)
+		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options. If set to <see langword="null"/>, the site's DefaultLoadOptions will be used.</param>
+		public PageCollection(Site site, PageLoadOptions? options)
 			: base(site)
 		{
-			this.LoadOptions = options ?? site.NotNull().DefaultLoadOptions;
+			ArgumentNullException.ThrowIfNull(site);
+			this.LoadOptions = options ?? site.DefaultLoadOptions;
 			this.pageCreator = this.LoadOptions.PageCreator;
 		}
 
@@ -63,7 +64,8 @@
 		public PageCollection(Site site, IPageSetResult result)
 			: this(site)
 		{
-			this.PopulateMapCollections(result.NotNull());
+			ArgumentNullException.ThrowIfNull(result);
+			this.PopulateMapCollections(result);
 		}
 		#endregion
 
@@ -161,10 +163,11 @@
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
 		public static PageCollection Purge(Site site, PurgeInput input)
 		{
+			ArgumentNullException.ThrowIfNull(site);
 			var retval = UnlimitedDefault(site);
-			if (site.NotNull().EditingEnabled)
+			if (site.EditingEnabled)
 			{
-				var result = site.NotNull().AbstractionLayer.Purge(input);
+				var result = site.AbstractionLayer.Purge(input);
 				retval.PopulateMapCollections(result);
 				foreach (var item in result)
 				{
@@ -184,7 +187,7 @@
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
 		public static PageCollection Purge(Site site, IEnumerable<Title> titles, PurgeMethod method, int batchSize)
 		{
-			titles.ThrowNull();
+			ArgumentNullException.ThrowIfNull(titles);
 			var retval = UnlimitedDefault(site);
 			var subTitles = new List<string>();
 			foreach (var title in titles)
@@ -240,7 +243,8 @@
 		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
 		public static PageCollection Watch(Site site, WatchInput input)
 		{
-			var result = site.NotNull().AbstractionLayer.Watch(input);
+			ArgumentNullException.ThrowIfNull(site);
+			var result = site.AbstractionLayer.Watch(input);
 			PageCollection retval = new(site, result);
 			foreach (var item in result)
 			{
@@ -279,7 +283,7 @@
 		public void CreateRange(IEnumerable<Title> titles, string text)
 		{
 			ArgumentNullException.ThrowIfNull(titles);
-			foreach (var title in titles.NotNull())
+			foreach (var title in titles)
 			{
 				this.Create(title, text ?? string.Empty);
 			}
@@ -325,7 +329,7 @@
 		/// <param name="other">The PageCollection to merge with.</param>
 		public void MergeWith(PageCollection other)
 		{
-			other.ThrowNull();
+			ArgumentNullException.ThrowIfNull(other);
 			this.AddRange(other);
 			foreach (var entry in other.TitleMap)
 			{
@@ -375,7 +379,7 @@
 		#region Internal Methods
 		internal void PopulateMapCollections(IPageSetResult result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			foreach (var item in result.Interwiki)
 			{
 				FullTitle title = TitleFactory.FromUnvalidated(this.Site, item.Value.Title);
@@ -413,7 +417,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasAnyFlag(BacklinksTypes.ImageUsage))
@@ -442,7 +446,7 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
 			if (recurse)
 			{
 				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
@@ -577,12 +581,13 @@
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
-			if (pageSetInput.NotNull().IsEmpty)
+			ArgumentNullException.ThrowIfNull(pageSetInput);
+			if (pageSetInput.IsEmpty)
 			{
 				return;
 			}
 
-			pageValidator.ThrowNull();
+			ArgumentNullException.ThrowIfNull(pageValidator);
 			var options = this.LoadOptions;
 			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;

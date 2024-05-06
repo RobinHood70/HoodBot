@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -92,7 +91,7 @@
 
 		public void ReplaceAll(Page page, SiteTemplateNode template)
 		{
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(template);
 			foreach (var action in this.generalReplacers)
 			{
 				action(page, template);
@@ -128,8 +127,8 @@
 
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
-			page.ThrowNull();
-			template.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
+			ArgumentNullException.ThrowIfNull(template);
 			if ((template.Find(1) ?? template.Find("link")) is not IParameterNode link)
 			{
 				return;
@@ -270,7 +269,7 @@
 		#region Private Methods
 		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
-			page.ThrowNull();
+			ArgumentNullException.ThrowIfNull(page);
 			if (param != null
 				&& TitleFactory.FromUnvalidated(page.Site, param.Value.ToValue()) is var from
 				&& this.globalUpdates.TryGetValue(from, out var to))

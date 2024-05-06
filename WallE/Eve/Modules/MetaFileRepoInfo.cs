@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -34,9 +33,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileRepositoryInfoInput input)
 		{
-			input.ThrowNull();
-			request
-				.NotNull().Add("prop", input.Properties);
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
+			request.Add("prop", input.Properties);
 		}
 
 		protected override FileRepositoryInfoItem? GetItem(JToken result)

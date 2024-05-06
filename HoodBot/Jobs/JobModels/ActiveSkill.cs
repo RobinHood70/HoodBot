@@ -30,7 +30,7 @@
 		#region Public Override Methods
 		public override void AddData(IDataRecord row)
 		{
-			row.ThrowNull();
+			ArgumentNullException.ThrowIfNull(row);
 			var morphNum = (sbyte)row["morph"];
 			if (morphNum >= this.morphs.Count)
 			{
@@ -101,9 +101,11 @@
 		#region Protected Override Methods
 		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
 		{
+			ArgumentNullException.ThrowIfNull(factory);
+			ArgumentNullException.ThrowIfNull(template);
 			var baseMorph = this.morphs[0];
 			var baseRank = baseMorph.Ranks[^1];
-			UpdateParameter(factory, template.NotNull(), "id", baseRank.Id.ToStringInvariant());
+			UpdateParameter(factory, template, "id", baseRank.Id.ToStringInvariant());
 			var (valueText, mechanicText) = baseRank.GetCostSplit();
 			var baseSkillCost = mechanicText.Length == 0
 				? valueText

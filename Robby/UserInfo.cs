@@ -23,7 +23,9 @@
 		/// <param name="userItem">The API user information.</param>
 		public UserInfo(Site site, AllUsersItem userItem)
 		{
-			User user = new(site, userItem.NotNull().Name);
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(userItem);
+			User user = new(site, userItem.Name);
 			var by = userItem.BlockedBy == null ? null : new User(site, userItem.BlockedBy);
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
@@ -49,7 +51,9 @@
 		/// <param name="userItem">The API user information.</param>
 		public UserInfo(Site site, UsersItem userItem)
 		{
-			User user = new(site, userItem.NotNull().Name);
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(userItem);
+			User user = new(site, userItem.Name);
 			var by = userItem.BlockedBy == null ? null : new User(site, userItem.BlockedBy);
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);

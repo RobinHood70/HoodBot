@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -32,7 +32,8 @@
 		{
 			List<string> protections = [];
 			List<string> expiry = [];
-			input.ThrowNull();
+			ArgumentNullException.ThrowIfNull(input);
+			ArgumentNullException.ThrowIfNull(request);
 			if (input.Protections != null)
 			{
 				foreach (var protection in input.Protections)
@@ -44,7 +45,6 @@
 			}
 
 			request
-				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.Add("protections", protections)
@@ -59,7 +59,7 @@
 
 		protected override ProtectResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull();
+			ArgumentNullException.ThrowIfNull(result);
 			List<ProtectResultItem> protections = [];
 			if (result["protections"] is JToken protectionsNode)
 			{

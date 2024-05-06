@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
@@ -31,9 +30,8 @@
 		protected override void BuildRequestLocal(Request request, NullObject input)
 		{
 			// Custom request which doesn't honour format parameter; remove that one and those that cause warnings.
-			request
-				.NotNull()
-				.Remove("format");
+			ArgumentNullException.ThrowIfNull(request);
+			request.Remove("format");
 			request.Remove("formatversion");
 			request.Remove("utf8");
 		}
