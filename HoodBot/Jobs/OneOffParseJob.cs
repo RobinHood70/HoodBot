@@ -1,14 +1,16 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
+	using System.Diagnostics;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	[method: JobInfo("One-Off Parse Job")]
 	public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Public Override Properties
-		public override string LogDetails => "Add Planet Navbox";
+		public override string LogDetails => "You should never see this";
 
 		public override string LogName => "One-Off Parse Job";
 		#endregion
@@ -18,25 +20,23 @@
 
 		protected override void LoadPages()
 		{
-			this.Shuffle = true;
-			this.Pages.GetBacklinks("Template:Planet Infobox", BacklinksTypes.EmbeddedIn, true);
+			this.Pages.GetCategoryMembers("Online-Empty NPC Pages");
 		}
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			if (parser.FindSiteTemplate("Planet Navbox") is not null)
+			if (parser.FindSiteTemplate("Online NPC Summary") is not SiteTemplateNode template)
 			{
-				return;
+				throw new InvalidOperationException();
 			}
 
-			var loc = parser.FindLastIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
-			if (loc == -1)
+			var templateText = WikiTextVisitor.Raw(template);
+			if (templateText.Contains("Northern Elsweyr", StringComparison.OrdinalIgnoreCase) ||
+				templateText.Contains("Scrivener's Hall", StringComparison.OrdinalIgnoreCase) ||
+				templateText.Contains("Southern Elsweyr", StringComparison.OrdinalIgnoreCase))
 			{
-				parser.AddText("\n\n{{Planet Navbox}}");
-				return;
+				Debug.WriteLine(parser.Page.Title.FullPageName());
 			}
-
-			parser.InsertText(loc, "{{Planet Navbox}}\n");
 		}
 		#endregion
 	}
