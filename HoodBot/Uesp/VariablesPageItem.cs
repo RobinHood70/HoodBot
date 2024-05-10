@@ -5,8 +5,12 @@
 
 	public class VariablesPageItem(int ns, string title, long pageId, PageFlags flags) : PageItem(ns, title, pageId, flags)
 	{
+		#region Fields
+		private readonly List<VariableItem> variables = [];
+		#endregion
+
 		#region Public Properties
-		public IReadOnlyList<VariableItem> Variables { get; private set; } = [];
+		public IReadOnlyList<VariableItem> Variables => this.variables;
 		#endregion
 
 		#region Public Override Methods
@@ -14,7 +18,7 @@
 		{
 			if (output is VariablesResult result)
 			{
-				this.Variables = result;
+				this.variables.AddRange(result);
 			}
 		}
 		#endregion

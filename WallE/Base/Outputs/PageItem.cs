@@ -99,63 +99,63 @@ namespace RobinHood70.WallE.Base
 			switch (output)
 			{
 				case CategoriesResult result:
-					this.categories = result;
+					this.categories.AddRange(result);
 					break;
 				case CategoryInfoResult result:
 					this.CategoryInfo = result;
 					break;
 				case ContributorsResult result:
 					this.AnonContributors = result.AnonymousContributors;
-					this.contributors = [.. result];
+					this.contributors.AddRange(result);
 					break;
 				case DuplicateFilesResult result:
-					this.duplicateFiles = result;
+					this.duplicateFiles.AddRange(result);
 					break;
 				case ExternalLinksResult result:
-					this.externalLinks = result;
+					this.externalLinks.AddRange(result);
 					break;
 				case FileUsageResult result:
-					this.fileUsages = result;
+					this.fileUsages.AddRange(result);
 					break;
 				case ImageInfoResult result:
 					this.ImageRepository = result.Repository;
-					this.imageInfoEntries = result;
+					this.imageInfoEntries.AddRange(result);
 					break;
 				case ImagesResult result:
-					this.images = result;
+					this.images.AddRange(result);
 					break;
 				case InterwikiLinksResult result:
-					this.interwikiLinks = result;
+					this.interwikiLinks.AddRange(result);
 					break;
 				case LanguageLinksResult result:
-					this.languageLinks = result;
+					this.languageLinks.AddRange(result);
 					break;
 				case LinksHereResult result:
-					this.linksHere = result;
+					this.linksHere.AddRange(result);
 					break;
 				case LinksResult result:
-					this.links = result;
+					this.links.AddRange(result);
 					break;
 				case PageInfo result:
 					this.Info = result;
 					break;
 				case PagePropertiesResult result:
-					this.properties = result;
+					this.properties.AddRange(result);
 					break;
 				case PropDeletedRevisionsResult result:
-					this.deletedRevisions = result;
+					this.deletedRevisions.AddRange(result);
 					break;
 				case RedirectsResult result:
-					this.redirects = result;
+					this.redirects.AddRange(result);
 					break;
 				case RevisionsResult result:
-					this.revisions = result;
+					this.revisions.AddRange(result);
 					break;
 				case TemplatesResult result:
-					this.templates = result;
+					this.templates.AddRange(result);
 					break;
 				case TranscludedInResult result:
-					this.transcludedIn = result;
+					this.transcludedIn.AddRange(result);
 					break;
 				default:
 					this.ParseCustomResult(output);
