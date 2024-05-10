@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Diagnostics;
 	using System.IO;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
 
 	[method: JobInfo("One-Off Job")]
 	internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
@@ -10,15 +10,17 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			File.Delete("D:\\AllBooks.txt");
-			var books = new PageCollection(this.Site, PageModules.Info | PageModules.Revisions | PageModules.Properties);
-			books.GetCategoryMembers("Lore-Books");
-			foreach (var book in books)
+			var lines = File.ReadAllLines(@"D:\CreationCheck.txt");
+			foreach (var fullPageName in lines)
 			{
-				if (!book.IsRedirect && (!book.IsDisambiguation ?? false))
+				var input = new LogEventsInput(fullPageName);
+				var logs = this.Site.AbstractionLayer.LogEvents(input);
+				foreach (var logEvent in logs)
 				{
-					var bookText = $"= {book.Title.PageName} =\n" + book.Text + "\n\n\n";
-					File.AppendAllText("D:\\AllBooks.txt", bookText);
+					if (!string.Equals(logEvent.LogAction, "autopatrol", System.StringComparison.OrdinalIgnoreCase))
+					{
+						Debug.WriteLine($"{logEvent.LogAction}: {logEvent.Timestamp} - {fullPageName}");
+					}
 				}
 			}
 		}
