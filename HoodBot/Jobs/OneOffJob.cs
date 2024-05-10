@@ -1,27 +1,22 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics;
-	using System.IO;
-	using RobinHood70.WallE.Base;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	[method: JobInfo("One-Off Job")]
-	internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
+	internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var lines = File.ReadAllLines(@"D:\CreationCheck.txt");
-			foreach (var fullPageName in lines)
+			var titles = new TitleCollection(this.Site, "User:Alpha Kenny Buddy/Sandbox1");
+			var pages = titles.Load(PageModules.Links);
+			var links = pages[0].Links;
+			this.ProgressMaximum = links.Count;
+			foreach (var link in links)
 			{
-				var input = new LogEventsInput(fullPageName);
-				var logs = this.Site.AbstractionLayer.LogEvents(input);
-				foreach (var logEvent in logs)
-				{
-					if (!string.Equals(logEvent.LogAction, "autopatrol", System.StringComparison.OrdinalIgnoreCase))
-					{
-						Debug.WriteLine($"{logEvent.LogAction}: {logEvent.Timestamp} - {fullPageName}");
-					}
-				}
+				link.Delete("User-created name from mod");
+				this.Progress++;
 			}
 		}
 		#endregion
