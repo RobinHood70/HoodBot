@@ -3,12 +3,11 @@
 	using System;
 	using System.CodeDom.Compiler;
 	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 
 	[method: JobInfo("Castles Rulings", "|Castles")]
@@ -17,55 +16,40 @@
 		#region Private Constants
 		private const string CommaSpace = ", ";
 		private const string NotFound = " - NOT FOUND!!!";
-		private const string Language = "en-US";
-		private const string SpaceSlash = " / ";
 		#endregion
 
 		#region Static Fields
-		private static readonly char[] CurlyBraces = ['{', '}'];
-		private static readonly CultureInfo GameCulture = new(Language);
+		private static readonly CultureInfo GameCulture = new("en-US");
+		private readonly static string[] PropGroupSummaries = ["Kitchen", "Oil Press", "Smelter", "Loom", "Mill", "Workshop", "Sewing Table", "Smithy", "Bookshelf", "Music Station", "Art Studio", "Buffet", "Bath", "Throne", "Bed", "War Table", "Decoration", "Shrine of Mara", "Dragon Lair", string.Empty, "Gauntlet"];
+		private readonly static string[] Races = ["Argonian", "Breton", "Dark Elf", "High Elf", "Imperial", "Khajiit", "Nord", "Orc", "Redguard", "Wood Elf"];
+		private readonly static string[] RulingsGroupNames = ["_requiredRulings", "_randomRulings", "_personalRulings", "_instantRulings", "_rewardRulings"];
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<int, string> archetypes = [];
-		// private readonly Dictionary<int, string> eventReports = [];
 		private readonly Dictionary<int, string> groups = [];
-		private readonly Dictionary<string, string> language = new(StringComparer.Ordinal);
 		private readonly List<string>[] propGroups = new List<string>[21];
-		private readonly string[] propGroupSummaries = ["Kitchen", "Oil Press", "Smelter", "Loom", "Mill", "Workshop", "Sewing Table", "Smithy", "Bookshelf", "Music Station", "Art Studio", "Buffet", "Bath", "Throne", "Bed", "War Table", "Decoration", "Shrine of Mara", "Dragon Lair", string.Empty, "Gauntlet"];
 		private readonly Dictionary<int, string> propData = [];
 		private readonly Dictionary<int, string> quests = [];
 		private readonly Dictionary<int, string> rulingFlags = [];
-		private readonly Dictionary<string, dynamic> rulingsGroups = [];
-		private readonly string[] rulingsGroupNames = ["_requiredRulings", "_randomRulings", "_personalRulings", "_instantRulings", "_rewardRulings"];
-		private readonly string[] races = ["Argonian", "Breton", "Dark Elf", "High Elf", "Imperial", "Khajiit", "Nord", "Orc", "Redguard", "Wood Elf"];
-		private readonly Dictionary<string, string> sentences = new(StringComparer.Ordinal);
 		private readonly Dictionary<int, string> tags = [];
 		private readonly Dictionary<int, string> taskPools = [];
-		private readonly Dictionary<string, string[]> terms = new(StringComparer.Ordinal);
 		private readonly Dictionary<int, string> traits = [];
-		private readonly Dictionary<string, string[]> variations = new(StringComparer.Ordinal);
+		private readonly CastlesTranslator translator = new(GameCulture);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			this.LoadLanguageDatabase(Language);
-			this.LoadSentences(Language);
-			this.LoadTerms(Language);
-			this.LoadVariations(Language);
-
-			// this.LoadEventReports();
 			this.LoadGroups();
 			this.LoadPropData();
 			this.LoadQuests();
-			this.LoadRulingGroups();
 			this.LoadSubjectArchetypes();
 			this.LoadTags();
 			this.LoadTaskPools();
 			this.LoadTraits();
 
-			this.WriteFile(@"D:\Castles\Rulings.txt");
+			this.ConvertGroups(@"D:\Castles\Rulings.txt");
 		}
 
 		protected override string GetEditSummary(Page page) => "Update rulings";
@@ -153,25 +137,6 @@
 			}
 
 			return true;
-		}
-
-		private static List<string> GetPersonal(ParseInfo parseInfo)
-		{
-			var value = parseInfo.Id switch
-			{
-				"name.given" => "First Name",
-				"name.family" => "Family Name",
-				_ => null,
-			};
-
-			if (value is null)
-			{
-				Debug.WriteLine("Personal not found: " + parseInfo.OriginalText);
-				value = parseInfo.Id;
-			}
-
-			value = $"<{parseInfo.Target}'s {value}>";
-			return [value];
 		}
 
 		private static string? GetRelationshipConditions(string intro, dynamic relationships)
@@ -491,17 +456,6 @@
 			return intro + string.Join(CommaSpace, list);
 		}
 
-		private bool GetLanguageEntry(string id, [NotNullWhen(true)] out string? result)
-		{
-			var retval = this.language.TryGetValue(id, out result);
-			if (!retval)
-			{
-				Debug.WriteLine("Language entry not found: " + id);
-			}
-
-			return retval;
-		}
-
 		private string? GetPropConditions(string intro, dynamic items)
 		{
 			if (items.Count == 0)
@@ -514,7 +468,7 @@
 			{
 				var id = (int)item._propUid._uid.id;
 				var text = id == 0
-					? "any " + this.propGroupSummaries[(int)item._anyOfPropsInGroup]
+					? "any " + PropGroupSummaries[(int)item._anyOfPropsInGroup]
 					: this.propData[id];
 				var condition = item._condition == 0 ? "not " : string.Empty;
 				list.Add(condition + text);
@@ -553,7 +507,7 @@
 			foreach (var item in items)
 			{
 				var id = (int)item._race;
-				var text = this.races[id];
+				var text = Races[id];
 				list.Add(text);
 			}
 
@@ -583,19 +537,6 @@
 			return intro + ": " + string.Join(CommaSpace, flagList);
 		}
 
-		private bool GetSentence(string id, bool root, [NotNullWhen(true)] out string? value)
-		{
-			_ = this.sentences.TryGetValue(id, out value);
-			if (value is not null)
-			{
-				value = this.Parse(value, root);
-				return true;
-			}
-
-			Debug.WriteLine("Sentence not found: " + id);
-			return false;
-		}
-
 		private string? GetTaskPools(string intro, dynamic item)
 		{
 			var id = (int)item._uid.id;
@@ -606,38 +547,6 @@
 
 			var text = this.taskPools[id];
 			return intro + text;
-		}
-
-		private List<string>? GetTerm(ParseInfo parseInfo) => this.GetTerm(parseInfo, parseInfo.Id);
-
-		private List<string>? GetTerm(ParseInfo parseInfo, string id)
-		{
-			_ = this.terms.TryGetValue(id, out var term);
-			if (term is null)
-			{
-				Debug.WriteLine($"Term not found: {id} from {parseInfo.OriginalText}");
-				return null;
-			}
-
-			bool[] include =
-			[
-				parseInfo.Male != false && parseInfo.Singular != false,
-				parseInfo.Male != false && parseInfo.Singular != true,
-				parseInfo.Male != true && parseInfo.Singular != false,
-				parseInfo.Male != true && parseInfo.Singular != true,
-			];
-
-			var list = new List<string>();
-			for (var i = 0; i < 4; i++)
-			{
-				var subTerm = term[i];
-				if (include[i] && !list.Contains(subTerm, StringComparer.Ordinal))
-				{
-					list.Add(term[i]);
-				}
-			}
-
-			return list;
 		}
 
 		private string? GetTraits(string intro, dynamic items)
@@ -659,42 +568,6 @@
 			return intro + string.Join(CommaSpace, list);
 		}
 
-		private List<string>? GetVariations(ParseInfo parseInfo)
-		{
-			if (!this.variations.TryGetValue(parseInfo.Id, out var variations))
-			{
-				return null;
-			}
-
-			var retval = new List<string>();
-			if (parseInfo.Sentence)
-			{
-				foreach (var variation in variations)
-				{
-					if (this.GetSentence(variation, false, out var value))
-					{
-						retval.Add(value);
-					}
-				}
-			}
-			else if (parseInfo.Term)
-			{
-				foreach (var variation in variations)
-				{
-					if (this.GetTerm(parseInfo, variation) is List<string> value)
-					{
-						retval.AddRange(value);
-					}
-				}
-			}
-			else
-			{
-				Debug.WriteLine("Unknown variation type: " + parseInfo.OriginalText);
-			}
-
-			return retval;
-		}
-
 		private void LoadGroups()
 		{
 			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\GroupDataDefault2.json");
@@ -707,7 +580,7 @@
 				{
 					var id = (int)item._groupUid.id;
 					var title = (string)item._displayName;
-					if (this.GetLanguageEntry(title, out var desc))
+					if (this.translator.GetLanguageEntry(title) is string desc)
 					{
 						this.groups.Add(id, desc);
 					}
@@ -729,7 +602,7 @@
 			{
 				var id = (int)item._propUid.id;
 				var title = (string)item._displayName;
-				if (this.GetLanguageEntry(title, out var desc))
+				if (this.translator.GetLanguageEntry(title) is string desc)
 				{
 					this.propData.Add(id, desc);
 					var group = (int)item._propGroupData._propGroup;
@@ -739,34 +612,34 @@
 			}
 		}
 
-		/*
-		private void LoadEventReports()
-		{
-			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@"D:\Castles\MonoBehaviour\ReportEntriesDataDefault2.json")) ?? throw new InvalidOperationException();
-			foreach (var item in obj._castleWideEventReportEntries)
-			{
-				var id = (int)item._eventUid._uid.id;
-				var title = (string)item._reportMessage;
-				var desc = this.translations[title];
-				this.eventReports.TryAdd(id, desc); // TryAdd due to identical duplicate entry
-			}
-		}
-		*/
-
-		private void LoadRulingGroups()
+		private void ConvertGroups(string fileName)
 		{
 			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@"D:\Castles\MonoBehaviour\RulingsDefault2.json")) ?? throw new InvalidOperationException();
-			foreach (var item in obj._rulingFlagDefinitions)
+			var items = obj._rulingFlagDefinitions;
+			foreach (var item in items)
 			{
 				var id = (int)item._rulingFlagUid.id;
 				var name = (string)item._expressionName;
 				this.rulingFlags.Add(id, name);
 			}
 
-			foreach (var rulingsGroupName in this.rulingsGroupNames)
+			using var baseStream = File.CreateText(fileName);
+			using var stream = new IndentedTextWriter(baseStream);
+			foreach (var rulingsGroupName in RulingsGroupNames)
 			{
-				this.rulingsGroups.Add(rulingsGroupName, obj[rulingsGroupName]);
+				var group = obj[rulingsGroupName];
+				stream.WriteLine(rulingsGroupName);
+				stream.Indent++;
+				foreach (var ruling in group)
+				{
+					this.WriteRuling(stream, ruling);
+				}
+
+				stream.Indent--;
 			}
+
+			stream.Close();
+			baseStream.Close();
 		}
 
 		private void LoadQuests()
@@ -778,11 +651,7 @@
 			{
 				var id = (int)item._questUid.id;
 				var title = (string)item._nameLocalizationKey;
-				if (!this.language.TryGetValue(title, out var desc))
-				{
-					desc = title + NotFound;
-				}
-
+				var desc = this.translator.GetLanguageEntry(title) ?? (title + NotFound);
 				this.quests.Add(id, desc);
 			}
 		}
@@ -794,18 +663,19 @@
 			var items = obj._subjectArchetypesList;
 			foreach (var item in items)
 			{
+				// Not all names are language entries, so warnings coming from this function are normal.
 				var id = (int)item._subjectArchetypeUid.id;
 				var firstName = (string)item._firstname;
-				if (firstName.Length > 0 && this.language.TryGetValue(firstName, out var translation))
+				if (firstName.Length > 0 && this.translator.GetLanguageEntry(firstName) is string translationFirst)
 				{
-					firstName = translation;
+					firstName = translationFirst;
 				}
 
 				var lastName = (string)item._lastname;
 				lastName = lastName.Replace("\u200B", string.Empty, StringComparison.Ordinal);
-				if (lastName.Length > 0 && this.language.TryGetValue(lastName, out translation))
+				if (lastName.Length > 0 && this.translator.GetLanguageEntry(lastName) is string translationLast)
 				{
-					lastName = translation;
+					lastName = translationLast;
 				}
 
 				if (firstName.Length > 0 && lastName.Length > 0)
@@ -839,8 +709,10 @@
 			{
 				var id = (int)item._taskPoolUid.id;
 				var title = (string)item._name;
-				var desc = this.language[title];
-				this.taskPools.Add(id, desc);
+				if (this.translator.GetLanguageEntry(title) is string desc)
+				{
+					this.taskPools.Add(id, desc);
+				}
 			}
 		}
 
@@ -856,146 +728,23 @@
 				{
 					var id = (int)item._traitUid.id;
 					var title = (string)item._title;
-					var desc = this.language[title];
-					this.traits.Add(id, desc);
+					if (this.translator.GetLanguageEntry(title) is string desc)
+					{
+						this.traits.Add(id, desc);
+					}
 				}
 			}
-		}
-
-		private void LoadSentences(string language)
-		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\sentences_{language}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
-			foreach (var item in items)
-			{
-				this.sentences.Add((string)item._referenceId, (string)item._data);
-			}
-		}
-
-		private void LoadTerms(string language)
-		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\terms_{language}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
-			foreach (var item in items)
-			{
-				var data = (string)item._data;
-				var split = data.Split(TextArrays.Pipe);
-				this.terms.Add((string)item._referenceId, split);
-			}
-		}
-
-		private void LoadLanguageDatabase(string language)
-		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\LanguageDatabase_Gameplay_{language}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj.entries;
-			foreach (var item in items)
-			{
-				this.language.TryAdd((string)item.key, (string)item.entry);
-			}
-		}
-
-		private void LoadVariations(string language)
-		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\variations_{language}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
-			foreach (var item in items)
-			{
-				var data = (string)item._data;
-				var split = data.Split(TextArrays.Comma);
-				var varList = new List<string>(split.Length);
-				foreach (var id in split)
-				{
-					// Square breackets appear to indicate randomness weight.
-					var stripped = id.Split('[', 2)[0];
-					varList.Add(stripped);
-				}
-
-				this.variations.Add((string)item._referenceId, [.. varList]);
-			}
-		}
-
-		private string Parse(string input, bool root)
-		{
-			var braceSplit = input.Split(CurlyBraces);
-
-			// Check parentheses before we start modifying braceSplit
-			for (var braceIndex = 1; braceIndex < braceSplit.Length; braceIndex += 2)
-			{
-				var parentheses = braceSplit.Length > 3 || braceSplit[braceIndex - 1].Length > 0 || (braceIndex + 1 < braceSplit.Length && braceSplit[braceIndex + 1].Length > 0);
-				var parseInfo = new ParseInfo(braceSplit[braceIndex]);
-				if (parseInfo.Id.Length > 0)
-				{
-					var list =
-						parseInfo.Variation ? this.GetVariations(parseInfo) :
-						parseInfo.Term ? this.GetTerm(parseInfo) :
-						parseInfo.Personal ? GetPersonal(parseInfo) :
-						["Unknown type: " + parseInfo.OriginalText];
-					if (list is null || list.Count == 0)
-					{
-						list = [parseInfo.BracedId];
-					}
-					else
-					{
-						for (var listIndex = list.Count - 1; listIndex >= 0; listIndex--)
-						{
-							if (list[listIndex].Length == 0)
-							{
-								list.RemoveAt(listIndex);
-							}
-						}
-					}
-
-					var sep = (root && braceSplit.Length == 3 && braceSplit[0].Length == 0 && braceSplit[2].Length == 0)
-						? "<newline>"
-						: SpaceSlash;
-					var newTerm = string.Join(sep, list);
-					parentheses &= list.Count > 1; // If single term, turn off parentheses
-					if (parseInfo.Parent.Length > 0)
-					{
-						newTerm = $"{parseInfo.Parent}: {newTerm}";
-						parentheses = true; // If parent exists, force parentheses on
-					}
-
-					if (parentheses && newTerm.Length > 0)
-					{
-						newTerm = '(' + newTerm + ')';
-					}
-
-					if (parseInfo.Article)
-					{
-						newTerm = "a/an " + newTerm;
-					}
-
-					braceSplit[braceIndex] = newTerm;
-				}
-				else if (parseInfo.Target.Length > 0)
-				{
-					braceSplit[braceIndex] = $"(same as {parseInfo.Target}, above)";
-				}
-			}
-
-			var retval = string.Join(string.Empty, braceSplit);
-			if (root)
-			{
-				retval = retval.UpperFirst(GameCulture, true);
-			}
-
-			return retval;
 		}
 
 		private void WriteChoice(IndentedTextWriter stream, dynamic choice)
 		{
 			var choiceId = (string)choice._rulingChoiceDescription;
-			if (!this.GetSentence(choiceId, true, out var choiceDesc))
+			if (this.translator.GetSentence(choiceId, true) is not string choiceDesc)
 			{
 				choiceDesc = choiceId + NotFound;
 			}
 
-			var parsed = this.Parse(choiceDesc, true);
+			var parsed = this.translator.Parse(choiceDesc, true);
 			var subChoices = parsed.Split("<newline>");
 			for (var subIndex = 0; subIndex < subChoices.Length; subIndex++)
 			{
@@ -1043,35 +792,15 @@
 			stream.Indent--;
 		}
 
-		private void WriteFile(string fileName)
-		{
-			using var baseStream = File.CreateText(fileName);
-			using var stream = new IndentedTextWriter(baseStream);
-			foreach (var name in this.rulingsGroupNames)
-			{
-				stream.WriteLine(name);
-				stream.Indent++;
-				foreach (var ruling in this.rulingsGroups[name])
-				{
-					this.WriteRuling(stream, ruling);
-				}
-
-				stream.Indent--;
-			}
-
-			stream.Close();
-			baseStream.Close();
-		}
-
 		private void WriteRuling(IndentedTextWriter stream, dynamic ruling)
 		{
 			var descId = (string)ruling._rulingDescription;
-			if (!this.GetSentence(descId, true, out var translated))
+			if (this.translator.GetSentence(descId, true) is not string translated)
 			{
 				translated = descId + NotFound;
 			}
 
-			var text = this.Parse(translated, false);
+			var text = this.translator.Parse(translated, false);
 			stream.WriteLine(text);
 			stream.Indent++;
 			this.WriteRulingConditions(stream, ruling);
@@ -1120,131 +849,6 @@
 					stream.WriteLine(entry);
 				}
 			}
-		}
-		#endregion
-
-		#region Private Classes
-		private class ParseInfo
-		{
-			public ParseInfo(string text)
-			{
-				text = text.Trim(CurlyBraces);
-				this.OriginalText = text;
-				var split = text.Split(TextArrays.Comma);
-				var keyword = split[0];
-				switch (keyword[0])
-				{
-					// Descriptions are guesses based on the letter and their function
-					case 'c':
-						// Child
-						break;
-					case 'm':
-						// graMmar
-						this.Term = true;
-						this.Male = keyword[2] switch
-						{
-							'f' => false,
-							'm' => true,
-							_ => null
-						};
-
-						this.Singular = keyword[3] switch
-						{
-							'p' => false,
-							's' => true,
-							_ => null
-						};
-
-						break;
-					case 'n':
-						// seNtence
-						this.Sentence = true;
-						break;
-					case 'p':
-						// Personal
-						this.Personal = true;
-						break;
-					case 's':
-						// Simple?
-						this.Term = true;
-						break;
-				}
-
-				if (keyword.Length > 1)
-				{
-					var target = keyword[1..];
-					this.Target = target switch
-					{
-						"a" => "Co-Requester",
-						"r" => "Ruler",
-						"s" => "Requester",
-						_ => target
-					};
-				}
-
-				this.Id = split[^1];
-				if (split.Length < 2)
-				{
-					return;
-				}
-
-				split = split[1..^1];
-				foreach (var tag in split)
-				{
-					switch (tag[0])
-					{
-						case 'a':
-							// Article
-							this.Article = true;
-							break;
-						case 'c':
-							// Unknown
-							break;
-						case 'D':
-							// Unknown
-							break;
-						case 'o':
-							break;
-						case 'p':
-							this.Parent = tag[1..];
-							break;
-						case 's':
-							// Unknown
-							break;
-						case 'v':
-							this.Variation = true;
-							break;
-					}
-				}
-			}
-
-			public bool Article { get; }
-
-			public string BracedId => '{' + this.Id + '}';
-
-			public string Id { get; }
-
-			public bool? Male { get; }
-
-			public string OriginalText { get; }
-
-			public string Parent { get; } = string.Empty;
-
-			public bool Personal { get; }
-
-			public bool Sentence { get; }
-
-			public bool? Singular { get; }
-
-			public string Target { get; } = string.Empty;
-
-			public bool Term { get; }
-
-			public bool Source { get; }
-
-			public bool Variation { get; }
-
-			public override string ToString() => this.OriginalText;
 		}
 		#endregion
 	}
