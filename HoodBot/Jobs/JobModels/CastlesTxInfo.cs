@@ -10,6 +10,18 @@
 			text = text.Trim(TextArrays.CurlyBrackets);
 			this.OriginalText = text;
 			var split = text.Split(TextArrays.Comma);
+
+			/*
+			var printout = new List<string>(split[..^1]);
+			while (printout.Count < 4)
+			{
+				printout.Add(string.Empty);
+			}
+
+			printout.Add(split[^1]);
+			Debug.WriteLine(string.Join('\t', printout));
+			*/
+
 			var keyword = split[0];
 			switch (keyword[0])
 			{
@@ -18,10 +30,11 @@
 					// Child
 					break;
 				case 'm':
-					// graMmar
+					// Multiple
 					this.Term = true;
 					this.Male = keyword[2] switch
 					{
+						// There are no instances of 'f', and only one instance of 'm', but the 'm' is clearly male, so I'm assuming the rest from there.
 						'f' => false,
 						'm' => true,
 						_ => null
@@ -44,7 +57,8 @@
 					this.Personal = true;
 					break;
 				case 's':
-					// Simple?
+					// Singular
+					this.Singular = true;
 					this.Term = true;
 					break;
 			}
@@ -72,17 +86,28 @@
 			{
 				switch (tag[0])
 				{
+					case 'A':
+						// Indefinite Article
+						this.Capitalize = true;
+						this.IndefiniteArticle = true;
+						break;
 					case 'a':
-						// Article
-						this.Article = true;
+						// Indefinite Article
+						this.IndefiniteArticle = true;
 						break;
 					case 'c':
 						// Unknown
 						break;
 					case 'D':
 						// Unknown
+						this.Capitalize = true;
+						this.DefiniteArticle = true;
+						break;
+					case 'd':
+						this.DefiniteArticle = true;
 						break;
 					case 'o':
+						// Unknown - remainder of parameter is either nothing or a decimal number.
 						break;
 					case 'p':
 						this.Parent = tag[1..];
@@ -99,11 +124,15 @@
 		#endregion
 
 		#region Public Properties
-		public bool Article { get; }
-
 		public string BracedId => '{' + this.Id + '}';
 
+		public bool Capitalize { get; }
+
+		public bool DefiniteArticle { get; }
+
 		public string Id { get; }
+
+		public bool IndefiniteArticle { get; }
 
 		public bool? Male { get; }
 

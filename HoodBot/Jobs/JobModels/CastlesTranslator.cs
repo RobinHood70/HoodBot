@@ -22,10 +22,10 @@
 		private readonly Dictionary<string, string> sentences = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string[]> terms = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string[]> variations = new(StringComparer.Ordinal);
-		private string[] indefiniteArticles = [];
-		private Regex? indefiniteArticleStarts;
-		private string[] indefiniteExceptions = [];
-		private Regex? indefiniteExceptionStarts;
+		private readonly string[] indefiniteArticles = [];
+		private readonly Regex indefiniteArticleStarts;
+		private readonly string[] indefiniteExceptions = [];
+		private readonly Regex indefiniteExceptionStarts;
 		#endregion
 
 		#region Constructors
@@ -34,7 +34,13 @@
 			ArgumentNullException.ThrowIfNull(culture);
 			this.culture = culture;
 			this.LoadLanguageDatabase();
-			this.LoadRules();
+
+			var rules = this.LoadRules();
+			this.indefiniteArticleStarts = new Regex($@"\A({rules["article.indefinite.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			this.indefiniteExceptionStarts = new Regex($@"\A({rules["article.indefinite.exception.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			this.indefiniteArticles = rules["article.indefinite.format"].Split(TextArrays.Pipe);
+			this.indefiniteExceptions = rules["article.indefinite.exception.format"].Split(TextArrays.Pipe);
+
 			this.LoadSentences();
 			this.LoadTerms();
 			this.LoadVariations();
@@ -54,37 +60,37 @@
 
 		public string? GetSentence(string id, bool root, [CallerMemberName] string caller = "")
 		{
-			_ = this.sentences.TryGetValue(id, out var value);
-			if (value is not null)
+			if (!this.sentences.TryGetValue(id, out var value))
 			{
-				return this.Parse(value, root);
+				Debug.WriteLine($"Sentence not found: {id} in {caller}()");
+				return null;
 			}
 
-			Debug.WriteLine($"Sentence not found: {id} in {caller}()");
-			return null;
+			return this.Parse(value, root);
 		}
 
 		public string Parse(string input, bool root)
 		{
+			ArgumentNullException.ThrowIfNull(input);
 			var braceSplit = input.Split(TextArrays.CurlyBrackets);
 
 			// Check parentheses before we start modifying braceSplit
 			for (var braceIndex = 1; braceIndex < braceSplit.Length; braceIndex += 2)
 			{
 				var parentheses = braceSplit.Length > 3 || braceSplit[braceIndex - 1].Length > 0 || (braceIndex + 1 < braceSplit.Length && braceSplit[braceIndex + 1].Length > 0);
-				var parseInfo = new CastlesTxInfo(braceSplit[braceIndex]);
-				if (parseInfo.Id.Length > 0)
+				var txInfo = new CastlesTxInfo(braceSplit[braceIndex]);
+				if (txInfo.Id.Length > 0)
 				{
-					var list = this.GetList(parseInfo);
+					var list = this.GetList(txInfo);
 
 					var sep = (root && braceSplit.Length == 3 && braceSplit[0].Length == 0 && braceSplit[2].Length == 0)
 						? "<newline>"
 						: SpaceSlash;
 					var newTerm = string.Join(sep, list);
 					parentheses &= list.Count > 1; // If single term, turn off parentheses
-					if (parseInfo.Parent.Length > 0)
+					if (txInfo.Parent.Length > 0)
 					{
-						newTerm = $"{parseInfo.Parent}: {newTerm}";
+						newTerm = $"{txInfo.Parent}: {newTerm}";
 						parentheses = true; // If parent exists, force parentheses on
 					}
 
@@ -95,16 +101,16 @@
 
 					braceSplit[braceIndex] = newTerm;
 				}
-				else if (parseInfo.Target.Length > 0)
+				else if (txInfo.Target.Length > 0)
 				{
-					braceSplit[braceIndex] = $"(same as {parseInfo.Target}, above)";
+					braceSplit[braceIndex] = $"(same as {txInfo.Target}, above)";
 				}
 			}
 
 			var retval = string.Join(string.Empty, braceSplit);
 			if (root)
 			{
-				retval = retval.UpperFirst(culture, true);
+				retval = retval.UpperFirst(this.culture, true);
 			}
 
 			return retval;
@@ -112,9 +118,9 @@
 		#endregion
 
 		#region Private Static Methods
-		private static List<string> GetPersonal(CastlesTxInfo parseInfo, [CallerMemberName] string caller = "")
+		private static List<string> GetPersonal(CastlesTxInfo txInfo, [CallerMemberName] string caller = "")
 		{
-			var id = parseInfo.Id;
+			var id = txInfo.Id;
 			var value = id switch
 			{
 				"name.given" => "First Name",
@@ -125,25 +131,25 @@
 			if (value is null)
 			{
 				Debug.WriteLine($"Personal not found: {id} in {caller}()");
-				value = id;
+				return [id];
 			}
 
-			value = $"<{parseInfo.Target}'s {value}>";
+			value = $"<{txInfo.Target}'s {value}>";
 			return [value];
 		}
 		#endregion
 
 		#region Private Methods
-		private List<string> GetList(CastlesTxInfo parseInfo)
+		private List<string> GetList(CastlesTxInfo txInfo)
 		{
 			var list =
-				parseInfo.Variation ? this.GetVariations(parseInfo) :
-				parseInfo.Term ? this.GetTerm(parseInfo, parseInfo.Id) :
-				parseInfo.Personal ? GetPersonal(parseInfo) :
+				txInfo.Variation ? this.GetVariations(txInfo) :
+				txInfo.Term ? this.GetTerm(txInfo, txInfo.Id) :
+				txInfo.Personal ? GetPersonal(txInfo) :
 				null;
 			if (list is null || list.Count == 0)
 			{
-				throw new InvalidOperationException("Unknown type: " + parseInfo.OriginalText);
+				throw new InvalidOperationException("Unknown type: " + txInfo.OriginalText);
 			}
 
 			for (var listIndex = list.Count - 1; listIndex >= 0; listIndex--)
@@ -157,10 +163,9 @@
 			return list;
 		}
 
-		private List<string>? GetTerm(CastlesTxInfo parseInfo, string id, [CallerMemberName] string caller = "")
+		private List<string>? GetTerm(CastlesTxInfo txInfo, string id, [CallerMemberName] string caller = "")
 		{
-			_ = this.terms.TryGetValue(id, out var term);
-			if (term is null)
+			if (!this.terms.TryGetValue(id, out var term))
 			{
 				Debug.WriteLine($"Term not found: {id} in {caller}()");
 				return null;
@@ -168,34 +173,50 @@
 
 			bool[] include =
 			[
-				parseInfo.Male != false && parseInfo.Singular != false,
-				parseInfo.Male != false && parseInfo.Singular != true,
-				parseInfo.Male != true && parseInfo.Singular != false,
-				parseInfo.Male != true && parseInfo.Singular != true,
+				txInfo.Male != false && txInfo.Singular != false,
+				txInfo.Male != false && txInfo.Singular != true,
+				txInfo.Male != true && txInfo.Singular != false,
+				txInfo.Male != true && txInfo.Singular != true,
 			];
 
 			var list = new List<string>();
 			for (var i = 0; i < 4; i++)
 			{
-				var subTerm = term[i];
-				if (include[i] && !list.Contains(subTerm, StringComparer.Ordinal))
+				var word = term[i];
+				if (include[i] && !list.Contains(word, StringComparer.Ordinal))
 				{
-					list.Add(term[i]);
+					list.Add(word);
+				}
+			}
+
+			if (txInfo.DefiniteArticle)
+			{
+				for (var i = 0; i < list.Count; i++)
+				{
+					// Naive implementation, since this is English-only for now.
+					list[i] = (txInfo.Capitalize ? "The " : "the ") + list[i];
+				}
+			}
+			else if (txInfo.IndefiniteArticle)
+			{
+				for (var i = 0; i < list.Count; i++)
+				{
+					list[i] = this.AddIndefiniteArticle(txInfo, list[i]);
 				}
 			}
 
 			return list;
 		}
 
-		private List<string>? GetVariations(CastlesTxInfo parseInfo)
+		private List<string>? GetVariations(CastlesTxInfo txInfo)
 		{
-			if (!this.variations.TryGetValue(parseInfo.Id, out var variations))
+			if (!this.variations.TryGetValue(txInfo.Id, out var variations))
 			{
 				return null;
 			}
 
 			var retval = new List<string>();
-			if (parseInfo.Sentence)
+			if (txInfo.Sentence)
 			{
 				foreach (var variation in variations)
 				{
@@ -205,11 +226,11 @@
 					}
 				}
 			}
-			else if (parseInfo.Term)
+			else if (txInfo.Term)
 			{
 				foreach (var variation in variations)
 				{
-					if (this.GetTerm(parseInfo, variation) is List<string> value)
+					if (this.GetTerm(txInfo, variation) is List<string> value)
 					{
 						retval.AddRange(value);
 					}
@@ -217,10 +238,33 @@
 			}
 			else
 			{
-				Debug.WriteLine("Unknown variation type: " + parseInfo.OriginalText);
+				Debug.WriteLine("Unknown variation type: " + txInfo.OriginalText);
 			}
 
 			return retval;
+		}
+
+		private string AddIndefiniteArticle(CastlesTxInfo txInfo, string word)
+		{
+			var index = txInfo.Male != false ? 2 : 0;
+			index += txInfo.Singular switch
+			{
+				true => 0,
+				false => 1,
+				null => throw new InvalidOperationException()
+			};
+
+			// Checks must be in this exact order - do not try to combine anything.
+			var indef =
+				this.indefiniteExceptionStarts.Match(word).Success ? this.indefiniteExceptions[index] :
+				this.indefiniteArticleStarts.Match(word).Success ? this.indefiniteArticles[index] :
+				this.indefiniteExceptions[index];
+			if (txInfo.Capitalize)
+			{
+				indef = indef.UpperFirst(this.culture);
+			}
+
+			return indef.Replace("{0}", word, StringComparison.Ordinal);
 		}
 
 		private void LoadLanguageDatabase()
@@ -234,7 +278,7 @@
 			}
 		}
 
-		private void LoadRules()
+		private Dictionary<string, string> LoadRules()
 		{
 			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@$"D:\Castles\MonoBehaviour\rules_{this.culture.IetfLanguageTag}.json")) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
@@ -246,10 +290,7 @@
 				rules.Add(key, value);
 			}
 
-			this.indefiniteArticleStarts = new Regex($@"\b({rules["article.indefinite.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			this.indefiniteExceptionStarts = new Regex($@"\b({rules["article.indefinite.exception.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			this.indefiniteArticles = rules["article.indefinite.format"].Split(TextArrays.Pipe);
-			this.indefiniteExceptions = rules["article.indefinite.exception.format"].Split(TextArrays.Pipe);
+			return rules;
 		}
 
 		private void LoadSentences()

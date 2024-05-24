@@ -107,7 +107,6 @@
 				time--;
 			}
 
-
 			var ts = TimeSpan.FromSeconds(time);
 			if (ts.Hours > 0 || ts.Minutes > 0 || ts.Seconds > 0)
 			{
@@ -128,9 +127,9 @@
 				return false;
 			}
 
-			foreach (var kvp in x)
+			foreach (var (key, value) in x)
 			{
-				if (kvp.Value != y[kvp.Key])
+				if (!y.TryGetValue(key, out var result) || (value != result))
 				{
 					return false;
 				}
@@ -138,6 +137,31 @@
 
 			return true;
 		}
+
+		private static string? GetRaces(string intro, dynamic items)
+		{
+			if (items.Count == 0)
+			{
+				return null;
+			}
+
+			var list = new List<string>();
+			foreach (var item in items)
+			{
+				var id = (int)item._race;
+				var text = Races[id];
+				list.Add(text);
+			}
+
+			return intro + string.Join(CommaSpace, list);
+		}
+
+		private static string GetRangeText(int from, int to) => GetRangeText(from, to, string.Empty, string.Empty);
+
+		private static string GetRangeText(int from, int to, string singleEntryText, string rangeText) =>
+			to == from ? singleEntryText + from.ToStringInvariant() :
+			to == int.MaxValue ? rangeText + from.ToStringInvariant() + '+' :
+			rangeText + from.ToStringInvariant() + '-' + to.ToStringInvariant();
 
 		private static string? GetRelationshipConditions(string intro, dynamic relationships)
 		{
@@ -179,12 +203,6 @@
 
 			return result;
 		}
-
-		private static string GetRangeText(int from, int to) => GetRangeText(from, to, string.Empty, string.Empty);
-
-		private static string GetRangeText(int from, int to, string fromText, string toText) => from == to
-			? fromText + from.ToStringInvariant()
-			: toText + from.ToStringInvariant() + '-' + to.ToStringInvariant();
 
 		private static string GetTime(TimeSpan time)
 		{
@@ -279,8 +297,8 @@
 
 			AddInt(list, "Group Happiness > ", conditions._groupHappinessGreaterThan);
 			AddInt(list, "Group Happiness < ", conditions._groupHappinessLessThan);
-			this.AddTags(list, '>', conditions._perCastleLevelTagQuantitiesGreaterThan);
-			this.AddTags(list, '<', conditions._perCastleLevelTagQuantitiesLessThan);
+			this.AddTags(list, '>', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesGreaterThan);
+			this.AddTags(list, '<', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesLessThan);
 			AddInt(list, "Castle Level > ", conditions._castleLevelGreaterThan);
 			AddInt(list, "Castle Level < ", conditions._castleLevelLessThan);
 			AddResult(list, this.GetRulingFlags("Ruling Flags", conditions._rulingFlags));
@@ -305,7 +323,7 @@
 		private void AddGenericConditions(List<string> list, string intro, dynamic conditions)
 		{
 			intro += " - ";
-			AddInt(list, intro + "is ", conditions._gender);
+			AddInt(list, intro + "gender is ", conditions._gender);
 			var time = (int)conditions._ageGreaterThanSecs;
 			if (time > 0)
 			{
@@ -327,8 +345,8 @@
 			AddResult(list, this.GetRulingFlags(intro + "Subject Ruling Flags", conditions._subjectRulingFlags));
 			AddResult(list, this.GetTraits(intro + "Traits include any of: ", conditions._anyOfTraitConditions));
 			AddResult(list, this.GetTraits(intro + "Traits include all of: ", conditions._allOfTraitConditions));
-			AddResult(list, this.GetRaces(intro + "Race is ", conditions._anyOfRaceConditions));
-			AddResult(list, this.GetRaces(intro + "Race is not ", conditions._allOfRaceConditions));
+			AddResult(list, GetRaces(intro + "Race is ", conditions._anyOfRaceConditions));
+			AddResult(list, GetRaces(intro + "Race is not ", conditions._allOfRaceConditions));
 			AddResult(list, this.GetPropConditions(intro + "Props: ", conditions._anyOfAssignedToPropConditions));
 			AddResult(list, this.GetPropConditions(intro + "Props: ", conditions._allOfAssignedToPropConditions));
 			AddResult(list, this.GetArchetypes(intro + "Any of: ", conditions._anyOfArchetypeConditions));
@@ -341,7 +359,7 @@
 			AddResult(list, this.GetPropConditions(intro + "Requester any of same props: ", conditions._anyOfRequesterAssignedToSamePropConditions));
 		}
 
-		private void AddTags(List<string> list, char sign, dynamic items)
+		private void AddTags(List<string> list, char sign, int castleLevelGT, int castleLevelLT, dynamic items)
 		{
 			if (items.Count == 0)
 			{
@@ -350,11 +368,10 @@
 
 			var last = new Dictionary<int, int>();
 			var minLevel = 1;
-			string desc;
-			string levels;
 			int level;
 			var index = 0;
 			var current = new Dictionary<int, int>();
+			var listCount = list.Count;
 			do
 			{
 				var item = items[index];
@@ -370,31 +387,75 @@
 
 				if (index == 0)
 				{
-					last = current;
+					foreach (var kvp in current)
+					{
+						last[kvp.Key] = kvp.Value;
+					}
 				}
 
 				if (!DictEquals(last, current))
 				{
-					levels = GetRangeText(minLevel, level - 1, "level ", "levels ");
-					foreach (var entry in last)
+					this.AddConditionText(list, last, sign, minLevel, level - 1, castleLevelGT, castleLevelLT);
+					last.Clear();
+					foreach (var kvp in current)
 					{
-						desc = this.tags[entry.Key];
-						list.Add($"{desc} {sign} {entry.Value} ({levels})");
+						last[kvp.Key] = kvp.Value;
 					}
 
-					last = current;
-					minLevel = level + 1;
+					minLevel = level;
 				}
 
 				index++;
 			}
 			while (index < items.Count);
-
-			levels = GetRangeText(minLevel, level, "level ", "levels ");
-			foreach (var entry in current)
+			if (list.Count == listCount && level == 1)
 			{
-				desc = this.tags[entry.Key];
-				list.Add($"{desc} {sign} {entry.Value} ({levels})");
+				level = -1;
+			}
+			else if (level < castleLevelLT)
+			{
+				level = castleLevelLT;
+			}
+
+			this.AddConditionText(list, current, sign, minLevel, level, castleLevelGT, castleLevelLT);
+		}
+
+		private void AddConditionText(List<string> list, Dictionary<int, int> entries, char sign, int minLevel, int maxLevel, int castleLevelGT, int castleLevelLT)
+		{
+			if (castleLevelGT > 0 && maxLevel >= 0 && maxLevel <= castleLevelGT)
+			{
+				// Conditions not possible
+				return;
+			}
+
+			if (castleLevelLT > 0 && minLevel >= castleLevelLT)
+			{
+				// Conditions not possible
+				return;
+			}
+
+			if (maxLevel == 200)
+			{
+				maxLevel = int.MaxValue;
+			}
+			else if (castleLevelLT != 0 && maxLevel >= castleLevelLT)
+			{
+				maxLevel = castleLevelLT - 1;
+			}
+			else
+
+			if (castleLevelGT != 0 && minLevel <= castleLevelGT)
+			{
+				minLevel = castleLevelGT + 1;
+			}
+
+			var levels = maxLevel == -1
+				? string.Empty
+				: " (" + GetRangeText(minLevel, maxLevel, "level ", "levels ") + ')';
+			foreach (var entry in entries)
+			{
+				var desc = this.tags[entry.Key].Trim();
+				list.Add($"Castle Level Tags: {desc} {sign} {entry.Value}{levels}");
 			}
 		}
 
@@ -491,24 +552,6 @@
 				var text = this.quests[id];
 				var condition = item._condition == 0 ? "not " : string.Empty;
 				list.Add(condition + text);
-			}
-
-			return intro + string.Join(CommaSpace, list);
-		}
-
-		private string? GetRaces(string intro, dynamic items)
-		{
-			if (items.Count == 0)
-			{
-				return null;
-			}
-
-			var list = new List<string>();
-			foreach (var item in items)
-			{
-				var id = (int)item._race;
-				var text = Races[id];
-				list.Add(text);
 			}
 
 			return intro + string.Join(CommaSpace, list);
@@ -628,14 +671,17 @@
 			foreach (var rulingsGroupName in RulingsGroupNames)
 			{
 				var group = obj[rulingsGroupName];
-				stream.WriteLine(rulingsGroupName);
-				stream.Indent++;
-				foreach (var ruling in group)
+				if (group is not null)
 				{
-					this.WriteRuling(stream, ruling);
-				}
+					stream.WriteLine(rulingsGroupName);
+					stream.Indent++;
+					foreach (var ruling in group)
+					{
+						this.WriteRuling(stream, ruling);
+					}
 
-				stream.Indent--;
+					stream.Indent--;
+				}
 			}
 
 			stream.Close();
