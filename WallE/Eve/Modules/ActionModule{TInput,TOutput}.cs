@@ -8,17 +8,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	public abstract class ActionModule<TInput, TOutput> : ActionModule
+	public abstract class ActionModule<TInput, TOutput>(WikiAbstractionLayer wal) : ActionModule(wal)
 		where TInput : class
 		where TOutput : class
 	{
-		#region Constructors
-		protected ActionModule(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Protected Virtual Properties
 		protected virtual bool ForceCustomDeserialization => false;
 		#endregion

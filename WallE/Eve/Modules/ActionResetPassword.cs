@@ -7,15 +7,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.28
-	internal sealed class ActionResetPassword : ActionModule<ResetPasswordInput, ResetPasswordResult>
+	internal sealed class ActionResetPassword(WikiAbstractionLayer wal) : ActionModule<ResetPasswordInput, ResetPasswordResult>(wal)
 	{
-		#region Constructors
-		public ActionResetPassword(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 127;
 

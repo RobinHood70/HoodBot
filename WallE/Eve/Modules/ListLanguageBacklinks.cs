@@ -6,16 +6,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListLanguageBacklinks : ListModule<LanguageBacklinksInput, LanguageBacklinksItem>, IGeneratorModule
+	internal sealed class ListLanguageBacklinks(WikiAbstractionLayer wal, LanguageBacklinksInput input, IPageSetGenerator? pageSetGenerator) : ListModule<LanguageBacklinksInput, LanguageBacklinksItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListLanguageBacklinks(WikiAbstractionLayer wal, LanguageBacklinksInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListLanguageBacklinks(WikiAbstractionLayer wal, LanguageBacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

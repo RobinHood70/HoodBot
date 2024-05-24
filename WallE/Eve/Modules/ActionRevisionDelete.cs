@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionRevisionDelete : ActionModule<RevisionDeleteInput, RevisionDeleteResult>
+	internal sealed class ActionRevisionDelete(WikiAbstractionLayer wal) : ActionModule<RevisionDeleteInput, RevisionDeleteResult>(wal)
 	{
-		#region Constructors
-		public ActionRevisionDelete(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 123;
 

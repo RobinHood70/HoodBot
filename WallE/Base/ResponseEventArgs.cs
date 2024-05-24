@@ -3,17 +3,10 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 
-	public class ResponseEventArgs : EventArgs
+	public class ResponseEventArgs(string response) : EventArgs
 	{
-		#region Constructors
-		public ResponseEventArgs(string response)
-		{
-			this.Response = response;
-		}
-		#endregion
-
 		#region Public Properties
-		public string Response { get; }
+		public string Response { get; } = response;
 		#endregion
 	}
 }

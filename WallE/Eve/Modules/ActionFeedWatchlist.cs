@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionFeedWatchlist : ActionModule<FeedWatchlistInput, CustomResult>
+	internal sealed class ActionFeedWatchlist(WikiAbstractionLayer wal) : ActionModule<FeedWatchlistInput, CustomResult>(wal)
 	{
-		#region Constructors
-		public ActionFeedWatchlist(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 109;
 

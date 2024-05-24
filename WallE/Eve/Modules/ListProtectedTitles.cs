@@ -7,16 +7,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListProtectedTitles : ListModule<ProtectedTitlesInput, ProtectedTitlesItem>, IGeneratorModule
+	internal sealed class ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input, IPageSetGenerator? pageSetGenerator) : ListModule<ProtectedTitlesInput, ProtectedTitlesItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

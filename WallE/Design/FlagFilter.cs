@@ -21,24 +21,14 @@ namespace RobinHood70.WallE.Design
 
 	/// <summary>A class for filtering flags enumerations based on the MediaWiki site version.</summary>
 	/// <typeparam name="T">The type of the flags filter to be checked.</typeparam>
-	public sealed class FlagFilter<T>
+	/// <remarks>Initializes a new instance of the <see cref="FlagFilter{T}" /> class.</remarks>
+	/// <param name="siteVersion">The site version.</param>
+	/// <param name="originalValue">The original value.</param>
+	public sealed class FlagFilter<T>(int siteVersion, T originalValue)
 		where T : struct, Enum
 	{
 		#region Fields
-		private readonly int siteVersion;
-		private ulong longValue;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="FlagFilter{T}" /> class.</summary>
-		/// <param name="siteVersion">The site version.</param>
-		/// <param name="originalValue">The original value.</param>
-		public FlagFilter(int siteVersion, T originalValue)
-		{
-			this.longValue = Convert.ToUInt64(originalValue, CultureInfo.InvariantCulture);
-			this.siteVersion = siteVersion;
-		}
+		private ulong longValue = Convert.ToUInt64(originalValue, CultureInfo.InvariantCulture);
 		#endregion
 
 		#region Public Properties
@@ -56,7 +46,7 @@ namespace RobinHood70.WallE.Design
 		/// <returns>The input flags, filtered appropriately.</returns>
 		public FlagFilter<T> FilterBefore(int version, T flagFilter)
 		{
-			if (this.siteVersion < version)
+			if (siteVersion < version)
 			{
 				this.longValue &= ~Convert.ToUInt64(flagFilter, CultureInfo.InvariantCulture);
 			}
@@ -70,7 +60,7 @@ namespace RobinHood70.WallE.Design
 		/// <returns>The input flags, filtered appropriately.</returns>
 		public FlagFilter<T> FilterFrom(int version, T flagFilter)
 		{
-			if (this.siteVersion >= version)
+			if (siteVersion >= version)
 			{
 				this.longValue &= ~Convert.ToUInt64(flagFilter, CultureInfo.InvariantCulture);
 			}

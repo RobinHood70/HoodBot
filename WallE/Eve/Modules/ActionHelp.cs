@@ -9,15 +9,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.27
-	internal sealed class ActionHelp : ActionModule<HelpInput, HelpResult>
+	internal sealed class ActionHelp(WikiAbstractionLayer wal) : ActionModule<HelpInput, HelpResult>(wal)
 	{
-		#region Constructors
-		public ActionHelp(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 0;
 

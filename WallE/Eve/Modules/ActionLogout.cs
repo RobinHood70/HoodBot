@@ -4,15 +4,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionLogout : ActionModule<LogoutInput, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
+	internal sealed class ActionLogout(WikiAbstractionLayer wal) : ActionModule<LogoutInput, NullObject>(wal) // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
 	{
-		#region Constructors
-		public ActionLogout(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 0;
 

@@ -3,26 +3,16 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WikiCommon;
 
-	public class LinksHereItem : IApiTitleOptional
+	public class LinksHereItem(int? ns, string? title, long pageId, bool redirect) : IApiTitleOptional
 	{
-		#region Constructors
-		public LinksHereItem(int? ns, string? title, long pageId, bool redirect)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.PageId = pageId;
-			this.Redirect = redirect;
-		}
-		#endregion
-
 		#region Public Properties
-		public int? Namespace { get; }
+		public int? Namespace { get; } = ns;
 
-		public long PageId { get; }
+		public long PageId { get; } = pageId;
 
-		public bool Redirect { get; }
+		public bool Redirect { get; } = redirect;
 
-		public string? Title { get; }
+		public string? Title { get; } = title;
 		#endregion
 
 		#region Public Override Methods

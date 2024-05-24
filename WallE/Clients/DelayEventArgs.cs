@@ -4,35 +4,25 @@
 	using System.ComponentModel;
 
 	/// <summary>EventArgs used for the RequestingDelay event when the wiki or client requests a specific delay before the next edit attempt.</summary>
-	public class DelayEventArgs : CancelEventArgs
+	/// <remarks>Initializes a new instance of the <see cref="DelayEventArgs" /> class.</remarks>
+	/// <param name="delayTime">How long to delay.</param>
+	/// <param name="reason">The reason/source of the delay.</param>
+	/// <param name="description">The human-readable description or the reason for the delay.</param>
+	public class DelayEventArgs(TimeSpan delayTime, DelayReason reason, string description) : CancelEventArgs
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="DelayEventArgs" /> class.</summary>
-		/// <param name="delayTime">How long to delay.</param>
-		/// <param name="reason">The reason/source of the delay.</param>
-		/// <param name="description">The human-readable description or the reason for the delay.</param>
-		public DelayEventArgs(TimeSpan delayTime, DelayReason reason, string description)
-		{
-			this.Description = description;
-			this.DelayTime = delayTime;
-			this.Reason = reason;
-		}
-		#endregion
-
 		#region Public Properties
 
 		/// <summary>Gets the delay time.</summary>
 		/// <value>The delay time.</value>
-		public TimeSpan DelayTime { get; }
+		public TimeSpan DelayTime { get; } = delayTime;
 
 		/// <summary>Gets the human-readable description of the delay reason.</summary>
 		/// <value>The description.</value>
-		public string Description { get; }
+		public string Description { get; } = description;
 
 		/// <summary>Gets the reason for the delay.</summary>
 		/// <value>The reason for the delay.</value>
-		public DelayReason Reason { get; }
+		public DelayReason Reason { get; } = reason;
 		#endregion
 	}
 }

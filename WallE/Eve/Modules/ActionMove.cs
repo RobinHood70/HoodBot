@@ -8,15 +8,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
-	internal sealed class ActionMove : ActionModule<MoveInput, IReadOnlyList<MoveItem>>
+	internal sealed class ActionMove(WikiAbstractionLayer wal) : ActionModule<MoveInput, IReadOnlyList<MoveItem>>(wal)
 	{
-		#region Constructors
-		public ActionMove(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

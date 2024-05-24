@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListTags : ListModule<TagsInput, TagsItem>
+	internal sealed class ListTags(WikiAbstractionLayer wal, TagsInput input) : ListModule<TagsInput, TagsItem>(wal, input)
 	{
-		#region Constructors
-		public ListTags(WikiAbstractionLayer wal, TagsInput input)
-			: base(wal, input)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 116;
 

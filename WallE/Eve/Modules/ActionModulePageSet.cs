@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule, IPageSetGenerator
+	public abstract class ActionModulePageSet<TInput, TOutput>(WikiAbstractionLayer wal) : ActionModule(wal), IPageSetGenerator
 		where TInput : PageSetInput
 		where TOutput : class, IApiTitle
 	{
@@ -31,15 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string> normalized = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, PageSetRedirectItem> redirects = new(StringComparer.Ordinal);
-		#endregion
 
-		#region Constructors
-		protected ActionModulePageSet(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-			this.ContinueModule = wal.ModuleFactory.CreateContinue();
-			this.MaximumListSize = wal.MaximumPageSetSize;
-		}
 		#endregion
 
 		#region Public Properties
@@ -47,9 +39,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected ContinueModule ContinueModule { get; set; }
+		protected ContinueModule ContinueModule { get; set; } = wal.ModuleFactory.CreateContinue();
 
-		protected int MaximumListSize { get; set; }
+		protected int MaximumListSize { get; set; } = wal.MaximumPageSetSize;
 		#endregion
 
 		#region Protected Override Properties

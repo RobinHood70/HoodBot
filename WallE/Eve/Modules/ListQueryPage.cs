@@ -8,10 +8,10 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
+	internal sealed class ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator? pageSetGenerator) : ListModule<QueryPageInput, QueryPageItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Fields
-		private readonly string queryPage;
+		private readonly string queryPage = input.Page;
 		private bool cached;
 		private DateTime? cachedTimestamp;
 		private int maxResults;
@@ -21,12 +21,6 @@
 		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input)
 			: this(wal, input, null)
 		{
-		}
-
-		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
-		{
-			this.queryPage = input.Page;
 		}
 		#endregion
 

@@ -7,17 +7,10 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
+	internal sealed class MetaAllMessages(WikiAbstractionLayer wal, AllMessagesInput input) : ListModule<AllMessagesInput, AllMessagesItem>(wal, input)
 	{
 		#region Fields
 		private string? languageCode;
-		#endregion
-
-		#region Constructors
-		public MetaAllMessages(WikiAbstractionLayer wal, AllMessagesInput input)
-			: base(wal, input)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties

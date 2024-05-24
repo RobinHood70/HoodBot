@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>
+	internal sealed class ActionImport(WikiAbstractionLayer wal) : ActionModule<ImportInput, IReadOnlyList<ImportItem>>(wal)
 	{
-		#region Constructors
-		public ActionImport(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 115;
 

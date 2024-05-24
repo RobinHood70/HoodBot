@@ -6,16 +6,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListWatchlistRaw : ListModule<WatchlistRawInput, WatchlistRawItem>, IGeneratorModule
+	internal sealed class ListWatchlistRaw(WikiAbstractionLayer wal, WatchlistRawInput input, IPageSetGenerator? pageSetGenerator) : ListModule<WatchlistRawInput, WatchlistRawItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListWatchlistRaw(WikiAbstractionLayer wal, WatchlistRawInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListWatchlistRaw(WikiAbstractionLayer wal, WatchlistRawInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

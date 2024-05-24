@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionImageRotate : ActionModulePageSet<ImageRotateInput, ImageRotateItem>
+	internal sealed class ActionImageRotate(WikiAbstractionLayer wal) : ActionModulePageSet<ImageRotateInput, ImageRotateItem>(wal)
 	{
-		#region Constructors
-		public ActionImageRotate(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 121;
 

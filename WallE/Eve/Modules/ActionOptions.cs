@@ -4,15 +4,8 @@
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionOptions : ActionModule<OptionsInputInternal, NullObject>
+	internal sealed class ActionOptions(WikiAbstractionLayer wal) : ActionModule<OptionsInputInternal, NullObject>(wal)
 	{
-		#region Constructors
-		public ActionOptions(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 120;
 

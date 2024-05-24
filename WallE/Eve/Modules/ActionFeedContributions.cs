@@ -6,15 +6,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionFeedContributions : ActionModule<FeedContributionsInput, CustomResult>
+	internal sealed class ActionFeedContributions(WikiAbstractionLayer wal) : ActionModule<FeedContributionsInput, CustomResult>(wal)
 	{
-		#region Constructors
-		public ActionFeedContributions(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 127;
 

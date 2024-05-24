@@ -10,7 +10,7 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
+	internal sealed class ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input, IPageSetGenerator? pageSetGenerator) : ListModule<CategoryMembersInput, CategoryMembersItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new(StringComparer.Ordinal)
@@ -24,11 +24,6 @@
 		#region Constructors
 		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

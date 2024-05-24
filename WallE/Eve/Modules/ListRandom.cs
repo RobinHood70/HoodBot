@@ -8,16 +8,11 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.29
-	internal sealed class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule
+	internal sealed class ListRandom(WikiAbstractionLayer wal, RandomInput input, IPageSetGenerator? pageSetGenerator) : ListModule<RandomInput, WikiTitleItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListRandom(WikiAbstractionLayer wal, RandomInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListRandom(WikiAbstractionLayer wal, RandomInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

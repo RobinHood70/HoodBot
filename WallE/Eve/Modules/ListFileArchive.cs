@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListFileArchive : ListModule<FileArchiveInput, FileArchiveItem>
+	internal sealed class ListFileArchive(WikiAbstractionLayer wal, FileArchiveInput input) : ListModule<FileArchiveInput, FileArchiveItem>(wal, input)
 	{
-		#region Constructors
-		public ListFileArchive(WikiAbstractionLayer wal, FileArchiveInput input)
-			: base(wal, input)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 117;
 

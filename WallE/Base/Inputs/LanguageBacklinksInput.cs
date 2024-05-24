@@ -14,17 +14,10 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class LanguageBacklinksInput : ILimitableInput, IGeneratorInput
+	public class LanguageBacklinksInput(string language) : ILimitableInput, IGeneratorInput
 	{
-		#region Constructors
-		public LanguageBacklinksInput(string language)
-		{
-			this.Language = language;
-		}
-		#endregion
-
 		#region public Properties
-		public string Language { get; }
+		public string Language { get; } = language;
 
 		public int Limit { get; set; }
 

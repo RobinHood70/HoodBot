@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class MetaFileRepoInfo : ListModule<FileRepositoryInfoInput, FileRepositoryInfoItem>
+	internal sealed class MetaFileRepoInfo(WikiAbstractionLayer wal, FileRepositoryInfoInput input) : ListModule<FileRepositoryInfoInput, FileRepositoryInfoItem>(wal, input)
 	{
-		#region Constructors
-		public MetaFileRepoInfo(WikiAbstractionLayer wal, FileRepositoryInfoInput input)
-			: base(wal, input)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 122;
 

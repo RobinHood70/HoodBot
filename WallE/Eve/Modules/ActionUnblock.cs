@@ -7,15 +7,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.29
-	internal sealed class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
+	internal sealed class ActionUnblock(WikiAbstractionLayer wal) : ActionModule<UnblockInput, UnblockResult>(wal)
 	{
-		#region Constructors
-		public ActionUnblock(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

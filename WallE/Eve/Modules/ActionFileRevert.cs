@@ -7,15 +7,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.27
-	internal sealed class ActionFileRevert : ActionModule<FileRevertInput, FileRevertResult>
+	internal sealed class ActionFileRevert(WikiAbstractionLayer wal) : ActionModule<FileRevertInput, FileRevertResult>(wal)
 	{
-		#region Constructors
-		public ActionFileRevert(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 118;
 

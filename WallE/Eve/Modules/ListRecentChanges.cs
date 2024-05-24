@@ -7,7 +7,7 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListRecentChanges : ListModule<RecentChangesInput, RecentChangesItem>, IGeneratorModule
+	internal sealed class ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input, IPageSetGenerator? pageSetGenerator) : ListModule<RecentChangesInput, RecentChangesItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Static Fields
 		private static readonly HashSet<string> KnownProps = new(StringComparer.Ordinal)
@@ -47,11 +47,6 @@
 		#region Constructors
 		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

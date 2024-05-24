@@ -9,15 +9,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
-	internal sealed class ActionExpandTemplates : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>
+	internal sealed class ActionExpandTemplates(WikiAbstractionLayer wal) : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>(wal)
 	{
-		#region Constructors
-		public ActionExpandTemplates(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

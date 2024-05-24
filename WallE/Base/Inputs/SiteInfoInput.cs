@@ -35,21 +35,14 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class SiteInfoInput
+	public class SiteInfoInput(SiteInfoProperties properties)
 	{
-		#region Constructors
-		public SiteInfoInput(SiteInfoProperties properties)
-		{
-			this.Properties = properties;
-		}
-		#endregion
-
 		#region Public Properties
 		public Filter FilterLocalInterwiki { get; set; }
 
 		public string? InterwikiLanguageCode { get; set; }
 
-		public SiteInfoProperties Properties { get; }
+		public SiteInfoProperties Properties { get; } = properties;
 
 		public bool ShowAllDatabases { get; set; }
 

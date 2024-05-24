@@ -15,15 +15,8 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class PagesWithPropertyInput : ILimitableInput, IGeneratorInput
+	public class PagesWithPropertyInput(string propertyName) : ILimitableInput, IGeneratorInput
 	{
-		#region Constructors
-		public PagesWithPropertyInput(string propertyName)
-		{
-			this.PropertyName = propertyName;
-		}
-		#endregion
-
 		#region Public Properties
 		public int Limit { get; set; }
 
@@ -31,7 +24,7 @@ namespace RobinHood70.WallE.Base
 
 		public PagesWithPropertyProperties Properties { get; set; }
 
-		public string PropertyName { get; }
+		public string PropertyName { get; } = propertyName;
 
 		public bool SortDescending { get; set; }
 		#endregion

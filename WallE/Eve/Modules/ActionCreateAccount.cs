@@ -8,15 +8,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>
+	internal sealed class ActionCreateAccount(WikiAbstractionLayer wal) : ActionModule<CreateAccountInput, CreateAccountResult>(wal)
 	{
-		#region Constructors
-		public ActionCreateAccount(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 121;
 
@@ -49,7 +42,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(result);
 			var resultText = result.MustHaveString("result");
-			resultText = string.Equals(resultText, "needtoken", System.StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
+			resultText = string.Equals(resultText, "needtoken", StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(
 				result: resultText,
 				captchaData: result["captcha"].GetStringDictionary<string>(),

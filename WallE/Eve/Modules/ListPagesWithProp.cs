@@ -5,16 +5,11 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ListPagesWithProp : ListModule<PagesWithPropertyInput, PagesWithPropertyItem>, IGeneratorModule
+	internal sealed class ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input, IPageSetGenerator? pageSetGenerator) : ListModule<PagesWithPropertyInput, PagesWithPropertyItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

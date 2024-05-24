@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionRollback : ActionModule<RollbackInput, RollbackResult>
+	internal sealed class ActionRollback(WikiAbstractionLayer wal) : ActionModule<RollbackInput, RollbackResult>(wal)
 	{
-		#region Constructors
-		public ActionRollback(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

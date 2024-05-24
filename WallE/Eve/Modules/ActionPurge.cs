@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionPurge : ActionModulePageSet<PurgeInput, PurgeItem>
+	internal sealed class ActionPurge(WikiAbstractionLayer wal) : ActionModulePageSet<PurgeInput, PurgeItem>(wal)
 	{
-		#region Constructors
-		public ActionPurge(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 114;
 

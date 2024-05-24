@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionEmailUser : ActionModule<EmailUserInput, EmailUserResult>
+	internal sealed class ActionEmailUser(WikiAbstractionLayer wal) : ActionModule<EmailUserInput, EmailUserResult>(wal)
 	{
-		#region Constructors
-		public ActionEmailUser(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 113;
 

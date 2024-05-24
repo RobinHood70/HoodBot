@@ -7,18 +7,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 
-	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>, IContinuableQueryModule
+	public abstract class ListModule<TInput, TItem>([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator) : QueryModule<TInput, IList<TItem>>(wal, input, pageSetGenerator), IContinuableQueryModule
 		where TInput : class
 		where TItem : class
 	{
 		#region Constructors
 		protected ListModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		protected ListModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

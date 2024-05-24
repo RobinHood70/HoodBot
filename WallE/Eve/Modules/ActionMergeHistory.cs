@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionMergeHistory : ActionModule<MergeHistoryInput, MergeHistoryResult>
+	internal sealed class ActionMergeHistory(WikiAbstractionLayer wal) : ActionModule<MergeHistoryInput, MergeHistoryResult>(wal)
 	{
-		#region Constructors
-		public ActionMergeHistory(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 127;
 

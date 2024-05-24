@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionRsd : ActionModule<NullObject, CustomResult>
+	internal sealed class ActionRsd(WikiAbstractionLayer wal) : ActionModule<NullObject, CustomResult>(wal)
 	{
-		#region Constructors
-		public ActionRsd(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 117;
 

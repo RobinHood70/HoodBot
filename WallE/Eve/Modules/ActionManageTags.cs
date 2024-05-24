@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionManageTags : ActionModule<ManageTagsInput, ManageTagsResult>
+	internal sealed class ActionManageTags(WikiAbstractionLayer wal) : ActionModule<ManageTagsInput, ManageTagsResult>(wal)
 	{
-		#region Constructors
-		public ActionManageTags(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 125;
 

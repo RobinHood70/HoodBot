@@ -3,15 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 
-	public class PrefixSearchInput : ILimitableInput, IGeneratorInput
+	public class PrefixSearchInput(string search) : ILimitableInput, IGeneratorInput
 	{
-		#region Constructors
-		public PrefixSearchInput(string search)
-		{
-			this.Search = search;
-		}
-		#endregion
-
 		#region Public Properties
 		public int Limit { get; set; }
 
@@ -19,7 +12,7 @@ namespace RobinHood70.WallE.Base
 
 		public IEnumerable<int>? Namespaces { get; set; }
 
-		public string Search { get; }
+		public string Search { get; } = search;
 		#endregion
 	}
 }

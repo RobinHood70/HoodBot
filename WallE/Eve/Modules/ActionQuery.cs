@@ -143,6 +143,11 @@
 			{
 				var request = this.CreateRequest();
 				var response = this.Wal.SendRequest(request);
+				if (string.IsNullOrWhiteSpace(response))
+				{
+					throw new InvalidDataException();
+				}
+
 				this.ParseResponse(response);
 			}
 			while (this.continueModule?.Continues ?? false);
@@ -201,11 +206,6 @@
 
 		private void ParseResponse(string response)
 		{
-			if (string.IsNullOrWhiteSpace(response))
-			{
-				throw new InvalidDataException();
-			}
-
 			try
 			{
 				var result = ToJson(response);

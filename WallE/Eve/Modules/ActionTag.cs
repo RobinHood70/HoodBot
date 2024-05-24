@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionTag : ActionModule<TagInput, List<TagItem>>
+	internal sealed class ActionTag(WikiAbstractionLayer wal) : ActionModule<TagInput, List<TagItem>>(wal)
 	{
-		#region Constructors
-		public ActionTag(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 125;
 

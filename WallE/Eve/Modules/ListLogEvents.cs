@@ -8,7 +8,7 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListLogEvents : ListModule<LogEventsInput, LogEventsItem>
+	internal sealed class ListLogEvents(WikiAbstractionLayer wal, LogEventsInput input) : ListModule<LogEventsInput, LogEventsItem>(wal, input)
 	{
 		#region Static Fields
 		private static readonly HashSet<string> KnownProps = new(StringComparer.Ordinal)
@@ -33,15 +33,7 @@
 			"userid",
 		};
 
-		private readonly bool getUserId;
-		#endregion
-
-		#region Constructors
-		public ListLogEvents(WikiAbstractionLayer wal, LogEventsInput input)
-			: base(wal, input)
-		{
-			this.getUserId = input.Properties.HasAnyFlag(LogEventsProperties.UserId);
-		}
+		private readonly bool getUserId = input.Properties.HasAnyFlag(LogEventsProperties.UserId);
 		#endregion
 
 		#region Public Override Properties

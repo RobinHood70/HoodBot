@@ -3,17 +3,10 @@
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
-	internal sealed class TokenManagerAction : TokenManagerOriginal
+	internal sealed class TokenManagerAction(WikiAbstractionLayer wal) : TokenManagerOriginal(wal)
 	{
 		#region Public Constants
 		public const int MinimumVersion = 120;
-		#endregion
-
-		#region Constructors
-		public TokenManagerAction(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
 		#endregion
 
 		#region Public Override Methods

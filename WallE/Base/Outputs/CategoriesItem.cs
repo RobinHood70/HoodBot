@@ -4,32 +4,20 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using RobinHood70.WikiCommon;
 
-	public class CategoriesItem : IApiTitle
+	public class CategoriesItem(int ns, string title, bool hidden, string? sortkey, string? sortkeyPrefix, DateTime? timestamp) : IApiTitle
 	{
-		#region Constructors
-		public CategoriesItem(int ns, string title, bool hidden, string? sortkey, string? sortkeyPrefix, DateTime? timestamp)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.Hidden = hidden;
-			this.SortKey = sortkey;
-			this.SortKeyPrefix = sortkeyPrefix;
-			this.Timestamp = timestamp;
-		}
-		#endregion
-
 		#region Public Properties
-		public bool Hidden { get; }
+		public bool Hidden { get; } = hidden;
 
-		public int Namespace { get; }
+		public int Namespace { get; } = ns;
 
-		public string? SortKey { get; }
+		public string? SortKey { get; } = sortkey;
 
-		public string? SortKeyPrefix { get; }
+		public string? SortKeyPrefix { get; } = sortkeyPrefix;
 
-		public DateTime? Timestamp { get; }
+		public DateTime? Timestamp { get; } = timestamp;
 
-		public string Title { get; }
+		public string Title { get; } = title;
 		#endregion
 
 		#region Public Override Methods

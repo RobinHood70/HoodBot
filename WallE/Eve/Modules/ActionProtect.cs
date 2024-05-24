@@ -8,15 +8,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionProtect : ActionModule<ProtectInput, ProtectResult>
+	internal sealed class ActionProtect(WikiAbstractionLayer wal) : ActionModule<ProtectInput, ProtectResult>(wal)
 	{
-		#region Constructors
-		public ActionProtect(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

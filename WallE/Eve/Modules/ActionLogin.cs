@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionLogin : ActionModule<LoginInput, LoginResult>
+	internal sealed class ActionLogin(WikiAbstractionLayer wal) : ActionModule<LoginInput, LoginResult>(wal)
 	{
-		#region Constructors
-		public ActionLogin(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 0;
 

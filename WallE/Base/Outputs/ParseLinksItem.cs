@@ -3,23 +3,14 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WikiCommon;
 
-	public class ParseLinksItem : IApiTitle
+	public class ParseLinksItem(int ns, string title, bool exists) : IApiTitle
 	{
-		#region Constructors
-		public ParseLinksItem(int ns, string title, bool exists)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.Exists = exists;
-		}
-		#endregion
-
 		#region Public Properties
-		public bool Exists { get; }
+		public bool Exists { get; } = exists;
 
-		public int Namespace { get; }
+		public int Namespace { get; } = ns;
 
-		public string Title { get; }
+		public string Title { get; } = title;
 		#endregion
 
 		#region Public Override Methods

@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionClearHasMsg : ActionModule<NullObject, CustomResult>
+	internal sealed class ActionClearHasMsg(WikiAbstractionLayer wal) : ActionModule<NullObject, CustomResult>(wal)
 	{
-		#region Constructors
-		public ActionClearHasMsg(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Parameters
 		public override int MinimumVersion => 124;
 

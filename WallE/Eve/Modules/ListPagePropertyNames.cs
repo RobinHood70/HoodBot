@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ListPagePropertyNames : ListModule<PagePropertyNamesInput, string>
+	internal sealed class ListPagePropertyNames(WikiAbstractionLayer wal, PagePropertyNamesInput input) : ListModule<PagePropertyNamesInput, string>(wal, input)
 	{
-		#region Constructors
-		public ListPagePropertyNames(WikiAbstractionLayer wal, PagePropertyNamesInput input)
-			: base(wal, input)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 117;
 

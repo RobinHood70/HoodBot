@@ -4,26 +4,16 @@ namespace RobinHood70.WallE.Base
 	using RobinHood70.WikiCommon;
 
 	// This class is not an ITitle because none of the properties are guaranteed to be emitted as of MW 1.33.
-	public class PagesWithPropertyItem : IApiTitleOptional
+	public class PagesWithPropertyItem(int? ns, string? title, long pageId, string? value) : IApiTitleOptional
 	{
-		#region Constructors
-		public PagesWithPropertyItem(int? ns, string? title, long pageId, string? value)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.PageId = pageId;
-			this.Value = value;
-		}
-		#endregion
-
 		#region Public Properties
-		public int? Namespace { get; }
+		public int? Namespace { get; } = ns;
 
-		public long PageId { get; }
+		public long PageId { get; } = pageId;
 
-		public string? Title { get; }
+		public string? Title { get; } = title;
 
-		public string? Value { get; }
+		public string? Value { get; } = value;
 		#endregion
 
 		#region Public Override Methods

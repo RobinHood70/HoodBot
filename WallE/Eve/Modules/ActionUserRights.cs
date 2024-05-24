@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionUserRights : ActionModule<UserRightsInput, UserRightsResult>
+	internal sealed class ActionUserRights(WikiAbstractionLayer wal) : ActionModule<UserRightsInput, UserRightsResult>(wal)
 	{
-		#region Constructors
-		public ActionUserRights(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 116;
 

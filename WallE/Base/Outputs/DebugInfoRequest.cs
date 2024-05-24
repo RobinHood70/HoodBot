@@ -4,26 +4,16 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 
-	public class DebugInfoRequest
+	public class DebugInfoRequest(IReadOnlyDictionary<string, string> headers, string method, IReadOnlyDictionary<string, string> parameters, Uri url)
 	{
-		#region Constructors
-		public DebugInfoRequest(IReadOnlyDictionary<string, string> headers, string method, IReadOnlyDictionary<string, string> parameters, Uri url)
-		{
-			this.Headers = headers;
-			this.Method = method;
-			this.Parameters = parameters;
-			this.Url = url;
-		}
-		#endregion
-
 		#region Public Properties
-		public IReadOnlyDictionary<string, string> Headers { get; }
+		public IReadOnlyDictionary<string, string> Headers { get; } = headers;
 
-		public string Method { get; }
+		public string Method { get; } = method;
 
-		public IReadOnlyDictionary<string, string> Parameters { get; }
+		public IReadOnlyDictionary<string, string> Parameters { get; } = parameters;
 
-		public Uri Url { get; }
+		public Uri Url { get; } = url;
 		#endregion
 
 		#region Public Override Methods

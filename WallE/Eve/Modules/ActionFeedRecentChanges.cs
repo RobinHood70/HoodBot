@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionFeedRecentChanges : ActionModule<FeedRecentChangesInput, CustomResult>
+	internal sealed class ActionFeedRecentChanges(WikiAbstractionLayer wal) : ActionModule<FeedRecentChangesInput, CustomResult>(wal)
 	{
-		#region Constructors
-		public ActionFeedRecentChanges(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 123;
 

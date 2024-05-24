@@ -6,16 +6,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListInterwikiBacklinks : ListModule<InterwikiBacklinksInput, InterwikiBacklinksItem>, IGeneratorModule
+	internal sealed class ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input, IPageSetGenerator? pageSetGenerator) : ListModule<InterwikiBacklinksInput, InterwikiBacklinksItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

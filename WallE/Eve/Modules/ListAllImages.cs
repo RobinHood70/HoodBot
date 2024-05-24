@@ -6,16 +6,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListAllImages : ListModule<AllImagesInput, AllImagesItem>, IGeneratorModule
+	internal sealed class ListAllImages(WikiAbstractionLayer wal, AllImagesInput input, IPageSetGenerator? pageSetGenerator) : ListModule<AllImagesInput, AllImagesItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListAllImages(WikiAbstractionLayer wal, AllImagesInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListAllImages(WikiAbstractionLayer wal, AllImagesInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

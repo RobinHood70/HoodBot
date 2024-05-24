@@ -6,15 +6,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
+	internal sealed class ActionOpenSearch(WikiAbstractionLayer wal) : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>(wal)
 	{
-		#region Constructors
-		public ActionOpenSearch(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 125;
 

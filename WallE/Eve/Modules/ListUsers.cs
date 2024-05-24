@@ -7,15 +7,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListUsers : ListModule<UsersInput, UsersItem>
+	internal sealed class ListUsers(WikiAbstractionLayer wal, UsersInput input) : ListModule<UsersInput, UsersItem>(wal, input)
 	{
-		#region Constructors
-		public ListUsers(WikiAbstractionLayer wal, UsersInput input)
-			: base(wal, input)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

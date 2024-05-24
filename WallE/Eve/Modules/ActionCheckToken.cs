@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionCheckToken : ActionModule<CheckTokenInput, CheckTokenResult>
+	internal sealed class ActionCheckToken(WikiAbstractionLayer wal) : ActionModule<CheckTokenInput, CheckTokenResult>(wal)
 	{
-		#region Constructors
-		public ActionCheckToken(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 125;
 

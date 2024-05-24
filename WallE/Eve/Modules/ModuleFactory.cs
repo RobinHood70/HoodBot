@@ -7,22 +7,13 @@
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
-	internal sealed class ModuleFactory : IModuleFactory
+	/// <remarks>Initializes a new instance of the <see cref="ModuleFactory" /> class.</remarks>
+	/// <param name="wal">The parent wiki abstraction layer.</param>
+	internal sealed class ModuleFactory(WikiAbstractionLayer wal) : IModuleFactory
 	{
 		#region Fields
 		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = [];
 		private readonly Dictionary<Type, PropertyFactoryMethod> properties = [];
-		private readonly WikiAbstractionLayer wal;
-		#endregion
-
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="ModuleFactory" /> class.</summary>
-		/// <param name="wal">The parent wiki abstraction layer.</param>
-		public ModuleFactory(WikiAbstractionLayer wal)
-		{
-			this.wal = wal;
-		}
 		#endregion
 
 		#region Public Methods
@@ -38,7 +29,7 @@
 				foreach (var propertyInput in propertyInputs)
 				{
 					var retval = this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod)
-						? factoryMethod(this.wal, propertyInput)
+						? factoryMethod(wal, propertyInput)
 						: throw new KeyNotFoundException(Globals.CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
 					yield return retval;
 				}
@@ -47,10 +38,10 @@
 
 		/// <summary>Creates a new continuation module.</summary>
 		/// <returns>A continuation module appropriate to the version of the wiki in use.</returns>
-		public ContinueModule CreateContinue() => this.wal.ContinueVersion switch
+		public ContinueModule CreateContinue() => wal.ContinueVersion switch
 		{
 			1 => new ContinueModule1(),
-			2 => new ContinueModule2(this.wal.SiteVersion),
+			2 => new ContinueModule2(wal.SiteVersion),
 			_ => new ContinueModuleUnknown(),
 		};
 
@@ -60,7 +51,7 @@
 		/// <param name="pageSetGenerator">The parent pageset.</param>
 		/// <returns>A module which corresponds to the input and has its IsGenerator property set.</returns>
 		public IGeneratorModule CreateGenerator<TInput>(TInput input, IPageSetGenerator pageSetGenerator)
-			where TInput : class, IGeneratorInput => this.generators[input.GetType()](this.wal, input, pageSetGenerator);
+			where TInput : class, IGeneratorInput => this.generators[input.GetType()](wal, input, pageSetGenerator);
 
 		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput, IPageSetGenerator)" />.</summary>
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>

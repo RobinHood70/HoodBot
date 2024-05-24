@@ -7,17 +7,10 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionEdit : ActionModule<EditInput, EditResult>
+	internal sealed class ActionEdit(WikiAbstractionLayer wal) : ActionModule<EditInput, EditResult>(wal)
 	{
 		#region Private Constants
 		private const int GetMultipartThreshold = 8000;
-		#endregion
-
-		#region Constructors
-		public ActionEdit(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties

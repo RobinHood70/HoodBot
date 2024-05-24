@@ -3,16 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 
-	public class CreateAccountInput
+	public class CreateAccountInput(string name, string password)
 	{
-		#region Constructors
-		public CreateAccountInput(string name, string password)
-		{
-			this.Name = name;
-			this.Password = password;
-		}
-		#endregion
-
 		#region Public Properties
 		public IDictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>(System.StringComparer.Ordinal);
 
@@ -24,9 +16,9 @@ namespace RobinHood70.WallE.Base
 
 		public bool MailPassword => this.Password == null && this.Email != null;
 
-		public string Name { get; }
+		public string Name { get; } = name;
 
-		public string? Password { get; }
+		public string? Password { get; } = password;
 
 		public string? RealName { get; set; }
 

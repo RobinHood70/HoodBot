@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 
-	internal sealed class OptionsInputInternal
+	internal sealed class OptionsInputInternal(string token, IEnumerable<string> change)
 	{
 		#region Constructors
 		public OptionsInputInternal(string token, string name, string? value)
@@ -11,16 +11,10 @@
 			this.OptionName = name;
 			this.OptionValue = value;
 		}
-
-		public OptionsInputInternal(string token, IEnumerable<string> change)
-		{
-			this.Change = change;
-			this.Token = token;
-		}
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<string> Change { get; set; }
+		public IEnumerable<string> Change { get; set; } = change;
 
 		public string? OptionName { get; set; }
 
@@ -30,7 +24,7 @@
 
 		public IEnumerable<string>? ResetKinds { get; set; }
 
-		public string Token { get; set; }
+		public string Token { get; set; } = token;
 		#endregion
 	}
 }

@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionPatrol : ActionModule<PatrolInput, PatrolResult>
+	internal sealed class ActionPatrol(WikiAbstractionLayer wal) : ActionModule<PatrolInput, PatrolResult>(wal)
 	{
-		#region Constructors
-		public ActionPatrol(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 114;
 

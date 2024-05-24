@@ -10,15 +10,8 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.28
-	internal sealed class ActionParse : ActionModule<ParseInput, ParseResult>
+	internal sealed class ActionParse(WikiAbstractionLayer wal) : ActionModule<ParseInput, ParseResult>(wal)
 	{
-		#region Constructors
-		public ActionParse(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 112;
 

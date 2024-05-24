@@ -9,15 +9,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class MetaUserInfo : QueryModule<UserInfoInput, UserInfoResult>
+	internal sealed class MetaUserInfo(WikiAbstractionLayer wal, UserInfoInput input) : QueryModule<UserInfoInput, UserInfoResult>(wal, input, null)
 	{
-		#region Constructors
-		public MetaUserInfo(WikiAbstractionLayer wal, UserInfoInput input)
-			: base(wal, input, null)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
@@ -54,7 +47,7 @@
 				remove: token.MustHave("remove").GetList<string>(),
 				removeSelf: token.MustHave("remove-self").GetList<string>());
 
-			Dictionary<string, RateLimitsItem?> rateLimits = new(System.StringComparer.Ordinal);
+			Dictionary<string, RateLimitsItem?> rateLimits = new(StringComparer.Ordinal);
 			if (result["ratelimits"] is JToken rateLimitsNode)
 			{
 				foreach (var entry in rateLimitsNode.Children<JProperty>())

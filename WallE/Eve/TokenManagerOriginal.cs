@@ -5,17 +5,13 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve.Modules;
 
-	internal class TokenManagerOriginal : ITokenManager
+	internal class TokenManagerOriginal(WikiAbstractionLayer wal) : ITokenManager
 	{
 		#region Static Fields
 		private static readonly string[] DummyPage = [":"]; // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
-		#endregion
 
+		#endregion
 		#region Constructors
-		public TokenManagerOriginal(WikiAbstractionLayer wal)
-		{
-			this.Wal = wal;
-		}
 		#endregion
 
 		#region Protected Static Properties
@@ -30,7 +26,7 @@
 		#region Protected Fields
 		protected Dictionary<string, string> SessionTokens { get; } = new Dictionary<string, string>(ValidTypes.Count, StringComparer.Ordinal);
 
-		protected WikiAbstractionLayer Wal { get; }
+		protected WikiAbstractionLayer Wal { get; } = wal;
 		#endregion
 
 		#region Public Methods

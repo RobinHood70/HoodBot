@@ -7,16 +7,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListAllRevisions : ListModule<AllRevisionsInput, AllRevisionsItem>, IGeneratorModule
+	internal sealed class ListAllRevisions(WikiAbstractionLayer wal, AllRevisionsInput input, IPageSetGenerator? pageSetGenerator) : ListModule<AllRevisionsInput, AllRevisionsItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListAllRevisions(WikiAbstractionLayer wal, AllRevisionsInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListAllRevisions(WikiAbstractionLayer wal, AllRevisionsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

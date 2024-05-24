@@ -6,15 +6,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionTokens : ActionModule<TokensInput, IReadOnlyDictionary<string, string>>
+	internal sealed class ActionTokens(WikiAbstractionLayer wal) : ActionModule<TokensInput, IReadOnlyDictionary<string, string>>(wal)
 	{
-		#region Constructors
-		public ActionTokens(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 120;
 

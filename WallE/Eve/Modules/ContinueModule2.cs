@@ -6,7 +6,7 @@
 	using static RobinHood70.WallE.Eve.Exceptions;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ContinueModule2 : ContinueModule
+	internal sealed class ContinueModule2(int siteVersion100) : ContinueModule
 	{
 		#region Public Constants
 		public const int ContinueMinimumVersion = 121;
@@ -18,17 +18,8 @@
 		#endregion
 
 		#region Fields
-		private readonly bool addContinue;
-		private readonly bool supportsBatch;
-		#endregion
-
-		#region Constructors
-		public ContinueModule2(int siteVersion100)
-		{
-			// Version 1.26 emits a warning when not emitting continue=, and lower versions require it, so we track it separately from supportsBatch.
-			this.addContinue = siteVersion100 <= BatchVersion;
-			this.supportsBatch = siteVersion100 >= BatchVersion;
-		}
+		private readonly bool addContinue = siteVersion100 <= BatchVersion;
+		private readonly bool supportsBatch = siteVersion100 >= BatchVersion;
 		#endregion
 
 		#region Public Override Properties
@@ -70,7 +61,7 @@
 				this.ContinueEntries.Clear();
 				foreach (var node in result.Children<JProperty>())
 				{
-					this.ContinueEntries.Add(node.Name, (string?)node.Value ?? throw MalformedTypeException(nameof(System.String), node));
+					this.ContinueEntries.Add(node.Name, (string?)node.Value ?? throw MalformedTypeException(nameof(String), node));
 				}
 
 				// Figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.

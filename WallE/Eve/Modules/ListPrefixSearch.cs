@@ -6,16 +6,11 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ListPrefixSearch : ListModule<PrefixSearchInput, WikiTitleItem>, IGeneratorModule
+	internal sealed class ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input, IPageSetGenerator? pageSetGenerator) : ListModule<PrefixSearchInput, WikiTitleItem>(wal, input, pageSetGenerator), IGeneratorModule
 	{
 		#region Constructors
 		public ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input)
 			: this(wal, input, null)
-		{
-		}
-
-		public ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

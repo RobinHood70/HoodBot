@@ -6,7 +6,7 @@
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
-	internal sealed class TokenManagerMeta : ITokenManager
+	internal sealed class TokenManagerMeta(WikiAbstractionLayer wal) : ITokenManager
 	{
 		#region Public Constants
 		public const int MinimumVersion = 124;
@@ -14,7 +14,6 @@
 		#endregion
 
 		#region Fields
-
 		private static readonly HashSet<string> ValidTypes = new(StringComparer.Ordinal)
 		{
 			Csrf,
@@ -25,22 +24,14 @@
 		};
 
 		private readonly Dictionary<string, string> sessionTokens = new(6, StringComparer.Ordinal);
-		private readonly WikiAbstractionLayer wal;
-		#endregion
-
-		#region Constructors
-		public TokenManagerMeta(WikiAbstractionLayer wal)
-		{
-			this.wal = wal;
-		}
 		#endregion
 
 		#region Public Override Methods
 		public string? LoginToken()
 		{
-			if (this.wal.SiteVersion >= MinimumVersionLogin)
+			if (wal.SiteVersion >= MinimumVersionLogin)
 			{
-				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, new TokensInput(Login)));
+				var tokens = wal.RunModuleQuery(new MetaTokens(wal, new TokensInput(Login)));
 				return tokens.Count == 0 ? null : tokens.First().Value;
 			}
 
@@ -65,7 +56,7 @@
 		{
 			if (this.sessionTokens.Count == 0)
 			{
-				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, new TokensInput(ValidTypes)));
+				var tokens = wal.RunModuleQuery(new MetaTokens(wal, new TokensInput(ValidTypes)));
 				foreach (var token in tokens)
 				{
 					this.sessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;

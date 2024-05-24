@@ -9,15 +9,8 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
+	internal sealed class ActionUpload(WikiAbstractionLayer wal) : ActionModule<UploadInputInternal, UploadResult>(wal)
 	{
-		#region Constructors
-		public ActionUpload(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 116;
 
@@ -55,7 +48,7 @@
 			ArgumentNullException.ThrowIfNull(result);
 			var resultText = result.MustHaveString("result");
 			IReadOnlyList<string> duplicates = [];
-			Dictionary<string, string> outputWarnings = new(System.StringComparer.Ordinal);
+			Dictionary<string, string> outputWarnings = new(StringComparer.Ordinal);
 			if (result["warnings"] is JToken warnings)
 			{
 				foreach (var prop in warnings.Children<JProperty>())

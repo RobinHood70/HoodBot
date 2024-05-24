@@ -14,21 +14,14 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class InterwikiBacklinksInput : ILimitableInput, IGeneratorInput
+	public class InterwikiBacklinksInput(string prefix) : ILimitableInput, IGeneratorInput
 	{
-		#region Constructors
-		public InterwikiBacklinksInput(string prefix)
-		{
-			this.Prefix = prefix;
-		}
-		#endregion
-
 		#region Public Properties
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public string Prefix { get; }
+		public string Prefix { get; } = prefix;
 
 		public InterwikiBacklinksProperties Properties { get; set; }
 

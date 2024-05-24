@@ -4,50 +4,33 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using RobinHood70.WikiCommon;
 
-	public class SearchResultItem : IApiTitle
+	public class SearchResultItem(int ns, string title, string? redirSnippet, string? redirTitle, string? sectionSnippet, string? sectionTitle, int size, string? snippet, DateTime? timestamp, string? titleSnippet, int wordCount) : IApiTitle
 	{
-		#region Constructors
-		public SearchResultItem(int ns, string title, string? redirSnippet, string? redirTitle, string? sectionSnippet, string? sectionTitle, int size, string? snippet, DateTime? timestamp, string? titleSnippet, int wordCount)
-		{
-			this.Namespace = ns;
-			this.Title = title;
-			this.RedirectSnippet = redirSnippet;
-			this.RedirectTitle = redirTitle;
-			this.SectionSnippet = sectionSnippet;
-			this.SectionTitle = sectionTitle;
-			this.Size = size;
-			this.Snippet = snippet;
-			this.Timestamp = timestamp;
-			this.TitleSnippet = titleSnippet;
-			this.WordCount = wordCount;
-		}
-		#endregion
-
 		#region Public Properties
-		public int Namespace { get; }
+		public int Namespace { get; } = ns;
 
-		public string? RedirectSnippet { get; }
+		public string? RedirectSnippet { get; } = redirSnippet;
 
-		public string? RedirectTitle { get; }
+		public string? RedirectTitle { get; } = redirTitle;
 
 		// Excluded because no common search engines ever used it and it's now deprecated.
 		//// public float Score { get; }
 
-		public string? SectionSnippet { get; }
+		public string? SectionSnippet { get; } = sectionSnippet;
 
-		public string? SectionTitle { get; }
+		public string? SectionTitle { get; } = sectionTitle;
 
-		public int Size { get; }
+		public int Size { get; } = size;
 
-		public string? Snippet { get; }
+		public string? Snippet { get; } = snippet;
 
-		public DateTime? Timestamp { get; }
+		public DateTime? Timestamp { get; } = timestamp;
 
-		public string Title { get; }
+		public string Title { get; } = title;
 
-		public string? TitleSnippet { get; }
+		public string? TitleSnippet { get; } = titleSnippet;
 
-		public int WordCount { get; }
+		public int WordCount { get; } = wordCount;
 		#endregion
 
 		#region Public Override Methods

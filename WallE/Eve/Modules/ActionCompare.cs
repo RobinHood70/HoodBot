@@ -5,15 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal sealed class ActionCompare : ActionModule<CompareInput, CompareResult>
+	internal sealed class ActionCompare(WikiAbstractionLayer wal) : ActionModule<CompareInput, CompareResult>(wal)
 	{
-		#region Constructors
-		public ActionCompare(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 118;
 
