@@ -21,23 +21,23 @@ namespace RobinHood70.WallE.Base
 	public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApiTitle
 	{
 		#region Fields
-		private List<ContributorsItem> contributors = [];
-		private List<CategoriesItem> categories = [];
-		private List<RevisionItem> deletedRevisions = [];
-		private List<DuplicateFilesItem> duplicateFiles = [];
-		private List<string> externalLinks = [];
-		private List<FileUsageItem> fileUsages = [];
-		private List<ImageInfoItem> imageInfoEntries = [];
-		private List<IApiTitle> images = [];
-		private List<InterwikiTitleItem> interwikiLinks = [];
-		private List<LanguageLinksItem> languageLinks = [];
-		private List<IApiTitle> links = [];
-		private List<LinksHereItem> linksHere = [];
-		private List<PagePropertiesItem> properties = [];
-		private List<RedirectsItem> redirects = [];
-		private List<RevisionItem> revisions = [];
-		private List<IApiTitle> templates = [];
-		private List<TranscludedInItem> transcludedIn = [];
+		private readonly List<ContributorsItem> contributors = [];
+		private readonly List<CategoriesItem> categories = [];
+		private readonly List<RevisionItem> deletedRevisions = [];
+		private readonly List<DuplicateFilesItem> duplicateFiles = [];
+		private readonly List<string> externalLinks = [];
+		private readonly List<FileUsageItem> fileUsages = [];
+		private readonly List<ImageInfoItem> imageInfoEntries = [];
+		private readonly List<IApiTitle> images = [];
+		private readonly List<InterwikiTitleItem> interwikiLinks = [];
+		private readonly List<LanguageLinksItem> languageLinks = [];
+		private readonly List<IApiTitle> links = [];
+		private readonly List<LinksHereItem> linksHere = [];
+		private readonly List<PagePropertiesItem> properties = [];
+		private readonly List<RedirectsItem> redirects = [];
+		private readonly List<RevisionItem> revisions = [];
+		private readonly List<IApiTitle> templates = [];
+		private readonly List<TranscludedInItem> transcludedIn = [];
 		#endregion
 
 		#region Public Properties
