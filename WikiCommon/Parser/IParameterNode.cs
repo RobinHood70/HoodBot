@@ -8,7 +8,7 @@
 		#region Properties
 
 		/// <summary>Gets a value indicating whether this <see cref="IParameterNode">parameter</see> is anonymous.</summary>
-		/// <value><c>true</c> if anonymous; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if anonymous; otherwise, <see langword="false"/>.</value>
 		bool Anonymous { get; }
 
 		/// <summary>Gets the name of the parameter, if not anonymous.</summary>

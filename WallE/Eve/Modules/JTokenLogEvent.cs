@@ -185,7 +185,8 @@
 				var valOffset = '0';
 				if (string.Equals(this.logAction, "event", StringComparison.Ordinal) || string.Equals(this.logAction, "revision", StringComparison.Ordinal))
 				{
-					var revisionType = (string?)this.parms[new string(valOffset, 1)];
+					var offsetText = new string(valOffset, 1);
+					var revisionType = (string?)this.parms[offsetText];
 					switch (revisionType)
 					{
 						case "archive":
@@ -194,10 +195,11 @@
 						case "revision":
 							this.Result.Add("revisiontype", revisionType);
 							valOffset++;
+							offsetText = new string(valOffset, 1);
 							break;
 					}
 
-					if (this.parms[new string(valOffset, 1)] is JToken logIdsNode && (string?)logIdsNode is string ids)
+					if (this.parms[offsetText] is JToken logIdsNode && (string?)logIdsNode is string ids)
 					{
 						List<long> logIds = [];
 						foreach (var commaSplit in ids.Split(TextArrays.Comma))
@@ -208,16 +210,18 @@
 						this.Result.Add("logids", logIds);
 					}
 
-					valOffset++;
-					if (this.parms[new string(valOffset, 1)] is JToken oldNode)
+					offsetText = new string(++valOffset, 1);
+					if (this.parms[offsetText] is JToken oldNode &&
+						(string?)oldNode is string oldText)
 					{
-						this.Result.Add("old", LogEventGetRDType((string?)oldNode));
+						this.Result.Add("old", LogEventGetRDType(oldText));
 					}
 
-					valOffset++;
-					if (this.parms[new string(valOffset, 1)] is JToken newNode)
+					offsetText = new string(++valOffset, 1);
+					if (this.parms[offsetText] is JToken newNode &&
+						(string?)newNode is string newText)
 					{
-						this.Result.Add("new", LogEventGetRDType((string?)newNode));
+						this.Result.Add("new", LogEventGetRDType(newText));
 					}
 				}
 			}

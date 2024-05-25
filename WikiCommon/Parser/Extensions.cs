@@ -60,12 +60,17 @@
 		public static IEnumerable<(string? Key, string Value)> ToKeyValue(this IEnumerable<IParameterNode> parameters)
 		{
 			ArgumentNullException.ThrowIfNull(parameters);
-			foreach (var param in parameters)
+			return ToKeyValue(parameters);
+
+			static IEnumerable<(string? Key, string Value)> ToKeyValue(IEnumerable<IParameterNode> parameters)
 			{
-				var value = param.Value.ToRaw();
-				yield return param.Name is NodeCollection name
-					? (name.ToRaw().Trim(), value.Trim())
-					: (null, value);
+				foreach (var param in parameters)
+				{
+					var value = param.Value.ToRaw();
+					yield return param.Name is NodeCollection name
+						? (name.ToRaw().Trim(), value.Trim())
+						: (null, value);
+				}
 			}
 		}
 		#endregion
@@ -93,7 +98,7 @@
 
 		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
 		/// <param name="parameter">The parameter.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
 		public static bool IsNullOrWhitespace(this IParameterNode? parameter) => parameter == null || parameter.Value.Count switch
 		{
@@ -168,7 +173,7 @@
 		/// <param name="parameter">The parameter.</param>
 		/// <param name="value">A variable to place the value into. Note that blank values will still be returned here with their full content, even when the return value is true.</param>
 		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static bool TryGetValue(this IParameterNode? parameter, out NodeCollection? value)
 		{
 			value = parameter?.Value;
@@ -178,7 +183,7 @@
 		/// <summary>Returns the value of a template parameter or the default value.</summary>
 		/// <param name="parameter">The parameter.</param>
 		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static string ValueOrDefault(this IParameterNode? parameter, string defaultValue)
 		{
 			if (parameter?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)
@@ -384,12 +389,17 @@
 		{
 			ArgumentNullException.ThrowIfNull(template);
 			ArgumentNullException.ThrowIfNull(parameterNames);
-			HashSet<string> nameSet = new(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-			foreach (var (name, parameter) in GetResolvedParameters(template))
+			return FindAll(template, ignoreCase, parameterNames);
+
+			static IEnumerable<IParameterNode> FindAll(ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 			{
-				if (nameSet.Contains(name))
+				HashSet<string> nameSet = new(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+				foreach (var (name, parameter) in GetResolvedParameters(template))
 				{
-					yield return parameter;
+					if (nameSet.Contains(name))
+					{
+						yield return parameter;
+					}
 				}
 			}
 		}
@@ -424,16 +434,21 @@
 		public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(this ITemplateNode template)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			var i = 0;
-			foreach (var parameter in template.Parameters)
+			return GetNumericParameters(template);
+
+			static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(ITemplateNode template)
 			{
-				if (parameter.Anonymous)
+				var i = 0;
+				foreach (var parameter in template.Parameters)
 				{
-					yield return (++i, parameter);
-				}
-				else if (int.TryParse(parameter.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
-				{
-					yield return (namedNumber, parameter);
+					if (parameter.Anonymous)
+					{
+						yield return (++i, parameter);
+					}
+					else if (int.TryParse(parameter.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
+					{
+						yield return (namedNumber, parameter);
+					}
 				}
 			}
 		}
@@ -501,11 +516,16 @@
 		public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			var anonIndex = 0;
-			foreach (var parameter in template.Parameters)
+			return GetResolvedParameters(template);
+
+			static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(ITemplateNode template)
 			{
-				var name = parameter.Name?.ToValue().Trim() ?? (++anonIndex).ToStringInvariant();
-				yield return (name, parameter);
+				var anonIndex = 0;
+				foreach (var parameter in template.Parameters)
+				{
+					var name = parameter.Name?.ToValue().Trim() ?? (++anonIndex).ToStringInvariant();
+					yield return (name, parameter);
+				}
 			}
 		}
 
@@ -554,29 +574,34 @@
 		public static IEnumerable<IList<IParameterNode>> ParameterCluster(this ITemplateNode template, int length)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			var parameters = template.GetNumericParametersSorted(true);
-			var i = 1;
-			List<IParameterNode> retval = [];
-			while (i < parameters.Count)
+			return ParameterCluster(template, length);
+
+			static IEnumerable<IList<IParameterNode>> ParameterCluster(ITemplateNode template, int length)
 			{
-				for (var j = 0; j < length; j++)
+				var parameters = template.GetNumericParametersSorted(true);
+				var i = 1;
+				List<IParameterNode> retval = [];
+				while (i < parameters.Count)
 				{
-					retval.Add(parameters[i + j]);
+					for (var j = 0; j < length; j++)
+					{
+						retval.Add(parameters[i + j]);
+					}
+
+					yield return retval;
+					retval = [];
+					i += length;
 				}
 
-				yield return retval;
-				retval = [];
-				i += length;
-			}
-
-			if (retval.Count > 0)
-			{
-				while (retval.Count < length)
+				if (retval.Count > 0)
 				{
-					retval.Add(template.Factory.ParameterNodeFromParts(string.Empty));
-				}
+					while (retval.Count < length)
+					{
+						retval.Add(template.Factory.ParameterNodeFromParts(string.Empty));
+					}
 
-				yield return retval;
+					yield return retval;
+				}
 			}
 		}
 
@@ -803,7 +828,7 @@
 		/// <summary>Returns the value of a template parameter or the default value.</summary>
 		/// <param name="template">The template to search.</param>
 		/// <param name="parameterName">The parameter name.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
 			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
 			nullNodes.Count != 0 &&
@@ -889,7 +914,7 @@
 		/// <param name="template">The template to search.</param>
 		/// <param name="parameterName">The parameter name.</param>
 		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static string ValueOrDefault(this ITemplateNode? template, string parameterName, string defaultValue)
 		{
 			if (template?.Find(parameterName)?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)

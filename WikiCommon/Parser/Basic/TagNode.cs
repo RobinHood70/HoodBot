@@ -78,8 +78,7 @@
 		}
 
 		/// <summary>Gets a value indicating whether the tag is self-closed.</summary>
-		/// <value>
-		///   <c>true</c> if this is a self-closed tag; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this is a self-closed tag; otherwise, <see langword="false"/>.</value>
 		public bool SelfClosed => this.Close == null;
 		#endregion
 
