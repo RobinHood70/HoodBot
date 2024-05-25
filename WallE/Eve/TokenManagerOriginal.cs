@@ -9,9 +9,6 @@
 	{
 		#region Static Fields
 		private static readonly string[] DummyPage = [":"]; // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
-
-		#endregion
-		#region Constructors
 		#endregion
 
 		#region Protected Static Properties

@@ -9,9 +9,6 @@
 
 	public sealed class ListGlobalBlocks(WikiAbstractionLayer wal, GlobalBlocksInput input) : ListModule<GlobalBlocksInput, GlobalBlocksResult>(wal, input)
 	{
-		#region Constructors
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion => 113;
 
