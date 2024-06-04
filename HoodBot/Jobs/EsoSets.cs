@@ -15,7 +15,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoItemSets : EditJob
+	internal sealed class EsoSets : EditJob
 	{
 		#region Private Constants
 		private const string Query =
@@ -43,21 +43,24 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Item Sets", "ESO Update")]
-		public EsoItemSets(JobManager jobManager, bool hideDiffs)
+		[JobInfo("Sets", "ESO Update")]
+		public EsoSets(JobManager jobManager, bool hideDiffs)
 			: base(jobManager)
 		{
 			jobManager.ShowDiffs = !hideDiffs;
 			if (this.Results is PageResultHandler results)
 			{
 				var title = results.Title;
-				results.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Item Sets");
+				results.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Sets");
 			}
+
+			// TODO: Rewrite Mod Header handling to be more intelligent.
+			this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
 		}
 		#endregion
 
 		#region Public Override Properties
-		public override string LogName => "Update ESO Item Sets";
+		public override string LogName => "Update ESO Sets";
 		#endregion
 
 		#region Protected Override Methods
@@ -120,6 +123,7 @@
 		}
 
 		protected override void PageMissing(Page page) => page.Text = blankText?
+			.Replace("«Mod Header»", "{{Mod Header|Gold Road}}", StringComparison.Ordinal)
 			.Replace("«Set»", this.sets[page.Title].Name, StringComparison.Ordinal);
 
 		protected override void PageLoaded(Page page)
@@ -181,7 +185,7 @@
 		private static List<SetData> GetSetData()
 		{
 			var retval = new List<SetData>();
-			foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new SetData(row)))
+			foreach (var item in Database.RunQuery(EsoLog.Connection, Query + "42pts", row => new SetData(row)))
 			{
 				retval.Add(item);
 			}
@@ -217,7 +221,7 @@
 
 			if (nonTrivial.Count > 0)
 			{
-				this.WriteLine("== Item Sets With Non-Trivial Updates ==");
+				this.WriteLine("== Sets With Non-Trivial Updates ==");
 				foreach (var (_, text) in nonTrivial)
 				{
 					this.WriteLine(text);
@@ -232,7 +236,7 @@
 					this.WriteLine();
 				}
 
-				this.WriteLine("== Item Sets With Trivial Updates==");
+				this.WriteLine("== Sets With Trivial Updates==");
 				this.WriteLine(string.Join(", ", trivial.Values));
 			}
 		}
