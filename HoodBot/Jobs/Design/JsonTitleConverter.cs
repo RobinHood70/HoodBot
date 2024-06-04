@@ -6,22 +6,16 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class JsonTitleConverter : JsonConverter<Title>
+	public class JsonTitleConverter(Site site) : JsonConverter<Title>
 	{
-		private readonly Site site;
-
-		public JsonTitleConverter(Site site)
-		{
-			this.site = site;
-		}
-
+		#region Public Override Methods
 		public override Title ReadJson(JsonReader reader, Type objectType, Title existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			ArgumentNullException.ThrowIfNull(reader);
 			var title = (string)reader
 				.Value
 				.PropertyNotNull(nameof(reader), nameof(reader.Value));
-			return TitleFactory.FromUnvalidated(this.site, title);
+			return TitleFactory.FromUnvalidated(site, title);
 		}
 
 		public override void WriteJson(JsonWriter writer, Title value, JsonSerializer serializer)
@@ -29,5 +23,6 @@
 			ArgumentNullException.ThrowIfNull(writer);
 			writer.WriteValue(value.FullPageName());
 		}
+		#endregion
 	}
 }

@@ -5,16 +5,9 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class WantedInMain : WikiJob
+	[method: JobInfo("Wanted Pages in Main Space", "Maintenance")]
+	internal sealed class WantedInMain(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		#region Constructors
-		[JobInfo("Wanted Pages in Main Space", "Maintenance")]
-		public WantedInMain(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void Main()
 		{

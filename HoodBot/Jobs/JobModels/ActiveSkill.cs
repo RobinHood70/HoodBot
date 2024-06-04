@@ -10,21 +10,12 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class ActiveSkill : Skill
+	internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 	{
 		#region Fields
-		private readonly int learnedLevel;
+		private readonly int learnedLevel = (int)row["learnedLevel"];
 		private readonly List<Morph> morphs = new(3);
-		private string skillType;
-		#endregion
-
-		#region Constructors
-		public ActiveSkill(IDataRecord row)
-			: base(row)
-		{
-			this.learnedLevel = (int)row["learnedLevel"];
-			this.skillType = EsoLog.ConvertEncoding((string)row["type"]);
-		}
+		private string skillType = EsoLog.ConvertEncoding((string)row["type"]);
 		#endregion
 
 		#region Public Override Methods

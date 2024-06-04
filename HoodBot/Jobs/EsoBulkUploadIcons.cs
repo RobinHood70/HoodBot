@@ -183,25 +183,15 @@
 		#endregion
 
 		#region Private Classes
-		private sealed class Part
+		private sealed class Part(string name, string type, string bodyPart)
 		{
-			#region Constructors
-			public Part(string name, string type, string bodyPart)
-			{
-				this.Name = name;
-				this.Type = type;
-				this.BodyPart = bodyPart;
-			}
-			#endregion
-
 			#region Public Properties
-			public string BodyPart { get; }
+			public string BodyPart { get; } = bodyPart;
 
-			public string Name { get; }
+			public string Name { get; } = name;
 
-			public string Type { get; }
+			public string Type { get; } = type;
 			#endregion
-
 		}
 
 		private sealed class Upload

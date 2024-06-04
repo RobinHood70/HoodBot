@@ -66,19 +66,11 @@
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
-	public abstract class TitleData<T> : TitleCollection<T>, ISiteSpecific, IWikiData
+	/// <remarks>Initializes a new instance of the <see cref="TitleData{TTitle}" /> class.</remarks>
+	/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
+	public abstract class TitleData<T>([NotNull, ValidatedNotNull] Site site) : TitleCollection<T>(site), ISiteSpecific, IWikiData
 		where T : ITitle
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="TitleData{TTitle}" /> class.</summary>
-		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
-		protected TitleData([NotNull, ValidatedNotNull] Site site)
-			: base(site)
-		{
-		}
-		#endregion
-
 		#region Public Methods
 
 		/// <inheritdoc/>

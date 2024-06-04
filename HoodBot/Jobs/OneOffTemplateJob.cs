@@ -5,16 +5,9 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class OneOffTemplateJob : TemplateJob
+	[method: JobInfo("One-Off Template Job")]
+	public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	{
-		#region Constructors
-		[JobInfo("One-Off Template Job")]
-		public OneOffTemplateJob(JobManager jobManager)
-				: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override string LogDetails => "Update " + this.TemplateName;
 

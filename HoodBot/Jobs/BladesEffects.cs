@@ -10,7 +10,8 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class BladesEffects : EditJob
+	[method: JobInfo("Create Effects", "Blades|")]
+	public class BladesEffects(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Static Fields
 		private static readonly HashSet<string> IgnoreList = new(StringComparer.Ordinal)
@@ -24,14 +25,7 @@
 			"Templar Set Burning Revenge",
 			"Templar Set Continuous Fire Damage",
 		};
-		#endregion
 
-		#region Constructors
-		[JobInfo("Create Effects", "Blades|")]
-		public BladesEffects(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

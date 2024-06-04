@@ -14,18 +14,11 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
+	[method: JobInfo("Terminals", "Starfield")]
+	internal sealed class SFTerminals(JobManager jobManager) : CreateOrUpdateJob<SFTerminals.Terminal>(jobManager)
 	{
 		#region Fields
 		private readonly MenuList menus = [];
-		#endregion
-
-		#region Constructors
-		[JobInfo("Terminals", "Starfield")]
-		public SFTerminals(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Properties

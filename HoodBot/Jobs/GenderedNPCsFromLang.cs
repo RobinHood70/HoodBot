@@ -7,14 +7,10 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 
-	internal sealed class GenderedNPCsFromLang : WikiJob
+	[method: JobInfo("NPCs from Lang")]
+	internal sealed class GenderedNPCsFromLang(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		[JobInfo("NPCs from Lang")]
-		public GenderedNPCsFromLang(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-
+		#region Protected Override Methods
 		protected override void Main()
 		{
 			TitleCollection esoNpcs = new(this.Site);
@@ -47,5 +43,6 @@
 
 			File.WriteAllLines(fileNameOut, npcs);
 		}
+		#endregion
 	}
 }

@@ -172,7 +172,7 @@
 						{
 							if (place.PlaceType == PlaceType.Unknown)
 							{
-								place.PlaceType = placeInfo.Type;
+								place.PlaceType = placeInfo.PlaceType;
 							}
 							else
 							{

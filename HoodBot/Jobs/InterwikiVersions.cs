@@ -7,16 +7,9 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 
-	internal sealed class InterwikiVersions : WikiJob
+	[method: JobInfo("Interwiki Versions", "External")]
+	internal sealed class InterwikiVersions(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		#region Constructors
-		[JobInfo("Interwiki Versions", "External")]
-		public InterwikiVersions(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void Main()
 		{

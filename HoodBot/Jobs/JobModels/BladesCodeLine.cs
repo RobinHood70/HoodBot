@@ -132,19 +132,17 @@
 		#endregion
 
 		#region Private Structs
-		private readonly struct IndentedLine
+		private readonly struct IndentedLine(int level, string text)
 		{
-			public IndentedLine(int level, string text)
-			{
-				this.Level = level;
-				this.Text = text;
-			}
+			#region Public Properties
+			public int Level { get; } = level;
 
-			public int Level { get; }
+			public string Text { get; } = text;
+			#endregion
 
-			public string Text { get; }
-
+			#region Public Override Methods
 			public override string ToString() => $"{this.Level.ToStringInvariant()}, {this.Text}";
+			#endregion
 		}
 		#endregion
 	}

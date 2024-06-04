@@ -10,16 +10,9 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
+	[method: JobInfo("Creatures", "Starfield")]
+	internal sealed class SFCreatures(JobManager jobManager) : CreateOrUpdateJob<SFCreatures.Creature>(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Creatures", "Starfield")]
-		public SFCreatures(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Override Properties
 		protected override string? Disambiguator => "creature";
 		#endregion

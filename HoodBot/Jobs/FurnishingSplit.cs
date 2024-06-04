@@ -10,7 +10,8 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
-	public class FurnishingSplit : ParsedPageJob
+	[method: JobInfo("Furnishing Split")]
+	public class FurnishingSplit(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Constants
 		private const string FurnishingPrefix = "ON-item-furnishing-";
@@ -19,14 +20,6 @@
 		#region Fields
 		private readonly List<string> issues = [];
 		private PageCollection? existingPages;
-		#endregion
-
-		#region Constructors
-		[JobInfo("Furnishing Split")]
-		public FurnishingSplit(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

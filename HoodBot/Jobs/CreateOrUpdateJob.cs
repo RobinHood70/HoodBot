@@ -6,16 +6,9 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	public abstract class CreateOrUpdateJob<T> : EditJob
+	public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobManager)
 		where T : notnull
 	{
-		#region Constructors
-		protected CreateOrUpdateJob(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Properties
 		protected bool Clobber { get; set; }
 		#endregion

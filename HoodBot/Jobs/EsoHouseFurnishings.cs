@@ -8,7 +8,8 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoHouseFurnishings : ParsedPageJob
+	[method: JobInfo("House Furnishings")]
+	internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Fields
 		private readonly Dictionary<string, string> linkSubstitutes = new(StringComparer.Ordinal)
@@ -30,14 +31,6 @@
 			["Pariah's Pinnacle"] = "mounted_decor"
 		};
 
-		#endregion
-
-		#region Constructors
-		[JobInfo("House Furnishings")]
-		public EsoHouseFurnishings(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

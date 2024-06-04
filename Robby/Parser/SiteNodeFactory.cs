@@ -6,23 +6,15 @@
 
 	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="NodeCollection"/>.</summary>
 	/// <seealso cref="IWikiNodeFactory" />
-	public class SiteNodeFactory : WikiNodeFactory
+	/// <remarks>Initializes a new instance of the <see cref="SiteNodeFactory"/> class.</remarks>
+	/// <param name="site">The <see cref="Site"/> value to be passed to those nodes that require it.</param>
+	public class SiteNodeFactory(Site site) : WikiNodeFactory
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="SiteNodeFactory"/> class.</summary>
-		/// <param name="site">The <see cref="Site"/> value to be passed to those nodes that require it.</param>
-		public SiteNodeFactory(Site site)
-		{
-			this.Site = site;
-		}
-		#endregion
-
 		#region Public Properties
 
 		/// <summary>Gets the site to use for site-specific operations like title resolution.</summary>
 		/// <value>The site.</value>
-		public Site Site { get; }
+		public Site Site { get; } = site;
 		#endregion
 
 		#region Public Override Methods

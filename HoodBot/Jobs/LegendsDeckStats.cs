@@ -10,18 +10,11 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class LegendsDeckStats : ParsedPageJob
+	[method: JobInfo("Update Deck Magicka Stats", "Legends")]
+	public class LegendsDeckStats(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Fields
 		private readonly Dictionary<string, int> cardPowers = new(StringComparer.Ordinal);
-		#endregion
-
-		#region Constructors
-		[JobInfo("Update Deck Magicka Stats", "Legends")]
-		public LegendsDeckStats(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

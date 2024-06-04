@@ -9,19 +9,12 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 
-	internal sealed class BladesFamilies : WikiJob
+	[method: JobInfo("Blades Families", "Blades")]
+	internal sealed class BladesFamilies(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
 		#region Fields
 		private readonly List<BladesEnemy> enemies = [];
 		private readonly List<BladesFamily> families = [];
-		#endregion
-
-		#region Constructors
-		[JobInfo("Blades Families", "Blades")]
-		public BladesFamilies(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

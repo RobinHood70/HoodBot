@@ -12,7 +12,8 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class UpdateLoreBookLists : EditJob
+	[method: JobInfo("Update Lore Book Entries", "Maintenance")]
+	public class UpdateLoreBookLists(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Private Constants
 		private const string TemplateName = "Lore Book Entry";
@@ -21,14 +22,6 @@
 		#region Fields
 		private readonly Dictionary<string, string> titleOverrides = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, List<string>> pageBooks = new(StringComparer.Ordinal);
-		#endregion
-
-		#region Constructors
-		[JobInfo("Update Lore Book Entries", "Maintenance")]
-		public UpdateLoreBookLists(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

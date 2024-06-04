@@ -2,14 +2,10 @@
 {
 	using System.Data;
 
-	internal sealed class PassiveRank : Rank
+	internal sealed class PassiveRank(IDataRecord row) : Rank(row)
 	{
-		public PassiveRank(IDataRecord row)
-			: base(row)
-		{
-			this.LearnedLevel = (int)row["learnedLevel"];
-		}
-
-		public int LearnedLevel { get; }
+		#region Public Properties
+		public int LearnedLevel { get; } = (int)row["learnedLevel"];
+		#endregion
 	}
 }

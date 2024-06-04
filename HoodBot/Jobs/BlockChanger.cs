@@ -8,7 +8,8 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 
-	internal sealed class BlockChanger : WikiJob
+	[method: JobInfo("Fix Infinite IP Blocks", "Maintenance")]
+	internal sealed class BlockChanger(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
 		#region Private Constants
 		private const int NumYears = 1;
@@ -16,14 +17,6 @@
 
 		#region Fields
 		private readonly List<Block> reblocks = [];
-		#endregion
-
-		#region Constructors
-		[JobInfo("Fix Infinite IP Blocks", "Maintenance")]
-		public BlockChanger(JobManager jobManager)
-			: base(jobManager, JobType.Write)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties

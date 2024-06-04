@@ -7,7 +7,8 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class BotRevert : EditJob
+	[method: JobInfo("Revert Bot Edits")]
+	internal sealed class BotRevert(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Private Constants
 		private const string EditSummary = "Revert Future/Lore Link edits";
@@ -15,14 +16,6 @@
 
 		#region Fields
 		private readonly SortedDictionary<Title, long> undos = [];
-		#endregion
-
-		#region Constructors
-		[JobInfo("Revert Bot Edits")]
-		public BotRevert(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Public Override Properties

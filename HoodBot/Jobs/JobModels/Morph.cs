@@ -6,30 +6,20 @@
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 
-	internal sealed class Morph
+	internal sealed class Morph(IDataRecord row)
 	{
-		#region Constructors
-		public Morph(IDataRecord row)
-		{
-			this.Name = EsoLog.ConvertEncoding((string)row["name"]);
-			this.CastingTime = EsoSpace.TimeToText((int)row["castTime"]);
-			this.EffectLine = EsoLog.ConvertEncoding((string)row["effectLines"]);
-			this.Target = EsoLog.ConvertEncoding((string)row["target"]);
-		}
-		#endregion
-
 		#region Public Properties
-		public string CastingTime { get; }
+		public string CastingTime { get; } = EsoSpace.TimeToText((int)row["castTime"]);
 
 		public string? Description { get; internal set; }
 
-		public string EffectLine { get; }
+		public string EffectLine { get; } = EsoLog.ConvertEncoding((string)row["effectLines"]);
 
-		public string Name { get; }
+		public string Name { get; } = EsoLog.ConvertEncoding((string)row["name"]);
 
 		public IList<ActiveRank> Ranks { get; } = new List<ActiveRank>(4);
 
-		public string Target { get; }
+		public string Target { get; } = EsoLog.ConvertEncoding((string)row["target"]);
 		#endregion
 
 		#region Public Static Methods

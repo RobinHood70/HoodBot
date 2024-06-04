@@ -3,16 +3,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
-	public class LinkFinderEsoCollections : LinkFinderJob
+	[method: JobInfo("Collections Link Finder", "ESO")]
+	public class LinkFinderEsoCollections(JobManager jobManager) : LinkFinderJob(jobManager, true)
 	{
-		#region Constructors
-		[JobInfo("Collections Link Finder", "ESO")]
-		public LinkFinderEsoCollections(JobManager jobManager)
-			: base(jobManager, true)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void LoadPages()
 		{

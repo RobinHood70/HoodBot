@@ -10,19 +10,12 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class LegendsSimilarList : TemplateJob
+	[method: JobInfo("List Similar Images", "Legends")]
+	internal sealed class LegendsSimilarList(JobManager jobManager) : TemplateJob(jobManager)
 	{
 		#region Fields
 		private int pageNumber;
 		private int resultCount;
-		#endregion
-
-		#region Constructors
-		[JobInfo("List Similar Images", "Legends")]
-		public LegendsSimilarList(JobManager jobManager)
-				: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Public Properties

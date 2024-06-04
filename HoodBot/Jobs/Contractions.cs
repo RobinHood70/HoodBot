@@ -7,18 +7,11 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class Contractions : WikiJob
+	[method: JobInfo("Contractions")]
+	internal sealed class Contractions(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
 		#region Static Fields
 		private static readonly Regex ContractionFinder = new(@"\b(aren[’']t|can[’']t|couldn[’']t|didn[’']t|doesn[’']t|don[’']t|hadn[’']t|hasn[’']t|haven[’']t|he[’']d|he[’']ll|he[’']s|I[’']d|I[’']ll|I[’']m|I[’']ve|isn[’']t|let[’']s|mightn[’']t|mustn[’']t|shan[’']t|she[’']d|she[’']ll|she[’']s|shouldn[’']t|that[’']s|there[’']s|they[’']d|they[’']ll|they[’']re|they[’']ve|we[’']d|we[’']ll|we[’']re|we[’']ve|weren[’']t|what[’']ll|what[’']re|what[’']s|what[’']ve|where[’']s|who[’']d|who[’']ll|who[’']re|who[’']s|who[’']ve|won[’']t|wouldn[’']t|you[’']d|you[’']ll|you[’']re|you[’']ve)\b", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		#endregion
-
-		#region Constructors
-		[JobInfo("Contractions")]
-		public Contractions(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

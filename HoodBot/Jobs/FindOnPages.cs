@@ -5,16 +5,9 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class FindOnPages : WikiJob
+	[method: JobInfo("Find On Pages")]
+	internal sealed class FindOnPages(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		#region Constructors
-		[JobInfo("Find On Pages")]
-		public FindOnPages(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override void Main()
 		{

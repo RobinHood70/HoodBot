@@ -733,47 +733,27 @@
 			#endregion
 		}
 
-		private sealed class Reward
+		private sealed class Reward(IDataRecord row)
 		{
-			public Reward(IDataRecord row)
-			{
-				this.CollectId = (int)row["collectId"];
-				this.ItemId = (int)row["itemId"];
-				this.RewardType = (short)row["type"];
-				this.Name = EsoLog.ConvertEncoding((string)row["name"]);
-				this.Quality = (sbyte)row["quality"];
-				this.Quantity = (int)row["quantity"];
-				this.QuestId = (long)row["questId"];
-			}
+			#region Public Properties
+			public int CollectId { get; } = (int)row["collectId"];
 
-			public int CollectId { get; }
+			public int ItemId { get; } = (int)row["itemId"];
 
-			public int ItemId { get; }
+			public int RewardType { get; } = (short)row["type"];
 
-			public int RewardType { get; }
+			public string Name { get; } = EsoLog.ConvertEncoding((string)row["name"]);
 
-			public string Name { get; }
+			public int Quality { get; } = (sbyte)row["quality"];
 
-			public int Quality { get; }
+			public int Quantity { get; } = (int)row["quantity"];
 
-			public int Quantity { get; }
-
-			public long QuestId { get; }
+			public long QuestId { get; } = (long)row["questId"];
+			#endregion
 		}
 
-		private sealed class Stage
+		private sealed class Stage(IDataRecord row)
 		{
-			#region Constructors
-			public Stage(IDataRecord row)
-			{
-				this.Id = (long)row["id"];
-				this.Text = EsoLog.ConvertEncoding((string)row["text"]);
-				this.Visibility = (Visibility)(sbyte)row["visibility"];
-				this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
-				this.QuestId = (long)row["questId"];
-			}
-			#endregion
-
 			#region Public Properties
 			public List<Condition> Conditions { get; } = [];
 
@@ -799,15 +779,15 @@
 				}
 			}
 
-			public long Id { get; }
+			public long Id { get; } = (long)row["id"];
 
-			public long QuestId { get; }
+			public long QuestId { get; } = (long)row["questId"];
 
-			public string Text { get; }
+			public string Text { get; } = EsoLog.ConvertEncoding((string)row["text"]);
 
-			public Visibility Visibility { get; }
+			public Visibility Visibility { get; } = (Visibility)(sbyte)row["visibility"];
 
-			public string Zone { get; }
+			public string Zone { get; } = EsoLog.ConvertEncoding((string)row["zone"]);
 			#endregion
 
 			#region Public Override Methods

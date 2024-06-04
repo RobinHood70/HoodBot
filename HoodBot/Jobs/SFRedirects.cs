@@ -7,16 +7,9 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class SFRedirects : CreateOrUpdateJob<string>
+	[method: JobInfo("Redirects", "Starfield")]
+	internal sealed class SFRedirects(JobManager jobManager) : CreateOrUpdateJob<string>(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Redirects", "Starfield")]
-		public SFRedirects(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Override Properties
 		protected override string? Disambiguator => null;
 		#endregion

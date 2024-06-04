@@ -11,16 +11,9 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class EsoFurnishingUpload : WikiJob
+	[method: JobInfo("Furnishing Icon Upload", "ESO")]
+	internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
-		#region Constructors
-		[JobInfo("Furnishing Icon Upload", "ESO")]
-		public EsoFurnishingUpload(JobManager jobManager)
-			: base(jobManager, JobType.Write)
-		{
-		}
-		#endregion
-
 		#region Public Override Properties
 		public override string LogName => "ESO Furnishing Upload";
 		#endregion

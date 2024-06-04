@@ -624,38 +624,24 @@
 		#endregion
 
 		#region Private Classes
-		private sealed class PageProtection
+		private sealed class PageProtection(string friendlyName, ProtectionLevel editProtection, ProtectionLevel moveProtection, ProtectionTemplateFunc? addProtectionTemplate, string header, string footer, bool noInclude, string reason)
 		{
-			#region Constructors
-			public PageProtection(string friendlyName, ProtectionLevel editProtection, ProtectionLevel moveProtection, ProtectionTemplateFunc? addProtectionTemplate, string header, string footer, bool noInclude, string reason)
-			{
-				this.FriendlyName = friendlyName;
-				this.EditProtection = editProtection;
-				this.MoveProtection = moveProtection;
-				this.Reason = reason;
-				this.AddProtectionTemplate = addProtectionTemplate;
-				this.Header = header;
-				this.Footer = footer;
-				this.NoInclude = noInclude;
-			}
-			#endregion
-
 			#region Public Properties
-			public ProtectionTemplateFunc? AddProtectionTemplate { get; }
+			public ProtectionTemplateFunc? AddProtectionTemplate { get; } = addProtectionTemplate;
 
-			public ProtectionLevel EditProtection { get; }
+			public ProtectionLevel EditProtection { get; } = editProtection;
 
-			public string Footer { get; }
+			public string Footer { get; } = footer;
 
-			public string FriendlyName { get; }
+			public string FriendlyName { get; } = friendlyName;
 
-			public string Header { get; }
+			public string Header { get; } = header;
 
-			public ProtectionLevel MoveProtection { get; }
+			public ProtectionLevel MoveProtection { get; } = moveProtection;
 
-			public bool NoInclude { get; }
+			public bool NoInclude { get; } = noInclude;
 
-			public string Reason { get; }
+			public string Reason { get; } = reason;
 			#endregion
 
 			#region Public Override Methods
@@ -663,40 +649,23 @@
 			#endregion
 		}
 
-		private sealed class ProtectedTitle : ITitle
+		private sealed class ProtectedTitle(Title title, PageProtection protection) : ITitle
 		{
-			#region Constructors
-			public ProtectedTitle(Title title, PageProtection protection)
-			{
-				this.Title = title;
-				this.Protection = protection;
-			}
-			#endregion
-
 			#region Public Properties
-			public PageProtection Protection { get; }
+			public PageProtection Protection { get; } = protection;
 
-			public Title Title { get; }
+			public Title Title { get; } = title;
 			#endregion
 		}
 
-		private sealed class ProtectionInfo
+		private sealed class ProtectionInfo(ICollection<int> namespaces, string regexPattern, PageProtection pageProtection)
 		{
-			#region Constructors
-			public ProtectionInfo(ICollection<int> namespaces, string regexPattern, PageProtection pageProtection)
-			{
-				this.Namespaces = namespaces;
-				this.SearchPattern = new Regex(regexPattern, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-				this.PageProtection = pageProtection;
-			}
-			#endregion
-
 			#region Public Properties
-			public ICollection<int> Namespaces { get; }
+			public ICollection<int> Namespaces { get; } = namespaces;
 
-			public PageProtection PageProtection { get; }
+			public PageProtection PageProtection { get; } = pageProtection;
 
-			public Regex SearchPattern { get; }
+			public Regex SearchPattern { get; } = new Regex(regexPattern, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			#endregion
 		}
 		#endregion

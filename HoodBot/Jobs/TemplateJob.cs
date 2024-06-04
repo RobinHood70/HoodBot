@@ -4,16 +4,9 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
-	public abstract class TemplateJob : ParsedPageJob
+	[method: JobInfo("Template Job")]
+	public abstract class TemplateJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Template Job")]
-		protected TemplateJob(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Abstract Properties
 		protected abstract string TemplateName { get; }
 		#endregion

@@ -7,16 +7,9 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class LabelNameRemover : TemplateJob
+	[method: JobInfo("Label Name Fixer")]
+	public class LabelNameRemover(JobManager jobManager) : TemplateJob(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Label Name Fixer")]
-		public LabelNameRemover(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Override Properties
 		protected override string TemplateName => "Online Collectible Summary";
 		#endregion

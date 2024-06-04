@@ -3,14 +3,10 @@
 	using System.Diagnostics;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class WatchTemplates : WikiJob
+	[method: JobInfo("Watch Template Space")]
+	internal sealed class WatchTemplates(JobManager jobManager) : WikiJob(jobManager, JobType.UnloggedWrite)
 	{
-		[JobInfo("Watch Template Space")]
-		public WatchTemplates(JobManager jobManager)
-			: base(jobManager, JobType.UnloggedWrite)
-		{
-		}
-
+		#region Protected Override Methods
 		protected override void Main()
 		{
 			var pages = this.Site.Watch(MediaWikiNamespaces.Template);
@@ -19,5 +15,6 @@
 				Debug.WriteLine(page.Title.PageName);
 			}
 		}
+		#endregion
 	}
 }

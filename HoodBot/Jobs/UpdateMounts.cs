@@ -10,18 +10,11 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class UpdateMounts : EditJob
+	[method: JobInfo("Update Mount IDs", "ESO")]
+	public class UpdateMounts(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Fields
 		private readonly SortedList<string, int> ids = new(StringComparer.OrdinalIgnoreCase);
-		#endregion
-
-		#region Constructors
-		[JobInfo("Update Mount IDs", "ESO")]
-		public UpdateMounts(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

@@ -14,20 +14,12 @@
 		NeedsEdited = Edit | Propose
 	}
 
-	public sealed class DetailedActions
+	public sealed class DetailedActions(ReplacementActions actions, string? reason)
 	{
-		#region Constructors
-		public DetailedActions(ReplacementActions actions, string? reason)
-		{
-			this.Actions = actions;
-			this.Reason = reason;
-		}
-		#endregion
-
 		#region Public Properties
-		public ReplacementActions Actions { get; private set; }
+		public ReplacementActions Actions { get; private set; } = actions;
 
-		public string? Reason { get; private set; }
+		public string? Reason { get; private set; } = reason;
 		#endregion
 
 		#region Public Methods

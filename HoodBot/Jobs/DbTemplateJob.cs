@@ -8,17 +8,10 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
-	public abstract class DbTemplateJob<TKey, TItem> : EditJob
+	[method: JobInfo("Template Job")]
+	public abstract class DbTemplateJob<TKey, TItem>(JobManager jobManager) : EditJob(jobManager)
 		where TKey : notnull
 	{
-		#region Constructors
-		[JobInfo("Template Job")]
-		protected DbTemplateJob(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Properties
 		protected IDictionary<TKey, TItem> DbItems { get; } = new Dictionary<TKey, TItem>();
 		#endregion

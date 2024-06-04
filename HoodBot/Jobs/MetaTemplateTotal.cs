@@ -5,7 +5,8 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class MetaTemplateTotal : WikiJob
+	[method: JobInfo("MetaTemplate Totals")]
+	internal sealed class MetaTemplateTotal(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
 		#region Static Fields
 		private static readonly string[] MetaTemplateCategories =
@@ -17,14 +18,6 @@
 			"MetaTemplate-Stack",
 			"MetaTemplate-Variables"
 		];
-		#endregion
-
-		#region Constructors
-		[JobInfo("MetaTemplate Totals")]
-		public MetaTemplateTotal(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods

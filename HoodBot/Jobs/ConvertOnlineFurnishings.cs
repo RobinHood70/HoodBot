@@ -9,7 +9,8 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class ConvertOnlineFurnishings : EditJob
+	[method: JobInfo("Convert Online Furnishings", "ESO")]
+	internal sealed class ConvertOnlineFurnishings(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Static Fields
 		private static readonly string[] AntiquityNames =
@@ -93,15 +94,6 @@
 			"vendortv",
 			"vendorwv"
 		];
-		#endregion
-
-		#region Constructors
-		[JobInfo("Convert Online Furnishings", "ESO")]
-		public ConvertOnlineFurnishings(JobManager jobManager)
-			: base(jobManager)
-		{
-			// jobManager.ShowDiffs = false;
-		}
 		#endregion
 
 		#region Protected Override Methods

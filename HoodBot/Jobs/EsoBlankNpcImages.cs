@@ -5,21 +5,14 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoBlankNpcImages : TemplateUsage
+	[method: JobInfo("NPCs Missing Image", "ESO")]
+	internal sealed class EsoBlankNpcImages(JobManager jobManager) : TemplateUsage(
+		jobManager,
+		["Online NPC Summary"],
+		true,
+		LocalConfig.BotDataSubPath("ESO NPCs No Images.txt"),
+		false)
 	{
-		#region Constructors
-		[JobInfo("NPCs Missing Image", "ESO")]
-		public EsoBlankNpcImages(JobManager jobManager)
-			: base(
-				  jobManager,
-				  ["Online NPC Summary"],
-				  true,
-				  LocalConfig.BotDataSubPath("ESO NPCs No Images.txt"),
-				  false)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override bool ShouldAddPage(ContextualParser parser) =>
 			parser.Page.Title.Namespace == UespNamespaces.Online &&

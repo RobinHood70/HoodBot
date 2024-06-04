@@ -8,8 +8,10 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class CheckArticleHeaders : WikiJob
+	[method: JobInfo("Check Article Headers", "Maintenance|")]
+	internal sealed class CheckArticleHeaders(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
+		#region Static Fields
 		private static readonly HashSet<string> BadHeaders = new(StringComparer.Ordinal)
 		{
 			"Bug",
@@ -19,17 +21,14 @@
 			"Quests",
 			"Related Quest"
 		};
+		#endregion
 
+		#region Fields
 		private readonly Dictionary<string, TitleCollection> exceptions = new(StringComparer.Ordinal);
-		private readonly int ns;
+		private readonly int ns = UespNamespaces.Online;
+		#endregion
 
-		[JobInfo("Check Article Headers", "Maintenance|")]
-		public CheckArticleHeaders(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-			this.ns = UespNamespaces.Online;
-		}
-
+		#region Protected Override Methods
 		protected override void Main()
 		{
 			this.LoadExceptionsForNamespace();
@@ -49,7 +48,9 @@
 				}
 			}
 		}
+		#endregion
 
+		#region Private Methods
 		private void LoadExceptionsForNamespace()
 		{
 			switch (this.ns)
@@ -80,5 +81,6 @@
 			||
 			(this.exceptions.TryGetValue(header, out var exceptionGroup) &&
 			exceptionGroup.Contains(page.Title));
+		#endregion
 	}
 }

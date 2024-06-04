@@ -5,19 +5,11 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class MissingNPCImages : TemplateJob
+	[method: JobInfo("Missing NPC Images", "Maintenance")]
+	public class MissingNPCImages(JobManager jobManager) : TemplateJob(jobManager)
 	{
 		#region Fields
-		private readonly TitleCollection allFiles;
-		#endregion
-
-		#region Constructors
-		[JobInfo("Missing NPC Images", "Maintenance")]
-		public MissingNPCImages(JobManager jobManager)
-				: base(jobManager)
-		{
-			this.allFiles = new TitleCollection(jobManager.Site);
-		}
+		private readonly TitleCollection allFiles = new(jobManager.Site);
 		#endregion
 
 		#region Public Override Properties

@@ -1,12 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
-	internal sealed class SettingsParameters
+	internal sealed class SettingsParameters(WikiInfoViewModel selectedItem)
 	{
-		public SettingsParameters(WikiInfoViewModel selectedItem)
-		{
-			this.SelectedItem = selectedItem;
-		}
-
-		public WikiInfoViewModel SelectedItem { get; }
+		#region Public Properties
+		public WikiInfoViewModel SelectedItem { get; } = selectedItem;
+		#endregion
 	}
 }

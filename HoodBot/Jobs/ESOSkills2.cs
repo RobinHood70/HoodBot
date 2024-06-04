@@ -7,16 +7,9 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class EsoSkills2 : CreateOrUpdateJob<EsoSkills2.Skill>
+	[method: JobInfo("Get Skills 2")]
+	internal sealed class EsoSkills2(JobManager jobManager) : CreateOrUpdateJob<EsoSkills2.Skill>(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Get Skills 2")]
-		public EsoSkills2(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Override Properties
 		protected override string? Disambiguator => "skill";
 		#endregion
@@ -30,7 +23,7 @@
 		{
 			var retval = new Dictionary<Title, Skill>();
 
-			this.OpenBrowser().GetAwaiter().GetResult();
+			OpenBrowser().GetAwaiter().GetResult();
 
 			return retval;
 		}
@@ -39,7 +32,7 @@
 		#endregion
 
 		#region Private Methods
-		private async Task OpenBrowser()
+		private static async Task OpenBrowser()
 		{
 			using var playwright = await Playwright.CreateAsync().ConfigureAwait(false);
 			var chromium = playwright.Chromium;
@@ -53,6 +46,5 @@
 		#region Internal Records
 		internal sealed record Skill(string SkillId);
 		#endregion
-
 	}
 }

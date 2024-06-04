@@ -4,14 +4,10 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	internal sealed class SmallImages : WikiJob
+	[method: JobInfo("Find Small Images")]
+	internal sealed class SmallImages(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
-		[JobInfo("Find Small Images")]
-		public SmallImages(JobManager jobManager)
-			: base(jobManager, JobType.ReadOnly)
-		{
-		}
-
+		#region Protected Override Methods
 		protected override void Main()
 		{
 			PageCollection files = new(this.Site, PageModules.FileInfo);
@@ -26,5 +22,6 @@
 				}
 			}
 		}
+		#endregion
 	}
 }

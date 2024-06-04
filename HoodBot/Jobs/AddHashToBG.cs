@@ -7,16 +7,9 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class AddHashToBG : ParsedPageJob
+	[method: JobInfo("Add hash to BG", "Maintenance")]
+	public class AddHashToBG(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
-		#region Constructors
-		[JobInfo("Add hash to BG", "Maintenance")]
-		public AddHashToBG(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-		#endregion
-
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Add hash to BG value";
 

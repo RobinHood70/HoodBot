@@ -5,19 +5,8 @@
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 
-	internal sealed class CastlesConditions : List<string>
+	internal sealed class CastlesConditions(CastlesData data, CultureInfo gameCulture) : List<string>
 	{
-		private readonly CastlesData data;
-		private readonly CultureInfo gameCulture;
-
-		#region Constructors
-		public CastlesConditions(CastlesData data, CultureInfo gameCulture)
-		{
-			this.data = data;
-			this.gameCulture = gameCulture;
-		}
-		#endregion
-
 		#region Public Propeties
 		public List<string> EffectFlags { get; } = [];
 		#endregion
@@ -27,10 +16,10 @@
 		{
 			this.AddActivationConditions(choice._rulingChoiceActivationConditions);
 			this.AddResult(this.GetRulerAssassinationChance(choice));
-			this.AddEffectFlagsResult(this.data.GetRulingFlags("Effect Flags", choice._effectRulingFlags));
-			this.AddEffectFlagsResult(this.data.GetRulingFlags("Ruler Flags", choice._effectRulerRulingFlags));
-			this.AddEffectFlagsResult(this.data.GetRulingFlags("Requester Flags", choice._effectRequesterRulingFlags));
-			this.AddEffectFlagsResult(this.data.GetRulingFlags("Co-Requester Flags", choice._effectCoRequesterRulingFlags));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Effect Flags", choice._effectRulingFlags));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Ruler Flags", choice._effectRulerRulingFlags));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Requester Flags", choice._effectRequesterRulingFlags));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Co-Requester Flags", choice._effectCoRequesterRulingFlags));
 			this.AddGenericConditions("Requester ", choice._requesterConditions);
 			this.AddGenericConditions("Co-Requester ", choice._coRequesterConditions);
 			var killChance = (int)choice._subjectKillPercentChance;
@@ -293,28 +282,28 @@
 			var id = (int)conditions._groupUid._uid.id;
 			if (id != 0)
 			{
-				this.AddResult("Group: " + this.data.Groups[id]);
+				this.AddResult("Group: " + data.Groups[id]);
 			}
 
 			this.AddResult("Group Happiness ", GetRangeTextGTLT((int)conditions._groupHappinessGreaterThan, (int)conditions._groupHappinessLessThan, string.Empty));
 			this.AddTags('>', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesGreaterThan);
 			this.AddTags('<', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesLessThan);
 			this.AddResult("Dynasty Level ", GetRangeTextGTLT((int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, string.Empty));
-			this.AddResult(this.data.GetRulingFlags("Ruling Flags", conditions._rulingFlags));
+			this.AddResult(data.GetRulingFlags("Ruling Flags", conditions._rulingFlags));
 			this.AddGenericConditions("Ruler ", conditions._rulerConditions);
 			this.AddBool("Alliance Member: ", conditions._allianceMember);
-			this.AddResult(this.data.GetPropConditions("Placed Prop - Any of: ", conditions._anyOfPlacedPropConditions));
-			this.AddResult(this.data.GetPropConditions("Placed Prop - All of: ", conditions._allOfPlacedPropConditions));
+			this.AddResult(data.GetPropConditions("Placed Prop - Any of: ", conditions._anyOfPlacedPropConditions));
+			this.AddResult(data.GetPropConditions("Placed Prop - All of: ", conditions._allOfPlacedPropConditions));
 			//// AddResult(list, this.GetEventConditions("Castle Events - Any of: ", conditions._anyOfCastleWideEventConditions));
 			//// AddResult(list, this.GetEventConditions("Castle Events - All of: ", conditions._allOfCastleWideEventConditions));
-			this.AddResult(this.data.GetArchetypes("Present in Castle - Any of: ", conditions._anyOfPresentInCastleSubjectArchetypeConditions));
-			this.AddResult(this.data.GetArchetypes("Present in Castle - All of: ", conditions._allOfPresentInCastleSubjectArchetypeConditions));
+			this.AddResult(data.GetArchetypes("Present in Castle - Any of: ", conditions._anyOfPresentInCastleSubjectArchetypeConditions));
+			this.AddResult(data.GetArchetypes("Present in Castle - All of: ", conditions._allOfPresentInCastleSubjectArchetypeConditions));
 			this.AddResult("Oil ", GetRangeTextGTLT((int)conditions._oilPercentageGreaterThan, (int)conditions._oilPercentageLessThan, "%"));
 			this.AddResult("Food ", GetRangeTextGTLT((int)conditions._foodPercentageGreaterThan, (int)conditions._foodPercentageLessThan, "%"));
-			this.AddResult(this.data.GetQuestConditions("Quests - Any of: ", conditions._anyOfCompletedQuestConditions));
-			this.AddResult(this.data.GetQuestConditions("Quests - All of: ", conditions._allOfCompletedQuestConditions));
+			this.AddResult(data.GetQuestConditions("Quests - Any of: ", conditions._anyOfCompletedQuestConditions));
+			this.AddResult(data.GetQuestConditions("Quests - All of: ", conditions._allOfCompletedQuestConditions));
 			//// Ignored as unused: _inProgressUnclaimedTask
-			this.AddResult(this.data.GetTaskPools("In-progress unclaimed task pool: ", conditions._inProgressUnclaimedTaskPool));
+			this.AddResult(data.GetTaskPools("In-progress unclaimed task pool: ", conditions._inProgressUnclaimedTaskPool));
 		}
 
 		private void AddBool(string text, dynamic value)
@@ -330,7 +319,7 @@
 		{
 			foreach (var entry in entries)
 			{
-				var desc = this.data.Tags[entry.Key].Trim();
+				var desc = data.Tags[entry.Key].Trim();
 				this.Add($"{desc} {sign} {entry.Value}{levels}");
 			}
 		}
@@ -340,7 +329,7 @@
 			var valueFloat = (float)value;
 			if (valueFloat != 0.0)
 			{
-				this.Add(text + valueFloat.ToString(this.gameCulture));
+				this.Add(text + valueFloat.ToString(gameCulture));
 			}
 		}
 
@@ -372,21 +361,21 @@
 			}
 
 			this.AddResult(intro + "Happiness ", GetRangeTextGTLT((int)conditions._happinessGreaterThan, (int)conditions._happinessLessThan, string.Empty));
-			this.AddResult(this.data.GetRulingFlags(intro + "Subject Ruling Flags", conditions._subjectRulingFlags));
-			this.AddResult(this.data.GetTraits(intro + "Traits include any of: ", conditions._anyOfTraitConditions));
-			this.AddResult(this.data.GetTraits(intro + "Traits include all of: ", conditions._allOfTraitConditions));
+			this.AddResult(data.GetRulingFlags(intro + "Subject Ruling Flags", conditions._subjectRulingFlags));
+			this.AddResult(data.GetTraits(intro + "Traits include any of: ", conditions._anyOfTraitConditions));
+			this.AddResult(data.GetTraits(intro + "Traits include all of: ", conditions._allOfTraitConditions));
 			this.AddResult(CastlesData.GetRaces(intro + "Race is ", conditions._anyOfRaceConditions));
 			this.AddResult(CastlesData.GetRaces(intro + "Race is not ", conditions._allOfRaceConditions));
-			this.AddResult(this.data.GetPropConditions(intro + "Props: ", conditions._anyOfAssignedToPropConditions));
-			this.AddResult(this.data.GetPropConditions(intro + "Props: ", conditions._allOfAssignedToPropConditions));
-			this.AddResult(this.data.GetArchetypes(intro + "Any of: ", conditions._anyOfArchetypeConditions));
-			this.AddResult(this.data.GetArchetypes(intro + "Not any of: ", conditions._allOfArchetypeConditions));
+			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions._anyOfAssignedToPropConditions));
+			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions._allOfAssignedToPropConditions));
+			this.AddResult(data.GetArchetypes(intro + "Any of: ", conditions._anyOfArchetypeConditions));
+			this.AddResult(data.GetArchetypes(intro + "Not any of: ", conditions._allOfArchetypeConditions));
 			this.AddResult(GetRelationshipConditions(intro + "Any of: ", conditions._anyOfRelationshipConditions));
 			this.AddResult(GetRelationshipConditions(intro + "All of: ", conditions._allOfRelationshipConditions));
 			this.AddInt(intro + "Last Subject Killer: ", conditions._lastSubjectKiller);
-			this.AddResult(this.data.GetGroups(intro + "Group any of: ", conditions._anyOfGroupConditions));
-			this.AddResult(this.data.GetGroups(intro + "Group all of: ", conditions._allOfGroupConditions));
-			this.AddResult(this.data.GetPropConditions(intro + "Requester any of same props: ", conditions._anyOfRequesterAssignedToSamePropConditions));
+			this.AddResult(data.GetGroups(intro + "Group any of: ", conditions._anyOfGroupConditions));
+			this.AddResult(data.GetGroups(intro + "Group all of: ", conditions._allOfGroupConditions));
+			this.AddResult(data.GetPropConditions(intro + "Requester any of same props: ", conditions._anyOfRequesterAssignedToSamePropConditions));
 		}
 
 		private void AddInt(string text, dynamic value)
@@ -394,7 +383,7 @@
 			var valueInt = (int)value;
 			if (valueInt != 0)
 			{
-				this.Add(text + valueInt.ToString("n0", this.gameCulture));
+				this.Add(text + valueInt.ToString("n0", gameCulture));
 			}
 		}
 
@@ -493,7 +482,7 @@
 				return null;
 			}
 
-			var result = "Ruler Assassination Chance: " + chance.ToString("n0", this.gameCulture) + '%';
+			var result = "Ruler Assassination Chance: " + chance.ToString("n0", gameCulture) + '%';
 			var range = GetRangeText((int)choice._rulerAssassinationMinDelaySecs, (int)choice._rulerAssassinationMaxDelaySecs);
 			if (range is not null)
 			{
