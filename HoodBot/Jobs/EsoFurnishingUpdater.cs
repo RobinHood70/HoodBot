@@ -136,11 +136,10 @@
 		#region Private Static Methods
 		private static void CheckBehavior(SiteTemplateNode template, Furnishing furnishing)
 		{
-			if (furnishing.Behavior?.Length > 0)
+			if (furnishing.Behavior is not null && furnishing.Behavior.Length > 0)
 			{
-				if (template.GetValue("behavior")?
-					.Replace(",,", ",", StringComparison.Ordinal)
-					.Trim(',').Length == 0)
+				var behavior = EsoSpace.TrimBehavior(template.GetValue("behavior"));
+				if (behavior is null || behavior.Length == 0)
 				{
 					template.Remove("behavior");
 				}

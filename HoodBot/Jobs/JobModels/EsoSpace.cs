@@ -16,6 +16,7 @@
 	internal static class EsoSpace
 	{
 		#region Static Fields
+		private static readonly char[] CommaOrSpace = [',', ' '];
 		private static VariablesPage? patchVarPage;
 		#endregion
 
@@ -75,6 +76,11 @@
 		}
 
 		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
+
+		public static string? TrimBehavior(string? behavior) => behavior?
+			.Trim()
+			.Replace(",,", ",", StringComparison.Ordinal)
+			.Trim(CommaOrSpace);
 		#endregion
 
 		#region Public WikiJob Extension Methods

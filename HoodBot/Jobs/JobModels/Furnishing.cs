@@ -67,7 +67,7 @@
 				this.TitleName = titleName;
 			}
 
-			var desc = EsoLog.ConvertEncoding((string)row["description"]);
+			var desc = (string)row["description"]; // Encoding conversion does not seem to be necessary here.
 			var sizeMatch = SizeFinder.Match(desc);
 			this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
 			desc = desc
@@ -78,9 +78,12 @@
 				? null
 				: desc;
 			var furnCategory = EsoLog.ConvertEncoding((string)row["furnCategory"]);
-			this.Behavior = (EsoLog.ConvertEncoding((string)row["tags"]))
-				.Replace(",,", ",", StringComparison.Ordinal)
-				.Trim(',');
+			var tags = (string?)row["tags"];
+			if (tags is not null)
+			{
+				this.Behavior = EsoSpace.TrimBehavior(EsoLog.ConvertEncoding(tags));
+			}
+
 			if (collectible)
 			{
 				this.FurnishingCategory = furnCategory;

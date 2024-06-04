@@ -88,6 +88,8 @@
 			[14] = "Prologue",
 			[15] = "Pledge",
 			[16] = "Companion",
+			// [17] = "Quest Type 17",
+			[18] = "Scribing",
 		};
 
 		private static readonly Dictionary<int, string> RepeatTypes = new()
@@ -208,14 +210,7 @@
 			}
 
 			var sb = new StringBuilder()
-				.AppendLine("{{Minimal|quest}}{{ONQP Header")
-				.AppendLine("|summaryWritten=")
-				.AppendLine("|summaryChecked=")
-				.AppendLine("|walkthroughWritten=")
-				.AppendLine("|walkthroughChecked=")
-				.AppendLine("|stagesWritten=")
-				.AppendLine("|stagesChecked=")
-				.Append("}}");
+				.Append("{{Minimal|quest}}");
 			if (quest.Mod != null)
 			{
 				sb
@@ -223,6 +218,16 @@
 					.Append(quest.Mod)
 					.Append("}}");
 			}
+
+			sb
+				.AppendLine("{{ONQP Header")
+				.AppendLine("|summaryWritten=")
+				.AppendLine("|summaryChecked=")
+				.AppendLine("|walkthroughWritten=")
+				.AppendLine("|walkthroughChecked=")
+				.AppendLine("|stagesWritten=")
+				.AppendLine("|stagesChecked=")
+				.Append("}}");
 
 			var questTypeText = QuestTypes[quest.Type]; // Split out because this can cause an error when a new type is introduced.
 			sb
@@ -651,6 +656,7 @@
 			public string? Mod => this.Zone switch
 			{
 				"Southern Elsweyr" => "Dragonhold",
+				"West Weald" => "Gold Road",
 				_ => null,
 			};
 
