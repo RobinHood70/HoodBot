@@ -8,7 +8,7 @@
 
 	public static class UespFunctions
 	{
-		private static Dictionary<string, string> IconAbbreviations = new(StringComparer.Ordinal)
+		private static readonly Dictionary<string, string> IconAbbreviations = new(StringComparer.Ordinal)
 		{
 			[string.Empty] = string.Empty,
 			["a"] = "armor-",

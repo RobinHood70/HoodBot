@@ -56,7 +56,6 @@
 
 		public UespNamespace FromTitle(Title title)
 		{
-			ArgumentNullException.ThrowIfNull(title);
 			var ns = title.Namespace.SubjectSpace;
 			return this.TryGetValue(ns.DecoratedName() + title.RootPageName(), out var retval) ? retval : this[ns.Name];
 		}

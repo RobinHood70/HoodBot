@@ -5,7 +5,7 @@
 	using System.IO;
 	using Newtonsoft.Json;
 
-	internal class CastlesData
+	internal sealed class CastlesData
 	{
 		#region Private Constants
 		public const string CommaSpace = ", ";
@@ -18,6 +18,13 @@
 		#endregion
 
 		#region Fields
+		private readonly Dictionary<int, string> archetypes = [];
+		private readonly List<string>[] propGroups = new List<string>[21];
+		private readonly Dictionary<int, string> propData = [];
+		private readonly Dictionary<int, string> quests = [];
+		private readonly Dictionary<int, string> rulingFlags = [];
+		private readonly Dictionary<int, string> taskPools = [];
+		private readonly Dictionary<int, string> traits = [];
 		private readonly CastlesTranslator translator;
 		#endregion
 
@@ -37,23 +44,9 @@
 		#endregion
 
 		#region Public Properties
-		private Dictionary<int, string> archetypes { get; } = [];
+		public Dictionary<int, string> Groups { get; } = [];
 
-		public Dictionary<int, string> groups { get; } = [];
-
-		private List<string>[] propGroups { get; } = new List<string>[21];
-
-		private Dictionary<int, string> propData { get; } = [];
-
-		private Dictionary<int, string> quests { get; } = [];
-
-		private Dictionary<int, string> rulingFlags { get; } = [];
-
-		public Dictionary<int, string> tags { get; } = [];
-
-		private Dictionary<int, string> taskPools { get; } = [];
-
-		private Dictionary<int, string> traits { get; } = [];
+		public Dictionary<int, string> Tags { get; } = [];
 		#endregion
 
 		#region Public Static Methods
@@ -107,7 +100,7 @@
 			{
 				var id = (int)item._groupUid._uid.id;
 				var condition = item._condition == 0 ? "not " : string.Empty;
-				var text = this.groups[id];
+				var text = this.Groups[id];
 				list.Add(condition + text);
 			}
 
@@ -224,7 +217,7 @@
 					var title = (string)item._displayName;
 					if (this.translator.GetLanguageEntry(title) is string desc)
 					{
-						this.groups.Add(id, desc);
+						this.Groups.Add(id, desc);
 					}
 				}
 			}
@@ -320,7 +313,7 @@
 			{
 				var id = (int)item._tagUid.id;
 				var desc = (string)item._description;
-				this.tags.Add(id, desc);
+				this.Tags.Add(id, desc);
 			}
 		}
 

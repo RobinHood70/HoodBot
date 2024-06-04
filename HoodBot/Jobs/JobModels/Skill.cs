@@ -78,7 +78,7 @@
 			if (!page.Exists)
 			{
 				page.Text =
-					"{{Minimal|Skill}}\n" +
+					"{{Minimal|Skill}}{{Mod Header|Gold Road}}\n" +
 					"{{Online Skill Summary}}\n" +
 					"\n" +
 					"<!--\n" +

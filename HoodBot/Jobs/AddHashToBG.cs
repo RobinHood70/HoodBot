@@ -9,12 +9,15 @@
 
 	public class AddHashToBG : ParsedPageJob
 	{
+		#region Constructors
 		[JobInfo("Add hash to BG", "Maintenance")]
 		public AddHashToBG(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
+		#endregion
 
+		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Add hash to BG value";
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
@@ -34,5 +37,6 @@
 				}
 			}
 		}
+		#endregion
 	}
 }

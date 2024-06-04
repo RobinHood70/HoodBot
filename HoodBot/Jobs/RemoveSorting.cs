@@ -5,7 +5,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
-	internal class RemoveSorting : EditJob
+	internal sealed class RemoveSorting : EditJob
 	{
 		#region Fields
 		private readonly TitleCollection categories;

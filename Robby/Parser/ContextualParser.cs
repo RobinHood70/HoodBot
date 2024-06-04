@@ -223,15 +223,20 @@
 		public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
 		{
 			ArgumentNullException.ThrowIfNull(findNames);
-			foreach (var templateNode in this.TemplateNodes)
+			return FindSiteTemplates(findNames);
+
+			IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
 			{
-				if (templateNode is SiteTemplateNode siteTemplate)
+				foreach (var templateNode in this.TemplateNodes)
 				{
-					foreach (var find in findNames)
+					if (templateNode is SiteTemplateNode siteTemplate)
 					{
-						if (siteTemplate.TitleValue == find)
+						foreach (var find in findNames)
 						{
-							yield return siteTemplate;
+							if (siteTemplate.TitleValue == find)
+							{
+								yield return siteTemplate;
+							}
 						}
 					}
 				}

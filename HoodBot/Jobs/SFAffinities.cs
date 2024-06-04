@@ -11,11 +11,11 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	[method: JobInfo("Affinities", "Starfield")]
-	internal class SFAffinities(JobManager jobManager) : EditJob(jobManager)
+	internal sealed class SFAffinities(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Fields
 		private readonly Dictionary<string, List<Affinity>> affinities = new(StringComparer.Ordinal);
-		private Page affinityPage;
+		private Page? affinityPage;
 		#endregion
 
 		#region Public Override Properties
@@ -71,7 +71,7 @@
 		{
 			var newPage = page.Exists
 				? page
-				: this.affinityPage;
+				: this.affinityPage ?? throw new InvalidOperationException();
 			var parser = new ContextualParser(newPage);
 			var sections = parser.ToSections(2);
 			var walkthroughNum = -1;
@@ -216,7 +216,7 @@
 		#endregion
 
 		#region Private Records
-		private record Affinity(string Name, string Context, string Andreja, string Barrett, string SamCoe, string SarahMorgan);
+		private sealed record Affinity(string Name, string Context, string Andreja, string Barrett, string SamCoe, string SarahMorgan);
 		#endregion
 	}
 }

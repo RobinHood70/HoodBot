@@ -305,7 +305,7 @@
 				Debug.WriteLine("  " + replacement);
 			}
 
-			Debug.WriteLine("*** Remember to run both the Item Sets and Skills jobs before deleting any unused replacements ***");
+			Debug.WriteLine("*** Remember to run both the Sets and Skills jobs before deleting any unused replacements ***");
 		}
 		#endregion
 

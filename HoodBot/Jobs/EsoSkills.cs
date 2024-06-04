@@ -71,6 +71,9 @@
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Skills");
 			}
+
+			// TODO: Rewrite Mod Header handling to be more intelligent.
+			this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
 		}
 		#endregion
 

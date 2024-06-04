@@ -1095,8 +1095,6 @@
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(Title from, Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
-			ArgumentNullException.ThrowIfNull(from);
-			ArgumentNullException.ThrowIfNull(to);
 			ArgumentNullException.ThrowIfNull(reason);
 			const string subPageName = "/SubPage";
 			Dictionary<string, string> disabledResult = new(StringComparer.Ordinal);

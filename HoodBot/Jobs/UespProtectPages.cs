@@ -407,11 +407,12 @@
 				protectionTemplate.Add(ProtectionString[protection.MoveProtection].ToLowerInvariant());
 			}
 
-			parser.InsertRange(insertPos,
-			[
+			var newNodes = new IWikiNode[]
+			{
 				parser.Factory.TextNode("// "),
 				protectionTemplate
-			]);
+			};
+			parser.InsertRange(insertPos, newNodes);
 
 			return insertPos + 2;
 		}
@@ -506,10 +507,7 @@
 			if (page.IsRedirect)
 			{
 				insertPos = nodes.FindIndex<ILinkNode>(0) + 1;
-				nodes.InsertRange(insertPos,
-				[
-					nodes.Factory.TextNode("\n"),
-				]);
+				nodes.InsertRange(insertPos, [nodes.Factory.TextNode("\n")]);
 				insertPos++;
 			}
 			else if (protection.NoInclude && (
@@ -531,12 +529,13 @@
 				if (insertPos == nodes.Count || nodes[insertPos] is ITextNode)
 				{
 					insertPos = 1;
-					nodes.InsertRange(0,
-					[
+					var newNodes = new IWikiNode[]
+					{
 						nodes.Factory.IgnoreNode("<noinclude>"),
 						nodes.Factory.IgnoreNode("</noinclude>"),
 						nodes.Factory.TextNode("\n")
-					]);
+					};
+					nodes.InsertRange(0, newNodes);
 				}
 				else
 				{

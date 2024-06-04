@@ -123,10 +123,10 @@
 			var biomes = item.Biomes.Count == 0
 				? string.Empty
 				: ("\n* " + string.Join("\n* ", item.Biomes));
+			/*
 			var gravityText = item.Gravity == 0
 				? string.Empty
 				: item.Gravity?.ToStringInvariant() ?? string.Empty;
-			/*
 			template.UpdateIfEmpty("system", item.StarName);
 			template.UpdateIfEmpty("type", item.Type);
 			template.UpdateIfEmpty("gravity", gravityText);
@@ -158,7 +158,6 @@
 		#endregion
 
 		#region Private Methods
-		private static int CombineId(string star, string planet) => (int.Parse(star, CultureInfo.CurrentCulture) << 8) + int.Parse(planet, CultureInfo.CurrentCulture);
 
 		/// <summary>
 		/// Retrieves dictionary of biomes from biomedata.csv.
@@ -226,14 +225,9 @@
 			foreach (var row in csv)
 			{
 				var planetName = row["Planet"];
-				if (!faunaCounts.ContainsKey(planetName))
-				{
-					faunaCounts[planetName] = 1;
-				}
-				else
-				{
-					faunaCounts[planetName]++;
-				}
+				faunaCounts[planetName] = faunaCounts.TryGetValue(planetName, out var value)
+					? ++value
+					: 1;
 			}
 
 			foreach (var fauna in faunaCounts)

@@ -5,12 +5,10 @@
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 
-	internal class CastlesConditions : List<string>
+	internal sealed class CastlesConditions : List<string>
 	{
 		private readonly CastlesData data;
 		private readonly CultureInfo gameCulture;
-
-		public List<string> EffectFlags { get; } = [];
 
 		#region Constructors
 		public CastlesConditions(CastlesData data, CultureInfo gameCulture)
@@ -18,6 +16,10 @@
 			this.data = data;
 			this.gameCulture = gameCulture;
 		}
+		#endregion
+
+		#region Public Propeties
+		public List<string> EffectFlags { get; } = [];
 		#endregion
 
 		#region Public Methods
@@ -291,7 +293,7 @@
 			var id = (int)conditions._groupUid._uid.id;
 			if (id != 0)
 			{
-				this.AddResult("Group: " + this.data.groups[id]);
+				this.AddResult("Group: " + this.data.Groups[id]);
 			}
 
 			this.AddResult("Group Happiness ", GetRangeTextGTLT((int)conditions._groupHappinessGreaterThan, (int)conditions._groupHappinessLessThan, string.Empty));
@@ -328,7 +330,7 @@
 		{
 			foreach (var entry in entries)
 			{
-				var desc = this.data.tags[entry.Key].Trim();
+				var desc = this.data.Tags[entry.Key].Trim();
 				this.Add($"{desc} {sign} {entry.Value}{levels}");
 			}
 		}

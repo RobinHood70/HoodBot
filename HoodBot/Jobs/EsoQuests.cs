@@ -88,7 +88,7 @@
 			[14] = "Prologue",
 			[15] = "Pledge",
 			[16] = "Companion",
-			// [17] = "Quest Type 17",
+			//// [17] = "Quest Type 17",
 			[18] = "Scribing",
 		};
 

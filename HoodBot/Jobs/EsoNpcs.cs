@@ -35,6 +35,9 @@
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO NPCs");
 			}
+
+			// TODO: Rewrite Mod Header handling to be more intelligent.
+			this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
 		}
 		#endregion
 
@@ -386,7 +389,7 @@
 			UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
 
 			return new StringBuilder()
-				.Append("{{Minimal|NPC}}")
+				.Append("{{Minimal|NPC}}{{Mod Header|Gold Road}}")
 				.AppendLine(WikiTextVisitor.Raw(template))
 				.AppendLine()
 				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")

@@ -392,7 +392,7 @@
 					case 0:
 						sb
 							.Append("|damagetype=")
-							.AppendLine(DamageTypeInfo.DamageTypes[0]);
+							.AppendLine(DamageTypeInfo.GetDamageType(0));
 						break;
 					case 1:
 					case 2:
@@ -589,9 +589,10 @@
 			#endregion
 		}
 
-		private sealed class DamageTypeInfo
+		private sealed class DamageTypeInfo(JToken token)
 		{
-			public static readonly string[] DamageTypes =
+			#region Public Properties
+			private static readonly string[] DamageTypes =
 			[
 				"weapon",
 				"slashing",
@@ -603,17 +604,18 @@
 				"poison"
 			];
 
-			public DamageTypeInfo(JToken token)
-			{
-				this.DamageType = DamageTypes[(int?)token["_type"] ?? 0];
-				this.PercentOfTotal = (float?)token["_percentOfTotal"] is float percent ? (int)(percent * 100) : 100;
-			}
+			public string DamageType { get; } = DamageTypes[(int?)token["_type"] ?? 0];
 
-			public string DamageType { get; set; }
+			public int PercentOfTotal { get; } = (float?)token["_percentOfTotal"] is float percent ? (int)(percent * 100) : 100;
+			#endregion
 
-			public int PercentOfTotal { get; set; }
+			#region Public Static Methods
+			public static string GetDamageType(int damageType) => DamageTypes[damageType];
+			#endregion
 
+			#region Public Override Methods
 			public override string ToString() => $"{this.DamageType}: {this.PercentOfTotal.ToString(CultureInfo.CurrentCulture)}";
+			#endregion
 		}
 		#endregion
 	}

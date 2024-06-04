@@ -350,7 +350,7 @@
 		#endregion
 
 		#region Private Classes
-		private class ArticleInfo(string articles, string articleStarts, string exceptions, string exceptionStarts)
+		private sealed class ArticleInfo(string articles, string articleStarts, string exceptions, string exceptionStarts)
 		{
 			#region Public Properties
 			public string[] Articles { get; } = articles.Split(TextArrays.Pipe);

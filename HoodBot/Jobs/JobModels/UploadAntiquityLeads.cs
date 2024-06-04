@@ -14,7 +14,7 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	[method: JobInfo("Upload Antiquity Leads")]
-	internal class UploadAntiquityLeads(JobManager jobManager) : EditJob(jobManager)
+	internal sealed class UploadAntiquityLeads(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Fields
 		private readonly Dictionary<string, Page> originalFileNames = [];
@@ -193,7 +193,7 @@
 		#endregion
 
 		#region Private Classes
-		private class Lead(IDataRecord row)
+		private sealed class Lead(IDataRecord row)
 		{
 			#region Public Static Properties
 			public static string Prefix => "ON-icon-lead-";

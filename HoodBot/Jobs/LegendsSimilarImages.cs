@@ -48,7 +48,7 @@
 						}
 						else if (!this.primaryLookup.TryAdd(title, firstTitle))
 						{
-							Debug.WriteLine($"\nDuplicate entries for {title.FullPageName}");
+							Debug.WriteLine($"\nDuplicate entries for {title.FullPageName()}");
 							Debug.WriteLine("  " + this.primaryLookup[title]);
 							Debug.WriteLine("  " + first);
 						}

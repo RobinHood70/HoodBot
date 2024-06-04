@@ -38,6 +38,9 @@
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Collectibles");
 			}
+
+			// TODO: Rewrite Mod Header handling to be more intelligent.
+			this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
 		}
 		#endregion
 
@@ -60,7 +63,7 @@
 				{
 					if (tag.InnerText?.Trim() is string blankTemplate)
 					{
-						this.blankText = blankTemplate;
+						this.blankText = "{{Mod Header|Gold Road}}" + blankTemplate;
 					}
 				}
 			}

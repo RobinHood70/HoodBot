@@ -202,6 +202,7 @@
 		/// <remarks>Limitations apply only to the current collection; result collections will inherently be unfiltered to allow for cross-namespace redirection. Filtering can be added to result collections after they are returned.</remarks>
 		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
 
+		/// <summary>Randomize the collection order.</summary>
 		public void Shuffle()
 		{
 			var random = new Random();

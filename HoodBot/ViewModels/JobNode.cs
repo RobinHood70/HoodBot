@@ -9,7 +9,7 @@
 	public sealed class JobNode : TreeNode
 	{
 		#region Constructors
-		public JobNode(TreeNode parent, JobInfo jobInfo)
+		public JobNode(TreeNode? parent, JobInfo jobInfo)
 			: base(parent, jobInfo.NotNull().Name)
 		{
 			this.JobInfo = jobInfo;
@@ -25,24 +25,23 @@
 		{
 			var jobList = JobInfo.GetAllJobs();
 			var jobGroups = MoveJobsIntoGroups(jobList);
-			TreeNode root = new(null, "<Root>");
+			var root = new TreeNode(null, "<Root>");
 			foreach (var jobGroup in jobGroups)
 			{
-				TreeNode groupNode;
+				TreeNode group;
 				if (jobGroup.Key.Length == 0)
 				{
-					groupNode = root;
+					group = root;
 				}
 				else
 				{
-					groupNode = new TreeNode(root, jobGroup.Key);
-					root.AddChild(groupNode);
+					group = new TreeNode(root, jobGroup.Key);
+					root.AddChild(group);
 				}
 
 				foreach (var job in jobGroup.Value)
 				{
-					var child = job.Groups.Count == 0 ? new JobNode(groupNode, job) : new JobNode(groupNode, job);
-					groupNode.AddChild(child);
+					group.AddChild(new JobNode(group, job));
 				}
 			}
 

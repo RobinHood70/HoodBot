@@ -9,7 +9,7 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <param name="text">The text.</param>
 		/// <param name="editSummary">The edit summary.</param>
-		/// <param name="isMinor">if set to <c>true</c> [is minor].</param>
+		/// <param name="isMinor">if set to <see langword="true"/> [is minor].</param>
 		public DiffContent(string fullPageName, string text, string editSummary, bool isMinor)
 		{
 			this.FullPageName = fullPageName;

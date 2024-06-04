@@ -14,7 +14,7 @@
 	public class Page : ITitle
 	{
 		#region Fields
-		private readonly Dictionary<Title, BacklinksTypes> backlinks = new();
+		private readonly Dictionary<Title, BacklinksTypes> backlinks = [];
 		private readonly List<Category> categories = [];
 		private readonly List<Title> links = [];
 		private readonly Dictionary<string, string> properties = new(StringComparer.Ordinal);
@@ -246,7 +246,7 @@
 		/// <value><see langword="true" /> if invalid; otherwise, <see langword="false" />.</value>
 		public bool IsInvalid { get; protected set; }
 
-		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
 		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
 		public bool IsLoaded { get; protected set; }
 

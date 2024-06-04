@@ -238,7 +238,7 @@
 				return line;
 			}
 
-			Debug.WriteLine($"Page {page.Title.FullPageName}, Default: {line}");
+			Debug.WriteLine($"Page {page.Title.FullPageName()}, Default: {line}");
 			return line;
 		}
 		#endregion

@@ -117,7 +117,6 @@
 			var toEncoding = Encoding.UTF8;
 			var bgBytes = fromEncoding.GetBytes(text);
 			return toEncoding.GetString(bgBytes);
-
 		}
 
 		public static string? ExtractItemId(string itemLinkText)
@@ -189,9 +188,9 @@
 			var query = "SELECT zoneName, subZoneName, mapName, description, mapType, mapContentType, mapFilterType, isDungeon FROM uesp_esolog.zones";
 			foreach (var row in Database.RunQuery(Connection, query))
 			{
-				var mapName = EsoLog.ConvertEncoding((string)row["mapName"]);
-				var subZoneName = EsoLog.ConvertEncoding((string)row["subZoneName"]);
-				var zoneName = EsoLog.ConvertEncoding((string)row["zoneName"]);
+				var mapName = ConvertEncoding((string)row["mapName"]);
+				var subZoneName = ConvertEncoding((string)row["subZoneName"]);
+				var zoneName = ConvertEncoding((string)row["zoneName"]);
 				var name = subZoneName.Length > 0
 						? subZoneName
 						: zoneName;

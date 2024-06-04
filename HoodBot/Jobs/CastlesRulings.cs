@@ -239,14 +239,14 @@
 			dynamic obj = serializer.Deserialize(jsonReader) ?? throw new InvalidOperationException();
 			foreach (var rulingsGroupName in RulingsGroupNames)
 			{
-				var rulings = new SortedList<string, Ruling>(StringComparer.Ordinal);
+				var rulingList = new SortedList<string, Ruling>(StringComparer.Ordinal);
 				var group = obj[rulingsGroupName];
 				if (group is not null)
 				{
 					foreach (var rulingObject in group)
 					{
 						var localRuling = this.GetRuling(rulingsGroupName, rulingObject);
-						rulings.Add(localRuling.Name, localRuling);
+						rulingList.Add(localRuling.Name, localRuling);
 						this.rulings.Add(localRuling.Name, localRuling);
 					}
 				}
@@ -349,7 +349,7 @@
 		#endregion
 
 		#region Private Classes
-		private class Choice
+		private sealed class Choice
 		{
 			#region Fields
 			private readonly CastlesData data;
@@ -393,12 +393,12 @@
 			#endregion
 		}
 
-		private class Choices : KeyedCollection<int, Choice>
+		private sealed class Choices : KeyedCollection<int, Choice>
 		{
 			protected override int GetKeyForItem(Choice item) => item.Id;
 		}
 
-		private class Ruling(string group, string name, string text, List<string> conditions, Choices choices)
+		private sealed class Ruling(string group, string name, string text, List<string> conditions, Choices choices)
 		{
 			public Choices Choices { get; } = choices;
 

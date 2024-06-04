@@ -230,7 +230,7 @@
 					newTitle.PageName.Contains("-item-", StringComparison.Ordinal)) &&
 					string.Equals(noItem1, noItem2, StringComparison.Ordinal))
 				{
-					Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName} with\n  {newTitle.FullPageName}");
+					Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName()} with\n  {newTitle.FullPageName()}");
 				}
 			}
 		}

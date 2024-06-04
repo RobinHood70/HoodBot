@@ -12,7 +12,7 @@
 	using RobinHood70.WikiCommon;
 
 	[method: JobInfo("Import Blocks")]
-	internal class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
+	internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
 		#region Static Fields
 		private static readonly Regex BlockFilter;
@@ -256,7 +256,6 @@
 
 				return new CommonBlock(address, expiry, source);
 			}
-
 		}
 		#endregion
 	}

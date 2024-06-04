@@ -268,7 +268,7 @@
 		public IDictionary<ParameterType, EmbeddedValue> Parameters { get; } = new Dictionary<ParameterType, EmbeddedValue>();
 
 		/// <summary>Gets a value indicating whether any overlapping parameters were dropped during initial parsing (e.g., left|right, multiple captions).</summary>
-		/// <value><c>true</c> if parameters were dropped; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if parameters were dropped; otherwise, <see langword="false"/>.</value>
 		public bool ParametersDropped { get; private set; }
 
 		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey; for images, this is the caption.</summary>
@@ -351,18 +351,23 @@
 		{
 			ArgumentNullException.ThrowIfNull(factory);
 			ArgumentNullException.ThrowIfNull(tag);
-			if (tag.InnerText?.Trim() is string innerText &&
-				innerText.Length > 0)
+			return FromGalleryNode(factory, tag);
+
+			static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
 			{
-				var ns = factory.Site[MediaWikiNamespaces.File];
-				var lines = innerText.Split(TextArrays.LineFeed);
-				foreach (var line in lines)
+				if (tag.InnerText?.Trim() is string innerText &&
+							innerText.Length > 0)
 				{
-					if (line.Trim() is var trimmedLine && trimmedLine.Length > 0)
+					var ns = factory.Site[MediaWikiNamespaces.File];
+					var lines = innerText.Split(TextArrays.LineFeed);
+					foreach (var line in lines)
 					{
-						var linkNode = factory.LinkNodeFromWikiText("[[" + trimmedLine + " ]]");
-						TrimTrailingSpace(linkNode);
-						yield return FromLinkNode(ns, linkNode);
+						if (line.Trim() is var trimmedLine && trimmedLine.Length > 0)
+						{
+							var linkNode = factory.LinkNodeFromWikiText("[[" + trimmedLine + " ]]");
+							TrimTrailingSpace(linkNode);
+							yield return FromLinkNode(ns, linkNode);
+						}
 					}
 				}
 			}

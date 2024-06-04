@@ -146,11 +146,11 @@
 			AddDateTime(parms, this.start);
 			AddDateTime(parms, this.end);
 
-			List<IWikiNode> nodes =
-				[
-					factory.TemplateNodeFromParts("/Entry", false, parms),
-					factory.TextNode("\n")
-				];
+			var nodes = new IWikiNode[]
+			{
+				factory.TemplateNodeFromParts("/Entry", false, parms),
+				factory.TextNode("\n")
+			};
 			parser.InsertRange(firstEntry, nodes);
 			parser.UpdatePage();
 		}
