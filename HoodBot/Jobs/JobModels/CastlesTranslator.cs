@@ -16,16 +16,20 @@
 		private const string SpaceSlash = " / ";
 		#endregion
 
+		#region Private Static Fields
+
+		// For now, these are static English. Getting them from the files was either non-obvious or more trouble than it was worth.
+		private static readonly string[] Relationships = ["Parent", "Child", "Sibling", "Aunt/Uncle", "Nephew/Niece", "Cousin", "Grandparent", "Grandchild", "Spouse", "Friend", "Lover", "Enemy"];
+		private static readonly string[] Requesters = ["Ruler", "Requester", "Co-Requester"];
+		#endregion
+
 		#region Fields
 		private readonly CultureInfo culture;
 		private readonly Dictionary<string, string> languageEntries = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string> sentences = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string[]> terms = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string[]> variations = new(StringComparer.Ordinal);
-		private readonly string[] indefiniteArticles = [];
-		private readonly Regex indefiniteArticleStarts;
-		private readonly string[] indefiniteExceptions = [];
-		private readonly Regex indefiniteExceptionStarts;
+		private readonly Dictionary<bool, ArticleInfo> articleInfos = [];
 		#endregion
 
 		#region Constructors
@@ -34,17 +38,25 @@
 			ArgumentNullException.ThrowIfNull(culture);
 			this.culture = culture;
 			this.LoadLanguageDatabase();
-
-			var rules = this.LoadRules();
-			this.indefiniteArticleStarts = new Regex($@"\A({rules["article.indefinite.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			this.indefiniteExceptionStarts = new Regex($@"\A({rules["article.indefinite.exception.starts"]})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			this.indefiniteArticles = rules["article.indefinite.format"].Split(TextArrays.Pipe);
-			this.indefiniteExceptions = rules["article.indefinite.exception.format"].Split(TextArrays.Pipe);
-
+			this.LoadRules();
 			this.LoadSentences();
 			this.LoadTerms();
 			this.LoadVariations();
 		}
+		#endregion
+
+		#region Public Properties
+		public IDictionary<string, string> ParserOverrides { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+		#endregion
+
+		#region Public Static Methods
+		public static string GetRelatonship(int index) => index < 0 || index >= Relationships.Length
+				? throw new ArgumentOutOfRangeException(nameof(index))
+				: Relationships[index];
+
+		public static string GetRequester(int index) => index < 0 || index >= Requesters.Length
+				? throw new ArgumentOutOfRangeException(nameof(index))
+				: Requesters[index];
 		#endregion
 
 		#region Public Methods
@@ -58,7 +70,7 @@
 			return result;
 		}
 
-		public string? GetSentence(string id, bool root, [CallerMemberName] string caller = "")
+		public string? GetSentence(string id, [CallerMemberName] string caller = "")
 		{
 			if (!this.sentences.TryGetValue(id, out var value))
 			{
@@ -66,7 +78,7 @@
 				return null;
 			}
 
-			return this.Parse(value, root);
+			return value;
 		}
 
 		public string Parse(string input, bool root)
@@ -82,21 +94,30 @@
 				if (txInfo.Id.Length > 0)
 				{
 					var list = this.GetList(txInfo);
-
 					var sep = (root && braceSplit.Length == 3 && braceSplit[0].Length == 0 && braceSplit[2].Length == 0)
 						? "<newline>"
 						: SpaceSlash;
 					var newTerm = string.Join(sep, list);
-					parentheses &= list.Count > 1; // If single term, turn off parentheses
 					if (txInfo.Parent.Length > 0)
 					{
 						newTerm = $"{txInfo.Parent}: {newTerm}";
 						parentheses = true; // If parent exists, force parentheses on
 					}
-
-					if (parentheses && newTerm.Length > 0)
+					else
 					{
-						newTerm = '(' + newTerm + ')';
+						parentheses &= list.Count > 1; // If single term, turn off parentheses
+					}
+
+					if (newTerm.Length > 0)
+					{
+						if (this.ParserOverrides.TryGetValue(txInfo.Id, out var termOverride))
+						{
+							newTerm = termOverride.Replace("{0}", newTerm, StringComparison.Ordinal);
+						}
+						else if (parentheses)
+						{
+							newTerm = '(' + newTerm + ')';
+						}
 					}
 
 					braceSplit[braceIndex] = newTerm;
@@ -189,19 +210,16 @@
 				}
 			}
 
-			if (txInfo.DefiniteArticle)
+			if (txInfo.ArticleType is bool articleType)
 			{
 				for (var i = 0; i < list.Count; i++)
 				{
-					// Naive implementation, since this is English-only for now.
-					list[i] = (txInfo.Capitalize ? "The " : "the ") + list[i];
-				}
-			}
-			else if (txInfo.IndefiniteArticle)
-			{
-				for (var i = 0; i < list.Count; i++)
-				{
-					list[i] = this.AddIndefiniteArticle(txInfo, list[i]);
+					list[i] = this.articleInfos[articleType].AddArticleToWord(
+						list[i],
+						txInfo.Male ?? true,
+						txInfo.Singular ?? throw new InvalidOperationException(),
+						txInfo.Capitalize,
+						this.culture);
 				}
 			}
 
@@ -220,8 +238,9 @@
 			{
 				foreach (var variation in variations)
 				{
-					if (this.GetSentence(variation, false) is string value)
+					if (this.GetSentence(variation) is string value)
 					{
+						value = this.Parse(value, false);
 						retval.Add(value);
 					}
 				}
@@ -244,29 +263,6 @@
 			return retval;
 		}
 
-		private string AddIndefiniteArticle(CastlesTxInfo txInfo, string word)
-		{
-			var index = txInfo.Male != false ? 2 : 0;
-			index += txInfo.Singular switch
-			{
-				true => 0,
-				false => 1,
-				null => throw new InvalidOperationException()
-			};
-
-			// Checks must be in this exact order - do not try to combine anything.
-			var indef =
-				this.indefiniteExceptionStarts.Match(word).Success ? this.indefiniteExceptions[index] :
-				this.indefiniteArticleStarts.Match(word).Success ? this.indefiniteArticles[index] :
-				this.indefiniteExceptions[index];
-			if (txInfo.Capitalize)
-			{
-				indef = indef.UpperFirst(this.culture);
-			}
-
-			return indef.Replace("{0}", word, StringComparison.Ordinal);
-		}
-
 		private void LoadLanguageDatabase()
 		{
 			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\LanguageDatabase_Gameplay_{this.culture.IetfLanguageTag}.json");
@@ -278,7 +274,7 @@
 			}
 		}
 
-		private Dictionary<string, string> LoadRules()
+		private void LoadRules()
 		{
 			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@$"D:\Castles\MonoBehaviour\rules_{this.culture.IetfLanguageTag}.json")) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
@@ -290,7 +286,21 @@
 				rules.Add(key, value);
 			}
 
-			return rules;
+			// Indefinite articles
+			var articleInfo = new ArticleInfo(
+				rules["article.indefinite.format"],
+				rules["article.indefinite.starts"],
+				rules["article.indefinite.exception.format"],
+				rules["article.indefinite.exception.starts"]);
+			this.articleInfos.Add(false, articleInfo);
+
+			// Definite articles
+			articleInfo = new ArticleInfo(
+				rules["article.indefinite.format"],
+				rules["article.indefinite.starts"],
+				rules["article.indefinite.exception.format"],
+				rules["article.indefinite.exception.starts"]);
+			this.articleInfos.Add(true, articleInfo);
 		}
 
 		private void LoadSentences()
@@ -336,6 +346,40 @@
 
 				this.variations.Add((string)item._referenceId, [.. varList]);
 			}
+		}
+		#endregion
+
+		#region Private Classes
+		private class ArticleInfo(string articles, string articleStarts, string exceptions, string exceptionStarts)
+		{
+			#region Public Properties
+			public string[] Articles { get; } = articles.Split(TextArrays.Pipe);
+
+			public Regex ArticleStarts { get; } = new Regex($@"\A({articleStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
+			public string[] Exceptions { get; } = exceptions.Split(TextArrays.Pipe);
+
+			public Regex ExceptionStarts { get; } = new Regex($@"\A({exceptionStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			#endregion
+
+			#region Public Methods
+			public string AddArticleToWord(string word, bool male, bool singular, bool capitalize, CultureInfo culture)
+			{
+				var declension = (male ? 0 : 2) + (singular ? 0 : 1);
+
+				// Checks must be in this exact order - do not optimize.
+				var retval =
+					this.ExceptionStarts.Match(word).Success ? this.Exceptions[declension] :
+					this.ArticleStarts.Match(word).Success ? this.Articles[declension] :
+					this.Exceptions[declension];
+				if (capitalize)
+				{
+					retval = retval.UpperFirst(culture);
+				}
+
+				return retval.Replace("{0}", word, StringComparison.Ordinal);
+			}
+			#endregion
 		}
 		#endregion
 	}

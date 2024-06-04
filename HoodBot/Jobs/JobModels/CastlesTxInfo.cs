@@ -89,11 +89,11 @@
 					case 'A':
 						// Indefinite Article
 						this.Capitalize = true;
-						this.IndefiniteArticle = true;
+						this.ArticleType = false;
 						break;
 					case 'a':
 						// Indefinite Article
-						this.IndefiniteArticle = true;
+						this.ArticleType = false;
 						break;
 					case 'c':
 						// Unknown
@@ -101,10 +101,10 @@
 					case 'D':
 						// Unknown
 						this.Capitalize = true;
-						this.DefiniteArticle = true;
+						this.ArticleType = true;
 						break;
 					case 'd':
-						this.DefiniteArticle = true;
+						this.ArticleType = true;
 						break;
 					case 'o':
 						// Unknown - remainder of parameter is either nothing or a decimal number.
@@ -124,15 +124,13 @@
 		#endregion
 
 		#region Public Properties
+		public bool? ArticleType { get; }
+
 		public string BracedId => '{' + this.Id + '}';
 
 		public bool Capitalize { get; }
 
-		public bool DefiniteArticle { get; }
-
 		public string Id { get; }
-
-		public bool IndefiniteArticle { get; }
 
 		public bool? Male { get; }
 
