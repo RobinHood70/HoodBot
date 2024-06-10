@@ -2,12 +2,14 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Threading.Tasks;
 	using Microsoft.Playwright;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
 	[method: JobInfo("Get Skills 2")]
+	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
 	internal sealed class EsoSkills2(JobManager jobManager) : CreateOrUpdateJob<EsoSkills2.Skill>(jobManager)
 	{
 		#region Protected Override Properties

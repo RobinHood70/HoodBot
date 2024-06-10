@@ -128,7 +128,7 @@
 		/// <param name="title">The link destination.</param>
 		/// <param name="displayText">The display text for the link.</param>
 		/// <returns>A new link node.</returns>
-		public ILinkNode LinkNodeFromParts(string title, string displayText) => this.LinkNodeFromParts(title, new[] { displayText });
+		public ILinkNode LinkNodeFromParts(string title, string displayText) => this.LinkNodeFromParts(title, [displayText]);
 
 		/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
 		/// <param name="title">The link destination.</param>

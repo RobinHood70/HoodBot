@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@
 	using RobinHood70.Robby.Parser;
 
 	[method: JobInfo("Terminals", "Starfield")]
+	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
 	internal sealed class SFTerminals(JobManager jobManager) : CreateOrUpdateJob<SFTerminals.Terminal>(jobManager)
 	{
 		#region Fields

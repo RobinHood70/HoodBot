@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -11,6 +12,7 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	[method: JobInfo("Creatures", "Starfield")]
+	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
 	internal sealed class SFCreatures(JobManager jobManager) : CreateOrUpdateJob<SFCreatures.Creature>(jobManager)
 	{
 		#region Protected Override Properties

@@ -13,7 +13,7 @@
 		#endregion
 
 		#region Fields
-		private readonly HashSet<string> modules = new(System.StringComparer.Ordinal);
+		private readonly HashSet<string> modules = new(StringComparer.Ordinal);
 
 		private string? currentGeneratorValue;
 		private string? savedGeneratorValue;
@@ -63,7 +63,7 @@
 			{
 				foreach (var param in module.Value.Children<JProperty>())
 				{
-					if (string.Equals(param.Name, this.GeneratorContinue, System.StringComparison.Ordinal))
+					if (string.Equals(param.Name, this.GeneratorContinue, StringComparison.Ordinal))
 					{
 						this.savedGeneratorValue = (string?)param.Value;
 					}

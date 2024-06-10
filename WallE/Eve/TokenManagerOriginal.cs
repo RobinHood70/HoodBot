@@ -44,8 +44,8 @@
 				InfoInput propInfoInput = new() { Tokens = [TokensInput.Edit, TokensInput.Watch] };
 				RecentChangesInput input = new() { GetPatrolToken = true, MaxItems = 1 };
 				ListRecentChanges recentChanges = new(this.Wal, input);
-				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
-				QueryInput queryInput = new(pageSetInput, propertyModules, new[] { recentChanges });
+				var propertyModules = this.Wal.ModuleFactory.CreateModules([propInfoInput]);
+				QueryInput queryInput = new(pageSetInput, propertyModules, [recentChanges]);
 				var pageSet = this.Wal.RunPageSetQuery(queryInput, WikiAbstractionLayer.DefaultPageFactory);
 				if (pageSet.Count == 1 && pageSet[0].Info is PageInfo info)
 				{
@@ -80,7 +80,7 @@
 		private string? GetRollbackToken(QueryPageSetInput pageSetInput)
 		{
 			RevisionsInput revisions = new() { GetRollbackToken = true };
-			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
+			var pages = this.Wal.LoadPages(pageSetInput, [revisions]);
 
 			// By all rights, there should only be one page and one revision in the collection, but we don't really care if something very weird happens here, just as long as at least ONE of them has a rollback token, so just iterate the entire set if somehow there are multiple results.
 			foreach (var page in pages)
