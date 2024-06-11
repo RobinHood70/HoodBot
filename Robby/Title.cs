@@ -9,6 +9,7 @@ namespace RobinHood70.Robby
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A structure to hold page Title information.</summary>
+	[SuppressMessage("Rules", "MA0097:A class that implements IComparable<T> or IComparable should override comparison operators", Justification = "While sorting makes some sense for a Title, <> comparison operators are likely to be a mistake for PageName comparison.")]
 	public readonly struct Title : IComparable<Title>, IEquatable<Title>, ITitle
 	{
 		#region Private Constants
