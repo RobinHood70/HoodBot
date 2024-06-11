@@ -53,14 +53,12 @@
 		#region Private Methods
 		private void LoadExceptionsForNamespace()
 		{
-			switch (this.ns)
+			if (this.ns == UespNamespaces.Online)
 			{
-				case UespNamespaces.Online:
-					var titles = this.EnsureExceptionGroup("Quests");
-					titles.GetCategoryMembers("Online-Places-Zones");
-					titles.GetCategoryMembers("Online-Achievements-DLC Achievements");
-					titles.GetCategoryMembers("Online-Achievements by Zone", true);
-					break;
+				var titles = this.EnsureExceptionGroup("Quests");
+				titles.GetCategoryMembers("Online-Places-Zones");
+				titles.GetCategoryMembers("Online-Achievements-DLC Achievements");
+				titles.GetCategoryMembers("Online-Achievements by Zone", true);
 			}
 		}
 
