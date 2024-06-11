@@ -15,7 +15,8 @@
 		{
 			static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
 
-			this.ChannelTime = EsoSpace.TimeToText((int)row["channelTime"]);
+			var channelTime = (int)row["channelTime"];
+			this.ChannelTime = EsoSpace.TimeToText(channelTime < 0 ? 0 : channelTime);
 			this.Duration = EsoSpace.TimeToText((int)row["duration"]);
 			this.Radius = FormatRange((int)row["radius"]);
 			var maxRange = FormatRange((int)row["maxRange"]);
