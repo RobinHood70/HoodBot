@@ -16,6 +16,7 @@
 		public SFNpcs(JobManager jobManager)
 			: base(jobManager)
 		{
+			this.Clobber = true;
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		}
 		#endregion
@@ -27,26 +28,51 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create NPC page";
 
-		protected override bool IsValid(ContextualParser parser, Npcs item) => parser.FindSiteTemplate("NPC Summary") is not null;
+		protected override bool IsValid(ContextualParser parser, Npcs item) => true; // parser.FindSiteTemplate("NPC Summary") is not null || parser.Page.IsMissing;
 
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
 			var items = new Dictionary<Title, Npcs>();
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true);
+			var csv = new CsvFile
+			{
+				Encoding = Encoding.GetEncoding(1252),
+				FieldSeparator = '\t'
+			};
+			csv.Load(LocalConfig.BotDataSubPath("Starfield\\New Npcs.txt"), true);
 			foreach (var row in csv)
 			{
-				if (row["Name"].Length > 0)
+				var name = row["Full Name: Full Name <<TESFullName_Component>>"];
+				if (name.Length > 0)
 				{
-					var acbs = Convert.ToInt32(row["Acbs1"], 16);
-					var female = (acbs & 1) != 0;
-					var dead = (acbs & 0x200000) != 0;
-					var factionText = row["Factions"];
+					// var acbs = Convert.ToInt32(row["Acbs1"], 16);
+					// var gender = (acbs & 1) != 0;
+					// var dead = (acbs & 0x200000) != 0;
+					var factionText = string.Empty; // row["Factions"];
 					var factions = factionText.Length == 0
 						? []
 						: factionText.Split(TextArrays.Comma);
-					var npc = new Npc(row["FormID"][2..], row["EditorID"].Trim(), row["Name"], row["Race"], female, dead, factions);
-					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"]);
+					var attribField = row["Property Sheet: ActorValues <<BGSPropertySheet_Component>>"];
+					var attribsSplit = attribField.Split(", ");
+					var attribs = new Dictionary<string, string>(StringComparer.Ordinal);
+					foreach (var attrib in attribsSplit)
+					{
+						var attribValue = attrib.Split("::");
+						attribs.Add(attribValue[0], attribValue[1]);
+					}
+
+					var healthText = attribs["Health"];
+					var health = (int)double.Parse(healthText, this.Site.Culture);
+					var dead = health <= 0;
+					var npc = new Npc(
+						row["Numeric ID"].Trim(TextArrays.Parentheses),
+						row["Editor ID"].Trim(),
+						name,
+						row["Race: Race <<TESRace_Component>>"].Replace("Race", string.Empty, StringComparison.Ordinal),
+						null /*gender*/,
+						dead,
+						factions,
+						health);
+					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 					var list = items.TryGetValue(title, out var npcs) ? npcs : [];
 					list.Add(npc);
 					items[title] = list;
@@ -56,12 +82,23 @@
 			return items;
 		}
 
+		protected override void PageLoaded(ContextualParser parser, Npcs item)
+		{
+			// parser.Page.Text = this.NewPageText(parser.Page.Title, item);
+			// parser.ReparsePageText(WikiCommon.Parser.InclusionType.Raw, false);
+		}
+
 		protected override string NewPageText(Title title, Npcs item)
 		{
 			var sb = new StringBuilder();
 			foreach (var npc in item)
 			{
-				var gender = npc.Female ? "Female" : "Male";
+				var gender = npc.Gender switch
+				{
+					null => string.Empty,
+					true => "Female",
+					false => "Male"
+				};
 				var factions = npc.Factions.Count == 0
 					? string.Empty
 					: ("{{Faction|" + string.Join("}}, {{Faction|", npc.Factions) + "}}");
@@ -72,7 +109,7 @@
 					.Append($"|race={npc.Race}\n")
 					.Append($"|baseid={npc.FormID}\n")
 					.Append($"|gender={gender}\n")
-					.Append("|health\n");
+					.Append(this.Site.Culture, $"|health={npc.Health}\n");
 				if (npc.Dead)
 				{
 					sb.Append("|dead=1\n");
@@ -92,7 +129,7 @@
 		#endregion
 
 		#region Internal Record Structs
-		internal record struct Npc(string FormID, string EditorID, string Name, string Race, bool Female, bool Dead, IReadOnlyList<string> Factions);
+		internal record struct Npc(string FormID, string EditorID, string Name, string Race, bool? Gender, bool Dead, IReadOnlyList<string> Factions, int Health);
 		#endregion
 
 		#region Internal Classes
