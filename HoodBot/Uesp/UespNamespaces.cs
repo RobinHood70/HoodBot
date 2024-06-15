@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
-	using System.Collections.Generic;
-
 	public static class UespNamespaces
 	{
 		#region Public Constants
@@ -117,64 +115,22 @@
 		public const int BeyondSkyrimTalk = 179;
 		public const int DFUMod = 180;
 		public const int DFUModTalk = 181;
+		public const int SkyrimTAG = 182;
+		public const int SkyrimTAGTalk = 183;
+		public const int Castles = 184;
+		public const int CastlesTalk = 185;
 		public const int Dapel = 200;
 		public const int DapelTalk = 201;
+		public const int Campaign = 460;
+		public const int CampaignTalk = 761;
 		public const int TimedText = 710;
 		public const int TimedTextTalk = 711;
+		public const int Module = 828;
+		public const int ModuleTalk = 829;
 		public const int Gadget = 2300;
 		public const int GadgetTalk = 2301;
 		public const int GadgetDefinition = 2302;
 		public const int GadgetDefinitionTalk = 2303;
-		#endregion
-
-		#region Public Properties
-		public static ICollection<int> Gamespaces { get; } =
-		[
-			Arena,
-			Daggerfall,
-			Battlespire,
-			Redguard,
-			Morrowind,
-			Tribunal,
-			Bloodmoon,
-			Oblivion,
-			Tes3Mod,
-			MorrowindMod,
-			Tes4Mod,
-			OblivionMod,
-			Shivering,
-			Shadowkey,
-			Lore,
-			Dawnstar,
-			Skyrim,
-			OBMobile,
-			Stormhold,
-			Tes5Mod,
-			SkyrimMod,
-			Online,
-			Dragonborn,
-			EsoMod,
-			Legends,
-			Blades,
-			Tes1Mod,
-			ArenaMod,
-			Tes2Mod,
-			DaggerfallMod,
-			CallToArms,
-			TesOtherMod,
-			Mod,
-			Pinball,
-			SkyrimVse,
-			TamrielRebuilt,
-			ProjectTamriel,
-			BetterCities,
-			MorrowindRebirth,
-			BeyondSkyrim,
-		];
-		#endregion
-
-		#region Public Functions
-		public static bool IsGamespace(int id) => Gamespaces.Contains(id);
 		#endregion
 	}
 }
