@@ -67,14 +67,14 @@
 				this.TitleName = titleName;
 			}
 
-			var desc = (string)row["description"]; // Encoding conversion does not seem to be necessary here.
-			var sizeMatch = SizeFinder.Match(desc);
-			this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
-			desc = desc
+			// Encoding conversion does not seem to be necessary for desc.
+			var desc = ((string)row["description"])
 				.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
 				.Replace("|r", string.Empty, StringComparison.Ordinal)
 				.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
-			this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length
+			var sizeMatch = SizeFinder.Match(desc);
+			this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value.UpperFirst(CultureInfo.CurrentCulture) : null;
+			this.Description = sizeMatch.Success && sizeMatch.Index == 0 && sizeMatch.Length == desc.Length
 				? null
 				: desc;
 			var furnCategory = EsoLog.ConvertEncoding((string)row["furnCategory"]);
