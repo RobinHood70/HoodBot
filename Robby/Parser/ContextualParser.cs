@@ -243,6 +243,16 @@
 			}
 		}
 
+		/// <summary>Reparses the existing page text with new inclusion parameters.</summary>
+		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
+		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
+		/// <remarks>This can be used either to reparse the same text with different inclusion parameters or to cause a totally new parse <see langword="if"/>the page text has been altered directly.</remarks>
+		public void ReparsePageText(InclusionType inclusionType, bool strictInclusion)
+		{
+			this.Clear();
+			this.Factory.ParseInto(this, this.Page.Text, inclusionType, strictInclusion);
+		}
+
 		/// <summary>Updates the <see cref="Page"/>'s <see cref="Page.Text">text</see> to the parser's contents.</summary>
 		public void UpdatePage() => this.Page.Text = this.ToRaw();
 		#endregion
