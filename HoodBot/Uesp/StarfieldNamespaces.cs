@@ -41,5 +41,6 @@
 		public const int GadgetTalk = 2301;
 		public const int GadgetDefinition = 2302;
 		public const int GadgetDefinitionTalk = 2303;
-		#endregion	}
+		#endregion
 	}
+}
