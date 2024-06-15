@@ -381,6 +381,12 @@
 			}
 
 			template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine, true);
+
+			if (furnishing.Size is not null)
+			{
+				template.Update("size", furnishing.Size, ParameterFormat.OnePerLine, false);
+			}
+
 			template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
 			if (!string.IsNullOrEmpty(furnishing.FurnishingCategory))
 			{
