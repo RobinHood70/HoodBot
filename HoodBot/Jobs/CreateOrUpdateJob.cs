@@ -11,6 +11,8 @@
 	{
 		#region Protected Properties
 		protected bool Clobber { get; set; }
+
+		protected bool CreateNew { get; set; } = true;
 		#endregion
 
 		#region Protected Abstract Properties
@@ -48,7 +50,7 @@
 				}
 			}
 
-			if (remaining.Count > 0)
+			if (this.CreateNew && remaining.Count > 0)
 			{
 				this.CreateNewPages(items, parsedPages, remaining);
 			}
