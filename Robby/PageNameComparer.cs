@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Globalization;
-	using RobinHood70.CommonCode;
 
 	/// <summary>A <see cref="StringComparer"/> class that compares page names in a given <see cref="Namespace">namespace</see>, respecting the rules for that namespace.</summary>
 	/// <remarks>Initializes a new instance of the <see cref="PageNameComparer"/> class.</remarks>
@@ -18,23 +17,24 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override int Compare(string? x, string? y) =>
-			Globals.NullComparer(x, y) ??
-			(this.culture.CompareInfo is var compareInfo &&
-			this.caseSensitive
-				? compareInfo.Compare(x, y, CompareOptions.None)
-				: CompareFull(x!, y!, compareInfo));
-
-		/// <inheritdoc/>
-		public override bool Equals(string? x, string? y) => this.Compare(x, y) == 0;
-
-		/// <inheritdoc/>
-		public override int GetHashCode(string obj) => Ordinal.GetHashCode(obj);
-		#endregion
-
-		#region Private Methods
-		private static int CompareFull(string x, string y, CompareInfo compareInfo)
+		public override int Compare(string? x, string? y)
 		{
+			if (x is null)
+			{
+				return (y is null) ? 0 : -1;
+			}
+
+			if (y is null)
+			{
+				return 1;
+			}
+
+			var compareInfo = this.culture.CompareInfo;
+			if (this.caseSensitive)
+			{
+				return compareInfo.Compare(x, y, CompareOptions.None);
+			}
+
 			var xFirst = x.Length > 0 ? x[..1] : string.Empty;
 			var yFirst = y.Length > 0 ? y[..1] : string.Empty;
 			var firstCharCompare = compareInfo.Compare(xFirst, yFirst, CompareOptions.IgnoreCase);
@@ -47,6 +47,12 @@
 			y = y.Length > 1 ? y[1..] : string.Empty;
 			return compareInfo.Compare(x, y, CompareOptions.None);
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(string? x, string? y) => this.Compare(x, y) == 0;
+
+		/// <inheritdoc/>
+		public override int GetHashCode(string obj) => Ordinal.GetHashCode(obj);
 		#endregion
 	}
 }
