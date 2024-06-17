@@ -91,6 +91,7 @@
 		public static (UespNamespace? Ns, string? Abbr, string? Name, string? Ext) AbbreviationFromIconName(UespNamespaceList nsList, string iconName)
 		{
 			ArgumentNullException.ThrowIfNull(iconName);
+			ArgumentNullException.ThrowIfNull(nsList);
 			var nsNameSplit = iconName.Split("-icon-", 2);
 			if (nsNameSplit.Length == 2)
 			{
