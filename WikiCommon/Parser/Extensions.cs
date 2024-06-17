@@ -696,15 +696,18 @@
 				{
 					if (i == template.Parameters.Count - 1)
 					{
-						var lastParam = template.Parameters[i];
+						var lastParam = template.Parameters[^1];
 						var trailing = lastParam.Value.ToValue();
 						trailing = trailing.GetTrailingWhitespace();
 
-						var newLast = template.Parameters[^2];
-						newLast.Value.Trim();
-						if (trailing is not null)
+						if (template.Parameters.Count > 1)
 						{
-							newLast.Value.AddText(trailing);
+							var newLast = template.Parameters[^2];
+							newLast.Value.Trim();
+							if (trailing is not null)
+							{
+								newLast.Value.AddText(trailing);
+							}
 						}
 					}
 
