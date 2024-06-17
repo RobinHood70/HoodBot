@@ -5,9 +5,8 @@
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-		<BaseOutputPath>D:\Source\Repos\HoodBot\HoodBot</BaseOutputPath>
+		<BaseOutputPath>C:\Users\rmorl\Source\Repos\HoodBot\HoodBot</BaseOutputPath>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
