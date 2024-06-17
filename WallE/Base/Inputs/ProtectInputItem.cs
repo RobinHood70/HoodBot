@@ -14,5 +14,9 @@ namespace RobinHood70.WallE.Base
 
 		public string Type { get; set; } = type;
 		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Type + '=' + this.Level;
+		#endregion
 	}
 }
