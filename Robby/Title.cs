@@ -10,7 +10,7 @@ namespace RobinHood70.Robby
 
 	/// <summary>A structure to hold page Title information.</summary>
 	[SuppressMessage("Rules", "MA0097:A class that implements IComparable<T> or IComparable should override comparison operators", Justification = "While sorting makes some sense for a Title, <> comparison operators are likely to be a mistake for PageName comparison.")]
-	public readonly struct Title : IComparable<Title>, IEquatable<Title>, ITitle
+	public sealed class Title : IComparable<Title>, IEquatable<Title>, ITitle
 	{
 		#region Private Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -30,7 +30,7 @@ namespace RobinHood70.Robby
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> struct.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="ns">The integer namespace of the Title.</param>
 		/// <param name="pageName">The page name of the Title.</param>
@@ -42,7 +42,7 @@ namespace RobinHood70.Robby
 			this.PageName = pageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> struct.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
 		/// <param name="ns">The integer namespace of the Title.</param>
 		/// <param name="pageName">The page name of the Title.</param>
 		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
@@ -51,6 +51,11 @@ namespace RobinHood70.Robby
 			ArgumentNullException.ThrowIfNull(pageName);
 			this.Namespace = ns;
 			this.PageName = pageName;
+		}
+
+		private Title()
+		{
+			throw new InvalidOperationException();
 		}
 		#endregion
 
@@ -140,7 +145,7 @@ namespace RobinHood70.Robby
 		/// <summary>Determines whether the specified <see cref="Title"/> is equal to the current one.</summary>
 		/// <param name="other">The Title to compare with the current one.</param>
 		/// <returns><see langword="true"/> if the specified object is equal to the current one; otherwise, <see langword="false"/>.</returns>
-		public bool Equals(Title other) => this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
+		public bool Equals(Title other) => this.Namespace is not null && this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <summary>Gets the full page name of a Title.</summary>
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a Title.</returns>
