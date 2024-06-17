@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -181,6 +182,7 @@
 		/// <param name="x">This first page name to compare.</param>
 		/// <param name="y">The second page name to compare.</param>
 		/// <returns>An integer that indicates whether the first page name is less than the second (-1), equal to the second (0), or greater than the second (1).</returns>
+		[SuppressMessage("Globalization", "CA1309:Use ordinal string comparison", Justification = "False hit, culture is specified.")]
 		public int ComparePageNames(string x, string y)
 		{
 			var siteCulture = this.Site.Culture;
