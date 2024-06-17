@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
@@ -134,7 +135,7 @@
 		#region Internal Static Methods
 
 		// This is flagged as internal mostly to stop warnings whenever it's not in use.
-		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+		internal static string SiteName(IWikiAbstractionLayer? sender) => sender?.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
 		#endregion
 
 		#region Protected Virtual Methods
@@ -211,12 +212,41 @@
 		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
 #if DEBUG
+			ArgumentNullException.ThrowIfNull(sender);
+			ArgumentNullException.ThrowIfNull(eventArgs);
 			if (!sender.EditingEnabled)
 			{
 				Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
 				foreach (var parameter in eventArgs.Parameters)
 				{
-					Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
+					Debug.Write($"  {parameter.Key} = ");
+					if (parameter.Value is string)
+					{
+						Debug.WriteLine(parameter.Value);
+					}
+					else if (parameter.Value is IEnumerable enumerable)
+					{
+						var first = true;
+						foreach (var parameterValue in enumerable)
+						{
+							if (first)
+							{
+								first = false;
+							}
+							else
+							{
+								Debug.Write(", ");
+							}
+
+							Debug.Write(parameterValue.ToString());
+						}
+
+						Debug.WriteLine(string.Empty);
+					}
+					else
+					{
+						Debug.WriteLine(parameter.Value?.ToString());
+					}
 				}
 			}
 #endif
@@ -224,9 +254,9 @@
 
 		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
-		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
+		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs?.Response}");
 
-		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
+		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs?.Request}");
 
 		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 		#endregion
