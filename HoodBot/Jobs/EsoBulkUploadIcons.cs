@@ -13,6 +13,7 @@
 	{
 		#region Private Constants
 		private const string RemoteIconPath = "/esoui/art/icons/";
+		private const string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 		#endregion
 
 		#region Static Fields
@@ -56,8 +57,6 @@
 			new("Bow", "weapons", "Bows"),
 			new("Staff", "weapons", "Staves"),
 		];
-
-		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 
 		private readonly List<string> styles;
 		#endregion
