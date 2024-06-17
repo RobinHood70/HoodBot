@@ -2,13 +2,12 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
-		<TargetFramework>net8.0-windows7.0</TargetFramework>
+		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<AnalysisMode>Default</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 		<Copyright>Copyright © Robert Morley 2023</Copyright>
 	</PropertyGroup>
