@@ -227,7 +227,7 @@
 
 			CancellationTokenSource cancel = new();
 			this.canceller = cancel;
-			var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, cancel);
+			using var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, cancel);
 			try
 			{
 				jobManager.StartingJob += this.JobManager_StartingJob;
