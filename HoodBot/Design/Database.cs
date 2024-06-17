@@ -58,9 +58,15 @@
 
 		public static IEnumerable<T> RunQuery<T>(string connectionString, string query, long pageSize, Func<IDataRecord, T> factory)
 		{
-			foreach (var row in RunQuery(connectionString, query, pageSize))
+			ArgumentNullException.ThrowIfNull(factory);
+			return ReallyRunQuery(connectionString, query, pageSize, factory);
+
+			static IEnumerable<T> ReallyRunQuery(string connectionString, string query, long pageSize, Func<IDataRecord, T> factory)
 			{
-				yield return factory(row);
+				foreach (var row in RunQuery(connectionString, query, pageSize))
+				{
+					yield return factory(row);
+				}
 			}
 		}
 		#endregion
