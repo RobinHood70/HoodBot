@@ -54,6 +54,7 @@
 		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(Title, string, ProtectionLevel, DateTime)"/> version of title call.</remarks>
 		public static ChangeStatus CreateProtect(this Title title, string reason, string? createProtection, DateTime expiry)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			if (createProtection == null)
 			{
 				return ChangeStatus.NoEffect;
@@ -83,6 +84,7 @@
 		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(Title, string, ProtectionLevel, string)"/> version of title call.</remarks>
 		public static ChangeStatus CreateProtect(this Title title, string reason, string createProtection, string duration)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			ArgumentNullException.ThrowIfNull(createProtection);
 			ProtectInputItem protection = new("create", createProtection) { ExpiryRelative = duration };
 			return Protect(title, reason, [protection]);
@@ -94,6 +96,7 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus CreateUnprotect(this Title title, string reason)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.None)!);
 			return Protect(title, reason, [protection]);
 		}
@@ -104,6 +107,7 @@
 		/// <returns>A value indicating the change status of the block.</returns>
 		public static ChangeStatus Delete(this Title title, string reason)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			ArgumentNullException.ThrowIfNull(reason);
 			var site = title.Namespace.Site;
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
@@ -153,6 +157,7 @@
 		/// <returns>A page for this title.</returns>
 		public static Page Load(this Title title, PageLoadOptions options)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			if (title.Namespace.CanTalk)
 			{
 				var pages = PageCollection.Unlimited(title.Site, options);
@@ -194,14 +199,17 @@
 		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(Title, string, ProtectionLevel, ProtectionLevel, DateTime)"/> version of title call.</remarks>
 		public static ChangeStatus Protect(this Title title, string reason, string? editProtection, string? moveProtection, DateTime expiry)
 		{
+			ArgumentNullException.ThrowIfNull(title);
+			ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
 			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
 			List<ProtectInputItem> protections = new(2);
-			if (editProtection != null)
+			if (editProtection is not null)
 			{
 				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = wikiExpiry });
 			}
 
-			if (moveProtection != null)
+			if (moveProtection is not null)
 			{
 				protections.Add(new ProtectInputItem("move", moveProtection) { Expiry = wikiExpiry });
 			}
@@ -219,6 +227,9 @@
 		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(Title, string, ProtectionLevel, ProtectionLevel, string?)"/> version of title call.</remarks>
 		public static ChangeStatus Protect(this Title title, string reason, string? editProtection, string? moveProtection, string? duration)
 		{
+			ArgumentNullException.ThrowIfNull(title);
+			ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
 			duration ??= "infinite";
 
 			List<ProtectInputItem> protections = new(2);

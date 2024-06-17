@@ -301,13 +301,17 @@
 		/// <summary>Gets the <see cref="Page"/> with the specified key or <see langword="null"/> if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested <see cref="Page"/>.</returns>
-		public Page? GetMapped(Title key) => this.TryGetValue(key, out var retval)
-			? retval
-			: (
-				this.titleMap.TryGetValue(key.FullPageName(), out var altKey) &&
-				this.TryGetValue(altKey, out retval))
-					? retval
-					: default;
+		public Page? GetMapped(Title key)
+		{
+			ArgumentNullException.ThrowIfNull(key);
+			return this.TryGetValue(key, out var retval)
+				? retval
+				: (
+					this.titleMap.TryGetValue(key.FullPageName(), out var altKey) &&
+					this.TryGetValue(altKey, out retval))
+						? retval
+						: default;
+		}
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>

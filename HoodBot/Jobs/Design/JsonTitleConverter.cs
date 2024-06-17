@@ -9,7 +9,7 @@
 	public class JsonTitleConverter(Site site) : JsonConverter<Title>
 	{
 		#region Public Override Methods
-		public override Title ReadJson(JsonReader reader, Type objectType, Title existingValue, bool hasExistingValue, JsonSerializer serializer)
+		public override Title ReadJson(JsonReader reader, Type objectType, Title? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			ArgumentNullException.ThrowIfNull(reader);
 			var title = (string)reader
@@ -18,10 +18,10 @@
 			return TitleFactory.FromUnvalidated(site, title);
 		}
 
-		public override void WriteJson(JsonWriter writer, Title value, JsonSerializer serializer)
+		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer)
 		{
 			ArgumentNullException.ThrowIfNull(writer);
-			writer.WriteValue(value.FullPageName());
+			writer.WriteValue(value?.FullPageName());
 		}
 		#endregion
 	}

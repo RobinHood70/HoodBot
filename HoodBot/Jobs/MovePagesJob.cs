@@ -504,8 +504,8 @@
 		protected virtual Title? LinkUpdateMatch(SiteLink from)
 		{
 			// This whole function could be reduced to a one-liner but is separated out for easier reading/debugging.
-			var toFound = this.linkUpdates.TryGetValue(from.Title, out var to);
-			if (toFound)
+			_ = this.linkUpdates.TryGetValue(from.Title, out var to);
+			if (to is not null)
 			{
 				// If this is a category tag, make the change conditional on UpdateCategoryMembers flag.
 				var isCategoryUpdate = from.Title.Namespace == MediaWikiNamespaces.Category && to.Namespace == MediaWikiNamespaces.Category;

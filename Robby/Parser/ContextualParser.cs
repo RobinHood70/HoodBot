@@ -205,7 +205,11 @@
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName) => this.FindSiteTemplates(new[] { findName.FullPageName() });
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName)
+		{
+			ArgumentNullException.ThrowIfNull(findName);
+			return this.FindSiteTemplates(new[] { findName.FullPageName() });
+		}
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findNames">The templates to find.</param>

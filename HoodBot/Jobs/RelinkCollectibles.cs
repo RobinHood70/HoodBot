@@ -35,12 +35,12 @@
 			if (from.Interwiki == null && from.Fragment != null)
 			{
 				var newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment + this.disambigs[to]));
-				if (newTitle.Namespace is null)
+				if (newTitle is null)
 				{
 					newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment));
 				}
 
-				if (newTitle.Namespace is null)
+				if (newTitle is null)
 				{
 					this.WriteLine($"* Match not found for {from} on page {SiteLink.ToText(page, LinkFormat.Plain)}.");
 					return from;

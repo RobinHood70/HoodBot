@@ -300,7 +300,11 @@
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="title">The title containing the name of the page to create.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(Title title) => this.CreatePage(title.FullPageName(), string.Empty);
+		public Page CreatePage(Title title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return this.CreatePage(title.FullPageName(), string.Empty);
+		}
 
 		/// <summary>Creates a new page with the specified text.</summary>
 		/// <param name="fullPageName">The full name of the page to create.</param>
@@ -465,6 +469,7 @@
 		/// <returns>The text of the page.</returns>
 		public Page? LoadPage(Title title, string subPageName)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			var titleName = title.PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
@@ -505,6 +510,7 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(Title title, string subPageName)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			var titleName = title.PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
@@ -784,6 +790,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus Undo(Title title, long revisionId, string editSummary)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			ArgumentNullException.ThrowIfNull(editSummary);
 
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
@@ -1095,7 +1102,10 @@
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(Title from, Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
+			ArgumentNullException.ThrowIfNull(from);
+			ArgumentNullException.ThrowIfNull(to);
 			ArgumentNullException.ThrowIfNull(reason);
+
 			const string subPageName = "/SubPage";
 			Dictionary<string, string> disabledResult = new(StringComparer.Ordinal);
 			if (!this.EditingEnabled)
@@ -1247,7 +1257,11 @@
 		/// <summary>Removes invalid characters from the title's PageName and replaces quote-like characters with quotes.</summary>
 		/// <param name="title">The title to sanitize.</param>
 		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
-		public virtual Title SanitizeTitle(Title title) => TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
+		public virtual Title SanitizeTitle(Title title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
+		}
 		#endregion
 
 		#region Protected Static Methods

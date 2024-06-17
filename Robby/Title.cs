@@ -89,7 +89,9 @@ namespace RobinHood70.Robby
 		/// <param name="left">The first Title to compare.</param>
 		/// <param name="right">The second Title to compare.</param>
 		/// <returns><see langword="true"/> if the specified Titles are equal; otherwise, <see langword="false"/>.</returns>
-		public static bool operator ==(Title left, Title right) => left.Equals(right);
+		public static bool operator ==(Title left, Title right) => left is null
+			? right is null
+			: left.Equals(right);
 
 		/// <summary>Determines whether one <see cref="Title"/> is different from another one.</summary>
 		/// <param name="left">The first Title to compare.</param>
@@ -106,13 +108,13 @@ namespace RobinHood70.Robby
 		/// <returns>An integer indicating whether the first Title is less than (-1), equal to (0), or greater than (1) the second Title.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the Site values don't match.</exception>
 		/// <remarks>This is not implemented as an IComparer because less-than/greater-than semantics only really apply in the context of sorting. The Comparer is made public primarily for the convenience of other sorting methods.</remarks>
-		public static int Compare(Title x, Title y)
-		{
-			var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
-			return nsCompare != 0
-				? nsCompare
-				: x.Namespace.ComparePageNames(x.PageName, y.PageName);
-		}
+		public static int Compare(Title? x, Title? y) => Globals.GenericComparer(x, y, (x, y) =>
+			{
+				var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
+				return nsCompare != 0
+					? nsCompare
+					: x.Namespace.ComparePageNames(x.PageName, y.PageName);
+			});
 
 		/// <summary>Trims the disambiguator off of a string (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The page name to modify.</param>
@@ -134,18 +136,26 @@ namespace RobinHood70.Robby
 				: this.PageName;
 
 		/// <inheritdoc/>
-		public int CompareTo(Title other)
+		public int CompareTo(Title? other)
 		{
+			if (other is null)
+			{
+				return 1;
+			}
+
 			var nsCompare = Namespace.Compare(this.Namespace, other.Namespace);
-			return nsCompare != 0
-				? nsCompare
-				: this.Namespace.ComparePageNames(this.PageName, other.PageName);
+			return nsCompare == 0
+				? this.Namespace.ComparePageNames(this.PageName, other.PageName)
+				: nsCompare;
 		}
 
 		/// <summary>Determines whether the specified <see cref="Title"/> is equal to the current one.</summary>
 		/// <param name="other">The Title to compare with the current one.</param>
 		/// <returns><see langword="true"/> if the specified object is equal to the current one; otherwise, <see langword="false"/>.</returns>
-		public bool Equals(Title other) => this.Namespace is not null && this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
+		public bool Equals(Title? other) =>
+			other is not null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <summary>Gets the full page name of a Title.</summary>
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a Title.</returns>

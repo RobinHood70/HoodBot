@@ -51,7 +51,7 @@
 
 		public string? Settlement { get; private set; }
 
-		public Title Title { get; private set; }
+		public Title? Title { get; private set; }
 
 		public string TitleName { get; }
 

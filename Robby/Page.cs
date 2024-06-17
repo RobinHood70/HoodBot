@@ -321,13 +321,21 @@
 		/// <summary>Creates a new page from a <see cref="Title"/> object.</summary>
 		/// <param name="title">The title to use.</param>
 		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(Title title) => title.Site.CreatePage(title);
+		public static Page FromTitle(Title title)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return title.Site.CreatePage(title);
+		}
 
 		/// <summary>Creates a new page from a <see cref="Title"/> object, filled with the supplied text.</summary>
 		/// <param name="title">The title to use.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>A new page based on the title.</returns>
-		public static Page FromTitle(Title title, string text) => title.Site.CreatePage(title, text);
+		public static Page FromTitle(Title title, string text)
+		{
+			ArgumentNullException.ThrowIfNull(title);
+			return title.Site.CreatePage(title, text);
+		}
 		#endregion
 
 		#region Public Methods

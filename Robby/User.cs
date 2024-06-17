@@ -39,6 +39,7 @@
 		/// <param name="userInfo">The API user information.</param>
 		public User(Title title, UsersItem userInfo)
 		{
+			ArgumentNullException.ThrowIfNull(title);
 			ArgumentNullException.ThrowIfNull(userInfo);
 			this.Title = title;
 			this.Info = new UserInfo(title.Site, userInfo);

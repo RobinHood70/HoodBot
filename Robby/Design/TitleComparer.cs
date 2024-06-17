@@ -38,7 +38,9 @@
 				: Title.SortComparer(x.Title, y.Title);
 
 		/// <inheritdoc/>
-		public bool Equals(ITitle? x, ITitle? y) => x?.Title == y?.Title;
+		public bool Equals(ITitle? x, ITitle? y) => x is null
+			? y is null
+			: y is not null && x.Title == y.Title;
 
 		/// <inheritdoc/>
 		public int GetHashCode([DisallowNull] ITitle obj) => HashCode.Combine(obj?.Title);
