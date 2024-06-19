@@ -12,14 +12,12 @@
 	using CommunityToolkit.Mvvm.Input;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 
 	public class MainViewModel : ObservableRecipient
 	{
@@ -210,9 +208,11 @@
 			this.parameterFetcher?.SetParameters();
 
 			List<JobInfo> jobList = [];
+			var login = false;
 			foreach (var node in this.JobTree.CheckedChildren<JobNode>())
 			{
 				jobList.Add(node.JobInfo);
+				login |= node.JobInfo.Login;
 			}
 
 			if (jobList.Count == 0)
@@ -225,9 +225,10 @@
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
-			CancellationTokenSource cancel = new();
-			this.canceller = cancel;
-			using var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, cancel);
+			// This is re-initialized every time so that one cancellation doesn't auto-cancel anything you start after it. I don't believe this is necessary for pausing, though.
+			this.canceller = new();
+
+			using var jobManager = new JobManager(wikiInfo.WikiInfo, this.editingEnabled, this.pauser, this.canceller);
 			try
 			{
 				jobManager.StartingJob += this.JobManager_StartingJob;
@@ -235,17 +236,16 @@
 				jobManager.ProgressUpdated += this.JobManager_ProgressUpdated;
 				jobManager.StatusUpdated += this.JobManager_StatusUpdated;
 				jobManager.PagePreview += this.SitePagePreview;
-				jobManager.Site.EditingEnabled = this.EditingEnabled;
 
-				var loginName = this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet);
-				var loginPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
-				jobManager.Site.Login(loginName, loginPassword);
-				jobManager.Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
-					? null
-					: new PageJobLogger(jobManager.Site, wikiInfo.LogPage);
-				jobManager.ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
-					? null
-					: new PageResultHandler(TitleFactory.FromUnvalidated(jobManager.Site, wikiInfo.ResultsPage));
+				if (login)
+				{
+					jobManager.Login(
+						this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet),
+						this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet),
+						wikiInfo.LogPage,
+						wikiInfo.ResultsPage);
+				}
+
 				var allJobsTimer = Stopwatch.StartNew();
 				await jobManager.Run(jobList).ConfigureAwait(true);
 				this.StatusWrite($"Total time for last run: {FormatTimeSpan(allJobsTimer.Elapsed)}{Environment.NewLine}");

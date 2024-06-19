@@ -16,6 +16,7 @@
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
@@ -28,7 +29,7 @@
 		#endregion
 
 		#region Constructors
-		public JobManager(WikiInfo wikiInfo, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
+		public JobManager(WikiInfo wikiInfo, bool editingEnabled, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
 		{
 			this.wikiInfo = wikiInfo;
 			this.CancelToken = cancelSource.Token;
@@ -36,6 +37,7 @@
 			this.Client = this.CreateClient();
 			this.AbstractionLayer = this.CreateAbstractionLayer();
 			this.Site = this.CreateSite();
+			this.Site.EditingEnabled = editingEnabled;
 		}
 		#endregion
 
@@ -79,6 +81,20 @@
 		{
 			this.Dispose(disposing: true);
 			GC.SuppressFinalize(this);
+		}
+
+		public void Login(string? userName, string? password, string? logPage, string? resultsPage)
+		{
+			// TODO: This could probably use a re-think to move logging in and such into the job itself. Then, each job could check if Site.LoggedIn or UserName or whatever and take appropriate action if needed. This would allow each job to customize login behaviour if needed, like log pages are already customizable, and we can do away with the custom attribute. Ultimately, all methods that actually access the site should occur within the job itself; this interim method just gets us a step closer.
+			this.Site.Login(userName, password);
+
+			// These must come after login since they require namespaces to be known.
+			this.Logger = string.IsNullOrEmpty(logPage)
+				? null
+				: new PageJobLogger(TitleFactory.FromUnvalidated(this.Site, logPage));
+			this.ResultHandler = string.IsNullOrEmpty(resultsPage)
+				? null
+				: new PageResultHandler(TitleFactory.FromUnvalidated(this.Site, resultsPage));
 		}
 
 		public async Task Run(IEnumerable<JobInfo> jobList)

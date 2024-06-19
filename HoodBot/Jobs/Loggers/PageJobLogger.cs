@@ -7,7 +7,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -28,11 +27,10 @@
 		#endregion
 
 		#region Constructors
-		public PageJobLogger(Site site, string pageName)
+		public PageJobLogger(Title logTitle)
 		{
-			ArgumentNullException.ThrowIfNull(site);
-			ArgumentNullException.ThrowIfNull(pageName);
-			this.logTitle = TitleFactory.FromUnvalidated(site, pageName);
+			ArgumentNullException.ThrowIfNull(logTitle);
+			this.logTitle = logTitle;
 		}
 		#endregion
 
