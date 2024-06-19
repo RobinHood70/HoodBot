@@ -20,6 +20,7 @@
 	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{
 		#region Fields
+		private readonly JobManager jobManager;
 		private readonly string logName;
 		private int progress;
 		private int progressMaximum = 1;
@@ -29,7 +30,7 @@
 		protected WikiJob(JobManager jobManager, JobType jobType)
 		{
 			ArgumentNullException.ThrowIfNull(jobManager);
-			this.JobManager = jobManager;
+			this.jobManager = jobManager;
 			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 			this.logName = this.GetType().Name.UnCamelCase();
 			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
@@ -45,8 +46,6 @@
 		#endregion
 
 		#region Public Properties
-		public JobManager JobManager { get; }
-
 		public JobType JobType { get; }
 
 		public JobLogger? Logger { get; protected set; }
@@ -104,7 +103,7 @@
 
 		public void StatusWrite(string? status)
 		{
-			this.JobManager.UpdateStatus(status);
+			this.jobManager.UpdateStatus(status);
 			this.FlowControl();
 		}
 
@@ -151,12 +150,12 @@
 
 		protected virtual void FlowControl()
 		{
-			if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
+			if (this.jobManager.PauseToken is PauseToken pause && pause.IsPaused)
 			{
-				pause.WaitWhilePausedAsync().Wait(this.JobManager.CancelToken);
+				pause.WaitWhilePausedAsync().Wait(this.jobManager.CancelToken);
 			}
 
-			if (this.JobManager.CancelToken is CancellationToken token &&
+			if (this.jobManager.CancelToken is CancellationToken token &&
 				token != CancellationToken.None)
 			{
 				token.ThrowIfCancellationRequested();
@@ -176,7 +175,7 @@
 
 		protected virtual void UpdateProgress()
 		{
-			this.JobManager.UpdateProgress(this.ProgressPercent);
+			this.jobManager.UpdateProgress(this.ProgressPercent);
 			this.FlowControl();
 		}
 		#endregion

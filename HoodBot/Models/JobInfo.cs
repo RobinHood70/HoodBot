@@ -22,7 +22,7 @@
 			List<ConstructorParameter> parameters = new(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{
-				if (!string.Equals(parameter.ParameterType.Name, nameof(WikiJob.JobManager), StringComparison.Ordinal))
+				if (!string.Equals(parameter.ParameterType.Name, nameof(JobManager), StringComparison.Ordinal))
 				{
 					parameters.Add(new ConstructorParameter(parameter));
 				}
