@@ -38,6 +38,8 @@
 
 		public IReadOnlyList<string> Groups { get; }
 
+		public bool Login { get; private set; } = true;
+
 		public string Name { get; }
 
 		public IReadOnlyList<ConstructorParameter> Parameters { get; }
@@ -62,7 +64,15 @@
 					{
 						if (constructor.GetCustomAttribute<JobInfoAttribute>() is JobInfoAttribute jobInfo)
 						{
-							yield return new JobInfo(constructor, jobInfo);
+							var job = new JobInfo(constructor, jobInfo);
+							if ((
+								constructor.GetCustomAttribute<NoLoginAttribute>() ??
+								type.GetCustomAttribute<NoLoginAttribute>()) is not null)
+							{
+								job.Login = false;
+							}
+
+							yield return job;
 						}
 					}
 				}
