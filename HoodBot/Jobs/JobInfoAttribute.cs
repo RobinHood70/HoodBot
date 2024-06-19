@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 
 	[AttributeUsage(AttributeTargets.Constructor)]
@@ -14,7 +13,6 @@
 		{
 		}
 
-		[SuppressMessage("Design", "CA1019:Define accessors for attribute arguments", Justification = "Inappropriate here.")]
 		public JobInfoAttribute(string name, string? groupsText)
 		{
 			this.Name = name;
