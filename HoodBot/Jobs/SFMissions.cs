@@ -7,9 +7,12 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
@@ -33,72 +36,98 @@
 
 		protected override IDictionary<Title, Mission> LoadItems()
 		{
-			var items = new Dictionary<Title, Mission>();
-			var disambigs = this.ParseDisambigs();
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/QuestStages.csv"), true);
-			foreach (var row in csv)
-			{
-				var name = row["QuestFull"];
-				var edid = row["QuestEditorID"];
-				name = SanitizeName(name);
-				var baseName = name;
-				if (
-					name.Length > 0 &&
-					!name.Contains('_', StringComparison.Ordinal) &&
-					!name.Contains("convers", StringComparison.OrdinalIgnoreCase) &&
-					!name.Contains("dialog", StringComparison.OrdinalIgnoreCase) &&
-					!edid.Contains("dialog", StringComparison.OrdinalIgnoreCase))
-				{
-					if (disambigs.TryGetValue(edid, out var disambig))
-					{
-						name += " (" + disambig + ")";
-					}
-
-					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
-					if (!items.TryGetValue(title, out var mission))
-					{
-						mission = new Mission(edid, baseName, disambig, []);
-						items.Add(title, mission);
-					}
-
-					mission.Stages.Add(new Stage(row["INDX1"], row["NAM2"].Trim(), row["CNAM"].Trim()));
-				}
-			}
+			var existing = this.LoadExisting();
+			var items = this.LoadQuests(existing);
 
 			return items;
 		}
 
-		protected override string NewPageText(Title title, Mission item)
-		{
-			var sb = new StringBuilder();
-			var name = item.Name;
-			sb
-				.Append("{{NewLine}}\n")
-				.Append("{{Mission Header\n");
-			if (!string.Equals(title.LabelName(), name, StringComparison.Ordinal))
-			{
-				sb.Append($"|title={name}\n");
-			}
-
-			sb
-				.Append("|type=\n")
-				.Append("|Giver=\n")
-				.Append("|Icon=\n")
-				.Append("|Reward={{Huh}}\n")
-				.Append($"|ID={item.EditorId}\n")
-				.Append("|Prev=\n")
-				.Append("|Next=\n")
-				.Append("|Loc=\n")
-				.Append("|image=\n")
-				.Append("|imgdesc=\n")
-				.Append("|description=\n")
-				.Append("}}\n");
-
-			return sb.ToString()[12..] + "\n{{Stub|Mission}}";
-		}
+		protected override string NewPageText(Title title, Mission item) => new StringBuilder()
+			.Append("{{Mission Header\n")
+			.Append("|type=\n")
+			.Append("|Giver=\n")
+			.Append("|Icon=\n")
+			.Append("|Reward={{Huh}}\n")
+			.Append("|ID=\n")
+			.Append("|Prev=\n")
+			.Append("|Next=\n")
+			.Append("|Loc=\n")
+			.Append("|image=\n")
+			.Append("|imgdesc=\n")
+			.Append("|description=\n")
+			.Append("}}\n\n")
+			.Append("{{Stub|Mission}}")
+			.ToString();
 
 		protected override void PageLoaded(ContextualParser parser, Mission item)
+		{
+			var tpl = parser.FindSiteTemplate("Mission Header");
+			if (tpl is null)
+			{
+				return;
+			}
+
+			tpl.Update("ID", item.EditorId);
+			var labelName = parser.Page.Title.LabelName();
+			if (!string.Equals(labelName, item.Name, StringComparison.Ordinal))
+			{
+				tpl.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+			}
+
+			var sections = parser.ToSections(2);
+			Section? summary = null;
+			foreach (var section in sections)
+			{
+				if (string.Equals(section.Header?.GetTitle(true), "Official Summary", StringComparison.OrdinalIgnoreCase))
+				{
+					var text = section.Content.ToRaw();
+					if (text.Contains(item.Summary, StringComparison.OrdinalIgnoreCase))
+					{
+						return;
+					}
+
+					summary = section;
+					break;
+				}
+			}
+
+			var lead = sections[0].Content;
+			if (summary is null)
+			{
+				summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{item.Summary}\"''\n\n");
+				var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
+				if (stubIndex != -1)
+				{
+					var stub = lead[stubIndex];
+					lead.RemoveAt(stubIndex);
+					summary.Content.Add(stub);
+					summary.Content.AddText("\n\n");
+				}
+
+				lead.TrimEnd();
+				lead.AddText("\n\n");
+				sections.Insert(1, summary);
+			}
+
+			parser.FromSections(sections);
+
+			var stagesTemplate = parser.FindSiteTemplate("Mission Entries");
+			if (stagesTemplate is null)
+			{
+				var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
+				if (insertLoc == -1)
+				{
+					insertLoc = parser.Count;
+				}
+
+				var missionEntries = BuildStageSection(item);
+				parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
+			}
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static string BuildStageSection(Mission item)
 		{
 			var sb = new StringBuilder();
 			sb
@@ -149,18 +178,37 @@
 			}
 
 			sb.Append("}}");
+			return sb.ToString();
+		}
 
-			var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
-			if (insertLoc == -1)
+		private static Dictionary<string, List<Stage>> LoadStages()
+		{
+			var retval = new Dictionary<string, List<Stage>>(StringComparer.Ordinal);
+			var csv = new CsvFile
 			{
-				insertLoc = parser.Count;
+				Encoding = Encoding.GetEncoding(1252),
+				AutoTrim = true
+			};
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/QuestStages2.csv"), true);
+			foreach (var row in csv)
+			{
+				var edid = row["QuestEditorID"];
+				var index = row["INDX1"].Trim(); // Actually an int, but there's no need to convert back and forth.
+				var comment = row["NAM2"].Trim();
+				var entry = row["CNAM"].Trim();
+				var stage = new Stage(index, comment, entry);
+
+				if (!retval.TryGetValue(edid, out var list))
+				{
+					list = [];
+				}
+
+				list.Add(stage);
 			}
 
-			parser.Insert(insertLoc, parser.Factory.TextNode(sb.ToString()));
+			return retval;
 		}
-		#endregion
 
-		#region Private Static Methods
 		private static string SanitizeName(string name)
 		{
 			if (name.StartsWith('[') && name.EndsWith(']'))
@@ -168,17 +216,17 @@
 				name = name[1..^1];
 			}
 
-			name = name
+			return name
 				.Replace("<Alias=", string.Empty, StringComparison.Ordinal)
 				.Replace(">", string.Empty, StringComparison.Ordinal)
 				.Replace('[', '(')
-				.Replace(']', ')');
-			return name;
+				.Replace(']', ')')
+				.Trim();
 		}
 		#endregion
 
 		#region Private Methods
-		private Dictionary<string, string> ParseDisambigs()
+		private Dictionary<string, string> LoadDisambigs()
 		{
 			var disambigLines = File.ReadAllLines(LocalConfig.BotDataSubPath("Starfield/Quests Disambigs.txt"));
 			var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -186,8 +234,8 @@
 			foreach (var disambig in disambigLines)
 			{
 				var split = disambig.Split(TextArrays.Tab);
-				disambigs.Add(split[0], split[2]);
-				var name = SanitizeName(split[1]);
+				var name = split[1];
+				disambigs.Add(split[0], name);
 				var pageName = "Starfield:" + name;
 				if (!disambigPages.TryGetValue(pageName, out var disambigPage))
 				{
@@ -196,7 +244,7 @@
 					disambigPages.Add(disambigPage);
 				}
 
-				var linkText = SiteLink.FromText(this.Site, pageName + " (" + split[2] + ")").ToString();
+				var linkText = SiteLink.FromText(this.Site, pageName).ToString();
 				disambigPage.Text += "* " + linkText + "\n";
 			}
 
@@ -216,10 +264,115 @@
 
 			return disambigs;
 		}
+
+		private Dictionary<string, Title> LoadExisting()
+		{
+			var exclusions = new TitleCollection(
+				this.Site,
+				StarfieldNamespaces.Starfield,
+				"Deliver to Location",
+				"Destroy Ship",
+				"Drydock Blues: Deimos Staryard",
+				"Drydock Blues: Hopetech",
+				"Drydock Blues: Stroud-Eklund S",
+				"Drydock Blues: Taiyo Astroneering Store",
+				"Drydock Blues: Trident Luxury Lines Staryard",
+				"Starborn (mission)",
+				"Supply Location",
+				"Survey Planet",
+				"Trader (mission)",
+				"Transport Passenger");
+
+			var existing = new Dictionary<string, Title>(StringComparer.Ordinal);
+			var backlinks = new PageCollection(this.Site);
+			backlinks.GetBacklinks("Template:Mission Header", BacklinksTypes.EmbeddedIn);
+			backlinks.Remove(exclusions);
+
+			foreach (var page in backlinks)
+			{
+				var parser = new ContextualParser(page);
+				var templates = new List<SiteTemplateNode>(parser.FindSiteTemplates("Mission Header"));
+				if (templates.Count > 1)
+				{
+					Debug.WriteLine("Multiple templates on " + page.Title.FullPageName());
+				}
+
+				foreach (var template in templates)
+				{
+					var edidParam = template.Find(true, "ID");
+					if (edidParam is not null)
+					{
+						var edid = edidParam.Value.ToRaw().Trim();
+						if (edid.Length > 0)
+						{
+							if (!existing.TryAdd(edid, page.Title))
+							{
+								Debug.WriteLine($"Conflict for {edid} on both {existing[edid].FullPageName()} and {page.Title.FullPageName()}");
+							}
+						}
+					}
+				}
+			}
+
+			return existing;
+		}
+
+		private Dictionary<Title, Mission> LoadQuests(Dictionary<string, Title> existing)
+		{
+			var retval = new Dictionary<Title, Mission>();
+			var stages = LoadStages();
+			var disambigs = this.LoadDisambigs();
+
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(LocalConfig.BotDataSubPath("Starfield/Quests2.csv"), true);
+			foreach (var row in csv)
+			{
+				var edid = row["EditorID"];
+				var name = row["Full"];
+				name = SanitizeName(name);
+
+				var summary = row["Summary"];
+				summary = summary
+					.Replace("!!----------------PLEASE WAIT TO DUPLICATE OR MODIFY-----------------!!", string.Empty, StringComparison.Ordinal)
+					.Trim();
+
+				var missionStages = stages.GetValueOrDefault(edid, []);
+
+				if (
+					name.Length > 0 &&
+					!name.Contains('_', StringComparison.Ordinal) &&
+					!name.Contains("convers", StringComparison.OrdinalIgnoreCase) &&
+					!name.Contains("dialog", StringComparison.OrdinalIgnoreCase) &&
+					!edid.Contains("dialog", StringComparison.OrdinalIgnoreCase) &&
+					(summary.Length > 0 || missionStages.Count > 0))
+				{
+					name = disambigs.GetValueOrDefault(edid, name);
+					if (name.Length > 0)
+					{
+						if (!existing.TryGetValue(edid, out var title))
+						{
+							title = TitleFactory.FromUnvalidated(this.Site.Namespaces["Starfield"], name);
+						}
+
+						if (retval.TryGetValue(title, out var mission))
+						{
+							Debug.WriteLine($"{title.FullPageName()} ({edid} / {mission.EditorId}) needs disambiguation.");
+						}
+						else
+						{
+							mission = new Mission(edid, name, summary, missionStages);
+							retval.Add(title, mission);
+						}
+					}
+				}
+			}
+
+			return retval;
+		}
 		#endregion
 
 		#region Internal Records
-		internal sealed record Mission(string EditorId, string Name, string? Disambig, List<Stage> Stages);
+		internal sealed record Mission(string EditorId, string Name, string Summary, List<Stage> Stages);
 
 		internal sealed record Stage(string Index, string Comment, string Entry);
 		#endregion
