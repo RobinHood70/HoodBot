@@ -12,8 +12,12 @@
 
 	public class RelinkCollectibles : MovePagesJob
 	{
+		#region Static Fields
+		private static readonly string[] AntiquityTitles = ["Online:Antiquity Furnishings", "Online:Antique Maps"];
+		#endregion
+
 		#region Fields
-		private readonly List<Title> esoTitles = [];
+		private readonly TitleCollection esoTitles;
 		private readonly Dictionary<Title, string> disambigs = [];
 		#endregion
 
@@ -25,6 +29,7 @@
 			this.MoveAction = MoveAction.None;
 			this.EditSummaryMove = "Match page name to item";
 			this.AllowFromEqualsTo = true; // Replacements are dummy replacements to trigger GetToLink();
+			this.esoTitles = new TitleCollection(this.Site);
 		}
 		#endregion
 
@@ -34,11 +39,9 @@
 		{
 			if (from.Interwiki == null && from.Fragment != null)
 			{
-				var newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment + this.disambigs[to]));
-				if (newTitle is null)
-				{
-					newTitle = this.esoTitles.Find(title => title.PageNameEquals(from.Fragment));
-				}
+				var newTitle =
+					this.esoTitles[from.Fragment + this.disambigs[to]] ??
+					this.esoTitles[from.Fragment];
 
 				if (newTitle is null)
 				{
@@ -58,13 +61,8 @@
 
 		protected override void PopulateMoves()
 		{
-			var allTitles = new TitleCollection(this.Site);
-			allTitles.GetNamespace(UespNamespaces.Online);
-			allTitles.Sort();
-			this.esoTitles.AddRange(allTitles.Titles());
-
-			var collectionTitles = GetTitles();
-			var collectionPages = this.GetPages(collectionTitles);
+			this.esoTitles.GetNamespace(UespNamespaces.Online);
+			var collectionPages = this.GetPages(AntiquityTitles); // this.GetCollectionTitles();
 			this.PopulateFromCollections(collectionPages);
 		}
 
@@ -114,8 +112,6 @@
 			}
 		}
 		*/
-
-		private static IEnumerable<string> GetTitles() => ["Online:Antiquity Furnishings", "Online:Antique Maps"]; // GetCollectionTitles();
 		#endregion
 
 		#region Private Methods
