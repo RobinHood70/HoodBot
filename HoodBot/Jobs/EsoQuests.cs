@@ -686,10 +686,10 @@
 					switch (reward.RewardType)
 					{
 						case -1:
-							this.XP = $"{{{{ESO XP|{reward.Quantity}}}}}";
+							this.XP = $"{{{{ESO XP|<!--{reward.Quantity}-->}}}} XP";
 							break;
 						case 1:
-							rewardList.Add($"{{{{ESO Gold|{reward.Quantity}}}}} Gold");
+							rewardList.Add($"{{{{ESO Gold|<!--{reward.Quantity}-->}}}} Gold");
 							break;
 						default:
 							var rewardText = reward.Quantity > 1 ? reward.Quantity.ToStringInvariant() + ' ' : string.Empty;
