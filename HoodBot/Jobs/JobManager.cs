@@ -75,6 +75,16 @@
 		public Site Site { get; }
 		#endregion
 
+		#region Public Static Methods
+		public static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
+
+		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs?.Response}");
+
+		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs?.Request}");
+
+		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		#endregion
+
 		#region Public Methods
 
 		public void Dispose()
@@ -267,14 +277,6 @@
 			}
 #endif
 		}
-
-		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
-
-		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs?.Response}");
-
-		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs?.Request}");
-
-		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 		#endregion
 
 		#region Private Methods
@@ -305,11 +307,11 @@
 #if DEBUG
 			if (abstractionLayer is IInternetEntryPoint internet)
 			{
-				internet.SendingRequest += this.WalSendingRequest;
+				internet.SendingRequest += WalSendingRequest;
 				//// internet.ResponseReceived += WalResponseRecieved;
 			}
 
-			abstractionLayer.WarningOccurred += this.WalWarningOccurred;
+			abstractionLayer.WarningOccurred += WalWarningOccurred;
 #endif
 
 			return abstractionLayer;
@@ -337,16 +339,16 @@
 			var retval = Site.GetFactoryMethod(this.wikiInfo.SiteClassIdentifier)(this.AbstractionLayer);
 			retval.Changing += this.SiteChanging;
 			retval.PagePreview += this.OnPagePreview;
-			retval.WarningOccurred += this.SiteWarningOccurred;
+			retval.WarningOccurred += SiteWarningOccurred;
 			return retval;
 		}
 
 		private void DisposeAbstractionLayer()
 		{
-			this.AbstractionLayer.WarningOccurred -= this.WalWarningOccurred;
+			this.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
 			if (this.AbstractionLayer is IInternetEntryPoint internet)
 			{
-				internet.SendingRequest -= this.WalSendingRequest;
+				internet.SendingRequest -= WalSendingRequest;
 			}
 		}
 
@@ -354,7 +356,7 @@
 
 		private void DisposeSite()
 		{
-			this.Site.WarningOccurred -= this.SiteWarningOccurred;
+			this.Site.WarningOccurred -= SiteWarningOccurred;
 			this.Site.PagePreview -= this.OnPagePreview;
 			this.Site.Changing -= this.SiteChanging;
 		}
