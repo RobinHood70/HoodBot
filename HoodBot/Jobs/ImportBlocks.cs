@@ -8,62 +8,65 @@
 	using RobinHood70.HoodBot.Wikimedia;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 
 	[method: JobInfo("Import Blocks")]
+	[method: NoLogin]
 	internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 	{
 		#region Static Fields
-		private static readonly Regex BlockFilter;
+		// Regex initialized from file to keep specific filters hidden from vandals.
+		private static readonly Regex BlockFilter = new(File.ReadAllText("Jobs\\ImportBlocksFilter.txt"), RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 		private static readonly Regex Ipv4Check = new(@"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<range>\/\d+)?\Z", RegexOptions.CultureInvariant, Globals.DefaultRegexTimeout);
-		#endregion
-
-		#region Static Constructor
-		static ImportBlocks()
+		private static readonly HashSet<string> Sites = new(StringComparer.Ordinal)
 		{
-			// Regex initialized from file to keep specific filters hidden from vandals.
-			var filter = File.ReadAllText("Jobs\\ImportBlocksFilter.txt");
-			BlockFilter = new(filter, RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
-		}
+			"en.uesp.net",
+			"starfieldwiki.net",
+			"ar.uesp.net",
+			"fr.uesp.net",
+			"it.uesp.net",
+			"pt.uesp.net",
+			"ck.uesp.net",
+			"cs.uesp.net",
+			"falloutck.uesp.net"
+		};
 		#endregion
 
-		/*
-		#region Public Static Methods
-		public static void DebugRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"Temporary API Request: {eventArgs.Request}");
+		#region Fields
+		private readonly IMediaWikiClient client = jobManager.Client;
 		#endregion
-		*/
 
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			if (this.Site.User is null)
+			// This is a little bit ugly in crossing responsibility boundaries by accessing App directly. Could also have a second copy with Settings.Load. Debatable which is better/uglier.
+			var wikis = App.UserSettings.Wikis;
+			foreach (var wiki in wikis)
 			{
-				throw new InvalidOperationException("This job cannot be run anonymously.");
-			}
-
-			var localBlocks = this.GetLocalBlocks();
-			DateTime? lastRun = DateTime.MinValue;
-			var dtPad = DateTime.Now.AddHours(-4); // Don't count anything within the last four hours, since that's almost certainly part of an aborted run of the current job rather than a previous job.
-			var botName = this.Site.User.Name;
-			foreach (var block in localBlocks.Values)
-			{
-				if (block.StartTime < dtPad &&
-					block.StartTime > lastRun &&
-					string.Equals(block.BlockedBy?.Name, botName, StringComparison.Ordinal) &&
-					(block.Reason?.Contains("proxy", StringComparison.OrdinalIgnoreCase) ?? false))
+				if (wiki.WikiInfo.Api is Uri uri && Sites.Contains(uri.Host) && wiki.UserName is not null)
 				{
-					lastRun = block.StartTime;
+					var api = new WikiAbstractionLayer(this.client, wiki.Api!);
+					api.SendingRequest += JobManager.WalSendingRequest;
+					var site = new Site(api);
+					site.Login(wiki.UserName, wiki.Password);
+
+					this.StatusWriteLine("Getting local blocks");
+					var localBlocks = GetLocalBlocks(site);
+					var lastRun = GetStartTime(wiki.UserName, localBlocks);
+					var wmfBlocks = this.GetWmfBlocks(lastRun);
+					var blockUpdates = DoSiteBlocks(wmfBlocks, localBlocks);
+
+					this.StatusWriteLine($"Applying {blockUpdates.UpdateCount} updated and {blockUpdates.NewCount} new blocks ({blockUpdates.OverlapCount} overlaps)");
+					this.UpdateBlocks(site, blockUpdates.NewBlocks);
+					api.SendingRequest -= JobManager.WalSendingRequest;
 				}
 			}
+		}
 
-			// -2 hours to allow plenty of time for possible mis-synchronization due to job run times, time differences, etc.
-			lastRun = lastRun == DateTime.MinValue ? null : lastRun.Value.AddHours(-2);
-
-			var wmfBlocks = new List<CommonBlock>();
-			this.GetGlobalBlocks(wmfBlocks, lastRun);
-			this.GetEnWikiBlocks(wmfBlocks, lastRun);
-
+		private static BlockUpdates DoSiteBlocks(List<CommonBlock> wmfBlocks, Dictionary<string, Block> localBlocks)
+		{
 			var newBlocks = new SortedDictionary<string, CommonBlock>(StringComparer.Ordinal);
 			var overlapCount = 0;
 			var updateCount = 0;
@@ -105,45 +108,45 @@
 				}
 			}
 
-			this.StatusWriteLine($"Applying {updateCount} updated and {newCount} new blocks ({overlapCount} overlaps)");
-			this.ProgressMaximum = newBlocks.Count;
-			foreach (var newBlock in newBlocks)
+			return new BlockUpdates(overlapCount, updateCount, newCount, newBlocks);
+		}
+
+		private static DateTime GetStartTime(string botName, Dictionary<string, Block> localBlocks)
+		{
+			var paddedNow = DateTime.Now.AddHours(-4); // Don't count anything within the last four hours, since that's almost certainly part of an aborted run of the current job rather than a previous job.
+			var lastRun = DateTime.MinValue;
+			foreach (var block in localBlocks.Values)
 			{
-				var block = newBlock.Value;
-				var reason = "Webhost/proxy";
-				if (block.Source is not null)
+				if (block.StartTime < paddedNow &&
+					block.StartTime > lastRun &&
+					string.Equals(block.BlockedBy?.Name, botName, StringComparison.Ordinal) &&
+					(block.Reason?.Contains("proxy", StringComparison.OrdinalIgnoreCase) ?? false))
 				{
-					reason += ": " + block.Source;
+					lastRun = block.StartTime;
 				}
-
-				var user = new User(this.Site, block.Address);
-				try
-				{
-					var result = user.Block(reason, BlockFlags.AnonymousOnly | BlockFlags.NoCreate, block.Expiry, true);
-				}
-				catch
-				{
-				}
-
-				this.Progress++;
 			}
+
+			// -2 hours to allow plenty of time for possible mis-synchronization due to job run times, time differences, etc.
+			if (lastRun != DateTime.MinValue)
+			{
+				lastRun = lastRun.AddHours(-2);
+			}
+
+			return lastRun;
 		}
 		#endregion
 
-		#region Private Methods
-		private void GetEnWikiBlocks(List<CommonBlock> blocks, DateTime? lastRun)
+		#region Private Static Methods
+		private static void GetEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 		{
-			this.StatusWriteLine("Getting English wiki blocks");
-			var api = (WikiAbstractionLayer)this.Site.AbstractionLayer;
-			var client = api.Client;
 			var uri = new Uri("https://en.wikipedia.org/w/api.php");
 			var wmApi = new WikiAbstractionLayer(client, uri);
-			//// wmApi.SendingRequest += DebugRequest;
+			wmApi.SendingRequest += JobManager.WalSendingRequest;
 			var wmSite = new Site(wmApi);
 			wmSite.Login(null, null);
 			var input = new BlocksInput
 			{
-				Start = lastRun,
+				Start = lastRun == DateTime.MinValue ? null : lastRun,
 				SortAscending = true,
 				FilterAccount = Filter.Exclude,
 				Properties =
@@ -165,27 +168,26 @@
 				}
 			}
 
-			// wmApi.SendingRequest -= DebugRequest;
+			wmApi.SendingRequest -= JobManager.WalSendingRequest;
 		}
 
-		private void GetGlobalBlocks(List<CommonBlock> blocks, DateTime? lastRun)
+		private static void GetGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 		{
-			this.StatusWriteLine("Getting WMF global blocks");
-			var api = (WikiAbstractionLayer)this.Site.AbstractionLayer;
-			var client = api.Client;
 			var uri = new Uri("https://meta.wikimedia.org/w/api.php");
-			//// var uri = new Uri("https://en.wikipedia.org/w/api.php");
 			var wmApi = new WikiAbstractionLayer(client, uri);
-			//// wmApi.SendingRequest += DebugRequest;
+			wmApi.SendingRequest += JobManager.WalSendingRequest;
+			wmApi.Initialize();
+
 			var input = new GlobalBlocksInput
 			{
-				Start = lastRun,
+				Start = lastRun == DateTime.MinValue ? null : lastRun,
 				SortAscending = true,
 				Properties =
 					GlobalBlocksProperties.Address |
 					GlobalBlocksProperties.Expiry |
 					GlobalBlocksProperties.Reason
 			};
+
 			var list = new ListGlobalBlocks(wmApi, input);
 			var result = wmApi.RunModuleQuery(list);
 			foreach (var block in result)
@@ -200,13 +202,12 @@
 				}
 			}
 
-			// wmApi.SendingRequest -= DebugRequest;
+			wmApi.SendingRequest -= JobManager.WalSendingRequest;
 		}
 
-		private Dictionary<string, Block> GetLocalBlocks()
+		private static Dictionary<string, Block> GetLocalBlocks(Site site)
 		{
-			this.StatusWriteLine("Getting local blocks");
-			var localBlocks = this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
+			var localBlocks = site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
 			var retval = new Dictionary<string, Block>(StringComparer.Ordinal);
 			foreach (var block in localBlocks)
 			{
@@ -218,6 +219,48 @@
 
 			return retval;
 		}
+		#endregion
+
+		#region Private Methods
+		private List<CommonBlock> GetWmfBlocks(DateTime lastRun)
+		{
+			var wmfBlocks = new List<CommonBlock>();
+			this.StatusWriteLine("Getting WMF global blocks");
+			GetGlobalBlocks(this.client, wmfBlocks, lastRun);
+			this.StatusWriteLine("Getting English wiki blocks");
+			GetEnWikiBlocks(this.client, wmfBlocks, lastRun);
+
+			return wmfBlocks;
+		}
+
+		private void UpdateBlocks(Site site, IDictionary<string, CommonBlock> newBlocks)
+		{
+			this.ResetProgress(newBlocks.Count);
+			foreach (var newBlock in newBlocks)
+			{
+				var block = newBlock.Value;
+				var reason = "Webhost/proxy";
+				if (block.Source is not null)
+				{
+					reason += ": " + block.Source;
+				}
+
+				var user = new User(site, block.Address);
+				try
+				{
+					var result = user.Block(reason, BlockFlags.AnonymousOnly | BlockFlags.NoCreate, block.Expiry, true);
+				}
+				catch
+				{
+				}
+
+				this.Progress++;
+			}
+		}
+		#endregion
+
+		#region Private Records
+		private record struct BlockUpdates(int OverlapCount, int UpdateCount, int NewCount, IDictionary<string, CommonBlock> NewBlocks);
 		#endregion
 
 		#region Private Classes
