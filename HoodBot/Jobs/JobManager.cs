@@ -161,7 +161,11 @@
 		#region Internal Static Methods
 
 		// This is flagged as internal mostly to stop warnings whenever it's not in use.
-		internal static string SiteName(IWikiAbstractionLayer? sender) => sender?.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+		internal static string SiteName(IWikiAbstractionLayer? sender) =>
+			sender?.AllSiteInfo?.General?.SiteName ??
+			(sender is IInternetEntryPoint net
+				? net.EntryPoint.Host
+				: "Site-Agnostic");
 		#endregion
 
 		#region Protected Virtual Methods
