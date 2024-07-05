@@ -7,7 +7,7 @@
 	public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Public Override Properties
-		public override string LogDetails => "Add navbox";
+		public override string LogDetails => "Fix duplicate sections";
 
 		public override string LogName => "One-Off Parse Job";
 		#endregion
@@ -17,22 +17,19 @@
 
 		protected override void LoadPages()
 		{
-			this.Pages.GetBacklinks("Template:NPC Summary", WikiCommon.BacklinksTypes.EmbeddedIn);
+			this.Pages.GetBacklinks("Template:Online File", WikiCommon.BacklinksTypes.EmbeddedIn);
+		}
+
+		protected override void PageLoaded(Page page)
+		{
+			page.Text = page.Text
+				.Replace("== Summary ==\n{{Online File", "{{Online File")
+				.Replace("\n\n== Licensing ==\n{{Zenimage}}", string.Empty)
+				;
 		}
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			if (parser.FindSiteTemplate("Npc Navbox") is null)
-			{
-				var index = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
-				if (index == -1)
-				{
-					index = parser.Count;
-				}
-
-				var text = index == -1 ? "\n\n{{Npc Navbox}}" : "{{Npc Navbox}}\n\n";
-				parser.InsertText(index, text);
-			}
 		}
 		#endregion
 	}
