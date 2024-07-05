@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
@@ -9,7 +7,7 @@
 	public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Public Override Properties
-		public override string LogDetails => "Add missing Mod Headers";
+		public override string LogDetails => "Add navbox";
 
 		public override string LogName => "One-Off Parse Job";
 		#endregion
@@ -19,31 +17,21 @@
 
 		protected override void LoadPages()
 		{
-			var from = new DateTime(2024, 6, 4, 2, 46, 0, DateTimeKind.Utc);
-			var to = DateTime.UtcNow;
-			var titles = new TitleCollection(this.Site);
-			var contributions = this.Site.User?.GetContributions(from, to) ?? throw new InvalidOperationException();
-			foreach (var contribution in contributions)
-			{
-				if (contribution.Title.Namespace == UespNamespaces.Online)
-				{
-					titles.Add(contribution.Title);
-				}
-			}
-
-			this.Pages.GetTitles(titles);
+			this.Pages.GetBacklinks("Template:NPC Summary", WikiCommon.BacklinksTypes.EmbeddedIn);
 		}
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			if (parser.FindSiteTemplate("Mod Header") is null)
+			if (parser.FindSiteTemplate("Npc Navbox") is null)
 			{
-				var insertLoc = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Online NPC Summary") || node.TitleValue.PageNameEquals("Online Furnishing Summary"));
-				if (insertLoc != -1)
+				var index = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
+				if (index == -1)
 				{
-					var newNode = parser.Factory.TemplateNodeFromWikiText("{{Mod Header|Gold Road}}");
-					parser.Insert(insertLoc, newNode);
+					index = parser.Count;
 				}
+
+				var text = index == -1 ? "\n\n{{Npc Navbox}}" : "{{Npc Navbox}}\n\n";
+				parser.InsertText(index, text);
 			}
 		}
 		#endregion
