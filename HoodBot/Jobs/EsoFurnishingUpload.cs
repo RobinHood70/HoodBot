@@ -62,9 +62,6 @@
 				{
 					var pageText =
 						$"{{{{Online File|{iconInfo.LocalIcon}}}}}\n" +
-						"\n" +
-						"== Licensing ==\n" +
-						"{{Zenimage}}" +
 						"[[Category:Online-Icons-Furnishings]]";
 					var wikiIconName = iconInfo.IconName.Replace("\"", string.Empty, StringComparison.Ordinal);
 					uesp.Upload(Path.Combine(LocalConfig.WikiIconsFolder, iconInfo.LocalIcon), wikiIconName, "Upload furnishing icon", pageText);
