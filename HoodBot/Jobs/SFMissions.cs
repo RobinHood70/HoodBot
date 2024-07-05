@@ -16,6 +16,12 @@
 
 	internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
+		#region Private Constants
+		private const string DisambigFileName = "Starfield/Quests Disambigs.txt";
+		private const string QuestsFileName = "Starfield/Quests3.csv";
+		private const string StagesFileName = "Starfield/QuestStages3.csv";
+		#endregion
+
 		#region Constructors
 		[JobInfo("Missions", "Starfield")]
 		public SFMissions(JobManager jobManager)
@@ -74,6 +80,35 @@
 				tpl.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
 			}
 
+			if (item.Summary.Length > 0)
+			{
+				DoSummary(parser, item.Summary);
+			}
+
+			if (item.Stages.Count > 0)
+			{
+				DoStages(parser, item.Stages);
+			}
+		}
+
+		private static void DoStages(ContextualParser parser, List<Stage> stages)
+		{
+			var stagesTemplate = parser.FindSiteTemplate("Mission Entries");
+			if (stagesTemplate is null)
+			{
+				var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub") || t.TitleValue.PageNameEquals("Starfield Trackers Alliance Mission"));
+				if (insertLoc == -1)
+				{
+					insertLoc = parser.Count;
+				}
+
+				var missionEntries = BuildStageSection(stages);
+				parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
+			}
+		}
+
+		private static void DoSummary(ContextualParser parser, string missionSummary)
+		{
 			var sections = parser.ToSections(2);
 			Section? summary = null;
 			foreach (var section in sections)
@@ -81,7 +116,7 @@
 				if (string.Equals(section.Header?.GetTitle(true), "Official Summary", StringComparison.OrdinalIgnoreCase))
 				{
 					var text = section.Content.ToRaw();
-					if (text.Contains(item.Summary, StringComparison.OrdinalIgnoreCase))
+					if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))
 					{
 						return;
 					}
@@ -92,49 +127,38 @@
 			}
 
 			var lead = sections[0].Content;
+			lead.TrimEnd();
+			lead.AddText("\n\n");
 			if (summary is null)
 			{
-				summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{item.Summary}\"''\n\n");
-				var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
+				summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
+				var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub") || t.TitleValue.PageNameEquals("Starfield Trackers Alliance Mission"));
 				if (stubIndex != -1)
 				{
 					var stub = lead[stubIndex];
 					lead.RemoveAt(stubIndex);
-					summary.Content.Add(stub);
+					lead.TrimEnd();
+					lead.AddText("\n\n");
 					summary.Content.AddText("\n\n");
+					summary.Content.Add(stub);
 				}
 
-				lead.TrimEnd();
-				lead.AddText("\n\n");
 				sections.Insert(1, summary);
 			}
 
 			parser.FromSections(sections);
-
-			var stagesTemplate = parser.FindSiteTemplate("Mission Entries");
-			if (stagesTemplate is null)
-			{
-				var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
-				if (insertLoc == -1)
-				{
-					insertLoc = parser.Count;
-				}
-
-				var missionEntries = BuildStageSection(item);
-				parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
-			}
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static string BuildStageSection(Mission item)
+		private static string BuildStageSection(List<Stage> stages)
 		{
 			var sb = new StringBuilder();
 			sb
-				.Append("\n\n== Mission Stages ==\n")
+				.Append("== Mission Stages ==\n")
 				.Append("{{Mission Entries\n");
 			var missing = new List<string>();
-			foreach (var stage in item.Stages)
+			foreach (var stage in stages)
 			{
 				if (stage.Entry.Length == 0 && stage.Comment.Length == 0)
 				{
@@ -171,13 +195,13 @@
 					.Append("|missing=")
 					.AppendJoin(", ", missing)
 					.Append('\n');
-				if (missing.Count == item.Stages.Count)
+				if (missing.Count == stages.Count)
 				{
 					sb.Append("|allmissing=1\n");
 				}
 			}
 
-			sb.Append("}}");
+			sb.Append("}}\n\n");
 			return sb.ToString();
 		}
 
@@ -189,7 +213,7 @@
 				Encoding = Encoding.GetEncoding(1252),
 				AutoTrim = true
 			};
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/QuestStages2.csv"), true);
+			csv.Load(LocalConfig.BotDataSubPath(StagesFileName), true);
 			foreach (var row in csv)
 			{
 				var edid = row["QuestEditorID"];
@@ -201,6 +225,7 @@
 				if (!retval.TryGetValue(edid, out var list))
 				{
 					list = [];
+					retval[edid] = list;
 				}
 
 				list.Add(stage);
@@ -228,7 +253,7 @@
 		#region Private Methods
 		private Dictionary<string, string> LoadDisambigs()
 		{
-			var disambigLines = File.ReadAllLines(LocalConfig.BotDataSubPath("Starfield/Quests Disambigs.txt"));
+			var disambigLines = File.ReadAllLines(LocalConfig.BotDataSubPath(DisambigFileName));
 			var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
 			var disambigPages = new PageCollection(this.Site);
 			foreach (var disambig in disambigLines)
@@ -324,12 +349,20 @@
 			var disambigs = this.LoadDisambigs();
 
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Quests2.csv"), true);
+			csv.Load(LocalConfig.BotDataSubPath(QuestsFileName), true);
 			foreach (var row in csv)
 			{
 				var edid = row["EditorID"];
 				var name = row["Full"];
 				name = SanitizeName(name);
+				if (edid.Contains("dialog", StringComparison.OrdinalIgnoreCase) ||
+					name.Length == 0 ||
+					name.Contains('_', StringComparison.Ordinal) ||
+					name.Contains("convers", StringComparison.OrdinalIgnoreCase) ||
+					name.Contains("dialog", StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
 
 				var summary = row["Summary"];
 				summary = summary
@@ -338,13 +371,7 @@
 
 				var missionStages = stages.GetValueOrDefault(edid, []);
 
-				if (
-					name.Length > 0 &&
-					!name.Contains('_', StringComparison.Ordinal) &&
-					!name.Contains("convers", StringComparison.OrdinalIgnoreCase) &&
-					!name.Contains("dialog", StringComparison.OrdinalIgnoreCase) &&
-					!edid.Contains("dialog", StringComparison.OrdinalIgnoreCase) &&
-					(summary.Length > 0 || missionStages.Count > 0))
+				if (summary.Length > 0 || missionStages.Count > 0)
 				{
 					name = disambigs.GetValueOrDefault(edid, name);
 					if (name.Length > 0)
