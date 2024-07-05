@@ -61,8 +61,7 @@
 				if (iconInfo.LocalIcon != null && !existing.Contains(iconInfo.IconName))
 				{
 					var pageText =
-						"== Summary ==\n" +
-						$"Original file: {iconInfo.LocalIcon}\n" +
+						$"{{{{Online File|{iconInfo.LocalIcon}}}}}\n" +
 						"\n" +
 						"== Licensing ==\n" +
 						"{{Zenimage}}" +
