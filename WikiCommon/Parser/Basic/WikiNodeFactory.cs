@@ -180,7 +180,7 @@
 		{
 			if (other != null)
 			{
-				if (other.Name is not null)
+				if (name is not null && other.Name is not null)
 				{
 					name = other.Name.CopyFormatTo(name);
 				}
