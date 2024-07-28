@@ -7,6 +7,7 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -84,6 +85,28 @@
 		#endregion
 
 		#region Public WikiJob Extension Methods
+		public static Dictionary<string, HashSet<string>> GetIconChecksums()
+		{
+			var allIcons = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+			if (Directory.Exists(LocalConfig.WikiIconsFolder))
+			{
+				foreach (var file in Directory.EnumerateFiles(LocalConfig.WikiIconsFolder, "*.*", SearchOption.AllDirectories))
+				{
+					var fileData = File.ReadAllBytes(file);
+					var checksum = Globals.GetHash(fileData, HashType.Sha1);
+					if (!allIcons.TryGetValue(checksum, out var list))
+					{
+						list = new HashSet<string>(1, StringComparer.Ordinal);
+						allIcons.Add(checksum, list);
+					}
+
+					list.Add(file[LocalConfig.WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
+				}
+			}
+
+			return allIcons;
+		}
+
 		public static void GetIcons(this WikiJob job, string updateFolder, bool pts)
 		{
 			var downloadPath = IconDownloadPath(updateFolder, pts);

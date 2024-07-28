@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -29,7 +28,7 @@
 		#region Fields
 		private readonly HashSet<Title> licenseTemplates = [];
 		private readonly Dictionary<string, List<ItemInfo>> allItems = new(StringComparer.Ordinal);
-		private readonly Dictionary<string, ICollection<string>> allIcons = new(StringComparer.Ordinal);
+		private Dictionary<string, HashSet<string>>? allIcons;
 		#endregion
 
 		#region Constructors
@@ -53,7 +52,7 @@
 			this.GetItems();
 
 			this.StatusWriteLine("Calculating image checksums");
-			this.GetIconChecksums();
+			this.allIcons = EsoSpace.GetIconChecksums();
 
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
@@ -65,6 +64,11 @@
 
 		protected override void PageLoaded(Page page)
 		{
+			if (this.allIcons is null)
+			{
+				throw new InvalidOperationException();
+			}
+
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
 				this.allIcons.TryGetValue(latestRevision.Sha1.PropertyNotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
@@ -177,25 +181,6 @@
 		#endregion
 
 		#region Private Methods
-		private void GetIconChecksums()
-		{
-			if (Directory.Exists(LocalConfig.WikiIconsFolder))
-			{
-				foreach (var file in Directory.EnumerateFiles(LocalConfig.WikiIconsFolder, "*.*", SearchOption.AllDirectories))
-				{
-					var fileData = File.ReadAllBytes(file);
-					var checksum = Globals.GetHash(fileData, HashType.Sha1);
-					if (!this.allIcons.TryGetValue(checksum, out var list))
-					{
-						list = new HashSet<string>(1, StringComparer.Ordinal);
-						this.allIcons.Add(checksum, list);
-					}
-
-					list.Add(file[LocalConfig.WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
-				}
-			}
-		}
-
 		private void GetItems()
 		{
 			Dictionary<string, string> queries = new(StringComparer.Ordinal)
