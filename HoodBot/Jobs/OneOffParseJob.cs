@@ -23,8 +23,8 @@
 		protected override void PageLoaded(Page page)
 		{
 			page.Text = page.Text
-				.Replace("== Summary ==\n{{Online File", "{{Online File")
-				.Replace("\n\n== Licensing ==\n{{Zenimage}}", string.Empty)
+				.Replace("== Summary ==\n{{Online File", "{{Online File", System.StringComparison.Ordinal)
+				.Replace("\n\n== Licensing ==\n{{Zenimage}}", string.Empty, System.StringComparison.Ordinal)
 				;
 		}
 
