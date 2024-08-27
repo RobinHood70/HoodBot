@@ -18,6 +18,7 @@
 	internal sealed class EsoCollectibles : ParsedPageJob
 	{
 		#region Private Constants
+		private const string ModHeader = "";
 		private const string TemplateName = "Online Collectible Summary";
 		#endregion
 
@@ -63,12 +64,18 @@
 				{
 					if (tag.InnerText?.Trim() is string blankTemplate)
 					{
-						this.blankText = "{{Mod Header|Gold Road}}" + blankTemplate;
+						this.blankText = ModHeader.Length == 0
+							? blankTemplate
+							: $"{{{{Mod Header|{ModHeader}}}}}" + blankTemplate;
 					}
 				}
 			}
 
-			this.CheckBlankText();
+			if (this.blankText is null)
+			{
+				throw new InvalidOperationException("blankText is null");
+			}
+
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 			var pages = this.GetBacklinks();
@@ -83,7 +90,11 @@
 
 		protected override void LoadPages()
 		{
-			this.CheckBlankText();
+			if (this.blankText is null)
+			{
+				throw new InvalidOperationException("blankText is null");
+			}
+
 			foreach (var collectible in this.collectibles)
 			{
 				var page = this.Site.CreatePage(collectible.Key, this.blankText!);
@@ -188,14 +199,6 @@
 				}
 
 				this.collectibles.Add(title, item);
-			}
-		}
-
-		private void CheckBlankText()
-		{
-			if (this.blankText is null)
-			{
-				throw new InvalidOperationException("blankText is null");
 			}
 		}
 
