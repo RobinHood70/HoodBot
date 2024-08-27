@@ -101,7 +101,7 @@
 					dict[mission] = list;
 				}
 
-				var reactionType = SplitReaction(reaction);
+				var reactionType = this.SplitReaction(reaction);
 				var dvalue = double.Parse(row[name + "Value"].Replace(',', '.'), this.Site.Culture);
 				var value = (int)dvalue;
 				if (dvalue - value != 0)
