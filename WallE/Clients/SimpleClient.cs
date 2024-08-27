@@ -62,7 +62,11 @@ namespace RobinHood70.WallE.Clients
 			};
 			this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
 
-			HttpClient client = new(this.retryHandler);
+			HttpClient client = new(this.retryHandler)
+			{
+				Timeout = TimeSpan.FromSeconds(300) // TODO: Manually added timeout for now. Excessive to allow large downloads like ESO icons file. Better to see if we can chunk the download or something.
+			};
+
 			var headers = client.DefaultRequestHeaders;
 			headers.UserAgent.ParseAdd(this.UserAgent);
 			headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
