@@ -564,11 +564,21 @@
 				.AddIfNotNull("diffto", MediaWikiGlobal.GetDiffToValue(input.DiffTo))
 				.AddIfNotNull("difftotext", input.DiffToText)
 				.AddIf("difftotextpst", input.DiffToTextPreSaveTransform, siteVersion >= 127)
-				.AddIfNotNull("contentformat", input.ContentFormat)
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.AddIf("dir", "newer", input.SortAscending)
 				.AddIfNotNull(input.ExcludeUser ? "excludeuser" : "user", input.User);
+
+			if (siteVersion >= 132)
+			{
+				request
+					.Add("slots", input.Slots)
+					.AddTemplated("contentformat-$1", input.Slots, input.ContentFormat);
+			}
+			else if (input.ContentFormat?.Count == 1)
+			{
+				request.Add("contentformat", input.ContentFormat[0]);
+			}
 
 			return request;
 		}

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Base
 	public class AllDeletedRevisionsInput : IRevisionsInput, IGeneratorInput
 	{
 		#region Public Properties
-		public string? ContentFormat { get; set; }
+		public IList<string> ContentFormat { get; } = [];
 
 		public int? DiffTo { get; set; }
 
@@ -40,6 +40,8 @@ namespace RobinHood70.WallE.Base
 		public RevisionsProperties Properties { get; set; }
 
 		public int Section { get; set; } = -1;
+
+		public IList<string> Slots { get; } = ["main"];
 
 		public bool SortAscending { get; set; }
 

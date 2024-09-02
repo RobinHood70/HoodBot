@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using System.Collections.Generic;
 
 	#region Public Enumerations
 	[Flags]
@@ -28,7 +29,10 @@ namespace RobinHood70.WallE.Base
 	public interface IRevisionsInput : ILimitableInput
 	{
 		#region Public Properties
-		string? ContentFormat { get; set; }
+
+		/// <summary>Gets the content format for each slot.</summary>
+		/// <remarks>This list must be in the same order as the slots.</remarks>
+		IList<string>? ContentFormat { get; }
 
 		/// <summary>Gets or sets the revision ID to compare a diff to.</summary>
 		/// <value>The ID to compare to.</value>
@@ -52,6 +56,8 @@ namespace RobinHood70.WallE.Base
 		RevisionsProperties Properties { get; set; }
 
 		int Section { get; set; }
+
+		IList<string> Slots { get; }
 
 		bool SortAscending { get; set; }
 
