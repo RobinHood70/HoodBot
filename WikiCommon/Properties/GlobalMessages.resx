@@ -120,4 +120,7 @@
   <data name="InvalidSwitchValue" xml:space="preserve">
     <value>The value specified does not correspond to a known switch value.</value>
   </data>
+  <data name="TemplatedCountMismatch" xml:space="preserve">
+    <value>The number of keys for the templated parameter differs from the number of values.</value>
+  </data>
 </root>

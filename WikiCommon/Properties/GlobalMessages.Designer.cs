@@ -68,5 +68,14 @@ namespace RobinHood70.WikiCommon.Properties {
                 return ResourceManager.GetString("InvalidSwitchValue", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of keys for the templated parameter differs from the number of values..
+        /// </summary>
+        public static string TemplatedCountMismatch {
+            get {
+                return ResourceManager.GetString("TemplatedCountMismatch", resourceCulture);
+            }
+        }
     }
 }

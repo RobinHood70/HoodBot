@@ -170,6 +170,33 @@
 			? this
 			: this.AddPiped(name, new HashSet<string>(values, StringComparer.Ordinal));
 
+		/// <summary>Adds a <see href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</see> if it has at least one value.</summary>
+		/// <param name="template">The templated parameter name. The key portion should be specified as $1.</param>
+		/// <param name="keys">The templated parameter keys.</param>
+		/// <param name="values">The templated parameter values.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <remarks>Values must correspond to keys in both order and count.</remarks>
+		/// <seealso href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams"></seealso>
+		public Request AddTemplated(string template, IList<string>? keys, IList<string>? values)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			if (values is not null && values.Count > 0)
+			{
+				ArgumentNullException.ThrowIfNull(keys);
+				if (keys.Count != values.Count)
+				{
+					throw new InvalidOperationException(GlobalMessages.TemplatedCountMismatch);
+				}
+
+				for (var i = 0; i < keys.Count; ++i)
+				{
+					this.Add(template.Replace("$1", keys[i], StringComparison.Ordinal), values[i]);
+				}
+			}
+
+			return this;
+		}
+
 		/// <summary>Adds an enumerable string parameter if it has at least one value.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
@@ -389,6 +416,15 @@
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIf(string name, IEnumerable<string>? values, bool condition) => condition ? this.Add(name, values) : this;
+
+		/// <summary>Adds a <a href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</a> if it has at least one value and the condition is true.</summary>
+		/// <param name="template">The templated parameter name. The key portion should be specified as $1.</param>
+		/// <param name="keys">The templated parameter keys.</param>
+		/// <param name="values">The templated parameter values.</param>
+		/// <param name="condition">The condition to check.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <remarks>Values must correspond to keys in both order and count.</remarks>
+		public Request AddTemplatedIf(string template, IList<string>? keys, IList<string>? values, bool condition) => condition ? this.AddTemplated(template, keys, values) : this;
 
 		/// <summary>Adds a collection of integers if the collection is non-null and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
