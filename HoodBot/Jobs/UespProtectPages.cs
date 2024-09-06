@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Hnb.Tasks
+﻿namespace RobinHood70.Hnb.Jobs
 {
 	using System;
 	using System.Collections.Generic;
