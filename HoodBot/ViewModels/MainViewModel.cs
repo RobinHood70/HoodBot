@@ -52,7 +52,7 @@
 		public MainViewModel()
 		{
 			// This probably shouldn't be here but rather in some kind of initalization for all sites. For now, however, this is quick and dirty.
-			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
+			Site.RegisterSiteClass(UespSite.CreateInstance, nameof(UespSite));
 
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 			var plugins = Plugins.Instance;
