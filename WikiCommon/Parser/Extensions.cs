@@ -82,7 +82,7 @@
 		/// <param name="trim">if set to <see langword="true"/>, trims the inner text before returning it.</param>
 		/// <returns>The text inside the heading delimiters.</returns>
 		/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
-		public static string GetTitle(this IHeaderNode header, bool trim)
+		public static string GetTitle(this IHeaderNode? header, bool trim)
 		{
 			if (header is null)
 			{
