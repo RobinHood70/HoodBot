@@ -21,7 +21,10 @@ namespace RobinHood70.WallE.Base
 		ParsedComment = 1 << 9,
 		Content = 1 << 10,
 		Tags = 1 << 11,
-		All = Ids | Flags | Timestamp | User | UserId | Size | Sha1 | ContentModel | Comment | ParsedComment | Content | Tags,
+		SlotSize = 1 << 12,
+		SlotSha1 = 1 << 13,
+		Roles = 1 << 14,
+		All = Ids | Flags | Timestamp | User | UserId | Size | Sha1 | ContentModel | Comment | ParsedComment | Content | Tags | SlotSize | SlotSha1 | Roles,
 		NoContent = All & ~Content
 	}
 	#endregion
@@ -29,10 +32,6 @@ namespace RobinHood70.WallE.Base
 	public interface IRevisionsInput : ILimitableInput
 	{
 		#region Public Properties
-
-		/// <summary>Gets the content format for each slot.</summary>
-		/// <remarks>This list must be in the same order as the slots.</remarks>
-		IList<string>? ContentFormat { get; }
 
 		/// <summary>Gets or sets the revision ID to compare a diff to.</summary>
 		/// <value>The ID to compare to.</value>
@@ -57,7 +56,7 @@ namespace RobinHood70.WallE.Base
 
 		int Section { get; set; }
 
-		IList<string> Slots { get; }
+		IEnumerable<SlotInput>? Slots { get; set; }
 
 		bool SortAscending { get; set; }
 

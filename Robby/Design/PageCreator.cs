@@ -109,12 +109,14 @@
 						RevisionsProperties.Content |
 						RevisionsProperties.Flags |
 						RevisionsProperties.Ids |
-						RevisionsProperties.Sha1 |
-						RevisionsProperties.Size |
+						RevisionsProperties.SlotSha1 |
+						RevisionsProperties.SlotSize |
 						RevisionsProperties.Tags |
 						RevisionsProperties.Timestamp |
 						RevisionsProperties.User,
+					Slots = [new("main")]
 				};
+
 				propertyInputs.Add(revs);
 			}
 

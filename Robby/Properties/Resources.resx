@@ -159,4 +159,7 @@
   <data name="WaitingForJobQueue" xml:space="preserve">
     <value>Waiting for job queue to clear: {0} jobs remaining.</value>
   </data>
+  <data name="RevisionSha1Failed" xml:space="preserve">
+    <value>SHA1 check for revision {0} failed.</value>
+  </data>
 </root>

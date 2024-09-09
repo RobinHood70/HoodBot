@@ -15,19 +15,18 @@ namespace RobinHood70.WallE.Base
 		Sha1Hidden = 1 << 3,
 		Suppressed = 1 << 4,
 		TextHidden = 1 << 5,
-		UserHidden = 1 << 6
+		UserHidden = 1 << 6,
+		BadContentFormat = 1 << 7,
+		BadContentFormatForParseTree = 1 << 8,
 	}
 	#endregion
 
 	public class RevisionItem
 	{
 		#region Constructors
-		internal RevisionItem(string? comment, string? content, string? contentFormat, string? contentModel, RevisionFlags flags, long parentId, string? parsedComment, string? parseTree, long revisionId, string? rollbackToken, string? sha1, long size, IReadOnlyList<string> tags, DateTime? timestamp, string? user, long userId)
+		internal RevisionItem(string? comment, RevisionFlags flags, long parentId, string? parsedComment, string? parseTree, long revisionId, string? rollbackToken, string? sha1, long size, IReadOnlyDictionary<string, SlotItem> slots, IReadOnlyList<string> tags, DateTime? timestamp, string? user, long userId)
 		{
 			this.Comment = comment;
-			this.Content = content;
-			this.ContentFormat = contentFormat;
-			this.ContentModel = contentModel;
 			this.Flags = flags;
 			this.ParentId = parentId;
 			this.ParsedComment = parsedComment;
@@ -36,6 +35,7 @@ namespace RobinHood70.WallE.Base
 			this.RollbackToken = rollbackToken;
 			this.Sha1 = sha1;
 			this.Size = size;
+			this.Slots = slots;
 			this.Tags = tags;
 			this.Timestamp = timestamp;
 			this.User = user;
@@ -45,8 +45,6 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Properties
 		public string? Comment { get; }
-
-		public string? Content { get; }
 
 		public string? ContentFormat { get; }
 
@@ -67,6 +65,8 @@ namespace RobinHood70.WallE.Base
 		public string? Sha1 { get; }
 
 		public long Size { get; }
+
+		public IReadOnlyDictionary<string, SlotItem> Slots { get; }
 
 		public IReadOnlyList<string>? Tags { get; }
 

@@ -133,6 +133,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SHA1 check for revision {0} failed..
+        /// </summary>
+        internal static string RevisionSha1Failed {
+            get {
+                return ResourceManager.GetString("RevisionSha1Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
         /// </summary>
         internal static string SiteMismatch {

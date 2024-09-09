@@ -268,15 +268,6 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SHA1 check for revision {0} failed..
-        /// </summary>
-        internal static string RevisionSha1Failed {
-            get {
-                return ResourceManager.GetString("RevisionSha1Failed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The search module failed to return a result..
         /// </summary>
         internal static string SearchFailed {

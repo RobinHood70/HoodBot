@@ -10,7 +10,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.Exceptions;
 
@@ -296,47 +295,80 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns>A <see cref="RevisionItem"/>.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
-		/// <exception cref="ChecksumException">Thrown when the SHA-1 checksum does not match the text of the revision.</exception>
 		public static RevisionItem GetRevision(this JToken token)
 		{
 			ArgumentNullException.ThrowIfNull(token);
-			var content = token.GetNullableBCString("content");
-			var revId = (long?)token["revid"] ?? 0;
+			var flags = token.GetFlags(
+				("anon", RevisionFlags.Anonymous),
+				("commenthidden", RevisionFlags.CommentHidden),
+				("minor", RevisionFlags.Minor),
+				("sha1hidden", RevisionFlags.Sha1Hidden),
+				("suppressed", RevisionFlags.Suppressed),
+				("texthidden", RevisionFlags.TextHidden),
+				("userhidden", RevisionFlags.UserHidden),
+				("badcontentformat", RevisionFlags.BadContentFormat),
+				("badcontentformatforparsetree", RevisionFlags.BadContentFormatForParseTree));
 			var sha1 = (string?)token["sha1"];
-			if (sha1 != null)
+			if (sha1 is not null && sha1.TrimStart('0').Length == 0)
 			{
-				if (sha1.TrimStart('0').Length == 0)
+				// If it's all zeroes, switch it to null. This is caused by SHA-1 values beginning with either 0x or 0b, as documented here: https://bugs.php.net/bug.php?id=50175 and https://bugs.php.net/bug.php?id=55398.
+				sha1 = null;
+			}
+
+			var size = (long?)token["size"] ?? 0;
+			var slotsToken = token["slots"];
+			var slots = new Dictionary<string, SlotItem>(StringComparer.Ordinal);
+			if (slotsToken is null)
+			{
+				var mappedFlags =
+					(flags.HasAnyFlag(RevisionFlags.BadContentFormat) ? SlotFlags.BadContentFormat : SlotFlags.None) |
+					(flags.HasAnyFlag(RevisionFlags.Sha1Hidden) ? SlotFlags.Sha1Hidden : SlotFlags.None) |
+					(flags.HasAnyFlag(RevisionFlags.TextHidden) ? SlotFlags.TextHidden : SlotFlags.None);
+				var slot = new SlotItem(
+					content: token.GetNullableBCString("content"),
+					contentFormat: (string?)token["contentformat"],
+					contentModel: (string?)token["contentmodel"],
+					flags: mappedFlags,
+					sha1: sha1,
+					size: size);
+				slots.Add("main", slot);
+			}
+			else
+			{
+				foreach (var slotProperty in slotsToken.Children<JProperty>())
 				{
-					// If it's all zeroes, switch it to null and ignore it. This is caused by SHA-1 values beginning with either 0x or 0b, as documented here: https://bugs.php.net/bug.php?id=50175 and https://bugs.php.net/bug.php?id=55398.
-					sha1 = null;
-				}
-				else if (content != null && !string.Equals(content.GetHash(HashType.Sha1), sha1, StringComparison.Ordinal))
-				{
-					// CONSIDER: This was changed from a warning to an exception. Should it be handled in Eve or allowed to fall through to the caller?
-					throw new ChecksumException(Globals.CurrentCulture(EveMessages.RevisionSha1Failed, revId));
+					var slotValue = slotProperty.Value;
+					var slotFlags = slotValue.GetFlags(
+						("badcontentformat", SlotFlags.BadContentFormat),
+						("missing", SlotFlags.Missing),
+						("nosuchsection", SlotFlags.NoSuchSection),
+						("sha1hidden", SlotFlags.Sha1Hidden),
+						("texthidden", SlotFlags.TextHidden),
+						("textmissing", SlotFlags.TextMissing));
+					var slot = new SlotItem(
+						content: slotValue.GetNullableBCString("content"),
+						contentFormat: (string?)slotValue["contentformat"],
+						contentModel: (string?)slotValue["contentmodel"],
+						flags: slotFlags,
+						sha1: (string?)slotValue["sha1"],
+						size: (long?)slotValue["size"] ?? 0);
+					slots.Add(slotProperty.Name, slot);
 				}
 			}
 
+			var revId = (long?)token["revid"] ?? 0;
+
 			return new RevisionItem(
 				comment: (string?)token["comment"],
-				content: content,
-				contentFormat: (string?)token["contentformat"],
-				contentModel: (string?)token["contentmodel"],
-				flags: token.GetFlags(
-					("anon", RevisionFlags.Anonymous),
-					("commenthidden", RevisionFlags.CommentHidden),
-					("minor", RevisionFlags.Minor),
-					("sha1hidden", RevisionFlags.Sha1Hidden),
-					("suppressed", RevisionFlags.Suppressed),
-					("texthidden", RevisionFlags.TextHidden),
-					("userhidden", RevisionFlags.UserHidden)),
+				flags: flags,
 				parentId: (long?)token["parentid"] ?? 0,
 				parsedComment: (string?)token["parsedcomment"],
 				parseTree: (string?)token["parsetree"],
 				revisionId: revId,
 				rollbackToken: (string?)token["rollbacktoken"],
 				sha1: sha1,
-				size: (long?)token["size"] ?? 0,
+				size: size,
+				slots: slots.AsReadOnly(),
 				tags: token["tags"].GetList<string>(),
 				timestamp: (DateTime?)token["timestamp"],
 				user: (string?)token["user"],
@@ -555,8 +587,36 @@
 		{
 			ArgumentNullException.ThrowIfNull(input);
 			ArgumentNullException.ThrowIfNull(request);
+			var props = input.Properties;
+			if (siteVersion >= 132)
+			{
+				request.AddTemplatedKeys("slots", input.Slots, s => s.Name);
+				request.AddTemplatedValues("contentformat-$1", input.Slots, s => s.Name, s => s.ContentFormat);
+			}
+			else
+			{
+				if (props.HasAnyFlag(RevisionsProperties.SlotSha1))
+				{
+					props |= RevisionsProperties.Sha1;
+				}
+
+				if (props.HasAnyFlag(RevisionsProperties.SlotSize))
+				{
+					props |= RevisionsProperties.Size;
+				}
+
+				if (input.Slots is IEnumerable<SlotInput> slots)
+				{
+					foreach (var slot in slots)
+					{
+						request.Add("contentformat", slot.ContentFormat);
+						break; // Only add first slot
+					}
+				}
+			}
+
 			request
-				.AddFlags("prop", input.Properties)
+				.AddFlags("prop", props)
 				.Add("expandtemplates", input.ExpandTemplates)
 				.Add("generatexml", input.GenerateXml)
 				.Add("parse", input.Parse)
@@ -568,17 +628,6 @@
 				.Add("end", input.End)
 				.AddIf("dir", "newer", input.SortAscending)
 				.AddIfNotNull(input.ExcludeUser ? "excludeuser" : "user", input.User);
-
-			if (siteVersion >= 132)
-			{
-				request
-					.Add("slots", input.Slots)
-					.AddTemplated("contentformat-$1", input.Slots, input.ContentFormat);
-			}
-			else if (input.ContentFormat?.Count == 1)
-			{
-				request.Add("contentformat", input.ContentFormat[0]);
-			}
 
 			return request;
 		}

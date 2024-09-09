@@ -7,6 +7,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Properties;
+
 	#region Public Enumerations
 
 	// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this, so we use that throughout this class instead.
@@ -169,33 +170,6 @@
 		public Request Add(string name, IEnumerable<string>? values) => values?.IsEmpty() != false
 			? this
 			: this.AddPiped(name, new HashSet<string>(values, StringComparer.Ordinal));
-
-		/// <summary>Adds a <see href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</see> if it has at least one value.</summary>
-		/// <param name="template">The templated parameter name. The key portion should be specified as $1.</param>
-		/// <param name="keys">The templated parameter keys.</param>
-		/// <param name="values">The templated parameter values.</param>
-		/// <returns>The current collection (fluent interface).</returns>
-		/// <remarks>Values must correspond to keys in both order and count.</remarks>
-		/// <seealso href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams"></seealso>
-		public Request AddTemplated(string template, IList<string>? keys, IList<string>? values)
-		{
-			ArgumentNullException.ThrowIfNull(template);
-			if (values is not null && values.Count > 0)
-			{
-				ArgumentNullException.ThrowIfNull(keys);
-				if (keys.Count != values.Count)
-				{
-					throw new InvalidOperationException(GlobalMessages.TemplatedCountMismatch);
-				}
-
-				for (var i = 0; i < keys.Count; ++i)
-				{
-					this.Add(template.Replace("$1", keys[i], StringComparison.Ordinal), values[i]);
-				}
-			}
-
-			return this;
-		}
 
 		/// <summary>Adds an enumerable string parameter if it has at least one value.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -417,15 +391,6 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIf(string name, IEnumerable<string>? values, bool condition) => condition ? this.Add(name, values) : this;
 
-		/// <summary>Adds a <a href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</a> if it has at least one value and the condition is true.</summary>
-		/// <param name="template">The templated parameter name. The key portion should be specified as $1.</param>
-		/// <param name="keys">The templated parameter keys.</param>
-		/// <param name="values">The templated parameter values.</param>
-		/// <param name="condition">The condition to check.</param>
-		/// <returns>The current collection (fluent interface).</returns>
-		/// <remarks>Values must correspond to keys in both order and count.</remarks>
-		public Request AddTemplatedIf(string template, IList<string>? keys, IList<string>? values, bool condition) => condition ? this.AddTemplated(template, keys, values) : this;
-
 		/// <summary>Adds a collection of integers if the collection is non-null and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The values.</param>
@@ -533,6 +498,62 @@
 			{
 				this.Remove(name);
 				this.Add(name, value);
+			}
+
+			return this;
+		}
+
+		/// <summary>Adds a <see href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</see> if it has at least one value.</summary>
+		/// <typeparam name="T">The type of the list being templated.</typeparam>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="list">The objects to iterate through.</param>
+		/// <param name="getKey">The function to get the key from any given <paramref name="list"/> item.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <seealso href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams"></seealso>
+		public Request AddTemplatedKeys<T>(string name, IEnumerable<T>? list, Func<T, string> getKey)
+		{
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(getKey);
+			if (list is not null)
+			{
+				var keys = new List<string>();
+				foreach (var item in list)
+				{
+					keys.Add(getKey(item));
+				}
+
+				if (keys.Count > 0)
+				{
+					this.AddPiped(name, keys);
+				}
+			}
+
+			return this;
+		}
+
+		/// <summary>Adds a <see href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams">templated parameter</see> if it has at least one value.</summary>
+		/// <typeparam name="T">The type of the list being templated.</typeparam>
+		/// <param name="template">The templated parameter name. The key portion should be specified as $1.</param>
+		/// <param name="list">The objects to iterate through.</param>
+		/// <param name="getKey">The function to get the key from any given <paramref name="list"/> item.</param>
+		/// <param name="getValue">The function to get the value from any given <paramref name="list"/> item.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <remarks>The list must not have been altered between AddTemplatedKeys and AddTemplatedValues. Individual values will only be emitted if non-null.</remarks>
+		/// <seealso href="https://www.mediawiki.org/w/api.php?action=help&amp;modules=main#main/templatedparams"></seealso>
+		public Request AddTemplatedValues<T>(string template, IEnumerable<T>? list, Func<T, string> getKey, Func<T, string?> getValue)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(getKey);
+			ArgumentNullException.ThrowIfNull(getValue);
+			if (list is not null)
+			{
+				foreach (var item in list)
+				{
+					if (getValue(item) is string value && getKey(item) is string key)
+					{
+						this.Add(template.Replace("$1", key, StringComparison.Ordinal), value);
+					}
+				}
 			}
 
 			return this;

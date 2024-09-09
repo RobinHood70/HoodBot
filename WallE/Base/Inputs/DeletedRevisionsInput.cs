@@ -7,8 +7,6 @@ namespace RobinHood70.WallE.Base
 	public class DeletedRevisionsInput : IRevisionsInput, IPropertyInput, IGeneratorInput
 	{
 		#region Public Properties
-		public IList<string> ContentFormat { get; } = [];
-
 		public int? DiffTo { get; set; }
 
 		public string? DiffToText { get; set; }
@@ -33,7 +31,7 @@ namespace RobinHood70.WallE.Base
 
 		public int Section { get; set; } = -1;
 
-		public IList<string> Slots { get; } = ["main"];
+		public IEnumerable<SlotInput>? Slots { get; set; }
 
 		public bool SortAscending { get; set; }
 

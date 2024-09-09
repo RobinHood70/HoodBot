@@ -2,10 +2,12 @@
 {
 	using System;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Stores all information related to a specific revision.</summary>
 	/// <remarks>Revisions can apply to users or pages. Pages store title information at the parent level, thus they are not included in the base Revision object.</remarks>
+	/// <exception cref="ChecksumException">Thrown when the SHA-1 checksum does not match the text of the revision.</exception>
 	public class Revision
 	{
 		#region Constructors
@@ -35,9 +37,21 @@
 			this.Id = revisionItem.RevisionId;
 			this.Minor = revisionItem.Flags.HasAnyFlag(RevisionFlags.Minor);
 			this.ParentId = revisionItem.ParentId;
-			this.Text = revisionItem.Content;
 			this.Timestamp = revisionItem.Timestamp;
 			this.User = revisionItem.User;
+
+			if (revisionItem.Slots.TryGetValue("main", out var mainSlot))
+			{
+				if (
+					mainSlot.Content is not null &&
+					!string.IsNullOrEmpty(mainSlot.Sha1) &&
+					!string.Equals(mainSlot.Content.GetHash(HashType.Sha1), mainSlot.Sha1, StringComparison.Ordinal))
+				{
+					throw new ChecksumException(Globals.CurrentCulture(Resources.RevisionSha1Failed, revisionItem.RevisionId));
+				}
+
+				this.Text = mainSlot.Content;
+			}
 		}
 		#endregion
 
