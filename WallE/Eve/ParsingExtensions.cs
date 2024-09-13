@@ -598,18 +598,20 @@
 				if (props.HasAnyFlag(RevisionsProperties.SlotSha1))
 				{
 					props |= RevisionsProperties.Sha1;
+					props &= ~RevisionsProperties.SlotSha1;
 				}
 
 				if (props.HasAnyFlag(RevisionsProperties.SlotSize))
 				{
 					props |= RevisionsProperties.Size;
+					props &= ~RevisionsProperties.SlotSize;
 				}
 
 				if (input.Slots is IEnumerable<SlotInput> slots)
 				{
 					foreach (var slot in slots)
 					{
-						request.Add("contentformat", slot.ContentFormat);
+						request.AddIfNotNull("contentformat", slot.ContentFormat);
 						break; // Only add first slot
 					}
 				}
