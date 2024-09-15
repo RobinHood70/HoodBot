@@ -115,7 +115,7 @@
 
 			if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
 			{
-				job.StatusWriteLine("Updating local icons file");
+				job.StatusWriteLine("Updating local icons file from " + downloadPath);
 				job.Site.Download(downloadPath, localFile);
 
 				job.StatusWriteLine("Extracting icons");
