@@ -76,6 +76,25 @@
 			return retval;
 		}
 
+		public static bool ShouldUpload(string localFileName, FilePage filePage)
+		{
+			// Assumes that FileInfo with Sha1 has been downloaded for page.
+			if (filePage.Exists)
+			{
+				var stream = File.OpenRead(localFileName);
+				var hashString = Globals.GetHash(stream, HashType.Sha1);
+				foreach (var fileRevision in filePage.FileRevisions)
+				{
+					if (string.Equals(fileRevision.Sha1, hashString, StringComparison.Ordinal))
+					{
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
 		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
 
 		public static string? TrimBehavior(string? behavior) => behavior?
