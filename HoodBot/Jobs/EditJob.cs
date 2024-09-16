@@ -12,7 +12,7 @@
 		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
 		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
-		protected PageCollection Pages { get; } = new PageCollection(jobManager.Site);
+		protected PageCollection Pages { get; init; } = new PageCollection(jobManager.Site);
 
 		protected bool RecreateIfDeleted { get; set; } = true;
 
