@@ -851,6 +851,16 @@
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null  if this is a new version of an existing file or to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
+		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.Upload(fileName, destinationName, editSummary, pageText, false);
+
+		/// <summary>Upload a file to the wiki.</summary>
+		/// <param name="fileName">The full path and filename of the file to upload.</param>
+		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
+		/// <param name="editSummary">The edit summary for the upload.</param>
+		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null  if this is a new version of an existing file or to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
+		/// <param name="ignoreWarnings">Whether to ignore upload warnings.</param>
+		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
+		/// <returns>A value indicating the change status of the upload.</returns>
 		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText, bool ignoreWarnings)
 		{
 			ArgumentNullException.ThrowIfNull(fileName);
@@ -869,6 +879,7 @@
 				[nameof(destinationName)] = destinationName,
 				[nameof(editSummary)] = editSummary,
 				[nameof(pageText)] = pageText,
+				[nameof(ignoreWarnings)] = ignoreWarnings,
 			};
 
 			return !this.EditingEnabled && !File.Exists(fileName)
@@ -880,14 +891,10 @@
 				using FileStream upload = new(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				UploadInput uploadInput = new(destinationName!, upload)
 				{
-					IgnoreWarnings = ignoreWarnings,
 					Comment = editSummary,
+					IgnoreWarnings = ignoreWarnings,
+					Text = pageText,
 				};
-
-				if (pageText != null)
-				{
-					uploadInput.Text = pageText;
-				}
 
 				return this.Upload(uploadInput)
 					? ChangeStatus.Success
