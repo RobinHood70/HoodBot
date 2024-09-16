@@ -12,6 +12,7 @@
 	internal sealed class EsoBulkUploadIcons : WikiJob
 	{
 		#region Private Constants
+		private const bool IncludePts = true;
 		private const string RemoteIconPath = "/esoui/art/icons/";
 		private const string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 		#endregion
@@ -84,8 +85,8 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var patchVersion = this.GetPatchVersion("botitemset");
-			this.GetIcons(patchVersion.Text, false);
+			var patchVersion = EsoLog.LatestDBUpdate(IncludePts);
+			this.GetIcons(patchVersion.Text, IncludePts);
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
@@ -108,17 +109,15 @@
 				foreach (var upload in this.uploads)
 				{
 					var typeUcfirst = upload.Part.Type.UpperFirst(this.Site.Culture);
-					var pageText = $"== Summary ==\n" +
-						$"Original file: {upload.Icon}<br>\n" +
-						$"Used for:\n" +
-						$":Collectible: {{{{Item Link|{upload.Style} {upload.Part.Name}|collectid={upload.Id}}}}}\n" +
-						$"\n" +
+					var pageText =
+						$"{{{{Online File\n" +
+						$"|originalfile={upload.Icon}\n" +
+						$"|Collectible|{{{{Item Link|{upload.Style} {upload.Part.Name}|collectid={upload.Id}}}}}\n" +
+						"}}\n" +
 						$"[[Category:Online-Icons-{typeUcfirst}-{upload.Style}]]\n" +
-						$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n" +
-						$"== Licensing ==\n" +
-						$"{{{{Zenimage}}}}";
+						$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n";
 					var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
-					this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText);
+					this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText, true);
 				}
 			}
 		}
@@ -159,17 +158,6 @@
 					if (iconLookup.TryGetValue(dbName, out var idIcon) && files.Contains(idIcon.Icon))
 					{
 						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
-						var exists = fileTitles.Contains("File:" + upload.DestinationName);
-						this.Write($"{upload.DestinationName}|{part.Name}");
-						if (exists)
-						{
-							this.WriteLine(" (already exists)");
-						}
-						else
-						{
-							this.WriteLine();
-							retval.Add(upload);
-						}
 					}
 				}
 
