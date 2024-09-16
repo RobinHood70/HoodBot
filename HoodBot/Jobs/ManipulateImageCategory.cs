@@ -28,7 +28,7 @@
 			List<FilePage> smallImages = [];
 			foreach (var result in list)
 			{
-				if (result is FilePage image && image.LatestFileRevision is FileRevision imageInfo && imageInfo.Height < 64 && imageInfo.Width < 64)
+				if (result is FilePage image && image.LatestFileRevision is FileRevision fileInfo && fileInfo.Height < 64 && fileInfo.Width < 64)
 				{
 					smallImages.Add(image);
 				}
@@ -37,11 +37,11 @@
 			smallImages.Sort();
 			foreach (var image in smallImages)
 			{
-				if (image.LatestFileRevision is FileRevision imageInfo)
+				if (image.LatestFileRevision is FileRevision fileInfo)
 				{
 					this.WriteLine(string.Create(
 						CultureInfo.InvariantCulture,
-						$"* {SiteLink.ToText(image, LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
+						$"* {SiteLink.ToText(image, LinkFormat.LabelName)} ({fileInfo.Width}x{fileInfo.Height})"));
 				}
 			}
 		}
