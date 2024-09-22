@@ -1,6 +1,7 @@
-﻿namespace RobinHood70.Robby.Design
+﻿namespace RobinHood70.Robby
 {
 	using System;
+	using RobinHood70.Robby.Design;
 
 	// TODO: Review constructors for various title objects.
 
