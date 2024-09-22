@@ -107,14 +107,6 @@
 		#endregion
 
 		#region Private Static Methods
-		private static int PairedComparer((string Key, string Value) x, (string Key, string Value) y)
-		{
-			var compare = string.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase);
-			return compare == 0
-				? string.Compare(x.Value, y.Value, StringComparison.OrdinalIgnoreCase)
-				: compare;
-		}
-
 		private static void UpdateFilePage(Title from, Page to)
 		{
 			var parser = new ContextualParser(to);
@@ -132,7 +124,7 @@
 
 			var i = 0;
 			IParameterNode? single = null;
-			var anons = new List<(string Key, string Value)>();
+			var anons = new SortedSet<KeyValuePair<string, string>>();
 			while (i < template.Parameters.Count)
 			{
 				var param = template.Parameters[i];
@@ -142,7 +134,7 @@
 					{
 						var key = param.Value.ToRaw();
 						var value = template.Parameters[i + 1].Value.ToRaw().Trim();
-						anons.Add((key, value));
+						anons.Add(new KeyValuePair<string, string>(key, value));
 					}
 					else
 					{
@@ -163,13 +155,6 @@
 			}
 
 			var trimmed = Lead.TrimCruft(from.PageName);
-			if (!anons.Contains(("Lead", trimmed)))
-			{
-				anons.Add(("Lead", trimmed));
-			}
-
-			anons.Sort(PairedComparer);
-
 			for (i = template.Parameters.Count - 1; i >= 0; i--)
 			{
 				if (template.Parameters[i].Anonymous)
