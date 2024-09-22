@@ -1,10 +1,9 @@
-﻿namespace RobinHood70.Hnb.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs;
 
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;

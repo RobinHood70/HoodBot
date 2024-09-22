@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Robby
+﻿namespace RobinHood70.Robby.Design
 {
 	using System;
 	using System.Collections.Generic;
