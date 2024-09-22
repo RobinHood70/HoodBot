@@ -185,7 +185,7 @@
 		private static List<SetData> GetSetData()
 		{
 			var retval = new List<SetData>();
-			foreach (var item in Database.RunQuery(EsoLog.Connection, Query + "42pts", row => new SetData(row)))
+			foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new SetData(row)))
 			{
 				retval.Add(item);
 			}
