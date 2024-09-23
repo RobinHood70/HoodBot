@@ -110,8 +110,9 @@
 		private static void UpdateFilePage(Title from, Page to)
 		{
 			var parser = new ContextualParser(to);
-			if (parser.FindSiteTemplate("Online File") is not SiteTemplateNode template)
+			if (EsoSpace.FindOrCreateOnlineFile(parser) is not SiteTemplateNode template)
 			{
+				// Template should ALWAYS be found, but in the unlikely event of a major change, display warning and continue.
 				Debug.WriteLine("Template not found on " + to.Title.FullPageName());
 				return;
 			}
@@ -122,57 +123,8 @@
 				template.Title.AddText("\n");
 			}
 
-			var i = 0;
-			IParameterNode? single = null;
-			var anons = new SortedSet<KeyValuePair<string, string>>();
-			while (i < template.Parameters.Count)
-			{
-				var param = template.Parameters[i];
-				if (param.Anonymous)
-				{
-					if (i < (template.Parameters.Count - 1))
-					{
-						var key = param.Value.ToRaw();
-						var value = template.Parameters[i + 1].Value.ToRaw().Trim();
-						anons.Add(new KeyValuePair<string, string>(key, value));
-					}
-					else
-					{
-						single = param;
-					}
-
-					i += 2;
-				}
-				else
-				{
-					if (!param.Value.ToRaw().EndsWith('\n'))
-					{
-						param.Value.AddText("\n");
-					}
-
-					i++;
-				}
-			}
-
 			var trimmed = Lead.TrimCruft(from.PageName);
-			for (i = template.Parameters.Count - 1; i >= 0; i--)
-			{
-				if (template.Parameters[i].Anonymous)
-				{
-					template.Parameters.RemoveAt(i);
-				}
-			}
-
-			foreach (var (key, value) in anons)
-			{
-				template.Add(key, ParameterFormat.Packed);
-				template.Add(value, ParameterFormat.OnePerLine);
-			}
-
-			if (single is not null)
-			{
-				template.Parameters.Add(single);
-			}
+			EsoSpace.AddToOnlineFile(template, "Lead", trimmed);
 
 			parser.UpdatePage();
 		}
