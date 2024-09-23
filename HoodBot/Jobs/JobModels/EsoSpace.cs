@@ -34,6 +34,84 @@
 		#endregion
 
 		#region Public Methods
+		public static ITemplateNode FindOrCreateOnlineFile(ContextualParser parser, params string[] originalFileNames)
+		{
+			ArgumentNullException.ThrowIfNull(parser);
+			if (parser.FindSiteTemplate("Online File") is not ITemplateNode template)
+			{
+				template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
+				parser.Insert(0, template);
+				parser.InsertText(1, "\n\n");
+			}
+
+			if (!template.Title.ToRaw().EndsWith('\n'))
+			{
+				template.Title.AddText("\n");
+			}
+
+			if (originalFileNames?.Length > 0)
+			{
+				var fileNames = new SortedSet<string>(originalFileNames, StringComparer.Ordinal);
+				if (template.Find("originalfile") is not IParameterNode fileParam)
+				{
+					fileParam = template.Factory.ParameterNodeFromParts("originalfilename", string.Empty);
+				}
+
+				var existing = fileParam.Value.ToValue();
+				fileNames.UnionWith(existing.Split(TextArrays.Comma));
+				fileNames.Remove(string.Empty);
+				fileParam.SetValue(string.Join(',', fileNames), ParameterFormat.OnePerLine);
+			}
+
+			return template;
+		}
+
+		public static void AddToOnlineFile(SiteTemplateNode template, string linkType, string linkValue) =>
+			AddToOnlineFile(template, (linkType, linkValue));
+
+		public static void AddToOnlineFile(SiteTemplateNode template, params (string Type, string Value)[] links) =>
+			AddToOnlineFile(template, (IList<(string Type, string Value)>)links);
+
+		public static void AddToOnlineFile(SiteTemplateNode template, IList<(string Type, string Value)> links)
+		{
+			// CONSIDER: This is kludgy - it clears and reinserts the entire parameter list every time to ensure correct format and sorting. Might want to rewrite as separate routines that get the SortedSet (or even revert to a list), clear the anonymous parameters, and update from list. That way, caller can optimize flow as needed.
+			ArgumentNullException.ThrowIfNull(template);
+			if (links is null || links.Count == 0)
+			{
+				return;
+			}
+
+			var i = 0;
+			var anons = new SortedSet<KeyValuePair<string, string>>(PairedStringComparer.Instance);
+			while (i < template.Parameters.Count)
+			{
+				var param = template.Parameters[i];
+				if (param.Anonymous)
+				{
+					var key = param.Value.ToRaw();
+					var value = i < (template.Parameters.Count - 1)
+						? template.Parameters[i + 1].Value.ToRaw().Trim()
+						: string.Empty;
+					anons.Add(new KeyValuePair<string, string>(key, value));
+					i += 2;
+				}
+			}
+
+			for (i = template.Parameters.Count - 1; i >= 0; i--)
+			{
+				if (template.Parameters[i].Anonymous)
+				{
+					template.Parameters.RemoveAt(i);
+				}
+			}
+
+			foreach (var (key, value) in anons)
+			{
+				template.Add(key, ParameterFormat.Packed);
+				template.Add(value, ParameterFormat.OnePerLine);
+			}
+		}
+
 		public static PlaceCollection GetPlaces(Site site)
 		{
 			ArgumentNullException.ThrowIfNull(site);
