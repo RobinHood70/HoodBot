@@ -6,8 +6,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
 
 	internal sealed class EsoBulkUploadIcons : WikiJob
 	{
@@ -90,15 +88,13 @@
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
-			TitleCollection fileTitles = new(this.Site);
-			fileTitles.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "ON-icon-");
 			foreach (var file in allFiles)
 			{
 				var fileName = Path.GetFileName(file);
 				files.Add(fileName);
 			}
 
-			this.uploads = this.GetUploads(files, fileTitles);
+			this.uploads = this.GetUploads(files);
 		}
 
 		protected override void Main()
@@ -144,24 +140,22 @@
 		#endregion
 
 		#region Private Methods
-		private List<Upload> GetUploads(HashSet<string> files, TitleCollection fileTitles)
+		private List<Upload> GetUploads(HashSet<string> files)
 		{
 			List<Upload> retval = new(this.styles.Count * Parts.Count);
 			var iconLookup = GetIcons();
 			foreach (var style in this.styles)
 			{
-				this.WriteLine($"==[[Online:{style} Style|]]==");
-				this.WriteLine("<gallery mode=nolines widths=64>");
 				foreach (var part in Parts)
 				{
 					var dbName = $"{style} {part.Name}";
 					if (iconLookup.TryGetValue(dbName, out var idIcon) && files.Contains(idIcon.Icon))
 					{
+						// We don't bother with manual duplicate checks here, since these should always be new. Upload will fail for dupes, but we ignore the warnings.
 						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
+						retval.Add(upload);
 					}
 				}
-
-				this.WriteLine();
 			}
 
 			retval.TrimExcess();
