@@ -181,7 +181,7 @@
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				var ns = this.GetKeyForItem(this[i]).Namespace;
-				if (removeTalk && ns.IsTalkSpace || hash.Contains(ns.Id))
+				if ((removeTalk && ns.IsTalkSpace) || hash.Contains(ns.Id))
 				{
 					this.RemoveAt(i);
 				}
