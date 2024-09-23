@@ -7,7 +7,7 @@
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 
-	internal sealed class EsoBulkUploadIcons : WikiJob
+	internal sealed class EsoUploadStyleIcons : WikiJob
 	{
 		#region Private Constants
 		private const bool IncludePts = true;
@@ -66,7 +66,7 @@
 
 		#region Constructors
 		[JobInfo("Bulk Upload Style Icons", "ESO Update")]
-		public EsoBulkUploadIcons(JobManager jobManager, string styles)
+		public EsoUploadStyleIcons(JobManager jobManager, string styles)
 			: base(jobManager, JobType.Write)
 		{
 			var styleSplit = styles.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
