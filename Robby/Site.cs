@@ -446,7 +446,7 @@
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
-		/// <returns>The text of the page.</returns>
+		/// <returns>The page.</returns>
 		public Page? LoadPage(string pageName)
 		{
 			ArgumentNullException.ThrowIfNull(pageName);
@@ -455,7 +455,7 @@
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
-		/// <returns>The text of the page.</returns>
+		/// <returns>The page.</returns>
 		public Page? LoadPage(Title title)
 		{
 			var pages = PageCollection.Unlimited(this);
@@ -466,7 +466,7 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
 		/// <param name="subPageName">The subpage to get.</param>
-		/// <returns>The text of the page.</returns>
+		/// <returns>The page.</returns>
 		public Page? LoadPage(Title title, string subPageName)
 		{
 			ArgumentNullException.ThrowIfNull(title);
