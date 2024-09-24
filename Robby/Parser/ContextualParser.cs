@@ -153,7 +153,13 @@
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-		public IEnumerable<SiteLinkNode> FindSiteLinks(string find) => this.FindSiteLinks((IFullTitle)TitleFactory.FromUnvalidated(this.Site, find));
+		public IEnumerable<SiteLinkNode> FindSiteLinks(string find)
+		{
+			var title = TitleFactory.FromUnvalidated(this.Site, find);
+			return (title.Fragment is not null || title.Interwiki is not null)
+				? this.FindSiteLinks(title.ToFullTitle())
+				: this.FindSiteLinks(title.Title);
+		}
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -161,12 +167,15 @@
 		/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
 		public IEnumerable<SiteLinkNode> FindSiteLinks(Title find)
 		{
-			foreach (var link in this.LinkNodes)
+			if (find is not null)
 			{
-				Title linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-				if (link is SiteLinkNode siteLink && linkTitle == find)
+				foreach (var link in this.LinkNodes)
 				{
-					yield return siteLink;
+					Title linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
+					if (link is SiteLinkNode siteLink && linkTitle == find)
+					{
+						yield return siteLink;
+					}
 				}
 			}
 		}
@@ -177,12 +186,15 @@
 		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
 		public IEnumerable<SiteLinkNode> FindSiteLinks(IFullTitle find)
 		{
-			foreach (var link in this.LinkNodes)
+			if (find is not null)
 			{
-				FullTitle linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-				if (link is SiteLinkNode siteLink && linkTitle.FullEquals(find))
+				foreach (var link in this.LinkNodes)
 				{
-					yield return siteLink;
+					FullTitle linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
+					if (link is SiteLinkNode siteLink && linkTitle.FullEquals(find))
+					{
+						yield return siteLink;
+					}
 				}
 			}
 		}
