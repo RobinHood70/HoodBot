@@ -15,44 +15,44 @@
 		private const string SkillTable = "skillTree";
 		private const string Query =
 		"SELECT\n" +
-			"skillTree.skillTypeName,\n" +
-			"skillTree.learnedLevel,\n" +
-			"skillTree.baseName,\n" +
-			"skillTree.type,\n" +
-			"minedSkills.id,\n" +
-			"minedSkills.name,\n" +
-			"minedSkills.description,\n" +
-			"minedSkills.descHeader,\n" +
-			"minedSkills.target,\n" +
-			"minedSkills.effectLines,\n" +
-			"minedSkills.duration,\n" +
-			"minedSkills.cost,\n" +
-			"minedSkills.maxRange,\n" +
-			"minedSkills.minRange,\n" +
-			"minedSkills.radius,\n" +
-			"minedSkills.isPassive,\n" +
-			"minedSkills.castTime,\n" +
-			"minedSkills.channelTime,\n" +
-			"minedSkills.mechanic,\n" +
-			"minedSkills.rank,\n" +
-			"minedSkills.morph,\n" +
-			"minedSkills.coefDescription,\n" +
-			"minedSkills.type1, minedSkills.a1, minedSkills.b1, minedSkills.c1, minedSkills.R1,\n" +
-			"minedSkills.type2, minedSkills.a2, minedSkills.b2, minedSkills.c2, minedSkills.R2,\n" +
-			"minedSkills.type3, minedSkills.a3, minedSkills.b3, minedSkills.c3, minedSkills.R3,\n" +
-			"minedSkills.type4, minedSkills.a4, minedSkills.b4, minedSkills.c4, minedSkills.R4,\n" +
-			"minedSkills.type5, minedSkills.a5, minedSkills.b5, minedSkills.c5, minedSkills.R5,\n" +
-			"minedSkills.type6, minedSkills.a6, minedSkills.b6, minedSkills.c6, minedSkills.R6\n" +
+			"st.skillTypeName,\n" +
+			"st.learnedLevel,\n" +
+			"st.baseName,\n" +
+			"st.type,\n" +
+			"ms.id,\n" +
+			"ms.name,\n" +
+			"ms.description,\n" +
+			"ms.descHeader,\n" +
+			"ms.target,\n" +
+			"ms.effectLines,\n" +
+			"ms.duration,\n" +
+			"ms.cost,\n" +
+			"ms.maxRange,\n" +
+			"ms.minRange,\n" +
+			"ms.radius,\n" +
+			"ms.isPassive,\n" +
+			"ms.castTime,\n" +
+			"ms.channelTime,\n" +
+			"ms.mechanic,\n" +
+			"ms.rank,\n" +
+			"ms.morph,\n" +
+			"ms.coefDescription,\n" +
+			"ms.type1, ms.a1, ms.b1, ms.c1, ms.R1,\n" +
+			"ms.type2, ms.a2, ms.b2, ms.c2, ms.R2,\n" +
+			"ms.type3, ms.a3, ms.b3, ms.c3, ms.R3,\n" +
+			"ms.type4, ms.a4, ms.b4, ms.c4, ms.R4,\n" +
+			"ms.type5, ms.a5, ms.b5, ms.c5, ms.R5,\n" +
+			"ms.type6, ms.a6, ms.b6, ms.c6, ms.R6\n" +
 		"FROM\n" +
-			"skillTree\n" +
+			"$st st\n" +
 		"INNER JOIN\n" +
-			"minedSkills ON skillTree.abilityId = minedSkills.id\n" +
+			"$ms ms ON st.abilityId = ms.id\n" +
 		"WHERE\n" +
-			/* "skillTree.baseName = 'Blood Scion' AND\n" + */
-			"minedSkills.isPlayer AND\n" +
-			"minedSkills.morph >= 0 AND\n" +
-			"minedSkills.skillLine != 'Emperor'\n" +
-		"ORDER BY skillTree.baseName, skillTree.skillTypeName, minedSkills.morph, minedSkills.rank;";
+			/* "st.baseName = 'Blood Scion' AND\n" + */
+			"ms.isPlayer AND\n" +
+			"ms.morph >= 0 AND\n" +
+			"ms.skillLine != 'Emperor'\n" +
+		"ORDER BY st.baseName, st.skillTypeName, ms.morph, ms.rank;";
 		#endregion
 
 		#region Fields
@@ -162,11 +162,10 @@
 		private static Dictionary<string, Skill> GetSkillList(EsoVersion? version)
 		{
 			Dictionary<string, Skill> retval = new(StringComparer.Ordinal);
-			var query = version is null
-				? Query
-				: Query
-					.Replace(SkillTable, SkillTable + version.Text, StringComparison.Ordinal)
-					.Replace(MinedTable, MinedTable + version.Text, StringComparison.Ordinal);
+			var versionText = version is null ? string.Empty : version.Text;
+			var query = Query
+				.Replace("$st", SkillTable + versionText, StringComparison.Ordinal)
+				.Replace("$ms", MinedTable + versionText, StringComparison.Ordinal);
 
 			var errors = false;
 			Skill? currentSkill = null;
