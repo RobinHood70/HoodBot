@@ -102,7 +102,7 @@ namespace RobinHood70.WallE.Base
 					this.categories.AddRange(result);
 					break;
 				case CategoryInfoResult result:
-					this.CategoryInfo = result;
+					this.CategoryInfo ??= result;
 					break;
 				case ContributorsResult result:
 					this.AnonContributors = result.AnonymousContributors;
@@ -118,7 +118,7 @@ namespace RobinHood70.WallE.Base
 					this.fileUsages.AddRange(result);
 					break;
 				case ImageInfoResult result:
-					this.ImageRepository = result.Repository;
+					this.ImageRepository ??= result.Repository;
 					this.imageInfoEntries.AddRange(result);
 					break;
 				case ImagesResult result:
@@ -137,7 +137,7 @@ namespace RobinHood70.WallE.Base
 					this.links.AddRange(result);
 					break;
 				case PageInfo result:
-					this.Info = result;
+					this.Info ??= result;
 					break;
 				case PagePropertiesResult result:
 					this.properties.AddRange(result);
