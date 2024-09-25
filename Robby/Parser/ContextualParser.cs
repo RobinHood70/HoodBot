@@ -171,10 +171,10 @@
 			{
 				foreach (var link in this.LinkNodes)
 				{
-					Title linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-					if (link is SiteLinkNode siteLink && linkTitle == find)
+					var linkTitle = TitleFactory.FromBacklinkNode(this.Site, link).Title;
+					if (linkTitle == find)
 					{
-						yield return siteLink;
+						yield return (SiteLinkNode)link;
 					}
 				}
 			}
@@ -191,9 +191,9 @@
 				foreach (var link in this.LinkNodes)
 				{
 					FullTitle linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-					if (link is SiteLinkNode siteLink && linkTitle.FullEquals(find))
+					if (linkTitle.FullEquals(find))
 					{
-						yield return siteLink;
+						yield return (SiteLinkNode)link;
 					}
 				}
 			}
