@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -32,46 +33,45 @@
 
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
+			var races = GetRaces();
+
 			var items = new Dictionary<Title, Npcs>();
 			var csv = new CsvFile
 			{
 				Encoding = Encoding.GetEncoding(1252),
-				FieldSeparator = '\t'
 			};
+
 			csv.Load(Starfield.ModFolder + "Npcs.csv", true);
 			foreach (var row in csv)
 			{
-				var name = row["Full Name: Full Name <<TESFullName_Component>>"];
+				var name = row["Name"];
 				if (name.Length > 0)
 				{
-					// var acbs = Convert.ToInt32(row["Acbs1"], 16);
-					// var gender = (acbs & 1) != 0;
-					// var dead = (acbs & 0x200000) != 0;
-					var factionText = string.Empty; // row["Factions"];
+					var acbs = Convert.ToInt32(row["Acbs1"], 16);
+					var gender = (acbs & 1) != 0;
+					var dead = (acbs & 0x200000) != 0;
+					var formId = row["FormID"]
+						.Replace("0x", string.Empty, StringComparison.Ordinal);
+					var editorId = row["EditorID"];
+					var raceId = row["Race"];
+					if (!races.TryGetValue(raceId, out var race))
+					{
+						race = string.Empty;
+					}
+
+					var factionText = row["Factions"];
 					var factions = factionText.Length == 0
 						? []
 						: factionText.Split(TextArrays.Comma);
-					var attribField = row["Property Sheet: ActorValues <<BGSPropertySheet_Component>>"];
-					var attribsSplit = attribField.Split(", ");
-					var attribs = new Dictionary<string, string>(StringComparer.Ordinal);
-					foreach (var attrib in attribsSplit)
-					{
-						var attribValue = attrib.Split("::");
-						attribs.Add(attribValue[0], attribValue[1]);
-					}
-
-					var healthText = attribs["Health"];
-					var health = (int)double.Parse(healthText, this.Site.Culture);
-					var dead = health <= 0;
 					var npc = new Npc(
-						row["Numeric ID"].Trim(TextArrays.Parentheses),
-						row["Editor ID"].Trim(),
+						formId,
+						editorId,
 						name,
-						row["Race: Race <<TESRace_Component>>"].Replace("Race", string.Empty, StringComparison.Ordinal),
-						null /*gender*/,
+						race,
+						gender,
 						dead,
 						factions,
-						health);
+						string.Empty);
 					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 					var list = items.TryGetValue(title, out var npcs) ? npcs : [];
 					list.Add(npc);
@@ -128,8 +128,46 @@
 		}
 		#endregion
 
+		#region Private Static Methods
+
+		private static Dictionary<string, string> GetRaces()
+		{
+			var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+			GetRaces(dict, Starfield.BaseFolder);
+			GetRaces(dict, Starfield.ModFolder);
+
+			return dict;
+		}
+
+		private static void GetRaces(Dictionary<string, string> dict, string folder)
+		{
+			var fileName = folder + "Races.csv";
+			if (!File.Exists(fileName))
+			{
+				return;
+			}
+
+			var csv = new CsvFile();
+			csv.Load(fileName, true);
+			foreach (var row in csv)
+			{
+				var formId = row["FormID"];
+				var name = row["Name"];
+				if (name.Length == 0)
+				{
+					name = row["EditorID"]
+						.UnCamelCase()
+						.Replace('_', ' ')
+						.Replace(" Race", string.Empty, StringComparison.Ordinal);
+				}
+
+				dict[formId] = name;
+			}
+		}
+		#endregion
+
 		#region Internal Record Structs
-		internal record struct Npc(string FormID, string EditorID, string Name, string Race, bool? Gender, bool Dead, IReadOnlyList<string> Factions, int Health);
+		internal record struct Npc(string FormID, string EditorID, string Name, string Race, bool? Gender, bool Dead, IReadOnlyList<string> Factions, string Health);
 		#endregion
 
 		#region Internal Classes
