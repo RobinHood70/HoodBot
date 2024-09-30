@@ -36,11 +36,7 @@
 			var races = GetRaces();
 
 			var items = new Dictionary<Title, Npcs>();
-			var csv = new CsvFile
-			{
-				Encoding = Encoding.GetEncoding(1252),
-			};
-
+			var csv = new CsvFile { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(Starfield.ModFolder + "Npcs.csv", true);
 			foreach (var row in csv)
 			{
@@ -147,7 +143,7 @@
 				return;
 			}
 
-			var csv = new CsvFile();
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(fileName, true);
 			foreach (var row in csv)
 			{

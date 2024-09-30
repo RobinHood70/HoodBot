@@ -1,17 +1,27 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	[method: JobInfo("Redirects", "Starfield")]
-	internal sealed class SFRedirects(JobManager jobManager) : CreateOrUpdateJob<string>(jobManager)
+	internal sealed class SFRedirects : CreateOrUpdateJob<string>
 	{
+		#region Constructors
+		[JobInfo("Redirects", "Starfield")]
+		public SFRedirects(JobManager jobManager)
+			: base(jobManager)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		}
+		#endregion
+
 		#region Protected Override Properties
 		protected override string? Disambiguator => null;
+
 		#endregion
 
 		#region Protected Override Methods
@@ -22,7 +32,7 @@
 		protected override IDictionary<Title, string> LoadItems()
 		{
 			var items = new SortedDictionary<Title, string>();
-			var csv = new CsvFile();
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(Starfield.ModFolder + "Effect_redirects.csv", true);
 			foreach (var row in csv)
 			{

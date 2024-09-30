@@ -32,10 +32,11 @@
 
 		protected override IDictionary<Title, Redirect> LoadItems()
 		{
-			var csv = new CsvFile();
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(Starfield.ModFolder + "Factions.csv", true);
 			var items = this.ParseFactions(csv);
 			var entries = this.GetFactionEntries(csv);
+
 			var first = entries.Keys.First() ?? " ";
 			var letter = char.ToUpper(first[0], CultureInfo.CurrentCulture);
 			var pageName = TitleFactory.FromUnvalidated(this.Site, "Starfield:Factions " + letter);
@@ -128,10 +129,10 @@
 			var npcs = new TitleCollection(this.Site);
 			npcs.GetCategoryMembers("Starfield-NPCs");
 			var members = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
-			var npcsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			npcsFile.Load(Starfield.ModFolder + "Npcs.csv", true);
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(Starfield.ModFolder + "Npcs.csv", true);
 			{
-				foreach (var row in npcsFile)
+				foreach (var row in csv)
 				{
 					var name = row["Name"];
 					if (name.Length > 0)

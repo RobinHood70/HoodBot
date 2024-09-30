@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -11,10 +10,17 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	[method: JobInfo("Creatures", "Starfield")]
-	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
-	internal sealed class SFCreatures(JobManager jobManager) : CreateOrUpdateJob<SFCreatures.Creature>(jobManager)
+	internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	{
+		#region Constructors
+		[JobInfo("Creatures", "Starfield")]
+		public SFCreatures(JobManager jobManager)
+			: base(jobManager)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		}
+		#endregion
+
 		#region Protected Override Properties
 		protected override string? Disambiguator => "creature";
 		#endregion
@@ -196,10 +202,10 @@
 
 		private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
 		{
-			var file = new CsvFile();
-			file.Load(Starfield.ModFolder + "sfcreatures_-_wip3.csv", true);
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
+			csv.Load(Starfield.ModFolder + "sfcreatures_-_wip3.csv", true);
 			Creature? creature = null;
-			foreach (var row in file)
+			foreach (var row in csv)
 			{
 				var name = row["Name"];
 				if (!string.Equals(creature?.Variants[0]["Name"], name, StringComparison.Ordinal))

@@ -44,7 +44,7 @@
 		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits.</remarks>
 		internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 		{
-			var csv = new CsvFile();
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			var items = new Dictionary<Title, Planet>();
 			csv.Load(Starfield.ModFolder + "Planets_Infobox.csv", true);
 			foreach (var row in csv)

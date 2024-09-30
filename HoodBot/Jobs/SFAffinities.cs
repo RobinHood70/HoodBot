@@ -10,12 +10,20 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	[method: JobInfo("Affinities", "Starfield")]
-	internal sealed class SFAffinities(JobManager jobManager) : EditJob(jobManager)
+	internal sealed class SFAffinities : EditJob
 	{
 		#region Fields
 		private readonly Dictionary<string, List<Affinity>> affinities = new(StringComparer.Ordinal);
 		private Page? affinityPage;
+		#endregion
+
+		#region Constructors
+		[JobInfo("Affinities", "Starfield")]
+		public SFAffinities(JobManager jobManager)
+			: base(jobManager)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		}
 		#endregion
 
 		#region Public Override Properties
@@ -28,14 +36,15 @@
 		protected override void LoadPages()
 		{
 			var fileName = Starfield.ModFolder + "Affinities_1.9.51.csv";
-			var file = new CsvFile
+			var csv = new CsvFile()
 			{
+				Encoding = Encoding.GetEncoding(1252),
 				FieldDelimiter = '\0',
 				FieldSeparator = ';' // Field separator changes *after* header.
 			};
 
-			file.Load(fileName, true);
-			foreach (var row in file)
+			csv.Load(fileName, true);
+			foreach (var row in csv)
 			{
 				var mission = row["Mission"];
 				if (!this.affinities.TryGetValue(mission, out var list))

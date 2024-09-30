@@ -7,14 +7,22 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 
-	[method: JobInfo("Affinities (NPC)", "Starfield")]
-	internal sealed class SFAffinitiesNpc(JobManager jobManager) : EditJob(jobManager)
+	internal sealed class SFAffinitiesNpc : EditJob
 	{
 		#region Fields
 		private readonly SortedDictionary<string, List<NpcAffinity>> andreja = new(StringComparer.Ordinal);
 		private readonly SortedDictionary<string, List<NpcAffinity>> barrett = new(StringComparer.Ordinal);
 		private readonly SortedDictionary<string, List<NpcAffinity>> samcoe = new(StringComparer.Ordinal);
 		private readonly SortedDictionary<string, List<NpcAffinity>> sarahmorgan = new(StringComparer.Ordinal);
+		#endregion
+
+		#region Constructors
+		[JobInfo("Affinities (NPC)", "Starfield")]
+		public SFAffinitiesNpc(JobManager jobManager)
+			: base(jobManager)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		}
 		#endregion
 
 		#region Public Override Properties
@@ -27,14 +35,15 @@
 		protected override void LoadPages()
 		{
 			var fileName = Starfield.ModFolder + "Affinities_1.9.51.csv";
-			var file = new CsvFile
+			var csv = new CsvFile
 			{
+				Encoding = Encoding.GetEncoding(1252),
 				FieldDelimiter = '\0',
 				FieldSeparator = ';'
 			};
 
-			file.Load(fileName, true);
-			foreach (var row in file)
+			csv.Load(fileName, true);
+			foreach (var row in csv)
 			{
 				this.GetNpcAffinity(row, "Andreja", this.andreja);
 				this.GetNpcAffinity(row, "Barrett", this.barrett);

@@ -5,7 +5,6 @@
 	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -15,12 +14,19 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	[method: JobInfo("Terminals", "Starfield")]
-	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
-	internal sealed class SFTerminals(JobManager jobManager) : CreateOrUpdateJob<SFTerminals.Terminal>(jobManager)
+	internal sealed class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
 	{
 		#region Fields
 		private readonly MenuList menus = [];
+		#endregion
+
+		#region Constructors
+		[JobInfo("Terminals", "Starfield")]
+		public SFTerminals(JobManager jobManager)
+			: base(jobManager)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		}
 		#endregion
 
 		#region Protected Override Properties
@@ -34,7 +40,7 @@
 
 		protected override IDictionary<Title, Terminal> LoadItems()
 		{
-			var csv = new CsvFile();
+			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(Starfield.ModFolder + "Tmlm.csv", true);
 			Menu? menu = null;
 			var lastId = string.Empty;

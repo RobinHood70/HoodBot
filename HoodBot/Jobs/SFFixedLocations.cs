@@ -29,6 +29,7 @@
 		public SFFixedLocations(JobManager jobManager)
 			: base(jobManager)
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			this.footerTemplates = new TitleCollection(this.Site)
 			{
 				new Title(this.Site[MediaWikiNamespaces.Template], "Stub")
@@ -141,7 +142,7 @@
 		#region Private Static Methods
 		private void GetRefUses()
 		{
-			var refUsesFile = new CsvFile();
+			var refUsesFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			refUsesFile.Load(Starfield.ModFolder + "RefUses.csv", true);
 			foreach (var row in refUsesFile)
 			{
