@@ -13,7 +13,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class SFPlanets : CreateOrUpdateJob<SFPlanets.Planet>
+	internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	{
 		#region Static Fields
 		private static readonly Regex BiomeFinder = new(
@@ -24,7 +24,7 @@
 
 		#region Constructors
 		[JobInfo("Planets", "Starfield")]
-		public SFPlanets(JobManager jobManager)
+		public SFPlanets_Old(JobManager jobManager)
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -46,7 +46,7 @@
 		{
 			var csv = new CsvFile();
 			var items = new Dictionary<Title, Planet>();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Planets_Infobox.csv"), true, 0);
+			csv.Load(Starfield.Folder + "Planets_Infobox.csv", true);
 			foreach (var row in csv)
 			{
 				var id = row["Name"];
@@ -101,12 +101,12 @@
 
 		protected override string NewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
 			"|image=\n" +
-			$"|system=\n" +
-			$"|type=\n" +
-			$"|gravity=\n" +
+			"|system=\n" +
+			"|type=\n" +
+			"|gravity=\n" +
 			"|temp=\n" +
 			"|atmosphere=\n" +
-			$"|magnetosphere=\n" +
+			"|magnetosphere=\n" +
 			"|fauna=\n" +
 			"|flora=\n" +
 			"|water=\n" +
@@ -123,7 +123,6 @@
 			var biomes = item.Biomes.Count == 0
 				? string.Empty
 				: ("\n* " + string.Join("\n* ", item.Biomes));
-			/*
 			var gravityText = item.Gravity == 0
 				? string.Empty
 				: item.Gravity?.ToStringInvariant() ?? string.Empty;
@@ -148,7 +147,6 @@
 			{
 				template.Remove("orbits");
 			}
-			*/
 
 			if (biomes.Length > 0)
 			{
@@ -166,7 +164,7 @@
 		{
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/biomesplanets.csv"), false);
+			csv.Load(Starfield.Folder + "biomesplanets.csv", false);
 
 			string? planet = null;
 			var biomeList = new List<string>();
@@ -221,7 +219,7 @@
 		{
 			var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/sfcreatures_-_wip3.csv"), true);
+			csv.Load(Starfield.Folder + "sfcreatures_-_wip3.csv", true);
 			foreach (var row in csv)
 			{
 				var planetName = row["Planet"];
