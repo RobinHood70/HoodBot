@@ -18,6 +18,10 @@
 	[method: JobInfo("Upload Antiquity Leads", "ESO Update")]
 	internal sealed class UploadAntiquityLeads(JobManager jobManager) : TemplateJob(jobManager)
 	{
+		#region Private Constants
+		private const string VarName = "originalfile";
+		#endregion
+
 		#region Fields
 		private readonly Dictionary<string, Page> filePages = [];
 		private readonly Dictionary<int, Lead> leads = [];
@@ -134,13 +138,13 @@
 		private void GetFilePages()
 		{
 			var uesp = (UespSite)this.Site;
-			var pages = uesp.CreateMetaPageCollection(PageModules.Default | PageModules.Custom, true, false, "originalfile");
+			var pages = uesp.CreateMetaPageCollection(PageModules.Default | PageModules.Custom, true, false, VarName);
 			pages.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.File);
-			pages.GetCustomGenerator(new VariablesInput() { Variables = ["originalfile"] });
+			pages.GetCustomGenerator(new VariablesInput() { Variables = [VarName] });
 			foreach (var page in pages)
 			{
 				var varPage = (VariablesPage)page;
-				if (varPage.GetVariable("originalfile") is string origFile)
+				if (varPage.GetVariable(VarName) is string origFile)
 				{
 					var split = origFile.Split(TextArrays.Comma);
 					foreach (var name in split)
