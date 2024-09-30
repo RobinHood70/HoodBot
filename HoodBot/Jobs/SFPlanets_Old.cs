@@ -46,7 +46,7 @@
 		{
 			var csv = new CsvFile();
 			var items = new Dictionary<Title, Planet>();
-			csv.Load(Starfield.Folder + "Planets_Infobox.csv", true);
+			csv.Load(Starfield.ModFolder + "Planets_Infobox.csv", true);
 			foreach (var row in csv)
 			{
 				var id = row["Name"];
@@ -164,7 +164,7 @@
 		{
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
-			csv.Load(Starfield.Folder + "biomesplanets.csv", false);
+			csv.Load(Starfield.ModFolder + "biomesplanets.csv", false);
 
 			string? planet = null;
 			var biomeList = new List<string>();
@@ -219,7 +219,7 @@
 		{
 			var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.Folder + "sfcreatures_-_wip3.csv", true);
+			csv.Load(Starfield.ModFolder + "sfcreatures_-_wip3.csv", true);
 			foreach (var row in csv)
 			{
 				var planetName = row["Planet"];

@@ -2,6 +2,8 @@
 {
 	internal static class Starfield
 	{
-		public static string Folder { get; } = LocalConfig.BotDataSubPath(@"Starfield\ShatteredSpaceData1\ShatteredSpace\");
+		public static string BaseFolder { get; } = LocalConfig.BotDataSubPath(@"Starfield\");
+
+		public static string ModFolder { get; } = BaseFolder + @"ShatteredSpaceData1\ShatteredSpace\";
 	}
 }

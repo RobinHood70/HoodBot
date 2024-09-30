@@ -35,7 +35,7 @@
 		protected override IDictionary<Title, Terminal> LoadItems()
 		{
 			var csv = new CsvFile();
-			csv.Load(Starfield.Folder + "Tmlm.csv", true);
+			csv.Load(Starfield.ModFolder + "Tmlm.csv", true);
 			Menu? menu = null;
 			var lastId = string.Empty;
 			var entries = new SortedDictionary<int, Entry>();
@@ -71,7 +71,7 @@
 			csv.Clear();
 
 			var retval = new Dictionary<Title, Terminal>();
-			csv.Load(Starfield.Folder + "Term2.csv", true);
+			csv.Load(Starfield.ModFolder + "Term2.csv", true);
 			foreach (var row in csv)
 			{
 				var disambig = row["Disambig"];

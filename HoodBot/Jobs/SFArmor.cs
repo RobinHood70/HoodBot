@@ -34,7 +34,7 @@
 		{
 			var items = new Dictionary<Title, List<CsvRow>>();
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.Folder + "Armors.csv", true);
+			csv.Load(Starfield.ModFolder + "Armors.csv", true);
 			foreach (var row in csv)
 			{
 				var name = row["Name"];

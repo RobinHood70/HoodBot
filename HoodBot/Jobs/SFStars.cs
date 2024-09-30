@@ -29,7 +29,7 @@
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
 			var items = new Dictionary<Title, CsvRow>();
-			var fileName = Starfield.Folder + "stars.csv";
+			var fileName = Starfield.ModFolder + "stars.csv";
 			var starsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			starsFile.Load(fileName, true);
 			foreach (var star in starsFile)
@@ -44,20 +44,23 @@
 		protected override bool IsValid(ContextualParser parser, CsvRow item) => parser.FindSiteTemplate("System Infobox") is not null;
 
 		protected override string NewPageText(Title title, CsvRow item) =>
-			$"{{{{System Infobox\n" +
+			"{{Trail|Places}}\n" +
+			"{{System Infobox\n" +
 			$"|eid={item["FormID"]}\n" +
 			$"|name={item["Name"]}\n" +
-			$"|class={item["spect"]}\n" +
-			$"|id={item["gl"]}\n" +
-			$"|temp={item["Temp"]}\n" +
-			$"|magnitude={item["absmag"]}\n" +
+			$"|class={item["Spectral"]}\n" +
+			$"|id={item["Gliese"]}\n" +
+			$"|temp={item["Temperature"]}\n" +
+			$"|magnitude={item["AbsMag"]}\n" +
 			"|image=\n" +
 			"|level=\n" +
 			"|mass=\n" +
 			"|moon=\n" +
 			"|planet=\n" +
 			"|radius=\n" +
-			$"}}}}";
+			"}}\n\n" +
+			"{{NewLine}}\n" +
+			"{{System Table}}";
 		#endregion
 	}
 }

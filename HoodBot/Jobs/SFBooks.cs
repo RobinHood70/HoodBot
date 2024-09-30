@@ -42,7 +42,7 @@
 			var retval = new Dictionary<Title, Book>();
 			var books = LoadBooks();
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.Folder + "Books.csv", true);
+			csv.Load(Starfield.ModFolder + "Books.csv", true);
 			foreach (var row in csv)
 			{
 				var formId = row["FormID"][2..];
@@ -96,7 +96,7 @@
 		private static Dictionary<string, Book> LoadBooks()
 		{
 			var retval = new Dictionary<string, Book>(StringComparer.Ordinal);
-			var fileText = File.ReadAllText(Starfield.Folder + "Books.txt", Encoding.GetEncoding(1252));
+			var fileText = File.ReadAllText(Starfield.ModFolder + "Books.txt", Encoding.GetEncoding(1252));
 			var matches = BookMatcher.Matches(fileText) as IEnumerable<Match>;
 
 			// In-file replacements prior to bot run:

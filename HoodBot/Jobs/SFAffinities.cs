@@ -27,7 +27,7 @@
 
 		protected override void LoadPages()
 		{
-			var fileName = Starfield.Folder + "Affinities_1.9.51.csv";
+			var fileName = Starfield.ModFolder + "Affinities_1.9.51.csv";
 			var file = new CsvFile
 			{
 				FieldDelimiter = '\0',
