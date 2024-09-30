@@ -16,10 +16,10 @@
 
 	internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
-		#region Private Constants
-		private const string DisambigFileName = "Starfield/Quests Disambigs.txt";
-		private const string QuestsFileName = "Starfield/Quests3.csv";
-		private const string StagesFileName = "Starfield/QuestStages3.csv";
+		#region Private Static Fields
+		private static readonly string DisambigFileName = Starfield.Folder + "Quests Disambigs.txt";
+		private static readonly string QuestsFileName = Starfield.Folder + "Quests3.csv";
+		private static readonly string StagesFileName = Starfield.Folder + "QuestStages3.csv";
 		#endregion
 
 		#region Constructors

@@ -29,7 +29,7 @@
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
 			var items = new Dictionary<Title, CsvRow>();
-			var fileName = LocalConfig.BotDataSubPath("Starfield/stars.csv");
+			var fileName = Starfield.Folder + "stars.csv";
 			var starsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			starsFile.Load(fileName, true);
 			foreach (var star in starsFile)

@@ -38,7 +38,7 @@
 				Encoding = Encoding.GetEncoding(1252),
 				FieldSeparator = '\t'
 			};
-			csv.Load(LocalConfig.BotDataSubPath("Starfield\\New Npcs.txt"), true);
+			csv.Load(Starfield.Folder + "New Npcs.txt", true);
 			foreach (var row in csv)
 			{
 				var name = row["Full Name: Full Name <<TESFullName_Component>>"];

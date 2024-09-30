@@ -33,7 +33,7 @@
 		protected override IDictionary<Title, Redirect> LoadItems()
 		{
 			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Factions.csv"), true);
+			csv.Load(Starfield.Folder + "Factions.csv", true);
 			var items = this.ParseFactions(csv);
 			var entries = this.GetFactionEntries(csv);
 			var first = entries.Keys.First() ?? " ";
@@ -129,7 +129,7 @@
 			npcs.GetCategoryMembers("Starfield-NPCs");
 			var members = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
 			var npcsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			npcsFile.Load(LocalConfig.BotDataSubPath("Starfield/Npcs.csv"), true);
+			npcsFile.Load(Starfield.Folder + "Npcs.csv", true);
 			{
 				foreach (var row in npcsFile)
 				{

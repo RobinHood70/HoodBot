@@ -197,7 +197,7 @@
 		private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
 		{
 			var file = new CsvFile();
-			file.Load(LocalConfig.BotDataSubPath(@"Starfield\sfcreatures_-_wip3.csv"), true);
+			file.Load(Starfield.Folder + "sfcreatures_-_wip3.csv", true);
 			Creature? creature = null;
 			foreach (var row in file)
 			{

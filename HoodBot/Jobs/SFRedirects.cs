@@ -23,7 +23,7 @@
 		{
 			var items = new SortedDictionary<Title, string>();
 			var csv = new CsvFile();
-			csv.Load(LocalConfig.BotDataSubPath("Starfield/Effect_redirects.csv"), true);
+			csv.Load(Starfield.Folder + "Effect_redirects.csv", true);
 			foreach (var row in csv)
 			{
 				var pageName = row["Page Name"]
