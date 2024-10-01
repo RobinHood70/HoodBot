@@ -18,6 +18,8 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
+			this.OnUpdate = this.UpdateCreature;
 		}
 		#endregion
 
@@ -38,61 +40,10 @@
 
 			return retval;
 		}
+		#endregion
 
-		protected override void PageLoaded(ContextualParser parser, Creature item)
-		{
-			var cs = parser.FindSiteTemplate("Creature Summary");
-			if (cs is not null)
-			{
-				cs.Remove("resp");
-				cs.Remove("typenamesp");
-
-				cs.RenameParameter("level", "difficulty");
-				cs.RenameParameter("levels", "difficulty");
-
-				var typeValue = cs.GetValue("type");
-				if (typeValue != null && (typeValue.Length == 0 || string.Equals(typeValue, "Fauna", StringComparison.Ordinal)))
-				{
-					cs.Remove("type");
-				}
-
-				if (item.Variants.Count < 2)
-				{
-					this.UpdateLoc(cs, item);
-					UpdateTemplate(cs, item.Variants[0]);
-				}
-				else
-				{
-					var planets = new SortedSet<string>(StringComparer.Ordinal);
-					foreach (var variant in item.Variants)
-					{
-						planets.Add(variant["Planet"]);
-					}
-
-					cs.Update("planet", string.Join(", ", planets));
-				}
-			}
-
-			if (parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
-			{
-				AddVariants(parser, item);
-			}
-
-			foreach (var variant in item.Variants)
-			{
-				var resource = variant["Resource"].Split(" (", 2, StringSplitOptions.None)[0];
-				var redirectText =
-					$"#REDIRECT [[Starfield:{variant["Name"]}#{variant["Planet"]}]]\n" +
-					$"[[Category:Starfield-Creatures-{resource}]]\n" +
-					"[[Category:Redirects to Broader Subjects]]";
-				var redirect = this.Site.CreatePage($"Starfield:{variant["Name"]} ({variant["Planet"]})", redirectText);
-				this.Pages.Add(redirect);
-			}
-
-			parser.UpdatePage();
-		}
-
-		protected override string NewPageText(Title title, Creature item)
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, Creature item)
 		{
 			var sb = new StringBuilder();
 			sb
@@ -112,14 +63,33 @@
 
 			return sb.ToString();
 		}
-		#endregion
 
-		#region Private Static Methods
 		private static void NoNone(ITemplateNode template, string key, string value)
 		{
 			if (string.Equals(value, "None", StringComparison.Ordinal))
 			{
 				template.Update(key, value);
+			}
+		}
+
+		private static void UpdateLoc(SiteTemplateNode template, Creature item)
+		{
+			// Remove loc if it's a link and duplicates planet
+			if (template.Find("loc") is IParameterNode loc)
+			{
+				if (loc.Value.Count == 2 &&
+				loc.Value[0] is ILinkNode linkNode)
+				{
+					var link = SiteLink.FromLinkNode(template.TitleValue.Site, linkNode);
+					foreach (var row in item.Variants)
+					{
+						if (string.Equals(link.Text, row["Planet"], StringComparison.OrdinalIgnoreCase))
+						{
+							template.Remove("loc");
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -223,25 +193,57 @@
 			}
 		}
 
-		private void UpdateLoc(SiteTemplateNode template, Creature item)
+		private void UpdateCreature(ContextualParser parser, Creature item)
 		{
-			// Remove loc if it's a link and duplicates planet
-			if (template.Find("loc") is IParameterNode loc)
+			var cs = parser.FindSiteTemplate("Creature Summary");
+			if (cs is not null)
 			{
-				if (loc.Value.Count == 2 &&
-				loc.Value[0] is ILinkNode linkNode)
+				cs.Remove("resp");
+				cs.Remove("typenamesp");
+
+				cs.RenameParameter("level", "difficulty");
+				cs.RenameParameter("levels", "difficulty");
+
+				var typeValue = cs.GetValue("type");
+				if (typeValue != null && (typeValue.Length == 0 || string.Equals(typeValue, "Fauna", StringComparison.Ordinal)))
 				{
-					var link = SiteLink.FromLinkNode(this.Site, linkNode);
-					foreach (var row in item.Variants)
+					cs.Remove("type");
+				}
+
+				if (item.Variants.Count < 2)
+				{
+					UpdateLoc(cs, item);
+					UpdateTemplate(cs, item.Variants[0]);
+				}
+				else
+				{
+					var planets = new SortedSet<string>(StringComparer.Ordinal);
+					foreach (var variant in item.Variants)
 					{
-						if (string.Equals(link.Text, row["Planet"], StringComparison.OrdinalIgnoreCase))
-						{
-							template.Remove("loc");
-							break;
-						}
+						planets.Add(variant["Planet"]);
 					}
+
+					cs.Update("planet", string.Join(", ", planets));
 				}
 			}
+
+			if (parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
+			{
+				AddVariants(parser, item);
+			}
+
+			foreach (var variant in item.Variants)
+			{
+				var resource = variant["Resource"].Split(" (", 2, StringSplitOptions.None)[0];
+				var redirectText =
+					$"#REDIRECT [[Starfield:{variant["Name"]}#{variant["Planet"]}]]\n" +
+					$"[[Category:Starfield-Creatures-{resource}]]\n" +
+					"[[Category:Redirects to Broader Subjects]]";
+				var redirect = this.Site.CreatePage($"Starfield:{variant["Name"]} ({variant["Planet"]})", redirectText);
+				this.Pages.Add(redirect);
+			}
+
+			parser.UpdatePage();
 		}
 		#endregion
 

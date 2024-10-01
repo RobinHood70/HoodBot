@@ -12,7 +12,11 @@
 		#region Protected Properties
 		protected bool Clobber { get; set; }
 
-		protected bool CreateNew { get; set; } = true;
+		protected Func<Title, T, string>? NewPageText { get; set; }
+
+		protected Action<ContextualParser, T>? OnExists { get; set; }
+
+		protected Action<ContextualParser, T>? OnUpdate { get; set; }
 		#endregion
 
 		#region Protected Abstract Properties
@@ -23,14 +27,6 @@
 		protected abstract bool IsValid(ContextualParser parser, T item);
 
 		protected abstract IDictionary<Title, T> LoadItems();
-
-		protected abstract string NewPageText(Title title, T item);
-		#endregion
-
-		#region Protected Virtual Methods
-		protected virtual void PageLoaded(ContextualParser parser, T item)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods
@@ -50,34 +46,47 @@
 				}
 			}
 
-			if (this.CreateNew && remaining.Count > 0)
-			{
-				this.CreateNewPages(items, parsedPages, remaining);
-			}
+			parsedPages.AddRange(this.GetNewPages(items, remaining));
+			this.DoOnExists(items, parsedPages);
+			this.DoOnUpdate(items, parsedPages);
 
-			this.UpdatePages(items, parsedPages);
+			foreach (var parser in parsedPages)
+			{
+				parser.UpdatePage();
+				this.Pages.Add(parser.Page);
+			}
 		}
 
 		protected override void PageLoaded(Page page) => throw new NotSupportedException();
 		#endregion
 
 		#region Private Methods
-		private void CreateNewPages(IDictionary<Title, T> items, List<ContextualParser> parsedPages, TitleCollection remaining)
+		private void DoOnExists(IDictionary<Title, T> items, List<ContextualParser> parsedPages)
 		{
-			foreach (var title in remaining)
+			if (this.OnExists is null)
 			{
-				var item = items[title];
-				var text = this.NewPageText(title, item);
-				var page = this.Site.CreatePage(title, text);
-				var parser = new ContextualParser(page);
-				if (this.IsValid(parser, item))
+				return;
+			}
+
+			foreach (var parser in parsedPages)
+			{
+				if (parser.Page.Exists)
 				{
-					parsedPages.Add(parser);
+					this.OnExists(parser, items[parser.Title]);
 				}
-				else
-				{
-					this.Warn($"New page [[{page.Title.FullPageName()}]] failed validity check.");
-				}
+			}
+		}
+
+		private void DoOnUpdate(IDictionary<Title, T> items, List<ContextualParser> parsedPages)
+		{
+			if (this.OnUpdate is null)
+			{
+				return;
+			}
+
+			foreach (var parser in parsedPages)
+			{
+				this.OnUpdate(parser, items[parser.Page.Title]);
 			}
 		}
 
@@ -95,6 +104,10 @@
 					{
 						parsedPages.Add(parser);
 						remaining.Remove(title);
+						if (this.OnUpdate is null)
+						{
+							this.Warn(title.ToString() + " - valid page already exists, possible conflict.");
+						}
 					}
 					else if (this.Disambiguator is not null)
 					{
@@ -132,13 +145,27 @@
 			}
 		}
 
-		private void UpdatePages(IDictionary<Title, T> items, List<ContextualParser> parsedPages)
+		private IEnumerable<ContextualParser> GetNewPages(IDictionary<Title, T> items, TitleCollection remaining)
 		{
-			foreach (var parser in parsedPages)
+			if (this.NewPageText is null)
 			{
-				this.PageLoaded(parser, items[parser.Page.Title]);
-				parser.UpdatePage();
-				this.Pages.Add(parser.Page);
+				yield break;
+			}
+
+			foreach (var title in remaining)
+			{
+				var item = items[title];
+				var text = this.NewPageText(title, item);
+				var page = this.Site.CreatePage(title, text);
+				var parser = new ContextualParser(page);
+				if (this.IsValid(parser, item))
+				{
+					yield return parser;
+				}
+				else
+				{
+					this.Warn($"New page [[{page.Title.FullPageName()}]] failed validity check.");
+				}
 			}
 		}
 		#endregion

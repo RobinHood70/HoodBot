@@ -18,6 +18,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = this.GetNewPageText;
 		}
 		#endregion
 
@@ -96,8 +97,10 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, Redirect item)
+		#region Private Methods
+		private string GetNewPageText(Title title, Redirect item)
 		{
 			var retval = $"#REDIRECT [[Starfield:Factions {item.Letter}#{item.Section}]] [[Category:Redirects to Broader Subjects]] [[Category:Starfield-Factions]]";
 			var origName = (this.Disambiguator is not null && title.PageName.EndsWith(" (" + this.Disambiguator + ")", StringComparison.Ordinal))
@@ -131,26 +134,24 @@
 			var members = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
 			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			csv.Load(Starfield.ModFolder + "Npcs.csv", true);
+			foreach (var row in csv)
 			{
-				foreach (var row in csv)
+				var name = row["Name"];
+				if (name.Length > 0)
 				{
-					var name = row["Name"];
-					if (name.Length > 0)
+					var factionText = row["Factions"];
+					var factions = factionText.Length == 0
+						? []
+						: factionText.Split(TextArrays.Comma);
+					var title =
+						npcs.TryGetValue("Starfield:" + name + " (NPC)", out var page) ? page :
+						npcs.TryGetValue("Starfield:" + name, out page) ? page :
+						throw new KeyNotFoundException();
+					foreach (var faction in factions)
 					{
-						var factionText = row["Factions"];
-						var factions = factionText.Length == 0
-							? []
-							: factionText.Split(TextArrays.Comma);
-						var title =
-							npcs.TryGetValue("Starfield:" + name + " (NPC)", out var page) ? page :
-							npcs.TryGetValue("Starfield:" + name, out page) ? page :
-							throw new KeyNotFoundException();
-						foreach (var faction in factions)
-						{
-							var memberList = members.TryGetValue(faction, out var list) ? list : new TitleCollection(this.Site);
-							memberList.TryAdd(title);
-							members[faction] = memberList;
-						}
+						var memberList = members.TryGetValue(faction, out var list) ? list : new TitleCollection(this.Site);
+						memberList.TryAdd(title);
+						members[faction] = memberList;
 					}
 				}
 			}

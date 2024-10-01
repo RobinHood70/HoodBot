@@ -25,6 +25,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
 		}
 		#endregion
 
@@ -59,8 +60,10 @@
 
 			return retval;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, Book book)
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, Book book)
 		{
 			var text =
 				"{{Trail|Items|Books}}\n" +

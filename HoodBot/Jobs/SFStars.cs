@@ -16,6 +16,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
 		}
 		#endregion
 
@@ -42,8 +43,10 @@
 		}
 
 		protected override bool IsValid(ContextualParser parser, CsvRow item) => parser.FindSiteTemplate("System Infobox") is not null;
+		#endregion
 
-		protected override string NewPageText(Title title, CsvRow item) =>
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, CsvRow item) =>
 			"{{Trail|Places}}\n" +
 			"{{System Infobox\n" +
 			$"|eid={item["FormID"]}\n" +

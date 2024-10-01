@@ -29,8 +29,6 @@
 
 			return retval;
 		}
-
-		protected override string NewPageText(Title title, Skill item) => throw new NotImplementedException();
 		#endregion
 
 		#region Private Methods

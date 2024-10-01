@@ -26,6 +26,8 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = this.GetNewPageText;
+			this.OnUpdate = this.UpdateTerminal;
 		}
 		#endregion
 
@@ -121,8 +123,10 @@
 				return text;
 			}
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, Terminal item)
+		#region Private Static Methods
+		private string GetNewPageText(Title title, Terminal item)
 		{
 			var menuList = new MenuList()
 			{
@@ -211,10 +215,10 @@
 			}
 		}
 
-		protected override void PageLoaded(ContextualParser parser, Terminal item)
+		private void UpdateTerminal(ContextualParser parser, Terminal item)
 		{
 			parser.Clear();
-			parser.AddText(this.NewPageText(parser.Title, item));
+			parser.AddText(this.GetNewPageText(parser.Title, item));
 		}
 		#endregion
 

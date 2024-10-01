@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -17,22 +16,17 @@
 
 		protected override string GetEditSummary(Page page)
 		{
-			throw new NotImplementedException();
+			return string.Empty;
 		}
 
 		protected override bool IsValid(ContextualParser parser, CsvRow item)
 		{
-			throw new NotImplementedException();
+			return false;
 		}
 
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
-			throw new NotImplementedException();
-		}
-
-		protected override string NewPageText(Title title, CsvRow item)
-		{
-			throw new NotImplementedException();
+			return new Dictionary<Title, CsvRow>();
 		}
 	}
 }

@@ -18,6 +18,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
 		}
 		#endregion
 
@@ -49,8 +50,10 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, List<CsvRow> item)
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, List<CsvRow> item)
 		{
 			var sb = new StringBuilder();
 			string? firstType = null;

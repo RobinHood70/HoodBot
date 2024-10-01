@@ -9,6 +9,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	{
@@ -17,8 +18,9 @@
 		public SFNpcs(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.Clobber = true;
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
+			this.OnUpdate = UpdateNpcs;
 		}
 		#endregion
 
@@ -29,7 +31,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create NPC page";
 
-		protected override bool IsValid(ContextualParser parser, Npcs item) => true; // parser.FindSiteTemplate("NPC Summary") is not null || parser.Page.IsMissing;
+		protected override bool IsValid(ContextualParser parser, Npcs item) => parser.FindSiteTemplate("NPC Summary") is not null;
 
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
@@ -77,54 +79,57 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override void PageLoaded(ContextualParser parser, Npcs item)
+		#region Private Static Methods
+		private static void BuildTemplate(StringBuilder sb, Npc npc)
 		{
-			// parser.Page.Text = this.NewPageText(parser.Page.Title, item);
-			// parser.ReparsePageText(WikiCommon.Parser.InclusionType.Raw, false);
+			var gender = npc.Gender switch
+			{
+				null => string.Empty,
+				true => "Female",
+				false => "Male"
+			};
+			var factions = npc.Factions.Count == 0
+				? string.Empty
+				: ("{{Faction|" + string.Join("}}, {{Faction|", npc.Factions) + "}}");
+			sb
+				.Append("{{NPC Summary\n")
+				.Append($"|eid={npc.EditorID}\n")
+				.Append($"|race={npc.Race}\n")
+				.Append($"|baseid={npc.FormID}\n")
+				.Append($"|gender={gender}\n")
+				.Append($"|health={npc.Health}\n");
+			if (npc.Dead)
+			{
+				sb.Append("|dead=1\n");
+			}
+
+			sb
+				.Append("|skills=\n")
+				.Append($"|faction={factions}\n")
+				.Append("|image=\n")
+				.Append("|imgdesc=\n")
+				.Append("}}\n\n")
+				.Append("{{NewLine}}\n");
 		}
 
-		protected override string NewPageText(Title title, Npcs item)
+		private static string GetNewPageText(Title title, Npcs item)
 		{
 			var sb = new StringBuilder();
 			foreach (var npc in item)
 			{
-				var gender = npc.Gender switch
-				{
-					null => string.Empty,
-					true => "Female",
-					false => "Male"
-				};
-				var factions = npc.Factions.Count == 0
-					? string.Empty
-					: ("{{Faction|" + string.Join("}}, {{Faction|", npc.Factions) + "}}");
-				sb
-					.Append("{{NewLine}}\n")
-					.Append("{{NPC Summary\n")
-					.Append($"|eid={npc.EditorID}\n")
-					.Append($"|race={npc.Race}\n")
-					.Append($"|baseid={npc.FormID}\n")
-					.Append($"|gender={gender}\n")
-					.Append(this.Site.Culture, $"|health={npc.Health}\n");
-				if (npc.Dead)
-				{
-					sb.Append("|dead=1\n");
-				}
-
-				sb
-					.Append("|skills=\n")
-					.Append($"|faction={factions}\n")
-					.Append("|image=\n")
-					.Append("|imgdesc=\n")
-					.Append("}}");
+				BuildTemplate(sb, npc);
 			}
 
-			var npcs = sb.ToString()[12..];
-			return npcs + "\n\n{{Stub|NPC}}";
-		}
-		#endregion
+			if (sb.Length > 0)
+			{
+				sb.Remove(sb.Length - 12, 12);
+			}
 
-		#region Private Static Methods
+			sb.Append("{{Npc Navbox}}\n\n{{Stub|NPC}}");
+			return sb.ToString();
+		}
 
 		private static Dictionary<string, string> GetRaces()
 		{
@@ -158,6 +163,27 @@
 				}
 
 				dict[formId] = name;
+			}
+		}
+
+		private static void UpdateNpcs(ContextualParser parser, Npcs item)
+		{
+			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+			var templates = parser.FindSiteTemplates("NPC Summary");
+			foreach (var npc in item)
+			{
+				foreach (var template in templates)
+				{
+					if (string.Equals(template.GetValue("eid")?.Trim(), npc.EditorID, StringComparison.OrdinalIgnoreCase))
+					{
+						return;
+					}
+				}
+
+				var sb = new StringBuilder();
+				BuildTemplate(sb, npc);
+				var newNodes = parser.Parse(sb.ToString());
+				parser.InsertRange(0, newNodes);
 			}
 		}
 		#endregion

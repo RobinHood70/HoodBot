@@ -28,6 +28,8 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
+			this.OnUpdate = UpdatePlanet;
 		}
 		#endregion
 
@@ -98,8 +100,10 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
 			"|image=\n" +
 			"|system=\n" +
 			"|type=\n" +
@@ -117,7 +121,7 @@
 			"|orbital_position=\n" +
 			"}}\n\n{{Stub|Planet}}";
 
-		protected override void PageLoaded(ContextualParser parser, Planet item)
+		private static void UpdatePlanet(ContextualParser parser, Planet item)
 		{
 			var template = parser.FindSiteTemplate("Planet Infobox") ?? throw new InvalidOperationException();
 			var biomes = item.Biomes.Count == 0

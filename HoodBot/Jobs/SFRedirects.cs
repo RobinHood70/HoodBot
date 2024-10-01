@@ -16,6 +16,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
 		}
 		#endregion
 
@@ -44,8 +45,10 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, string item) => item;
+		#region Private Static Methods
+		private static string GetNewPageText(Title title, string item) => item;
 		#endregion
 	}
 }

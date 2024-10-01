@@ -21,6 +21,7 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = this.GetNewPageText;
 		}
 		#endregion
 
@@ -52,8 +53,10 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, CsvRow item)
+		#region Private Methods
+		private string GetNewPageText(Title title, CsvRow item)
 		{
 			var starName = this.stars[item["Star ID"]];
 			var starType = item["Type"]

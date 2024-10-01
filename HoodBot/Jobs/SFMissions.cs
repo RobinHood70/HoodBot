@@ -28,6 +28,8 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.NewPageText = GetNewPageText;
+			this.OnUpdate = UpdateMission;
 		}
 		#endregion
 
@@ -47,48 +49,61 @@
 
 			return items;
 		}
+		#endregion
 
-		protected override string NewPageText(Title title, Mission item) => new StringBuilder()
-			.Append("{{Mission Header\n")
-			.Append("|type=\n")
-			.Append("|Giver=\n")
-			.Append("|Icon=\n")
-			.Append("|Reward={{Huh}}\n")
-			.Append("|ID=\n")
-			.Append("|Prev=\n")
-			.Append("|Next=\n")
-			.Append("|Loc=\n")
-			.Append("|image=\n")
-			.Append("|imgdesc=\n")
-			.Append("|description=\n")
-			.Append("}}\n\n")
-			.Append("{{Stub|Mission}}")
-			.ToString();
-
-		protected override void PageLoaded(ContextualParser parser, Mission item)
+		#region Private Static Methods
+		private static string BuildStageSection(List<Stage> stages)
 		{
-			var tpl = parser.FindSiteTemplate("Mission Header");
-			if (tpl is null)
+			var sb = new StringBuilder();
+			sb
+				.Append("== Mission Stages ==\n")
+				.Append("{{Mission Entries\n");
+			var missing = new List<string>();
+			foreach (var stage in stages)
 			{
-				return;
+				if (stage.Entry.Length == 0 && stage.Comment.Length == 0)
+				{
+					missing.Add(stage.Index);
+				}
+				else
+				{
+					sb
+						.Append('|')
+						.Append(stage.Index)
+						.Append('|')
+						.Append('|');
+					if (stage.Comment.Length > 0)
+					{
+						sb
+							.Append("{{Mission Comment|")
+							.Append(stage.Comment.Replace("=", "{{=}}", StringComparison.Ordinal))
+							.Append("}}");
+						if (stage.Entry.Length > 0)
+						{
+							sb.Append("<br>");
+						}
+					}
+
+					sb
+						.Append(stage.Entry)
+						.Append('\n');
+				}
 			}
 
-			tpl.Update("ID", item.EditorId);
-			var labelName = parser.Page.Title.LabelName();
-			if (!string.Equals(labelName, item.Name, StringComparison.Ordinal))
+			if (missing.Count > 0)
 			{
-				tpl.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+				sb
+					.Append("|missing=")
+					.AppendJoin(", ", missing)
+					.Append('\n');
+				if (missing.Count == stages.Count)
+				{
+					sb.Append("|allmissing=1\n");
+				}
 			}
 
-			if (item.Summary.Length > 0)
-			{
-				DoSummary(parser, item.Summary);
-			}
-
-			if (item.Stages.Count > 0)
-			{
-				DoStages(parser, item.Stages);
-			}
+			sb.Append("}}\n\n");
+			return sb.ToString();
 		}
 
 		private static void DoStages(ContextualParser parser, List<Stage> stages)
@@ -148,62 +163,23 @@
 
 			parser.FromSections(sections);
 		}
-		#endregion
 
-		#region Private Static Methods
-		private static string BuildStageSection(List<Stage> stages)
-		{
-			var sb = new StringBuilder();
-			sb
-				.Append("== Mission Stages ==\n")
-				.Append("{{Mission Entries\n");
-			var missing = new List<string>();
-			foreach (var stage in stages)
-			{
-				if (stage.Entry.Length == 0 && stage.Comment.Length == 0)
-				{
-					missing.Add(stage.Index);
-				}
-				else
-				{
-					sb
-						.Append('|')
-						.Append(stage.Index)
-						.Append('|')
-						.Append('|');
-					if (stage.Comment.Length > 0)
-					{
-						sb
-							.Append("{{Mission Comment|")
-							.Append(stage.Comment.Replace("=", "{{=}}", StringComparison.Ordinal))
-							.Append("}}");
-						if (stage.Entry.Length > 0)
-						{
-							sb.Append("<br>");
-						}
-					}
-
-					sb
-						.Append(stage.Entry)
-						.Append('\n');
-				}
-			}
-
-			if (missing.Count > 0)
-			{
-				sb
-					.Append("|missing=")
-					.AppendJoin(", ", missing)
-					.Append('\n');
-				if (missing.Count == stages.Count)
-				{
-					sb.Append("|allmissing=1\n");
-				}
-			}
-
-			sb.Append("}}\n\n");
-			return sb.ToString();
-		}
+		private static string GetNewPageText(Title title, Mission item) => new StringBuilder()
+			.Append("{{Mission Header\n")
+			.Append("|type=\n")
+			.Append("|Giver=\n")
+			.Append("|Icon=\n")
+			.Append("|Reward={{Huh}}\n")
+			.Append("|ID=\n")
+			.Append("|Prev=\n")
+			.Append("|Next=\n")
+			.Append("|Loc=\n")
+			.Append("|image=\n")
+			.Append("|imgdesc=\n")
+			.Append("|description=\n")
+			.Append("}}\n\n")
+			.Append("{{Stub|Mission}}")
+			.ToString();
 
 		private static Dictionary<string, List<Stage>> LoadStages()
 		{
@@ -247,6 +223,32 @@
 				.Replace('[', '(')
 				.Replace(']', ')')
 				.Trim();
+		}
+
+		private static void UpdateMission(ContextualParser parser, Mission item)
+		{
+			var tpl = parser.FindSiteTemplate("Mission Header");
+			if (tpl is null)
+			{
+				return;
+			}
+
+			tpl.Update("ID", item.EditorId);
+			var labelName = parser.Page.Title.LabelName();
+			if (!string.Equals(labelName, item.Name, StringComparison.Ordinal))
+			{
+				tpl.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+			}
+
+			if (item.Summary.Length > 0)
+			{
+				DoSummary(parser, item.Summary);
+			}
+
+			if (item.Stages.Count > 0)
+			{
+				DoStages(parser, item.Stages);
+			}
 		}
 		#endregion
 
