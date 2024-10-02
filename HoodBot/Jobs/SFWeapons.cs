@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -7,6 +8,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	{
@@ -17,6 +19,7 @@
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			this.NewPageText = GetNewPageText;
+			this.OnUpdate = UpdateWeapon;
 		}
 		#endregion
 
@@ -51,32 +54,68 @@
 		#endregion
 
 		#region Private Static Methods
+		private static void BuildTemplate(StringBuilder sb, CsvRow item)
+		{
+			sb
+				.Append("{{Item Summary\n")
+				.Append($"|objectid={item["FormID"][2..]}\n")
+				.Append($"|editorid={item["EditorID"].Trim()}\n")
+				.Append("|type={{Huh}}\n")
+				.Append("|image=\n")
+				.Append("|imgdesc=\n")
+				.Append($"|weight={item["Weight"]}\n")
+				.Append($"|value={item["Value"]}\n")
+				.Append("|physicalw={{Huh}}\n")
+				.Append($"|ammo={item["Ammo"]}\n")
+				.Append($"|capacity={item["MagSize"]}\n")
+				.Append("|firerate={{Huh}}\n")
+				.Append("|range={{Huh}}\n")
+				.Append("|accuracy={{Huh}}\n")
+				.Append("|mods={{Huh}}\n")
+				.Append("}}\n");
+		}
+
+		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, CsvRow row)
+		{
+			var templates = parser.FindSiteTemplates("Item Summary");
+			foreach (var template in templates)
+			{
+				var edid = template.GetValue("editorid")?.Trim();
+				if (string.Equals(edid, row["EditorID"], StringComparison.OrdinalIgnoreCase))
+				{
+					return template;
+				}
+			}
+
+			return null;
+		}
+
 		private static string GetNewPageText(Title title, List<CsvRow> itemList)
 		{
 			var sb = new StringBuilder();
 			foreach (var item in itemList)
 			{
-				sb
-					.Append("{{NewLine}}\n")
-					.Append("{{Item Summary\n")
-					.Append($"|objectid={item["FormID"][2..]}\n")
-					.Append($"|editorid={item["EditorID"].Trim()}\n")
-					.Append("|type={{Huh}}\n")
-					.Append("|image=\n")
-					.Append("|imgdesc=\n")
-					.Append($"|weight={item["Weight"]}\n")
-					.Append($"|value={item["Value"]}\n")
-					.Append("|physicalw={{Huh}}\n")
-					.Append($"|ammo={item["Ammo"]}\n")
-					.Append($"|capacity={item["MagSize"]}\n")
-					.Append("|firerate={{Huh}}\n")
-					.Append("|range={{Huh}}\n")
-					.Append("|accuracy={{Huh}}\n")
-					.Append("|mods={{Huh}}\n")
-					.Append("}}\n");
+				BuildTemplate(sb, item);
 			}
 
-			return "{{Trail|Items|Weapons}}" + sb.ToString()[12..] + $"The [[Starfield:{title.PageName}|]] is a [[Starfield:Weapons|weapon]].\n\n{{{{Stub|Weapon}}}}";
+			return $"{{{{Trail|Items|Weapons}}}}{sb}The [[Starfield:{title.PageName}|]] is a [[Starfield:Weapons|weapon]].\n\n{{{{Stub|Weapon}}}}";
+		}
+
+		private static void UpdateWeapon(ContextualParser parser, List<CsvRow> list)
+		{
+			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Item Summary"));
+			foreach (var row in list)
+			{
+				if (FindMatchingTemplate(parser, row) is null)
+				{
+					var sb = new StringBuilder();
+					BuildTemplate(sb, row);
+					var newNodes = parser.Parse(sb.ToString());
+					parser.InsertRange(insertPos, newNodes);
+					insertPos += newNodes.Count;
+				}
+			}
 		}
 		#endregion
 	}

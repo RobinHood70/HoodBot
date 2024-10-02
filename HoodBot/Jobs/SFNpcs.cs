@@ -169,22 +169,32 @@
 		private static void UpdateNpcs(ContextualParser parser, Npcs item)
 		{
 			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-			var templates = parser.FindSiteTemplates("NPC Summary");
+			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Item Summary"));
 			foreach (var npc in item)
 			{
-				foreach (var template in templates)
+				if (FindMatchingTemplate(parser, npc) is null)
 				{
-					if (string.Equals(template.GetValue("eid")?.Trim(), npc.EditorID, StringComparison.OrdinalIgnoreCase))
-					{
-						return;
-					}
+					var sb = new StringBuilder();
+					BuildTemplate(sb, npc);
+					var newNodes = parser.Parse(sb.ToString());
+					parser.InsertRange(insertPos, newNodes);
+					insertPos += newNodes.Count;
 				}
-
-				var sb = new StringBuilder();
-				BuildTemplate(sb, npc);
-				var newNodes = parser.Parse(sb.ToString());
-				parser.InsertRange(0, newNodes);
 			}
+		}
+
+		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, Npc search)
+		{
+			var templates = parser.FindSiteTemplates("NPC Summary");
+			foreach (var template in templates)
+			{
+				if (string.Equals(template.GetValue("eid")?.Trim(), search.EditorID, StringComparison.OrdinalIgnoreCase))
+				{
+					return template;
+				}
+			}
+
+			return null;
 		}
 		#endregion
 

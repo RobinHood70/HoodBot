@@ -9,6 +9,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 	{
@@ -19,6 +20,7 @@
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			this.NewPageText = GetNewPageText;
+			this.OnUpdate = UpdateArmor;
 		}
 		#endregion
 
@@ -53,56 +55,100 @@
 		#endregion
 
 		#region Private Static Methods
+		private static void BuildTemplate(StringBuilder sb, CsvRow armor)
+		{
+			var itemType = GetItemType(armor);
+			sb
+				.Append("{{Item Summary\n")
+				.Append($"|objectid={armor["FormID"][2..]}\n")
+				.Append($"|editorid={armor["EditorID"].Trim()}\n")
+				.Append($"|type={itemType}\n")
+				.Append("|image=\n")
+				.Append("|imgdesc=\n")
+				.Append($"|weight={armor["Weight"]}\n")
+				.Append($"|value={armor["Value"]}\n")
+				.Append("|physical={{Huh}}\n")
+				.Append("|energy={{Huh}}\n")
+				.Append("|electromagnetic={{Huh}}\n")
+				.Append("|radiation={{Huh}}\n")
+				.Append("|thermal={{Huh}}\n")
+				.Append("|airborne={{Huh}}\n")
+				.Append("|corrosive={{Huh}}\n")
+				.Append("}}");
+		}
+
+		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, CsvRow row)
+		{
+			var templates = parser.FindSiteTemplates("Item Summary");
+			foreach (var template in templates)
+			{
+				var edid = template.GetValue("editorid")?.Trim();
+				if (string.Equals(edid, row["EditorID"], StringComparison.OrdinalIgnoreCase))
+				{
+					return template;
+				}
+			}
+
+			return null;
+		}
+
+		private static string? GetItemType(CsvRow armor)
+		{
+			var nameEdid = armor["Name"] + '/' + armor["EditorID"].Trim();
+			var itemType =
+				nameEdid.Contains("Clothes", StringComparison.Ordinal) ? "Apparel" :
+				nameEdid.Contains("Outfit", StringComparison.Ordinal) ? "Apparel" :
+				nameEdid.Contains("Skin", StringComparison.OrdinalIgnoreCase) ? "Skin" :
+				nameEdid.Contains("Helmet", StringComparison.Ordinal) ? "Helmet" :
+				nameEdid.Contains("Pack", StringComparison.Ordinal) ? "Pack" :
+				nameEdid.Contains("Spacesuit", StringComparison.OrdinalIgnoreCase) ? "Spacesuit" :
+				null;
+
+			if (itemType is null)
+			{
+				Debug.WriteLine("Item type not found: " + nameEdid);
+			}
+
+			return itemType;
+		}
+
 		private static string GetNewPageText(Title title, List<CsvRow> item)
 		{
 			var sb = new StringBuilder();
-			string? firstType = null;
 			foreach (var armor in item)
 			{
-				var nameEdid = armor["Name"] + '/' + armor["EditorID"].Trim();
-				var itemType =
-					nameEdid.Contains("Clothes", StringComparison.Ordinal) ? "Apparel" :
-					nameEdid.Contains("Spacesuit", StringComparison.Ordinal) ? "Spacesuit" :
-					nameEdid.Contains("Pack", StringComparison.Ordinal) ? "Pack" :
-					nameEdid.Contains("Helmet", StringComparison.Ordinal) ? "Helmet" :
-					null;
-
-				if (itemType is null)
-				{
-					Debug.WriteLine(nameEdid);
-				}
-
-				firstType ??= itemType;
-				sb
-					.Append("{{NewLine}}\n")
-					.Append("{{Item Summary\n")
-					.Append($"|objectid={armor["FormID"][2..]}\n")
-					.Append($"|editorid={armor["EditorID"].Trim()}\n")
-					.Append($"|type={itemType}\n")
-					.Append("|image=\n")
-					.Append("|imgdesc=\n")
-					.Append($"|weight={armor["Weight"]}\n")
-					.Append($"|value={armor["Value"]}\n")
-					.Append("|physical={{Huh}}\n")
-					.Append("|energy={{Huh}}\n")
-					.Append("|electromagnetic={{Huh}}\n")
-					.Append("|radiation={{Huh}}\n")
-					.Append("|thermal={{Huh}}\n")
-					.Append("|airborne={{Huh}}\n")
-					.Append("|corrosive={{Huh}}\n")
-					.Append("}}\n");
+				BuildTemplate(sb, armor);
 			}
 
+			var firstType = GetItemType(item[0]);
 			var link = firstType switch
 			{
 				"Apparel" => "piece of [[Starfield:Apparel|apparel]]",
 				"Helmet" => "[[Starfield:Helmet|helmet]]",
 				"Pack" => "[[Starfield:Pack|pack]]",
+				"Skin" => "[[Starfield:Skin|skin]]",
 				"Spacesuit" => "[[Starfield:Spacesuit|spacesuit]]",
 				_ => null,
 			};
 
-			return $"{{{{Trail|Items|{firstType}}}}}" + sb.ToString()[12..] + $"The [[Starfield:{title.PageName}|]] is a {link}.\n\n{{{{Stub|{firstType}}}}}";
+			return $"{{{{Trail|Items|{firstType}}}}}{sb}The [[Starfield:{title.PageName}|]] is a {link}.\n\n{{{{Stub|{firstType}}}}}";
+		}
+
+		private static void UpdateArmor(ContextualParser parser, List<CsvRow> list)
+		{
+			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Item Summary"));
+			foreach (var row in list)
+			{
+				if (FindMatchingTemplate(parser, row) is null)
+				{
+					var sb = new StringBuilder();
+					BuildTemplate(sb, row);
+					var newNodes = parser.Parse(sb.ToString());
+					parser.InsertRange(insertPos, newNodes);
+					insertPos += newNodes.Count;
+				}
+			}
 		}
 		#endregion
 	}
