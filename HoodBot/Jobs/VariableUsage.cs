@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -30,6 +29,30 @@
 			this.GetCalls(results);
 			this.ExportResults();
 			this.Progress++;
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static List<string> BuildHeader(bool isLoadCall, int maxCount)
+		{
+			List<string> header = new(maxCount + 3)
+			{
+				"Template Name"
+			};
+
+			if (isLoadCall)
+			{
+				header.Add("Load Page");
+			}
+
+			header.Add("Set");
+
+			for (var i = 1; i <= maxCount; i++)
+			{
+				header.Add("Variable " + i.ToStringInvariant());
+			}
+
+			return header;
 		}
 		#endregion
 
@@ -75,9 +98,6 @@
 
 		private void WriteFile(bool isLoadCall)
 		{
-			var csvFile = new CsvFile();
-			//// csvFile.EmptyFieldText = " ";
-
 			var list = isLoadCall ? this.loadCalls : this.saveCalls;
 			var maxCount = 0;
 			foreach (var call in list)
@@ -88,24 +108,11 @@
 				}
 			}
 
-			List<string> header = new(maxCount + 3)
+			var type = isLoadCall ? "Loaded" : "Saved";
+			var csvFile = new CsvFile(LocalConfig.BotDataSubPath(type + " Variables.txt"))
 			{
-				"Template Name"
+				Header = BuildHeader(isLoadCall, maxCount)
 			};
-
-			if (isLoadCall)
-			{
-				header.Add("Load Page");
-			}
-
-			header.Add("Set");
-
-			for (var i = 1; i <= maxCount; i++)
-			{
-				header.Add("Variable " + i.ToStringInvariant());
-			}
-
-			csvFile.Header = header;
 
 			foreach (var call in list)
 			{
@@ -124,9 +131,8 @@
 				csvFile.Add(cells);
 			}
 
-			var type = isLoadCall ? "Loaded" : "Saved";
-			Debug.WriteLine($"{type}: {csvFile.Count} rows");
-			csvFile.Save(LocalConfig.BotDataSubPath(type + " Variables.txt"));
+			this.StatusWriteLine($"{type}: {csvFile.Count} rows");
+			csvFile.Save();
 		}
 		#endregion
 

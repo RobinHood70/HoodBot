@@ -42,8 +42,12 @@
 		{
 			var retval = new Dictionary<Title, Book>();
 			var books = LoadBooks();
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "Books.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "Books.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var formId = row["FormID"][2..];
@@ -99,7 +103,7 @@
 		private static Dictionary<string, Book> LoadBooks()
 		{
 			var retval = new Dictionary<string, Book>(StringComparer.Ordinal);
-			var fileText = File.ReadAllText(Starfield.ModFolder + "Books.txt", Encoding.GetEncoding(1252));
+			var fileText = File.ReadAllText(Starfield.ModFolder + "Books.csv", Encoding.GetEncoding(1252));
 			var matches = BookMatcher.Matches(fileText) as IEnumerable<Match>;
 
 			// In-file replacements prior to bot run:
@@ -120,19 +124,19 @@
 					.Replace("</i>", "''", StringComparison.OrdinalIgnoreCase);
 				var text = orig
 					.Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", StringComparison.Ordinal)
-					.Replace("<font size='20'>", "ƒspan style='font-size:50%'„", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='30'>", "ƒspan style='font-size:75%'„", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='50'>", "ƒspan style='font-size:125%'„", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='70'>", "ƒspan style='font-size:175%'„", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='80'>", "ƒspan style='font-size:200%'„", StringComparison.OrdinalIgnoreCase)
-					.Replace("</font>", "ƒ/span„", StringComparison.OrdinalIgnoreCase)
+					.Replace("<font size='20'>", "<span style='font-size:50%'>", StringComparison.OrdinalIgnoreCase)
+					.Replace("<font size='30'>", "<span style='font-size:75%'>", StringComparison.OrdinalIgnoreCase)
+					.Replace("<font size='50'>", "<span style='font-size:125%'>", StringComparison.OrdinalIgnoreCase)
+					.Replace("<font size='70'>", "<span style='font-size:175%'>", StringComparison.OrdinalIgnoreCase)
+					.Replace("<font size='80'>", "<span style='font-size:200%'>", StringComparison.OrdinalIgnoreCase)
+					.Replace("</font>", "</span>", StringComparison.OrdinalIgnoreCase)
 					.Replace("<p align='center'>", "……Center†", StringComparison.OrdinalIgnoreCase)
 					.Replace("</p>", "‡‡", StringComparison.OrdinalIgnoreCase)
 					.Replace("<image name='BookImage_SlaytonLogo' caption='Slayton Aerospace'>", "[[File:Book-Slayton Logo|Slayton Aerospace]]", StringComparison.Ordinal);
-				var text2 = Regex.Replace(text, @"[A-Za-z0-9\.,!?\ ():;'\""%=_&*#\[\]\|\\\/\@\$~`{}\r\nâèƒ„…†‡+-]+", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
+				var text2 = Regex.Replace(text, @"[A-Za-z0-9\.,!?\ ():;'\""%=_&*#\[\]\|\\\/\@\$~`{}\r\nâè<>…†‡+-]+", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
 				text = text
-					.Replace('ƒ', '<')
-					.Replace('„', '>')
+					.Replace('<', '<')
+					.Replace('>', '>')
 					.Replace('…', '{')
 					.Replace('†', '|')
 					.Replace('‡', '}');

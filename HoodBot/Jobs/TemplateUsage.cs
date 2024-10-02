@@ -156,14 +156,11 @@
 
 		private void WriteFile(List<(Title Page, ITemplateNode Template)> results, string location)
 		{
-			CsvFile csvFile = new() { EmptyFieldText = " " };
-			List<string> output =
-			[
-				"Page",
-				"Template Name",
-				.. this.headerOrder,
-			];
-			csvFile.Header = output;
+			var csvFile = new CsvFile(location)
+			{
+				EmptyFieldText = " ",
+				Header = ["Page", "Template Name", .. this.headerOrder]
+			};
 
 			foreach (var template in results)
 			{
@@ -176,7 +173,7 @@
 				}
 			}
 
-			csvFile.Save(location);
+			csvFile.Save();
 		}
 		#endregion
 	}

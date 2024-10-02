@@ -17,7 +17,7 @@
 	internal sealed class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
 	{
 		#region Fields
-		private readonly MenuList menus = [];
+		private readonly Dictionary<string, Menu> menus;
 		#endregion
 
 		#region Constructors
@@ -28,6 +28,7 @@
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			this.NewPageText = this.GetNewPageText;
 			this.OnUpdate = this.UpdateTerminal;
+			this.menus = LoadMenus();
 		}
 		#endregion
 
@@ -42,8 +43,68 @@
 
 		protected override IDictionary<Title, Terminal> LoadItems()
 		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "Tmlm.csv", true);
+			var retval = new Dictionary<Title, Terminal>();
+			var csv = new CsvFile(Starfield.ModFolder + "Term2.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
+			foreach (var row in csv)
+			{
+				var disambig = row["Disambig"];
+				if (disambig.Length > 0)
+				{
+					disambig = " (" + disambig + ")";
+				}
+
+				var name = row["Full"];
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name + disambig);
+				var image = row["Model"].Split(TextArrays.Backslash)[^1];
+				var menuId = row["TMLM"];
+				var menu = this.menus.TryGetValue(menuId, out var tryMenu) ? tryMenu : new Menu(row["EditorID"], "MENU NOT FOUND", menuId, ImmutableDictionary<int, Entry>.Empty);
+				var terminal = new Terminal(name, row["EditorID"], image, menu);
+				if (menu.Entries.Count == 0)
+				{
+					Debug.WriteLine("MainMenu " + menuId + " not found!");
+				}
+
+				retval.Add(title, terminal);
+			}
+
+			return retval;
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static string GlobalReplace(string text)
+		{
+			if (text is null || text.Length == 0)
+			{
+				return string.Empty;
+			}
+
+			text = Regex.Replace(text, @"(?<!\\n)\\n(?!\\n)", "<br>", RegexOptions.None, Globals.DefaultRegexTimeout);
+			text = text
+				.Replace("\\n", "\n", StringComparison.Ordinal)
+				.Trim();
+			if (":;*=".Contains(text[0], StringComparison.Ordinal))
+			{
+				text = "<nowiki/>" + text;
+			}
+
+			return text;
+		}
+
+		private static Dictionary<string, Menu> LoadMenus()
+		{
+			var retval = new Dictionary<string, Menu>(StringComparer.Ordinal);
+			var csv = new CsvFile(Starfield.ModFolder + "Tmlm.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			Menu? menu = null;
 			var lastId = string.Empty;
 			var entries = new SortedDictionary<int, Entry>();
@@ -54,7 +115,7 @@
 				{
 					if (menu is not null)
 					{
-						this.menus.Add(menu);
+						retval.Add(menu.EditorId, menu);
 					}
 
 					lastId = edid;
@@ -73,59 +134,14 @@
 
 			if (menu is not null)
 			{
-				this.menus.Add(menu);
-			}
-
-			csv.Clear();
-
-			var retval = new Dictionary<Title, Terminal>();
-			csv.Load(Starfield.ModFolder + "Term2.csv", true);
-			foreach (var row in csv)
-			{
-				var disambig = row["Disambig"];
-				if (disambig.Length > 0)
-				{
-					disambig = " (" + disambig + ")";
-				}
-
-				var name = row["Full"];
-				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name + disambig);
-				var image = row["Model"].Split(TextArrays.Backslash)[^1];
-				var menuId = row["TMLM"];
-				menu = this.menus.TryGetValue(menuId, out var tryMenu) ? tryMenu : new Menu(row["EditorID"], "MENU NOT FOUND", menuId, ImmutableDictionary<int, Entry>.Empty);
-				var terminal = new Terminal(name, row["EditorID"], image, menu);
-				if (menu.Entries.Count == 0)
-				{
-					Debug.WriteLine("MainMenu " + menuId + " not found!");
-				}
-
-				retval.Add(title, terminal);
+				retval.Add(menu.EditorId, menu);
 			}
 
 			return retval;
-
-			static string GlobalReplace(string text)
-			{
-				if (text is null || text.Length == 0)
-				{
-					return string.Empty;
-				}
-
-				text = Regex.Replace(text, @"(?<!\\n)\\n(?!\\n)", "<br>", RegexOptions.None, Globals.DefaultRegexTimeout);
-				text = text
-					.Replace("\\n", "\n", StringComparison.Ordinal)
-					.Trim();
-				if (":;*=".Contains(text[0], StringComparison.Ordinal))
-				{
-					text = "<nowiki/>" + text;
-				}
-
-				return text;
-			}
 		}
 		#endregion
 
-		#region Private Static Methods
+		#region Private Methods
 		private string GetNewPageText(Title title, Terminal item)
 		{
 			var menuList = new MenuList()

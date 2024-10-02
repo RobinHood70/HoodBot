@@ -36,14 +36,15 @@
 		protected override void LoadPages()
 		{
 			var fileName = Starfield.ModFolder + "Affinities_1.9.51.csv";
-			var csv = new CsvFile()
+			var csv = new CsvFile(fileName)
 			{
+				// Field separator may be different in header from text. Just fix it manually.
 				Encoding = Encoding.GetEncoding(1252),
 				FieldDelimiter = '\0',
-				FieldSeparator = ';' // Field separator changes *after* header.
+				HasHeader = true
 			};
 
-			csv.Load(fileName, true);
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var mission = row["Mission"];

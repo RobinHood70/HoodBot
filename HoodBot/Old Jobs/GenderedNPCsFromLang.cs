@@ -18,12 +18,10 @@
 
 			var fileName = LocalConfig.BotDataSubPath("en.lang.csv");
 			var fileNameOut = LocalConfig.BotDataSubPath("GenderedNPCs.txt");
-			using var reader = File.OpenText(fileName);
-			CsvFile csvFile = new()
+			CsvFile csvFile = new(fileName)
 			{
 				DoubleUpDelimiters = true
 			};
-			csvFile.ReadText(reader, true);
 			SortedSet<string> npcs = new(System.StringComparer.Ordinal);
 			foreach (var row in csvFile)
 			{

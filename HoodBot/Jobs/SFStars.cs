@@ -30,13 +30,16 @@
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
 			var items = new Dictionary<Title, CsvRow>();
-			var fileName = Starfield.ModFolder + "stars.csv";
-			var starsFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			starsFile.Load(fileName, true);
-			foreach (var star in starsFile)
+			var csv = new CsvFile(Starfield.ModFolder + "stars.csv")
 			{
-				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + star["Name"]);
-				items.Add(title, star);
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
+			foreach (var row in csv)
+			{
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"]);
+				items.Add(title, row);
 			}
 
 			return items;

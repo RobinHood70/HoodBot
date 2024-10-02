@@ -46,9 +46,13 @@
 		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits.</remarks>
 		internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			var items = new Dictionary<Title, Planet>();
-			csv.Load(Starfield.ModFolder + "Planets_Infobox.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "Planets_Infobox.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var id = row["Name"];
@@ -166,10 +170,14 @@
 		/// </summary>
 		private static Dictionary<string, ICollection<string>> GetBiomes()
 		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
 			var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
-			csv.Load(Starfield.ModFolder + "biomesplanets.csv", false);
+			var csv = new CsvFile(Starfield.ModFolder + "biomesplanets.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252),
+				HasHeader = false
+			};
 
+			csv.Load();
 			string? planet = null;
 			var biomeList = new List<string>();
 			foreach (var row in csv)
@@ -222,8 +230,12 @@
 		private void ReadWip3(Dictionary<Title, Planet> items)
 		{
 			var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "sfcreatures_-_wip3.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "sfcreatures_-_wip3.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var planetName = row["Planet"];

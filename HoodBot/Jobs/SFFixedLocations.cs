@@ -142,8 +142,12 @@
 		#region Private Static Methods
 		private void GetRefUses()
 		{
-			var refUsesFile = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			refUsesFile.Load(Starfield.ModFolder + "RefUses.csv", true);
+			var refUsesFile = new CsvFile(Starfield.ModFolder + "RefUses.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			refUsesFile.Load();
 			foreach (var row in refUsesFile)
 			{
 				var reference = row["Reference"];

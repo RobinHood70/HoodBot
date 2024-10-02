@@ -36,15 +36,24 @@
 
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "stars.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "stars.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				this.stars.Add(row["FormID"], row["Name"]);
 			}
 
 			var items = new Dictionary<Title, CsvRow>();
-			csv.Load(Starfield.ModFolder + "galaxy.csv", true, 1);
+			csv = new CsvFile(Starfield.ModFolder + "galaxy.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var item in csv)
 			{
 				var name = "Starfield:" + item["Name"];

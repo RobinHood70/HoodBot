@@ -184,12 +184,12 @@
 		private static Dictionary<string, List<Stage>> LoadStages()
 		{
 			var retval = new Dictionary<string, List<Stage>>(StringComparer.Ordinal);
-			var csv = new CsvFile
+			var csv = new CsvFile(LocalConfig.BotDataSubPath(StagesFileName))
 			{
-				Encoding = Encoding.GetEncoding(1252),
-				AutoTrim = true
+				Encoding = Encoding.GetEncoding(1252)
 			};
-			csv.Load(LocalConfig.BotDataSubPath(StagesFileName), true);
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var edid = row["QuestEditorID"];
@@ -350,8 +350,12 @@
 			var stages = LoadStages();
 			var disambigs = this.LoadDisambigs();
 
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(LocalConfig.BotDataSubPath(QuestsFileName), true);
+			var csv = new CsvFile(LocalConfig.BotDataSubPath(QuestsFileName))
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var edid = row["EditorID"];

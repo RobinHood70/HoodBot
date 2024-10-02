@@ -35,14 +35,14 @@
 		protected override void LoadPages()
 		{
 			var fileName = Starfield.ModFolder + "Affinities_1.9.51.csv";
-			var csv = new CsvFile
+			var csv = new CsvFile(fileName)
 			{
 				Encoding = Encoding.GetEncoding(1252),
 				FieldDelimiter = '\0',
 				FieldSeparator = ';'
 			};
 
-			csv.Load(fileName, true);
+			csv.Load();
 			foreach (var row in csv)
 			{
 				this.GetNpcAffinity(row, "Andreja", this.andreja);

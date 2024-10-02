@@ -172,8 +172,12 @@
 
 		private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
 		{
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "sfcreatures_-_wip3.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "sfcreatures_-_wip3.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			Creature? creature = null;
 			foreach (var row in csv)
 			{

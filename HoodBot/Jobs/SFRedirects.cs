@@ -33,8 +33,12 @@
 		protected override IDictionary<Title, string> LoadItems()
 		{
 			var items = new SortedDictionary<Title, string>();
-			var csv = new CsvFile() { Encoding = Encoding.GetEncoding(1252) };
-			csv.Load(Starfield.ModFolder + "Effect_redirects.csv", true);
+			var csv = new CsvFile(Starfield.ModFolder + "Effect_redirects.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			csv.Load();
 			foreach (var row in csv)
 			{
 				var pageName = row["Page Name"]
