@@ -7,7 +7,6 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -18,8 +17,8 @@
 	{
 		#region Private Static Fields
 		private static readonly string DisambigFileName = Starfield.ModFolder + "Quests Disambigs.txt";
-		private static readonly string QuestsFileName = Starfield.ModFolder + "Quests3.csv";
-		private static readonly string StagesFileName = Starfield.ModFolder + "QuestStages3.csv";
+		private static readonly string QuestsFileName = Starfield.ModFolder + "Quests.csv";
+		private static readonly string StagesFileName = Starfield.ModFolder + "QuestStages.csv";
 		#endregion
 
 		#region Constructors
@@ -40,7 +39,8 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create/update mission";
 
-		protected override bool IsValid(ContextualParser parser, Mission item) => parser.FindSiteTemplate("Mission Header") is not null;
+		protected override bool IsValid(ContextualParser parser, Mission item) =>
+			FindTemplate(parser, item) is not null;
 
 		protected override IDictionary<Title, Mission> LoadItems()
 		{
@@ -164,13 +164,24 @@
 			parser.FromSections(sections);
 		}
 
+		private static SiteTemplateNode? FindTemplate(ContextualParser parser, Mission item)
+		{
+			var template = parser.FindSiteTemplate("Mission Header");
+			return string.Equals(
+				template?.GetValue("ID")?.Trim(),
+				item.EditorId,
+				StringComparison.Ordinal)
+					? template
+					: null;
+		}
+
 		private static string GetNewPageText(Title title, Mission item) => new StringBuilder()
 			.Append("{{Mission Header\n")
 			.Append("|type=\n")
 			.Append("|Giver=\n")
 			.Append("|Icon=\n")
 			.Append("|Reward={{Huh}}\n")
-			.Append("|ID=\n")
+			.Append($"|ID={item.EditorId}\n")
 			.Append("|Prev=\n")
 			.Append("|Next=\n")
 			.Append("|Loc=\n")
@@ -181,16 +192,28 @@
 			.Append("{{Stub|Mission}}")
 			.ToString();
 
+		private static Dictionary<string, string> LoadDisambigs()
+		{
+			var disambigLines = File.ReadAllLines(DisambigFileName);
+			var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
+			foreach (var disambigLine in disambigLines)
+			{
+				var split = disambigLine.Split(TextArrays.Tab);
+				disambigs.Add(split[0], split[1]);
+			}
+
+			return disambigs;
+		}
+
 		private static Dictionary<string, List<Stage>> LoadStages()
 		{
 			var retval = new Dictionary<string, List<Stage>>(StringComparer.Ordinal);
-			var csv = new CsvFile(LocalConfig.BotDataSubPath(StagesFileName))
+			var csv = new CsvFile(StagesFileName)
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
 
-			csv.Load();
-			foreach (var row in csv)
+			foreach (var row in csv.ReadRows())
 			{
 				var edid = row["QuestEditorID"];
 				var index = row["INDX1"].Trim(); // Actually an int, but there's no need to convert back and forth.
@@ -227,17 +250,17 @@
 
 		private static void UpdateMission(ContextualParser parser, Mission item)
 		{
-			var tpl = parser.FindSiteTemplate("Mission Header");
-			if (tpl is null)
+			var template = FindTemplate(parser, item);
+			if (template is null)
 			{
 				return;
 			}
 
-			tpl.Update("ID", item.EditorId);
+			template.Update("ID", item.EditorId);
 			var labelName = parser.Page.Title.LabelName();
 			if (!string.Equals(labelName, item.Name, StringComparison.Ordinal))
 			{
-				tpl.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+				template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
 			}
 
 			if (item.Summary.Length > 0)
@@ -253,48 +276,9 @@
 		#endregion
 
 		#region Private Methods
-		private Dictionary<string, string> LoadDisambigs()
-		{
-			var disambigLines = File.ReadAllLines(LocalConfig.BotDataSubPath(DisambigFileName));
-			var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
-			var disambigPages = new PageCollection(this.Site);
-			foreach (var disambig in disambigLines)
-			{
-				var split = disambig.Split(TextArrays.Tab);
-				var name = split[1];
-				disambigs.Add(split[0], name);
-				var pageName = "Starfield:" + name;
-				if (!disambigPages.TryGetValue(pageName, out var disambigPage))
-				{
-					disambigPage = this.Site.CreatePage(pageName);
-					disambigPage.Text = $"'''{name}''' may refer to:\n";
-					disambigPages.Add(disambigPage);
-				}
-
-				var linkText = SiteLink.FromText(this.Site, pageName).ToString();
-				disambigPage.Text += "* " + linkText + "\n";
-			}
-
-			var disambigCheck = new PageCollection(this.Site);
-			disambigCheck.GetTitles(disambigPages.ToFullPageNames());
-			foreach (var page in disambigPages)
-			{
-				var checkPage = disambigCheck[page.Title];
-				if (!string.Equals(checkPage.Revisions[0].User, "RobinHood70", StringComparison.Ordinal))
-				{
-					Debug.WriteLine(page.Title.FullPageName() + " modified.");
-				}
-
-				page.Text += "\n{{Disambig}}";
-				page.Save("Replace with disambiguation page", false);
-			}
-
-			return disambigs;
-		}
-
 		private Dictionary<string, Title> LoadExisting()
 		{
-			var exclusions = new TitleCollection(
+			/* var exclusions = new TitleCollection(
 				this.Site,
 				StarfieldNamespaces.Starfield,
 				"Deliver to Location",
@@ -308,36 +292,22 @@
 				"Supply Location",
 				"Survey Planet",
 				"Trader (mission)",
-				"Transport Passenger");
+				"Transport Passenger"); */
 
 			var existing = new Dictionary<string, Title>(StringComparer.Ordinal);
 			var backlinks = new PageCollection(this.Site);
 			backlinks.GetBacklinks("Template:Mission Header", BacklinksTypes.EmbeddedIn);
-			backlinks.Remove(exclusions);
+			// backlinks.Remove(exclusions);
 
 			foreach (var page in backlinks)
 			{
 				var parser = new ContextualParser(page);
-				var templates = new List<SiteTemplateNode>(parser.FindSiteTemplates("Mission Header"));
-				if (templates.Count > 1)
+				var template = parser.FindSiteTemplate("Mission Header");
+				if (template?.GetRaw("ID")?.Trim() is string edid &&
+					edid.Length > 0 &&
+					!existing.TryAdd(edid, page.Title))
 				{
-					Debug.WriteLine("Multiple templates on " + page.Title.FullPageName());
-				}
-
-				foreach (var template in templates)
-				{
-					var edidParam = template.Find(true, "ID");
-					if (edidParam is not null)
-					{
-						var edid = edidParam.Value.ToRaw().Trim();
-						if (edid.Length > 0)
-						{
-							if (!existing.TryAdd(edid, page.Title))
-							{
-								Debug.WriteLine($"Conflict for {edid} on both {existing[edid].FullPageName()} and {page.Title.FullPageName()}");
-							}
-						}
-					}
+					Debug.WriteLine($"Conflict for {edid} on both {existing[edid].FullPageName()} and {page.Title.FullPageName()}");
 				}
 			}
 
@@ -348,15 +318,13 @@
 		{
 			var retval = new Dictionary<Title, Mission>();
 			var stages = LoadStages();
-			var disambigs = this.LoadDisambigs();
-
-			var csv = new CsvFile(LocalConfig.BotDataSubPath(QuestsFileName))
+			var disambigs = LoadDisambigs();
+			var csv = new CsvFile(QuestsFileName)
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
 
-			csv.Load();
-			foreach (var row in csv)
+			foreach (var row in csv.ReadRows())
 			{
 				var edid = row["EditorID"];
 				var name = row["Full"];
