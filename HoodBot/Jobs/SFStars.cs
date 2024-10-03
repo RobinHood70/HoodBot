@@ -38,7 +38,7 @@
 			csv.Load();
 			foreach (var row in csv)
 			{
-				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"]);
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"] + " System");
 				items.Add(title, row);
 			}
 
