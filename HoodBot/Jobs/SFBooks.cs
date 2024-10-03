@@ -16,7 +16,24 @@
 	internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	{
 		#region Static Fields
-		private static readonly Regex BookMatcher = new(@"FormID: (?<formid>0x[0-9A-F]{8}) \(\d+\)\r\nEditorID: (?<edid>.*?)\r\n   Title: (?<title>.*?)\r\n(?<text>.*?)\r\n======================\r\n", RegexOptions.Singleline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		// Used Editor IDs here instead of Form IDs since EDIDs are more likely to be unique across all mods.
+		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
+		{
+			["LC180Slate_CF01A"] = "Trust Nobody (A)",
+			["LC180Slate_CF01B"] = "Trust Nobody (B)",
+			["MS04_SpacerSlate01COPY0000"] = "Lair Slate: The Gold Mine (Shatter Space)",
+			["SFBGS001LC21_DataSlate_Warning"] = "Stolen Sandwich (Shatter Space)",
+			["SFBGS001_Crater_Note06"] = "Happy Birthday (Shatter Space)",
+			["SFBGS001_Dazra_AlterationClinic01"] = "Repair Notes (Shatter Space)",
+			["SFBGS001_Dazra_TempleSlate04"] = "Thank you (template)",
+			["SFBGS001_LC15Slate_Kalyn"] = "Thank you (Kalyn)",
+			["SFBGS001_LC27_Checklist"] = "Checklist (Shatter Space)",
+			["SFBGS001_LC48Slate_Lootlist"] = "Entrance and loot register",
+			["SFBGS001_LC48Slate_Lootlist_quest"] = "Entrance and loot register (quest version)",
+			["SFBGS001_MS04_Slate_Complete"] = "Sensor Data Collection Slate (complete)",
+			["SFBGS001_VkaiZ03_Orphanage_AudioSlate02"] = "Orphanage: Chores (audio)",
+			["SFBGS001_VkaiZ03_Orphanage_DataSlate02"] = "Orphanage: Chores (data)",
+		};
 		#endregion
 
 		#region Constructors
@@ -41,7 +58,6 @@
 		protected override IDictionary<Title, Book> LoadItems()
 		{
 			var retval = new Dictionary<Title, Book>();
-			var books = LoadBooks();
 			var csv = new CsvFile(Starfield.ModFolder + "Books.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
@@ -51,15 +67,20 @@
 			foreach (var row in csv)
 			{
 				var formId = row["FormID"][2..];
-				var book = books[formId];
-				book.Value = int.Parse(row["Value"], CultureInfo.CurrentCulture);
-				book.Weight = double.Parse(row["Weight"], CultureInfo.CurrentCulture);
-				book.Model = row["Model"];
-				var title = book.Title
+				var editorId = row["EditorID"];
+				var value = int.Parse(row["Value"], CultureInfo.CurrentCulture);
+				var weight = double.Parse(row["Weight"], CultureInfo.CurrentCulture);
+				var bookTitle = row["Title"]
 					.Replace("#", string.Empty, StringComparison.Ordinal)
 					.Replace("<Alias=", string.Empty, StringComparison.Ordinal)
 					.Replace(">", string.Empty, StringComparison.Ordinal);
-				retval.Add(TitleFactory.FromUnvalidated(this.Site, "Starfield:" + title), book);
+				var model = row["Model"];
+				var text = GetBookText(formId);
+				var book = new Book(formId, editorId, bookTitle, text, value, weight, model);
+
+				var titleText = TitleOverrides.GetValueOrDefault(editorId, bookTitle);
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + titleText);
+				retval.Add(title, book);
 			}
 
 			return retval;
@@ -100,71 +121,53 @@
 		#endregion
 
 		#region Private Methods
-		private static Dictionary<string, Book> LoadBooks()
+		private static string GetBookText(string formId)
 		{
-			var retval = new Dictionary<string, Book>(StringComparer.Ordinal);
-			var fileText = File.ReadAllText(Starfield.ModFolder + "Books.csv", Encoding.GetEncoding(1252));
-			var matches = BookMatcher.Matches(fileText) as IEnumerable<Match>;
-
-			// In-file replacements prior to bot run:
-			// * Some </font></b> where appropriate.
-			// * Some </b></u> where appropriate.
-			// * Trailing whitespace
-			foreach (var item in matches)
+			// This is a horrible way to replace things, but it's simple and speed is not a factor for the relatively small number of books.
+			var orig = File.ReadAllText($@"{Starfield.ModFolder}Books\0x{formId}.txt", Encoding.GetEncoding(1252));
+			if (orig.Length == 0)
 			{
-				var formId = item.Groups["formid"].Value[2..];
-
-				// This is a horrible way to replace things, but it's simple and speed is not a factor for the relatively small number of books.
-				var orig = item.Groups["text"].Value
-					.Trim()
-					.Replace("\r", string.Empty, StringComparison.Ordinal)
-					.Replace("<b>", "'''", StringComparison.OrdinalIgnoreCase)
-					.Replace("</b>", "'''", StringComparison.OrdinalIgnoreCase)
-					.Replace("<i>", "''", StringComparison.OrdinalIgnoreCase)
-					.Replace("</i>", "''", StringComparison.OrdinalIgnoreCase);
-				var text = orig
-					.Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", StringComparison.Ordinal)
-					.Replace("<font size='20'>", "<span style='font-size:50%'>", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='30'>", "<span style='font-size:75%'>", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='50'>", "<span style='font-size:125%'>", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='70'>", "<span style='font-size:175%'>", StringComparison.OrdinalIgnoreCase)
-					.Replace("<font size='80'>", "<span style='font-size:200%'>", StringComparison.OrdinalIgnoreCase)
-					.Replace("</font>", "</span>", StringComparison.OrdinalIgnoreCase)
-					.Replace("<p align='center'>", "……Center†", StringComparison.OrdinalIgnoreCase)
-					.Replace("</p>", "‡‡", StringComparison.OrdinalIgnoreCase)
-					.Replace("<image name='BookImage_SlaytonLogo' caption='Slayton Aerospace'>", "[[File:Book-Slayton Logo|Slayton Aerospace]]", StringComparison.Ordinal);
-				var text2 = Regex.Replace(text, @"[A-Za-z0-9\.,!?\ ():;'\""%=_&*#\[\]\|\\\/\@\$~`{}\r\nâè<>…†‡+-]+", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
-				text = text
-					.Replace('<', '<')
-					.Replace('>', '>')
-					.Replace('…', '{')
-					.Replace('†', '|')
-					.Replace('‡', '}');
-				if (text2.Length > 0)
-				{
-					Debug.WriteLine("=========================");
-					Debug.WriteLine(text2);
-					Debug.WriteLine(text);
-					Debug.WriteLine(string.Empty);
-				}
-
-				if (!string.Equals(text, orig, StringComparison.Ordinal))
-				{
-					text += "\n[[Category:Needs Checking-Formatting]]";
-				}
-
-				var book = new Book(
-					formId,
-					item.Groups["edid"].Value,
-					item.Groups["title"].Value,
-					text,
-					0,
-					0,
-					string.Empty);
-				retval.Add(formId, book);
+				return string.Empty;
 			}
 
-			return retval;
+			if (orig[0] == '\t')
+			{
+				orig = ':' + orig[1..];
+			}
+
+			orig = orig
+				.Replace("\r", string.Empty, StringComparison.Ordinal)
+				.Replace("<b>", "'''", StringComparison.OrdinalIgnoreCase)
+				.Replace("</b>", "'''", StringComparison.OrdinalIgnoreCase)
+				.Replace("<i>", "''", StringComparison.OrdinalIgnoreCase)
+				.Replace("</i>", "''", StringComparison.OrdinalIgnoreCase);
+			var text = orig
+				.Replace("\n\t", "\n:", StringComparison.Ordinal)
+				.Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", StringComparison.Ordinal)
+				.Replace("<font size='20'>", "<span style='font-size:50%'>", StringComparison.OrdinalIgnoreCase)
+				.Replace("<font size='30'>", "<span style='font-size:75%'>", StringComparison.OrdinalIgnoreCase)
+				.Replace("<font size='50'>", "<span style='font-size:125%'>", StringComparison.OrdinalIgnoreCase)
+				.Replace("<font size='70'>", "<span style='font-size:175%'>", StringComparison.OrdinalIgnoreCase)
+				.Replace("<font size='80'>", "<span style='font-size:200%'>", StringComparison.OrdinalIgnoreCase)
+				.Replace("</font>", "</span>", StringComparison.OrdinalIgnoreCase)
+				.Replace("<p align='center'>", "……Center†", StringComparison.OrdinalIgnoreCase)
+				.Replace("</p>", "‡‡", StringComparison.OrdinalIgnoreCase)
+				.Replace("<image name='BookImage_SlaytonLogo' caption='Slayton Aerospace'>", "[[File:Book-Slayton Logo|Slayton Aerospace]]", StringComparison.Ordinal);
+			var textCheck = Regex.Replace(text, @"[A-Za-z0-9\.·,!?\ ():;'\""%=_&*#\[\]\|\\\/\@\$~`{}\n^é+-]+", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
+			if (textCheck.Length > 0)
+			{
+				Debug.WriteLine("=========================");
+				Debug.WriteLine(textCheck);
+				Debug.WriteLine(orig);
+				Debug.WriteLine(string.Empty);
+			}
+
+			if (!string.Equals(text, orig, StringComparison.Ordinal))
+			{
+				text += "\n[[Category:Needs Checking-Formatting]]";
+			}
+
+			return text.Trim();
 		}
 		#endregion
 
