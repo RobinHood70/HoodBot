@@ -303,7 +303,7 @@
 			{
 				var parser = new ContextualParser(page);
 				var template = parser.FindSiteTemplate("Mission Header");
-				if (template?.GetRaw("ID")?.Trim() is string edid &&
+				if (template?.GetRaw("ID") is string edid &&
 					edid.Length > 0 &&
 					!existing.TryAdd(edid, page.Title))
 				{
