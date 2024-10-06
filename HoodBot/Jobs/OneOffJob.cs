@@ -10,9 +10,9 @@
 		protected override void Main()
 		{
 			var titles = new TitleCollection(this.Site);
-			titles.GetCategoryMembers("Online-Books", true);
+			titles.GetCategoryMembers("Online-Furnishings", true);
 			titles.Sort();
-			File.WriteAllText("D:\\Online Books.txt", string.Join("\r\n", titles));
+			File.WriteAllText("D:\\Online Furnishings.txt", string.Join("\r\n", titles));
 		}
 		#endregion
 	}
