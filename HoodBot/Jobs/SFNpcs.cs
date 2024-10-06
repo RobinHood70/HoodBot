@@ -35,26 +35,37 @@
 
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
+			var fauna = GetFauna();
 			var races = GetRaces();
+			var items = GetNPCs(this.Site, races, fauna);
 
+			return items;
+		}
+
+		private static Dictionary<Title, Npcs> GetNPCs(Site site, Dictionary<string, string> races, HashSet<string> fauna)
+		{
 			var items = new Dictionary<Title, Npcs>();
 			var csv = new CsvFile(Starfield.ModFolder + "Npcs.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
 
-			csv.Load();
-			foreach (var row in csv)
+			foreach (var row in csv.ReadRows())
 			{
 				var name = row["Name"];
 				if (name.Length > 0)
 				{
+					var editorId = row["EditorID"];
+					if (fauna.Contains(editorId))
+					{
+						continue;
+					}
+
 					var acbs = Convert.ToInt32(row["Acbs1"], 16);
 					var gender = (acbs & 1) != 0;
 					var dead = (acbs & 0x200000) != 0;
 					var formId = row["FormID"]
 						.Replace("0x", string.Empty, StringComparison.Ordinal);
-					var editorId = row["EditorID"];
 					var raceId = row["Race"];
 					if (!races.TryGetValue(raceId, out var race))
 					{
@@ -74,7 +85,7 @@
 						dead,
 						factions,
 						string.Empty);
-					var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
+					var title = TitleFactory.FromUnvalidated(site, "Starfield:" + name);
 					var list = items.TryGetValue(title, out var npcs) ? npcs : [];
 					list.Add(npc);
 					items[title] = list;
@@ -116,6 +127,32 @@
 				.Append("|imgdesc=\n")
 				.Append("}}\n\n")
 				.Append("{{NewLine}}\n");
+		}
+
+		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, Npc search)
+		{
+			var templates = parser.FindSiteTemplates("NPC Summary");
+			foreach (var template in templates)
+			{
+				if (string.Equals(template.GetValue("eid")?.Trim(), search.EditorID, StringComparison.OrdinalIgnoreCase))
+				{
+					return template;
+				}
+			}
+
+			return null;
+		}
+
+		private static HashSet<string> GetFauna()
+		{
+			var fauna = new HashSet<string>(StringComparer.Ordinal);
+			var csv = new CsvFile(Starfield.ModFolder + "Fauna.csv");
+			foreach (var row in csv.ReadRows())
+			{
+				fauna.Add(row["EditorID"]);
+			}
+
+			return fauna;
 		}
 
 		private static string GetNewPageText(Title title, Npcs item)
@@ -189,20 +226,6 @@
 					insertPos += newNodes.Count;
 				}
 			}
-		}
-
-		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, Npc search)
-		{
-			var templates = parser.FindSiteTemplates("NPC Summary");
-			foreach (var template in templates)
-			{
-				if (string.Equals(template.GetValue("eid")?.Trim(), search.EditorID, StringComparison.OrdinalIgnoreCase))
-				{
-					return template;
-				}
-			}
-
-			return null;
 		}
 		#endregion
 
