@@ -34,6 +34,7 @@
 
 		protected override IDictionary<Title, Creature> LoadItems()
 		{
+			this.StatusWriteLine("NEEDS UPDATED TO USE Npcs.csv (or have more info in fauna.csv)")
 			var retval = new Dictionary<Title, Creature>();
 			var titleMap = this.GetTitleMap();
 			this.ReadFile(retval, titleMap);
@@ -162,7 +163,7 @@
 				var template = parser.FindSiteTemplate("Creature Summary");
 				if (template is not null)
 				{
-					var name = template.Find("titlename")?.Value.ToRaw() ?? page.Title.LabelName();
+					var name = template.GetRaw("titlename") ?? page.Title.LabelName();
 					titleMap.Add(name, page.Title);
 				}
 			}
@@ -172,17 +173,16 @@
 
 		private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
 		{
-			var csv = new CsvFile(Starfield.ModFolder + "sfcreatures_-_wip3.csv")
+			var csv = new CsvFile(Starfield.ModFolder + "Fauna.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
 
-			csv.Load();
 			Creature? creature = null;
-			foreach (var row in csv)
+			foreach (var row in csv.ReadRows())
 			{
-				var name = row["Name"];
-				if (!string.Equals(creature?.Variants[0]["Name"], name, StringComparison.Ordinal))
+				var name = row["Full"];
+				if (!string.Equals(creature?.Variants[0]["Full"], name, StringComparison.Ordinal))
 				{
 					creature = new Creature([]);
 					if (!titleMap.TryGetValue(name, out var title))
@@ -204,7 +204,6 @@
 			{
 				cs.Remove("resp");
 				cs.Remove("typenamesp");
-
 				cs.RenameParameter("level", "difficulty");
 				cs.RenameParameter("levels", "difficulty");
 
