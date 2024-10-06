@@ -297,7 +297,7 @@
 			var existing = new Dictionary<string, Title>(StringComparer.Ordinal);
 			var backlinks = new PageCollection(this.Site);
 			backlinks.GetBacklinks("Template:Mission Header", BacklinksTypes.EmbeddedIn);
-			// backlinks.Remove(exclusions);
+			//// backlinks.Remove(exclusions);
 
 			foreach (var page in backlinks)
 			{
