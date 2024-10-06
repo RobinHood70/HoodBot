@@ -34,7 +34,7 @@
 
 		protected override IDictionary<Title, Creature> LoadItems()
 		{
-			this.StatusWriteLine("NEEDS UPDATED TO USE Npcs.csv (or have more info in fauna.csv)")
+			this.StatusWriteLine("NEEDS UPDATED TO USE Npcs.csv (or have more info in fauna.csv)");
 			var retval = new Dictionary<Title, Creature>();
 			var titleMap = this.GetTitleMap();
 			this.ReadFile(retval, titleMap);
