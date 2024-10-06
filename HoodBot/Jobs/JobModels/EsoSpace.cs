@@ -173,7 +173,7 @@
 			return true;
 		}
 
-		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
+		public static string TimeToText(int time) => time == -1 ? string.Empty : ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
 
 		public static string? TrimBehavior(string? behavior) => behavior?
 			.Trim()

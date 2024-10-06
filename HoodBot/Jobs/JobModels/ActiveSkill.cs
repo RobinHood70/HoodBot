@@ -15,7 +15,9 @@
 		#region Fields
 		private readonly int learnedLevel = (int)row["learnedLevel"];
 		private readonly List<Morph> morphs = new(3);
-		private string skillType = EsoLog.ConvertEncoding((string)row["type"]);
+		private readonly string skillType = ((string)row["icon"]).Contains("_artifact_", StringComparison.OrdinalIgnoreCase)
+			? "Artifact"
+			: EsoLog.ConvertEncoding((string)row["type"]);
 		#endregion
 
 		#region Public Override Methods
@@ -30,11 +32,6 @@
 
 			var morph = this.morphs[^1];
 			var rank = new ActiveRank(row);
-			if (rank.Costs.Count == 1 && rank.Costs[0].Value == -1)
-			{
-				this.skillType = "Artifact";
-			}
-
 			morph.Ranks.Add(rank);
 		}
 
@@ -97,12 +94,8 @@
 			var baseMorph = this.morphs[0];
 			var baseRank = baseMorph.Ranks[^1];
 			UpdateParameter(factory, template, "id", baseRank.Id.ToStringInvariant());
-			var (valueText, mechanicText) = baseRank.GetCostSplit();
-			var baseSkillCost = mechanicText.Length == 0
-				? valueText
-				: valueText + ' ' + mechanicText;
+			var baseSkillCost = string.Join(", ", baseRank.Costs);
 			this.UpdateMorphs(factory, template, baseMorph, baseSkillCost);
-
 			UpdateParameter(factory, template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			UpdateParameter(factory, template, "linerank", this.learnedLevel.ToStringInvariant());
 			UpdateParameter(factory, template, "cost", baseSkillCost);

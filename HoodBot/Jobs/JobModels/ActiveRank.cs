@@ -23,17 +23,21 @@
 			var minRange = FormatRange((int)row["minRange"]);
 			this.Range = string.Equals(minRange, "0", StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
 			string[] costValues;
+			string[] costTimeValues;
 			string[] mechanicValues;
 			var costField = row["cost"];
+			var costTimeField = row["costTime"];
 			var mechanicField = row["mechanic"];
 			if (costField is string costText)
 			{
 				costValues = costText.Split(TextArrays.Comma);
+				costTimeValues = ((string)costTimeField).Split(TextArrays.Comma);
 				mechanicValues = EsoLog.ConvertEncoding((string)row["mechanic"]).Split(TextArrays.Comma);
 			}
 			else
 			{
 				costValues = [((int)costField).ToStringInvariant()];
+				costTimeValues = [((int)costTimeField).ToStringInvariant()];
 				mechanicValues = [((int)mechanicField).ToStringInvariant()];
 			}
 
@@ -44,11 +48,20 @@
 
 			for (var i = 0; i < costValues.Length; i++)
 			{
-				var costValue = costValues[i].Length == 0
-					? -1
-					: int.Parse(costValues[i], CultureInfo.InvariantCulture);
+				var costValue = costValues[i];
+				costValue = costValue.Length > 0
+					? costValue.Split(TextArrays.Period)[0].TrimStart('0')
+					: null;
+				var costTimeValue = costTimeValues.Length > i
+					? costTimeValues[i]
+					: null;
+				costTimeValue = costTimeValue?.Length > 0
+					? costTimeValue.Split(TextArrays.Period)[0].TrimStart('0')
+					: null;
 				var mechanic = int.Parse(mechanicValues[i], CultureInfo.InvariantCulture);
-				this.Costs.Add(new Cost(costValue, mechanic));
+				var mechanicText = EsoLog.MechanicNames[mechanic];
+
+				this.Costs.Add(new Cost(costValue, costTimeValue, mechanicText));
 			}
 		}
 		#endregion
@@ -66,24 +79,15 @@
 		#endregion
 
 		#region Public Methods
-		public (string ValueText, string MechanicText) GetCostSplit()
+		public Cost GetCostSplit()
 		{
-			string valueText;
 			if (this.Costs.Count == 1)
 			{
-				var value = this.Costs[0].Value;
-				if (value <= 0)
-				{
-					return ("Free", string.Empty);
-				}
-
-				valueText = value.ToStringInvariant();
-			}
-			else
-			{
-				valueText = string.Join(", ", this.Costs.Select(c => c.Value.ToStringInvariant()));
+				return this.Costs[0];
 			}
 
+			var valueText = string.Join(", ", this.Costs.Select(c => c.Value));
+			var valuePerTimeText = string.Join(", ", this.Costs.Select(c => c.ValuePerTime));
 			var mechanicText = this.Costs.Count switch
 			{
 				1 => this.Costs[0].MechanicText,
@@ -97,7 +101,7 @@
 				_ => throw new InvalidOperationException($"Costs has {this.Costs.Count} values which is not currently handled")
 			};
 
-			return (valueText, mechanicText);
+			return new Cost(valueText, valuePerTimeText, mechanicText);
 		}
 		#endregion
 	}

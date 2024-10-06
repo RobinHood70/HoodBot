@@ -178,6 +178,7 @@
 			ArgumentNullException.ThrowIfNull(value);
 			return value switch
 			{
+				"" => string.Empty,
 				"0" => "Instant",
 				"1" => "1 second",
 				_ => $"{value} seconds"

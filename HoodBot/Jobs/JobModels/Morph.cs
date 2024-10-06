@@ -75,18 +75,20 @@
 			//// Actual cost is from ComputeEsoSkillCost() in ESO Log. The formula as of this writing is: maxCost * level / 72 + cost.Value / 12, which reduces to cost.Value * (level + 6) / 72). When level is set to a constant of 66 (the maximum level, as used on the wiki), this collapses to just cost.Value.
 			var mechanicTexts = new List<string>(this.Ranks.Count);
 			var valueTexts = new List<string>(this.Ranks.Count);
+			var valuePerTimeTexts = new List<string>(this.Ranks.Count);
 			foreach (var rank in this.Ranks)
 			{
-				var (valueText, mechanicText) = rank.GetCostSplit();
-				valueTexts.Add(valueText);
-				mechanicTexts.Add(mechanicText);
+				var cost = rank.GetCostSplit();
+				valueTexts.Add(cost.Value ?? string.Empty);
+				valuePerTimeTexts.Add(cost.ValuePerTime ?? string.Empty);
+				mechanicTexts.Add(cost.MechanicText);
 			}
 
 			var values = NowrapSameString(valueTexts);
+			var valuesPerTime = NowrapSameString(valuePerTimeTexts);
 			var mechanics = NowrapSameString(mechanicTexts);
-			return mechanics.Length == 0
-				? values
-				: values + ' ' + mechanics;
+
+			return new Cost(values, valuesPerTime, mechanics).ToString();
 		}
 		#endregion
 

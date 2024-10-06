@@ -19,6 +19,7 @@
 			"st.learnedLevel,\n" +
 			"st.baseName,\n" +
 			"st.type,\n" +
+			"st.icon,\n" +
 			"ms.id,\n" +
 			"ms.name,\n" +
 			"ms.description,\n" +
@@ -27,6 +28,7 @@
 			"ms.effectLines,\n" +
 			"ms.duration,\n" +
 			"ms.cost,\n" +
+			"ms.costTime,\n" +
 			"ms.maxRange,\n" +
 			"ms.minRange,\n" +
 			"ms.radius,\n" +
