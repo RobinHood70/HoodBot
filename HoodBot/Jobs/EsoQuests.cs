@@ -122,6 +122,7 @@
 			{
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Quests");
+				pageResults.SaveAsBot = false;
 			}
 		}
 		#endregion

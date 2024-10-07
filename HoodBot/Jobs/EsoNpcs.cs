@@ -34,6 +34,7 @@
 			{
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO NPCs");
+				pageResults.SaveAsBot = false;
 			}
 
 			// TODO: Rewrite Mod Header handling to be more intelligent.

@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
@@ -20,6 +21,8 @@
 		#endregion
 
 		#region Public Properties
+		public bool SaveAsBot { get; set; } = true;
+
 		public Title Title { get; set; }
 		#endregion
 
@@ -33,7 +36,7 @@
 				text.Length > 0)
 			{
 				var page = Page.FromTitle(this.Title, text);
-				page.Save(this.Description, false);
+				page.Save(this.Description, false, Tristate.Unknown, true, this.SaveAsBot);
 			}
 		}
 		#endregion

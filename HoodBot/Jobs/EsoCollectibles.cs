@@ -38,6 +38,7 @@
 			{
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Collectibles");
+				pageResults.SaveAsBot = false;
 			}
 
 			// TODO: Rewrite Mod Header handling to be more intelligent.

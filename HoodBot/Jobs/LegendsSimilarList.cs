@@ -35,7 +35,8 @@
 			{
 				this.pageNumber++;
 				var title = pageResults.Title;
-				pageResults.Title = TitleFactory.FromValidated(title.Namespace, $"User:HoodBot/Legends Images {this.pageNumber}");
+				pageResults.Title = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.User], $"HoodBot/Legends Images {this.pageNumber}");
+				pageResults.SaveAsBot = false;
 				this.WriteLine("{| class=\"wikitable compress\"");
 			}
 

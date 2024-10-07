@@ -48,10 +48,11 @@
 			: base(jobManager)
 		{
 			jobManager.ShowDiffs = !hideDiffs;
-			if (this.Results is PageResultHandler results)
+			if (this.Results is PageResultHandler pageResults)
 			{
-				var title = results.Title;
-				results.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Sets");
+				var title = pageResults.Title;
+				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Sets");
+				pageResults.SaveAsBot = false;
 			}
 
 			// TODO: Rewrite Mod Header handling to be more intelligent.

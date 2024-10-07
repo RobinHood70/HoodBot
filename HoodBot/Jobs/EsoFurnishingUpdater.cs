@@ -55,6 +55,7 @@
 			{
 				var title = pageResults.Title;
 				pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Furnishings");
+				pageResults.SaveAsBot = false;
 			}
 		}
 		#endregion

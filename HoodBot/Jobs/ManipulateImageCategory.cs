@@ -12,9 +12,10 @@
 		public ManipulateImageCategory(JobManager jobManager)
 			: base(jobManager, JobType.ReadOnly)
 		{
-			if (this.Results is PageResultHandler results)
+			if (this.Results is PageResultHandler pageResults)
 			{
-				results.Title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
+				pageResults.Title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
+				pageResults.SaveAsBot = false;
 			}
 		}
 
