@@ -17,42 +17,47 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override int Compare(string? x, string? y)
+		public override int Compare(string? x, string? y) => x is null
+			? y is null
+				? 0
+				: -1
+			: y is null
+				? 1
+				: this.InternalCompare(x, y);
+
+		/// <inheritdoc/>
+		public override bool Equals(string? x, string? y) => x is null
+			? y is null
+			: y is not null && x.Length == y.Length && this.InternalCompare(x, y) == 0;
+
+		/// <inheritdoc/>
+		public override int GetHashCode(string obj) => Ordinal.GetHashCode(obj);
+		#endregion
+
+		#region Private Methods
+		private int InternalCompare(string x, string y)
 		{
-			if (x is null)
-			{
-				return (y is null) ? 0 : -1;
-			}
-
-			if (y is null)
-			{
-				return 1;
-			}
-
 			var compareInfo = this.culture.CompareInfo;
 			if (this.caseSensitive)
 			{
 				return compareInfo.Compare(x, y, CompareOptions.None);
 			}
 
-			var xFirst = x.Length > 0 ? x[..1] : string.Empty;
-			var yFirst = y.Length > 0 ? y[..1] : string.Empty;
-			var firstCharCompare = compareInfo.Compare(xFirst, yFirst, CompareOptions.IgnoreCase);
-			if (firstCharCompare != 0)
+			if (x.Length == 0)
 			{
-				return firstCharCompare;
+				return y.Length == 0 ? 0 : -1;
 			}
 
-			x = x.Length > 1 ? x[1..] : string.Empty;
-			y = y.Length > 1 ? y[1..] : string.Empty;
-			return compareInfo.Compare(x, y, CompareOptions.None);
+			if (y.Length == 0)
+			{
+				return 1;
+			}
+
+			var firstCharCompare = compareInfo.Compare(x, 0, 1, y, 0, 1, CompareOptions.IgnoreCase);
+			return firstCharCompare == 0
+				? compareInfo.Compare(x, 1, y, 1, CompareOptions.None)
+				: firstCharCompare;
 		}
-
-		/// <inheritdoc/>
-		public override bool Equals(string? x, string? y) => this.Compare(x, y) == 0;
-
-		/// <inheritdoc/>
-		public override int GetHashCode(string obj) => Ordinal.GetHashCode(obj);
 		#endregion
 	}
 }
