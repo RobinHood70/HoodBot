@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using System.Diagnostics;
+	using System.Linq;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -55,22 +55,29 @@
 			? retval
 			: null;
 
-		public UespNamespace FromTitle(Title title)
+		public UespNamespace? FromTitle(Title title)
 		{
 			// TODO: Optimize this more like it is in NSInfo itself.
 			var ns = title.Namespace.SubjectSpace;
-			var longest = 0;
-			UespNamespace? retval = null;
-			foreach (var uespNs in this)
+			var comparer = title.Site.GetPageNameComparer(ns.CaseSensitive);
+			var subSpaces = this.Items
+				.Where(ns => ns.IsPseudoNamespace && ns.BaseNamespace == title.Namespace)
+				.OrderByDescending(ns => ns.ModName.Length);
+			foreach (var uespNs in subSpaces)
 			{
-				if (uespNs.BaseNamespace == ns && uespNs.Base.Length > longest)
+				var pageName = title.PageName;
+				if (pageName.Length > uespNs.ModName.Length && pageName[uespNs.ModName.Length] == '/')
 				{
-					retval = uespNs;
+					pageName = pageName[0..(uespNs.ModName.Length - 1)];
+				}
+
+				if (comparer.Equals(uespNs.ModName, pageName))
+				{
+					return uespNs;
 				}
 			}
 
-			Debug.Assert(retval is not null, "Retval should never be null here.");
-			return retval;
+			return this[title.Namespace.CanonicalName];
 		}
 
 		public UespNamespace? GetAnyBase(string? nsBase) =>

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
@@ -10,7 +11,6 @@
 		#region Fields
 		private static readonly string[] FieldSeparator = ["||", "\n|"];
 		private static readonly HashSet<string> PhpTrue = new(StringComparer.OrdinalIgnoreCase) { "1", "yes", "true", "on" };
-		private readonly Site site;
 		#endregion
 
 		#region Constructors
@@ -18,7 +18,6 @@
 		{
 			ArgumentNullException.ThrowIfNull(site);
 			ArgumentException.ThrowIfNullOrEmpty(line);
-			this.site = site;
 			var nsData = line.Split(FieldSeparator, StringSplitOptions.None);
 			for (var i = 0; i < nsData.Length; i++)
 			{
@@ -27,11 +26,19 @@
 
 			var baseName = nsData[0];
 			this.Base = baseName;
-			var colonLoc = baseName.IndexOf(':', StringComparison.Ordinal);
-			this.IsPseudoNamespace = colonLoc != -1;
-			var baseNamespace = this.IsPseudoNamespace
-				? baseName[..colonLoc]
-				: baseName;
+			var baseSplit = baseName.Split(TextArrays.Colon, 2);
+			var baseNamespace = baseSplit[0];
+			if (baseSplit.Length == 2)
+			{
+				this.IsPseudoNamespace = true;
+				this.ModName = baseSplit[1];
+			}
+			else
+			{
+				this.IsPseudoNamespace = false;
+				this.ModName = string.Empty;
+			}
+
 			this.BaseNamespace = site[baseNamespace];
 			this.Full = baseName + (this.IsPseudoNamespace ? "/" : ":");
 			this.Id = nsData[1].Length == 0
@@ -77,9 +84,13 @@
 
 		public Title MainPage { get; }
 
+		public string ModName { get; }
+
 		public string Name { get; }
 
 		public Namespace Parent { get; }
+
+		public Site Site => this.BaseNamespace.Site;
 
 		public string Trail { get; }
 		#endregion
@@ -89,7 +100,7 @@
 			other is not null &&
 			string.Equals(this.Base, other.Base, StringComparison.Ordinal);
 
-		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.site, this.Full + pageName);
+		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site, this.Full + pageName);
 		#endregion
 
 		#region Public Override Methods
