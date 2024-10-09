@@ -171,7 +171,7 @@
 				nextTitles.Clear();
 				foreach (var page in loadPages)
 				{
-					var ns = this.nsList.FromTitle(page.Title);
+					var ns = this.nsList.FromTitle(page.Title) ?? throw new InvalidOperationException();
 					foreach (var backlink in page.Backlinks)
 					{
 						// Once we have a page that's out of the desired namespace, we don't need to follow it anymore, so don't try to load it.
@@ -199,7 +199,7 @@
 					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
 			}
 
-			return this.nsList.FromTitle(title);
+			return this.nsList.FromTitle(title) ?? throw new InvalidOperationException();
 		}
 
 		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
@@ -228,7 +228,7 @@
 
 		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)
 		{
-			var ns = this.nsList.FromTitle(page.Title);
+			var ns = this.nsList.FromTitle(page.Title) ?? throw new InvalidOperationException();
 			foreach (var backlink in backlinks)
 			{
 				var title = backlink.Key;

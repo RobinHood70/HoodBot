@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Diagnostics;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -17,7 +18,7 @@
 		#region Constructors
 		public UespNamespaceList(Site site)
 		{
-			// Add defined namespaces
+			// TODO: Read from API, which will inherently include all namespaces.
 			ArgumentNullException.ThrowIfNull(site);
 			if (site.LoadMessage("nsinfo-namespacelist") is string message)
 			{
@@ -56,8 +57,20 @@
 
 		public UespNamespace FromTitle(Title title)
 		{
+			// TODO: Optimize this more like it is in NSInfo itself.
 			var ns = title.Namespace.SubjectSpace;
-			return this.TryGetValue(ns.DecoratedName() + title.RootPageName(), out var retval) ? retval : this[ns.Name];
+			var longest = 0;
+			UespNamespace? retval = null;
+			foreach (var uespNs in this)
+			{
+				if (uespNs.BaseNamespace == ns && uespNs.Base.Length > longest)
+				{
+					retval = uespNs;
+				}
+			}
+
+			Debug.Assert(retval is not null, "Retval should never be null here.");
+			return retval;
 		}
 
 		public UespNamespace? GetAnyBase(string? nsBase) =>

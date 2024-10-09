@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -33,7 +34,7 @@
 		protected override void LoadPages()
 		{
 			var searchTitle = TitleFactory.FromUnvalidated(this.Site, SearchPrefix);
-			var fakeNs = new UespNamespaceList(this.Site).FromTitle(searchTitle);
+			var fakeNs = new UespNamespaceList(this.Site).FromTitle(searchTitle) ?? throw new InvalidOperationException();
 			this.nsFull = fakeNs.Full;
 
 			var baseTitle = TitleFactory.FromUnvalidated(this.Site, fakeNs.Base);
