@@ -12,7 +12,7 @@
 	public class UespNamespaceList : KeyedCollection<string, UespNamespace>
 	{
 		#region Fields
-		private readonly Dictionary<string, UespNamespace> nsIds = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, UespNamespace> nsIds = new(StringComparer.OrdinalIgnoreCase);
 		#endregion
 
 		#region Constructors
