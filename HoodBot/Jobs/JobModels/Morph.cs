@@ -70,25 +70,36 @@
 			return retval;
 		}
 
-		public string RankCosts()
+		public List<Cost> ConsolidateCosts()
 		{
 			//// Actual cost is from ComputeEsoSkillCost() in ESO Log. The formula as of this writing is: maxCost * level / 72 + cost.Value / 12, which reduces to cost.Value * (level + 6) / 72). When level is set to a constant of 66 (the maximum level, as used on the wiki), this collapses to just cost.Value.
-			var mechanicTexts = new List<string>(this.Ranks.Count);
-			var valueTexts = new List<string>(this.Ranks.Count);
-			var valuePerTimeTexts = new List<string>(this.Ranks.Count);
-			foreach (var rank in this.Ranks)
+			var newCosts = new List<Cost>();
+			var costs = this.Ranks[0].Costs;
+			var values = new List<string>();
+			for (var i = 0; i < costs.Count; i++)
 			{
-				var cost = rank.GetCostSplit();
-				valueTexts.Add(cost.Value ?? string.Empty);
-				valuePerTimeTexts.Add(cost.ValuePerTime ?? string.Empty);
-				mechanicTexts.Add(cost.MechanicText);
+				var baseCost = costs[i];
+				foreach (var rank in this.Ranks)
+				{
+					if (rank.Costs.Count != costs.Count)
+					{
+						throw new InvalidOperationException("Cost count mismatch");
+					}
+
+					var currentCost = rank.Costs[i];
+					if (!string.Equals(currentCost.MechanicText, baseCost.MechanicText, StringComparison.Ordinal))
+					{
+						throw new InvalidOperationException("Mechanic mismatch");
+					}
+
+					values.Add(rank.Costs[i].Value);
+				}
+
+				var newValue = NowrapSameString(values);
+				newCosts.Add(new Cost(newValue, baseCost.MechanicText));
 			}
 
-			var values = NowrapSameString(valueTexts);
-			var valuesPerTime = NowrapSameString(valuePerTimeTexts);
-			var mechanics = NowrapSameString(mechanicTexts);
-
-			return new Cost(values, valuesPerTime, mechanics).ToString();
+			return newCosts;
 		}
 		#endregion
 

@@ -94,7 +94,7 @@
 			var baseMorph = this.morphs[0];
 			var baseRank = baseMorph.Ranks[^1];
 			UpdateParameter(factory, template, "id", baseRank.Id.ToStringInvariant());
-			var baseSkillCost = string.Join(", ", baseRank.Costs);
+			var baseSkillCost = Cost.GetCostText(baseRank.Costs);
 			this.UpdateMorphs(factory, template, baseMorph, baseSkillCost);
 			UpdateParameter(factory, template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			UpdateParameter(factory, template, "linerank", this.learnedLevel.ToStringInvariant());
@@ -156,7 +156,8 @@
 				descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 			}
 
-			var morphSkillCost = morph.RankCosts();
+			var morphSkillCosts = morph.ConsolidateCosts();
+			var morphSkillCost = Cost.GetCostText(morphSkillCosts);
 			if (!string.Equals(morphSkillCost, baseSkillCost, StringComparison.Ordinal))
 			{
 				descriptions.Add("Cost: " + morphSkillCost);

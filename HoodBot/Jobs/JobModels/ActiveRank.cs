@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Globalization;
-	using System.Linq;
 	using RobinHood70.CommonCode;
 
 	internal sealed class ActiveRank : Rank
@@ -22,47 +21,9 @@
 			var maxRange = FormatRange((int)row["maxRange"]);
 			var minRange = FormatRange((int)row["minRange"]);
 			this.Range = string.Equals(minRange, "0", StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
-			string[] costValues;
-			string[] costTimeValues;
-			string[] mechanicValues;
-			var costField = row["cost"];
-			var costTimeField = row["costTime"];
-			var mechanicField = row["mechanic"];
-			if (costField is string costText)
-			{
-				costValues = costText.Split(TextArrays.Comma);
-				costTimeValues = ((string)costTimeField).Split(TextArrays.Comma);
-				mechanicValues = EsoLog.ConvertEncoding((string)row["mechanic"]).Split(TextArrays.Comma);
-			}
-			else
-			{
-				costValues = [((int)costField).ToStringInvariant()];
-				costTimeValues = [((int)costTimeField).ToStringInvariant()];
-				mechanicValues = [((int)mechanicField).ToStringInvariant()];
-			}
 
-			if (costValues.Length != mechanicValues.Length)
-			{
-				throw new InvalidOperationException("Costs and mechanics have different lengths.");
-			}
-
-			for (var i = 0; i < costValues.Length; i++)
-			{
-				var costValue = costValues[i];
-				costValue = costValue.Length > 0
-					? costValue.Split(TextArrays.Period)[0].TrimStart('0')
-					: null;
-				var costTimeValue = costTimeValues.Length > i
-					? costTimeValues[i]
-					: null;
-				costTimeValue = costTimeValue?.Length > 0
-					? costTimeValue.Split(TextArrays.Period)[0].TrimStart('0')
-					: null;
-				var mechanic = int.Parse(mechanicValues[i], CultureInfo.InvariantCulture);
-				var mechanicText = EsoLog.MechanicNames[mechanic];
-
-				this.Costs.Add(new Cost(costValue, costTimeValue, mechanicText));
-			}
+			this.Costs.AddRange(GetCostSplit(row, "cost", "mechanic", false));
+			this.Costs.AddRange(GetCostSplit(row, "costTime", "mechanicTime", true));
 		}
 		#endregion
 
@@ -78,30 +39,32 @@
 		public string Range { get; }
 		#endregion
 
-		#region Public Methods
-		public Cost GetCostSplit()
+		#region Private Static Methods
+		private static IEnumerable<Cost> GetCostSplit(IDataRecord row, string costsName, string mechanicsName, bool perTime)
 		{
-			if (this.Costs.Count == 1)
+			var costsText = (string)row[costsName];
+			if (string.IsNullOrEmpty(costsText))
 			{
-				return this.Costs[0];
+				yield break;
 			}
 
-			var valueText = string.Join(", ", this.Costs.Select(c => c.Value));
-			var valuePerTimeText = string.Join(", ", this.Costs.Select(c => c.ValuePerTime));
-			var mechanicText = this.Costs.Count switch
+			var mechanicsText = (string)row[mechanicsName];
+			var costs = costsText.Split(TextArrays.Comma);
+			var mechanics = mechanicsText.Split(TextArrays.Comma);
+			if (costs.Length != mechanics.Length)
 			{
-				1 => this.Costs[0].MechanicText,
-				2 =>
-					this.Costs[0].MechanicText + " and " +
-					this.Costs[1].MechanicText,
-				3 =>
-					this.Costs[0].MechanicText + ", " +
-					this.Costs[1].MechanicText + ", and " +
-					this.Costs[2].MechanicText,
-				_ => throw new InvalidOperationException($"Costs has {this.Costs.Count} values which is not currently handled")
-			};
+				throw new InvalidOperationException("Costs and mechanics have different lengths.");
+			}
 
-			return new Cost(valueText, valuePerTimeText, mechanicText);
+			for (var i = 0; i < costs.Length; i++)
+			{
+				if (int.Parse(costs[i], CultureInfo.InvariantCulture) != 0)
+				{
+					var mechanicNum = int.Parse(mechanics[i], CultureInfo.InvariantCulture);
+					var mechanic = EsoLog.MechanicNames[mechanicNum] + (perTime ? " / 1s" : string.Empty);
+					yield return new Cost(costs[i], mechanic);
+				}
+			}
 		}
 		#endregion
 	}

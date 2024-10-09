@@ -36,6 +36,7 @@
 			"ms.castTime,\n" +
 			"ms.channelTime,\n" +
 			"ms.mechanic,\n" +
+			"ms.mechanicTime,\n" +
 			"ms.rank,\n" +
 			"ms.morph,\n" +
 			"ms.coefDescription,\n" +
@@ -50,7 +51,7 @@
 		"INNER JOIN\n" +
 			"$ms ms ON st.abilityId = ms.id\n" +
 		"WHERE\n" +
-			/* "st.baseName = 'Blood Scion' AND\n" + */
+			/* "st.baseName = 'Lava Whip' AND\n" + */
 			"ms.isPlayer AND\n" +
 			"ms.morph >= 0 AND\n" +
 			"ms.skillLine != 'Emperor'\n" +
