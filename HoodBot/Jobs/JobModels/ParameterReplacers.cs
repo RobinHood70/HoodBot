@@ -36,7 +36,7 @@
 			this.AddTemplateReplacers("Book Link", this.LoreFirst);
 			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
 			this.AddTemplateReplacers("Cat Footer", this.CatFooter);
-			this.AddTemplateReplacers("Cite Book", this.LoreFirst);
+			this.AddTemplateReplacers("Cite Book", this.DefaultLoreFirst);
 			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
 			this.AddTemplateReplacers("ESO Antiquity Furnishing", this.EsoAntiquityReplacer);
 			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
@@ -235,6 +235,28 @@
 						param1.SetValue(abbr, ParameterFormat.Copy);
 						param2.SetValue(name, ParameterFormat.Copy);
 					}
+				}
+			}
+		}
+
+		protected void DefaultLoreFirst(Page page, SiteTemplateNode template)
+		{
+			var nsParam = template.Find("ns_base", "ns_id");
+			var pageName = template.Find(1);
+			var baseName = nsParam?.Value.ToValue().Trim() ?? "Lore";
+			var nsBase = this.NamespaceList.GetAnyBase(baseName);
+			if (pageName is not null &&
+				nsBase?.GetTitle(pageName.Value.ToValue().Trim()) is Title findTitle &&
+				this.globalUpdates.TryGetValue(findTitle, out var target) &&
+				this.NamespaceList.FromTitle(target) is UespNamespace targetNsBase)
+			{
+				pageName.Value.Clear();
+				pageName.Value.AddText(target.PageName);
+				template.Remove("ns_base");
+				template.Remove("ns_id");
+				if (!string.Equals(targetNsBase.Base, "Lore", StringComparison.Ordinal))
+				{
+					template.Add("ns_base", targetNsBase.Id);
 				}
 			}
 		}
