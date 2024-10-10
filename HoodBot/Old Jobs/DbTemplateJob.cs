@@ -31,7 +31,7 @@
 			{
 				var page = this.GetPageForItem(item);
 				var parser = new ContextualParser(page);
-				var template = this.GetTemplateFromPage(parser);
+				var template = this.GetTemplateFromParser(parser);
 				this.UpdateTemplateFromItem(template, item);
 				parser.UpdatePage();
 			}
@@ -58,7 +58,7 @@
 
 		protected abstract Page GetPageForItem(KeyValuePair<TKey, TItem> item);
 
-		protected abstract SiteTemplateNode GetTemplateFromPage(object page);
+		protected abstract SiteTemplateNode GetTemplateFromParser(ContextualParser parser);
 
 		protected abstract TItem NewItem(IDataRecord record);
 
@@ -66,7 +66,7 @@
 
 		protected abstract void ParseTemplate(SiteTemplateNode template, ContextualParser parser);
 
-		protected abstract void UpdateTemplateFromItem(object template, KeyValuePair<TKey, TItem> item);
+		protected abstract void UpdateTemplateFromItem(SiteTemplateNode template, KeyValuePair<TKey, TItem> item);
 		#endregion
 	}
 }
