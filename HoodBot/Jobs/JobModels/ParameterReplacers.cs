@@ -154,13 +154,16 @@
 				return;
 			}
 
-			if (nsParam == null)
+			if (!string.Equals(newNs.Id, oldNs.Id, StringComparison.Ordinal))
 			{
-				template.Add("ns_base", newNs.Id);
-			}
-			else
-			{
-				nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
+				if (nsParam == null)
+				{
+					template.Add("ns_base", newNs.Id);
+				}
+				else
+				{
+					nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
+				}
 			}
 
 			if (toTitle == newNs.MainPage)
