@@ -7,6 +7,7 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<CsWinRTAotOptimizerEnabled>false</CsWinRTAotOptimizerEnabled>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

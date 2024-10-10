@@ -9,6 +9,7 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<CsWinRTAotOptimizerEnabled>false</CsWinRTAotOptimizerEnabled>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <DefineConstants>DEBUG;TRACE</DefineConstants>

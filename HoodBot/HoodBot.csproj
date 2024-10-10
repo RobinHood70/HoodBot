@@ -10,6 +10,7 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 		<Copyright>Copyright © Robert Morley 2023</Copyright>
+		<CsWinRTAotOptimizerEnabled>false</CsWinRTAotOptimizerEnabled>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG</DefineConstants>

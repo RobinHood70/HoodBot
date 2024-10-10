@@ -11,6 +11,7 @@
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 		<SignAssembly>False</SignAssembly>
 		<AssemblyOriginatorKeyFile />
+		<CsWinRTAotOptimizerEnabled>false</CsWinRTAotOptimizerEnabled>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <DefineConstants>DEBUG;TRACE</DefineConstants>
