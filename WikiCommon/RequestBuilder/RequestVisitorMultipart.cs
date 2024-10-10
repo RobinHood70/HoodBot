@@ -112,7 +112,7 @@
 				return;
 			}
 
-			this.stream.PropertyThrowNull(nameof(RequestVisitorMultipart), nameof(this.stream));
+			Globals.ThrowIfNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
 			var data = string.Create(
 				CultureInfo.InvariantCulture,
 				$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
@@ -174,7 +174,7 @@
 				return;
 			}
 
-			this.stream.PropertyThrowNull(nameof(RequestVisitorMultipart), nameof(this.stream));
+			Globals.ThrowIfNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
 			var postData = string.Create(
 				CultureInfo.InvariantCulture,
 				$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");

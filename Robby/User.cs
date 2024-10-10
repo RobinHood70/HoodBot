@@ -19,7 +19,7 @@
 		public User(Site site, string user)
 		{
 			ArgumentNullException.ThrowIfNull(site);
-			ArgumentNullException.ThrowIfNull(user);
+			ArgumentException.ThrowIfNullOrEmpty(user);
 			this.Title = GetTitle(site, user);
 		}
 
@@ -27,9 +27,9 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="userInfo">The API user information.</param>
 		public User(Site site, AllUsersItem userInfo)
-			: this(site, userInfo.NotNull().Name)
 		{
 			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(userInfo);
 			this.Title = GetTitle(site, userInfo.Name);
 			this.Info = new UserInfo(site, userInfo);
 		}

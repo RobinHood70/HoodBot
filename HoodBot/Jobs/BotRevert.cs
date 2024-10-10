@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
@@ -27,13 +26,22 @@
 
 		protected override void LoadPages()
 		{
-			this.Site.User.PropertyThrowNull(nameof(this.Site), nameof(this.Site.User));
+			if (this.Site.User is null)
+			{
+				this.StatusWriteLine("Can't run job, not logged in.");
+				return;
+			}
 
 			var books = new TitleCollection(this.Site);
 			books.GetBacklinks("Template:Book Header", BacklinksTypes.EmbeddedIn);
 			var minDate = new DateTime(2022, 8, 22, 0, 0, 0, DateTimeKind.Utc);
 			var maxDate = new DateTime(2022, 8, 22, 23, 59, 59, DateTimeKind.Utc);
-			var contributionRange = this.Site.User.GetContributions(minDate, maxDate);
+			var contributionRange = this.Site.User?.GetContributions(minDate, maxDate);
+			if (contributionRange is null)
+			{
+				return;
+			}
+
 			foreach (var contribution in contributionRange)
 			{
 				if (books.Contains(contribution.Title))

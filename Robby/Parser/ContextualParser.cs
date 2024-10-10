@@ -4,8 +4,8 @@
 
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -19,15 +19,15 @@
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
 		/// <param name="page">The page to parse.</param>
 		public ContextualParser(Page page)
-			: this(page.NotNull(), page.Text, InclusionType.Raw, false)
+			: this(page, page?.Text, InclusionType.Raw, false)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
 		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
-		public ContextualParser(Page page, string text)
-			: this(page.NotNull(), text, InclusionType.Raw, false)
+		public ContextualParser(Page page, string? text)
+			: this(page, text, InclusionType.Raw, false)
 		{
 		}
 
@@ -36,21 +36,21 @@
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public ContextualParser(Page page, InclusionType inclusionType, bool strictInclusion)
-			: this(page.NotNull(), page.Text, inclusionType, strictInclusion)
+			: this(page, page?.Text, inclusionType, strictInclusion)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
 		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
-		/// <param name="text">The text to parse.</param>
+		/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public ContextualParser(Page page, string text, InclusionType inclusionType, bool strictInclusion)
-			: base(new SiteNodeFactory(page.NotNull().Title.Namespace.Site))
+		public ContextualParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
+			: base(FactoryFromPage(page))
 		{
 			this.Page = page;
-			this.Site = page.Title.Namespace.Site;
-			this.Factory.ParseInto(this, text, inclusionType, strictInclusion);
+			this.Site = page.Site;
+			this.Factory.ParseInto(this, text ?? string.Empty, inclusionType, strictInclusion);
 		}
 		#endregion
 
@@ -271,6 +271,14 @@
 
 		/// <summary>Updates the <see cref="Page"/>'s <see cref="Page.Text">text</see> to the parser's contents.</summary>
 		public void UpdatePage() => this.Page.Text = this.ToRaw();
+		#endregion
+
+		#region Private Static Methods
+		private static SiteNodeFactory FactoryFromPage([NotNull] Page page)
+		{
+			ArgumentNullException.ThrowIfNull(page);
+			return new SiteNodeFactory(page.Site);
+		}
 		#endregion
 	}
 }

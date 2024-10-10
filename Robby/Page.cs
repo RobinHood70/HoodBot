@@ -77,7 +77,7 @@
 			{
 				foreach (var link in list)
 				{
-					link.Title.PropertyThrowNull(nameof(link));
+					Globals.ThrowIfNull(link.Title, nameof(link), nameof(link.Title));
 					Title title = TitleFactory.FromUnvalidated(this.Title.Site, link.Title);
 					if (this.backlinks.ContainsKey(title))
 					{

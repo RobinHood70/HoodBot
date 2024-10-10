@@ -576,8 +576,9 @@
 
 					if (actionValue.HasAction(ReplacementActions.Propose))
 					{
-						var reason = action.Value.Reason.PropertyNotNullOrWhiteSpace(nameof(DetailedActions), nameof(DetailedActions.Reason));
-						ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
+						var reason = action.Value.Reason;
+						Globals.ThrowIfNull(reason, nameof(action), nameof(action.Value), nameof(action.Value.Reason));
+						ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason + "}}");
 						editSummary = this.EditSummaryPropose;
 						isMinor = false;
 					}
@@ -665,16 +666,16 @@
 				{
 					if (this.MoveAction != MoveAction.None)
 					{
-						action.SetMoveActions(ReplacementActions.Skip, "no links, but marked to not be deleted");
+						action.SetMoveActions(ReplacementActions.Skip, "No links, but marked to not be deleted");
 					}
 				}
 				else if (deletions.Contains(fromPage.Title))
 				{
-					action.SetMoveActions(ReplacementActions.Skip, "no links, but already proposed for deletion");
+					action.SetMoveActions(ReplacementActions.Skip, "No links, but already proposed for deletion");
 				}
 				else
 				{
-					action.SetMoveActions(ReplacementActions.Propose, "unused so propose for deletion");
+					action.SetMoveActions(ReplacementActions.Propose, "Unused so propose for deletion");
 				}
 			}
 		}
@@ -1016,8 +1017,8 @@
 					if (unique.TryGetValue(title, out var existing))
 					{
 						this.Warn($"Duplicate To title. All related entries will be skipped. [[{existing}]] and [[{move.Key}]] both moving to [[{move.Value}]]");
-						this.actions[title].SetMoveActions(ReplacementActions.Skip, "duplicate To page");
-						current.SetMoveActions(ReplacementActions.Skip, "duplicate To page");
+						this.actions[title].SetMoveActions(ReplacementActions.Skip, "Duplicate To page");
+						current.SetMoveActions(ReplacementActions.Skip, "Duplicate To page");
 					}
 					else
 					{

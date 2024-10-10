@@ -33,7 +33,7 @@
 			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
 			if (this.Continues)
 			{
-				this.GeneratorContinue.PropertyThrowNull(nameof(ContinueModule1), nameof(this.GeneratorContinue));
+				Globals.ThrowIfNull(this.GeneratorContinue, nameof(ContinueModule1), nameof(this.GeneratorContinue));
 
 				// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
 				request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);

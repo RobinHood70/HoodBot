@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
+	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -66,9 +67,7 @@
 		protected override void Login(LoginInput? input)
 		{
 			base.Login(input);
-
-			this.User.PropertyThrowNull(nameof(UespSite), nameof(this.User));
-
+			Debug.Assert(this.User is not null, "User null after login.");
 			if (this.EditingEnabled)
 			{
 				// Assumes we'll never be editing UESP anonymously.

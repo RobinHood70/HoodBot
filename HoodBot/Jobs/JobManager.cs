@@ -299,7 +299,8 @@
 
 		private IWikiAbstractionLayer CreateAbstractionLayer()
 		{
-			var api = this.wikiInfo.Api.PropertyNotNull(nameof(this.wikiInfo), nameof(this.wikiInfo.Api));
+			Globals.ThrowIfNull(this.wikiInfo.Api, nameof(JobManager), nameof(this.wikiInfo), nameof(this.wikiInfo.Api));
+			var api = this.wikiInfo.Api;
 			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
 				? new WallE.Test.WikiAbstractionLayer()
 				: new WikiAbstractionLayer(this.Client, api);

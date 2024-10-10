@@ -31,7 +31,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(request);
 			ArgumentNullException.ThrowIfNull(input);
-			input.Modules.PropertyThrowNull(nameof(input), nameof(input.Modules));
+			Globals.ThrowIfNull(input.Modules, nameof(input), nameof(input.Modules));
 			if (this.SiteVersion >= 125)
 			{
 				request

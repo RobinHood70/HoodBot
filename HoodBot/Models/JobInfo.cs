@@ -13,12 +13,12 @@
 		{
 			ArgumentNullException.ThrowIfNull(constructor);
 			ArgumentNullException.ThrowIfNull(jobInfo);
+			var constructorParameters = constructor.GetParameters();
+			Globals.ThrowIfNull(constructorParameters, nameof(constructor), nameof(constructor.GetParameters));
+
 			this.Constructor = constructor;
 			this.Groups = jobInfo.Groups;
 			this.Name = jobInfo.Name;
-
-			var constructorParameters = constructor.GetParameters()
-				.PropertyNotNull(ValidationType.Method, nameof(constructor));
 			List<ConstructorParameter> parameters = new(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{

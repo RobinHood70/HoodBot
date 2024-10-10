@@ -71,7 +71,8 @@
 
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
-				this.allIcons.TryGetValue(latestRevision.Sha1.PropertyNotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
+				Globals.ThrowIfNull(latestRevision.Sha1, nameof(latestRevision), nameof(latestRevision.Sha1));
+				this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
 				ContextualParser parser = new(page);
 				this.ReplaceLicense(parser);
 				PageParts parts = new(filePage);

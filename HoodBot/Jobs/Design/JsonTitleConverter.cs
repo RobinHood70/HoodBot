@@ -2,20 +2,19 @@
 {
 	using System;
 	using Newtonsoft.Json;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
+	[Obsolete("Appears to be unused")]
 	public class JsonTitleConverter(Site site) : JsonConverter<Title>
 	{
 		#region Public Override Methods
 		public override Title ReadJson(JsonReader reader, Type objectType, Title? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			ArgumentNullException.ThrowIfNull(reader);
-			var title = (string)reader
-				.Value
-				.PropertyNotNull(nameof(reader), nameof(reader.Value));
-			return TitleFactory.FromUnvalidated(site, title);
+			return reader.Value is string title
+				? TitleFactory.FromUnvalidated(site, title).ToTitle()
+				: throw new InvalidOperationException("Value property should not be null.");
 		}
 
 		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer)

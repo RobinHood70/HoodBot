@@ -11,6 +11,7 @@
 		public ConstructorParameter(ParameterInfo parameter)
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
+			Globals.ThrowIfNull(parameter.Name, nameof(parameter), nameof(parameter.Name));
 			var attributes = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
 			if (attributes.Length > 1)
 			{
@@ -18,7 +19,7 @@
 			}
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
-			this.Name = parameter.Name.PropertyNotNull(nameof(parameter));
+			this.Name = parameter.Name;
 			this.Type = parameter.ParameterType;
 			this.Label = this.Attribute?.Label ?? this.Name.UnCamelCase();
 			this.Value =
