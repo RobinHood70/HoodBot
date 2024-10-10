@@ -8,8 +8,7 @@
 
 	/// <summary>Interface for objects which handle job results.</summary>
 	/// <remarks>Initializes a new instance of the <see cref="ResultHandler"/> class.</remarks>
-	/// <param name="culture">The culture for the class. This controls localization of messages. If <see langword="null"/>, <see cref="CultureInfo.CurrentUICulture"/> will be used.</param>
-	public abstract class ResultHandler(CultureInfo? culture)
+	public abstract class ResultHandler()
 	{
 		#region Constants
 		private const string BotResults = "Bot Results";
@@ -22,9 +21,9 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the culture passed in the constructor. This controls the language used for the class.</summary>
+		/// <summary>Gets or sets the culture, which controls the language used for the class.</summary>
 		/// <value>The culture.</value>
-		public CultureInfo Culture { get; } = culture ?? CultureInfo.CurrentUICulture;
+		public CultureInfo Culture { get; set; } = CultureInfo.CurrentUICulture;
 
 		/// <summary>Gets or sets the default text for the <see cref="Description"/>.</summary>
 		/// <value>The default text for the <see cref="Description"/>.</value>

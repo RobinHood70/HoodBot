@@ -13,7 +13,6 @@
 		/// <param name="site">The site the results page is on.</param>
 		/// <param name="pageName">The page name to save results to.</param>
 		public PageResultHandler(Title title)
-			: base(title.Site.Culture)
 		{
 			this.Title = title;
 			this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);

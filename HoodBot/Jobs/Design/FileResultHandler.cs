@@ -14,7 +14,6 @@
 		/// <summary>Initializes a new instance of the <see cref="FileResultHandler"/> class.</summary>
 		/// <param name="fileName">The file name to save to. Will be overwritten if it exists.</param>
 		public FileResultHandler(string fileName)
-			: base(null)
 		{
 			ArgumentNullException.ThrowIfNull(fileName);
 			this.fileName = fileName;

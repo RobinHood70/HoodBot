@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a new section of a user's talk page.</summary>
@@ -17,7 +16,6 @@
 		/// <summary>Initializes a new instance of the <see cref="UserTalkResultHandler"/> class.</summary>
 		/// <param name="user">The user whose talk page should be added to.</param>
 		public UserTalkResultHandler(User user)
-			: base(user.NotNull().Title.Site.Culture)
 		{
 			this.user = user;
 			this.botTalkSummary = this.ResourceManager.GetString("BotJobNotice", this.Culture) ?? this.DefaultText;
