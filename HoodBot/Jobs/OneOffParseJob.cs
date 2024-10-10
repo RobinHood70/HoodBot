@@ -2,10 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -14,89 +13,164 @@
 	public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		#region Fields
-		private readonly HashSet<string> fauna = new(StringComparer.Ordinal);
-		#endregion
-
-		#region Public Override Properties
-		public override string LogDetails => "Convert NPC Summary to Creature Summary";
-
-		public override string LogName => "One-Off Parse Job";
+		private readonly Dictionary<Title, BookInfo> bookLookup = [];
+		private readonly UespNamespaceList namespaceList = new(jobManager.Site);
 		#endregion
 
 		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => this.LogDetails;
+		protected override string GetEditSummary(Page page) => "Make interview refs consistent";
 
 		protected override void LoadPages()
 		{
-			this.GetFauna();
-			this.Pages.GetBacklinks("Template:NPC Summary", BacklinksTypes.EmbeddedIn);
+			this.bookLookup.Add(TitleFactory.FromUnvalidated(this.Site, "General:Skeleton Man's Interview with Denizens of Tamriel"), new("People of Morrowind", "PoM"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:People of Morrowind"),
+				new("People of Morrowind", "PoM"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:Interview with a Dark Elf"),
+				new("Interview with a Dark Elf", "IWADE"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "Morrowind:Interview with a Dark Elf"),
+				new("Interview with a Dark Elf", "IWADE"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:Interview With Three Booksellers"),
+				new("Interview With Three Booksellers", "IWTB"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:Interview With Two Denizens of the Shivering Isles"),
+				new("Interview With Two Denizens of the Shivering Isles", "IWTDSI"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:Homestead Interview"),
+				new("Homestead Interview", "HomesteadInt"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:A Matter of Voice and Brass: Dragon Bones DLC Interview"),
+				new("A Matter of Voice and Brass: Dragon Bones DLC Interview", "AMOVAB"));
+			this.bookLookup.Add(
+				TitleFactory.FromUnvalidated(this.Site, "General:New Life Festival Interview"),
+				new("New Life Festival Interview", "NLFI"));
+
+			this.Pages.GetBacklinks("Template:Ref", BacklinksTypes.EmbeddedIn);
 		}
 
 		protected override void ParseText(ContextualParser parser)
 		{
-			var changed = false;
-			var skipped = false;
-			foreach (var template in parser.FindSiteTemplates("NPC Summary"))
+			var nameChanges = this.UpdateRefTargets(parser);
+			UpdateRefNames(parser, nameChanges);
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static void UpdateRefNames(ContextualParser parser, Dictionary<string, string> nameChanges)
+		{
+			foreach (var reference in parser.FindSiteTemplates("Ref"))
 			{
-				var editorId = template.GetValue("eid");
-				if (editorId is not null && this.fauna.Contains(editorId))
+				if (reference.Find("name") is IParameterNode nameParam)
 				{
-					changed = true;
-					template.Title.Clear();
-					template.Title.AddText("Creature Summary\n");
-					template.Remove("eid");
-					template.RenameParameter("race", "species");
-					template.Remove("gender");
-					template.Remove("skills");
-					var dead = template.GetValue("dead");
-					if (dead is not null)
+					var nameValue = nameParam.Value;
+					var name = nameValue.ToRaw().Trim();
+					if (nameChanges.TryGetValue(name, out var newName))
 					{
-						if (dead.Length > 0)
+						nameValue.Clear();
+						nameValue.AddText(newName);
+						if (string.Equals(reference.GetValue("group"), "UOL", StringComparison.Ordinal))
 						{
-							template.UpdateIfEmpty("health", "0", ParameterFormat.OnePerLine);
+							reference.Remove("group");
 						}
 
-						template.Remove("dead");
+						reference.SetTitle("Ref");
+						reference.Sort("name", "group");
 					}
-
-					template.AddIfNotExists("refid", string.Empty, ParameterFormat.OnePerLine);
-					template.AddIfNotExists("planet", string.Empty, ParameterFormat.OnePerLine);
-					template.AddIfNotExists("biomes", string.Empty, ParameterFormat.OnePerLine);
-					template.AddIfNotExists("species", string.Empty, ParameterFormat.OnePerLine);
-					template.AddIfNotExists("predation", string.Empty, ParameterFormat.OnePerLine);
-					template.Sort("refid", "baseid", "planet", "biomes", "species", "predation", "image", "imgdesc");
-				}
-				else
-				{
-					skipped = true;
-				}
-			}
-
-			if (changed)
-			{
-				if (skipped)
-				{
-					Debug.WriteLine(parser.Title);
-				}
-				else if (parser.FindSiteTemplate("Stub") is SiteTemplateNode stub)
-				{
-					stub.Parameters.Clear();
-					var faunaStub = parser.Factory.ParameterNodeFromParts("Fauna");
-					stub.Parameters.Add(faunaStub);
 				}
 			}
 		}
 		#endregion
 
 		#region Private Methods
-		private void GetFauna()
+		private BookInfo? FindBookInfo(ContextualParser parser, NodeCollection target)
 		{
-			var csv = new CsvFile(Starfield.ModFolder + "Fauna.csv");
-			foreach (var row in csv.ReadRows())
-			{
-				this.fauna.Add(row["EditorID"]);
-			}
+			var targetText = target.ToRaw().Trim();
+			var bookInfo = (string.Equals(targetText, "{{TIL|Interview with Three Argonians in Shadowfen|interview-three-argonians-shadowfen}}", StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(targetText, "[https://www.imperial-library.info/content/interview-three-argonians-shadowfen Interview with Three Argonians in Shadowfen]", StringComparison.OrdinalIgnoreCase))
+				? new("Interview with Three Argonians in Shadowfen", "IWTAS")
+				: this.GetBookNameForRef(parser.Title, target);
+			return bookInfo;
 		}
+
+		private BookInfo? GetBookNameForRef(Title title, NodeCollection target)
+		{
+			var targetIndex = 0;
+			if (target.Count == 3 &&
+				target[0] is ITextNode open &&
+				string.Equals(open.Text, "''", StringComparison.Ordinal) &&
+				target[2] is ITextNode close &&
+				string.Equals(close.Text, "''", StringComparison.Ordinal))
+			{
+				targetIndex = 1;
+			}
+			else if (target.Count != 1)
+			{
+				return null;
+			}
+
+			return target[targetIndex] switch
+			{
+				SiteTemplateNode template => template.TitleValue.PageNameEquals("Cite Book")
+					? this.GetCiteBookTarget(title, template)
+					: null,
+				SiteLinkNode link => this.bookLookup.TryGetValue(link.TitleValue, out var retval)
+					? retval
+					: null,
+				_ => null,
+			};
+		}
+
+		private BookInfo? GetCiteBookTarget(Title title, SiteTemplateNode template)
+		{
+			var nsParamValue = template.Find("ns_base", "ns_id")?.Value.ToValue().Trim();
+			var ns = this.namespaceList.GetNsBase(title, nsParamValue) ?? throw new InvalidOperationException();
+			var pageName = template.GetValue(1);
+			var templateTarget = TitleFactory.FromUnvalidated(this.Site, ns.Full + pageName);
+			return this.bookLookup.TryGetValue(templateTarget, out var retval)
+				? retval
+				: null;
+		}
+
+		private Dictionary<string, string> UpdateRefTargets(ContextualParser parser)
+		{
+			var retval = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			foreach (var reference in parser.FindSiteTemplates("Ref"))
+			{
+				var targetParam = reference.Find(1);
+				if (targetParam is null ||
+					targetParam.Value.Count == 0 ||
+					this.FindBookInfo(parser, targetParam.Value) is not BookInfo bookInfo)
+				{
+					continue;
+				}
+
+				targetParam.Anonymize();
+				targetParam.Value.Clear();
+				targetParam.Value.AddParsed("{{Cite Book|" + bookInfo.FullName + "|ns_base=GEN}}");
+				var nameParam = reference.Find("name");
+
+				// Note: we're adding even same-named entries to retval so that the updater will remove group=UOL from ALL appropriate refs.
+				if (nameParam is null)
+				{
+					reference.Add("name", bookInfo.ShortName);
+					retval.TryAdd(bookInfo.ShortName, bookInfo.ShortName);
+				}
+				else
+				{
+					var name = nameParam.Value.ToRaw().Trim();
+					retval.TryAdd(name, bookInfo.ShortName);
+				}
+			}
+
+			return retval;
+		}
+		#endregion
+
+		#region Private Records
+		private record BookInfo(string FullName, string ShortName);
 		#endregion
 	}
 }
