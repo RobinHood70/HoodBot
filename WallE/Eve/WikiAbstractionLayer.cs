@@ -314,6 +314,16 @@
 			this.EntryPoint = urib.Uri;
 		}
 
+		/// <summary>Runs a standard list query.</summary>
+		/// <typeparam name="TInput">The input type for the list.</typeparam>
+		/// <typeparam name="TOutput">The output type for the list.</typeparam>
+		/// <param name="module">The list module, which must be derived from <see cref="ListModule{TInput, TItem}"/>.</param>
+		/// <returns>A list of TOutput items.</returns>
+		/// <remarks>This function is used internally, but also made available externally for custom lists. See the documentation for <see cref="RunModuleQuery{TInput, TOutput}(QueryModule{TInput, TOutput})">RunModuleQuery</see> for further details.</remarks>
+		public IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
+			where TInput : class
+			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
+
 		/// <summary>Runs the continuable query specified by the input.</summary>
 		/// <param name="input">The input.</param>
 		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
@@ -323,11 +333,6 @@
 			query.Submit();
 			this.DoStopCheck(query.UserInfo);
 		}
-
-		/// <summary>Runs the continuable query specified by the input.</summary>
-		/// <param name="input">The input.</param>
-		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
-		public void RunQuery(params IQueryModule[] input) => this.RunQuery(input as IEnumerable<IQueryModule>);
 
 		/// <summary>Runs the query specified based directly on the input module.</summary>
 		/// <typeparam name="TInput">The input type for the module.</typeparam>
@@ -360,6 +365,11 @@
 
 			return retval;
 		}
+
+		/// <summary>Runs the continuable query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
+		public void RunQuery(params IQueryModule[] input) => this.RunQuery(input as IEnumerable<IQueryModule>);
 
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
@@ -1469,10 +1479,6 @@
 		}
 
 		private string GetSessionToken(string type) => CheckToken(this.TokenManager.SessionToken(type), type);
-
-		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
-			where TInput : class
-			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
 
 		private PageSetResult<TOutput> SubmitPageSet<TInput, TOutput>(ActionModulePageSet<TInput, TOutput> action, TInput input)
 			where TInput : PageSetInput
