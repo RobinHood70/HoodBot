@@ -126,7 +126,7 @@
 		private BookInfo? GetCiteBookTarget(Title title, SiteTemplateNode template)
 		{
 			var nsParamValue = template.Find("ns_base", "ns_id")?.Value.ToValue().Trim();
-			var ns = this.namespaceList.GetNsBase(title, nsParamValue) ?? throw new InvalidOperationException();
+			var ns = this.namespaceList.GetNsBase(nsParamValue, title) ?? throw new InvalidOperationException();
 			var pageName = template.GetValue(1);
 			var templateTarget = TitleFactory.FromUnvalidated(this.Site, ns.Full + pageName);
 			return this.bookLookup.TryGetValue(templateTarget, out var retval)

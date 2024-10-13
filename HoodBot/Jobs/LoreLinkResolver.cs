@@ -34,11 +34,9 @@
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			var limits =
-				from ns in this.nsList
-				where ns.IsGamespace && !ns.IsPseudoNamespace
-				select ns.BaseNamespace.Id;
-
+			var limits = this.nsList.Values
+				.Where(ns => ns.IsGamespace && !ns.IsPseudoNamespace)
+				.Select(ns => ns.BaseNamespace.Id);
 			var linkTitles = new TitleCollection(this.Site);
 			linkTitles.SetLimitations(LimitationType.OnlyAllow, limits);
 			linkTitles.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
@@ -195,8 +193,7 @@
 			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
 			{
 				var lookup = nsBase.Value.ToValue();
-				return this.nsList.GetAnyBase(lookup)
-					?? throw new InvalidOperationException("ns_base invalid in " + WikiTextVisitor.Raw(linkTemplate));
+				return this.nsList[lookup];
 			}
 
 			return this.nsList.FromTitle(title) ?? throw new InvalidOperationException();

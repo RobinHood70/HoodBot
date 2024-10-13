@@ -108,7 +108,7 @@
 					name = name[..extOffset];
 				}
 
-				var ns = nsList.FromId(nsNameSplit[0]);
+				var ns = nsList[nsNameSplit[0]];
 				var abbrNameSplit = name.Split('-', 2);
 				var abbr = abbrNameSplit[0] switch
 				{

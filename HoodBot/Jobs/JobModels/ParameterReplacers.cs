@@ -135,7 +135,7 @@
 			}
 
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(page.Title, nsParam?.Value.ToValue()) is not UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(nsParam?.Value.ToValue(), page.Title) is not UespNamespace oldNs)
 			{
 				return;
 			}
@@ -225,7 +225,7 @@
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(page.Title, nsParam?.Value.ToValue()) is UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(nsParam?.Value.ToValue(), page.Title) is UespNamespace oldNs)
 			{
 				var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
 				var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
@@ -245,22 +245,22 @@
 		protected void DefaultLoreFirst(Page page, SiteTemplateNode template)
 		{
 			var nsParam = template.Find("ns_base", "ns_id");
-			var pageName = template.Find(1);
 			var baseName = nsParam?.Value.ToValue().Trim() ?? "Lore";
-			var nsBase = this.NamespaceList.GetAnyBase(baseName);
-			if (pageName is not null &&
-				nsBase?.GetTitle(pageName.Value.ToValue().Trim()) is Title findTitle &&
-				this.globalUpdates.TryGetValue(findTitle, out var target) &&
-				this.NamespaceList.FromTitle(target) is UespNamespace targetNsBase)
+			var nsBase = this.NamespaceList[baseName];
+			if (template.Find(1)?.Value is not NodeCollection pageName ||
+				!this.globalUpdates.TryGetValue(nsBase.GetTitle(pageName.ToValue().Trim()), out var target) ||
+				this.NamespaceList.FromTitle(target) is not UespNamespace targetNsBase)
 			{
-				pageName.Value.Clear();
-				pageName.Value.AddText(target.PageName);
-				template.Remove("ns_base");
-				template.Remove("ns_id");
-				if (!string.Equals(targetNsBase.Base, "Lore", StringComparison.Ordinal))
-				{
-					template.Add("ns_base", targetNsBase.Id);
-				}
+				return;
+			}
+
+			pageName.Clear();
+			pageName.AddText(target.PageName);
+			template.Remove("ns_base");
+			template.Remove("ns_id");
+			if (!string.Equals(targetNsBase.Base, "Lore", StringComparison.Ordinal))
+			{
+				template.Add("ns_base", targetNsBase.Id);
 			}
 		}
 

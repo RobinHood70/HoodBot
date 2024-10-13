@@ -573,8 +573,8 @@
 		private List<ProtectedTitle> LoadPageNames(ICollection<int> spacesToLoad)
 		{
 			List<ProtectedTitle> titlesToProtect = [];
-			UespNamespaceList uespNamespaceList = new(this.Site);
-			foreach (var ns in uespNamespaceList)
+			UespNamespaceList nsList = new(this.Site);
+			foreach (var ns in nsList.Values)
 			{
 				if (ns.IsGamespace)
 				{

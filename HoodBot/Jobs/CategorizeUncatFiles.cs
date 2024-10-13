@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -15,8 +14,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, UespNamespace> nsIds = new(StringComparer.OrdinalIgnoreCase);
-
+		private readonly UespNamespaceList nsList = new UespNamespaceList(jobManager.Site);
 		#endregion
 
 		#region Public Override Properties
@@ -24,16 +22,6 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLoadPages()
-		{
-			// UespNamespaceList nsList = new(this.Site);
-			UespNamespaceList nsList = new(this.Site);
-			foreach (var ns in nsList)
-			{
-				this.nsIds.Add(ns.Id, ns);
-			}
-		}
-
 		protected override string GetEditSummary(Page page) => "Add category";
 
 		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
@@ -84,7 +72,7 @@
 		{
 			var split = pageName.Split(Dash, 4);
 			if (split.Length >= 3 &&
-				this.nsIds.TryGetValue(split[0], out var uespNamespace))
+				this.nsList.TryGetValue(split[0], out var uespNamespace))
 			{
 				var next = 1;
 				var itemCat = split[next];

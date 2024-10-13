@@ -23,13 +23,14 @@
 			this.ProgressMaximum = nsMeta.Count;
 			foreach (var ns in nsMeta)
 			{
-				var realNamespace = ns.BaseNamespace;
-				if (realNamespace.IsContentSpace)
+				var baseNamespace = ns.Value.BaseNamespace;
+				if (baseNamespace.IsContentSpace)
 				{
-					ignore.GetCategoryMembers(ns.Category + "-Books", false);
-					ignore.GetCategoryMembers(ns.Category + "-NPCs", false);
-					ignore.GetCategoryMembers(ns.Category + "-Quests", false);
-					realNamespaces.Add(realNamespace);
+					var cat = ns.Value.Category;
+					ignore.GetCategoryMembers(cat + "-Books", false);
+					ignore.GetCategoryMembers(cat + "-NPCs", false);
+					ignore.GetCategoryMembers(cat + "-Quests", false);
+					realNamespaces.Add(baseNamespace);
 				}
 
 				this.Progress++;
