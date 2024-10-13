@@ -6,18 +6,20 @@
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.IO;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
+	internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
 	{
 		#region Fields
-		private readonly Dictionary<string, Menu> menus;
+		private readonly Dictionary<string, Menu> menus = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -26,9 +28,8 @@
 			: base(jobManager)
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.CreateOnly = Tristate.True;
 			this.NewPageText = this.GetNewPageText;
-			this.OnUpdate = this.UpdateTerminal;
-			this.menus = LoadMenus();
 		}
 		#endregion
 
@@ -43,40 +44,13 @@
 
 		protected override IDictionary<Title, Terminal> LoadItems()
 		{
-			var retval = new Dictionary<Title, Terminal>();
-			var csv = new CsvFile(Starfield.ModFolder + "Term2.csv")
-			{
-				Encoding = Encoding.GetEncoding(1252)
-			};
-
-			csv.Load();
-			foreach (var row in csv)
-			{
-				var disambig = row["Disambig"];
-				if (disambig.Length > 0)
-				{
-					disambig = " (" + disambig + ")";
-				}
-
-				var name = row["Full"];
-				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name + disambig);
-				var image = row["Model"].Split(TextArrays.Backslash)[^1];
-				var menuId = row["TMLM"];
-				var menu = this.menus.TryGetValue(menuId, out var tryMenu) ? tryMenu : new Menu(row["EditorID"], "MENU NOT FOUND", menuId, ImmutableDictionary<int, Entry>.Empty);
-				var terminal = new Terminal(name, row["EditorID"], image, menu);
-				if (menu.Entries.Count == 0)
-				{
-					Debug.WriteLine("MainMenu " + menuId + " not found!");
-				}
-
-				retval.Add(title, terminal);
-			}
-
-			return retval;
+			this.LoadMenus();
+			return this.ReadTerm();
 		}
 		#endregion
 
 		#region Private Static Methods
+
 		private static string GlobalReplace(string text)
 		{
 			if (text is null || text.Length == 0)
@@ -88,66 +62,47 @@
 			text = text
 				.Replace("\\n", "\n", StringComparison.Ordinal)
 				.Trim();
-			if (":;*=".Contains(text[0], StringComparison.Ordinal))
-			{
-				text = "<nowiki/>" + text;
-			}
-
+			text = Dewikify().Replace(text, "<nowiki/>$&");
 			return text;
 		}
 
-		private static Dictionary<string, Menu> LoadMenus()
+		private static Dictionary<string, string> ReadDisambigs()
 		{
-			var retval = new Dictionary<string, Menu>(StringComparer.Ordinal);
-			var csv = new CsvFile(Starfield.ModFolder + "Tmlm.csv")
+			Dictionary<string, string> disambigs = new(StringComparer.Ordinal);
+			var disambigLines = File.ReadAllLines(Starfield.ModFolder + "Term Disambigs.txt");
+			foreach (var line in disambigLines)
 			{
-				Encoding = Encoding.GetEncoding(1252)
-			};
-
-			csv.Load();
-			Menu? menu = null;
-			var lastId = string.Empty;
-			var entries = new SortedDictionary<int, Entry>();
-			foreach (var row in csv)
-			{
-				var edid = row["EditorID"];
-				if (!string.Equals(edid, lastId, StringComparison.Ordinal))
-				{
-					if (menu is not null)
-					{
-						retval.Add(menu.EditorId, menu);
-					}
-
-					lastId = edid;
-					entries = [];
-					menu = new Menu(row["EditorID"], row["Full"], GlobalReplace(row["BTXT"]), entries);
-				}
-
-				var entry = new Entry(
-					row["ITXT"],
-					row["ISTX"],
-					int.Parse(row["ITID"], CultureInfo.CurrentCulture),
-					row["TNAM"],
-					GlobalReplace(row["UNAM"]) ?? string.Empty);
-				entries.Add(int.Parse(row["Index"], CultureInfo.CurrentCulture), entry);
+				var split = line.Split(TextArrays.Tab);
+				disambigs.Add(split[0], split[1]);
 			}
 
-			if (menu is not null)
-			{
-				retval.Add(menu.EditorId, menu);
-			}
-
-			return retval;
+			return disambigs;
 		}
+
+		[GeneratedRegex(@"^[\*:;=]", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
+		private static partial Regex Dewikify();
 		#endregion
 
 		#region Private Methods
 		private string GetNewPageText(Title title, Terminal item)
 		{
-			var menuList = new MenuList()
+			Menu menu;
+			if (item.MenuId.Length == 0)
 			{
-				item.MainMenu
-			};
+				menu = new Menu(item.EditorId, "NO MENUS", string.Empty, ImmutableDictionary<int, Entry>.Empty);
+			}
+			else
+			{
+				menu = this.menus.TryGetValue(item.MenuId, out var tryMenu)
+					? tryMenu
+					: new Menu(item.EditorId, "MENU NOT FOUND", item.MenuId, ImmutableDictionary<int, Entry>.Empty);
+				if (menu.Entries.Count == 0)
+				{
+					this.Warn("MainMenu " + item.MenuId + " not found!");
+				}
+			}
+
+			var menuList = new MenuList(menu);
 			var menuOffset = 0;
 			var sb = new StringBuilder();
 			sb.Append("{{Terminal Summary\n");
@@ -170,88 +125,151 @@
 
 			while (menuOffset < menuList.Count)
 			{
-				OutputMenu(sb, menuList, menuOffset);
+				this.OutputMenu(sb, menuList, menuOffset);
 				menuOffset++;
 			}
 
 			sb.Append("|}");
 			return sb.ToString();
+		}
 
-			void OutputMenu(StringBuilder sb, MenuList menuList, int menuOffset)
+		private void LoadMenus()
+		{
+			var csv = new CsvFile(Starfield.ModFolder + "Tmlm.csv")
 			{
-				var menu = menuList[menuOffset];
-				if (menuOffset > 0)
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			foreach (var row in csv.ReadRows())
+			{
+				var edid = row["EditorID"];
+				if (!this.menus.TryGetValue(edid, out var menu))
 				{
-					sb.Append("|-\n");
+					var entries = new SortedDictionary<int, Entry>();
+					menu = new Menu(edid, row["Full"], GlobalReplace(row["BTXT"]), entries);
+					this.menus.Add(menu.EditorId, menu);
 				}
 
+				var entry = new Entry(
+					row["ITXT"],
+					row["ISTX"],
+					int.Parse(row["ITID"], CultureInfo.CurrentCulture),
+					row["TNAM"],
+					GlobalReplace(row["UNAM"]) ?? string.Empty);
+				menu.Entries.Add(int.Parse(row["Index"], CultureInfo.CurrentCulture), entry);
+			}
+		}
+
+		private void OutputMenu(StringBuilder sb, MenuList menuList, int menuOffset)
+		{
+			var menu = menuList[menuOffset];
+			if (menuOffset > 0)
+			{
+				sb.Append("|-\n");
+			}
+
+			sb
+				.Append($"! colspan=2 | <span class=termHeader>")
+				.Append(menu.Title.Length == 0 ? "&nbsp;" : menu.Title)
+				.Append("</span>\n");
+			if (menu.Instructions.Length > 0)
+			{
 				sb
-					.Append($"! colspan=2 | <span class=termHeader>")
-					.Append(menu.Title)
-					.Append("</span>\n");
-				if (menu.Instructions.Length > 0)
+					.Append("|-\n")
+					.Append("| colspan=2 | ")
+					.Append(menu.Instructions)
+					.Append('\n');
+			}
+
+			foreach (var kvp in menu.Entries)
+			{
+				var entry = kvp.Value;
+				sb
+					.Append("|-\n")
+					.Append("| ")
+					.Append(entry.Heading);
+				if (entry.AltTitle.Length > 0)
 				{
-					sb
-						.Append("|-\n")
-						.Append("| colspan=2 | ")
-						.Append(menu.Instructions)
-						.Append('\n');
+					sb.Append($" ({entry.AltTitle})");
 				}
 
-				foreach (var kvp in menu.Entries)
+				sb.Append("\n| ");
+				if (entry.NextEntryId.Length > 0)
 				{
-					var entry = kvp.Value;
+					this.menus.TryGetValue(entry.NextEntryId, out var nextMenu);
+					var menuName = nextMenu?.Title ?? entry.NextEntryId;
+					sb.Append($"(Go to <code>{menuName}<code> menu.)\n");
+					if (nextMenu is not null && !menuList.Contains(entry.NextEntryId))
+					{
+						menuList.Add(nextMenu);
+					}
+				}
+				else
+				{
 					sb
-						.Append("|-\n")
-						.Append("| ")
-						.Append(entry.Heading);
-					if (entry.AltTitle.Length > 0)
-					{
-						sb.Append($" ({entry.AltTitle})");
-					}
-
-					sb.Append("\n| ");
-					if (entry.NextEntryId.Length > 0)
-					{
-						this.menus.TryGetValue(entry.NextEntryId, out var nextMenu);
-						var menuName = nextMenu?.Title ?? entry.NextEntryId;
-						sb.Append($"(Go to <code>{menuName}<code> menu.)\n");
-						if (nextMenu is not null && !menuList.Contains(entry.NextEntryId))
-						{
-							menuList.Add(nextMenu);
-						}
-					}
-					else
-					{
-						sb
-							.Append(entry.Text)
-							.Append('\n');
-					}
+						.Append(entry.Text)
+						.Append('\n');
 				}
 			}
 		}
 
+		private Dictionary<Title, Terminal> ReadTerm()
+		{
+			var disambigs = ReadDisambigs();
+			var retval = new Dictionary<Title, Terminal>();
+			var csv = new CsvFile(Starfield.ModFolder + "Term.csv")
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
+
+			foreach (var row in csv.ReadRows())
+			{
+				var edid = row["EditorID"];
+				var name = row["Full"];
+				if (disambigs.TryGetValue(edid, out var disambig))
+				{
+					disambig = " (" + disambig + ")";
+				}
+
+				var title = TitleFactory.FromUnvalidated(this.Site[StarfieldNamespaces.Starfield], name + disambig);
+				var image = row["Model"].Split(TextArrays.Backslash)[^1];
+				var menuId = row["TMLM"];
+				var terminal = new Terminal(name, edid, image, menuId);
+
+				if (!retval.TryAdd(title, terminal))
+				{
+					Debug.WriteLine(edid + '\t' + name);
+				}
+			}
+
+			return retval;
+		}
+
+		/*
 		private void UpdateTerminal(ContextualParser parser, Terminal item)
 		{
 			parser.Clear();
 			parser.AddText(this.GetNewPageText(parser.Title, item));
 		}
+		*/
 		#endregion
 
 		#region Internal Records
 		internal sealed record Entry(string Heading, string AltTitle, int Sort2, string NextEntryId, string Text);
 
-		internal sealed record Menu(string EditorId, string Title, string Instructions, IReadOnlyDictionary<int, Entry> Entries);
+		internal sealed record Menu(string EditorId, string Title, string Instructions, IDictionary<int, Entry> Entries);
 
-		internal sealed record Terminal(string Name, string EditorId, string ImageName, Menu MainMenu);
+		internal sealed record Terminal(string Name, string EditorId, string ImageName, string MenuId);
 		#endregion
 
 		#region Internal Classes
 		internal sealed class MenuList : KeyedCollection<string, Menu>
 		{
-			public MenuList()
+			public MenuList(Menu menu)
 				: base(StringComparer.Ordinal)
 			{
+				ArgumentNullException.ThrowIfNull(menu);
+				this.Add(menu);
 			}
 
 			protected override string GetKeyForItem(Menu item)
