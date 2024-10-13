@@ -36,7 +36,7 @@
 		{
 			var limits =
 				from ns in this.nsList
-				where ns.IsGameSpace && !ns.IsPseudoNamespace
+				where ns.IsGamespace && !ns.IsPseudoNamespace
 				select ns.BaseNamespace.Id;
 
 			var linkTitles = new TitleCollection(this.Site);

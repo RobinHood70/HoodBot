@@ -576,7 +576,7 @@
 			UespNamespaceList uespNamespaceList = new(this.Site);
 			foreach (var ns in uespNamespaceList)
 			{
-				if (ns.IsGameSpace)
+				if (ns.IsGamespace)
 				{
 					titlesToProtect.Add(new ProtectedTitle(ns.MainPage, GamespaceProtection));
 				}

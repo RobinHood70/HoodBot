@@ -4,9 +4,8 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Linq;
-	using System.Text.RegularExpressions;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
+	using RobinHood70.WallE.Eve;
 
 	// TODO: Expand to add all namespaces and allow all namespace names (including aliases) as a lookup value.
 	public class UespNamespaceList : KeyedCollection<string, UespNamespace>
@@ -20,30 +19,14 @@
 		{
 			// TODO: Read from API, which will inherently include all namespaces.
 			ArgumentNullException.ThrowIfNull(site);
-			if (site.LoadMessage("nsinfo-namespacelist") is string message)
+			if (site.AbstractionLayer is WikiAbstractionLayer eve)
 			{
-				var idTag = Regex.Match(message, @"{\|.*?\bid=(?<delim>['""]?)nsinfo-table\k<delim>\b(.|\n)*?\|-(?<text>(.|\n)*?)\|}", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-				var lines = idTag.Groups["text"].Value.Split("\n|-", StringSplitOptions.RemoveEmptyEntries);
-				foreach (var line in lines)
+				var input = new NsinfoInput();
+				var module = new ListNsinfo(eve, input);
+				var nsInfo = eve.RunListQuery(module);
+				foreach (var ns in nsInfo)
 				{
-					var row = line.Split(TextArrays.NewLineChars, 2)[^1];
-					if (row.Length > 0 && row[0] == '|')
-					{
-						row = row[1..];
-						var nsData = new UespNamespace(site, row);
-						this.Add(nsData);
-						this.nsIds.Add(nsData.Id, nsData);
-					}
-				}
-			}
-
-			// Add remaining namespaces
-			foreach (var ns in site.Namespaces)
-			{
-				if (!this.Contains(ns.Name))
-				{
-					// Second ns.Name is to ensure mixed case for backwards compatibility
-					this.Add(new UespNamespace(site, $"{ns.Name} || {ns.Name} || || || || || ||"));
+					this.Add(new UespNamespace(site, ns));
 				}
 			}
 		}

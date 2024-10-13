@@ -1,69 +1,33 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
-	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
 	public sealed class UespNamespace : IEquatable<UespNamespace>
 	{
-		#region Fields
-		private static readonly string[] FieldSeparator = ["||", "\n|"];
-		private static readonly HashSet<string> PhpTrue = new(StringComparer.OrdinalIgnoreCase) { "1", "yes", "true", "on" };
-		#endregion
-
 		#region Constructors
-		internal UespNamespace(Site site, string line)
+		internal UespNamespace(Site site, NsinfoItem ns)
 		{
 			ArgumentNullException.ThrowIfNull(site);
-			ArgumentException.ThrowIfNullOrEmpty(line);
-			var nsData = line.Split(FieldSeparator, StringSplitOptions.None);
-			for (var i = 0; i < nsData.Length; i++)
-			{
-				nsData[i] = nsData[i].Trim();
-			}
-
-			var baseName = nsData[0];
-			this.Base = baseName;
-			var baseSplit = baseName.Split(TextArrays.Colon, 2);
-			var baseNamespace = baseSplit[0];
-			if (baseSplit.Length == 2)
-			{
-				this.IsPseudoNamespace = true;
-				this.ModName = baseSplit[1];
-			}
-			else
-			{
-				this.IsPseudoNamespace = false;
-				this.ModName = string.Empty;
-			}
-
-			this.BaseNamespace = site[baseNamespace];
-			this.Full = baseName + (this.IsPseudoNamespace ? "/" : ":");
-			this.Id = nsData[1].Length == 0
-				? baseName.ToUpperInvariant()
-				: nsData[1];
-			var parentName = nsData[2].Length == 0
-				? baseName
-				: nsData[2];
-			this.Parent = site[parentName];
-			this.Name = nsData[3].Length == 0
-				? baseName
-				: nsData[3];
-			var pageName = nsData[4].Length == 0
-				? this.Full + this.Name
-				: nsData[4];
-			this.MainPage = TitleFactory.FromUnvalidated(site, pageName);
-			this.Category = nsData[5].Length == 0
-				? baseName
-				: nsData[5];
-			this.Trail = nsData[6].Length == 0
-				? string.Concat($"[[{this.MainPage}|{this.Name}]]")
-				: nsData[6];
-			this.IsGameSpace = nsData[7].Length == 0
-				? this.BaseNamespace.Id is (>= 100 and <= 199) or (>= 3000 and <= 4999)
-				: PhpTrue.Contains(nsData[7]);
+			ArgumentNullException.ThrowIfNull(ns);
+			this.Base = ns.Base;
+			this.BaseNamespace = site[ns.NsId];
+			this.Category = ns.Category;
+			this.Full = ns.Full;
+			this.Icon = ns.Icon;
+			this.IconUrl = ns.IconUrl.Length == 0 ? null : new Uri(ns.IconUrl);
+			this.Id = ns.Id;
+			this.IsGamespace = ns.IsGamespace;
+			this.IsModspace = ns.IsModspace;
+			this.IsPseudoNamespace = ns.IsPseudospace;
+			this.MainPage = TitleFactory.FromUnvalidated(site, ns.MainPage);
+			this.ModName = ns.ModName;
+			this.ModParent = ns.ModParent;
+			this.Name = ns.Name;
+			this.PageName = ns.PageName;
+			this.Parent = site[ns.Parent];
+			this.Trail = ns.Trail;
 		}
 		#endregion
 
@@ -76,9 +40,15 @@
 
 		public string Full { get; }
 
+		public string Icon { get; }
+
+		public Uri? IconUrl { get; }
+
 		public string Id { get; }
 
-		public bool IsGameSpace { get; }
+		public bool IsGamespace { get; }
+
+		public bool IsModspace { get; }
 
 		public bool IsPseudoNamespace { get; }
 
@@ -86,7 +56,11 @@
 
 		public string ModName { get; }
 
+		public string ModParent { get; }
+
 		public string Name { get; }
+
+		public string PageName { get; }
 
 		public Namespace Parent { get; }
 
