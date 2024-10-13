@@ -40,7 +40,7 @@
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
-		public override string Name { get; }
+		public override string Name { get; } // Set in constructor
 		#endregion
 
 		#region Protected Override Properties
