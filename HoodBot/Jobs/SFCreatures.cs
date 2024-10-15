@@ -30,7 +30,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create variant redirect"; // "Create/update creature page";
 
-		protected override bool IsValid(ContextualParser parser, Creature item) => parser.FindSiteTemplate("Creature Summary") is not null;
+		protected override bool IsValid(SiteParser parser, Creature item) => parser.FindSiteTemplate("Creature Summary") is not null;
 
 		protected override IDictionary<Title, Creature> LoadItems()
 		{
@@ -81,7 +81,7 @@
 				if (loc.Value.Count == 2 &&
 				loc.Value[0] is ILinkNode linkNode)
 				{
-					var link = SiteLink.FromLinkNode(template.TitleValue.Site, linkNode);
+					var link = SiteLink.FromLinkNode(template.Title.Site, linkNode);
 					foreach (var row in item.Variants)
 					{
 						if (string.Equals(link.Text, row["Planet"], StringComparison.OrdinalIgnoreCase))
@@ -123,13 +123,13 @@
 		#endregion
 
 		#region Private Methods
-		private static void AddVariants(ContextualParser parser, Creature item)
+		private static void AddVariants(SiteParser parser, Creature item)
 		{
-			var newNodes = new NodeCollection(parser.Factory);
+			var newNodes = new WikiNodeCollection(parser.Factory);
 			var insertPos = parser.FindIndex<IHeaderNode>(0);
 			if (insertPos == -1)
 			{
-				insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub"));
+				insertPos = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub"));
 				if (insertPos == -1)
 				{
 					insertPos = parser.Count;
@@ -159,7 +159,7 @@
 			existing.GetBacklinks("Template:Creature Summary");
 			foreach (var page in existing)
 			{
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				var template = parser.FindSiteTemplate("Creature Summary");
 				if (template is not null)
 				{
@@ -197,7 +197,7 @@
 			}
 		}
 
-		private void UpdateCreature(ContextualParser parser, Creature item)
+		private void UpdateCreature(SiteParser parser, Creature item)
 		{
 			var cs = parser.FindSiteTemplate("Creature Summary");
 			if (cs is not null)

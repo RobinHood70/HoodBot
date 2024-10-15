@@ -94,7 +94,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create/update planet";
 
-		protected override bool IsValid(ContextualParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
+		protected override bool IsValid(SiteParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
 
 		protected override IDictionary<Title, Planet> LoadItems()
 		{
@@ -125,7 +125,7 @@
 			"|orbital_position=\n" +
 			"}}\n\n{{Stub|Planet}}";
 
-		private static void UpdatePlanet(ContextualParser parser, Planet item)
+		private static void UpdatePlanet(SiteParser parser, Planet item)
 		{
 			var template = parser.FindSiteTemplate("Planet Infobox") ?? throw new InvalidOperationException();
 			var biomes = item.Biomes.Count == 0

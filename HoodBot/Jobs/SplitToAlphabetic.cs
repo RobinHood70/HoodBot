@@ -49,7 +49,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			foreach (var link in parser.LinkNodes)
 			{
 				var linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
@@ -63,8 +63,8 @@
 
 					var sortTitle = this.replacements.GetValueOrDefault(fragment, fragment);
 					var letter = sortTitle[0];
-					link.Title.Clear();
-					link.Title.AddText($"{linkTitle.FullPageName()} {letter}#{fragment}");
+					link.TitleNodes.Clear();
+					link.TitleNodes.AddText($"{linkTitle.FullPageName()} {letter}#{fragment}");
 				}
 			}
 
@@ -78,7 +78,7 @@
 			Page page;
 			var pageTitle = "Lore:Fish " + entry.Key;
 			page = this.Site.CreatePage(pageTitle);
-			var newParser = new ContextualParser(page);
+			var newParser = new SiteParser(page);
 			newParser.FromSections(entry.Value);
 			var refTemplates = newParser.FindSiteTemplates("Ref");
 			bool hasRefs = false;
@@ -136,7 +136,7 @@
 				throw new InvalidOperationException();
 			}
 
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			var sections = parser.ToSections(2);
 			var newSections = this.GroupSections(sections);
 			this.Progress = 0;

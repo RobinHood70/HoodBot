@@ -131,22 +131,22 @@
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
-		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		NodeCollection Parse(string? text);
+		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
+		WikiNodeCollection Parse(string? text);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion);
+		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
+		WikiNodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion);
 
 		/// <summary>Parses the specified text.</summary>
-		/// <param name="nodes">The <see cref="NodeCollection"/> to add to.</param>
+		/// <param name="nodes">The <see cref="WikiNodeCollection"/> to add to.</param>
 		/// <param name="text">The text to parse Null values will be treated as empty strings.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public void ParseInto(NodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion);
+		public void ParseInto(WikiNodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion);
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
 		/// <typeparam name="T">The type of node desired.</typeparam>

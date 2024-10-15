@@ -406,7 +406,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(ns);
 			ArgumentNullException.ThrowIfNull(link);
-			var titleText = link.Title.ToRaw();
+			var titleText = link.TitleNodes.ToRaw();
 			var valueSplit = SplitWhitespace(titleText);
 			SiteLink retval = TitleFactory.FromUnvalidated(ns, valueSplit.Value);
 			retval.OriginalTitle = titleText;
@@ -591,8 +591,8 @@
 		{
 			var thisNode = this.ToLinkNode();
 			ArgumentNullException.ThrowIfNull(node);
-			node.Title.Clear();
-			node.Title.AddRange(thisNode.Title);
+			node.TitleNodes.Clear();
+			node.TitleNodes.AddRange(thisNode.TitleNodes);
 			node.Parameters.Clear();
 			node.Parameters.AddRange(thisNode.Parameters);
 		}
@@ -717,7 +717,7 @@
 		private static void TrimTrailingSpace(ILinkNode linkNode)
 		{
 			var nodes = linkNode.Parameters.Count == 0
-				? linkNode.Title
+				? linkNode.TitleNodes
 				: linkNode.Parameters[^1].Value;
 			if (nodes[^1] is ITextNode last)
 			{

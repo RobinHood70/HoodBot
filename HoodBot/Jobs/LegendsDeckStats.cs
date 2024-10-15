@@ -24,7 +24,7 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			SortedDictionary<int, int> powerCount = [];

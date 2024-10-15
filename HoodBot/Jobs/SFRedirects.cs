@@ -28,7 +28,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create redirect";
 
-		protected override bool IsValid(ContextualParser parser, string item) => true;
+		protected override bool IsValid(SiteParser parser, string item) => true;
 
 		protected override IDictionary<Title, string> LoadItems()
 		{

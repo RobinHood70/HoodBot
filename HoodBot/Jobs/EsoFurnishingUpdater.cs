@@ -125,7 +125,7 @@
 
 		protected override string GetEditSummary(Page page) => "Update info from ESO database";
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			if (this.GenericTemplateFixes(template))
@@ -204,7 +204,7 @@
 		#region Private Methods
 		private void CheckImage(SiteTemplateNode template, string name, string link)
 		{
-			var fileSpace = template.TitleValue.Site[MediaWikiNamespaces.File];
+			var fileSpace = template.Title.Site[MediaWikiNamespaces.File];
 			var imageName = Furnishing.ImageName(name);
 			if (template.GetValue("image") is string imageValue)
 			{

@@ -63,17 +63,17 @@
 			var findTitles = new TitleCollection(this.Site);
 			foreach (var page in this.Pages)
 			{
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				foreach (var linkTemplate in parser.FindSiteTemplates("Lore Link"))
 				{
 					var ns = this.GetNamespace(linkTemplate, page.Title);
 					string term;
-					if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
+					if (linkTemplate.Find($"{ns.Id}link")?.Value is WikiNodeCollection overridden)
 					{
 						term = overridden.ToRaw().Trim();
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site, term));
 					}
-					else if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
+					else if (linkTemplate.Find(1)?.Value is WikiNodeCollection nodes)
 					{
 						term = nodes.ToRaw().Trim();
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.BaseNamespace, term));
@@ -118,7 +118,7 @@
 				}
 		*/
 
-		protected override void ParseText(ContextualParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
+		protected override void ParseText(SiteParser parser) => parser.Replace(node => this.LinkReplace(node, parser), false);
 		#endregion
 
 		#region Private Static Methods
@@ -137,12 +137,12 @@
 
 		private Title? ResolveTemplate(SiteTemplateNode linkTemplate, UespNamespace ns)
 		{
-			if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
+			if (linkTemplate.Find($"{ns.Id}link")?.Value is WikiNodeCollection overridden)
 			{
 				return TitleFactory.FromUnvalidated(this.Site, overridden.ToRaw());
 			}
 
-			if (linkTemplate.Find(1)?.Value is NodeCollection nodes)
+			if (linkTemplate.Find(1)?.Value is WikiNodeCollection nodes)
 			{
 				var pageName = nodes.ToRaw();
 				Title fullName = TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName);
@@ -199,10 +199,10 @@
 			return this.nsList.FromTitle(title) ?? throw new InvalidOperationException();
 		}
 
-		private NodeCollection? LinkReplace(IWikiNode node, ContextualParser parser)
+		private WikiNodeCollection? LinkReplace(IWikiNode node, SiteParser parser)
 		{
 			if (node is not SiteTemplateNode linkTemplate ||
-				!linkTemplate.TitleValue.PageNameEquals("Lore Link"))
+				!linkTemplate.Title.PageNameEquals("Lore Link"))
 			{
 				return null;
 			}
@@ -220,7 +220,7 @@
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 				? displayNode.Value.ToRaw()
 				: Title.ToLabelName(linkNode.Value.ToRaw());
-			return new NodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText));
+			return new WikiNodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText));
 		}
 
 		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)

@@ -97,7 +97,7 @@
 				action(page, template);
 			}
 
-			if (this.templateReplacers.TryGetValue(template.TitleValue, out var replacementActions))
+			if (this.templateReplacers.TryGetValue(template.Title, out var replacementActions))
 			{
 				foreach (var action in replacementActions)
 				{
@@ -247,7 +247,7 @@
 			var nsParam = template.Find("ns_base", "ns_id");
 			var baseName = nsParam?.Value.ToValue().Trim() ?? "Lore";
 			var nsBase = this.NamespaceList[baseName];
-			if (template.Find(1)?.Value is not NodeCollection pageName ||
+			if (template.Find(1)?.Value is not WikiNodeCollection pageName ||
 				!this.globalUpdates.TryGetValue(nsBase.GetTitle(pageName.ToValue().Trim()), out var target) ||
 				this.NamespaceList.FromTitle(target) is not UespNamespace targetNsBase)
 			{

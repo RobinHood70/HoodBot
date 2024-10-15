@@ -4,7 +4,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
-	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="NodeCollection"/>.</summary>
+	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="WikiNodeCollection"/>.</summary>
 	/// <seealso cref="IWikiNodeFactory" />
 	/// <remarks>Initializes a new instance of the <see cref="SiteNodeFactory"/> class.</remarks>
 	/// <param name="site">The <see cref="Site"/> value to be passed to those nodes that require it.</param>

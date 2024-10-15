@@ -87,7 +87,7 @@
 			ArgumentNullException.ThrowIfNull(node);
 			this
 				.BuildTagOpen("link", null, false)
-				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
+				.BuildTag("title", null, node.TitleNodes); // Title is always emitted, even if empty.
 			foreach (var part in node.Parameters)
 			{
 				part.Accept(this);
@@ -97,7 +97,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(NodeCollection nodes)
+		public void Visit(WikiNodeCollection nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			foreach (var node in nodes)
@@ -155,7 +155,7 @@
 			ArgumentNullException.ThrowIfNull(node);
 			this
 				.BuildTagOpen("template", null, false)
-				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
+				.BuildTag("title", null, node.TitleNodes); // Title is always emitted, even if empty.
 			foreach (var part in node.Parameters)
 			{
 				part.Accept(this);
@@ -174,7 +174,7 @@
 		#endregion
 
 		#region Private Methods
-		private XmlVisitor BuildTag(string name, Dictionary<string, int>? attributes, NodeCollection? inner)
+		private XmlVisitor BuildTag(string name, Dictionary<string, int>? attributes, WikiNodeCollection? inner)
 		{
 			var selfClosed = inner == null || inner.Count == 0;
 			this.BuildTagOpen(name, attributes, selfClosed);

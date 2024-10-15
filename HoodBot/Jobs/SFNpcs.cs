@@ -31,7 +31,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create NPC page";
 
-		protected override bool IsValid(ContextualParser parser, Npcs item) => parser.FindSiteTemplate("NPC Summary") is not null;
+		protected override bool IsValid(SiteParser parser, Npcs item) => parser.FindSiteTemplate("NPC Summary") is not null;
 
 		protected override IDictionary<Title, Npcs> LoadItems()
 		{
@@ -129,7 +129,7 @@
 				.Append("{{NewLine}}\n");
 		}
 
-		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, Npc search)
+		private static SiteTemplateNode? FindMatchingTemplate(SiteParser parser, Npc search)
 		{
 			var templates = parser.FindSiteTemplates("NPC Summary");
 			foreach (var template in templates)
@@ -211,10 +211,10 @@
 			}
 		}
 
-		private static void UpdateNpcs(ContextualParser parser, Npcs item)
+		private static void UpdateNpcs(SiteParser parser, Npcs item)
 		{
 			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Item Summary"));
+			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Item Summary"));
 			foreach (var npc in item)
 			{
 				if (FindMatchingTemplate(parser, npc) is null)

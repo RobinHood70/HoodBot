@@ -29,7 +29,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Add \"Card art\" to unlabeled gallery images";
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			if (this.resultCount == 0 && this.Results is PageResultHandler pageResults)
 			{

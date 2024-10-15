@@ -71,9 +71,9 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual bool ShouldAddPage(ContextualParser parser) => true;
+		protected virtual bool ShouldAddPage(SiteParser parser) => true;
 
-		protected virtual bool ShouldAddTemplate(SiteTemplateNode template, ContextualParser parser) => true;
+		protected virtual bool ShouldAddTemplate(SiteTemplateNode template, SiteParser parser) => true;
 		#endregion
 
 		#region Private Static Methods
@@ -94,18 +94,18 @@
 		#endregion
 
 		#region Private Methods
-		private void AddPage(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser)
+		private void AddPage(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, SiteParser parser)
 		{
 			foreach (var template in parser.FindAll<SiteTemplateNode>())
 			{
-				if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.TitleValue))
+				if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.Title))
 				{
 					this.AddTemplate(templates, paramTranslator, parser, template);
 				}
 			}
 		}
 
-		private void AddTemplate(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser, SiteTemplateNode template)
+		private void AddTemplate(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, SiteParser parser, SiteTemplateNode template)
 		{
 			templates.Add((parser.Page.Title, template));
 			foreach (var (name, _) in template.GetResolvedParameters())
@@ -144,7 +144,7 @@
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				if (this.ShouldAddPage(parser))
 				{
 					this.AddPage(templates, paramTranslator, parser);

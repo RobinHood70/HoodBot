@@ -191,7 +191,7 @@
 		#endregion
 
 		#region Private Delegates
-		private delegate int ProtectionTemplateFunc(ContextualParser parser, PageProtection protection, int insertPos);
+		private delegate int ProtectionTemplateFunc(SiteParser parser, PageProtection protection, int insertPos);
 		#endregion
 
 		#region Public Override Properties
@@ -302,14 +302,14 @@
 
 		#region Private Static Methods
 
-		private static void AddFooter(ContextualParser parser, PageProtection protection)
+		private static void AddFooter(SiteParser parser, PageProtection protection)
 		{
 			var footer = protection.Footer;
 			var footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
-			if (parser.FindSiteTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
+			if (parser.FindSiteTemplate(footerTemplate.Title.PageName) is SiteTemplateNode existing)
 			{
-				existing.Title.Clear();
-				existing.Title.AddRange(footerTemplate.Title);
+				existing.TitleNodes.Clear();
+				existing.TitleNodes.AddRange(footerTemplate.TitleNodes);
 			}
 			else
 			{
@@ -318,7 +318,7 @@
 			}
 		}
 
-		private static int AddHeader(ContextualParser parser, PageProtection protection, int insertPos)
+		private static int AddHeader(SiteParser parser, PageProtection protection, int insertPos)
 		{
 			var nodes = parser;
 			var header = protection.Header;
@@ -330,12 +330,12 @@
 			}
 
 			var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
-			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue == headerTemplate.TitleValue);
+			var index = nodes.FindIndex<SiteTemplateNode>(node => node.Title == headerTemplate.Title);
 			if (index != -1)
 			{
 				var existing = (SiteTemplateNode)nodes[index];
-				existing.Title.Clear();
-				existing.Title.AddRange(headerTemplate.Title);
+				existing.TitleNodes.Clear();
+				existing.TitleNodes.AddRange(headerTemplate.TitleNodes);
 				nodes.RemoveAt(index);
 				if (index < insertPos)
 				{
@@ -371,17 +371,17 @@
 			return insertPos + 1;
 		}
 
-		private static int AddJavascriptProtection(ContextualParser parser, PageProtection protection, int insertPos)
+		private static int AddJavascriptProtection(SiteParser parser, PageProtection protection, int insertPos)
 		{
 			ITemplateNode protectionTemplate;
-			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
+			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
 				if (currentPos > 0 && parser[currentPos - 1] is ITextNode textNode && textNode.Text.Equals("// ", StringComparison.Ordinal))
 				{
 					protectionTemplate = (ITemplateNode)parser[currentPos];
-					protectionTemplate.Title.Clear();
-					protectionTemplate.Title.AddText(ProtectionTemplateName);
+					protectionTemplate.TitleNodes.Clear();
+					protectionTemplate.TitleNodes.AddText(ProtectionTemplateName);
 					protectionTemplate.Remove("edit");
 					protectionTemplate.Remove("move");
 					protectionTemplate.Remove("2");
@@ -416,7 +416,7 @@
 			return insertPos + 2;
 		}
 
-		private static int AddStandardProtection(ContextualParser parser, PageProtection protection, int insertPos)
+		private static int AddStandardProtection(SiteParser parser, PageProtection protection, int insertPos)
 		{
 			insertPos = RemoveProtectionTemplate(parser, insertPos);
 			var editWord = ProtectionString[protection.EditProtection].ToLowerInvariant();
@@ -426,7 +426,7 @@
 
 		private static string CombinedProtectionString(ProtectionLevel editProtection, ProtectionLevel moveProtection) => editProtection == moveProtection ? ProtectionString[editProtection] : $"Edit={ProtectionString[editProtection]}, Move={ProtectionString[moveProtection]}";
 
-		private static string GetDate(ContextualParser parser)
+		private static string GetDate(SiteParser parser)
 		{
 			var minDate = DateTime.MaxValue;
 			foreach (var node in parser.FindAll<ITextNode>())
@@ -445,7 +445,7 @@
 				: string.Empty;
 		}
 
-		private static int InsertStandardProtectionTemplate(ContextualParser parser, PageProtection protection, int insertPos, string editWord, string moveWord)
+		private static int InsertStandardProtectionTemplate(SiteParser parser, PageProtection protection, int insertPos, string editWord, string moveWord)
 		{
 			var protectionTemplate = parser.Factory.TemplateNodeFromParts(ProtectionTemplateName);
 			if (protection.EditProtection != ProtectionLevel.None || protection.MoveProtection != ProtectionLevel.None)
@@ -471,14 +471,14 @@
 				}
 				: ProtectionLevel.None;
 
-		private static int RemoveProtectionTemplate(ContextualParser parser, int insertPos)
+		private static int RemoveProtectionTemplate(SiteParser parser, int insertPos)
 		{
-			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
+			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
 				var existing = (SiteTemplateNode)parser[currentPos];
-				existing.Title.Clear();
-				existing.Title.AddText(ProtectionTemplateName);
+				existing.TitleNodes.Clear();
+				existing.TitleNodes.AddText(ProtectionTemplateName);
 				existing.Remove("edit");
 				existing.Remove("move");
 				existing.Remove("2");
@@ -499,7 +499,7 @@
 		{
 			var protection = this.pageProtections[page.Title];
 			var insertPos = 0;
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			var nodes = parser;
 
 			// Figure out where to put a new Protection tempalte: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.

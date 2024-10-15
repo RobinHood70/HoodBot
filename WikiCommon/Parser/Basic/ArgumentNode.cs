@@ -24,7 +24,7 @@
 			ArgumentNullException.ThrowIfNull(name);
 			ArgumentNullException.ThrowIfNull(defaultValue);
 			this.Factory = factory;
-			this.Name = new NodeCollection(factory, name);
+			this.Name = new WikiNodeCollection(factory, name);
 			if (defaultValue.Count > 0)
 			{
 				foreach (var parameter in defaultValue)
@@ -35,9 +35,9 @@
 					}
 				}
 
-				// defaultValue comes to us from WikiStack as a list of IParameterNodes, but is never actually treated as such, so we morph the main default value into a NodeCollection then, if there are junk values after that, we add them to ExtraValues unaltered.
-				NodeCollection nodes = new(factory);
-				if (defaultValue[0].Name is NodeCollection valueName)
+				// defaultValue comes to us from WikiStack as a list of IParameterNodes, but is never actually treated as such, so we morph the main default value into a WikiNodeCollection then, if there are junk values after that, we add them to ExtraValues unaltered.
+				WikiNodeCollection nodes = new(factory);
+				if (defaultValue[0].Name is WikiNodeCollection valueName)
 				{
 					nodes.AddRange(valueName);
 					nodes.AddText("=");
@@ -63,7 +63,7 @@
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public NodeCollection? DefaultValue { get; private set; }
+		public WikiNodeCollection? DefaultValue { get; private set; }
 
 		/// <inheritdoc/>
 		public IReadOnlyList<IParameterNode>? ExtraValues => this.extraValues;
@@ -72,10 +72,10 @@
 		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
-		public NodeCollection Name { get; }
+		public WikiNodeCollection Name { get; }
 
 		/// <inheritdoc/>
-		public IEnumerable<NodeCollection> NodeCollections
+		public IEnumerable<WikiNodeCollection> NodeCollections
 		{
 			get
 			{
@@ -116,7 +116,7 @@
 
 		/// <summary>Adds a default value. If one exists, this will overwrite it.</summary>
 		/// <param name="value">The value to add.</param>
-		public void SetDefaultValue(IEnumerable<IWikiNode> value) => this.DefaultValue = new NodeCollection(this.Factory, value);
+		public void SetDefaultValue(IEnumerable<IWikiNode> value) => this.DefaultValue = new WikiNodeCollection(this.Factory, value);
 
 		/// <summary>Trims all extra values from the argument.</summary>
 		public void TrimExtraValues() => this.extraValues = null;

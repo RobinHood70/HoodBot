@@ -30,7 +30,7 @@
 
 		protected override string GetEditSummary(Page page) => "Comment out missing images";
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			if (template.Find("image") is IParameterNode image)
 			{

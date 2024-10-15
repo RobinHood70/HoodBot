@@ -16,30 +16,30 @@
 
 	/// <summary>A collection of <see cref="IWikiNode"/>s representing wiki text. Implemented as a linked list.</summary>
 	/// <seealso cref="LinkedList{T}" />
-	public class NodeCollection : List<IWikiNode>
+	public class WikiNodeCollection : List<IWikiNode>
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
-		public NodeCollection(IWikiNodeFactory factory)
+		public WikiNodeCollection(IWikiNodeFactory factory)
 		{
 			ArgumentNullException.ThrowIfNull(factory);
 			this.Factory = factory;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		/// <param name="nodes">The nodes to initialize the collection with.</param>
-		public NodeCollection(IWikiNodeFactory factory, params IWikiNode[] nodes)
+		public WikiNodeCollection(IWikiNodeFactory factory, params IWikiNode[] nodes)
 			: this(factory, (IEnumerable<IWikiNode>)nodes)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		/// <param name="nodes">The nodes to initialize the collection with.</param>
-		public NodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
+		public WikiNodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
 			: base(nodes)
 		{
 			ArgumentNullException.ThrowIfNull(factory);
@@ -158,7 +158,7 @@
 			}
 		}
 
-		/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="NodeCollection"/>.</summary>
+		/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 		/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
 		/// <param name="text">The text to be added.</param>
 		public void AddParsed([Localizable(false)] string text)
@@ -169,16 +169,16 @@
 
 		/// <summary>Creates a shallow copy of the collection.</summary>
 		/// <returns>A shallow copy of all nodes in the collection, along with the factory.</returns>
-		public NodeCollection Clone()
+		public WikiNodeCollection Clone()
 		{
 			var nodes = new IWikiNode[this.Count];
 			this.CopyTo(nodes);
-			return new NodeCollection(this.Factory, nodes);
+			return new WikiNodeCollection(this.Factory, nodes);
 		}
 
-		/// <summary>Copies the surrounding whitespace from the current NodeCollection to the provided value.</summary>
+		/// <summary>Copies the surrounding whitespace from the current WikiNodeCollection to the provided value.</summary>
 		/// <param name="value">The value to format.</param>
-		/// <returns>The value with the same surrounding whitespace as the provided NodeCollection.</returns>
+		/// <returns>The value with the same surrounding whitespace as the provided WikiNodeCollection.</returns>
 		public string CopyFormatTo(string? value)
 		{
 			var (leading, trailing) = this.ToValue().GetSurroundingWhitespace();
@@ -383,8 +383,8 @@
 
 		/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A new NodeCollection created from the text.</returns>
-		public NodeCollection Parse(string text) => this.Factory.Parse(text, this.Factory.InclusionType, this.Factory.StrictInclusion);
+		/// <returns>A new WikiNodeCollection created from the text.</returns>
+		public WikiNodeCollection Parse(string text) => this.Factory.Parse(text, this.Factory.InclusionType, this.Factory.StrictInclusion);
 
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -400,7 +400,7 @@
 		/// <summary>Replaces the specified node with zero or more new nodes.</summary>
 		/// <param name="replaceMethod">A function to replace a single node with a collection of new nodes.</param>
 		/// <param name="searchReplacements">A value indicating whether replacement nodes should be searched for new matches.</param>
-		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new NodeCollection that will replace the current node.
+		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 		/// </remarks>
 		public void Replace(NodeReplacer replaceMethod, bool searchReplacements)
 		{
@@ -436,15 +436,15 @@
 		/// <param name="oldValue">The text to look for.</param>
 		/// <param name="newValue">The text that should replace <paramref name="oldValue"/> with.</param>
 		/// <param name="comparisonType">The string comparison method to use.</param>
-		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new NodeCollection that will replace the current node.
+		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 		/// </remarks>
 		public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => this.ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
 
-		/// <summary>Converts the <see cref="NodeCollection"/> to raw text.</summary>
+		/// <summary>Converts the <see cref="WikiNodeCollection"/> to raw text.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public string ToRaw() => WikiTextVisitor.Raw(this);
 
-		/// <summary>Converts the <see cref="NodeCollection"/> to it's value text.</summary>
+		/// <summary>Converts the <see cref="WikiNodeCollection"/> to it's value text.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public string ToValue() => WikiTextVisitor.Value(this);
 
@@ -514,16 +514,16 @@
 		#endregion
 
 		#region Private Static Methods
-		private NodeCollection? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
+		private WikiNodeCollection? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
 		{
 			switch (match)
 			{
 				case ICommentNode comment:
 					comment.Comment = comment.Comment.Replace(from, to, comparison);
-					return new NodeCollection(this.Factory, comment);
+					return new WikiNodeCollection(this.Factory, comment);
 				case ITextNode text:
 					text.Text = text.Text.Replace(from, to, comparison);
-					return new NodeCollection(this.Factory, text);
+					return new WikiNodeCollection(this.Factory, text);
 				default:
 					return null;
 			}

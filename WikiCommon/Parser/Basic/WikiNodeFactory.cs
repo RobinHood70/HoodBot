@@ -9,7 +9,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
 
-	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="NodeCollection"/>.</summary>
+	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="WikiNodeCollection"/>.</summary>
 	/// <seealso cref="IWikiNodeFactory" />
 	public class WikiNodeFactory : IWikiNodeFactory
 	{
@@ -57,7 +57,7 @@
 				return string.Empty;
 			}
 
-			// Because we're not returning a NodeCollection, the default factory does everything we need here.
+			// Because we're not returning a WikiNodeCollection, the default factory does everything we need here.
 			WikiNodeFactory factory = new();
 			var nodes = factory.Parse(value);
 			foreach (var node in nodes)
@@ -204,26 +204,26 @@
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public NodeCollection Parse(string? text) => this.Parse(text, InclusionType.Raw, false);
+		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
+		public WikiNodeCollection Parse(string? text) => this.Parse(text, InclusionType.Raw, false);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
+		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
+		public WikiNodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
 		{
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
-			return new NodeCollection(this, stack.GetNodes());
+			return new WikiNodeCollection(this, stack.GetNodes());
 		}
 
 		/// <summary>Parses the specified text.</summary>
-		/// <param name="nodes">The <see cref="NodeCollection"/> to add to.</param>
+		/// <param name="nodes">The <see cref="WikiNodeCollection"/> to add to.</param>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public void ParseInto(NodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion)
+		public void ParseInto(WikiNodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			this.InclusionType = inclusionType;

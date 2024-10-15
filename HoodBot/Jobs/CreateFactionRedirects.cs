@@ -44,7 +44,7 @@
 			factionPages.GetNamespace(searchTitle.Namespace.Id, Filter.Any, searchTitle.PageName);
 			foreach (var factionPage in factionPages)
 			{
-				var parser = new ContextualParser(factionPage);
+				var parser = new SiteParser(factionPage);
 				var sections = parser.ToSections(2);
 				foreach (var section in sections)
 				{
@@ -55,7 +55,7 @@
 
 					var headerTitle = section.Header.GetTitle(true);
 					this.CreatePage(factionPage, headerTitle, headerTitle);
-					var factionTemplates = section.Content.FindAll<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Factions"));
+					var factionTemplates = section.Content.FindAll<SiteTemplateNode>(template => template.Title.PageNameEquals("Factions"));
 					foreach (var node in factionTemplates)
 					{
 						var edid = node.GetRaw("edid");

@@ -87,7 +87,7 @@
 			this.Pages.GetBacklinks("Template:Online Furnishing Antiquity/Row", BacklinksTypes.EmbeddedIn, false, Filter.Exclude);
 		}
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			string? idText = template.GetValue("id");
 			if (idText is not null)
@@ -113,7 +113,7 @@
 		#region Private Static Methods
 		private static void UpdateFilePage(Title from, Page to)
 		{
-			var parser = new ContextualParser(to);
+			var parser = new SiteParser(to);
 			if (EsoSpace.FindOrCreateOnlineFile(parser) is not SiteTemplateNode template)
 			{
 				// Template should ALWAYS be found, but in the unlikely event of a major change, display warning and continue.
@@ -122,9 +122,9 @@
 			}
 
 			// A bit kludgy compared to just finding the correct insert position, but ensures that the values are always sorted in pairs and after any named parameters.
-			if (!template.Title.ToRaw().EndsWith('\n'))
+			if (!template.TitleNodes.ToRaw().EndsWith('\n'))
 			{
-				template.Title.AddText("\n");
+				template.TitleNodes.AddText("\n");
 			}
 
 			var trimmed = Lead.TrimCruft(from.PageName);

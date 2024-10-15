@@ -46,7 +46,7 @@
 		public static string GetTitleText(this IBacklinkNode backlink)
 		{
 			ArgumentNullException.ThrowIfNull(backlink);
-			var retval = backlink.Title.ToValue();
+			var retval = backlink.TitleNodes.ToValue();
 			retval = WikiTextUtilities.DecodeAndNormalize(retval);
 			return retval.Trim();
 		}
@@ -67,7 +67,7 @@
 				foreach (var param in parameters)
 				{
 					var value = param.Value.ToRaw();
-					yield return param.Name is NodeCollection name
+					yield return param.Name is WikiNodeCollection name
 						? (name.ToRaw().Trim(), value.Trim())
 						: (null, value);
 				}
@@ -164,7 +164,7 @@
 		public static string ToKeyValue(this IParameterNode parameter)
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
-			return parameter.Name is NodeCollection name
+			return parameter.Name is WikiNodeCollection name
 				? name.ToRaw() + '=' + parameter.Value.ToRaw()
 				: parameter.Value.ToRaw();
 		}
@@ -174,7 +174,7 @@
 		/// <param name="value">A variable to place the value into. Note that blank values will still be returned here with their full content, even when the return value is true.</param>
 		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
-		public static bool TryGetValue(this IParameterNode? parameter, out NodeCollection? value)
+		public static bool TryGetValue(this IParameterNode? parameter, out WikiNodeCollection? value)
 		{
 			value = parameter?.Value;
 			return value?.Count > 0 && value[0] is ITextNode && value?.ToRaw().Trim().Length > 0; // Check the whole thing in case of fragmented text nodes.
@@ -186,7 +186,7 @@
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static string ValueOrDefault(this IParameterNode? parameter, string defaultValue)
 		{
-			if (parameter?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)
+			if (parameter?.Value is not WikiNodeCollection nullNodes || nullNodes.Count == 0)
 			{
 				return defaultValue;
 			}
@@ -258,7 +258,7 @@
 				retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 				template.Parameters.Insert(index + 1, retval);
 				var copyNode = index == 0
-					? template.Title
+					? template.TitleNodes
 					: template.Parameters[index - 1].Value;
 				if (copyNode.ToValue().GetTrailingWhitespace() is string trailingSpace)
 				{
@@ -729,7 +729,7 @@
 		/// <param name="condition">The condition for the parameter to be removed.</param>
 		/// <returns><see langword="true"/>if any parameters were removed.</returns>
 		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-		public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<NodeCollection?> condition)
+		public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<WikiNodeCollection?> condition)
 		{
 			ArgumentNullException.ThrowIfNull(template);
 			ArgumentNullException.ThrowIfNull(parameterName);
@@ -771,9 +771,9 @@
 		{
 			ArgumentNullException.ThrowIfNull(template);
 			newTitle ??= string.Empty;
-			var (leading, trailing) = GetSurroundingSpace(template.Title.ToValue());
-			template.Title.Clear();
-			template.Title.AddText(leading + newTitle + trailing);
+			var (leading, trailing) = GetSurroundingSpace(template.TitleNodes.ToValue());
+			template.TitleNodes.Clear();
+			template.TitleNodes.AddText(leading + newTitle + trailing);
 		}
 
 		/// <summary>Sorts parameters in the order specified.</summary>
@@ -833,7 +833,7 @@
 		/// <param name="parameterName">The parameter name.</param>
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
-			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
+			template?.Find(parameterName)?.Value is WikiNodeCollection nullNodes &&
 			nullNodes.Count != 0 &&
 			nullNodes.ToRaw().Trim().Length != 0;
 
@@ -920,7 +920,7 @@
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static string ValueOrDefault(this ITemplateNode? template, string parameterName, string defaultValue)
 		{
-			if (template?.Find(parameterName)?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)
+			if (template?.Find(parameterName)?.Value is not WikiNodeCollection nullNodes || nullNodes.Count == 0)
 			{
 				return defaultValue;
 			}

@@ -17,7 +17,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Remove redundant imgdesc";
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			if (template.Find("titlename") != null)
 			{

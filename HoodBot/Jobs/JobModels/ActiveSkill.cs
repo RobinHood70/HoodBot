@@ -99,7 +99,7 @@
 			UpdateParameter(factory, template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			UpdateParameter(factory, template, "linerank", this.learnedLevel.ToStringInvariant());
 			UpdateParameter(factory, template, "cost", baseSkillCost);
-			if (template.Find("cost")?.Value is NodeCollection paramValue)
+			if (template.Find("cost")?.Value is WikiNodeCollection paramValue)
 			{
 				// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
 				EsoReplacer.ReplaceGlobal(paramValue);

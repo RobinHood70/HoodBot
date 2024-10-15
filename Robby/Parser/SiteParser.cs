@@ -11,41 +11,41 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	/// <summary>This is a higher-level parser that works on a NodeCollection, but adds functionality to resolve magic words and templates within the context of the page.</summary>
-	public class ContextualParser : NodeCollection, ITitle
+	/// <summary>This is a higher-level parser that works on a WikiNodeCollection, but adds functionality to resolve magic words and templates within the context of the page.</summary>
+	public class SiteParser : WikiNodeCollection, ITitle
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 		/// <param name="page">The page to parse.</param>
-		public ContextualParser(Page page)
+		public SiteParser(Page page)
 			: this(page, page?.Text, InclusionType.Raw, false)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
-		public ContextualParser(Page page, string? text)
+		public SiteParser(Page page, string? text)
 			: this(page, text, InclusionType.Raw, false)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 		/// <param name="page">The page to parse.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public ContextualParser(Page page, InclusionType inclusionType, bool strictInclusion)
+		public SiteParser(Page page, InclusionType inclusionType, bool strictInclusion)
 			: this(page, page?.Text, inclusionType, strictInclusion)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public ContextualParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
+		public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
 			: base(FactoryFromPage(page))
 		{
 			this.Page = page;
@@ -97,7 +97,7 @@
 			for (var i = 0; i < this.Count; i++)
 			{
 				if (this[i] is SiteLinkNode link &&
-					link.TitleValue.Namespace == MediaWikiNamespaces.Category)
+					link.Title.Namespace == MediaWikiNamespaces.Category)
 				{
 					if (TitleFactory.FromBacklinkNode(this.Site, link).Title == catTitle)
 					{
@@ -249,7 +249,7 @@
 					{
 						foreach (var find in findNames)
 						{
-							if (siteTemplate.TitleValue == find)
+							if (siteTemplate.Title == find)
 							{
 								yield return siteTemplate;
 							}

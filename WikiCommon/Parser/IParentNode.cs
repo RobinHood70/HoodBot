@@ -13,7 +13,7 @@
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		IEnumerable<NodeCollection> NodeCollections { get; }
+		IEnumerable<WikiNodeCollection> NodeCollections { get; }
 		#endregion
 	}
 }

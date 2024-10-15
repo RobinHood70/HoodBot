@@ -66,7 +66,7 @@
 		#region Private Methods
 		private void SearchPage(Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			var text = new List<string>();
 			foreach (var textNode in parser.TextNodes)
 			{

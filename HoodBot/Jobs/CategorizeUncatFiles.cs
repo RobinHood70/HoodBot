@@ -26,7 +26,7 @@
 
 		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			var headerFound = false;

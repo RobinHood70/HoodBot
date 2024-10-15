@@ -46,7 +46,7 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				foreach (var node in parser.LinkNodes)
 				{
 					FullTitle link = new(TitleFactory.FromBacklinkNode(this.Site, node));

@@ -111,14 +111,14 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var originalParser = new ContextualParser(page);
+			var originalParser = new SiteParser(page);
 			var index = originalParser.FindIndex(node => node is SiteTemplateNode templateNode &&
-				templateNode.TitleValue.Namespace == MediaWikiNamespaces.Template &&
-				templateNode.TitleValue.PageNameEquals("Online Furnishing Summary"));
+				templateNode.Title.Namespace == MediaWikiNamespaces.Template &&
+				templateNode.Title.PageNameEquals("Online Furnishing Summary"));
 			if (index != -1)
 			{
 				var template = (SiteTemplateNode)originalParser[index];
-				var parser = new ContextualParser(this.Site.CreatePage(page.Title, string.Empty))
+				var parser = new SiteParser(this.Site.CreatePage(page.Title, string.Empty))
 				{
 					template
 				};
@@ -149,7 +149,7 @@
 
 		#region Private Static Methods
 		/*
-		private static void ConvertAchievements(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertAchievements(SiteParser parser, SiteTemplateNode template)
 		{
 			if (template.GetRaw("achievement") is string achievement && IsCollectible(template))
 			{
@@ -177,7 +177,7 @@
 				string.Equals(furnLimitType, "Special Collectible", StringComparison.OrdinalIgnoreCase);
 		}
 
-		private static void ConvertAntiquity(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertAntiquity(SiteParser parser, SiteTemplateNode template)
 		{
 			if (template.GetRaw("antiquity") is string antiquity)
 			{
@@ -241,7 +241,7 @@
 			}
 		}
 
-		private static void ConvertBooks(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertBooks(SiteParser parser, SiteTemplateNode template)
 		{
 			var bookList = new List<string>(36);
 			for (var i = 1; i <= 36; i++)
@@ -290,7 +290,7 @@
 			}
 		}
 
-		private static void ConvertCrafting(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertCrafting(SiteParser parser, SiteTemplateNode template)
 		{
 			if (template.Find(CraftingParameters) is not null)
 			{
@@ -332,7 +332,7 @@
 			}
 		}
 
-		private static void ConvertHouses(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertHouses(SiteParser parser, SiteTemplateNode template)
 		{
 			if (template.GetRaw("cat") is string cat && !NonHouseCats.Contains(cat))
 			{
@@ -345,7 +345,7 @@
 			}
 		}
 
-		private static void ConvertLead(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertLead(SiteParser parser, SiteTemplateNode template)
 		{
 			// template.SetTitle("User:RobinHood70/Vav");
 			// template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("name", parser.Page.PageName + '\n'));
@@ -364,7 +364,7 @@
 			parser.Add(parser.Factory.TemplateNodeFromParts("NewLeft"));
 		}
 
-		private static void ConvertPurchase(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertPurchase(SiteParser parser, SiteTemplateNode template)
 		{
 			if (IsCollectible(template) && !RewardProhibited(template))
 			{
@@ -437,7 +437,7 @@
 				vendorCrowns.Contains("Housing", StringComparison.OrdinalIgnoreCase));
 		}
 
-		private static void ConvertSources(ContextualParser parser, SiteTemplateNode template)
+		private static void ConvertSources(SiteParser parser, SiteTemplateNode template)
 		{
 			var source = template.GetRaw("source");
 			var bundles = template.GetRaw("bundles");

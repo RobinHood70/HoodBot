@@ -15,7 +15,7 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			foreach (var template in parser.TemplateNodes)

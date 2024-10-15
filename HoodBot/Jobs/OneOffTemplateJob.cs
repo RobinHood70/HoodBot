@@ -21,7 +21,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Use orbital_position instead of order";
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			var op = template.Find("orbital_position");
 			if (op is not null && op.Value.ToRaw().Trim().Length > 0)

@@ -51,7 +51,7 @@
 			this.Pages.GetBacklinks("Template:Ref", BacklinksTypes.EmbeddedIn);
 		}
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			var nameChanges = this.UpdateRefTargets(parser);
 			UpdateRefNames(parser, nameChanges);
@@ -59,7 +59,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static void UpdateRefNames(ContextualParser parser, Dictionary<string, string> nameChanges)
+		private static void UpdateRefNames(SiteParser parser, Dictionary<string, string> nameChanges)
 		{
 			foreach (var reference in parser.FindSiteTemplates("Ref"))
 			{
@@ -85,7 +85,7 @@
 		#endregion
 
 		#region Private Methods
-		private BookInfo? FindBookInfo(ContextualParser parser, NodeCollection target)
+		private BookInfo? FindBookInfo(SiteParser parser, WikiNodeCollection target)
 		{
 			var targetText = target.ToRaw().Trim();
 			var bookInfo = (string.Equals(targetText, "{{TIL|Interview with Three Argonians in Shadowfen|interview-three-argonians-shadowfen}}", StringComparison.OrdinalIgnoreCase) ||
@@ -95,7 +95,7 @@
 			return bookInfo;
 		}
 
-		private BookInfo? GetBookNameForRef(Title title, NodeCollection target)
+		private BookInfo? GetBookNameForRef(Title title, WikiNodeCollection target)
 		{
 			var targetIndex = 0;
 			if (target.Count == 3 &&
@@ -113,10 +113,10 @@
 
 			return target[targetIndex] switch
 			{
-				SiteTemplateNode template => template.TitleValue.PageNameEquals("Cite Book")
+				SiteTemplateNode template => template.Title.PageNameEquals("Cite Book")
 					? this.GetCiteBookTarget(title, template)
 					: null,
-				SiteLinkNode link => this.bookLookup.TryGetValue(link.TitleValue, out var retval)
+				SiteLinkNode link => this.bookLookup.TryGetValue(link.Title, out var retval)
 					? retval
 					: null,
 				_ => null,
@@ -134,7 +134,7 @@
 				: null;
 		}
 
-		private Dictionary<string, string> UpdateRefTargets(ContextualParser parser)
+		private Dictionary<string, string> UpdateRefTargets(SiteParser parser)
 		{
 			var retval = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 			foreach (var reference in parser.FindSiteTemplates("Ref"))

@@ -20,7 +20,7 @@
 		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(nodeFactory, title, parameters)
 		{
-			this.TitleValue = TitleFactory.FromUnvalidated(nodeFactory.Site, this.GetTitleText());
+			this.Title = TitleFactory.FromUnvalidated(nodeFactory.Site, this.GetTitleText());
 		}
 		#endregion
 
@@ -28,7 +28,7 @@
 
 		/// <summary>Gets the site-specific title value.</summary>
 		/// <value>The title value.</value>
-		public Title TitleValue { get; }
+		public Title Title { get; }
 		#endregion
 	}
 }

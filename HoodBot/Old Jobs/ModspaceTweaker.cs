@@ -55,7 +55,7 @@
 				this.ChangeExternalLinks(page);
 				this.FixQuestLinksRegex(page);
 
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				DoBookSummary(parser, loreBooks);
 				FixFactions(parser);
 				AddBold(parser, page.SubPageName);
@@ -71,7 +71,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static void AddBold(ContextualParser parser, string pageName)
+		private static void AddBold(SiteParser parser, string pageName)
 		{
 			var headerNodes = 0;
 			foreach (var node in parser)
@@ -106,7 +106,7 @@
 			}
 		}
 
-		private static void DoBookSummary(ContextualParser parser, HashSet<string> loreBooks)
+		private static void DoBookSummary(SiteParser parser, HashSet<string> loreBooks)
 		{
 			var nodes = parser;
 			var i = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
@@ -145,7 +145,7 @@
 			}
 		}
 
-		private static void FixFactions(ContextualParser parser)
+		private static void FixFactions(SiteParser parser)
 		{
 			foreach (var npcSummary in parser.FindTemplates("NPC Summary"))
 			{

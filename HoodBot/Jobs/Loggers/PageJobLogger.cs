@@ -79,7 +79,7 @@
 		#endregion
 
 		#region Private Methods
-		private static bool UpdateCurrentStatus(ContextualParser parser, string status)
+		private static bool UpdateCurrentStatus(SiteParser parser, string status)
 		{
 			var currentTask = parser.FindIndex<IHeaderNode>(header => string.Equals(header.GetTitle(true), "Current Task", StringComparison.Ordinal));
 			var taskLog = parser.FindIndex<IHeaderNode>(currentTask + 1);
@@ -101,10 +101,10 @@
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			this.logPage ??= this.logTitle.Load();
-			ContextualParser parser = new(this.logPage);
+			SiteParser parser = new(this.logPage);
 			var factory = parser.Factory;
 			var sameTaskText = UpdateCurrentStatus(parser, this.status);
-			var firstEntry = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
+			var firstEntry = parser.FindIndex<SiteTemplateNode>(template => template.Title.PageNameEquals("/Entry"));
 			if (firstEntry == -1)
 			{
 				// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.

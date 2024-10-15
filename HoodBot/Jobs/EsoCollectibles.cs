@@ -56,9 +56,9 @@
 			this.StatusWriteLine("Getting wiki info");
 			if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
 			{
-				var extract = new ContextualParser(page);
+				var extract = new SiteParser(page);
 				var pre = extract.FindSiteTemplate("Pre");
-				if (pre?.Find(1)?.Value is NodeCollection nodes &&
+				if (pre?.Find(1)?.Value is WikiNodeCollection nodes &&
 					nodes.Count > 0 &&
 					nodes[0] is ITagNode tag &&
 					string.Equals(tag.Name, "nowiki", StringComparison.Ordinal))
@@ -104,7 +104,7 @@
 			}
 		}
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			var page = parser.Page;
 			parser.ReplaceText(
@@ -259,7 +259,7 @@
 
 		private void ParseCrate(Page crate)
 		{
-			ContextualParser parser = new(crate);
+			SiteParser parser = new(crate);
 			//// var tier = string.Empty;
 			foreach (var node in parser)
 			{
@@ -267,7 +267,7 @@
 				{
 					//// tier = GetSectionTitle(header);
 				}
-				else if (node is SiteTemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
+				else if (node is SiteTemplateNode template && template.Title.PageNameEquals("ESO Crate Card List"))
 				{
 					foreach (var parameter in template.ParameterCluster(2))
 					{
@@ -350,7 +350,7 @@
 
 			public string Name { get; }
 
-			public NodeCollection? NewContent { get; private set; }
+			public WikiNodeCollection? NewContent { get; private set; }
 
 			public string NickName { get; }
 

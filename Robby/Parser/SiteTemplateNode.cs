@@ -21,7 +21,7 @@
 		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(factory, title, parameters)
 		{
-			this.TitleValue = TitleFactory.FromUnvalidated(factory.Site[MediaWikiNamespaces.Template], this.GetTitleText());
+			this.Title = TitleFactory.FromUnvalidated(factory.Site[MediaWikiNamespaces.Template], this.GetTitleText());
 		}
 		#endregion
 
@@ -29,7 +29,7 @@
 
 		/// <summary>Gets the site-specific title value.</summary>
 		/// <value>The title value.</value>
-		public Title TitleValue { get; }
+		public Title Title { get; }
 		#endregion
 	}
 }

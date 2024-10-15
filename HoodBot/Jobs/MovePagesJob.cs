@@ -278,7 +278,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			this.BacklinkPageLoaded(parser);
 			parser.UpdatePage();
 		}
@@ -289,7 +289,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser)
+		protected virtual void BacklinkPageLoaded(SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			this.ReplaceBacklinks(parser.Page, parser);
@@ -375,7 +375,7 @@
 			}
 		}
 
-		protected virtual void CustomEdit(ContextualParser parser, Title from)
+		protected virtual void CustomEdit(SiteParser parser, Title from)
 		{
 		}
 
@@ -564,7 +564,7 @@
 				if (editPages.TryGetValue(action.Key, out var editPage))
 				{
 					var actionValue = action.Value;
-					var parser = new ContextualParser(editPage);
+					var parser = new SiteParser(editPage);
 					var isMinor = true;
 					string? editSummary = null;
 					if (actionValue.HasAction(ReplacementActions.Edit))
@@ -600,7 +600,7 @@
 		{
 		}
 
-		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
+		protected virtual void ReplaceBacklinks(Page page, WikiNodeCollection nodes)
 		{
 			ArgumentNullException.ThrowIfNull(page);
 			ArgumentNullException.ThrowIfNull(nodes);
@@ -787,7 +787,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(page);
 			ArgumentNullException.ThrowIfNull(template);
-			var fullTitle = new FullTitle(template.TitleValue);
+			var fullTitle = new FullTitle(template.Title);
 			if (this.linkUpdates.TryGetValue(fullTitle.Title, out var to))
 			{
 				var nameText = to.Namespace == MediaWikiNamespaces.Template
@@ -851,7 +851,7 @@
 			return unique.Count == 0 || (unique.Count == 1 && unique.Contains(page.Title));
 		}
 
-		private static void ProposeForDeletion(ContextualParser parser, string deletionText)
+		private static void ProposeForDeletion(SiteParser parser, string deletionText)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			ArgumentNullException.ThrowIfNull(deletionText);

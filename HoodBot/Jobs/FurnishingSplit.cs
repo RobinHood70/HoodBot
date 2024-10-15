@@ -54,7 +54,7 @@
 			base.Main();
 		}
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			List<string> pageIssues = [];

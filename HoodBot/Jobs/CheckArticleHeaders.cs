@@ -37,7 +37,7 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				ContextualParser parsedPage = new(page);
+				SiteParser parsedPage = new(page);
 				foreach (var node in parsedPage.HeaderNodes)
 				{
 					var header = node.GetTitle(true);

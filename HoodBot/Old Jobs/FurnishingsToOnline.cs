@@ -125,7 +125,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string RemoveTemplate(NodeCollection nodes, int templateIndex)
+		private static string RemoveTemplate(WikiNodeCollection nodes, int templateIndex)
 		{
 			nodes.RemoveAt(templateIndex);
 			var placeHolder = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Placeholder"));
@@ -148,7 +148,7 @@
 				return;
 			}
 
-			ContextualParser originalParser = new(page);
+			SiteParser originalParser = new(page);
 			SortedDictionary<string, string> skills = new(StringComparer.Ordinal);
 			SortedDictionary<string, string> materials = new(StringComparer.Ordinal);
 			var templateIndex = originalParser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
@@ -160,7 +160,7 @@
 
 				page.Text = RemoveTemplate(originalParser, templateIndex);
 				this.filePages.Add(page);
-				ContextualParser parser = new(page, string.Empty);
+				SiteParser parser = new(page, string.Empty);
 				var newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
 				parser.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
 				parser.Add(newTemplate);

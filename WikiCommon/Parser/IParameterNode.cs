@@ -13,11 +13,11 @@
 
 		/// <summary>Gets the name of the parameter, if not anonymous.</summary>
 		/// <value>The name.</value>
-		NodeCollection? Name { get; }
+		WikiNodeCollection? Name { get; }
 
 		/// <summary>Gets the parameter value.</summary>
 		/// <value>The value.</value>
-		NodeCollection Value { get; }
+		WikiNodeCollection Value { get; }
 		#endregion
 
 		#region Methods

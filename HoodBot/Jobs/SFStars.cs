@@ -45,7 +45,7 @@
 			return items;
 		}
 
-		protected override bool IsValid(ContextualParser parser, CsvRow item) => parser.FindSiteTemplate("System Infobox") is not null;
+		protected override bool IsValid(SiteParser parser, CsvRow item) => parser.FindSiteTemplate("System Infobox") is not null;
 		#endregion
 
 		#region Private Static Methods

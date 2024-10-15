@@ -23,9 +23,9 @@
 		/// <param name="node">The node.</param>
 		void Visit(ILinkNode node);
 
-		/// <summary>Visits the specified <see cref="NodeCollection"/>.</summary>
+		/// <summary>Visits the specified <see cref="WikiNodeCollection"/>.</summary>
 		/// <param name="nodes">The node collection.</param>
-		void Visit(NodeCollection nodes);
+		void Visit(WikiNodeCollection nodes);
 
 		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
 		/// <param name="node">The node.</param>

@@ -29,7 +29,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create faction page";
 
-		protected override bool IsValid(ContextualParser parser, Redirect item) => parser.Page.Text.StartsWith("#REDIRECT", StringComparison.Ordinal);
+		protected override bool IsValid(SiteParser parser, Redirect item) => parser.Page.Text.StartsWith("#REDIRECT", StringComparison.Ordinal);
 
 		protected override IDictionary<Title, Redirect> LoadItems()
 		{

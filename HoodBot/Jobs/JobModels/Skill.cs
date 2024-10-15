@@ -88,8 +88,8 @@
 					"{{Online Skills " + this.Class + "}}";
 			}
 
-			ContextualParser oldPage = new(page);
-			ContextualParser parser = new(page);
+			SiteParser oldPage = new(page);
+			SiteParser parser = new(page);
 			List<SiteTemplateNode> skillSummaries = new(parser.FindSiteTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{

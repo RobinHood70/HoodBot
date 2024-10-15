@@ -63,7 +63,7 @@
 
 		public static string IconAbbreviation(string nsId, SiteTemplateNode template)
 		{
-			var templateTitle = template.TitleValue;
+			var templateTitle = template.Title;
 			if (templateTitle.Namespace != MediaWikiNamespaces.Template ||
 				!templateTitle.PageNameEquals("Icon") ||
 				template.GetValue(1) is not string iconType ||

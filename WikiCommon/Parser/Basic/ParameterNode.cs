@@ -18,8 +18,8 @@
 			ArgumentNullException.ThrowIfNull(factory);
 			ArgumentNullException.ThrowIfNull(value);
 			this.Factory = factory;
-			this.Name = name == null ? null : new NodeCollection(factory, name);
-			this.Value = new NodeCollection(factory, value);
+			this.Name = name == null ? null : new WikiNodeCollection(factory, name);
+			this.Value = new WikiNodeCollection(factory, value);
 		}
 		#endregion
 
@@ -32,10 +32,10 @@
 		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
-		public NodeCollection? Name { get; private set; }
+		public WikiNodeCollection? Name { get; private set; }
 
 		/// <inheritdoc/>
-		public IEnumerable<NodeCollection> NodeCollections
+		public IEnumerable<WikiNodeCollection> NodeCollections
 		{
 			get
 			{
@@ -49,7 +49,7 @@
 		}
 
 		/// <inheritdoc/>
-		public NodeCollection Value { get; }
+		public WikiNodeCollection Value { get; }
 		#endregion
 
 		#region Public Methods
@@ -62,7 +62,7 @@
 		public void AddName(IEnumerable<IWikiNode> name)
 		{
 			ArgumentNullException.ThrowIfNull(name);
-			this.Name = new NodeCollection(this.Factory, name);
+			this.Name = new WikiNodeCollection(this.Factory, name);
 		}
 
 		/// <inheritdoc/>
@@ -84,7 +84,7 @@
 			if (!this.Anonymous)
 			{
 				var name =
-					this.Name is NodeCollection nameNodes &&
+					this.Name is WikiNodeCollection nameNodes &&
 					nameNodes.Count == 1 &&
 					nameNodes[0] is TextNode nameNode
 						? nameNode.Text

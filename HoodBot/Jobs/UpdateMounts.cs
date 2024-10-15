@@ -46,7 +46,7 @@
 			if (this.ids.TryGetValue(idPageName, out var id))
 			{
 				this.ids.Remove(idPageName);
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				if (parser.FindSiteTemplate("Online Collectible Summary") is ITemplateNode template)
 				{
 					template.Update("id", id.ToStringInvariant());

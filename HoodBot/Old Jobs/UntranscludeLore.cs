@@ -23,7 +23,7 @@
 		private readonly PageCollection lorePages;
 		private Page currentPage;
 		private Page currentLorePage;
-		private Dictionary<string, NodeCollection> transclusionParameters;
+		private Dictionary<string, WikiNodeCollection> transclusionParameters;
 		private HashSet<int> linkedNamespaces;
 		private bool noTransclusions;
 		private bool templateHappened;
@@ -90,7 +90,7 @@
 		#endregion
 
 		#region Private Methods
-		private void ConfirmOldTransclusion(NodeCollection parsedText)
+		private void ConfirmOldTransclusion(WikiNodeCollection parsedText)
 		{
 			if (!this.templateHappened)
 			{
@@ -227,7 +227,7 @@
 						}
 					}
 
-					var loreText = NodeCollection.Parse(fixedUpLoreText, true, true);
+					var loreText = WikiNodeCollection.Parse(fixedUpLoreText, true, true);
 					if (/* templateNode.AtLineStart && */loreText.First.Value is TextNode textNode)
 					{
 						textNode.Text = textNode.Text.TrimStart();
@@ -270,7 +270,7 @@
 					if (!this.templateHappened)
 					{
 						this.templateHappened = true;
-						return new NodeCollection(null, new[] { templateNode, OldTransclusionNode });
+						return new WikiNodeCollection(null, new[] { templateNode, OldTransclusionNode });
 					}
 				}
 			}
@@ -378,7 +378,7 @@
 			foreach (var page in this.gamePages)
 			{
 				this.SetPageInfo(page);
-				var parsedText = NodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
+				var parsedText = WikiNodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
 				this.templateHappened = false;
 				parsedText.Replace(this.LoreTransclusionReplacer);
 				parsedText.Replace(this.OldLoreInserter);
@@ -393,7 +393,7 @@
 			foreach (var page in this.lorePages)
 			{
 				this.SetPageInfo(page);
-				var parsedText = NodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
+				var parsedText = WikiNodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
 				this.templateHappened = false;
 				parsedText.Replace(this.TemplateReplacer);
 				parsedText.Replace(this.OldLoreInserter);

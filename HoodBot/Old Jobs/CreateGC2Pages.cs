@@ -1,20 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.IO;
-	using System.Text;
-	using System.Text.RegularExpressions;
-	using Ionic.Zlib;
-	using RobinHood70.CommonCode;
-	using RobinHood70.GC2.GC2Lib;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
-
 	public class CreateGC2Pages : EditJob
 	{
 		#region Constants
@@ -100,7 +85,7 @@
 			return sb.ToString();
 		}
 
-		private static void EmitWaves(NodeCollection nodes, Field field)
+		private static void EmitWaves(WikiNodeCollection nodes, Field field)
 		{
 			var factory = nodes.Factory;
 			var newLine = factory.TextNode("\n");
@@ -249,7 +234,7 @@
 
 		private static int ParseInt(string data) => int.Parse(data, CultureInfo.InvariantCulture);
 
-		private static void UpdatePage(ContextualParser parser, Field field)
+		private static void UpdatePage(SiteParser parser, Field field)
 		{
 			var nodes = parser;
 			var start = nodes.FindIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/Start", StringComparison.Ordinal)) + 1;
@@ -262,7 +247,7 @@
 			nodes.RemoveRange(start, end - start);
 			var factory = nodes.Factory;
 			var newLine = factory.TextNode("\n");
-			var waveNodes = new NodeCollection(nodes.Factory)
+			var waveNodes = new WikiNodeCollection(nodes.Factory)
 			{
 				newLine
 			};
@@ -272,7 +257,7 @@
 		#endregion
 
 		#region Private Methods
-		private void DropCollectionList(DropCollection? drops, ContextualParser parser)
+		private void DropCollectionList(DropCollection? drops, SiteParser parser)
 		{
 			if (drops != null)
 			{
@@ -297,7 +282,7 @@
 				: throw new InvalidOperationException($"Title {title.PageName} does not contain a recognized field name.");
 		}
 
-		private void InsertText(ContextualParser parser, Field field)
+		private void InsertText(SiteParser parser, Field field)
 		{
 			this.UpdateInfobox(parser, field);
 			string difficulty;
@@ -557,7 +542,7 @@
 
 		private void Pages_PageLoaded(PageCollection sender, Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			var field = this.FieldFromPageName(page);
 			if (page.Exists)
 			{
@@ -578,7 +563,7 @@
 			return value.ToString(this.Site.Culture);
 		}
 
-		private void UpdateInfobox(ContextualParser parser, Field field)
+		private void UpdateInfobox(SiteParser parser, Field field)
 		{
 			if (parser.FindTemplate(InfoboxName) is not ITemplateNode infobox)
 			{

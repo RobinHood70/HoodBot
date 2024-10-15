@@ -58,7 +58,7 @@
 			foreach (var row in matches)
 			{
 				var baseRecipe = row.Groups["baseRecipe"].Value.Trim();
-				var nameNodes = new List<LinkNode>(NodeCollection.Parse(row.Groups["names"].Value).FindAll<LinkNode>());
+				var nameNodes = new List<LinkNode>(WikiNodeCollection.Parse(row.Groups["names"].Value).FindAll<LinkNode>());
 				var matEffects = row.Groups["matEffects"].Value.Split("||");
 				if (nameNodes.Count != 7 || matEffects.Length != 14)
 				{
@@ -74,7 +74,7 @@
 					/*
 					if (this.Pages.TryGetValue(title.FullPageName, out var potionPage))
 					{
-						var nodes = NodeCollection.Parse(potionPage.Text);
+						var nodes = WikiNodeCollection.Parse(potionPage.Text);
 						if (nodes.FindFirst<TemplateNode>(node => node.GetTitleValue() == "Blades Item Summary") is TemplateNode template)
 						{
 							template.AddParameter("recipe", recipe);

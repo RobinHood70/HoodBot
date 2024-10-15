@@ -53,7 +53,7 @@
 				nameBackLinkPages.GetTitles(nameLinks);
 				foreach (var npcPage in nameBackLinkPages)
 				{
-					var parser = new ContextualParser(npcPage);
+					var parser = new SiteParser(npcPage);
 					foreach (var template in parser.FindSiteTemplates(templates))
 					{
 						var race = template.GetValue("race");

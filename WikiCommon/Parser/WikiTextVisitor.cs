@@ -147,7 +147,7 @@
 			if (this.raw)
 			{
 				this.builder.Append("[[");
-				node.Title.Accept(this);
+				node.TitleNodes.Accept(this);
 				foreach (var param in node.Parameters)
 				{
 					param.Accept(this);
@@ -172,13 +172,13 @@
 				}
 				else
 				{
-					node.Title.Accept(this);
+					node.TitleNodes.Accept(this);
 				}
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(NodeCollection nodes)
+		public void Visit(WikiNodeCollection nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			foreach (var node in nodes)
@@ -231,7 +231,7 @@
 		{
 			this.builder.Append("{{");
 			ArgumentNullException.ThrowIfNull(node);
-			node.Title.Accept(this);
+			node.TitleNodes.Accept(this);
 			foreach (var param in node.Parameters)
 			{
 				param.Accept(this);

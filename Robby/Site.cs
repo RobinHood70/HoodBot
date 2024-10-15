@@ -1329,7 +1329,7 @@
 				}
 				else
 				{
-					var parser = new ContextualParser(page);
+					var parser = new SiteParser(page);
 					foreach (var link in parser.LinkNodes)
 					{
 						retval.Add(SiteLink.FromLinkNode(this, link).Title);

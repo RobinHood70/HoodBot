@@ -22,15 +22,15 @@
 			ArgumentNullException.ThrowIfNull(text);
 			this.Factory = factory;
 			this.Level = level;
-			this.Title = new NodeCollection(factory, text);
-			this.Comment = comment is null ? null : new NodeCollection(factory, comment);
+			this.Title = new WikiNodeCollection(factory, text);
+			this.Comment = comment is null ? null : new WikiNodeCollection(factory, comment);
 		}
 		#endregion
 
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public NodeCollection? Comment { get; }
+		public WikiNodeCollection? Comment { get; }
 
 		/// <inheritdoc/>
 		public bool Confirmed { get; set; }
@@ -42,7 +42,7 @@
 		public int Level { get; }
 
 		/// <inheritdoc/>
-		public IEnumerable<NodeCollection> NodeCollections
+		public IEnumerable<WikiNodeCollection> NodeCollections
 		{
 			get
 			{
@@ -51,7 +51,7 @@
 		}
 
 		/// <inheritdoc/>
-		public NodeCollection Title { get; }
+		public WikiNodeCollection Title { get; }
 		#endregion
 
 		#region Public Methods

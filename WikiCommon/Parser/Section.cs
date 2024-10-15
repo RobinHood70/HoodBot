@@ -9,8 +9,8 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 		/// <param name="header">The header node for the section (null for lead).</param>
-		/// <param name="content">The <see cref="NodeCollection"/> representing the content of the section.</param>
-		public Section(IHeaderNode? header, NodeCollection content)
+		/// <param name="content">The <see cref="WikiNodeCollection"/> representing the content of the section.</param>
+		public Section(IHeaderNode? header, WikiNodeCollection content)
 		{
 			ArgumentNullException.ThrowIfNull(content);
 			this.Content = content;
@@ -21,15 +21,15 @@
 		/// <param name="header">The header node for the section (null for lead).</param>
 		/// <param name="factory">The factory for the content nodes.</param>
 		public Section(IHeaderNode? header, IWikiNodeFactory factory)
-			: this(header, new NodeCollection(factory))
+			: this(header, new WikiNodeCollection(factory))
 		{
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets the <see cref="NodeCollection"/> representing the content of the section.</summary>
-		public NodeCollection Content { get; }
+		/// <summary>Gets the <see cref="WikiNodeCollection"/> representing the content of the section.</summary>
+		public WikiNodeCollection Content { get; }
 
 		/// <summary>Gets or sets the header node for the section (null for lead).</summary>
 		public IHeaderNode? Header { get; set; }

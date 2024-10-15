@@ -212,7 +212,7 @@
 			return template;
 		}
 
-		private static Section? FindSummary(ContextualParser parser, IList<Section> sections)
+		private static Section? FindSummary(SiteParser parser, IList<Section> sections)
 		{
 			Section? summary = null;
 			var summarySections = 0;
@@ -234,7 +234,7 @@
 			return summary;
 		}
 
-		private static List<string> GetFilenames(ContextualParser parser, List<string> parameters, string original)
+		private static List<string> GetFilenames(SiteParser parser, List<string> parameters, string original)
 		{
 			var filenames = new List<string>();
 			var remainder = new List<string>();
@@ -274,7 +274,7 @@
 			if (info.Find("description") is IParameterNode desc)
 			{
 				IParameterNode? node = null;
-				if (desc.Value.Find<SiteTemplateNode>(value => value.TitleValue.PageNameEquals("En")) is SiteTemplateNode en)
+				if (desc.Value.Find<SiteTemplateNode>(value => value.Title.PageNameEquals("En")) is SiteTemplateNode en)
 				{
 					node = en.Find(1);
 				}
@@ -300,7 +300,7 @@
 
 					break;
 				case SiteTemplateNode templateNode:
-					if (templateNode.TitleValue.PageNameEquals("Zenimage"))
+					if (templateNode.Title.PageNameEquals("Zenimage"))
 					{
 						return [];
 					}
@@ -342,7 +342,7 @@
 		#endregion
 
 		#region Private Methods
-		private void ParseDescription(ContextualParser parser, List<string> parameters, string description)
+		private void ParseDescription(SiteParser parser, List<string> parameters, string description)
 		{
 			if (description.Length > 0 && description[^1] != '\n')
 			{
@@ -420,10 +420,10 @@
 			return remainder;
 		}
 
-		private bool ParseSummary(ContextualParser parser, Section summary)
+		private bool ParseSummary(SiteParser parser, Section summary)
 		{
 			string? text = null;
-			var infoOffset = summary.Content.FindIndex<SiteTemplateNode>(n => n.TitleValue.PageNameEquals("Information"));
+			var infoOffset = summary.Content.FindIndex<SiteTemplateNode>(n => n.Title.PageNameEquals("Information"));
 			if (infoOffset != -1)
 			{
 				var info = (SiteTemplateNode)summary.Content[infoOffset];
@@ -451,7 +451,7 @@
 
 		private void UpdateText(Page page, string text)
 		{
-			ContextualParser parser = new(page, text);
+			SiteParser parser = new(page, text);
 			if (parser.FindSiteTemplate("Online File") is not null)
 			{
 				return;

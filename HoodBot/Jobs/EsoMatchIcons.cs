@@ -73,7 +73,7 @@
 			{
 				Globals.ThrowIfNull(latestRevision.Sha1, nameof(latestRevision), nameof(latestRevision.Sha1));
 				this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				this.ReplaceLicense(parser);
 				PageParts parts = new(filePage);
 				if (foundIcons == null || foundIcons.Count == 0)
@@ -106,7 +106,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static (int Index, int End) FindLicense(ContextualParser parser)
+		private static (int Index, int End) FindLicense(SiteParser parser)
 		{
 			int summaryIndex;
 			int summaryEnd;
@@ -126,7 +126,7 @@
 			return (summaryIndex, summaryEnd);
 		}
 
-		private static (int Index, int End) FindSummary(ContextualParser parser)
+		private static (int Index, int End) FindSummary(SiteParser parser)
 		{
 			int summaryIndex;
 			int summaryEnd;
@@ -165,12 +165,12 @@
 			return isBook;
 		}
 
-		private static List<SiteLink> ParseCatgories(Site site, ContextualParser parser)
+		private static List<SiteLink> ParseCatgories(Site site, SiteParser parser)
 		{
 			List<SiteLink> retval = [];
 			for (var i = 0; i < parser.Count; i++)
 			{
-				if (parser[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
+				if (parser[i] is SiteLinkNode link && link.Title.Namespace == MediaWikiNamespaces.Category)
 				{
 					retval.Add(SiteLink.FromLinkNode(site, link));
 					parser.RemoveAt(i);
@@ -260,12 +260,12 @@
 			}
 		}
 
-		private void ReplaceLicense(ContextualParser parsedPage)
+		private void ReplaceLicense(SiteParser parsedPage)
 		{
-			if (parsedPage.Find<SiteTemplateNode>(template => this.licenseTemplates.Contains(template.TitleValue)) is SiteTemplateNode license)
+			if (parsedPage.Find<SiteTemplateNode>(template => this.licenseTemplates.Contains(template.Title)) is SiteTemplateNode license)
 			{
-				license.Title.Clear();
-				license.Title.AddText("Zenimage");
+				license.TitleNodes.Clear();
+				license.TitleNodes.AddText("Zenimage");
 				license.Parameters.Clear();
 			}
 		}
@@ -307,7 +307,7 @@
 			public PageParts(Page page)
 			{
 				this.Page = page;
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				this.Categories.AddRange(ParseCatgories(page.Site, parser));
 
 				(var index, var end) = FindSummary(parser);
@@ -426,7 +426,7 @@
 			#endregion
 
 			#region Private Methods
-			private void ParseSummary(ContextualParser parser, int summaryIndex, int summaryEnd)
+			private void ParseSummary(SiteParser parser, int summaryIndex, int summaryEnd)
 			{
 				var isPreText = true;
 				StringBuilder preText = new();

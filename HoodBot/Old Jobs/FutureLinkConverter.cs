@@ -70,12 +70,12 @@
 			this.Pages.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn, true);
 		}
 
-		protected override void ParseText(ContextualParser parser) =>
+		protected override void ParseText(SiteParser parser) =>
 			parser.Replace(node => this.ReplaceNode(node, parser), false);
 
-		private NodeCollection? ReplaceNode(IWikiNode node, ContextualParser parser)
+		private WikiNodeCollection? ReplaceNode(IWikiNode node, SiteParser parser)
 		{
-			NodeCollection? retval = null;
+			WikiNodeCollection? retval = null;
 			if (node is SiteTemplateNode template &&
 				template.TitleValue.PageNameEquals("Future Link"))
 			{

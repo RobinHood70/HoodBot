@@ -40,10 +40,10 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			foreach (var link in parser.LinkNodes)
 			{
-				var linkTitle = TitleFactory.FromUnvalidated(this.Site, link.Title.ToValue());
+				var linkTitle = TitleFactory.FromUnvalidated(this.Site, link.TitleNodes.ToValue());
 				if (this.categories.Contains(linkTitle.FullPageName()))
 				{
 					link.Parameters.Clear();

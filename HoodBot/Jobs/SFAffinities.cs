@@ -82,7 +82,7 @@
 			var newPage = page.Exists
 				? page
 				: this.affinityPage ?? throw new InvalidOperationException();
-			var parser = new ContextualParser(newPage);
+			var parser = new SiteParser(newPage);
 			var sections = parser.ToSections(2);
 			var walkthroughNum = -1;
 			for (var sectionNum = 0; sectionNum < sections.Count; sectionNum++)

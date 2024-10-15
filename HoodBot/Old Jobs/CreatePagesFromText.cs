@@ -52,7 +52,7 @@
 				this.Pages.Add(page);
 			}
 
-			static void CheckText(NodeCollection parsed, int offset)
+			static void CheckText(WikiNodeCollection parsed, int offset)
 			{
 				if (offset < parsed.Count && (parsed[offset] is not ITextNode textNode || textNode.Text.TrimStart().Length != 0))
 				{

@@ -64,7 +64,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<Title> titles, string warningType)
+		public static string ConstructWarning(SiteParser oldPage, SiteParser newPage, ICollection<Title> titles, string warningType)
 		{
 			ArgumentNullException.ThrowIfNull(oldPage);
 			ArgumentNullException.ThrowIfNull(newPage);
@@ -132,9 +132,9 @@
 			}
 		}
 
-		public static void ReplaceEsoLinks(Site site, NodeCollection nodes)
+		public static void ReplaceEsoLinks(Site site, WikiNodeCollection nodes)
 		{
-			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go.
+			// Iterating manually rather than with WikiNodeCollection methods, since the list is being altered as we go.
 			var factory = nodes.Factory;
 			for (var i = 0; i < nodes.Count; i++)
 			{
@@ -146,8 +146,8 @@
 					var text = textNode.Text;
 					if (i > 0 &&
 						nodes[i - 1] is SiteTemplateNode previous &&
-						(previous.TitleValue.PageNameEquals("huh")
-						|| previous.TitleValue.PageNameEquals("nowrap")))
+						(previous.Title.PageNameEquals("huh")
+						|| previous.Title.PageNameEquals("nowrap")))
 					{
 						text = WikiTextVisitor.Raw(previous) + text;
 						var boldStart = false;
@@ -185,7 +185,7 @@
 					ICollection<Match> matches = EsoLinks.Matches(text);
 					if (matches.Count > 0)
 					{
-						NodeCollection newNodes = new(factory);
+						WikiNodeCollection newNodes = new(factory);
 						var startPos = 0;
 						foreach (var match in matches)
 						{
@@ -214,13 +214,13 @@
 			}
 		}
 
-		public static void ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
+		public static void ReplaceFirstLink(WikiNodeCollection nodes, TitleCollection usedList)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			ArgumentNullException.ThrowIfNull(usedList);
 			for (var i = 0; i < nodes.Count; i++)
 			{
-				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is NodeCollection newNodes)
+				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is WikiNodeCollection newNodes)
 				{
 					nodes.RemoveAt(i);
 					nodes.InsertRange(i, newNodes);
@@ -229,7 +229,7 @@
 			}
 		}
 
-		public static void ReplaceGlobal(NodeCollection nodes)
+		public static void ReplaceGlobal(WikiNodeCollection nodes)
 		{
 			// We only look at the top level...anything below that represents a replacement and should not be re-evaluated.
 			var factory = nodes.Factory;
@@ -239,7 +239,7 @@
 				if (nodes[i] is ITextNode textNode)
 				{
 					var text = textNode.Text;
-					NodeCollection newNodes = new(factory);
+					WikiNodeCollection newNodes = new(factory);
 					var startPos = 0;
 					for (var currentPos = 0; currentPos < text.Length; currentPos++)
 					{
@@ -283,7 +283,7 @@
 			}
 		}
 
-		public static void ReplaceSkillLinks(NodeCollection nodes, string skillName)
+		public static void ReplaceSkillLinks(WikiNodeCollection nodes, string skillName)
 		{
 			foreach (var textNode in nodes.FindAll<ITextNode>())
 			{
@@ -311,7 +311,7 @@
 
 		#region Public Methods
 
-		public ICollection<Title> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<Title> CheckNewLinks(SiteParser oldPage, SiteParser newPage)
 		{
 			HashSet<Title> oldLinks = [];
 			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
@@ -329,7 +329,7 @@
 			return oldLinks;
 		}
 
-		public ICollection<Title> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<Title> CheckNewTemplates(SiteParser oldPage, SiteParser newPage)
 		{
 			HashSet<Title> oldTemplates = [];
 			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
@@ -348,14 +348,14 @@
 			return oldTemplates;
 		}
 
-		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage)
+		public bool IsNonTrivialChange(SiteParser oldPage, SiteParser newPage)
 		{
 			var oldText = this.StrippedTextFromNodes(oldPage);
 			var newText = this.StrippedTextFromNodes(newPage);
 			return !string.Equals(oldText, newText, StringComparison.OrdinalIgnoreCase);
 		}
 
-		public void RemoveTrivialTemplates(NodeCollection oldNodes)
+		public void RemoveTrivialTemplates(WikiNodeCollection oldNodes)
 		{
 			bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
 
@@ -385,11 +385,11 @@
 			list.Sort((x, y) => y.From.Length.CompareTo(x.From.Length));
 		}
 
-		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
+		private static WikiNodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
 			HashSet<string> foundReplacements = new(StringComparer.Ordinal);
 			var textLength = text.Length;
-			NodeCollection retval = new(factory);
+			WikiNodeCollection retval = new(factory);
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{
@@ -408,7 +408,7 @@
 							if (newNode is ILinkNode link)
 							{
 								var siteLink = SiteLink.FromLinkNode(usedList.Site, link);
-								if (usedList.Contains(siteLink.Title) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
+								if (usedList.Contains(siteLink.Title) && link.Parameters.Count > 0 && link.Parameters[0].Value is WikiNodeCollection valueNode)
 								{
 									retval.AddRange(valueNode);
 								}
@@ -485,7 +485,7 @@
 		#endregion
 
 		#region Private Methods
-		private string StrippedTextFromNodes(NodeCollection nodes)
+		private string StrippedTextFromNodes(WikiNodeCollection nodes)
 		{
 			var onlyNodes = nodes.Clone();
 			onlyNodes.RemoveAll<IIgnoreNode>();

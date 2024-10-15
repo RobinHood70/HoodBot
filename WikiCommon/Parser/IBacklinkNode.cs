@@ -13,7 +13,7 @@
 
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
-		NodeCollection Title { get; }
+		WikiNodeCollection TitleNodes { get; }
 		#endregion
 	}
 }

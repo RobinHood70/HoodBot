@@ -92,7 +92,7 @@
 			var rulingName = page.Title.SubPageName();
 			var ruling = this.rulings[rulingName];
 
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			var template = parser.FindSiteTemplate("Castles Ruling") ?? throw new InvalidOperationException();
 			var textParam = template.Find("text") ?? throw new InvalidOperationException();
 			var conditionsParam = template.Find("conditions") ?? throw new InvalidOperationException();

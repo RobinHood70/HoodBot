@@ -86,7 +86,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(NodeCollection nodes)
+		public void Visit(WikiNodeCollection nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			foreach (var node in nodes)

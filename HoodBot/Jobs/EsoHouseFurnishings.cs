@@ -43,12 +43,12 @@
 			//// this.Pages.GetTitles("Online:Enchanted Snow Globe Home", "Online:Lucky Cat Landing", "Online:Potentate's Retreat", "Online:Varlaisvea Ayleid Ruins", "Online:Varlaisvea Ayleid Ruins", "Online:Stone Eagle Aerie", "Online:Pantherfang Chapel", "Online:Sweetwater Cascades");
 		}
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			var sections = new List<Section>(parser.ToSections());
 			foreach (var section in FindFurnishings(sections))
 			{
-				if (section.Content.Find<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("ESO House Furnishings")) is not null)
+				if (section.Content.Find<SiteTemplateNode>(template => template.Title.PageNameEquals("ESO House Furnishings")) is not null)
 				{
 					this.WriteLine($"* [[{parser.Page.Title.FullPageName()}]] has already been converted.");
 					continue;
@@ -153,7 +153,7 @@
 		#region Private Methods
 		private string? ParseLine(Page page, string line, List<string> itemList)
 		{
-			var parsedLine = new ContextualParser(page, line);
+			var parsedLine = new SiteParser(page, line);
 			if (parsedLine.Count > 0 && parsedLine[0] is ITextNode textNode)
 			{
 				var text = textNode.Text;
@@ -167,7 +167,7 @@
 						return null;
 					case ":*":
 					case ";*":
-						if (parsedLine[1] is SiteTemplateNode furnishing && furnishing.TitleValue.PageNameEquals("Furnishing Link"))
+						if (parsedLine[1] is SiteTemplateNode furnishing && furnishing.Title.PageNameEquals("Furnishing Link"))
 						{
 							var link = furnishing.Find(1)?.Value.ToRaw();
 							var (_, count) = SplitLine(line);

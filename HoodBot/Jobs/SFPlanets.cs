@@ -19,7 +19,7 @@
 			return string.Empty;
 		}
 
-		protected override bool IsValid(ContextualParser parser, CsvRow item)
+		protected override bool IsValid(SiteParser parser, CsvRow item)
 		{
 			return false;
 		}

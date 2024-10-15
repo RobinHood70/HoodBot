@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Public Methods
-		public static ITemplateNode FindOrCreateOnlineFile(ContextualParser parser, params string[] originalFileNames)
+		public static ITemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			if (parser.FindSiteTemplate("Online File") is not ITemplateNode template)
@@ -44,9 +44,9 @@
 				parser.InsertText(1, "\n\n");
 			}
 
-			if (!template.Title.ToRaw().EndsWith('\n'))
+			if (!template.TitleNodes.ToRaw().EndsWith('\n'))
 			{
-				template.Title.AddText("\n");
+				template.TitleNodes.AddText("\n");
 			}
 
 			if (originalFileNames?.Length > 0)
@@ -245,7 +245,7 @@
 			job.StatusWriteLine("Update bot parameters");
 			var paramName = pageType;
 			var patchPage = GetPatchPage(job);
-			var parser = new ContextualParser(patchPage);
+			var parser = new SiteParser(patchPage);
 			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.SetValue(version.Text, ParameterFormat.NoChange);

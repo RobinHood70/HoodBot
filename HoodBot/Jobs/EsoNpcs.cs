@@ -94,7 +94,7 @@
 				var npc = this.pageNpcs[page.Title];
 				var placeInfo = EsoSpace.PlaceInfo;
 
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				if (parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
 				{
 					UpdateLocations(npc, template, parser.Factory, placeInfo);
@@ -261,7 +261,7 @@
 
 				if (issue == null)
 				{
-					ContextualParser parsed = new(page);
+					SiteParser parsed = new(page);
 					var template = parsed.FindSiteTemplate("Online NPC Summary");
 					if (this.allowUpdates)
 					{
@@ -329,7 +329,7 @@
 				}
 				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation == true)
 				{
-					ContextualParser parser = new(page);
+					SiteParser parser = new(page);
 					foreach (var linkNode in parser.LinkNodes)
 					{
 						var disambig = SiteLink.FromLinkNode(this.Site, linkNode);

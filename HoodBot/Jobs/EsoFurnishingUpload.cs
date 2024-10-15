@@ -64,7 +64,7 @@
 
 				if (EsoSpace.ShouldUpload(localFileName, (FilePage)page))
 				{
-					var parser = new ContextualParser(page);
+					var parser = new SiteParser(page);
 					_ = EsoSpace.FindOrCreateOnlineFile(parser, iconInfo.LocalIcon);
 					parser.AddCategory("Online-Icons-Furnishings", true);
 					parser.UpdatePage();

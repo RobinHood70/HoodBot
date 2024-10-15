@@ -36,10 +36,10 @@
 			this.Pages.GetTitles(goodTitles);
 		}
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
-			template.Title.Clear();
-			template.Title.AddText("Zenimage");
+			template.TitleNodes.Clear();
+			template.TitleNodes.AddText("Zenimage");
 			template.Parameters.Clear();
 		}
 		#endregion

@@ -18,7 +18,7 @@
 			this.Pages.GetBacklinks(title.FullPageName(), BacklinksTypes.EmbeddedIn);
 		}
 
-		protected override void ParseText(ContextualParser parser)
+		protected override void ParseText(SiteParser parser)
 		{
 			foreach (var template in parser.FindSiteTemplates(this.TemplateName))
 			{
@@ -28,7 +28,7 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract void ParseTemplate(SiteTemplateNode template, ContextualParser parser);
+		protected abstract void ParseTemplate(SiteTemplateNode template, SiteParser parser);
 		#endregion
 	}
 }

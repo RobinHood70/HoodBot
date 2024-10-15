@@ -30,7 +30,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create weapon page";
 
-		protected override bool IsValid(ContextualParser parser, List<CsvRow> item) => parser.FindSiteTemplate("Item Summary") is not null;
+		protected override bool IsValid(SiteParser parser, List<CsvRow> item) => parser.FindSiteTemplate("Item Summary") is not null;
 
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()
 		{
@@ -79,7 +79,7 @@
 				.Append("}}\n");
 		}
 
-		private static SiteTemplateNode? FindMatchingTemplate(ContextualParser parser, CsvRow row)
+		private static SiteTemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
 		{
 			var templates = parser.FindSiteTemplates("Item Summary");
 			foreach (var template in templates)
@@ -105,10 +105,10 @@
 			return $"{{{{Trail|Items|Weapons}}}}{sb}The [[Starfield:{title.PageName}|]] is a [[Starfield:Weapons|weapon]].\n\n{{{{Stub|Weapon}}}}";
 		}
 
-		private static void UpdateWeapon(ContextualParser parser, List<CsvRow> list)
+		private static void UpdateWeapon(SiteParser parser, List<CsvRow> list)
 		{
 			// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Item Summary"));
+			var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Item Summary"));
 			foreach (var row in list)
 			{
 				if (FindMatchingTemplate(parser, row) is null)

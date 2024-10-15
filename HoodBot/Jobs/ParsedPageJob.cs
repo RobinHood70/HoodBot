@@ -6,13 +6,13 @@
 	public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 	{
 		#region Protected Abstract Methods
-		protected abstract void ParseText(ContextualParser parser);
+		protected abstract void ParseText(SiteParser parser);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void PageLoaded(Page page)
 		{
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			this.ParseText(parser);
 			parser.UpdatePage();
 		}

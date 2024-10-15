@@ -40,7 +40,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create terminal page";
 
-		protected override bool IsValid(ContextualParser parser, Terminal item) => parser.FindSiteTemplate("Terminal Summary") is not null;
+		protected override bool IsValid(SiteParser parser, Terminal item) => parser.FindSiteTemplate("Terminal Summary") is not null;
 
 		protected override IDictionary<Title, Terminal> LoadItems()
 		{
@@ -246,7 +246,7 @@
 		}
 
 		/*
-		private void UpdateTerminal(ContextualParser parser, Terminal item)
+		private void UpdateTerminal(SiteParser parser, Terminal item)
 		{
 			parser.Clear();
 			parser.AddText(this.GetNewPageText(parser.Title, item));

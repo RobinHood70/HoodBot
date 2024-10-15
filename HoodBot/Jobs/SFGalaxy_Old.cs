@@ -32,7 +32,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create planet page";
 
-		protected override bool IsValid(ContextualParser parser, CsvRow data) => parser.FindSiteTemplate("Planet Infobox") is not null;
+		protected override bool IsValid(SiteParser parser, CsvRow data) => parser.FindSiteTemplate("Planet Infobox") is not null;
 
 		protected override IDictionary<Title, CsvRow> LoadItems()
 		{

@@ -39,7 +39,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create/update mission";
 
-		protected override bool IsValid(ContextualParser parser, Mission item) =>
+		protected override bool IsValid(SiteParser parser, Mission item) =>
 			FindTemplate(parser, item) is not null;
 
 		protected override IDictionary<Title, Mission> LoadItems()
@@ -106,12 +106,12 @@
 			return sb.ToString();
 		}
 
-		private static void DoStages(ContextualParser parser, List<Stage> stages)
+		private static void DoStages(SiteParser parser, List<Stage> stages)
 		{
 			var stagesTemplate = parser.FindSiteTemplate("Mission Entries");
 			if (stagesTemplate is null)
 			{
-				var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub") || t.TitleValue.PageNameEquals("Starfield Trackers Alliance Mission"));
+				var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub") || t.Title.PageNameEquals("Starfield Trackers Alliance Mission"));
 				if (insertLoc == -1)
 				{
 					insertLoc = parser.Count;
@@ -122,7 +122,7 @@
 			}
 		}
 
-		private static void DoSummary(ContextualParser parser, string missionSummary)
+		private static void DoSummary(SiteParser parser, string missionSummary)
 		{
 			var sections = parser.ToSections(2);
 			Section? summary = null;
@@ -147,7 +147,7 @@
 			if (summary is null)
 			{
 				summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
-				var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Stub") || t.TitleValue.PageNameEquals("Starfield Trackers Alliance Mission"));
+				var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub") || t.Title.PageNameEquals("Starfield Trackers Alliance Mission"));
 				if (stubIndex != -1)
 				{
 					var stub = lead[stubIndex];
@@ -164,7 +164,7 @@
 			parser.FromSections(sections);
 		}
 
-		private static SiteTemplateNode? FindTemplate(ContextualParser parser, Mission item)
+		private static SiteTemplateNode? FindTemplate(SiteParser parser, Mission item)
 		{
 			var template = parser.FindSiteTemplate("Mission Header");
 			return string.Equals(
@@ -248,7 +248,7 @@
 				.Trim();
 		}
 
-		private static void UpdateMission(ContextualParser parser, Mission item)
+		private static void UpdateMission(SiteParser parser, Mission item)
 		{
 			var template = FindTemplate(parser, item);
 			if (template is null)
@@ -301,7 +301,7 @@
 
 			foreach (var page in backlinks)
 			{
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				var template = parser.FindSiteTemplate("Mission Header");
 				if (template?.GetRaw("ID") is string edid &&
 					edid.Length > 0 &&

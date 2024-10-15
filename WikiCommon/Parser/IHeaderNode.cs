@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
-	// TODO: Switch to have Title as one NodeCollection and TrailingText as another.
+	// TODO: Switch to have Title as one WikiNodeCollection and TrailingText as another.
 	// CONSIDER: Reintroduce confirmed/possible status for constructs like:
 	//    ===Header===<includeonly>BreaksHeader</includeonly>
 	// Might be doable inline as part of TrailingText, so check this.
@@ -11,7 +11,7 @@
 		#region Properties
 
 		/// <summary>Gets any text that appeared after the ==.</summary>
-		NodeCollection? Comment { get; }
+		WikiNodeCollection? Comment { get; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="IHeaderNode"/> is confirmed (direct text) or possible (template or argument).</summary>
 		/// <value><see langword="true"/> if confirmed; otherwise, <see langword="false"/>.</value>
@@ -23,7 +23,7 @@
 
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
-		NodeCollection Title { get; }
+		WikiNodeCollection Title { get; }
 		#endregion
 	}
 }

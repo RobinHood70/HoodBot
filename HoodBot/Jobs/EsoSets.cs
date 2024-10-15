@@ -130,7 +130,7 @@
 		protected override void PageLoaded(Page page)
 		{
 			var setData = this.sets[page.Title];
-			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
+			SiteParser oldPage = new(page, InclusionType.Transcluded, false);
 			if (oldPage.Count < 2 || !(
 					oldPage[0] is IIgnoreNode firstNode &&
 					firstNode.Value.EndsWith("<onlyinclude>", StringComparison.Ordinal) &&
@@ -155,7 +155,7 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
-			ContextualParser parser = new(page, sb.ToString());
+			SiteParser parser = new(page, sb.ToString());
 			EsoReplacer.ReplaceGlobal(parser);
 			EsoReplacer.ReplaceEsoLinks(this.Site, parser);
 			EsoReplacer.ReplaceFirstLink(parser, usedList);

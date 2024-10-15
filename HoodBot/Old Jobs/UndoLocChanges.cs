@@ -64,14 +64,14 @@
 		#endregion
 
 		#region Private Static Methods
-		private static IWikiNode? GetLocation(NodeCollection parser)
+		private static IWikiNode? GetLocation(WikiNodeCollection parser)
 		{
 			var templates = parser.FindAll<TemplateNode>(template => WikiTextVisitor.Value(template.Title).Trim() == "Online NPC Summary");
 			var list = new List<TemplateNode>(templates);
 			return list.Count == 1 ? list[0].Parameters.FindLastLinked<ParameterNode>(param => param.Name != null && WikiTextVisitor.Value(param.Name).Trim() == "loc") : null;
 		}
 
-		private static List<string> LocSplit(NodeCollection valueNodes)
+		private static List<string> LocSplit(WikiNodeCollection valueNodes)
 		{
 			var retval = new List<string>(valueNodes.Count << 1)
 			{
@@ -156,9 +156,9 @@
 		{
 			if (page.Revisions.Count > 1)
 			{
-				var parser = NodeCollection.Parse(page.CurrentRevision!.Text);
-				var newer = GetLocation(NodeCollection.Parse(page.Revisions[1].Text));
-				var older = GetLocation(NodeCollection.Parse(page.Revisions[0].Text));
+				var parser = WikiNodeCollection.Parse(page.CurrentRevision!.Text);
+				var newer = GetLocation(WikiNodeCollection.Parse(page.Revisions[1].Text));
+				var older = GetLocation(WikiNodeCollection.Parse(page.Revisions[0].Text));
 				var current = GetLocation(parser);
 				if (current == null || newer == null)
 				{
@@ -198,7 +198,7 @@
 				{
 					var currentText = string.Join(", ", currentSplit) + '\n';
 					currentNode.Value.Clear();
-					currentNode.Value.AddRange(NodeCollection.Parse(currentText));
+					currentNode.Value.AddRange(WikiNodeCollection.Parse(currentText));
 
 					var olderText = olderNode == null ? "\n" : WikiTextVisitor.Raw(olderNode.Value);
 					if (removeCount < newSplit.Count && currentText != olderText)

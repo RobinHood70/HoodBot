@@ -9,8 +9,8 @@
 
 		/// <summary>Gets the default value.</summary>
 		/// <value>The default value. This will be <see langword="null"/> if there is no default value (e.g., <c>{{{1}}}</c>) in order to distinguish it from a node with an empty default value (e.g., <c>{{{1|}}}</c>).</value>
-		/// <remarks>To prevent the possibility of DefaultValue being set to a NodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
-		NodeCollection? DefaultValue { get; }
+		/// <remarks>To prevent the possibility of DefaultValue being set to a WikiNodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
+		WikiNodeCollection? DefaultValue { get; }
 
 		/// <summary>Gets any additional values after the default value (e.g., the b in {{{1|a|b}}}).</summary>
 		/// <value>The extra values.</value>
@@ -19,7 +19,7 @@
 
 		/// <summary>Gets the name of the argument.</summary>
 		/// <value>The argument name.</value>
-		NodeCollection Name { get; }
+		WikiNodeCollection Name { get; }
 		#endregion
 
 		#region Methods

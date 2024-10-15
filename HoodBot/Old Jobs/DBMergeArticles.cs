@@ -78,7 +78,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static void UpdateFileParameter(PageMoverJob job, int ns, NodeCollection value)
+		public static void UpdateFileParameter(PageMoverJob job, int ns, WikiNodeCollection value)
 		{
 			var split = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(value.NotNull(nameof(value))));
 			var title = TitleFactory.FromName(job.NotNull(nameof(job)).Site, ns, split.Value);
@@ -150,7 +150,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static void AddModHeader(ContextualParser parser)
+		private static void AddModHeader(SiteParser parser)
 		{
 			if (parser.FindFirst<TemplateNode>(item => item.GetTitleValue() == "Mod Header") == null)
 			{
@@ -184,7 +184,7 @@
 			}
 		}
 
-		private static void UpdateArchiveTable(ContextualParser parser, List<string> archiveList)
+		private static void UpdateArchiveTable(SiteParser parser, List<string> archiveList)
 		{
 			var template = parser.FindFirst<TemplateNode>(item => item.GetTitleValue().ToLowerInvariant() == "archive table");
 			if (template == null)
@@ -523,7 +523,7 @@
 			}
 			else
 			{
-				var parser = ContextualParser.FromPage(page);
+				var parser = SiteParser.FromPage(page);
 				if (!page.Namespace.IsTalkSpace)
 				{
 					AddModHeader(parser);

@@ -40,7 +40,7 @@
 					Title? first = null;
 					foreach (var linkNode in nodes.FindAll<SiteLinkNode>(null, false, false, 0))
 					{
-						var title = linkNode.TitleValue;
+						var title = linkNode.Title;
 						this.allTitles.Add(title);
 						if (first is not Title firstTitle)
 						{
@@ -72,7 +72,7 @@
 		#region Private Methods
 		private static void AddSimilarImages(Page page, Title title)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			if (parser.FindSiteTemplate("Similar Images") is null)
 			{
 				var sections = new List<Section>(parser.ToSections());
@@ -87,7 +87,7 @@
 				}
 
 				var sectionHeader = parser.Factory.HeaderNodeFromParts(2, "Similar Images");
-				var nodes = new NodeCollection(parser.Factory);
+				var nodes = new WikiNodeCollection(parser.Factory);
 				var template = parser.Factory.TemplateNodeFromParts("Similar Images");
 				template.Add(title.PageName);
 				sections[insertSection - 1].Content.AddText("\n\n");

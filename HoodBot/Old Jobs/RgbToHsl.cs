@@ -25,14 +25,14 @@
 			var pages = PageCollection.Unlimited(this.Site);
 			pages.GetNamespace(MediaWikiNamespaces.Template, Filter.Any, "ESO ArmorDye Icon/");
 			var dyes = this.dyesTitle.Load();
-			var parser = new ContextualParser(dyes);
+			var parser = new SiteParser(dyes);
 			foreach (var templateNode in parser.FindTemplates("ESO Dye"))
 			{
 				var name = templateNode.Find(1)?.Value.ToValue();
 				var pageName = "Template:ESO ArmorDye Icon/" + name;
 				if (pages.TryGetValue(pageName, out var page))
 				{
-					var value = new ContextualParser(page, InclusionType.Transcluded, true).Nodes.ToValue();
+					var value = new SiteParser(page, InclusionType.Transcluded, true).Nodes.ToValue();
 					var r = int.Parse(value.Substring(0, 2), NumberStyles.HexNumber, this.Site.Culture);
 					var g = int.Parse(value.Substring(2, 2), NumberStyles.HexNumber, this.Site.Culture);
 					var b = int.Parse(value.Substring(4, 2), NumberStyles.HexNumber, this.Site.Culture);

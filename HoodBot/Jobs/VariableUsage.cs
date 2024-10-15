@@ -143,7 +143,7 @@
 			{
 				List<string> variables = [];
 				this.Page = page;
-				var title = loadSave.Title.ToRaw();
+				var title = loadSave.TitleNodes.ToRaw();
 				var split = title.Split(TextArrays.Colon, 2);
 				var name = split[0];
 				var first = split[1];

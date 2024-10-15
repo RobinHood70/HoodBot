@@ -25,7 +25,7 @@
 			ArgumentNullException.ThrowIfNull(title);
 			ArgumentNullException.ThrowIfNull(parameters);
 			this.Factory = factory;
-			this.Title = new NodeCollection(factory, title);
+			this.TitleNodes = new WikiNodeCollection(factory, title);
 			this.Parameters = parameters;
 			foreach (var parameter in parameters)
 			{
@@ -43,11 +43,11 @@
 		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
-		public IEnumerable<NodeCollection> NodeCollections
+		public IEnumerable<WikiNodeCollection> NodeCollections
 		{
 			get
 			{
-				yield return this.Title;
+				yield return this.TitleNodes;
 				foreach (var parameter in this.Parameters)
 				{
 					foreach (var nodeCollection in parameter.NodeCollections)
@@ -62,7 +62,7 @@
 		public IList<IParameterNode> Parameters { get; }
 
 		/// <inheritdoc/>
-		public NodeCollection Title { get; }
+		public WikiNodeCollection TitleNodes { get; }
 		#endregion
 
 		#region Public Methods

@@ -114,7 +114,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string BasicTemplateParsing(NodeCollection parsedContent)
+		private static string BasicTemplateParsing(WikiNodeCollection parsedContent)
 		{
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{
@@ -151,7 +151,7 @@
 			return parsedContent.ToRaw();
 		}
 
-		private static string GroupFixer(NodeCollection parsedContent)
+		private static string GroupFixer(WikiNodeCollection parsedContent)
 		{
 			// Find closed groups with a pipe right after them which should be part of the group.
 			for (var pos = parsedContent.Count - 2; pos >= 0; pos--)
@@ -176,7 +176,7 @@
 			return parsedContent.ToRaw();
 		}
 
-		private static string StripSingles(NodeCollection parsedContent)
+		private static string StripSingles(WikiNodeCollection parsedContent)
 		{
 			// Strip EAL/Group wrapper from single-entry groups if possible.
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
@@ -219,7 +219,7 @@
 		#endregion
 
 		#region Private Methods
-		private string DeconvertSingles(NodeCollection parsedContent)
+		private string DeconvertSingles(WikiNodeCollection parsedContent)
 		{
 			// If a group is still a single entry, rename it as such.
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
@@ -269,7 +269,7 @@
 			return retval + "}}";
 		}
 
-		private string ParseEntries(NodeCollection parsedContent)
+		private string ParseEntries(WikiNodeCollection parsedContent)
 		{
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{

@@ -53,7 +53,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create book page";
 
-		protected override bool IsValid(ContextualParser parser, Book item) => parser.FindSiteTemplate("Game Book") is not null;
+		protected override bool IsValid(SiteParser parser, Book item) => parser.FindSiteTemplate("Game Book") is not null;
 
 		protected override IDictionary<Title, Book> LoadItems()
 		{

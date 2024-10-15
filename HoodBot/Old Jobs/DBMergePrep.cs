@@ -24,7 +24,7 @@
 			this.Pages.GetTitles(titles);
 		}
 
-		protected override void ParseText(object sender, Page page, ContextualParser parsedPage)
+		protected override void ParseText(object sender, Page page, SiteParser parsedPage)
 		{
 			foreach (var template in parsedPage.NotNull(nameof(parsedPage)).FindAllRecursive<TemplateNode>())
 			{

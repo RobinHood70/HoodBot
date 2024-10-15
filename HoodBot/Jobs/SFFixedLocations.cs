@@ -52,7 +52,7 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new SiteParser(page);
 			var sections = parser.ToSections(2);
 			foreach (var section in sections)
 			{
@@ -123,7 +123,7 @@
 			for (int nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)
 			{
 				if (lastContent[nodeIndex] is SiteTemplateNode template &&
-					this.footerTemplates.Contains(template.TitleValue))
+					this.footerTemplates.Contains(template.Title))
 				{
 					var footerSection = new Section(null, lastContent.Factory);
 					footerSection.Content.AddRange(lastContent[nodeIndex..]);

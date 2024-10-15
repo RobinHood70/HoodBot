@@ -89,7 +89,7 @@
 			this.Pages.Sort();
 			foreach (var page in this.Pages)
 			{
-				ContextualParser parsedPage = new(page);
+				SiteParser parsedPage = new(page);
 				foreach (var link in parsedPage.FindAll<SiteLinkNode>())
 				{
 					var pageName = link.TitleValue.PageName;

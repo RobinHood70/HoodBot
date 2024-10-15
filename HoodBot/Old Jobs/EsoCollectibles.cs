@@ -150,7 +150,7 @@
 				.Trim();
 		}
 
-		private static void ParseCollectible(CollectibleInfo collectible, ContextualParser parser)
+		private static void ParseCollectible(CollectibleInfo collectible, SiteParser parser)
 		{
 			var page = parser.Page;
 			var templateIndex = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
@@ -226,13 +226,13 @@
 
 		#region Private Methods
 
-		private ContextualParser? FindOrCreatePage(PageCollection pages, CollectibleInfo newPage)
+		private SiteParser? FindOrCreatePage(PageCollection pages, CollectibleInfo newPage)
 		{
 			this.blankText ??= this.GetPageTemplate();
 			pages.TryGetValue(newPage.DisambigName, out var page);
 			if (page is not null && page.Exists)
 			{
-				ContextualParser disambigParser = new(page);
+				SiteParser disambigParser = new(page);
 				return ParserHasTemplate(disambigParser)
 					? disambigParser
 					: throw new InvalidOperationException($"{newPage.DisambigName} found, but no template on it.");
@@ -246,15 +246,15 @@
 
 			if (!page.Exists || page.IsRedirect)
 			{
-				return new ContextualParser(page, this.blankText);
+				return new SiteParser(page, this.blankText);
 			}
 
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			return ParserHasTemplate(parser)
 				? parser
-				: new ContextualParser(this.Site.CreatePage(newPage.DisambigName, this.blankText));
+				: new SiteParser(this.Site.CreatePage(newPage.DisambigName, this.blankText));
 
-			static bool ParserHasTemplate(ContextualParser parser) => parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			static bool ParserHasTemplate(SiteParser parser) => parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 		}
 
 		private void GetCrownCrates()
@@ -269,7 +269,7 @@
 
 		private void ParseCrate(Page crate)
 		{
-			ContextualParser parser = new(crate);
+			SiteParser parser = new(crate);
 			//// var tier = string.Empty;
 			foreach (var node in parser)
 			{
@@ -339,7 +339,7 @@
 			var pages = this.GetSectionPages(collectibles);
 			foreach (var collectible in collectibles)
 			{
-				if (this.FindOrCreatePage(pages, collectible) is ContextualParser parser)
+				if (this.FindOrCreatePage(pages, collectible) is SiteParser parser)
 				{
 					ParseCollectible(collectible, parser);
 					if (parser.Page.TextModified)
@@ -362,7 +362,7 @@
 
 		private void ParseListPage(object sender, Page page)
 		{
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			var sectionInfo = this.ParseSections(page, parser);
 			if (sectionInfo.Collectibles.Count == 0)
 			{
@@ -377,7 +377,7 @@
 			parser.UpdatePage();
 		}
 
-		private SectionInfo ParseSections(Page page, ContextualParser parser)
+		private SectionInfo ParseSections(Page page, SiteParser parser)
 		{
 			SectionInfo sectionInfo = new();
 			var sections = parser.ToSections();
@@ -561,7 +561,7 @@
 
 			public string Name { get; }
 
-			public NodeCollection NewContent { get; }
+			public WikiNodeCollection NewContent { get; }
 
 			public string NickName { get; }
 

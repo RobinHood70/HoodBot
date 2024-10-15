@@ -33,7 +33,7 @@
 			loreBookPages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 			foreach (var page in loreBookPages)
 			{
-				ContextualParser parser = new(page);
+				SiteParser parser = new(page);
 				foreach (var template in parser.FindSiteTemplates(TemplateName))
 				{
 					if (template.GetValue(2) is string value)
@@ -55,10 +55,10 @@
 
 		protected override void PageLoaded(Page page)
 		{
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			var factory = parser.Factory;
-			var first = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
-			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			var first = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(TemplateName));
+			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(TemplateName));
 			if (first != -1)
 			{
 				List<IWikiNode> newNodes = [];

@@ -91,7 +91,7 @@
 			TitleCollection titles = new(this.Site);
 			foreach (var page in this.sourcePages)
 			{
-				ContextualParser parsedPage = new(page);
+				SiteParser parsedPage = new(page);
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
 					if (headerNode.Level == 3 &&
@@ -119,7 +119,7 @@
 		#region Private Methods
 		private static void AddHeaderLinks(object sender, Page page)
 		{
-			ContextualParser parser = new(page);
+			SiteParser parser = new(page);
 			var factory = parser.Factory;
 			foreach (var headerNode in parser.HeaderNodes)
 			{

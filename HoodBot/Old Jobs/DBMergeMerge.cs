@@ -84,7 +84,7 @@
 				if (!replacement.FromPage.IsRedirect)
 				{
 					var text = replacement.ToPage.Text + "\n\n= Dragonborn {{DB}} =\n" + replacement.FromPage.Text;
-					var toPageParser = ContextualParser.FromText(replacement.To, text, null);
+					var toPageParser = SiteParser.FromText(replacement.To, text, null);
 					toPageParser.AddCategory("DBMerge-Merged");
 
 					this.ReplaceNodes(replacement.ToPage, toPageParser);
@@ -204,7 +204,7 @@
 				return;
 			}
 
-			var parser = ContextualParser.FromPage(page);
+			var parser = SiteParser.FromPage(page);
 			if (parser.AddCategory("DBMerge-Redirects"))
 			{
 				page.Text = WikiTextVisitor.Raw(parser);

@@ -140,7 +140,7 @@
 		#region Public Methods
 
 		/// <summary>Does final processing before returning the node collection.</summary>
-		/// <returns>The <see cref="NodeCollection"/> representing the text provided in the constructor.</returns>
+		/// <returns>The <see cref="WikiNodeCollection"/> representing the text provided in the constructor.</returns>
 		public IEnumerable<IWikiNode> GetNodes()
 		{
 			var finalNodes = this.array[0].CurrentPiece;

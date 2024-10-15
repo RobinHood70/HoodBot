@@ -14,9 +14,9 @@
 
 		protected Func<Title, T, string>? NewPageText { get; set; }
 
-		protected Action<ContextualParser, T>? OnExists { get; set; }
+		protected Action<SiteParser, T>? OnExists { get; set; }
 
-		protected Action<ContextualParser, T>? OnUpdate { get; set; }
+		protected Action<SiteParser, T>? OnUpdate { get; set; }
 		#endregion
 
 		#region Protected Abstract Properties
@@ -24,7 +24,7 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract bool IsValid(ContextualParser parser, T item);
+		protected abstract bool IsValid(SiteParser parser, T item);
 
 		protected abstract IDictionary<Title, T> LoadItems();
 		#endregion
@@ -33,7 +33,7 @@
 		protected override void LoadPages()
 		{
 			var items = this.LoadItems();
-			var parsedPages = new List<ContextualParser>();
+			var parsedPages = new List<SiteParser>();
 			var remaining = new TitleCollection(this.Site);
 			remaining.AddRange(items.Keys);
 
@@ -61,7 +61,7 @@
 		#endregion
 
 		#region Private Methods
-		private void DoOnExists(IDictionary<Title, T> items, List<ContextualParser> parsedPages)
+		private void DoOnExists(IDictionary<Title, T> items, List<SiteParser> parsedPages)
 		{
 			if (this.OnExists is null)
 			{
@@ -77,7 +77,7 @@
 			}
 		}
 
-		private void DoOnUpdate(IDictionary<Title, T> items, List<ContextualParser> parsedPages)
+		private void DoOnUpdate(IDictionary<Title, T> items, List<SiteParser> parsedPages)
 		{
 			if (this.OnUpdate is null)
 			{
@@ -90,7 +90,7 @@
 			}
 		}
 
-		private void GetBasePages(IDictionary<Title, T> items, List<ContextualParser> parsedPages, TitleCollection remaining)
+		private void GetBasePages(IDictionary<Title, T> items, List<SiteParser> parsedPages, TitleCollection remaining)
 		{
 			var found = new PageCollection(this.Site);
 			found.GetTitles(remaining);
@@ -99,7 +99,7 @@
 				var title = page.Title;
 				if (page.Exists)
 				{
-					var parser = new ContextualParser(page);
+					var parser = new SiteParser(page);
 					if (this.IsValid(parser, items[title]))
 					{
 						parsedPages.Add(parser);
@@ -122,7 +122,7 @@
 			}
 		}
 
-		private void GetDisambiguatedPages(IDictionary<Title, T> items, List<ContextualParser> parsedPages, TitleCollection remaining)
+		private void GetDisambiguatedPages(IDictionary<Title, T> items, List<SiteParser> parsedPages, TitleCollection remaining)
 		{
 			var found = new PageCollection(this.Site);
 			found.GetTitles(remaining);
@@ -131,7 +131,7 @@
 				var title = page.Title;
 				if (page.Exists)
 				{
-					var parser = new ContextualParser(page);
+					var parser = new SiteParser(page);
 					if (this.IsValid(parser, items[title]))
 					{
 						parsedPages.Add(parser);
@@ -145,7 +145,7 @@
 			}
 		}
 
-		private IEnumerable<ContextualParser> GetNewPages(IDictionary<Title, T> items, TitleCollection remaining)
+		private IEnumerable<SiteParser> GetNewPages(IDictionary<Title, T> items, TitleCollection remaining)
 		{
 			if (this.NewPageText is null)
 			{
@@ -157,7 +157,7 @@
 				var item = items[title];
 				var text = this.NewPageText(title, item);
 				var page = this.Site.CreatePage(title, text);
-				var parser = new ContextualParser(page);
+				var parser = new SiteParser(page);
 				if (this.IsValid(parser, item))
 				{
 					yield return parser;
