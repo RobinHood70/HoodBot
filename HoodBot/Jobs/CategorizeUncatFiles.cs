@@ -14,7 +14,7 @@
 		#endregion
 
 		#region Fields
-		private readonly UespNamespaceList nsList = new UespNamespaceList(jobManager.Site);
+		private readonly UespNamespaceList nsList = new(jobManager.Site);
 		#endregion
 
 		#region Public Override Properties
