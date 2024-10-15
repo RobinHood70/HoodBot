@@ -6,6 +6,13 @@
 	[method: JobInfo("One-Off Job")]
 	internal sealed partial class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 	{
+		#region Public Override Properties
+		//// public override string LogDetails => "Get category";
+
+		public override string LogName => "One-Off Job";
+		#endregion
+
+
 		#region Protected Override Methods
 		protected override void Main()
 		{
