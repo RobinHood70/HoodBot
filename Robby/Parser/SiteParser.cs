@@ -259,6 +259,42 @@
 			}
 		}
 
+		/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
+		/// <param name="templateName">The name of the template.</param>
+		public void RemoveTemplates(string templateName)
+		{
+			var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], templateName);
+			this.RemoveTemplates(title);
+		}
+
+		/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
+		/// <param name="title">The title of the template.</param>
+		public void RemoveTemplates(Title title)
+		{
+			for (int i = this.Count - 1; i >= 0; i--)
+			{
+				var node = this[i];
+				if (node is SiteTemplateNode template && template.Title == title)
+				{
+					this.RemoveAt(i);
+					var afterNewLine = i == 0 ||
+						(this[i - 1] is ITextNode textBefore &&
+						textBefore.Text.Length > 0 &&
+						textBefore.Text[^1] == '\n');
+					if (afterNewLine &&
+						i < this.Count &&
+						this[i] is ITextNode textAfter)
+					{
+						textAfter.Text = textAfter.Text.TrimStart();
+						if (textAfter.Text.Length == 0)
+						{
+							this.RemoveAt(i);
+						}
+					}
+				}
+			}
+		}
+
 		/// <summary>Reparses the existing page text with new inclusion parameters.</summary>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
