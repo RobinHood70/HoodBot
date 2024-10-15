@@ -192,8 +192,8 @@
 		#region Public Static Methods
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site the page is in.</param>
-		/// <param name="nsId">The namespace the page should resolve to.</param>
+		/// <param name="site">The site the page is on.</param>
+		/// <param name="nsId">The namespace the page should resolve to. If the resolved namespace doesn't match, this will throw an error.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		public static TitleFactory CoValidate(Site site, int? nsId, string fullPageName)
 		{
@@ -224,6 +224,7 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
+		/// <remarks>This method bypasses some of the checks the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., is ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
 		public static TitleFactory FromValidated(Namespace ns, string pageName)
 		{
 			ArgumentNullException.ThrowIfNull(ns);
@@ -242,13 +243,13 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="ns">The namespace the page is in.</param>
+		/// <param name="defaultNamespace">The default namespace for the page; if pageName starts with a namespace name, this parameter will be ignored.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Namespace ns, string pageName)
+		public static TitleFactory FromUnvalidated(Namespace defaultNamespace, string pageName)
 		{
-			ArgumentNullException.ThrowIfNull(ns);
+			ArgumentNullException.ThrowIfNull(defaultNamespace);
 			ArgumentNullException.ThrowIfNull(pageName);
-			return new(ns.Site, ns.Id, WikiTextUtilities.DecodeAndNormalize(pageName));
+			return new(defaultNamespace.Site, defaultNamespace.Id, WikiTextUtilities.DecodeAndNormalize(pageName));
 		}
 		#endregion
 
