@@ -189,7 +189,7 @@
 			};
 
 			var list = new ListGlobalBlocks(wmApi, input);
-			var result = wmApi.RunModuleQuery(list);
+			var result = wmApi.RunListQuery(list);
 			foreach (var block in result)
 			{
 				if (block.Address is not null)
