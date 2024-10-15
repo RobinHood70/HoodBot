@@ -190,6 +190,12 @@
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed. Assumes version 2, then falls back to 1 in the event of an error message.</remarks>
 		public int DetectedFormatVersion { get; protected internal set; } = 2;
 
+		/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
+		/// <value>The URI to use as a base.</value>
+		/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)" /> routine, but is left as settable by derived classes, should customization be needed.</remarks>
+		/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)" />
+		public Uri EntryPoint { get; protected set; }
+
 		/// <summary>Gets the interwiki prefixes.</summary>
 		/// <value>A hashset of all interwiki prefixes, to allow <see cref="PageSetRedirectItem.Interwiki"/> emulation for MW 1.24 and below.</value>
 		/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as an IReadOnlySet, since it's the fastest lookup.</remarks>
@@ -248,12 +254,6 @@
 				this.tokenManager = value;
 			}
 		}
-
-		/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
-		/// <value>The URI to use as a base.</value>
-		/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)" /> routine, but is left as settable by derived classes, should customization be needed.</remarks>
-		/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)" />
-		public Uri EntryPoint { get; protected set; }
 
 		/// <summary>Gets or sets the language to use for responses from the wiki.</summary>
 		/// <value>The use language.</value>
@@ -324,16 +324,6 @@
 			where TInput : class
 			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
 
-		/// <summary>Runs the continuable query specified by the input.</summary>
-		/// <param name="input">The input.</param>
-		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
-		public void RunQuery(IEnumerable<IQueryModule> input)
-		{
-			ActionQuery query = new(this, input);
-			query.Submit();
-			this.DoStopCheck(query.UserInfo);
-		}
-
 		/// <summary>Runs the query specified based directly on the input module.</summary>
 		/// <typeparam name="TInput">The input type for the module.</typeparam>
 		/// <typeparam name="TOutput">The output type for the module.</typeparam>
@@ -370,6 +360,16 @@
 		/// <param name="input">The input.</param>
 		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
 		public void RunQuery(params IQueryModule[] input) => this.RunQuery(input as IEnumerable<IQueryModule>);
+
+		/// <summary>Runs the continuable query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
+		public void RunQuery(IEnumerable<IQueryModule> input)
+		{
+			ActionQuery query = new(this, input);
+			query.Submit();
+			this.DoStopCheck(query.UserInfo);
+		}
 
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
