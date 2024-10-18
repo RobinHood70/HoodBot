@@ -22,6 +22,7 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.Parser.Basic;
 
 	#region Public Delegates
 
@@ -1048,12 +1049,16 @@
 		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
 			ArgumentNullException.ThrowIfNull(text);
-			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
+			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect)
+				? redirect.Aliases
+				: DefaultRedirect;
 			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-			var nodes = new SiteNodeFactory(this).Parse(text);
+			var nodes = new WikiNodeFactory().Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
-			if (nodes.Count > 1 && nodes[0] is ITextNode textNode && nodes[1] is ILinkNode linkNode)
+			if (nodes.Count > 1 &&
+				nodes[0] is ITextNode textNode &&
+				nodes[1] is ILinkNode linkNode)
 			{
 				var searchText = textNode.Text.TrimEnd();
 
@@ -1065,7 +1070,7 @@
 
 				if (redirects.Contains(searchText))
 				{
-					return TitleFactory.FromBacklinkNode(this, linkNode);
+					return TitleFactory.FromBacklinkNode(this, linkNode).ToFullTitle();
 				}
 			}
 
