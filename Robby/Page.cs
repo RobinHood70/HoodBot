@@ -23,6 +23,7 @@
 		private Uri? canonicalPath;
 		private Revision? currentRevision;
 		private Uri? editPath;
+		private bool? isRedirect;
 		private string text = string.Empty;
 		#endregion
 
@@ -109,7 +110,7 @@
 					this.CurrentRevisionId = info.LastRevisionId;
 					this.editPath = info.EditUrl;
 					this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
-					this.IsRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
+					this.isRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
 					this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
 					this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
 					foreach (var protItem in pageItem.Info.Protections)
@@ -123,7 +124,7 @@
 					this.CurrentRevisionId = 0;
 					this.editPath = null;
 					this.IsNew = false;
-					this.IsRedirect = false;
+					this.isRedirect = false;
 					protections.Clear();
 					this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
 					this.Text = null;
@@ -258,9 +259,16 @@
 		/// <value><see langword="true" /> if the page is new; otherwise, <see langword="false" />.</value>
 		public bool IsNew { get; protected set; }
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
+		/// <summary>Gets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
 		/// <value><see langword="true" /> if the page is a redirect; otherwise, <see langword="false" />.</value>
-		public bool IsRedirect { get; protected set; }
+		public bool IsRedirect
+		{
+			get
+			{
+				this.isRedirect ??= this.Site.GetRedirectFromTextInternal(this.Text) is not null;
+				return this.isRedirect.Value;
+			}
+		}
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
@@ -300,7 +308,11 @@
 		public string Text
 		{
 			get => this.text;
-			set => this.text = value ?? string.Empty;
+			set
+			{
+				this.text = value ?? string.Empty;
+				this.isRedirect = null;
+			}
 		}
 
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>

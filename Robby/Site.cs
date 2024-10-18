@@ -21,7 +21,6 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
 	#region Public Delegates
@@ -1046,36 +1045,9 @@
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-		public virtual IFullTitle? GetRedirectFromText(string text)
-		{
-			ArgumentNullException.ThrowIfNull(text);
-			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect)
-				? redirect.Aliases
-				: DefaultRedirect;
-			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-			var nodes = new WikiNodeFactory().Parse(text);
-
-			// Is the text of the format TextNode, LinkNode?
-			if (nodes.Count > 1 &&
-				nodes[0] is ITextNode textNode &&
-				nodes[1] is ILinkNode linkNode)
-			{
-				var searchText = textNode.Text.TrimEnd();
-
-				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
-				if (searchText.Length > 0 && searchText[^1] == ':')
-				{
-					searchText = searchText[0..^1].TrimEnd();
-				}
-
-				if (redirects.Contains(searchText))
-				{
-					return TitleFactory.FromBacklinkNode(this, linkNode).ToFullTitle();
-				}
-			}
-
-			return null;
-		}
+		public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is LinkNode linkNode
+			? TitleFactory.FromBacklinkNode(this, linkNode).ToFullTitle()
+			: null;
 
 		/// <summary>Gets all page property names in use on the wiki.</summary>
 		/// <returns>All page property names on the wiki.</returns>
@@ -1273,6 +1245,39 @@
 		{
 			ArgumentNullException.ThrowIfNull(title);
 			return TitleFactory.FromValidated(title.Namespace, this.SanitizePageName(title.PageName));
+		}
+		#endregion
+
+		#region Internal Methods
+		internal LinkNode? GetRedirectFromTextInternal(string text)
+		{
+			ArgumentNullException.ThrowIfNull(text);
+			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect)
+				? redirect.Aliases
+				: DefaultRedirect;
+			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
+			var nodes = new WikiNodeFactory().Parse(text);
+
+			// Is the text of the format TextNode, LinkNode?
+			if (nodes.Count > 1 &&
+				nodes[0] is TextNode textNode &&
+				nodes[1] is LinkNode linkNode)
+			{
+				var searchText = textNode.Text.TrimEnd();
+
+				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
+				if (searchText.Length > 0 && searchText[^1] == ':')
+				{
+					searchText = searchText[0..^1].TrimEnd();
+				}
+
+				if (redirects.Contains(searchText))
+				{
+					return linkNode;
+				}
+			}
+
+			return null;
 		}
 		#endregion
 
