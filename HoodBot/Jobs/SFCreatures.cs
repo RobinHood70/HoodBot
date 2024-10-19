@@ -164,7 +164,10 @@
 				if (template is not null)
 				{
 					var name = template.GetRaw("titlename") ?? page.Title.LabelName();
-					titleMap.Add(name, page.Title);
+					if (!titleMap.TryAdd(name, page.Title))
+					{
+						titleMap.Add(page.Title.PageName, page.Title);
+					}
 				}
 			}
 
