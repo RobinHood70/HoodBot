@@ -63,8 +63,7 @@
 				Encoding = Encoding.GetEncoding(1252)
 			};
 
-			csv.Load();
-			foreach (var row in csv)
+			foreach (var row in csv.ReadRows())
 			{
 				var formId = row["FormID"][2..];
 				var editorId = row["EditorID"];
