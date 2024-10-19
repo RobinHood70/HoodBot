@@ -77,8 +77,10 @@
 			// TODO: Add a dictionary that can be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
-				var nodes = new WikiNodeFactory().Parse(page.Text);
-				foreach (var template in nodes.FindAll<ITemplateNode>())
+				var factory = new WikiNodeFactory();
+				var nodes = factory.Parse(page.Text);
+				var collection = new WikiNodeCollection(factory, nodes);
+				foreach (var template in collection.FindAll<ITemplateNode>())
 				{
 					var name = template.GetTitleText();
 					if (name.StartsWith("#load", StringComparison.OrdinalIgnoreCase))

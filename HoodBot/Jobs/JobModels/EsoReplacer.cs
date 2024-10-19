@@ -191,7 +191,7 @@
 						{
 							if (match.Index > startPos)
 							{
-								newNodes.Add(factory.TextNode(text[startPos..match.Index]));
+								newNodes.AddText(text[startPos..match.Index]);
 							}
 
 							newNodes.Add(ReplaceTemplatableText(match, site));
@@ -251,7 +251,7 @@
 								UnreplacedList.Remove(replacement.From);
 								if (currentPos > startPos)
 								{
-									newNodes.Add(factory.TextNode(text[startPos..currentPos]));
+									newNodes.AddText(text[startPos..currentPos]);
 								}
 
 								foreach (var node in replacement.To)
@@ -400,7 +400,7 @@
 					{
 						if (i != start)
 						{
-							retval.Add(factory.TextNode(text[start..i]));
+							retval.AddText(text[start..i]);
 						}
 
 						foreach (var newNode in replacement.To)

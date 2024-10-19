@@ -39,24 +39,27 @@
 
 		/// <summary>Formats the provided text into a <see cref="Section"/>.</summary>
 		/// <param name="factory">The factory to use to parse the request.</param>
-		/// <param name="header">The header text.</param>
+		/// <param name="header">The header text. If null, the section will be a lead section.</param>
 		/// <param name="content">The body text.</param>
-		/// <returns>THe new Section.</returns>
-		public static Section FromText(IWikiNodeFactory factory, string header, string content) => FromText(factory, 2, header, content);
+		/// <returns>The new Section.</returns>
+		public static Section FromText(IWikiNodeFactory factory, string? header, string content) => FromText(factory, 2, header, content);
 
 		/// <summary>Formats the provided text into a <see cref="Section"/>.</summary>
 		/// <param name="factory">The factory to use to parse the request.</param>
-		/// <param name="level">The level of the header if not 2.</param>
-		/// <param name="header">The header text.</param>
+		/// <param name="level">The level of the header. If set to 0, <paramref name="header"/> will be ignored and the section will be a lead section.</param>
+		/// <param name="header">The header text. If null, <paramref name="level"/> will be ignored and the section will be a lead section.</param>
 		/// <param name="content">The body text.</param>
 		/// <returns>THe new Section.</returns>
-		public static Section FromText(IWikiNodeFactory factory, int level, string header, string content)
+		public static Section FromText(IWikiNodeFactory factory, int level, string? header, string content)
 		{
 			ArgumentNullException.ThrowIfNull(factory);
-			var headerNode = factory.HeaderNodeFromParts(level, header);
-			var bodyNodes = factory.Parse('\n' + content, factory.InclusionType, factory.StrictInclusion);
+			var headerNode = (header is null || level == 0)
+				? null
+				: factory.HeaderNodeFromParts(level, header);
+			var bodyNodes = factory.Parse('\n' + content);
+			var collection = new WikiNodeCollection(factory, bodyNodes);
 
-			return new Section(headerNode, bodyNodes);
+			return new Section(headerNode, collection);
 		}
 		#endregion
 	}

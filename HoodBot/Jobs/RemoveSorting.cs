@@ -4,6 +4,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class RemoveSorting : EditJob
 	{

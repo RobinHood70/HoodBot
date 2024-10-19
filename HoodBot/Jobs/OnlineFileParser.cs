@@ -287,7 +287,7 @@
 
 		private static bool IsCollectibleLink(string description) => description.StartsWith("{{Item Link", StringComparison.OrdinalIgnoreCase) && description.Contains("collectid", StringComparison.Ordinal);
 
-		private static ICollection<IWikiNode>? NodeReplacer(IWikiNode node)
+		private static IList<IWikiNode>? NodeReplacer(IWikiNode node)
 		{
 			switch (node)
 			{

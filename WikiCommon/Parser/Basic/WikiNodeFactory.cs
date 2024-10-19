@@ -102,15 +102,15 @@
 		public IArgumentNode ArgumentNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<IArgumentNode>(wikiText);
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
-		/// <param name="level">The header level (number of equals signs).</param>
+		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
 		/// <param name="text">The text of the header.</param>
 		/// <returns>A new header node.</returns>
 		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
 		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text)
 		{
-			var equals = new string('=', level);
-			return this.HeaderNodeFromWikiText(equals + text + equals);
+			var nodes = this.Parse(text);
+			return this.HeaderNode(level, nodes, null);
 		}
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
@@ -205,32 +205,15 @@
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
-		public WikiNodeCollection Parse(string? text) => this.Parse(text, InclusionType.Raw, false);
+		public IList<IWikiNode> Parse(string? text) => this.Parse(text, this.InclusionType, this.StrictInclusion);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
-		public WikiNodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
-		{
-			WikiStack stack = new(this, text, inclusionType, strictInclusion);
-			return new WikiNodeCollection(this, stack.GetNodes());
-		}
-
-		/// <summary>Parses the specified text.</summary>
-		/// <param name="nodes">The <see cref="WikiNodeCollection"/> to add to.</param>
-		/// <param name="text">The text to parse.</param>
-		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
-		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public void ParseInto(WikiNodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion)
-		{
-			ArgumentNullException.ThrowIfNull(nodes);
-			this.InclusionType = inclusionType;
-			this.StrictInclusion = strictInclusion;
-			WikiStack stack = new(this, text, inclusionType, strictInclusion);
-			nodes.AddRange(stack.GetNodes());
-		}
+		public IList<IWikiNode> Parse(string? text, InclusionType inclusionType, bool strictInclusion) =>
+			new WikiStack(this, text, inclusionType, strictInclusion).GetNodes();
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
 		/// <typeparam name="T">The type of node desired.</typeparam>
@@ -395,8 +378,9 @@
 			new CommentNode(comment);
 
 		/// <inheritdoc/>
-		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment) =>
-			new HeaderNode(this, level, text, comment);
+		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment) => level is < 1 or > 6
+			? throw new ArgumentOutOfRangeException(nameof(level))
+			: new HeaderNode(this, level, text, comment);
 
 		/// <inheritdoc/>
 		public virtual IIgnoreNode IgnoreNode(string value) =>

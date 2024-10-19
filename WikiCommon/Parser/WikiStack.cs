@@ -141,7 +141,7 @@
 
 		/// <summary>Does final processing before returning the node collection.</summary>
 		/// <returns>The <see cref="WikiNodeCollection"/> representing the text provided in the constructor.</returns>
-		public IEnumerable<IWikiNode> GetNodes()
+		public IList<IWikiNode> GetNodes()
 		{
 			var finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)

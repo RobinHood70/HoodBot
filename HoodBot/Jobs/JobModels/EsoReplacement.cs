@@ -1,13 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
+	using System.Collections.Generic;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoReplacement(string from, WikiNodeCollection to)
+	internal sealed class EsoReplacement(string from, IList<IWikiNode> to)
 	{
 		#region Public Properties
 		public string From { get; } = from;
 
-		public WikiNodeCollection To { get; } = to;
+		public IList<IWikiNode> To { get; } = to;
 		#endregion
 
 		#region Public Override Methods

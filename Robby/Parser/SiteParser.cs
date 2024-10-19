@@ -50,7 +50,8 @@
 		{
 			this.Page = page;
 			this.Site = page.Site;
-			this.Factory.ParseInto(this, text ?? string.Empty, inclusionType, strictInclusion);
+			var nodes = this.Factory.Parse(text, inclusionType, strictInclusion);
+			this.AddRange(nodes);
 		}
 		#endregion
 
@@ -302,7 +303,8 @@
 		public void ReparsePageText(InclusionType inclusionType, bool strictInclusion)
 		{
 			this.Clear();
-			this.Factory.ParseInto(this, this.Page.Text, inclusionType, strictInclusion);
+			var newNodes = this.Factory.Parse(this.Page.Text, inclusionType, strictInclusion);
+			this.AddRange(newNodes);
 		}
 
 		/// <summary>Updates the <see cref="Page"/>'s <see cref="Page.Text">text</see> to the parser's contents.</summary>

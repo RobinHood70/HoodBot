@@ -94,6 +94,19 @@
 		}
 		#endregion
 
+		#region IList<IWikiNode> Extensions
+
+		/// <summary>Converts the <see cref="WikiNodeCollection"/> to raw text.</summary>
+		/// <param name="nodes">The nodes to convert.</param>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public static string ToRaw(this IList<IWikiNode> nodes) => WikiTextVisitor.Raw(nodes);
+
+		/// <summary>Converts the <see cref="WikiNodeCollection"/> to it's value text.</summary>
+		/// <param name="nodes">The nodes to convert.</param>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public static string ToValue(this IList<IWikiNode> nodes) => WikiTextVisitor.Value(nodes);
+		#endregion
+
 		#region IParameterNode Extensions
 
 		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
@@ -167,17 +180,6 @@
 			return parameter.Name is WikiNodeCollection name
 				? name.ToRaw() + '=' + parameter.Value.ToRaw()
 				: parameter.Value.ToRaw();
-		}
-
-		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
-		/// <param name="parameter">The parameter.</param>
-		/// <param name="value">A variable to place the value into. Note that blank values will still be returned here with their full content, even when the return value is true.</param>
-		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
-		public static bool TryGetValue(this IParameterNode? parameter, out WikiNodeCollection? value)
-		{
-			value = parameter?.Value;
-			return value?.Count > 0 && value[0] is ITextNode && value?.ToRaw().Trim().Length > 0; // Check the whole thing in case of fragmented text nodes.
 		}
 
 		/// <summary>Returns the value of a template parameter or the default value.</summary>

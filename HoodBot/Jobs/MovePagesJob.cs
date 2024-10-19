@@ -600,7 +600,7 @@
 		{
 		}
 
-		protected virtual void ReplaceBacklinks(Page page, WikiNodeCollection nodes)
+		protected virtual void ReplaceBacklinks(Page page, IList<IWikiNode> nodes)
 		{
 			ArgumentNullException.ThrowIfNull(page);
 			ArgumentNullException.ThrowIfNull(nodes);

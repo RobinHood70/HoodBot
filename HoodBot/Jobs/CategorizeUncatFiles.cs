@@ -5,6 +5,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	[method: JobInfo("Categorize Uncategorized Files", "Maintenance")]
 	public class CategorizeUncatFiles(JobManager jobManager) : ParsedPageJob(jobManager)

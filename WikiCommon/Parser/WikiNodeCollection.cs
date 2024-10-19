@@ -11,8 +11,7 @@
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
-	/// <returns>A LinkedListNode&lt;IWikiNode>.</returns>
-	public delegate ICollection<IWikiNode>? NodeReplacer(IWikiNode node);
+	public delegate IList<IWikiNode>? NodeReplacer(IWikiNode node);
 
 	/// <summary>A collection of <see cref="IWikiNode"/>s representing wiki text. Implemented as a linked list.</summary>
 	/// <seealso cref="LinkedList{T}" />
@@ -384,7 +383,7 @@
 		/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A new WikiNodeCollection created from the text.</returns>
-		public WikiNodeCollection Parse(string text) => this.Factory.Parse(text, this.Factory.InclusionType, this.Factory.StrictInclusion);
+		public IList<IWikiNode> Parse(string text) => this.Factory.Parse(text);
 
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -438,15 +437,7 @@
 		/// <param name="comparisonType">The string comparison method to use.</param>
 		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 		/// </remarks>
-		public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => this.ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
-
-		/// <summary>Converts the <see cref="WikiNodeCollection"/> to raw text.</summary>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public string ToRaw() => WikiTextVisitor.Raw(this);
-
-		/// <summary>Converts the <see cref="WikiNodeCollection"/> to it's value text.</summary>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public string ToValue() => WikiTextVisitor.Value(this);
+		public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
 
 		/// <summary>Trims whitespace from the beginning and end of the collection.</summary>
 		/// <remarks>Note that this is a naive implementation that only looks at the first and last nodes of the collection. It is therefore recommended that you use <see cref="MergeText(bool)"/> first. This implementation also does not recurse, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
@@ -514,16 +505,16 @@
 		#endregion
 
 		#region Private Static Methods
-		private WikiNodeCollection? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
+		private static IList<IWikiNode>? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
 		{
 			switch (match)
 			{
 				case ICommentNode comment:
 					comment.Comment = comment.Comment.Replace(from, to, comparison);
-					return new WikiNodeCollection(this.Factory, comment);
+					return [comment];
 				case ITextNode text:
 					text.Text = text.Text.Replace(from, to, comparison);
-					return new WikiNodeCollection(this.Factory, text);
+					return [text];
 				default:
 					return null;
 			}

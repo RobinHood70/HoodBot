@@ -212,14 +212,15 @@
 		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			var valueNodes = factory.Parse(value.Trim());
+			var collection = new WikiNodeCollection(factory, valueNodes);
 			if (usedList != null)
 			{
-				EsoReplacer.ReplaceGlobal(valueNodes);
-				EsoReplacer.ReplaceEsoLinks(factory.Site, valueNodes);
-				EsoReplacer.ReplaceFirstLink(valueNodes, usedList);
+				EsoReplacer.ReplaceGlobal(collection);
+				EsoReplacer.ReplaceEsoLinks(factory.Site, collection);
+				EsoReplacer.ReplaceFirstLink(collection, usedList);
 				if (skillName != null)
 				{
-					EsoReplacer.ReplaceSkillLinks(valueNodes, skillName);
+					EsoReplacer.ReplaceSkillLinks(collection, skillName);
 				}
 			}
 

@@ -37,8 +37,9 @@
 				foreach (var section in entry.Text.Split("\n|-\n"))
 				{
 					var nodes = factory.Parse(section);
+					var collection = new WikiNodeCollection(factory, nodes);
 					Title? first = null;
-					foreach (var linkNode in nodes.FindAll<SiteLinkNode>(null, false, false, 0))
+					foreach (var linkNode in collection.FindAll<SiteLinkNode>(null, false, false, 0))
 					{
 						var title = linkNode.Title;
 						this.allTitles.Add(title);

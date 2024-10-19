@@ -58,7 +58,7 @@
 			{
 				var extract = new SiteParser(page);
 				var pre = extract.FindSiteTemplate("Pre");
-				if (pre?.Find(1)?.Value is WikiNodeCollection nodes &&
+				if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
 					nodes.Count > 0 &&
 					nodes[0] is ITagNode tag &&
 					string.Equals(tag.Name, "nowiki", StringComparison.Ordinal))
@@ -350,7 +350,7 @@
 
 			public string Name { get; }
 
-			public WikiNodeCollection? NewContent { get; private set; }
+			public IList<IWikiNode>? NewContent { get; private set; }
 
 			public string NickName { get; }
 

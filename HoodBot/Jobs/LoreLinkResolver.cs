@@ -199,7 +199,7 @@
 			return this.nsList.FromTitle(title) ?? throw new InvalidOperationException();
 		}
 
-		private WikiNodeCollection? LinkReplace(IWikiNode node, SiteParser parser)
+		private List<IWikiNode>? LinkReplace(IWikiNode node, SiteParser parser)
 		{
 			if (node is not SiteTemplateNode linkTemplate ||
 				!linkTemplate.Title.PageNameEquals("Lore Link"))
@@ -220,7 +220,7 @@
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 				? displayNode.Value.ToRaw()
 				: Title.ToLabelName(linkNode.Value.ToRaw());
-			return new WikiNodeCollection(parser.Factory, parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText));
+			return new List<IWikiNode>([parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText)]);
 		}
 
 		private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)

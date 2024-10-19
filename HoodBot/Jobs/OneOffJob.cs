@@ -12,7 +12,6 @@
 		public override string LogName => "One-Off Job";
 		#endregion
 
-
 		#region Protected Override Methods
 		protected override void Main()
 		{
