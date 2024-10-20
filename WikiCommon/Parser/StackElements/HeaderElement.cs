@@ -69,7 +69,7 @@
 						var innerStart = this.startPos + count;
 						var innerText = text[innerStart..(searchStart - count)];
 						var headerNodes = subparser.Parse(innerText);
-						var commentNodes = searchStart < stack.Index ? subparser.Parse(text[searchStart..stack.Index]) : null;
+						var commentNodes = searchStart < stack.Index ? subparser.Parse(text[searchStart..stack.Index]) : [];
 						var header = this.Stack.NodeFactory.HeaderNode(count, headerNodes, commentNodes);
 						stack.Pop();
 						stack.Top.CurrentPiece.Nodes.Add(header);

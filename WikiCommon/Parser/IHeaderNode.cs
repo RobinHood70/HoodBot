@@ -11,7 +11,7 @@
 		#region Properties
 
 		/// <summary>Gets any text that appeared after the ==.</summary>
-		WikiNodeCollection? Comment { get; }
+		WikiNodeCollection Comment { get; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="IHeaderNode"/> is confirmed (direct text) or possible (template or argument).</summary>
 		/// <value><see langword="true"/> if confirmed; otherwise, <see langword="false"/>.</value>

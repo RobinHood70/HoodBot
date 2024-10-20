@@ -16,21 +16,21 @@
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
 		/// <param name="comment">Any text that came after the close ==.</param>
-		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment)
+		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode> comment)
 		{
 			ArgumentNullException.ThrowIfNull(factory);
 			ArgumentNullException.ThrowIfNull(text);
 			this.Factory = factory;
 			this.Level = level;
 			this.Title = new WikiNodeCollection(factory, text);
-			this.Comment = comment is null ? null : new WikiNodeCollection(factory, comment);
+			this.Comment = new WikiNodeCollection(factory, comment ?? []);
 		}
 		#endregion
 
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public WikiNodeCollection? Comment { get; }
+		public WikiNodeCollection Comment { get; }
 
 		/// <inheritdoc/>
 		public bool Confirmed { get; set; }

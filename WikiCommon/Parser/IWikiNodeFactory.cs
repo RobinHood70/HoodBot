@@ -50,7 +50,7 @@
 		/// <param name="text">The text of the header.</param>
 		/// <param name="comment">Any comments or whitespace that come after the closing ==.</param>
 		/// <returns>A new instance of the <see cref="HeaderNode"/> class.</returns>
-		IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment);
+		IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode> comment);
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
@@ -58,6 +58,14 @@
 		/// <returns>A new instance of the <see cref="HeaderNode"/> class.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
 		IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text);
+
+		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
+		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
+		/// <param name="text">The text of the header.</param>
+		/// <param name="comment">The comment or whitespace at the end of the header.</param>
+		/// <returns>A new instance of the <see cref="HeaderNode"/> class.</returns>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
+		IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text, string comment);
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="wikiText">The wiki text of the header.</param>

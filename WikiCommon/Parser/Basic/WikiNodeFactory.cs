@@ -107,10 +107,20 @@
 		/// <returns>A new header node.</returns>
 		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
-		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text)
+		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNodeFromParts(level, text, string.Empty);
+
+		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
+		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
+		/// <param name="text">The text of the header.</param>
+		/// <param name="comment">The comment or whitespace at the end of the header.</param>
+		/// <returns>A new header node.</returns>
+		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
+		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text, string comment)
 		{
-			var nodes = this.Parse(text);
-			return this.HeaderNode(level, nodes, null);
+			var headerNodes = this.Parse(text);
+			var commentNodes = this.Parse(comment);
+			return this.HeaderNode(level, headerNodes, commentNodes);
 		}
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
@@ -378,7 +388,7 @@
 			new CommentNode(comment);
 
 		/// <inheritdoc/>
-		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment) => level is < 1 or > 6
+		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode> comment) => level is < 1 or > 6
 			? throw new ArgumentOutOfRangeException(nameof(level))
 			: new HeaderNode(this, level, text, comment);
 
