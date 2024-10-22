@@ -56,7 +56,7 @@
 			var sections = parser.ToSections(2);
 			foreach (var section in sections)
 			{
-				if (string.Equals(section.Header.GetTitle(true), SectionName, StringComparison.Ordinal))
+				if (string.Equals(section.GetTitle(), SectionName, StringComparison.Ordinal))
 				{
 					return;
 				}

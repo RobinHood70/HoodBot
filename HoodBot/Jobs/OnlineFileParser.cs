@@ -218,7 +218,7 @@
 			var summarySections = 0;
 			foreach (var section in sections)
 			{
-				var title = section.Header?.GetTitle(true);
+				var title = section.GetTitle();
 				if (title is not null && SummaryNames.Contains(title))
 				{
 					summary = section; // Set to last Summary section

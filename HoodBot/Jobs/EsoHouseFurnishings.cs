@@ -96,7 +96,7 @@
 
 					itemList.Sort(StringComparer.Ordinal);
 					var insertText = string.Join('\n', itemList) + "\n";
-					if (string.Equals(section.Header?.GetTitle(true), "Furnishings", StringComparison.Ordinal))
+					if (string.Equals(section.GetTitle(), "Furnishings", StringComparison.Ordinal))
 					{
 						insertText += "furnished=1\n";
 					}
@@ -119,9 +119,8 @@
 		{
 			foreach (var section in sections)
 			{
-				if (section.Header is IHeaderNode header)
+				if (section.GetTitle() is string headerText)
 				{
-					var headerText = header.GetTitle(true);
 					if (string.Equals(headerText, "Gallery", StringComparison.Ordinal))
 					{
 						yield break;

@@ -112,8 +112,8 @@
 			var newSections = new SortedList<char, List<Section>>();
 			foreach (var section in sections)
 			{
-				var sectionTitle = section.Header.GetTitle(true);
-				if (!this.skipSections.Contains(sectionTitle))
+				var sectionTitle = section.GetTitle();
+				if (sectionTitle is not null && !this.skipSections.Contains(sectionTitle))
 				{
 					var sortTitle = this.replacements.GetValueOrDefault(sectionTitle, sectionTitle);
 					if (!newSections.TryGetValue(sortTitle[0], out var sectionList))

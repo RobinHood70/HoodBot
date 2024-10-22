@@ -48,12 +48,11 @@
 				var sections = parser.ToSections(2);
 				foreach (var section in sections)
 				{
-					if (section.Header is null)
+					if (section.GetTitle() is not string headerTitle)
 					{
 						continue;
 					}
 
-					var headerTitle = section.Header.GetTitle(true);
 					this.CreatePage(factionPage, headerTitle, headerTitle);
 					var factionTemplates = section.Content.FindAll<SiteTemplateNode>(template => template.Title.PageNameEquals("Factions"));
 					foreach (var node in factionTemplates)

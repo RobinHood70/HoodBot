@@ -56,10 +56,42 @@
 			var headerNode = (header is null || level == 0)
 				? null
 				: factory.HeaderNodeFromParts(level, header);
-			var bodyNodes = factory.Parse('\n' + content);
+			if (headerNode is not null)
+			{
+				content = "\n" + content;
+			}
+
+			var bodyNodes = factory.Parse(content);
 			var collection = new WikiNodeCollection(factory, bodyNodes);
 
 			return new Section(headerNode, collection);
+		}
+		#endregion
+
+		#region Public Methods
+
+		/// <summary>This is a shortcut method to get the title of the section's header.</summary>
+		/// <returns>The section's title.</returns>
+		public string? GetTitle() => this.Header?.GetTitle(true);
+		#endregion
+
+		#region Public Override Methods
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var title = this.GetTitle();
+			var text = this.Content?.Count > 0
+				? WikiTextVisitor.Raw(this.Content[0])
+				: string.Empty;
+			if (text.Length > 15)
+			{
+				text = text[..15];
+			}
+
+			return title is null
+				? text
+				: title + ": " + text;
 		}
 		#endregion
 	}
