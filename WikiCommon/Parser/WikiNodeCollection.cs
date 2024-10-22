@@ -107,9 +107,8 @@
 		public IList<Section> ToSections() => this.ToSections(6);
 
 		/// <summary>Splits a page into its individual sections. </summary>
-		/// <param name="level">Only split on sections of this level or lower.</param>
+		/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		/// <remarks>This returns an <see cref="IList{T}"/> instead of an <see cref="IEnumerable{T}"/> to avoid the possibility of indirectly passing ToSections to FromSections, having them both working on the same list at the same time.</remarks>
 		public IList<Section> ToSections(int level)
 		{
 			var sections = new List<Section>();
