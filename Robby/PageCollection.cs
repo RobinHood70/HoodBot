@@ -12,7 +12,7 @@
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
 	/// <seealso cref="TitleCollection{TTitle}" />
-	public class PageCollection : TitleData<Page>
+	public class PageCollection : TitleData<Page, PageCollection>
 	{
 		#region Fields
 		private readonly PageCreator pageCreator;
@@ -258,35 +258,38 @@
 
 		#region Public Methods
 
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <summary>Creates a new page and adds it to the collection.</summary>
 		/// <param name="title">The title to create the page with.</param>
-		public void Create(Title title) => this.Create(title, string.Empty);
+		public PageCollection Create(Title title) => this.Create(title, string.Empty);
 
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <summary>Creates a new page and adds it to the collection.</summary>
 		/// <param name="title">The title to create the page with.</param>
 		/// <param name="text">The text to add to the page.</param>
-		public void Create(Title title, string text)
+		public PageCollection Create(Title title, string text)
 		{
-			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var page = this.pageCreator.CreatePage(title);
 			page.Text = text;
 			this.Add(page);
+
+			return this;
 		}
 
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <summary>Creates a new set of pages and adds them to the collection.</summary>
 		/// <param name="titles">The collection to initialize this instance from.</param>
-		public void CreateRange(IEnumerable<Title> titles) => this.CreateRange(titles, string.Empty);
+		public PageCollection CreateRange(IEnumerable<Title> titles) => this.CreateRange(titles, string.Empty);
 
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <summary>Creates a new set of pages and adds them to the collection.</summary>
 		/// <param name="titles">The collection to initialize this instance from.</param>
 		/// <param name="text">The text to add to each page.</param>
-		public void CreateRange(IEnumerable<Title> titles, string text)
+		public PageCollection CreateRange(IEnumerable<Title> titles, string text)
 		{
 			ArgumentNullException.ThrowIfNull(titles);
 			foreach (var title in titles)
 			{
 				this.Create(title, text ?? string.Empty);
 			}
+
+			return this;
 		}
 
 		/// <summary>Gets the <see cref="Page"/> with the specified key or <see langword="null"/> if not found.</summary>
@@ -315,23 +318,23 @@
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(params string[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+		public PageCollection GetTitles(params string[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<string> titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+		public PageCollection GetTitles(IEnumerable<string> titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(params Title[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+		public PageCollection GetTitles(params Title[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()), this.IsTitleInLimits);
+		public PageCollection GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()), this.IsTitleInLimits);
 
 		/// <summary>Merges the current PageCollection with another, including all <see cref="TitleMap"/> entries.</summary>
 		/// <param name="other">The PageCollection to merge with.</param>
-		public void MergeWith(PageCollection other)
+		public PageCollection MergeWith(PageCollection other)
 		{
 			ArgumentNullException.ThrowIfNull(other);
 			this.AddRange(other);
@@ -339,11 +342,13 @@
 			{
 				this.titleMap.Add(entry.Key, entry.Value);
 			}
+
+			return this;
 		}
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
 		/// <param name="changed"><see langword="true"/> to remove changed pages; <see langword="false"/> to remove unchanged pages.</param>
-		public void RemoveChanged(bool changed)
+		public PageCollection RemoveChanged(bool changed)
 		{
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
@@ -352,11 +357,13 @@
 					this.RemoveAt(i);
 				}
 			}
+
+			return this;
 		}
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
 		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
-		public void RemoveExists(bool exists)
+		public PageCollection RemoveExists(bool exists)
 		{
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
@@ -365,19 +372,21 @@
 					this.RemoveAt(i);
 				}
 			}
+
+			return this;
 		}
 		#endregion
 
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput), this.IsTitleInLimits);
+		public override PageCollection GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput), this.IsTitleInLimits);
 
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds), this.IsTitleInLimits);
+		public override PageCollection GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds), this.IsTitleInLimits);
 		#endregion
 
 		#region Internal Methods
@@ -419,7 +428,7 @@
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetBacklinks(BacklinksInput input)
+		protected override PageCollection GetBacklinks(BacklinksInput input)
 		{
 			ArgumentNullException.ThrowIfNull(input);
 			Globals.ThrowIfNull(input.Title, nameof(input), nameof(input.Title));
@@ -439,123 +448,128 @@
 					Redirect = input.Redirect,
 				});
 			}
+
+			return this;
 		}
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetCategories(AllCategoriesInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetCategories(AllCategoriesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
-		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
+		protected override PageCollection GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
 			ArgumentNullException.ThrowIfNull(input);
 			if (recurse)
 			{
 				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
+				return this;
 			}
-			else
-			{
-				this.GetCustomGenerator(input);
-			}
+
+			return this.GetCustomGenerator(input);
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles)
+		{
+			this.LoadPages(input, titles);
+			return this;
+		}
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetFiles(AllImagesInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetFiles(AllImagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetFileUsage(AllFileUsagesInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetFileUsage(AllFileUsagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetLinksToNamespace(AllLinksInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetLinksToNamespace(AllLinksInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose backlinks should be loaded.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetPages(AllPagesInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetPages(AllPagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
+		protected override PageCollection GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetPagesWithProperty(PagesWithPropertyInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetPagesWithProperty(PagesWithPropertyInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetPrefixSearchResults(PrefixSearchInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetPrefixSearchResults(PrefixSearchInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		protected override void GetQueryPage(QueryPageInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetQueryPage(QueryPageInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Gets a random set of pages from the wiki.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRandomPages(RandomInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetRandomPages(RandomInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRecentChanges(RecentChangesInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetRecentChanges(RecentChangesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRedirectsToNamespace(AllRedirectsInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetRedirectsToNamespace(AllRedirectsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRevisions(AllRevisionsInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetRevisions(AllRevisionsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetSearchResults(SearchInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetSearchResults(SearchInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages with template transclusions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetTransclusions(AllTransclusionsInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetTransclusions(AllTransclusionsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetWatchlistChanged(WatchlistInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetWatchlistChanged(WatchlistInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
+		protected override PageCollection GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
 
 		/// <inheritdoc/>
 		protected override bool IsTitleInLimits(Page title)
@@ -583,12 +597,12 @@
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="pageSetInput">The page set input.</param>
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
-		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
+		protected virtual PageCollection LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
 			ArgumentNullException.ThrowIfNull(pageSetInput);
 			if (pageSetInput.IsEmpty)
 			{
-				return;
+				return this;
 			}
 
 			ArgumentNullException.ThrowIfNull(pageValidator);
@@ -624,14 +638,14 @@
 					this.PageLoaded?.Invoke(this, page);
 				}
 			}
+
+			return this;
 		}
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(
-			new QueryPageSetInput(
-				generator,
-				titles.ToFullPageNames()),
+		private PageCollection LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(
+			new QueryPageSetInput(generator, titles.ToFullPageNames()),
 			this.IsTitleInLimits);
 
 		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
