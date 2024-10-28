@@ -253,7 +253,7 @@
 
 			value = TrimValue(value, paramFormat);
 			if (paramFormat == ParameterFormat.Copy &&
-				template.FindCopyParameter(false) is var index &&
+				template.FindCopyParameter(name is null) is var index &&
 				index != -1)
 			{
 				var previous = template.Parameters[index];
