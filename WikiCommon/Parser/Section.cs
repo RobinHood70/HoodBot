@@ -72,7 +72,15 @@
 
 		/// <summary>This is a shortcut method to get the title of the section's header.</summary>
 		/// <returns>The section's title.</returns>
-		public string? GetTitle() => this.Header?.GetTitle(true);
+		public string? GetFullTitle() => this.Header is null
+			? null
+			: WikiTextVisitor.Raw(this.Header);
+
+		/// <summary>This is a shortcut method to get the title of the section's header.</summary>
+		/// <returns>The section's title.</returns>
+		public string? GetTitle() => this.Header is null
+			? null
+			: WikiTextVisitor.Raw(this.Header.Title).Trim();
 		#endregion
 
 		#region Public Override Methods
@@ -80,7 +88,7 @@
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			var title = this.GetTitle();
+			var title = this.GetFullTitle();
 			var text = this.Content?.Count > 0
 				? WikiTextVisitor.Raw(this.Content[0])
 				: string.Empty;
@@ -91,7 +99,7 @@
 
 			return title is null
 				? text
-				: title + ": " + text;
+				: title + "  " + text;
 		}
 		#endregion
 	}
