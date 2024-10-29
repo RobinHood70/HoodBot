@@ -114,7 +114,6 @@
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
 			var editingEnabledMaster = this.Site.EditingEnabled;
-			var allJobsTimer = Stopwatch.StartNew();
 			foreach (var jobInfo in jobList)
 			{
 				var abort = this.OnStartingJob(jobInfo);
