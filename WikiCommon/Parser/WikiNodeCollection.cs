@@ -336,6 +336,16 @@
 		public bool Has<T>(Predicate<T>? condition)
 			where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
 
+		/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
+		/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
+		/// <param name="index">This index at which to insert the text.</param>
+		/// <param name="text">The text.</param>
+		public void InsertParsed(int index, [Localizable(false)] string text)
+		{
+			var newNodes = this.Parse(text);
+			this.InsertRange(index, newNodes);
+		}
+
 		/// <summary>Adds text to the end of the collection.</summary>
 		/// <param name="index">This index at which to insert the text.</param>
 		/// <param name="text">The text.</param>
