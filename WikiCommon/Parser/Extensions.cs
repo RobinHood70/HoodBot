@@ -268,13 +268,33 @@
 					previous.Value.TrimEnd();
 					previous.Value.AddText(trailingSpace);
 				}
-			}
-			else
-			{
-				retval = template.Factory.ParameterNodeFromParts(name, value);
-				template.Parameters.Add(retval);
+
+				return retval;
 			}
 
+			if (paramFormat is ParameterFormat.OnePerLine or ParameterFormat.PackedTrail)
+			{
+				if (template.Parameters.Count == 0)
+				{
+					template.TitleNodes.TrimEnd();
+					template.TitleNodes.AddText("\n");
+				}
+				else
+				{
+					var previous = template.Parameters[^1];
+					if (!previous.Anonymous)
+					{
+						var previousValue = previous.Value.ToRaw();
+						if (previousValue.Length == 0 || previousValue[^1] != '\n')
+						{
+							previous.Value.AddText("\n");
+						}
+					}
+				}
+			}
+
+			retval = template.Factory.ParameterNodeFromParts(name, value);
+			template.Parameters.Add(retval);
 			return retval;
 		}
 
