@@ -7,11 +7,16 @@
 
 	/// <summary>This class wraps around any other <see cref="IMediaWikiClient" /> providing simple throttling based on whether the previous request was a GET request or a POST request.</summary>
 	/// <seealso cref="IMediaWikiClient" />
-	public class ThrottledClient : IMediaWikiClient
+	/// <remarks>Initializes a new instance of the <see cref="ThrottledClient" /> class with specified read and write intervals.</remarks>
+	/// <param name="baseClient">The base client.</param>
+	/// <param name="readInterval">The read interval.</param>
+	/// <param name="writeInterval">The write interval.</param>
+	public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval, TimeSpan writeInterval) : IMediaWikiClient
 	{
 		#region Fields
-		private readonly IMediaWikiClient baseClient;
-		private readonly Stopwatch stopwatch = new();
+		private readonly long readIntervalTicks = readInterval.Ticks;
+		private readonly long writeIntervalTicks = writeInterval.Ticks;
+		private long nextAllowed;
 		#endregion
 
 		#region Constructors
@@ -22,18 +27,6 @@
 			: this(baseClient, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(6))
 		{
 		}
-
-		/// <summary>Initializes a new instance of the <see cref="ThrottledClient" /> class with specified read and write intervals.</summary>
-		/// <param name="baseClient">The base client.</param>
-		/// <param name="readInterval">The read interval.</param>
-		/// <param name="writeInterval">The write interval.</param>
-		public ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval, TimeSpan writeInterval)
-		{
-			this.baseClient = baseClient;
-			this.ReadInterval = readInterval;
-			this.WriteInterval = writeInterval;
-			this.stopwatch.Start();
-		}
 		#endregion
 
 		#region Public Events
@@ -41,37 +34,22 @@
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> DelayComplete
 		{
-			add => this.baseClient.DelayComplete += value;
-			remove => this.baseClient.DelayComplete -= value;
+			add => baseClient.DelayComplete += value;
+			remove => baseClient.DelayComplete -= value;
 		}
 
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay
 		{
-			add => this.baseClient.RequestingDelay += value;
-			remove => this.baseClient.RequestingDelay -= value;
+			add => baseClient.RequestingDelay += value;
+			remove => baseClient.RequestingDelay -= value;
 		}
-		#endregion
-
-		#region Public Properties
-
-		/// <summary>Gets a value indicating whether the last request was a POST request.</summary>
-		/// <value><see langword="true" /> if the last request was a POST request; otherwise, <see langword="false" />.</value>
-		public bool? LastWasPost { get; private set; }
-
-		/// <summary>Gets or sets the minimum time to wait between a GET request and the request after it.</summary>
-		/// <value>The minimum time to wait between a GET request and the request after it.</value>
-		public TimeSpan ReadInterval { get; set; }
-
-		/// <summary>Gets or sets the miniumum time to wait between a POST request and the request after it.</summary>
-		/// <value>The miniumum time to wait between a POST request and the request after it.</value>
-		public TimeSpan WriteInterval { get; set; }
 		#endregion
 
 		#region Public Methods
 
 		/// <summary>Deletes all cookies from persistent storage and clears the cookie cache.</summary>
-		public void ExpireAll() => this.baseClient.ExpireAll();
+		public void ExpireAll() => baseClient.ExpireAll();
 
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
@@ -80,9 +58,8 @@
 		public bool DownloadFile(Uri uri, string? fileName)
 		{
 			this.Throttle();
-			var retval = this.baseClient.DownloadFile(uri, fileName);
-			this.stopwatch.Restart();
-			this.LastWasPost = false;
+			var retval = baseClient.DownloadFile(uri, fileName);
+			this.nextAllowed = Stopwatch.GetTimestamp() + this.readIntervalTicks;
 
 			return retval;
 		}
@@ -93,9 +70,8 @@
 		public string? Get(Uri uri)
 		{
 			this.Throttle();
-			var retval = this.baseClient.Get(uri);
-			this.stopwatch.Restart();
-			this.LastWasPost = false;
+			var retval = baseClient.Get(uri);
+			this.nextAllowed = Stopwatch.GetTimestamp() + this.readIntervalTicks;
 
 			return retval;
 		}
@@ -104,9 +80,8 @@
 		public string? Post(Uri uri, HttpContent content)
 		{
 			this.Throttle();
-			var retval = this.baseClient.Post(uri, content);
-			this.stopwatch.Restart();
-			this.LastWasPost = true;
+			var retval = baseClient.Post(uri, content);
+			this.nextAllowed = Stopwatch.GetTimestamp() + this.writeIntervalTicks;
 
 			return retval;
 		}
@@ -116,15 +91,14 @@
 		/// <param name="reason">The reason for the delay, as specified by the caller.</param>
 		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
-		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => this.baseClient.RequestDelay(delayTime, reason, description);
+		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => baseClient.RequestDelay(delayTime, reason, description);
 
 		/// <inheritdoc/>
 		public bool UriExists(Uri uri)
 		{
 			this.Throttle();
-			var retval = this.baseClient.UriExists(uri);
-			this.stopwatch.Restart();
-			this.LastWasPost = false;
+			var retval = baseClient.UriExists(uri);
+			this.nextAllowed = Stopwatch.GetTimestamp() + this.readIntervalTicks;
 
 			return retval;
 		}
@@ -140,14 +114,12 @@
 		#region Private Methods
 		private void Throttle()
 		{
-			if (this.LastWasPost is not null)
+			if (this.nextAllowed != 0)
 			{
-				var delayTime = this.LastWasPost.Value
-					? this.WriteInterval
-					: this.ReadInterval;
-				if (delayTime - this.stopwatch.Elapsed > TimeSpan.Zero)
+				var elapsed = Stopwatch.GetElapsedTime(this.nextAllowed);
+				if (elapsed < TimeSpan.Zero)
 				{
-					this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled");
+					this.RequestDelay(-elapsed, DelayReason.ClientThrottled, "Throttled");
 				}
 			}
 		}
