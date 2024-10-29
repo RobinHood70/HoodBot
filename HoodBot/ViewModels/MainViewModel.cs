@@ -367,6 +367,7 @@
 		{
 			if (text is null)
 			{
+				// null can be passed both internally and StatusUpdate event to clear status box.
 				this.Status = string.Empty;
 			}
 			else if (this.Status.Length == 0)
