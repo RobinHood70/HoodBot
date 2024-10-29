@@ -10,6 +10,7 @@
 	using System.Windows.Media;
 	using CommunityToolkit.Mvvm.ComponentModel;
 	using CommunityToolkit.Mvvm.Input;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
@@ -74,7 +75,7 @@
 					if (!this.executing && this.selectedItem is WikiInfoViewModel wikiInfo)
 					{
 						this.executing = true;
-						this.StatusWrite("Initializing" + Environment.NewLine);
+						this.StatusWriteLine("Initializing");
 						await this.ExecuteJobs(wikiInfo).ConfigureAwait(true);
 						this.executing = false;
 					}
@@ -246,9 +247,9 @@
 						wikiInfo.ResultsPage);
 				}
 
-				var allJobsTimer = Stopwatch.StartNew();
+				var allJobsTimer = Stopwatch.GetTimestamp();
 				await jobManager.Run(jobList).ConfigureAwait(true);
-				this.StatusWrite($"Total time for last run: {FormatTimeSpan(allJobsTimer.Elapsed)}{Environment.NewLine}");
+				this.StatusWriteLine($"Total time for last run: {FormatTimeSpan(Stopwatch.GetElapsedTime(allJobsTimer))}");
 			}
 			finally
 			{
@@ -266,7 +267,7 @@
 		{
 			this.ProgressBarColor = ProgressBarGreen;
 			this.jobStarted = DateTime.UtcNow;
-			this.StatusWrite($"Starting {eventArgs.Job.Name}{Environment.NewLine}");
+			this.StatusWriteLine($"Starting {eventArgs.Job.Name}");
 		}
 
 		private void JobManager_FinishedJob(JobManager sender, JobEventArgs eventArgs)
@@ -370,13 +371,19 @@
 			}
 			else if (this.Status.Length == 0)
 			{
-				this.Status = text.TrimStart();
+				text = text.TrimStart(TextArrays.NewLineChars);
+				if (text.Length > 0)
+				{
+					this.Status = text;
+				}
 			}
-			else
+			else if (text.Length > 0)
 			{
 				this.Status += text;
 			}
 		}
+
+		private void StatusWriteLine(string text) => this.StatusWrite(text + Environment.NewLine);
 
 		private void UpdateProgress(double progress)
 		{
