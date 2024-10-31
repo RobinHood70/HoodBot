@@ -57,14 +57,14 @@
 
 		#region Public Properties
 
+		/// <summary>Gets a set of functions to evaluate magic words (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
+		/// <value>The magic word resolvers.</value>
+		public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+
 		/// <summary>Gets or sets the title.</summary>
 		/// <value>The title.</value>
 		/// <remarks>This provides the context for resolving magic words.</remarks>
 		public Page Page { get; set; }
-
-		/// <summary>Gets a set of functions to evaluate magic words (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
-		/// <value>The magic word resolvers.</value>
-		public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
 		/// <summary>Gets a set parameter (e.g., <c>{{{1|}}}</c>) names and the values to be used when resolving them (NOT IMPLEMENTED).</summary>
 		/// <value>The parameters.</value>
