@@ -69,7 +69,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static void AddMembersToNewFactions(Dictionary<string, List<Member>> allMembers, List<Faction> newFactions)
+		private static void AddMembersToNewFactions(Dictionary<string, Members> allMembers, List<Faction> newFactions)
 		{
 			foreach (var faction in newFactions)
 			{
@@ -83,47 +83,34 @@
 		private static string BuildSectionText(Faction faction, bool addHeader)
 		{
 			var sb = new StringBuilder();
-			if (addHeader)
-			{
-				var titleText = Starfield.ModTemplate.Length == 0
-					? faction.EditorId
-					: $"{{{{Anchor|{faction.EditorId}}}}}{Starfield.ModTemplate}";
-				sb.Append($"==={titleText}===\n");
-			}
-
+			var formId = string.Equals(faction.FormId[0..1], "00", StringComparison.Ordinal)
+				? faction.FormId
+				: "xx" + faction.FormId[2..];
 			sb
 				.Append("{{Factions\n")
 				.Append($"|edid={faction.EditorId}\n")
-				.Append($"|formid={faction.FormId}\n");
-			/*
-			if (faction.Members.Count > 0)
+				.Append($"|formid={formId}\n");
+			if (Starfield.ModTemplate.Length > 0)
 			{
-				sb
-					.Append("|members={{Factions/Members\n")
-					.Append("  |members={{List|sep=,&#32;\n");
-				foreach (var member in faction.Members)
-				{
-					var title = this.FindNpc(member);
-					sb
-						.Append("    |[[")
-						.Append(title.FullPageName())
-						.Append("|]]");
-					if (member.Rank != 0)
-					{
-						sb
-							.Append(" (")
-							.Append(member.Rank)
-							.Append(')');
-					}
-				}
-
-				sb.Append("\n}}}}");
+				sb.Append($"|dlctemplate={Starfield.ModTemplate}\n");
 			}
-			*/
+
+			if (addHeader)
+			{
+				sb.Append("|header=1\n");
+			}
 
 			sb.Append("}}\n\n");
 
 			return sb.ToString();
+		}
+
+		private static void ConfirmInitialHeader(Section section)
+		{
+			if (section.Content.Find<SiteTemplateNode>(t => t.Title.PageNameEquals("Factions")) is SiteTemplateNode firstFaction)
+			{
+				firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
+			}
 		}
 
 		private static List<Faction> GetFactions(string folder)
@@ -182,7 +169,7 @@
 			}
 		}
 
-		private void AddMembersToExistingFactions(Dictionary<Title, SectionCollection> existing, Dictionary<string, List<Member>> allMembers)
+		private void AddMembersToExistingFactions(Dictionary<Title, SectionCollection> existing, Dictionary<string, Members> allMembers)
 		{
 			foreach (var (edid, newMembers) in allMembers)
 			{
@@ -250,10 +237,6 @@
 			var groupedSections = new Dictionary<string, List<Faction>>(StringComparer.OrdinalIgnoreCase);
 			foreach (var faction in factions)
 			{
-				if (faction.EditorId == "SFBGS001_LC18_CrimeFactionCrimsonFleet")
-				{
-				}
-
 				if (!groupedSections.TryGetValue(faction.SectionName, out var list))
 				{
 					list = [];
@@ -272,9 +255,11 @@
 				var sections = factionSections[keyTitle];
 				foreach (var faction in list)
 				{
-					var sectionText = BuildSectionText(faction, list.Count > 1);
-					if (sections.TryGetValue(sectionName, out var section))
+					var groupExists = sections.TryGetValue(sectionName, out var section);
+					var sectionText = BuildSectionText(faction, groupExists || list.Count > 1);
+					if (section is not null)
 					{
+						ConfirmInitialHeader(section);
 						section.Content.AddParsed(sectionText);
 					}
 					else
@@ -304,20 +289,13 @@
 				TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 		}
 
-		private Dictionary<string, List<Member>> GetFactionMembers()
+		private Dictionary<string, Members> GetFactionMembers()
 		{
-			var members = new Dictionary<string, List<Member>>(StringComparer.Ordinal);
+			var members = new Dictionary<string, Members>(StringComparer.Ordinal);
 			this.LoadNpcsFromFile(members, false);
-			this.LoadNpcsFromFile(members, true);
-			foreach (var (_, list) in members)
+			if (!string.Equals(Starfield.BaseFolder, Starfield.ModFolder, StringComparison.Ordinal))
 			{
-				list.Sort(static (m1, m2) =>
-				{
-					var rankSort = m2.Rank.CompareTo(m1.Rank);
-					return rankSort == 0
-						? m1.Name.CompareTo(m2.Name)
-						: rankSort;
-				});
+				this.LoadNpcsFromFile(members, true);
 			}
 
 			return members;
@@ -330,6 +308,11 @@
 			var retval = new Dictionary<Title, SectionCollection>();
 			foreach (var page in existing)
 			{
+				if (string.Equals(Starfield.BaseFolder, Starfield.ModFolder, StringComparison.Ordinal))
+				{
+					page.Text = string.Empty;
+				}
+
 				var sortedSections = new SectionCollection(page);
 				retval.Add(page.Title, sortedSections);
 			}
@@ -379,7 +362,7 @@
 			return retval;
 		}
 
-		private void LoadNpcsFromFile(Dictionary<string, List<Member>> members, bool fromMod)
+		private void LoadNpcsFromFile(Dictionary<string, Members> members, bool fromMod)
 		{
 			var folder = fromMod
 				? Starfield.ModFolder
@@ -424,10 +407,7 @@
 					}
 
 					var member = new Member(name, rank, fromMod);
-					if (!memberList.Contains(member))
-					{
-						memberList.Add(member);
-					}
+					memberList.Add(member);
 				}
 			}
 		}
@@ -456,6 +436,37 @@
 			public string? NameOnly { get; } = name.Length == 0 || string.Equals(name, editorId, StringComparison.Ordinal) ? null : name;
 
 			public string SectionName { get; } = name.Length == 0 ? editorId : name;
+		}
+
+		private sealed class MemberSorter : IComparer<Member>
+		{
+			public static MemberSorter Instance { get; } = new MemberSorter();
+
+			public int Compare(Member? x, Member? y)
+			{
+				if (x is null)
+				{
+					return y is null ? 0 : -1;
+				}
+
+				if (y is null)
+				{
+					return 1;
+				}
+
+				var rankSort = y.Rank.CompareTo(x.Rank);
+				return rankSort == 0
+					? x.Name.CompareTo(y.Name)
+					: rankSort;
+			}
+		}
+
+		private sealed class Members : SortedSet<Member>
+		{
+			public Members()
+				: base(MemberSorter.Instance)
+			{
+			}
 		}
 
 		private sealed class SectionCollection : SortedDictionary<string, Section>
