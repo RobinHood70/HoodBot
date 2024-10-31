@@ -20,16 +20,8 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override IArgumentNode ArgumentNode(IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue) =>
-			new ArgumentNode(this, name, defaultValue);
-
-		/// <inheritdoc/>
 		public override ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
 			new SiteLinkNode(this, title, parameters);
-
-		/// <inheritdoc/>
-		public override IParameterNode ParameterNode(IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) =>
-			new ParameterNode(this, name, value);
 
 		/// <inheritdoc/>
 		public override ITemplateNode TemplateNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
