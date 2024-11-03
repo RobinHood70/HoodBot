@@ -6,6 +6,7 @@ namespace RobinHood70.Robby
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A structure to hold page Title information.</summary>
@@ -93,11 +94,25 @@ namespace RobinHood70.Robby
 			? right is null
 			: left.Equals(right);
 
+		/// <summary>Determines whether a <see cref="Title"/> is equivalent to the string provided.</summary>
+		/// <param name="left">The Title to compare.</param>
+		/// <param name="right">The string to compare against.</param>
+		/// <returns><see langword="true"/> if the specified Title and string are equivalent; otherwise, <see langword="false"/>.</returns>
+		public static bool operator ==(Title left, string right) => left is null
+			? right is null
+			: left.Equals(TitleFactory.FromUnvalidated(left.Site, right).Title);
+
 		/// <summary>Determines whether one <see cref="Title"/> is different from another one.</summary>
 		/// <param name="left">The first Title to compare.</param>
 		/// <param name="right">The second Title to compare.</param>
 		/// <returns><see langword="true"/> if the specified Titles are different; otherwise, <see langword="false"/>.</returns>
 		public static bool operator !=(Title left, Title right) => !(left == right);
+
+		/// <summary>Determines whether a <see cref="Title"/> is different from the string provided.</summary>
+		/// <param name="left">The Title to compare.</param>
+		/// <param name="right">The string to compare against.</param>
+		/// <returns><see langword="true"/> if the specified Title and string are different; otherwise, <see langword="false"/>.</returns>
+		public static bool operator !=(Title left, string right) => !(left == right);
 		#endregion
 
 		#region Public Static Methods
