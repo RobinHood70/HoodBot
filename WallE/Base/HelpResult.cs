@@ -21,7 +21,9 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Help.First().Ellipsis(30) ?? this.Mime;
+		public override string ToString() => this.Help.Count == 0
+			? this.Mime
+			: this.Help[0].Ellipsis(30);
 		#endregion
 	}
 }

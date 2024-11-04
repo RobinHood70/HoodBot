@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Linq;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -19,9 +20,11 @@
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
-			this.ContinueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users?.IsEmpty() == false)
-? "start"
-: "continue";
+			this.ContinueName =
+				this.SiteVersion < 114 ||
+				(this.SiteVersion < 123 && input.UserPrefix is null && input.Users is not null && input.Users.Any())
+					? "start"
+					: "continue";
 		}
 		#endregion
 

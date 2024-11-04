@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;

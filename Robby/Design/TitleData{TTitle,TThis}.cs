@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
@@ -265,9 +266,9 @@
 		public TThis GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string> protectionLevels)
 		{
 			ArgumentNullException.ThrowIfNull(protectionTypes);
-			return protectionTypes.IsEmpty()
-				? throw new InvalidOperationException("You must specify at least one value for protectionTypes")
-				: this.GetPages(new AllPagesInput() { ProtectionTypes = protectionTypes, ProtectionLevels = protectionLevels });
+			return protectionTypes.Any()
+				? this.GetPages(new AllPagesInput() { ProtectionTypes = protectionTypes, ProtectionLevels = protectionLevels })
+				: throw new InvalidOperationException("You must specify at least one value for protectionTypes");
 		}
 
 		/// <inheritdoc/>

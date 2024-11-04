@@ -167,9 +167,12 @@
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		/// <remarks>Value order must not be important, and duplicate values will be removed.</remarks>
-		public Request Add(string name, IEnumerable<string>? values) => values?.IsEmpty() != false
-			? this
-			: this.AddPiped(name, new HashSet<string>(values, StringComparer.Ordinal));
+		public Request Add(string name, IEnumerable<string>? values) =>
+			values is null ||
+			(new HashSet<string>(values, StringComparer.Ordinal) is var hashSet &&
+			hashSet.Count == 0)
+				? this
+				: this.AddPiped(name, hashSet);
 
 		/// <summary>Adds an enumerable string parameter if it has at least one value.</summary>
 		/// <param name="name">The parameter name.</param>

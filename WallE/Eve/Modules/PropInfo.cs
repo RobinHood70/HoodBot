@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -52,7 +52,7 @@
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
-				.Add("token", input.Tokens.IsEmpty() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
+				.Add("token", this.SiteVersion < 124 && (input.Tokens is null || !input.Tokens.Any())); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
 		}
 
 		protected override void DeserializeParent(JToken parent)
