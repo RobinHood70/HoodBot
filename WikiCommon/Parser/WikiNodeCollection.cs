@@ -8,13 +8,13 @@
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Linq;
+	using RobinHood70.CommonCode;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
 	public delegate IList<IWikiNode>? NodeReplacer(IWikiNode node);
 
 	/// <summary>A collection of <see cref="IWikiNode"/>s representing wiki text. Implemented as a linked list.</summary>
-	/// <seealso cref="LinkedList{T}" />
 	public class WikiNodeCollection : List<IWikiNode>
 	{
 		#region Constructors
@@ -100,7 +100,7 @@
 		/// <param name="headerText">Name of the header.</param>
 		/// <returns>The first header with the specified text.</returns>
 		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-		public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => string.Equals(header.GetTitle(true), headerText, StringComparison.Ordinal));
+		public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>
@@ -112,7 +112,7 @@
 		public IList<Section> ToSections(int level)
 		{
 			var sections = new List<Section>();
-			Section section = new(null, this.Factory);
+			Section section = new(null, new WikiNodeCollection(this.Factory));
 			foreach (var node in this)
 			{
 				if (node is IHeaderNode header && header.Level <= level)
@@ -122,7 +122,7 @@
 						sections.Add(section);
 					}
 
-					section = new Section(header, this.Factory);
+					section = new Section(header, new WikiNodeCollection(this.Factory));
 				}
 				else
 				{
@@ -161,7 +161,7 @@
 		/// <param name="text">The text to be added.</param>
 		public void AddParsed([Localizable(false)] string text)
 		{
-			var newNodes = this.Parse(text);
+			var newNodes = this.Factory.Parse(text);
 			this.AddRange(newNodes);
 		}
 
@@ -342,7 +342,7 @@
 		/// <param name="text">The text.</param>
 		public void InsertParsed(int index, [Localizable(false)] string text)
 		{
-			var newNodes = this.Parse(text);
+			var newNodes = this.Factory.Parse(text);
 			this.InsertRange(index, newNodes);
 		}
 
@@ -388,11 +388,6 @@
 				}
 			}
 		}
-
-		/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
-		/// <param name="text">The text to parse.</param>
-		/// <returns>A new WikiNodeCollection created from the text.</returns>
-		public IList<IWikiNode> Parse(string text) => this.Factory.Parse(text);
 
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>

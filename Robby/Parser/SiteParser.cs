@@ -260,6 +260,11 @@
 			}
 		}
 
+		/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
+		/// <param name="text">The text to parse.</param>
+		/// <returns>A new WikiNodeCollection created from the text.</returns>
+		public IList<IWikiNode> Parse(string text) => this.Factory.Parse(text);
+
 		/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
 		/// <param name="templateName">The name of the template.</param>
 		public void RemoveTemplates(string templateName)

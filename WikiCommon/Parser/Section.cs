@@ -16,14 +16,6 @@
 			this.Content = content;
 			this.Header = header;
 		}
-
-		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
-		/// <param name="header">The header node for the section (null for lead).</param>
-		/// <param name="factory">The factory for the content nodes.</param>
-		public Section(IHeaderNode? header, IWikiNodeFactory factory)
-			: this(header, new WikiNodeCollection(factory))
-		{
-		}
 		#endregion
 
 		#region Public Properties

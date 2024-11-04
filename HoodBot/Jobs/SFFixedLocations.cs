@@ -56,7 +56,7 @@
 			var sections = parser.ToSections(2);
 			foreach (var section in sections)
 			{
-				if (string.Equals(section.GetTitle(), SectionName, StringComparison.Ordinal))
+				if (section.GetTitle().OrdinalEquals(SectionName))
 				{
 					return;
 				}
@@ -125,7 +125,7 @@
 				if (lastContent[nodeIndex] is SiteTemplateNode template &&
 					this.footerTemplates.Contains(template.Title))
 				{
-					var footerSection = new Section(null, lastContent.Factory);
+					var footerSection = new Section(null, new WikiNodeCollection(lastContent.Factory));
 					footerSection.Content.AddRange(lastContent[nodeIndex..]);
 					sections.Add(footerSection);
 					for (var deleteIndex = lastContent.Count - 1; deleteIndex >= nodeIndex; --deleteIndex)
