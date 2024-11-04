@@ -67,7 +67,7 @@
 
 		private static void NoNone(ITemplateNode template, string key, string value)
 		{
-			if (string.Equals(value, "None", StringComparison.Ordinal))
+			if (value.OrdinalEquals("None"))
 			{
 				template.Update(key, value);
 			}
@@ -185,7 +185,7 @@
 			foreach (var row in csv.ReadRows())
 			{
 				var name = row["Full"];
-				if (!string.Equals(creature?.Variants[0]["Full"], name, StringComparison.Ordinal))
+				if (!(creature?.Variants[0]["Full"]).OrdinalEquals(name))
 				{
 					creature = new Creature([]);
 					if (!titleMap.TryGetValue(name, out var title))
@@ -211,7 +211,7 @@
 				cs.RenameParameter("levels", "difficulty");
 
 				var typeValue = cs.GetValue("type");
-				if (typeValue != null && (typeValue.Length == 0 || string.Equals(typeValue, "Fauna", StringComparison.Ordinal)))
+				if (typeValue != null && (typeValue.Length == 0 || typeValue.OrdinalEquals("Fauna")))
 				{
 					cs.Remove("type");
 				}

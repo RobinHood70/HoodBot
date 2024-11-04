@@ -147,7 +147,7 @@
 				if (value != null)
 				{
 					var userSettings = App.UserSettings;
-					if (!string.Equals(userSettings.SelectedName, value.DisplayName, StringComparison.Ordinal))
+					if (!userSettings.SelectedName.OrdinalEquals(value.DisplayName))
 					{
 						userSettings.SelectedName = value.DisplayName;
 					}

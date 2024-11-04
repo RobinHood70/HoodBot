@@ -183,7 +183,7 @@
 			foreach (var row in csv)
 			{
 				var word = row[0].Trim()[..4];
-				if (string.Equals(word, "FULL", StringComparison.Ordinal))
+				if (word.OrdinalEquals("FULL"))
 				{
 					if (planet is not null)
 					{

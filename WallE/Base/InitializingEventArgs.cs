@@ -48,7 +48,7 @@
 				{
 					this.interwikiLanguageCode = value;
 				}
-				else if (!string.Equals(this.interwikiLanguageCode, value, StringComparison.Ordinal))
+				else if (!this.interwikiLanguageCode.OrdinalEquals(value))
 				{
 					throw new InvalidOperationException(Messages.SiteInfoLanguageConflict);
 				}

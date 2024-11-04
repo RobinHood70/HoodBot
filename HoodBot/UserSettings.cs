@@ -6,6 +6,7 @@
 	using System.IO;
 	using System.Security.Cryptography;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.ViewModels;
@@ -64,7 +65,7 @@
 			// It is assumed the list will be relatively small and therefore relatively trivial to iterate through, but this is a function to indicate that it's not completely trivial.
 			foreach (var wiki in this.Wikis)
 			{
-				if (string.Equals(wiki.DisplayName, this.SelectedName, StringComparison.Ordinal))
+				if (wiki.DisplayName.OrdinalEquals(this.SelectedName))
 				{
 					return wiki;
 				}
@@ -120,7 +121,7 @@
 			var index = this.Wikis.IndexOf(item);
 			if (index >= 0)
 			{
-				if (string.Equals(this.SelectedName, item.DisplayName, StringComparison.Ordinal))
+				if (this.SelectedName.OrdinalEquals(item.DisplayName))
 				{
 					this.SelectedName = null;
 				}

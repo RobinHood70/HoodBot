@@ -37,7 +37,7 @@
 			this.Name = EsoLog.ConvertEncoding((string)row["baseName"]);
 			var classLine = EsoLog.ConvertEncoding((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
 			var classValue = classLine[0];
-			this.Class = string.Equals(classValue, "Craft", StringComparison.Ordinal)
+			this.Class = classValue.OrdinalEquals("Craft")
 				? classValue
 				: "Crafting";
 			this.SkillLine = classLine[1];
@@ -105,7 +105,7 @@
 			var iconValue = MakeIcon(this.SkillLine, this.Name);
 
 			// Special cases
-			if (string.Equals(iconValue, "Woodworking-Woodworking", StringComparison.Ordinal))
+			if (iconValue.OrdinalEquals("Woodworking-Woodworking"))
 			{
 				iconValue = "Woodworking-Woodworking Skill";
 			}
@@ -168,7 +168,7 @@
 		protected static string FormatMeters(string value)
 		{
 			ArgumentNullException.ThrowIfNull(value);
-			return string.Equals(value, "1", StringComparison.Ordinal)
+			return value.OrdinalEquals("1")
 				? "1 meter"
 				: $"{value} meters";
 		}

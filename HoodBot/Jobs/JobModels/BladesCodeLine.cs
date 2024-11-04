@@ -108,7 +108,7 @@
 				}
 
 				var newLine = Parse(lines, ref i);
-				if (string.Equals(newLine.Name, "data", StringComparison.Ordinal))
+				if (newLine.Name.OrdinalEquals("data"))
 				{
 					newLine.Name = "data" + text;
 				}

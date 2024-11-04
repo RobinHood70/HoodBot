@@ -184,7 +184,7 @@
 				this.Id = id;
 				this.Style = style;
 				this.Part = part;
-				var partType = string.Equals(part.Type, "weapons", StringComparison.Ordinal) ? "weapon" : part.Type;
+				var partType = part.Type.OrdinalEquals("weapons") ? "weapon" : part.Type;
 				this.DestinationName = $"ON-icon-{partType}-{part.Name}-{style}.png";
 			}
 

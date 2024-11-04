@@ -106,9 +106,9 @@
 				EsoReplacer.ReplaceEsoLinks(factory.Site, paramValue);
 			}
 
-			UpdateParameter(factory, template, "range", FormatMeters(baseRank.Range), string.Equals(baseRank.Range, "0", StringComparison.Ordinal));
+			UpdateParameter(factory, template, "range", FormatMeters(baseRank.Range), baseRank.Range.OrdinalEquals("0"));
 
-			if (string.Equals(baseRank.Radius, "0", StringComparison.Ordinal))
+			if (baseRank.Radius.OrdinalEquals("0"))
 			{
 				template.Remove("radius");
 				template.Remove("area");
@@ -130,10 +130,10 @@
 				}
 			}
 
-			UpdateParameter(factory, template, "duration", FormatSeconds(baseRank.Duration), string.Equals(baseRank.Duration, "0", StringComparison.Ordinal));
-			UpdateParameter(factory, template, "channeltime", FormatSeconds(baseRank.ChannelTime), string.Equals(baseRank.ChannelTime, "0", StringComparison.Ordinal));
+			UpdateParameter(factory, template, "duration", FormatSeconds(baseRank.Duration), baseRank.Duration.OrdinalEquals("0"));
+			UpdateParameter(factory, template, "channeltime", FormatSeconds(baseRank.ChannelTime), baseRank.ChannelTime.OrdinalEquals("0"));
 			UpdateParameter(factory, template, "target", baseMorph.Target);
-			UpdateParameter(factory, template, "type", this.skillType, string.Equals(this.skillType, "Active", StringComparison.Ordinal));
+			UpdateParameter(factory, template, "type", this.skillType, this.skillType.OrdinalEquals("Active"));
 		}
 
 		#endregion
@@ -145,44 +145,44 @@
 			List<string> descriptions = [];
 			var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
 			var morph = this.morphs[morphCounter];
-			if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, StringComparison.Ordinal))
+			if (!morph.CastingTime.OrdinalEquals(baseMorph.CastingTime))
 			{
 				descriptions.Add("Casting Time: " + FormatSeconds(morph.CastingTime));
 			}
 
 			var morphChannelTime = Morph.NowrapSameString(morph.Ranks.Select(r => r.ChannelTime));
-			if (!string.Equals(morphChannelTime, baseRank.ChannelTime, StringComparison.Ordinal))
+			if (!morphChannelTime.OrdinalEquals(baseRank.ChannelTime))
 			{
 				descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 			}
 
 			var morphSkillCosts = morph.ConsolidateCosts();
 			var morphSkillCost = Cost.GetCostText(morphSkillCosts);
-			if (!string.Equals(morphSkillCost, baseSkillCost, StringComparison.Ordinal))
+			if (!morphSkillCost.OrdinalEquals(baseSkillCost))
 			{
 				descriptions.Add("Cost: " + morphSkillCost);
 			}
 
 			var morphDuration = Morph.NowrapSameString(morph.Ranks.Select(r => r.Duration));
-			if (!string.Equals(morphDuration, baseRank.Duration, StringComparison.Ordinal) && !string.Equals(morphDuration, "0", StringComparison.Ordinal))
+			if (!morphDuration.OrdinalEquals(baseRank.Duration) && !morphDuration.OrdinalEquals("0"))
 			{
 				descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 			}
 
 			var morphRadius = Morph.NowrapSameString(morph.Ranks.Select(r => r.Radius));
-			if (!string.Equals(morphRadius, baseRank.Radius, StringComparison.Ordinal) && !string.Equals(morphRadius, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
+			if (!morphRadius.OrdinalEquals(baseRank.Radius) && !morphRadius.OrdinalEquals("0") && !morph.Target.OrdinalEquals("Self"))
 			{
 				var word = template.Find("radius", "area")?.Name?.ToValue().UpperFirst(factory.Site.Culture) ?? "Area";
 				descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 			}
 
 			var morphRange = Morph.NowrapSameString(morph.Ranks.Select(r => r.Range));
-			if (!string.Equals(morphRange, baseRank.Range, StringComparison.Ordinal) && !string.Equals(morphRange, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
+			if (!morphRange.OrdinalEquals(baseRank.Range) && !morphRange.OrdinalEquals("0") && !morph.Target.OrdinalEquals("Self"))
 			{
 				descriptions.Add("Range: " + FormatMeters(morphRange));
 			}
 
-			if (!string.Equals(morph.Target, baseMorph.Target, StringComparison.Ordinal))
+			if (!morph.Target.OrdinalEquals(baseMorph.Target))
 			{
 				descriptions.Add("Target: " + morph.Target);
 			}

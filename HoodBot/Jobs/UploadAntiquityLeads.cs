@@ -102,7 +102,7 @@
 
 				var title = icon.Title;
 				var defaultTitle = $"ON-icon-lead-{parser.Page.Title.PageName}.png";
-				if (!string.Equals(title.PageName, defaultTitle, StringComparison.Ordinal))
+				if (!title.PageName.OrdinalEquals(defaultTitle))
 				{
 					template.Update("icon", title.PageName);
 				}

@@ -157,7 +157,7 @@
 		private static void CheckIcon(SiteTemplateNode template, string labelName)
 		{
 			var fileName = labelName.Replace(':', ',');
-			if (string.Equals(template.GetValue("icon"), $"ON-icon-furnishing-{fileName}.png", StringComparison.Ordinal))
+			if (template.GetValue("icon").OrdinalEquals($"ON-icon-furnishing-{fileName}.png"))
 			{
 				template.Remove("icon");
 			}
@@ -167,7 +167,7 @@
 		{
 			if (template.GetValue("name") is string nameValue)
 			{
-				if (!string.Equals(nameValue, labelName, StringComparison.Ordinal))
+				if (!nameValue.OrdinalEquals(labelName))
 				{
 					return nameValue;
 				}
@@ -210,7 +210,7 @@
 			{
 				imageValue = imageValue.Trim();
 				if (imageValue.Length != 0 &&
-					!string.Equals(imageValue, imageName, StringComparison.Ordinal))
+					!imageValue.OrdinalEquals(imageName))
 				{
 					imageName = imageValue;
 				}
@@ -224,7 +224,7 @@
 			var oldTitle = TitleFactory.FromUnvalidated(fileSpace, imageName).Title;
 			var newTitle = TitleFactory.FromUnvalidated(fileSpace, nameFix).Title;
 
-			if (!string.Equals(oldTitle.LabelName(), newTitle.LabelName(), StringComparison.Ordinal))
+			if (!oldTitle.LabelName().OrdinalEquals(newTitle.LabelName()))
 			{
 				this.fileMessages.Add($"{SiteLink.ToText(oldTitle, LinkFormat.LabelName)} on {link} ''should be''<br>\n{newTitle.PageName}");
 
@@ -232,7 +232,7 @@
 				var noItem2 = newTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
 				if ((oldTitle.PageName.Contains("-item-", StringComparison.Ordinal) ||
 					newTitle.PageName.Contains("-item-", StringComparison.Ordinal)) &&
-					string.Equals(noItem1, noItem2, StringComparison.Ordinal))
+					noItem1.OrdinalEquals(noItem2))
 				{
 					Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName()} with\n  {newTitle.FullPageName()}");
 				}
@@ -242,13 +242,13 @@
 		private void CheckTitle(Title title, string labelName, Furnishing furnishing)
 		{
 			var compareName = Furnishing.PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
-			if (!string.Equals(labelName, compareName, StringComparison.Ordinal))
+			if (!labelName.OrdinalEquals(compareName))
 			{
 				this.pageMessages.Add($"[[{title.FullPageName()}|{labelName}]] ''should be''<br>\n" +
 				  $"{compareName}");
 				if (!title.PageName.Contains(':', StringComparison.Ordinal) &&
 					compareName.Contains(':', StringComparison.Ordinal) &&
-					string.Equals(title.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
+					title.PageName.Replace(',', ':').OrdinalEquals(furnishing.Title.PageName))
 				{
 					Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\t{furnishing.Title}");
 				}
@@ -337,7 +337,7 @@
 					list.Add((split[i], intValue));
 				}
 
-				if (string.Equals(parameterName, "material", StringComparison.Ordinal))
+				if (parameterName.OrdinalEquals("material"))
 				{
 					list.Sort((item1, item2) =>
 						item2.Value.CompareTo(item1.Value) is int result && result == 0
@@ -421,13 +421,13 @@
 
 				var expectedNmae = craftWord + ": " + (template.GetValue("name") ?? page.Title.LabelName());
 				var planname = template.GetValue("planname");
-				if (string.Equals(expectedNmae, planname, StringComparison.Ordinal))
+				if (expectedNmae.OrdinalEquals(planname))
 				{
 					template.Remove("planname");
 				}
 			}
 
-			if (template.GetValue("planquality") is string planquality && string.Equals(template.GetValue("quality"), planquality, StringComparison.Ordinal))
+			if (template.GetValue("planquality") is string planquality && template.GetValue("quality").OrdinalEquals(planquality))
 			{
 				template.Remove("planquality");
 			}
@@ -444,7 +444,7 @@
 
 			var bindTypeValue = template.GetValue("bindtype");
 			var bindType = (furnishing.Collectible ||
-				string.Equals(bindTypeValue, "0", StringComparison.Ordinal))
+				bindTypeValue.OrdinalEquals("0"))
 					? null
 					: furnishing.BindType;
 			if (bindType is not null)
@@ -459,7 +459,7 @@
 			else if (template.GetValue("furnLimitType") is string furnLimitType)
 			{
 				var wantsToBe = Furnishing.FurnishingLimitTypes[furnishing.FurnishingLimitType];
-				if (!string.Equals(furnLimitType + 's', wantsToBe, StringComparison.Ordinal))
+				if (!(furnLimitType + 's').OrdinalEquals(wantsToBe))
 				{
 					template.Update("furnLimitType", wantsToBe);
 				}

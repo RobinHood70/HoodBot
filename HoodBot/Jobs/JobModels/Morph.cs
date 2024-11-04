@@ -46,7 +46,7 @@
 			var retval = ChangeType.None;
 			var curDesc = this.GetParsedDescription();
 			var prevDesc = previous.GetParsedDescription();
-			if (!string.Equals(curDesc, prevDesc, StringComparison.Ordinal))
+			if (!curDesc.OrdinalEquals(prevDesc))
 			{
 				retval = ChangeType.Minor;
 			}
@@ -87,7 +87,7 @@
 					}
 
 					var currentCost = rank.Costs[i];
-					if (!string.Equals(currentCost.MechanicText, baseCost.MechanicText, StringComparison.Ordinal))
+					if (!currentCost.MechanicText.OrdinalEquals(baseCost.MechanicText))
 					{
 						throw new InvalidOperationException("Mechanic mismatch");
 					}

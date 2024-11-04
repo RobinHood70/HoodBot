@@ -52,7 +52,7 @@
 			}
 
 			var factory = (SiteNodeFactory)parser.Factory;
-			var galleryNodes = new List<ITagNode>(parser.FindAll<ITagNode>(tag => string.Equals(tag.Name, "gallery", StringComparison.Ordinal)));
+			var galleryNodes = new List<ITagNode>(parser.FindAll<ITagNode>(tag => tag.Name.OrdinalEquals("gallery")));
 			foreach (var galleryNode in galleryNodes)
 			{
 				if (galleryNode.InnerText is not null)

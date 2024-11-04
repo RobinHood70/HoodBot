@@ -33,7 +33,7 @@
 				return value;
 			}
 
-			if (string.Equals((string?)token["case"], "case-sensitive", StringComparison.Ordinal))
+			if (((string?)token["case"]).OrdinalEquals("case-sensitive"))
 			{
 				var longVal = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
 				var longFlag = Convert.ToUInt64(flag, CultureInfo.InvariantCulture);

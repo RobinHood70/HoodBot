@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
@@ -65,11 +66,11 @@
 				{
 					this.Site.Undo(undo.Key, undo.Value, EditSummary);
 				}
-				catch (WikiException we) when (string.Equals(we.Code, "undofailure", StringComparison.Ordinal))
+				catch (WikiException we) when (we.Code.OrdinalEquals("undofailure"))
 				{
 					this.WriteLine($"* {SiteLink.ToText(undo.Key)} - {we.Info}");
 				}
-				catch (WikiException we) when (string.Equals(we.Code, "nosuchrevid", StringComparison.Ordinal))
+				catch (WikiException we) when (we.Code.OrdinalEquals("nosuchrevid"))
 				{
 					this.WriteLine($"* {SiteLink.ToText(undo.Key)} - only one edit, can't undo");
 				}

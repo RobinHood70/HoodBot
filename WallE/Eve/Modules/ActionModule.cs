@@ -176,7 +176,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var nsText = nsSplit[0];
 				foreach (var ns in this.Wal.Namespaces)
 				{
-					if (string.Equals(nsText, ns.Value.Name, StringComparison.Ordinal))
+					if (nsText.OrdinalEquals(ns.Value.Name))
 					{
 						return ns.Key;
 					}

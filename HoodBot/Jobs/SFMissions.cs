@@ -167,12 +167,9 @@
 		private static SiteTemplateNode? FindTemplate(SiteParser parser, Mission item)
 		{
 			var template = parser.FindSiteTemplate("Mission Header");
-			return string.Equals(
-				template?.GetValue("ID")?.Trim(),
-				item.EditorId,
-				StringComparison.Ordinal)
-					? template
-					: null;
+			return (template?.GetValue("ID")?.Trim()).OrdinalEquals(item.EditorId)
+				? template
+				: null;
 		}
 
 		private static string GetNewPageText(Title title, Mission item) => new StringBuilder()
@@ -258,7 +255,7 @@
 
 			template.Update("ID", item.EditorId);
 			var labelName = parser.Page.Title.LabelName();
-			if (!string.Equals(labelName, item.Name, StringComparison.Ordinal))
+			if (!labelName.OrdinalEquals(item.Name))
 			{
 				template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
 			}

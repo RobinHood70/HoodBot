@@ -128,7 +128,7 @@
 						break;
 				}
 
-				if (doBugFix && le is LogEventsItem logEventsOutput && string.Equals(logEventsOutput.LogType, "newusers", StringComparison.Ordinal))
+				if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType.OrdinalEquals("newusers"))
 				{
 					// Per https://phabricator.wikimedia.org/T73020
 					switch (logEventsOutput.LogAction)
@@ -171,7 +171,7 @@
 
 			private void ExtraDataBlock()
 			{
-				if (!string.Equals(this.logAction, "unblock", StringComparison.Ordinal) && this.parms["duration"] != null)
+				if (!this.logAction.OrdinalEquals("unblock") && this.parms["duration"] != null)
 				{
 					this.Result.Add("duration", (string?)this.parms["duration"]);
 					this.Result.Add("flags", (string?)this.parms["flags"]);
@@ -183,7 +183,7 @@
 			{
 				// TODO: This code *only* seems to support 1.24 and below. Is that right? That doesn't seem like what I would've wanted, but maybe I just forgot to come back to this.
 				var valOffset = '0';
-				if (string.Equals(this.logAction, "event", StringComparison.Ordinal) || string.Equals(this.logAction, "revision", StringComparison.Ordinal))
+				if (this.logAction.OrdinalEquals("event") || this.logAction.OrdinalEquals("revision"))
 				{
 					var offsetText = new string(valOffset, 1);
 					var revisionType = (string?)this.parms[offsetText];
@@ -258,16 +258,16 @@
 			{
 				this.Result.Add("currentid", (long?)this.parms["curid"] ?? 0);
 				this.Result.Add("previousid", (long?)this.parms["previd"] ?? 0);
-				this.Result.Add("autopatrolled", string.Equals((string?)this.parms["auto"], "1", StringComparison.Ordinal));
+				this.Result.Add("autopatrolled", ((string?)this.parms["auto"]).OrdinalEquals("1"));
 			}
 
 			private void ExtraDataProtect()
 			{
-				if (string.Equals(this.logAction, "move_prot", StringComparison.Ordinal))
+				if (this.logAction.OrdinalEquals("move_prot"))
 				{
 					this.Result.Add("movedpage", (string?)this.parms["0"]);
 				}
-				else if (!string.Equals(this.logAction, "unprotect", StringComparison.Ordinal))
+				else if (!this.logAction.OrdinalEquals("unprotect"))
 				{
 					List<ProtectionsItem> protections = [];
 					if ((string?)this.parms["0"] is string parm0)

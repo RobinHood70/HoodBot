@@ -106,7 +106,7 @@
 			var menuOffset = 0;
 			var sb = new StringBuilder();
 			sb.Append("{{Terminal Summary\n");
-			if (!string.Equals(title.LabelName(), item.Name, StringComparison.Ordinal))
+			if (!title.LabelName().OrdinalEquals(item.Name))
 			{
 				sb
 					.Append($"|name={item.Name}\n");

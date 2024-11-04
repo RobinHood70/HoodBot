@@ -20,7 +20,7 @@
 			this.Radius = FormatRange((int)row["radius"]);
 			var maxRange = FormatRange((int)row["maxRange"]);
 			var minRange = FormatRange((int)row["minRange"]);
-			this.Range = string.Equals(minRange, "0", StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
+			this.Range = minRange.OrdinalEquals("0") ? maxRange : string.Concat(minRange, "-", maxRange);
 
 			this.Costs.AddRange(GetCostSplit(row, "cost", "mechanic", false));
 			this.Costs.AddRange(GetCostSplit(row, "costTime", "mechanicTime", true));

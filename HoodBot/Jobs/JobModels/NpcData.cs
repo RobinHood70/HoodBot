@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	#region Public Enumerations
@@ -170,7 +171,7 @@
 				{
 					foreach (var subPlace in this.Places)
 					{
-						if (subPlace.Key.PlaceType != PlaceType.Unknown && string.Equals(subPlace.Key.Zone, place.TitleName, StringComparison.Ordinal))
+						if (subPlace.Key.PlaceType != PlaceType.Unknown && subPlace.Key.Zone.OrdinalEquals(place.TitleName))
 						{
 							return true;
 						}

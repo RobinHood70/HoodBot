@@ -163,7 +163,7 @@
 				var hashString = Globals.GetHash(stream, HashType.Sha1);
 				foreach (var fileRevision in filePage.FileRevisions)
 				{
-					if (string.Equals(fileRevision.Sha1, hashString, StringComparison.Ordinal))
+					if (fileRevision.Sha1.OrdinalEquals(hashString))
 					{
 						return false;
 					}

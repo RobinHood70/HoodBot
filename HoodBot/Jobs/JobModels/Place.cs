@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
@@ -86,7 +87,7 @@
 		#endregion
 
 		#region Public Methods
-		public bool Equals([AllowNull] Place other) => string.Equals(this.Key, other?.Key, StringComparison.Ordinal);
+		public bool Equals([AllowNull] Place other) => this.Key.OrdinalEquals(other?.Key);
 		#endregion
 
 		#region Public Override Methods

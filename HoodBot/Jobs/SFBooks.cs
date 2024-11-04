@@ -92,7 +92,7 @@
 			var text =
 				"{{Trail|Items|Books}}\n" +
 				"{{Game Book\n";
-			if (!string.Equals(book.Title, title.PageName, StringComparison.Ordinal))
+			if (!book.Title.OrdinalEquals(title.PageName))
 			{
 				text += "|linktitle=" + book.Title + "\n";
 			}
@@ -161,7 +161,7 @@
 				Debug.WriteLine(string.Empty);
 			}
 
-			if (!string.Equals(text, orig, StringComparison.Ordinal))
+			if (!text.OrdinalEquals(orig))
 			{
 				text += "\n[[Category:Needs Checking-Formatting]]";
 			}

@@ -43,7 +43,7 @@
 				if (this.Mechanic == -1)
 				{
 					var mechanicType = row.GetDataTypeName(row.GetOrdinal("mechanic"));
-					var mechanicText = string.Equals(mechanicType, "INT", StringComparison.Ordinal)
+					var mechanicText = mechanicType.OrdinalEquals("INT")
 						? ((int)row["mechanic"]).ToStringInvariant()
 						: EsoLog.ConvertEncoding((string)row["mechanic"]);
 					if (mechanicText.Contains(',', StringComparison.Ordinal))

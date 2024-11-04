@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -154,7 +155,7 @@
 			SortedList<string, string> iconChanges = new(Skill.IconNameCache.Count, StringComparer.Ordinal);
 			foreach (var kvp in Skill.IconNameCache)
 			{
-				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))
+				if (!kvp.Key.OrdinalEquals(kvp.Value))
 				{
 					iconChanges.Add(kvp.Key, kvp.Value);
 				}
@@ -182,7 +183,7 @@
 
 				// We use a string for comparison below because the skill itself will sometimes massage the data.
 				if (currentSkill is null ||
-					!string.Equals(currentSkill.PageName, newSkill.PageName, StringComparison.Ordinal))
+					!currentSkill.PageName.OrdinalEquals(newSkill.PageName))
 				{
 					currentSkill = newSkill;
 					retval.Add(currentSkill.PageName, currentSkill);

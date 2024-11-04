@@ -300,7 +300,7 @@
 		{
 			Globals.ThrowIfNull(this.wikiInfo.Api, nameof(JobManager), nameof(this.wikiInfo), nameof(this.wikiInfo.Api));
 			var api = this.wikiInfo.Api;
-			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
+			IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
 				? new WallE.Test.WikiAbstractionLayer()
 				: new WikiAbstractionLayer(this.Client, api);
 			if (abstractionLayer is IMaxLaggable maxLagWal)

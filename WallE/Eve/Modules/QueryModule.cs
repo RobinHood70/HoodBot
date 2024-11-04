@@ -143,10 +143,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public virtual bool HandleWarning(string from, string? text)
 		{
-			if (text != null && string.Equals(from, this.Name, StringComparison.Ordinal))
+			if (text != null && from.OrdinalEquals(this.Name))
 			{
 				var match = LimitFinder.Match(text);
-				if (match != null && string.Equals(match.Groups["module"].Value, this.FullPrefix, StringComparison.Ordinal))
+				if (match != null && match.Groups["module"].Value.OrdinalEquals(this.FullPrefix))
 				{
 					this.ModuleLimit = int.Parse(match.Groups["limit"].Value, CultureInfo.InvariantCulture);
 					return true;

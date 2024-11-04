@@ -626,7 +626,7 @@
 			switch (node)
 			{
 				case ITagNode tag:
-					if (string.Equals(tag.Name, "gallery", StringComparison.Ordinal))
+					if (tag.Name.OrdinalEquals("gallery"))
 					{
 						this.UpdateGalleryLinks(page, tag);
 					}

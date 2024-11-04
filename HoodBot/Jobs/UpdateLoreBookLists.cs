@@ -96,7 +96,7 @@
 		private static bool ListBookValue(string value) =>
 			value.Length != 0 &&
 			!string.Equals(value, "no", StringComparison.OrdinalIgnoreCase) &&
-			(string.Equals(value, "1", StringComparison.Ordinal) ||
+			(value.OrdinalEquals("1") ||
 			(int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intVal)
 				? intVal != 0
 				: !bool.TryParse(value, out var boolVal) || !boolVal));
@@ -107,9 +107,9 @@
 			title = title.Replace("\"", string.Empty, StringComparison.Ordinal);
 			var split = title.Split(TextArrays.Space, 2, StringSplitOptions.None);
 			return split.Length > 1 && split[0] is string article && (
-				string.Equals(article, "A", StringComparison.Ordinal) ||
-				string.Equals(article, "An", StringComparison.Ordinal) ||
-				string.Equals(article, "The", StringComparison.Ordinal))
+				article.OrdinalEquals("A") ||
+				article.OrdinalEquals("An") ||
+				article.OrdinalEquals("The"))
 					? split[1] + "  , " + split[0] // We add extra spaces here so that, for example, "The Alik'r" will sort before "Alik'r Survival for Outsiders", but in the unlikely event of a hypothetical conflict between "The Alik'r" and "An Alik'r", they will still sort consistently.
 					: title;
 		}

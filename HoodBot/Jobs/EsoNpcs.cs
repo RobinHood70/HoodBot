@@ -193,7 +193,7 @@
 					if (template.Find(name) is IParameterNode loc)
 					{
 						var value = loc.Value.ToValue().TrimEnd();
-						if (!string.Equals(value, locText, StringComparison.Ordinal))
+						if (!value.OrdinalEquals(locText))
 						{
 							loc.SetValue(loc.IsNullOrWhitespace() ? locText : (value + ", " + locText), ParameterFormat.Copy);
 						}

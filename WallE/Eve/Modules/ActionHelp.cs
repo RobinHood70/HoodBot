@@ -38,7 +38,7 @@
 				foreach (var module in input.Modules)
 				{
 					var submodule = module.Split(TextArrays.Plus, 2, StringSplitOptions.None);
-					if (submodule.Length == 2 && string.Equals(submodule[0].Trim(), "query", StringComparison.Ordinal))
+					if (submodule.Length == 2 && submodule[0].Trim().OrdinalEquals("query"))
 					{
 						queryModules.Add(submodule[1].Trim());
 					}

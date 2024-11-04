@@ -71,7 +71,7 @@
 			if (this.EditingEnabled)
 			{
 				// Assumes we'll never be editing UESP anonymously.
-				this.AbstractionLayer.Assert = string.Equals(this.User.Title.PageName, "HoodBot", StringComparison.Ordinal)
+				this.AbstractionLayer.Assert = this.User.Title.PageName.OrdinalEquals("HoodBot")
 					? "bot"
 					: "user";
 			}

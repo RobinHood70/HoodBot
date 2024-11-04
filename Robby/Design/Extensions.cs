@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 
 	/// <summary>A generic set of extensions useful in the program's design.</summary>
 	public static class Extensions
@@ -50,8 +51,8 @@
 			title == null ? other == null :
 			other != null &&
 			title.Interwiki == other.Interwiki &&
-			title.Title.Namespace == other.Title.Namespace &&
-			title.Title.Namespace.PageNameEquals(title.Title.PageName, other.Title.PageName, false) && string.Equals(title.Fragment, other.Fragment, System.StringComparison.Ordinal);
+			title.Title == other.Title &&
+			title.Fragment.OrdinalEquals(other.Fragment);
 		#endregion
 
 		#region IReadOnlyCollection<T> Extensions

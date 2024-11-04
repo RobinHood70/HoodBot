@@ -42,7 +42,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(result);
 			var resultText = result.MustHaveString("result");
-			resultText = string.Equals(resultText, "needtoken", StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
+			resultText = resultText.OrdinalEquals("needtoken") ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(
 				result: resultText,
 				captchaData: result["captcha"].GetStringDictionary<string>(),

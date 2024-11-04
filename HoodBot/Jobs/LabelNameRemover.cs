@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
@@ -23,10 +23,7 @@
 			{
 				Debug.WriteLine(parser.Page.Title.FullPageName());
 			}
-			else if (string.Equals(
-				template.GetValue("imgdesc"),
-				parser.Page.Title.LabelName(),
-				StringComparison.Ordinal))
+			else if (template.GetValue("imgdesc").OrdinalEquals(parser.Title.LabelName()))
 			{
 				template.Remove("imgdesc");
 			}

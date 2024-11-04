@@ -32,7 +32,7 @@
 		/// <param name="e">The Captcha event arguments.</param>
 		public static void SolveSimple(IWikiAbstractionLayer sender, CaptchaEventArgs e)
 		{
-			if (sender != null && e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
+			if (sender != null && e != null && e.CaptchaData["type"].OrdinalEquals("simple"))
 			{
 				Regex math = new(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, Globals.DefaultRegexTimeout);
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));

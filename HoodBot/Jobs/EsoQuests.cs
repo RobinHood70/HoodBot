@@ -380,7 +380,7 @@
 			List<string> retval = [];
 			foreach (var condition in conditions)
 			{
-				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
+				if (condition.Text.Length > 0 && !condition.Text.OrdinalEquals("TRACKER GOAL TEXT"))
 				{
 					var conditionText = condition.Text.TrimEnd(TextArrays.Colon);
 					var fullText = $"{{{{Online Quest Objective|{objectiveType}|{conditionText}}}}}";
@@ -461,7 +461,7 @@
 				{
 					if (places[quest.Value.Zone] is Place place)
 					{
-						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
+						while (!place.TypeText.OrdinalEquals("Zone") && place.Zone != null && places[place.Zone] is Place newZone)
 						{
 							place = newZone;
 						}
@@ -515,7 +515,7 @@
 			Dictionary<string, List<Condition>> mergedStages = new(StringComparer.Ordinal);
 			foreach (var stage in quest.Stages)
 			{
-				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
+				if (!stage.Zone.OrdinalEquals("Tamriel") && !stage.Zone.OrdinalEquals(quest.Zone))
 				{
 					Title title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], stage.Zone);
 					locs.Add(SiteLink.ToText(title, LinkFormat.LabelName));
@@ -572,7 +572,7 @@
 				other != null &&
 				this.IsComplete == other.IsComplete &&
 				this.IsFail == other.IsFail &&
-				string.Equals(this.Text, other.Text, StringComparison.Ordinal);
+				this.Text.OrdinalEquals(other.Text);
 			#endregion
 
 			#region Public Override Methods
@@ -620,10 +620,10 @@
 				this.GoalText = EsoLog.ConvertEncoding((string)row["goaltext"]);
 
 				var zone = EsoLog.ConvertEncoding((string)row["zone"]);
-				if (zone.Length == 0 || string.Equals(zone, "Tamriel", StringComparison.Ordinal))
+				if (zone.Length == 0 || zone.OrdinalEquals("Tamriel"))
 				{
 					zone = EsoLog.ConvertEncoding((string)row["locationZone"]);
-					if (string.Equals(zone, "Tamriel", StringComparison.Ordinal))
+					if (zone.OrdinalEquals("Tamriel"))
 					{
 						zone = string.Empty;
 					}

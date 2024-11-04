@@ -119,7 +119,7 @@
 			{
 				if (block.StartTime < paddedNow &&
 					block.StartTime > lastRun &&
-					string.Equals(block.BlockedBy?.Name, botName, StringComparison.Ordinal) &&
+					(block.BlockedBy?.Name).OrdinalEquals(botName) &&
 					(block.Reason?.Contains("proxy", StringComparison.OrdinalIgnoreCase) ?? false))
 				{
 					lastRun = block.StartTime;

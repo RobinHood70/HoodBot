@@ -627,7 +627,7 @@
 
 				foreach (var testItem in this)
 				{
-					if (string.Equals(this.GetKeyForItem(testItem), key, StringComparison.Ordinal))
+					if (this.GetKeyForItem(testItem).OrdinalEquals(key))
 					{
 						return testItem;
 					}

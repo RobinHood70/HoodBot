@@ -44,7 +44,7 @@
 					: this.Wal.MaximumPageSetSize;
 			*/
 			this.MaximumListSize =
-				this.input.PropertyModules?.Find(module => string.Equals(module.Name, "revisions", StringComparison.Ordinal)) is PropRevisions revModule &&
+				this.input.PropertyModules?.Find(module => module.Name.OrdinalEquals("revisions")) is PropRevisions revModule &&
 				revModule.IsRevisionRange
 					? 1
 					: this.Wal.MaximumPageSetSize;
@@ -275,7 +275,7 @@
 
 					foreach (var testItem in this)
 					{
-						if (string.Equals(this.GetKeyForItem(testItem), key, StringComparison.Ordinal))
+						if (this.GetKeyForItem(testItem).OrdinalEquals(key))
 						{
 							return testItem;
 						}

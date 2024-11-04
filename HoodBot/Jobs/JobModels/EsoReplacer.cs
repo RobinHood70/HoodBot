@@ -289,7 +289,7 @@
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
-					if (string.Equals(skillName, synergy.Skill, StringComparison.Ordinal))
+					if (skillName.OrdinalEquals(synergy.Skill))
 					{
 						textNode.Text = textNode.Text.Replace(synergy.Text, synergy.SynergyLink, StringComparison.Ordinal);
 					}

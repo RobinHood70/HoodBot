@@ -68,7 +68,7 @@
 				throw new InvalidOperationException("I don't think this is possible.");
 			}
 
-			if (string.Equals(this.Description, previous.Description, StringComparison.Ordinal))
+			if (this.Description.OrdinalEquals(previous.Description))
 			{
 				return ChangeType.None;
 			}

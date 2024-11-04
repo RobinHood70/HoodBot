@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Text;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Represents a string with optional text before and after it, such as a value surrounded by whitespace or delimiters.</summary>
 	public sealed class EmbeddedValue : IEquatable<EmbeddedValue>
@@ -183,9 +184,9 @@
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		public bool Equals(EmbeddedValue? other) =>
 			other != null &&
-			string.Equals(this.Before, other.Before, StringComparison.Ordinal) &&
-			string.Equals(this.After, other.After, StringComparison.Ordinal) &&
-			string.Equals(this.Value, other.Value, StringComparison.Ordinal);
+			this.Before.OrdinalEquals(other.Before) &&
+			this.After.OrdinalEquals(other.After) &&
+			this.Value.OrdinalEquals(other.Value);
 
 		/// <summary>Returns a string that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>

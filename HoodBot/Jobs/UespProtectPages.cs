@@ -213,7 +213,7 @@
 			{
 				var protection = this.pageProtections[page.Title];
 				if (page.Exists &&
-					(!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) ||
+					(!protection.FriendlyName.OrdinalEquals("Deletion Review") ||
 					page.StartTimestamp?.AddDays(30) < DateTime.Now))
 				{
 					this.WriteLine("|-");

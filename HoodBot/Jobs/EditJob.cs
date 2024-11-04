@@ -53,7 +53,7 @@
 						throw;
 					}
 				}
-				catch (WikiException we) when (!this.SaveOverDeleted && string.Equals(we.Code, "pagedeleted", StringComparison.Ordinal))
+				catch (WikiException we) when (!this.SaveOverDeleted && we.Code.OrdinalEquals("pagedeleted"))
 				{
 					this.Warn("Page not saved because it was previously deleted.");
 					saved = true;

@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
@@ -72,7 +73,7 @@
 		#region Public Methods
 		public bool Equals(UespNamespace? other) =>
 			other is not null &&
-			string.Equals(this.Base, other.Base, StringComparison.Ordinal);
+			this.Base.OrdinalEquals(other.Base);
 
 		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site, this.Full + pageName);
 		#endregion

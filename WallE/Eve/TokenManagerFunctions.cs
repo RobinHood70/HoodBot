@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
 
 	internal static class TokenManagerFunctions
@@ -17,7 +18,7 @@
 
 		public static string ValidateTokenType(HashSet<string> validTypes, string type, string replace, string replaceWith)
 		{
-			if (string.Equals(type, replace, StringComparison.Ordinal))
+			if (type.OrdinalEquals(replace))
 			{
 				type = replaceWith;
 			}

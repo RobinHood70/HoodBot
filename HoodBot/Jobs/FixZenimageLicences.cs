@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
@@ -26,7 +27,7 @@
 			{
 				var titleSplit = title.PageName.Split('-');
 				if (titleSplit.Length > 2 &&
-					string.Equals(titleSplit[0], "ON", StringComparison.Ordinal) &&
+					titleSplit[0].OrdinalEquals("ON") &&
 					prefixes.Contains(titleSplit[1]))
 				{
 					goodTitles.Add(title);

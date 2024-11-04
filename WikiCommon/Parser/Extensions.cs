@@ -342,7 +342,7 @@
 						retval = index;
 					}
 				}
-				else if (string.Equals(node.Name.ToValue(), name, StringComparison.Ordinal))
+				else if (node.Name.ToValue().OrdinalEquals(name))
 				{
 					retval = index;
 				}
@@ -439,7 +439,7 @@
 			for (var i = 0; i < template.Parameters.Count; i++)
 			{
 				var paramName = template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
-				if (string.Equals(paramName, name, StringComparison.Ordinal))
+				if (paramName.OrdinalEquals(name))
 				{
 					retval = i;
 				}
@@ -714,7 +714,7 @@
 					name = anonIndex.ToStringInvariant();
 				}
 
-				if (string.Equals(name, parameterName, StringComparison.Ordinal))
+				if (name.OrdinalEquals(parameterName))
 				{
 					if (i == template.Parameters.Count - 1)
 					{

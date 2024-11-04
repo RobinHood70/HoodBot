@@ -169,7 +169,7 @@
 			if (pageName.Contains("-icon-", StringComparison.Ordinal))
 			{
 				// This check, however, could easily be a false hit in mid string instead of at the start, so check here instead.
-				if (string.Equals(fileSplit[0], "icons", StringComparison.Ordinal))
+				if (fileSplit[0].OrdinalEquals("icons"))
 				{
 					fileSplit.RemoveAt(0);
 				}

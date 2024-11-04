@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -149,12 +150,12 @@
 
 			link.Value.Clear();
 			link.SetValue(toTitle.PageName, ParameterFormat.Copy);
-			if (this.NamespaceList.FromTitle(toTitle) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
+			if (this.NamespaceList.FromTitle(toTitle) is not UespNamespace newNs || !oldNs.Id.OrdinalEquals(newNs.Id))
 			{
 				return;
 			}
 
-			if (!string.Equals(newNs.Id, oldNs.Id, StringComparison.Ordinal))
+			if (!newNs.Id.OrdinalEquals(oldNs.Id))
 			{
 				if (nsParam == null)
 				{
@@ -210,7 +211,7 @@
 			}
 
 			this.PageNameReplace(this.site[MediaWikiNamespaces.File], param);
-			if (addedDefault && string.Equals(param.Value.ToRaw().Trim(), defaultValue, StringComparison.Ordinal))
+			if (addedDefault && param.Value.ToRaw().Trim().OrdinalEquals(defaultValue))
 			{
 				template.Remove("icon");
 			}
@@ -258,7 +259,7 @@
 			pageName.AddText(target.PageName);
 			template.Remove("ns_base");
 			template.Remove("ns_id");
-			if (!string.Equals(targetNsBase.Base, "Lore", StringComparison.Ordinal))
+			if (!targetNsBase.Base.OrdinalEquals("Lore"))
 			{
 				template.Add("ns_base", targetNsBase.Id);
 			}

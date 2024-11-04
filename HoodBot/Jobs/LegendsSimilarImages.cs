@@ -80,7 +80,7 @@
 				var insertSection = 1;
 				for (var i = 0; i < sections.Count; i++)
 				{
-					if (string.Equals(sections[i].GetTitle(), "Summary", StringComparison.Ordinal))
+					if (sections[i].GetTitle().OrdinalEquals("Summary"))
 					{
 						insertSection = i + 1;
 						break;

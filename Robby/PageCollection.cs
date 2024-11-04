@@ -396,7 +396,7 @@
 			foreach (var item in result.Interwiki)
 			{
 				FullTitle title = TitleFactory.FromUnvalidated(this.Site, item.Value.Title);
-				Debug.Assert(string.Equals(title.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
+				Debug.Assert((title.Interwiki?.Prefix).OrdinalEquals(item.Value.Prefix), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = title;
 			}
 

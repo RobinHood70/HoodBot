@@ -45,7 +45,7 @@
 				if (
 					mainSlot.Content is not null &&
 					!string.IsNullOrEmpty(mainSlot.Sha1) &&
-					!string.Equals(mainSlot.Content.GetHash(HashType.Sha1), mainSlot.Sha1, StringComparison.Ordinal))
+					!mainSlot.Content.GetHash(HashType.Sha1).OrdinalEquals(mainSlot.Sha1))
 				{
 					throw new ChecksumException(Globals.CurrentCulture(Resources.RevisionSha1Failed, revisionItem.RevisionId));
 				}

@@ -34,7 +34,7 @@
 			foreach (var header in parser.HeaderNodes)
 			{
 				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
-				if (string.Equals(title, "Licensing", StringComparison.Ordinal))
+				if (title.OrdinalEquals("Licensing"))
 				{
 					headerFound = true;
 				}

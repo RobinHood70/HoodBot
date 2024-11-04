@@ -74,7 +74,7 @@
 		}
 
 		private bool IsException(Page page, string header) =>
-			(string.Equals(header, "Quests", StringComparison.Ordinal) &&
+			(header.OrdinalEquals("Quests") &&
 			page.Title.PageName.StartsWith("Patch/", StringComparison.Ordinal))
 			||
 			(this.exceptions.TryGetValue(header, out var exceptionGroup) &&

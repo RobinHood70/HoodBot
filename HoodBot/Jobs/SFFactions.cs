@@ -83,7 +83,7 @@
 		private static string BuildSectionText(Faction faction, bool addHeader)
 		{
 			var sb = new StringBuilder();
-			var formId = string.Equals(faction.FormId[0..1], "00", StringComparison.Ordinal)
+			var formId = faction.FormId[0..1].OrdinalEquals("00")
 				? faction.FormId
 				: "xx" + faction.FormId[2..];
 			sb
@@ -293,7 +293,7 @@
 		{
 			var members = new Dictionary<string, Members>(StringComparer.Ordinal);
 			this.LoadNpcsFromFile(members, false);
-			if (!string.Equals(Starfield.BaseFolder, Starfield.ModFolder, StringComparison.Ordinal))
+			if (!Starfield.BaseFolder.OrdinalEquals(Starfield.ModFolder))
 			{
 				this.LoadNpcsFromFile(members, true);
 			}
@@ -308,7 +308,7 @@
 			var retval = new Dictionary<Title, SectionCollection>();
 			foreach (var page in existing)
 			{
-				if (string.Equals(Starfield.BaseFolder, Starfield.ModFolder, StringComparison.Ordinal))
+				if (Starfield.BaseFolder.OrdinalEquals(Starfield.ModFolder))
 				{
 					page.Text = string.Empty;
 				}
@@ -433,7 +433,7 @@
 
 			public string Name { get; } = name;
 
-			public string? NameOnly { get; } = name.Length == 0 || string.Equals(name, editorId, StringComparison.Ordinal) ? null : name;
+			public string? NameOnly { get; } = name.Length == 0 || name.OrdinalEquals(editorId) ? null : name;
 
 			public string SectionName { get; } = name.Length == 0 ? editorId : name;
 		}

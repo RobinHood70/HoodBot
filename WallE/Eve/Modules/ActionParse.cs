@@ -159,7 +159,7 @@
 					List<string> limits = [];
 					foreach (var limitResult in entry.Children<JProperty>())
 					{
-						if (!string.Equals(limitResult.Name, "name", StringComparison.Ordinal) && (string?)limitResult.Value is string value)
+						if (!limitResult.Name.OrdinalEquals("name") && (string?)limitResult.Value is string value)
 						{
 							limits.Add(value);
 						}

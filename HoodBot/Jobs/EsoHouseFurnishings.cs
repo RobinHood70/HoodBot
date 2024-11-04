@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Text;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
@@ -96,7 +97,7 @@
 
 					itemList.Sort(StringComparer.Ordinal);
 					var insertText = string.Join('\n', itemList) + "\n";
-					if (string.Equals(section.GetTitle(), "Furnishings", StringComparison.Ordinal))
+					if (section.GetTitle().OrdinalEquals("Furnishings"))
 					{
 						insertText += "furnished=1\n";
 					}
@@ -121,7 +122,7 @@
 			{
 				if (section.GetTitle() is string headerText)
 				{
-					if (string.Equals(headerText, "Gallery", StringComparison.Ordinal))
+					if (headerText.OrdinalEquals("Gallery"))
 					{
 						yield break;
 					}
@@ -201,7 +202,7 @@
 									link = newLink;
 								}
 
-								if (string.Equals(link, "general", StringComparison.Ordinal) &&
+								if (link.OrdinalEquals("general") &&
 									this.generalCategories.TryGetValue(page.Title.PageName, out newLink))
 								{
 									link = newLink;

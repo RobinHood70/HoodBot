@@ -36,7 +36,7 @@
 		#region Public Override Methods
 		public override bool HandleWarning(string from, string? text)
 		{
-			if (this.SiteVersion == 0 && string.Equals(from, "main", StringComparison.Ordinal) && text?.Contains("formatversion", StringComparison.Ordinal) == true)
+			if (this.SiteVersion == 0 && from.OrdinalEquals("main") && text?.Contains("formatversion", StringComparison.Ordinal) == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;

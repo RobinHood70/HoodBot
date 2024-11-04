@@ -221,7 +221,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override bool HandleWarning(string from, string text)
 		{
 			ArgumentNullException.ThrowIfNull(text);
-			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
+			if (from.OrdinalEquals(this.Name) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
 				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value, StringComparer.Ordinal))

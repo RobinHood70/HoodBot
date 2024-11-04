@@ -61,7 +61,7 @@
 				if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
 					nodes.Count > 0 &&
 					nodes[0] is ITagNode tag &&
-					string.Equals(tag.Name, "nowiki", StringComparison.Ordinal))
+					tag.Name.OrdinalEquals("nowiki"))
 				{
 					if (tag.InnerText?.Trim() is string blankTemplate)
 					{
@@ -304,7 +304,7 @@
 				var typeSingular = CategorySingular(this.Type);
 				var fileCategory = colTypeSingular switch
 				{
-					"Appearance" => string.Equals(typeSingular, "Hair Style", StringComparison.Ordinal)
+					"Appearance" => typeSingular.OrdinalEquals("Hair Style")
 						? "hairstyle"
 						: typeSingular,
 					"Customized Action" => "Action",

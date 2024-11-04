@@ -63,7 +63,7 @@
 			{
 				foreach (var param in module.Value.Children<JProperty>())
 				{
-					if (string.Equals(param.Name, this.GeneratorContinue, StringComparison.Ordinal))
+					if (param.Name.OrdinalEquals(this.GeneratorContinue))
 					{
 						this.savedGeneratorValue = (string?)param.Value;
 					}

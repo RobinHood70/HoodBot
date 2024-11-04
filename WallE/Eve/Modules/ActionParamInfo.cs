@@ -48,11 +48,11 @@
 
 			foreach (var module in input.Modules)
 			{
-				if (string.Equals(module, "main", StringComparison.Ordinal) || string.Equals(module, "mainmodule", StringComparison.Ordinal))
+				if (module.OrdinalEquals("main") || module.OrdinalEquals("mainmodule"))
 				{
 					mainModule = true;
 				}
-				else if (string.Equals(module, "pageset", StringComparison.Ordinal) || string.Equals(module, "pagesetmodule", StringComparison.Ordinal))
+				else if (module.OrdinalEquals("pageset") || module.OrdinalEquals("pagesetmodule"))
 				{
 					pagesetModule = true;
 				}

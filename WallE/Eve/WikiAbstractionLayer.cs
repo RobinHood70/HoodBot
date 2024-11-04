@@ -537,7 +537,7 @@
 			catch (WebException e) when (e.Response is not HttpWebResponse response || response.StatusCode == HttpStatusCode.InternalServerError)
 			{
 			}
-			catch (WikiException e) when (string.Equals(e.Code, ApiDisabledCode, StringComparison.Ordinal))
+			catch (WikiException e) when (e.Code.OrdinalEquals(ApiDisabledCode))
 			{
 			}
 
@@ -901,8 +901,8 @@
 
 			// Both checks are necessary because user names can legitimately contain @ signs.
 			if (this.CurrentUserInfo is UserInfoResult userInfo && (
-				string.Equals(userInfo.Name, input.UserName, StringComparison.Ordinal) ||
-				string.Equals(userInfo.Name, botPasswordName, StringComparison.Ordinal)))
+				userInfo.Name.OrdinalEquals(input.UserName) ||
+				userInfo.Name.OrdinalEquals(botPasswordName)))
 			{
 				return LoginResult.AlreadyLoggedIn(userInfo.UserId, userInfo.Name);
 			}
@@ -1419,9 +1419,9 @@
 
 				if (userInfoResult != null)
 				{
-					if (this.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.UserNameCheck)
-						&& this.SiteVersion < 128
-						&& !string.Equals(this.CurrentUserInfo?.Name, userInfoResult.Name, StringComparison.Ordinal))
+					if (this.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.UserNameCheck) &&
+						this.SiteVersion < 128 &&
+						!(this.CurrentUserInfo?.Name).OrdinalEquals(userInfoResult.Name))
 					{
 						// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
 						throw new StopException(EveMessages.UserNameChanged);

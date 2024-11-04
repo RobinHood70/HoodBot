@@ -81,7 +81,7 @@
 		#region Private Methods
 		private static bool UpdateCurrentStatus(SiteParser parser, string status)
 		{
-			var currentTask = parser.FindIndex<IHeaderNode>(header => string.Equals(header.GetTitle(true), "Current Task", StringComparison.Ordinal));
+			var currentTask = parser.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals("Current Task"));
 			var taskLog = parser.FindIndex<IHeaderNode>(currentTask + 1);
 			if (currentTask == -1 || taskLog == -1)
 			{
@@ -94,7 +94,7 @@
 			parser.RemoveRange(currentTask, taskLog - currentTask);
 			parser.Insert(currentTask, parser.Factory.TextNode("\n" + status + ".\n\n"));
 
-			return string.Equals(previousTask, status, StringComparison.Ordinal);
+			return previousTask.OrdinalEquals(status);
 		}
 
 		private void UpdateEntry()
