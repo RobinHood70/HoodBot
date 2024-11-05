@@ -10,7 +10,6 @@
 	internal sealed class EsoUploadStyleIcons : WikiJob
 	{
 		#region Private Constants
-		private const bool IncludePts = true;
 		private const string RemoteIconPath = "/esoui/art/icons/";
 		private const string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
 		#endregion
@@ -83,8 +82,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var patchVersion = EsoLog.LatestDBUpdate(IncludePts);
-			this.GetIcons(patchVersion.Text, IncludePts);
+			this.GetIcons(EsoLog.LatestDBUpdate(false));
 			var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 

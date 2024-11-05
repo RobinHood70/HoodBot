@@ -36,8 +36,7 @@
 
 		protected override void LoadPages()
 		{
-			var patchVersion = new EsoVersion(43, true);
-			this.GetIcons(patchVersion.Text, false);
+			this.GetIcons(EsoLog.LatestDBUpdate(false));
 			this.GetFilePages();
 
 			var leadFiles = new TitleCollection(this.Site);

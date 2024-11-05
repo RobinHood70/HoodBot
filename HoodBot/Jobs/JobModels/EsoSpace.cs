@@ -204,10 +204,10 @@
 			return allIcons;
 		}
 
-		public static void GetIcons(this WikiJob job, string updateFolder, bool pts)
+		public static void GetIcons(this WikiJob job, EsoVersion patchVersion)
 		{
-			var downloadPath = IconDownloadPath(updateFolder, pts);
-			var localFile = Path.Combine(LocalConfig.BotDataFolder, "icons.zip");
+			var downloadPath = IconDownloadPath(patchVersion);
+			var localFile = LocalConfig.BotDataSubPath("icons.zip");
 			var extractPath = LocalConfig.WikiIconsFolder;
 
 			if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
@@ -230,10 +230,9 @@
 				: EsoVersion.FromText(version);
 		}
 
-		public static string IconDownloadPath(string updateFolder, bool pts)
+		public static string IconDownloadPath(EsoVersion patchVersion)
 		{
-			var ptsText = pts ? "pts" : string.Empty;
-			return $"https://esofiles.uesp.net/update-{updateFolder}{ptsText}/icons.zip";
+			return $"https://esofiles.uesp.net/update-{patchVersion.Text}/icons.zip";
 		}
 
 		public static void SetBotUpdateVersion(this WikiJob job, string pageType, EsoVersion version)

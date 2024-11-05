@@ -23,8 +23,7 @@
 
 		protected override void Main()
 		{
-			var patchVersion = EsoLog.LatestDBUpdate(false);
-			this.GetIcons(patchVersion.Text, false);
+			this.GetIcons(EsoLog.LatestDBUpdate(false));
 			PageCollection pages = this.GetPages();
 			var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
 			this.ParsePageInfo(pages, items, false);
