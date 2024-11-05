@@ -351,12 +351,19 @@
 			// Compile list of existing IDs that can be ignored.
 			// Adds to pre-designated manual overrides in field declaration.
 			var ignore = new HashSet<long>(existing.Count);
-			foreach (var item in existing)
+			foreach (var page in existing)
 			{
-				if (item is VariablesPage varPage &&
-					long.TryParse(varPage.GetVariable("ID"), NumberStyles.Integer, existing.Site.Culture, out var questId))
+				if (page is VariablesPage varPage && varPage.GetVariable("ID") is string idText)
 				{
-					ignore.Add(questId);
+					var split = idText.Split(',');
+					foreach (var id in split)
+					{
+						var trimmedId = id.Trim();
+						if (long.TryParse(trimmedId, NumberStyles.Integer, existing.Site.Culture, out var questId))
+						{
+							ignore.Add(questId);
+						}
+					}
 				}
 			}
 
