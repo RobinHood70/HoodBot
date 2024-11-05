@@ -18,14 +18,12 @@
 	internal sealed class EsoCollectibles : ParsedPageJob
 	{
 		#region Private Constants
-		private const string ModHeader = "";
 		private const string TemplateName = "Online Collectible Summary";
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<Title, Collectible> collectibles = [];
 		private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
-		private string? blankText;
 		#endregion
 
 		#region Constructors
@@ -53,30 +51,6 @@
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			this.StatusWriteLine("Getting wiki info");
-			if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
-			{
-				var extract = new SiteParser(page);
-				var pre = extract.FindSiteTemplate("Pre");
-				if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
-					nodes.Count > 0 &&
-					nodes[0] is ITagNode tag &&
-					tag.Name.OrdinalEquals("nowiki"))
-				{
-					if (tag.InnerText?.Trim() is string blankTemplate)
-					{
-						this.blankText = ModHeader.Length == 0
-							? blankTemplate
-							: $"{{{{Mod Header|{ModHeader}}}}}" + blankTemplate;
-					}
-				}
-			}
-
-			if (this.blankText is null)
-			{
-				throw new InvalidOperationException("blankText is null");
-			}
-
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 			var pages = this.GetBacklinks();
@@ -91,14 +65,10 @@
 
 		protected override void LoadPages()
 		{
-			if (this.blankText is null)
-			{
-				throw new InvalidOperationException("blankText is null");
-			}
-
+			var blankText = this.GetBlankText();
 			foreach (var collectible in this.collectibles)
 			{
-				var page = this.Site.CreatePage(collectible.Key, this.blankText!);
+				var page = this.Site.CreatePage(collectible.Key, blankText!);
 				this.Pages.Add(page);
 				this.PageLoaded(page);
 			}
@@ -210,6 +180,28 @@
 			pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 
 			return pages;
+		}
+
+		private string GetBlankText()
+		{
+			this.StatusWriteLine("Getting wiki info");
+			if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
+			{
+				var extract = new SiteParser(page);
+				var pre = extract.FindSiteTemplate("Pre");
+				if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
+					nodes.Count > 0 &&
+					nodes[0] is ITagNode tag &&
+					tag.Name.OrdinalEquals("nowiki") &&
+					tag.InnerText?.Trim() is string blankTemplate)
+				{
+					return Eso.ModTemplate.Length == 0
+						? blankTemplate
+						: "{{Mod Header|{" + Eso.ModTemplateName + "}}" + blankTemplate;
+				}
+			}
+
+			throw new InvalidOperationException("Blank Template not set.");
 		}
 
 		private void GetCollectibles(TitleCollection allTitles, PageCollection pages, HashSet<long> knownIds)
