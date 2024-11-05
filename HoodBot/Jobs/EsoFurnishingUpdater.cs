@@ -32,6 +32,7 @@
 		#endregion
 
 		#region Static Fields
+		private static readonly HashSet<long> IgnoreIds = [194537];
 		private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
 		#endregion
 
@@ -130,7 +131,7 @@
 			ArgumentNullException.ThrowIfNull(parser);
 			if (this.GenericTemplateFixes(template))
 			{
-				this.Warn("Template problem on " + parser.Page.Title.FullPageName());
+				this.Warn("Template has anonymous parameter on " + parser.Title.FullPageName());
 			}
 
 			this.FurnishingFixes(template, parser.Page);
@@ -271,28 +272,34 @@
 
 		private Furnishing? FindFurnishing(SiteTemplateNode template, Page page, string labelName)
 		{
-			Furnishing? furnishing = null;
-			if (template.GetValue("id") is not string idText ||
-				string.IsNullOrEmpty(idText) ||
-				!long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+			Furnishing? retval = null;
+			if (long.TryParse(template.GetValue("id"), NumberStyles.None, page.Site.Culture, out var id))
+			{
+				if (IgnoreIds.Contains(id))
+				{
+					return null;
+				}
+
+				if (!this.furnishings.TryGetValue(id, out retval) && !this.collectibles.TryGetValue(id, out retval))
+				{
+					Debug.WriteLine($"Furnishing ID {id} not found on page {SiteLink.ToText(page)}.");
+				}
+			}
+			else
 			{
 				Debug.WriteLine($"Furnishing ID on {SiteLink.ToText(page)} is missing or nonsensical.");
 			}
-			else if (!this.furnishings.TryGetValue(id, out furnishing) && !this.collectibles.TryGetValue(id, out furnishing))
-			{
-				Debug.WriteLine($"Furnishing ID {id} not found on page {SiteLink.ToText(page)}.");
-			}
 
-			if (furnishing is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
+			if (retval is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
 			{
 				Debug.WriteLine($"  Recovered ID {recoveredId} from {labelName}.");
-				if (this.collectibles.TryGetValue(recoveredId, out furnishing) || this.furnishings.TryGetValue(recoveredId, out furnishing))
+				if (this.collectibles.TryGetValue(recoveredId, out retval) || this.furnishings.TryGetValue(recoveredId, out retval))
 				{
 					template.Update("id", recoveredId.ToStringInvariant());
 				}
 			}
 
-			return furnishing;
+			return retval;
 		}
 
 		private void FixBundles(SiteTemplateNode template)
@@ -483,9 +490,6 @@
 
 		private bool GenericTemplateFixes(SiteTemplateNode template)
 		{
-			var retval = template.Find(1) != null;
-
-			// template.Remove("1");
 			template.Remove("animated");
 			template.Remove("audible");
 			template.Remove("collectible");
@@ -516,7 +520,7 @@
 			this.FixList(template, "material");
 			this.FixList(template, "skill");
 
-			return retval;
+			return template.Find(1) is not null;
 		}
 		#endregion
 	}
