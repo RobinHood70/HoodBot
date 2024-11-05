@@ -58,8 +58,8 @@
 					{
 						var race = template.GetValue("race");
 						var altRace = RaceAlternates.TryGetValue(wantedRace, out var race2) ? race2 : string.Empty;
-						if (!string.Equals(race, wantedRace, System.StringComparison.OrdinalIgnoreCase) &&
-							!string.Equals(race, altRace, System.StringComparison.OrdinalIgnoreCase))
+						if (!race.OrdinalICEquals(wantedRace) &&
+							!race.OrdinalICEquals(altRace))
 						{
 							Debug.WriteLine($"Lore race of {wantedRace} doesn't match {race} on " + npcPage.Title.FullPageName());
 						}

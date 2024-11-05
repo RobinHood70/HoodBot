@@ -4,6 +4,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Eve;
 
@@ -32,7 +33,7 @@
 			{
 				var uespNs = new UespNamespace(site, ns);
 				this.byBase.Add(ns.Base, uespNs);
-				if (!string.Equals(ns.Base, ns.Id, StringComparison.OrdinalIgnoreCase))
+				if (!ns.Base.OrdinalICEquals(ns.Id))
 				{
 					this.byId.Add(ns.Id, uespNs);
 				}

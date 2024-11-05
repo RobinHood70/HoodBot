@@ -35,9 +35,9 @@
 		public ChangeType GetChangeType(Morph previous)
 		{
 			// Descriptions are handled via the ranks, which allows it to compare original descriptions.
-			if (!string.Equals(this.CastingTime, previous.CastingTime, StringComparison.OrdinalIgnoreCase) ||
-				!string.Equals(this.EffectLine, previous.EffectLine, StringComparison.OrdinalIgnoreCase) ||
-				!string.Equals(this.Target, previous.Target, StringComparison.OrdinalIgnoreCase))
+			if (!this.CastingTime.OrdinalICEquals(previous.CastingTime) ||
+				!this.EffectLine.OrdinalICEquals(previous.EffectLine) ||
+				!this.Target.OrdinalICEquals(previous.Target))
 			{
 				return ChangeType.Major;
 			}

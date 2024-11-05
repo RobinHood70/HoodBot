@@ -77,7 +77,7 @@
 			{
 				var next = 1;
 				var itemCat = split[next];
-				if (split.Length == 4 && string.Equals(itemCat, "icon", StringComparison.OrdinalIgnoreCase))
+				if (split.Length == 4 && itemCat.OrdinalICEquals("icon"))
 				{
 					next++;
 					itemCat += '-' + split[next];

@@ -85,7 +85,7 @@
 			foreach (var template in templates)
 			{
 				var edid = template.GetValue("editorid")?.Trim();
-				if (string.Equals(edid, row["EditorID"], StringComparison.OrdinalIgnoreCase))
+				if (edid.OrdinalICEquals(row["EditorID"]))
 				{
 					return template;
 				}

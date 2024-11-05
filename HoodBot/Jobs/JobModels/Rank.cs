@@ -75,7 +75,7 @@
 
 			var curSkill = Skill.HighlightVar.Replace(this.Description, " ");
 			var oldSkill = Skill.HighlightVar.Replace(previous.Description, " ");
-			return string.Equals(curSkill, oldSkill, StringComparison.OrdinalIgnoreCase)
+			return curSkill.OrdinalICEquals(oldSkill)
 				? ChangeType.Minor
 				: ChangeType.Major;
 		}

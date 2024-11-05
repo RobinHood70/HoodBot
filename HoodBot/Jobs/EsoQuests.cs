@@ -262,7 +262,7 @@
 				.Append("|Journal=")
 				.AppendLine(quest.BackgroundText);
 			if (!string.IsNullOrWhiteSpace(quest.EndBackgroundText) &&
-				!string.Equals(quest.EndBackgroundText, quest.BackgroundText, StringComparison.OrdinalIgnoreCase))
+				!quest.EndBackgroundText.OrdinalICEquals(quest.BackgroundText))
 			{
 				sb
 					.Append("\n\n'''End text''': ")

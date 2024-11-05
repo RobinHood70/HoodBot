@@ -143,7 +143,7 @@
 			{
 				EmailUserInput input = new(this.Name, body) { CCMe = ccMe, Subject = subject };
 				var retval = this.Title.Site.AbstractionLayer.EmailUser(input);
-				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+				var result = retval.Result.OrdinalICEquals("Success")
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
 				this.Info ??= new UserInfo(result == ChangeStatus.Success);
@@ -289,7 +289,7 @@
 
 				var retval = this.Title.Site.AbstractionLayer.Edit(input);
 
-				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+				return retval.Result.OrdinalICEquals("Success")
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
 			}

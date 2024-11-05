@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
@@ -36,8 +38,8 @@
 			{
 				var value = image.Value.ToRaw().Trim();
 				if (value.Length > 0 &&
-					!value.StartsWith("<!--", System.StringComparison.Ordinal) &&
-					!string.Equals(value, "none", System.StringComparison.OrdinalIgnoreCase))
+					!value.StartsWith("<!--", StringComparison.Ordinal) &&
+					!value.OrdinalICEquals("none"))
 				{
 					if (!this.allFiles.Contains("File:" + value))
 					{

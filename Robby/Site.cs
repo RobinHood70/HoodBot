@@ -814,7 +814,7 @@
 
 				var retval = this.AbstractionLayer.Edit(input);
 
-				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+				return retval.Result.OrdinalICEquals("Success")
 					? (!retval.Flags.HasAnyFlag(EditFlags.NoChange))
 						? ChangeStatus.Success
 						: ChangeStatus.NoEffect
@@ -1008,7 +1008,7 @@
 			{
 				CreateAccountInput input = new(name, password) { Email = email };
 				var retval = this.AbstractionLayer.CreateAccount(input);
-				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+				return retval.Result.OrdinalICEquals("Success")
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
 			}
@@ -1442,7 +1442,7 @@
 			else
 			{
 				var result = this.AbstractionLayer.Login(input);
-				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
+				if (!result.Result.OrdinalICEquals("Success"))
 				{
 					throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason ?? string.Empty));
 				}
@@ -1542,7 +1542,7 @@
 		/// <summary>Uploads a file.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
-		protected virtual bool Upload(UploadInput input) => string.Equals(this.AbstractionLayer.Upload(input).Result, "Success", StringComparison.OrdinalIgnoreCase);
+		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result.OrdinalICEquals("Success");
 		#endregion
 
 		#region Private Static Methods

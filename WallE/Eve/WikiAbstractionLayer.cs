@@ -662,7 +662,7 @@
 			{
 				// We don't go through the standard SubmitValueAction here, since that would perform an inappropriate stop check.
 				var action = new ActionClearHasMsg(this).Submit(NullObject.Null);
-				return string.Equals(action.Result, "success", StringComparison.OrdinalIgnoreCase);
+				return action.Result.OrdinalICEquals("success");
 			}
 			catch (NotSupportedException)
 			{
@@ -1509,9 +1509,9 @@
 				uploadInput.Offset += input.ChunkSize;
 				uploadInput.FileKey = result.FileKey;
 			}
-			while (string.Equals(result.Result, "Continue", StringComparison.OrdinalIgnoreCase) && uploadInput.Offset > 0);
+			while (result.Result.OrdinalICEquals("Continue") && uploadInput.Offset > 0);
 
-			if (string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
+			if (result.Result.OrdinalICEquals("Success"))
 			{
 				uploadInput.FinalChunk(input);
 				uploadInput.FileKey = result.FileKey;

@@ -128,7 +128,7 @@
 			Section? summary = null;
 			foreach (var section in sections)
 			{
-				if (string.Equals(section.GetTitle(), "Official Summary", StringComparison.OrdinalIgnoreCase))
+				if (section.GetTitle().OrdinalICEquals("Official Summary"))
 				{
 					var text = section.Content.ToRaw();
 					if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))

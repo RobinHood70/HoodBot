@@ -352,7 +352,7 @@
 		{
 			var oldText = this.StrippedTextFromNodes(oldPage);
 			var newText = this.StrippedTextFromNodes(newPage);
-			return !string.Equals(oldText, newText, StringComparison.OrdinalIgnoreCase);
+			return !oldText.OrdinalICEquals(newText);
 		}
 
 		public void RemoveTrivialTemplates(WikiNodeCollection oldNodes)

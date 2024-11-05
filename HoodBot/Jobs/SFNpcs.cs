@@ -134,7 +134,7 @@
 			var templates = parser.FindSiteTemplates("NPC Summary");
 			foreach (var template in templates)
 			{
-				if (string.Equals(template.GetValue("eid")?.Trim(), search.EditorID, StringComparison.OrdinalIgnoreCase))
+				if ((template.GetValue("eid")?.Trim()).OrdinalICEquals(search.EditorID))
 				{
 					return template;
 				}

@@ -178,7 +178,7 @@
 					var parser = item.Parser;
 					if (parser.Find<SiteTemplateNode>(t =>
 						t.Title.PageNameEquals("Factions") &&
-						string.Equals(t.GetValue("edid"), edid, StringComparison.OrdinalIgnoreCase)) is not SiteTemplateNode template)
+						t.GetValue("edid").OrdinalICEquals(edid)) is not SiteTemplateNode template)
 					{
 						continue;
 					}

@@ -84,7 +84,7 @@
 					var link = SiteLink.FromLinkNode(template.Title.Site, linkNode);
 					foreach (var row in item.Variants)
 					{
-						if (string.Equals(link.Text, row["Planet"], StringComparison.OrdinalIgnoreCase))
+						if (link.Text.OrdinalICEquals(row["Planet"]))
 						{
 							template.Remove("loc");
 							break;

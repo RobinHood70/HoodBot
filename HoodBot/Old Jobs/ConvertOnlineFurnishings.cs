@@ -173,8 +173,8 @@
 		{
 			var furnLimitType = template.GetRaw("furnLimitType");
 			return
-				string.Equals(furnLimitType, "Collectible Furnishing", StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(furnLimitType, "Special Collectible", StringComparison.OrdinalIgnoreCase);
+				furnLimitType.OrdinalICEquals("Collectible Furnishing") ||
+				furnLimitType.OrdinalICEquals("Special Collectible");
 		}
 
 		private static void ConvertAntiquity(SiteParser parser, SiteTemplateNode template)

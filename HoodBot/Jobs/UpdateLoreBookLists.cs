@@ -95,7 +95,7 @@
 		#region Private Static Methods
 		private static bool ListBookValue(string value) =>
 			value.Length != 0 &&
-			!string.Equals(value, "no", StringComparison.OrdinalIgnoreCase) &&
+			!value.OrdinalICEquals("no") &&
 			(value.OrdinalEquals("1") ||
 			(int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intVal)
 				? intVal != 0

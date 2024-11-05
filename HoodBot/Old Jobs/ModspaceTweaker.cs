@@ -162,7 +162,7 @@
 					foreach (var entry in split)
 					{
 						var trimmed = entry.Trim();
-						if (trimmed.Length > 0 && !string.Equals(trimmed, "None", StringComparison.OrdinalIgnoreCase))
+						if (trimmed.Length > 0 && !trimmed.OrdinalICEquals("None"))
 						{
 							if (first)
 							{

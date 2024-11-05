@@ -271,7 +271,7 @@
 							template.Find("ship").IsNullOrWhitespace() &&
 							template.Find("store").IsNullOrWhitespace() &&
 							template.Find("loc") is IParameterNode loc &&
-							(loc.IsNullOrWhitespace() || string.Equals(loc.Value.ToValue(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
+							(loc.IsNullOrWhitespace() || loc.Value.ToValue().OrdinalICEquals("{{huh}}")))
 						{
 							this.npcCollection.Add(npc);
 						}

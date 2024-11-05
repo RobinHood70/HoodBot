@@ -119,7 +119,7 @@
 				if (template.Find("radius", "area") is IParameterNode radiusParam)
 				{
 					var oldValue = radiusParam.Value.ToValue().Trim();
-					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
+					if (oldValue.OrdinalICEquals(newValue))
 					{
 						radiusParam.SetValue(newValue, ParameterFormat.Copy);
 					}

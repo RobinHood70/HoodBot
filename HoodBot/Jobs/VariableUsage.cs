@@ -149,7 +149,7 @@
 				var split = title.Split(TextArrays.Colon, 2);
 				var name = split[0];
 				var first = split[1];
-				if (string.Equals(name, "#load", StringComparison.OrdinalIgnoreCase))
+				if (name.OrdinalICEquals("#load"))
 				{
 					this.LoadPage = first;
 				}
