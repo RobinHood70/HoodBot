@@ -6,6 +6,10 @@
 
 		public static string ModFolder { get; } = BaseFolder + @"ShatteredSpaceData2\ShatteredSpace\";
 
-		public static string ModTemplate => "{{SS}}";
+		public static string ModTemplate => ModTemplateName.Length == 0
+			? string.Empty
+			: "{{" + ModTemplateName + "}}";
+
+		public static string ModTemplateName => "SS";
 	}
 }
