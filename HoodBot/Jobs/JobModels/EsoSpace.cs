@@ -82,19 +82,12 @@
 			}
 
 			var i = 0;
-			var anons = new SortedSet<KeyValuePair<string, string>>(PairedStringComparer.Instance);
-			while (i < template.Parameters.Count)
+			var anons = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+			foreach (var cluster in template.ParameterCluster(2))
 			{
-				var param = template.Parameters[i];
-				if (param.Anonymous)
-				{
-					var key = param.Value.ToRaw();
-					var value = i < (template.Parameters.Count - 1)
-						? template.Parameters[i + 1].Value.ToRaw().Trim()
-						: string.Empty;
-					anons.Add(new KeyValuePair<string, string>(key, value));
-					i += 2;
-				}
+				var key = cluster[0].Value.ToRaw().Trim();
+				var value = cluster[1].Value.ToRaw().Trim();
+				anons.Add(key + '\t' + value);
 			}
 
 			for (i = template.Parameters.Count - 1; i >= 0; i--)
@@ -105,10 +98,11 @@
 				}
 			}
 
-			foreach (var (key, value) in anons)
+			foreach (var item in anons)
 			{
-				template.Add(key, ParameterFormat.Packed);
-				template.Add(value, ParameterFormat.OnePerLine);
+				var split = item.Split('\t');
+				template.Add(split[0], ParameterFormat.Packed);
+				template.Add(split[1], ParameterFormat.OnePerLine);
 			}
 		}
 
