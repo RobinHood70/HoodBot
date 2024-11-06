@@ -103,7 +103,7 @@
 				var defaultTitle = $"ON-icon-lead-{parser.Page.Title.PageName}.png";
 				if (!title.PageName.OrdinalEquals(defaultTitle))
 				{
-					template.Update("icon", title.PageName);
+					template.UpdateIfEmpty("icon", title.PageName);
 				}
 			}
 		}
