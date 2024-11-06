@@ -9,26 +9,21 @@
 	// TODO: This is currently a straight copy of the Basic version. It needs to be reviewd for modifications that might be desired for the contextual version.
 
 	/// <summary>Represents a link, including embedded images.</summary>
-	public class SiteLinkNode : LinkNode
+	/// <remarks>Initializes a new instance of the <see cref="SiteLinkNode"/> class.</remarks>
+	/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
+	/// <param name="title">The title.</param>
+	/// <param name="parameters">The parameters.</param>
+	public class SiteLinkNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) : LinkNode(factory, title, parameters)
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLinkNode"/> class.</summary>
-		/// <param name="nodeFactory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
-		/// <param name="title">The title.</param>
-		/// <param name="parameters">The parameters.</param>
-		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
-			: base(nodeFactory, title, parameters)
-		{
-			this.Title = TitleFactory.FromUnvalidated(nodeFactory.Site, this.GetTitleText());
-		}
+		#region Fields
+		private Title? title;
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets the site-specific title value.</summary>
 		/// <value>The title value.</value>
-		public Title Title { get; }
+		public Title Title => this.title ??= TitleFactory.FromUnvalidated(factory.Site, this.GetTitleText());
 		#endregion
 	}
 }

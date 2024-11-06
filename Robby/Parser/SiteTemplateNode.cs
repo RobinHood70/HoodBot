@@ -10,26 +10,21 @@
 	// TODO: This is currently a straight copy of the Basic version. It needs to be reviewd for modifications that might be desired for the contextual version.
 
 	/// <summary>Represents a template call.</summary>
-	public class SiteTemplateNode : TemplateNode
+	/// <remarks>Initializes a new instance of the <see cref="SiteTemplateNode"/> class.</remarks>
+	/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
+	/// <param name="title">The title.</param>
+	/// <param name="parameters">The parameters.</param>
+	public class SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) : TemplateNode(factory, title, parameters)
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="SiteTemplateNode"/> class.</summary>
-		/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
-		/// <param name="title">The title.</param>
-		/// <param name="parameters">The parameters.</param>
-		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
-			: base(factory, title, parameters)
-		{
-			this.Title = TitleFactory.FromUnvalidated(factory.Site[MediaWikiNamespaces.Template], this.GetTitleText());
-		}
+		#region Fields
+		private Title? title;
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets the site-specific title value.</summary>
 		/// <value>The title value.</value>
-		public Title Title { get; }
+		public Title Title => this.title ??= TitleFactory.FromUnvalidated(((SiteNodeFactory)this.Factory).Site[MediaWikiNamespaces.Template], this.GetTitleText());
 		#endregion
 	}
 }
