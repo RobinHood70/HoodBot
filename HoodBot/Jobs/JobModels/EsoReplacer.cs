@@ -400,7 +400,8 @@
 					{
 						if (i != start)
 						{
-							retval.AddText(text[start..i]);
+							// Do NOT change this to AddText or it'll mess things up. Needs more investigation as to why if ever I feel like it..
+							retval.Add(factory.TextNode(text[start..i]));
 						}
 
 						foreach (var newNode in replacement.To)
