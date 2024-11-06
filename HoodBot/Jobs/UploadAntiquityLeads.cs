@@ -38,51 +38,10 @@
 		{
 			this.GetIcons(EsoLog.LatestDBUpdate(false));
 			this.GetFilePages();
-
-			var leadFiles = new TitleCollection(this.Site);
-			leadFiles.GetNamespace(MediaWikiNamespaces.File, Filter.Only, Lead.Prefix);
-
-			var query = Database.RunQuery(EsoLog.Connection, "SELECT icon, id, name, setName FROM antiquityLeads", row => new Lead(row));
-			foreach (var item in query)
-			{
-				this.leads.Add(item.Id, item);
-			}
-
-			var redirects = new Dictionary<Title, Page>();
-			foreach (var (key, lead) in this.leads)
-			{
-				if (this.filePages.TryGetValue(lead.Icon, out var page))
-				{
-					var leadTitle = TitleFactory.FromUnvalidated(this.Site, lead.FileTitle);
-					if (!leadFiles.Contains(leadTitle))
-					{
-						if (!redirects.TryGetValue(leadTitle, out var newTitle) ||
-							string.Compare(page.Title.PageName, newTitle.Title.PageName, StringComparison.Ordinal) == -1)
-						{
-							redirects[leadTitle] = page;
-						}
-					}
-				}
-				else
-				{
-					var filePage = this.UploadFile(lead);
-					this.filePages.Add(lead.Icon, filePage);
-				}
-			}
-
-			foreach (var kvp in redirects)
-			{
-				if (this.Pages.TryGetValue(kvp.Value, out var page))
-				{
-					UpdateFilePage(kvp.Key, page);
-				}
-				else
-				{
-					UpdateFilePage(kvp.Key, kvp.Value);
-					this.Pages.Add(kvp.Value);
-				}
-			}
-
+			var leadFiles = this.GetLeadFiles();
+			this.GetLeadsFromDb();
+			var redirects = this.GetRedirects(leadFiles);
+			this.UpdateFilePages(redirects);
 			this.Pages.GetBacklinks("Template:Online Furnishing Antiquity/Row", BacklinksTypes.EmbeddedIn, false, Filter.Exclude);
 		}
 
@@ -136,6 +95,7 @@
 		#region Private Methods
 		private void GetFilePages()
 		{
+			this.StatusWriteLine("Getting file pages");
 			var uesp = (UespSite)this.Site;
 			var pages = uesp.CreateMetaPageCollection(PageModules.Default | PageModules.Custom, true, false, VarName);
 			pages.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.File);
@@ -151,6 +111,69 @@
 						var trimmed = name.Trim();
 						this.filePages.TryAdd(trimmed, page);
 					}
+				}
+			}
+		}
+
+		private TitleCollection GetLeadFiles()
+		{
+			this.StatusWriteLine("Adding leads");
+			var leadTitles = new TitleCollection(this.Site);
+			leadTitles.GetNamespace(MediaWikiNamespaces.File, Filter.Only, Lead.Prefix);
+			return leadTitles;
+		}
+
+		private void GetLeadsFromDb()
+		{
+			this.StatusWriteLine("Getting leads from database");
+			var query = Database.RunQuery(EsoLog.Connection, "SELECT icon, id, name, setName FROM antiquityLeads", row => new Lead(row));
+			foreach (var item in query)
+			{
+				this.leads.Add(item.Id, item);
+			}
+		}
+
+		private Dictionary<Title, Page> GetRedirects(TitleCollection leadFiles)
+		{
+			this.StatusWriteLine("Getting redirects");
+			var redirects = new Dictionary<Title, Page>();
+			foreach (var (key, lead) in this.leads)
+			{
+				if (this.filePages.TryGetValue(lead.Icon, out var page))
+				{
+					var leadTitle = TitleFactory.FromUnvalidated(this.Site, lead.FileTitle);
+					if (!leadFiles.Contains(leadTitle))
+					{
+						if (!redirects.TryGetValue(leadTitle, out var newTitle) ||
+							string.Compare(page.Title.PageName, newTitle.Title.PageName, StringComparison.Ordinal) == -1)
+						{
+							redirects[leadTitle] = page;
+						}
+					}
+				}
+				else
+				{
+					var filePage = this.UploadFile(lead);
+					this.filePages.Add(lead.Icon, filePage);
+				}
+			}
+
+			return redirects;
+		}
+
+		private void UpdateFilePages(Dictionary<Title, Page> redirects)
+		{
+			this.StatusWriteLine("Updating file pages");
+			foreach (var kvp in redirects)
+			{
+				if (this.Pages.TryGetValue(kvp.Value, out var page))
+				{
+					UpdateFilePage(kvp.Key, page);
+				}
+				else
+				{
+					UpdateFilePage(kvp.Key, kvp.Value);
+					this.Pages.Add(kvp.Value);
 				}
 			}
 		}
