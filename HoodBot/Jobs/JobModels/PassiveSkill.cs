@@ -87,39 +87,46 @@
 			UpdateParameter(factory, template, "type", "Passive");
 			UpdateParameter(factory, template, "id", this.ranks[^1].Id.ToStringInvariant());
 			TitleCollection usedList = new(factory.Site);
+
 			foreach (var rank in this.ranks)
 			{
-				var splitDescription = Highlight.Split(rank.Description);
-				if (splitDescription[0].Length == 0)
-				{
-					splitDescription[1] = "<small>(" + splitDescription[1] + ")</small>";
-				}
-
-				for (var i = 0; i < splitDescription.Length; i++)
-				{
-					var coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
-					if (coef != null)
-					{
-						splitDescription[i] = coef.SkillDamageText();
-					}
-
-					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
-					if ((i & 1) == 1)
-					{
-						splitDescription[i] = "'''" + splitDescription[i] + "'''";
-					}
-				}
-
-				var description = string.Concat(splitDescription);
 				var rankText = rank.RankNum.ToStringInvariant();
 				var paramName = "desc" + (rank.RankNum == 1 ? string.Empty : rankText);
-
+				var description = this.FormatRankDescription(rank);
 				UpdateParameter(factory, template, paramName, description, usedList, this.Name);
 				if (rank is PassiveRank passiveRank)
 				{
 					UpdateParameter(factory, template, "linerank" + rankText, passiveRank.LearnedLevel.ToStringInvariant());
 				}
 			}
+		}
+		#endregion
+
+		#region Private Methods
+		private string FormatRankDescription(Rank rank)
+		{
+			var retval = new List<string>();
+			var splitDescription = Highlight.Split(rank.Description);
+			for (var i = 0; i < splitDescription.Length; i++)
+			{
+				var text = splitDescription[i];
+				if (i == 1 && splitDescription[0].Length == 0)
+				{
+					text = "<small>(" + text + ")</small>";
+				}
+
+				text = Coefficient.GetCoefficientText(rank.Coefficients, text, this.Name);
+
+				// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
+				if ((i & 1) == 1)
+				{
+					text = "'''" + text + "'''";
+				}
+
+				retval.Add(text);
+			}
+
+			return string.Concat(retval);
 		}
 		#endregion
 	}

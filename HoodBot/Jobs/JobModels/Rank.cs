@@ -21,14 +21,13 @@
 			this.Id = (int)row["id"];
 			this.RankNum = (sbyte)row["rank"];
 
-			//// var leadText = LeadText.Match((string)row["coefDescription"]);
-			//// var description = leadText.Value + (string)row["description"];
-			var description = EsoLog.ConvertEncoding((string)row["coefDescription"]);
-			if (string.IsNullOrWhiteSpace(description))
+			var description = (string)row["coefDescription"];
+			if (description.Length == 0)
 			{
-				description = EsoLog.ConvertEncoding((string)row["description"]);
+				description = (string)row["description"];
 			}
 
+			description = EsoLog.ConvertEncoding(description).Trim();
 			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
 			{
 				description = description.Replace(partial.From, partial.To, StringComparison.Ordinal);
@@ -45,8 +44,6 @@
 			}
 
 			this.Description = RegexLibrary.WhitespaceToSpace(description);
-			this.Id = (int)row["id"];
-			this.Coefficients = Coefficient.GetCoefficientList(row);
 		}
 		#endregion
 

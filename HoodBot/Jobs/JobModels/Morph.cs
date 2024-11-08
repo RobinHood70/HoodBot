@@ -217,22 +217,13 @@
 		{
 			var descriptor = string.Empty;
 			List<string> retval = [];
-			try
+			for (var j = 0; j < this.Ranks.Count; j++)
 			{
-				for (var j = 0; j < this.Ranks.Count; j++)
-				{
-					var coef = Coefficient.FromCollection(this.Ranks[j].Coefficients, splitDescriptions[j][i]);
-					if (coef != null)
-					{
-						splitDescriptions[j][i] = coef.SkillDamageText();
-					}
+				var text = splitDescriptions[j][i];
+				var coefs = this.Ranks[j].Coefficients;
+				text = Coefficient.GetCoefficientText(coefs, text, this.Name);
 
-					retval.Add(splitDescriptions[j][i]);
-				}
-			}
-			catch (IndexOutOfRangeException)
-			{
-				Debug.WriteLine($"Coefficient error on Dave's end in {this.Name}.");
+				retval.Add(text);
 			}
 
 			if (descriptor.Length > 0)

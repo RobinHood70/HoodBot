@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -31,28 +32,32 @@
 		#endregion
 
 		#region Constructors
-		public Coefficient(IDataRecord row, char num)
+		public Coefficient(IDataRecord row, int index)
 		{
-			this.A = (float)row["a" + num];
-			if (this.IsValid)
+			if (index is < 0 or > 5)
 			{
-				this.B = (float)row["b" + num];
-				this.C = (float)row["c" + num];
-				//// this.R = (float)row["R" + num];
-				this.Mechanic = (sbyte)row["type" + num];
-				if (this.Mechanic == -1)
-				{
-					var mechanicType = row.GetDataTypeName(row.GetOrdinal("mechanic"));
-					var mechanicText = mechanicType.OrdinalEquals("INT")
-						? ((int)row["mechanic"]).ToStringInvariant()
-						: EsoLog.ConvertEncoding((string)row["mechanic"]);
-					if (mechanicText.Contains(',', StringComparison.Ordinal))
-					{
-						throw new InvalidOperationException("Type == -1 and Mechanic is split. It's unclear how this should be handled.");
-					}
+				throw new ArgumentOutOfRangeException(nameof(index));
+			}
 
-					this.Mechanic = int.Parse(mechanicText, CultureInfo.InvariantCulture);
+			var num = "123456"[index];
+			this.A = (float)row["a" + num];
+			this.B = (float)row["b" + num];
+			this.C = (float)row["c" + num];
+			//// this.R = (float)row["R" + num];
+			this.Mechanic = (sbyte)row["type" + num];
+
+			if (this.IsValid() && this.Mechanic == -1)
+			{
+				var mechanicType = row.GetDataTypeName(row.GetOrdinal("mechanic"));
+				var mechanicText = mechanicType.OrdinalEquals("INT")
+					? ((int)row["mechanic"]).ToStringInvariant()
+					: EsoLog.ConvertEncoding((string)row["mechanic"]);
+				if (mechanicText.Contains(',', StringComparison.Ordinal))
+				{
+					throw new InvalidOperationException("Type == -1 and Mechanic is split. It's unclear how this should be handled.");
 				}
+
+				this.Mechanic = int.Parse(mechanicText, CultureInfo.InvariantCulture);
 			}
 		}
 		#endregion
@@ -64,8 +69,6 @@
 
 		public float C { get; }
 
-		public bool IsValid => this.A != -1;
-
 		// Type, or mechanic if type not defined. Called Mechanic to make it obvious that they serve the same purpose.
 		public int Mechanic { get; }
 
@@ -73,37 +76,42 @@
 		#endregion
 
 		#region Public Static Methods
-		public static Coefficient? FromCollection(IReadOnlyList<Coefficient> list, string text)
-		{
-			if (text?.Length > 0 && text[0] == '$')
-			{
-				var coefNumText = text[1];
-				var coefNum = (int)char.GetNumericValue(coefNumText) - 1;
-				var coef = list[coefNum];
-
-				return coef;
-			}
-
-			return null;
-		}
-
 		public static IReadOnlyList<Coefficient> GetCoefficientList(IDataRecord row)
 		{
-			var coefficients = new Coefficient[5];
-			for (var num = '1'; num <= '6'; num++)
+			var coefficients = new Coefficient[6];
+			for (var index = 0; index <= 5; index++)
 			{
-				Coefficient coefficient = new(row, num);
-				if (coefficient.IsValid)
-				{
-					coefficients[(int)(num - '1')] = coefficient;
-				}
+				coefficients[index] = new Coefficient(row, index);
 			}
 
 			return coefficients;
 		}
+
+		public static string GetCoefficientText(IReadOnlyList<Coefficient> coefs, string text, string skillName)
+		{
+			if (text.Length == 2 && text[0] == '$')
+			{
+				var index = text[1] - '1';
+				var coef = coefs[index];
+				if (!coef.IsValid())
+				{
+					Debug.WriteLine($"Coefficient error in {skillName}, coefficient {text[1]}.");
+					return text;
+				}
+
+				return coef.SkillDamageText();
+			}
+
+			return text;
+		}
 		#endregion
 
 		#region Public Methods
+
+		public bool IsValid()
+		{
+			return this.A != -1 || this.B != -1 || this.C != -1;
+		}
 
 		// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
 		public string SkillDamageText() => this.Mechanic switch
@@ -126,7 +134,9 @@
 			var scale = Math.Pow(10, unsig);
 			return scale * Math.Round(num / scale, digits);
 		}
+		#endregion
 
+		#region Private Methods
 		private string BitFieldDamage()
 		{
 			var a = this.A; // ToPrecision(this.A, 5);
