@@ -11,13 +11,10 @@
 		{
 			[23234] = ("|cffffff1|r second", "|cffffff1|r seconds"),
 			[24574] = ("|cffffff1|r minute", "|cffffff1|r minutes"),
-			[33195] = ("second after leaving the path", "seconds after leaving the path"),
 			[32166] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
+			[33195] = ("second after leaving the path", "seconds after leaving the path"),
 			[37631] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-			[38096] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-			[40242] = ("|cffffff1|r second.", "|cffffff1|r seconds."),
 			[41567] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-			[62107] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[85982] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
 			[85983] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
 			[85984] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
@@ -31,7 +28,6 @@
 			[85992] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
 			[85993] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
 			[93914] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-			[103710] = ("|cffffff1|r second", "|cffffff1|r seconds"),
 		};
 
 		public static Dictionary<string, string> NpcNameFixes { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
