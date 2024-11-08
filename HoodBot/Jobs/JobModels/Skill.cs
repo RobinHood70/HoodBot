@@ -224,7 +224,7 @@
 				}
 			}
 
-			template.Update(name, valueNodes.ToRaw(), ParameterFormat.OnePerLine, true);
+			template.Update(name, collection.ToRaw(), ParameterFormat.OnePerLine, true);
 		}
 
 		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value, bool removeCondition)
