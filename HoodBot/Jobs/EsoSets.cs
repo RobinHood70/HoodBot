@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Text;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -141,9 +142,15 @@
 				return;
 			}
 
+			var oldText = oldPage[1..^2].ToRaw().Trim();
+			var oldTextMatch = Regex.Match(oldText, @"^'''\d", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
+			var preText = oldText[0..oldTextMatch.Index];
+
 			TitleCollection usedList = new(this.Site);
 			StringBuilder sb = new();
-			sb.Append('\n');
+			sb
+				.Append('\n')
+				.Append(preText);
 			foreach (var (itemCount, text) in setData.BonusDescriptions)
 			{
 				sb
