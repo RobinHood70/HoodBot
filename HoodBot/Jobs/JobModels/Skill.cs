@@ -75,11 +75,17 @@
 		#region Public Methods
 		public string? UpdatePageText(Page page)
 		{
-			if (!page.Exists)
+			if (page.IsMissing)
 			{
 				page.Text =
-					"{{Minimal|Skill}}{{Mod Header|Gold Road}}\n" +
-					"{{Online Skill Summary}}\n" +
+					"{{Minimal|Skill}}";
+				if (Eso.ModTemplateName.Length > 0)
+				{
+					page.Text += "{{Mod Header|" + Eso.ModTemplateName + "}}\n";
+				}
+
+				page.Text +=
+					"{{" + TemplateName + "}}\n" +
 					"\n" +
 					"<!--\n" +
 					"==Notes==\n" +
@@ -97,6 +103,8 @@
 			}
 
 			var template = skillSummaries[0];
+			template.TitleNodes.Trim();
+			template.TitleNodes.AddText("\n");
 			template.RemoveDuplicates();
 			template.Remove("update");
 
