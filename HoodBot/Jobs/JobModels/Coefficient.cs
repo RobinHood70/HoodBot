@@ -87,19 +87,18 @@
 			return null;
 		}
 
-		public static List<Coefficient> GetCoefficientList(IDataRecord row)
+		public static IReadOnlyList<Coefficient> GetCoefficientList(IDataRecord row)
 		{
-			var coefficients = new List<Coefficient>(6);
+			var coefficients = new Coefficient[5];
 			for (var num = '1'; num <= '6'; num++)
 			{
 				Coefficient coefficient = new(row, num);
 				if (coefficient.IsValid)
 				{
-					coefficients.Add(coefficient);
+					coefficients[(int)(num - '1')] = coefficient;
 				}
 			}
 
-			coefficients.TrimExcess();
 			return coefficients;
 		}
 		#endregion
