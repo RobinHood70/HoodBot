@@ -81,7 +81,6 @@
 				return;
 			}
 
-			var i = 0;
 			var anons = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 			foreach (var cluster in template.ParameterCluster(2))
 			{
@@ -90,7 +89,7 @@
 				anons.Add(key + '\t' + value);
 			}
 
-			for (i = template.Parameters.Count - 1; i >= 0; i--)
+			for (var i = template.Parameters.Count - 1; i >= 0; i--)
 			{
 				if (template.Parameters[i].Anonymous)
 				{
