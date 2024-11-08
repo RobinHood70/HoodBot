@@ -137,7 +137,7 @@
 		{
 			this.StatusWriteLine("Getting redirects");
 			var redirects = new Dictionary<Title, Page>();
-			foreach (var (key, lead) in this.leads)
+			foreach (var lead in this.leads.Values)
 			{
 				if (this.filePages.TryGetValue(lead.Icon, out var page))
 				{
