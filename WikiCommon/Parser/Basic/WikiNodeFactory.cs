@@ -13,75 +13,28 @@
 	/// <seealso cref="IWikiNodeFactory" />
 	public class WikiNodeFactory : IWikiNodeFactory
 	{
-		#region Public Static Properties
+		#region Constructors
 
-		/// <summary>Gets or sets the text to use when escaping equals signs.</summary>
-		/// <value>The equals sign escape text.</value>
-		public static string EqualsEscape { get; set; } = "&#61;";
-
-		/// <summary>Gets or sets the text to use when escaping pipes.</summary>
-		/// <value>The pipe escape text.</value>
-		public static string PipeEscape { get; set; } = "{{!}}";
+		/// <summary>Initializes a new instance of the <see cref="WikiNodeFactory"/> class.</summary>
+		protected WikiNodeFactory()
+		{
+		}
 		#endregion
 
 		#region Public Properties
 
-		/// <inheritdoc/>
-		public InclusionType InclusionType { get; private set; }
+		/// <summary>Gets or sets the text to use when escaping equals signs.</summary>
+		/// <value>The equals sign escape text.</value>
+		public string EqualsEscape { get; set; } = "&#61;";
 
-		/// <inheritdoc/>
-		public bool StrictInclusion { get; private set; }
-
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>Escapes any pipes and equals signs in the value.</summary>
-		/// <param name="value">The text to escape.</param>
-		/// <returns>The escaped text.</returns>
-		public static string EscapeParameterName(string? value) => EscapeParameterText(value, false);
-
-		/// <summary>Escapes any pipes and equals signs in the value.</summary>
-		/// <param name="value">The text to escape.</param>
-		/// <returns>The escaped text.</returns>
-		public static string EscapeParameterValue(string? value) => EscapeParameterText(value, true);
-
-		/// <summary>Escapes any pipes and, optionally, equals signs in the value.</summary>
-		/// <param name="value">The text to escape.</param>
-		/// <param name="escapeEquals">if set to <see langword="true"/>, equals signs are escaped as well as pipes (i.e., <c>key=value|value</c> becomes <c>key&#61;value{{!}}value</c>); otherwise, only pipes will be escaped (i.e., <c>key=value|value</c> becomes <c>key=value{{!}}value</c>).</param>
-		/// <returns>The escaped text.</returns>
-		public static string EscapeParameterText(string? value, bool escapeEquals)
-		{
-			if (value == null)
-			{
-				return string.Empty;
-			}
-
-			// Because we're not returning a WikiNodeCollection, the default factory does everything we need here.
-			WikiNodeFactory factory = new();
-			var nodes = factory.Parse(value);
-			foreach (var node in nodes)
-			{
-				if (node is TextNode textNode)
-				{
-					textNode.Text = textNode.Text.Replace("|", PipeEscape, StringComparison.Ordinal);
-					if (escapeEquals)
-					{
-						textNode.Text = textNode.Text.Replace("=", EqualsEscape, StringComparison.Ordinal);
-					}
-				}
-			}
-
-			return nodes.ToRaw();
-		}
+		/// <summary>Gets or sets the text to use when escaping pipes.</summary>
+		/// <value>The pipe escape text.</value>
+		public string PipeEscape { get; set; } = "{{!}}";
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Creates a new <see cref="IArgumentNode"/>  from its parts.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="defaultValue">The default value.</param>
-		/// <returns>A new argument node.</returns>
+		/// <inheritdoc/>
 		public IArgumentNode ArgumentNodeFromParts(string name, string? defaultValue)
 		{
 			ArgumentNullException.ThrowIfNull(name);
@@ -95,27 +48,23 @@
 			return this.ArgumentNodeFromWikiText(text);
 		}
 
-		/// <summary>Creates a new <see cref="IArgumentNode"/> from the provided text.</summary>
-		/// <param name="wikiText">The text of the argument.</param>
-		/// <returns>A new argument node.</returns>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
+		/// <inheritdoc/>
 		public IArgumentNode ArgumentNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<IArgumentNode>(wikiText);
 
-		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
-		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
-		/// <param name="text">The text of the header.</param>
-		/// <returns>A new header node.</returns>
-		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
+		/// <summary>Escapes any pipes and equals signs in the value.</summary>
+		/// <param name="value">The text to escape.</param>
+		/// <returns>The escaped text.</returns>
+		public string EscapeParameterName(string? value) => this.EscapeParameterText(value, false);
+
+		/// <summary>Escapes any pipes and equals signs in the value.</summary>
+		/// <param name="value">The text to escape.</param>
+		/// <returns>The escaped text.</returns>
+		public string EscapeParameterValue(string? value) => this.EscapeParameterText(value, true);
+
+		/// <inheritdoc/>
 		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNodeFromParts(level, text, string.Empty);
 
-		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
-		/// <param name="level">The header level (number of equals signs). This must be between 1 and 6.</param>
-		/// <param name="text">The text of the header.</param>
-		/// <param name="comment">The comment or whitespace at the end of the header.</param>
-		/// <returns>A new header node.</returns>
-		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
+		/// <inheritdoc/>
 		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text, string comment)
 		{
 			var headerNodes = this.Parse(text);
@@ -123,27 +72,16 @@
 			return this.HeaderNode(level, headerNodes, commentNodes);
 		}
 
-		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
-		/// <param name="wikiText">The wiki text of the header.</param>
-		/// <returns>A new header node.</returns>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
+		/// <inheritdoc/>
 		public IHeaderNode HeaderNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<IHeaderNode>(wikiText);
 
-		/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <returns>A new link node.</returns>
+		/// <inheritdoc/>
 		public ILinkNode LinkNodeFromParts(string title) => this.LinkNodeFromParts(title, null as IEnumerable<string>);
 
-		/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="displayText">The display text for the link.</param>
-		/// <returns>A new link node.</returns>
+		/// <inheritdoc/>
 		public ILinkNode LinkNodeFromParts(string title, string displayText) => this.LinkNodeFromParts(title, [displayText]);
 
-		/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="parameters">The default value.</param>
-		/// <returns>A new link node.</returns>
+		/// <inheritdoc/>
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
 			ArgumentNullException.ThrowIfNull(title);
@@ -161,16 +99,10 @@
 			return this.LinkNode(titleNodes, paramEntries);
 		}
 
-		/// <summary>Creates a new <see cref="ILinkNode"/> from the provided text.</summary>
-		/// <param name="wikiText">The wiki text of the link, optionally including surrounding brackets (<c>[[...]]</c>).</param>
-		/// <returns>A new link node.</returns>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
+		/// <inheritdoc/>
 		public ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<ILinkNode>(wikiText);
 
-		/// <summary>Creates a new <see cref="IParameterNode"/> from another IParameterNode, copying surrounding whitespace from the other parameter.</summary>
-		/// <param name="other">The other parameter.</param>
-		/// <param name="value">The new parameter value.</param>
-		/// <returns>A new, formatted <see cref="IParameterNode"/> with the specified value.</returns>
+		/// <inheritdoc/>
 		public IParameterNode ParameterNodeFromOther(IParameterNode? other, string value)
 		{
 			if (other != null)
@@ -181,11 +113,7 @@
 			return this.ParameterNodeFromParts(value);
 		}
 
-		/// <summary>Creates a new <see cref="IParameterNode"/> from another IParameterNode, copying surrounding whitespace from the other parameter.</summary>
-		/// <param name="other">The other parameter.</param>
-		/// <param name="name">The new parameter name.</param>
-		/// <param name="value">The new parameter value.</param>
-		/// <returns>A new, formatted <see cref="IParameterNode"/> with the specified name and value.</returns>
+		/// <inheritdoc/>
 		public IParameterNode ParameterNodeFromOther(IParameterNode? other, string? name, string value)
 		{
 			if (other != null)
@@ -201,36 +129,20 @@
 			return this.ParameterNodeFromParts(name, value);
 		}
 
-		/// <summary>Creates a new anonymous <see cref="IParameterNode"/> from a value.</summary>
-		/// <param name="value">The value.</param>
-		/// <returns>A new ParameterNode.</returns>
+		/// <inheritdoc/>
 		public IParameterNode ParameterNodeFromParts(string value) => this.ParameterNode(null, this.Parse(value));
 
-		/// <summary>Creates a new <see cref="IParameterNode"/> from a name and value.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="value">The value.</param>
-		/// <returns>A new ParameterNode.</returns>
+		/// <inheritdoc/>
 		public IParameterNode ParameterNodeFromParts(string? name, string value) => this.ParameterNode(name == null ? null : this.Parse(name), this.Parse(value));
 
-		/// <summary>Parses the specified text.</summary>
-		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
-		public IList<IWikiNode> Parse(string? text) => this.Parse(text, this.InclusionType, this.StrictInclusion);
+		/// <inheritdoc/>
+		public IList<IWikiNode> Parse(string? text) => this.Parse(text, InclusionType.Raw, false);
 
-		/// <summary>Parses the specified text.</summary>
-		/// <param name="text">The text to parse.</param>
-		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
-		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		/// <returns>A <see cref="WikiNodeCollection"/> with the parsed text.</returns>
+		/// <inheritdoc/>
 		public IList<IWikiNode> Parse(string? text, InclusionType inclusionType, bool strictInclusion) =>
 			new WikiStack(this, text, inclusionType, strictInclusion).GetNodes();
 
-		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
-		/// <typeparam name="T">The type of node desired.</typeparam>
-		/// <param name="text">The text to parse.</param>
-		/// <param name="callerName">  The caller member name.</param>
-		/// <returns>The single node of the specified type.</returns>
-		/// <exception cref="ArgumentException">Thrown if there is more than one node in the collection, or the node is not of the specified type.</exception>
+		/// <inheritdoc/>
 		public T SingleNode<T>(string? text, [CallerMemberName] string callerName = "<Unknown>")
 			where T : IWikiNode
 		{
@@ -240,21 +152,17 @@
 				: throw new ArgumentException(paramName: nameof(text), message: Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName));
 		}
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="onePerLine">if set to <see langword="true"/>, parameters will be formatted one per line; otherwise, they will appear all on the same line.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
+		/// <remarks>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
+		/// <para>Template parameters added through this method will NOT have their values escaped.</para>
+		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, params string[] parameters) => this.TemplateNodeFromParts(title, onePerLine, parameters as IEnumerable<string>);
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="onePerLine">if set to <see langword="true"/>, parameters will be formatted one per line; otherwise, they will appear all on the same line.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
 		/// <remarks>
-		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in favour of this one, if appropriate.</para>
-		/// <para>Unlike the overloads with (name, value) tuples, template parameters added through this method will not have their values escaped.</para>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
+		/// <para>Template parameters added through this method will NOT have their values escaped.</para>
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<string>? parameters)
 		{
@@ -290,44 +198,30 @@
 			return this.TemplateNodeFromWikiText(sb.ToString());
 		}
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
 		/// <remarks>
-		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in favour of this one, if appropriate.</para>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
 		/// <para>Template parameters added through this method will automatically have their values escaped.</para>
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, params (string?, string)[] parameters) => this.TemplateNodeFromParts(title, false, parameters as IEnumerable<(string?, string)>);
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
 		/// <remarks>
-		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in favour of this one, if appropriate.</para>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
 		/// <para>Template parameters added through this method will automatically have their values escaped.</para>
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, IEnumerable<(string? Name, string Value)> parameters) => this.TemplateNodeFromParts(title, false, parameters);
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="onePerLine">if set to <see langword="true"/>, parameters will be formatted one per line; otherwise, they will appear all on the same line.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
 		/// <remarks>
-		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in favour of this one, if appropriate.</para>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
 		/// <para>Template parameters added through this method will automatically have their values escaped.</para>
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, params (string?, string)[] parameters) => this.TemplateNodeFromParts(title, onePerLine, parameters as IEnumerable<(string?, string)>);
 
-		/// <summary>Creates a new TemplateNode from its parts.</summary>
-		/// <param name="title">The link destination.</param>
-		/// <param name="onePerLine">if set to <see langword="true"/>, parameters will be formatted one per line; otherwise, they will appear all on the same line.</param>
-		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
-		/// <returns>A new template node.</returns>
+		/// <inheritdoc/>
 		/// <remarks>
-		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in favour of this one, if appropriate.</para>
+		/// <para>Due to the complexities of parsing parameter data, this method builds a string and then calls <see cref="TemplateNodeFromWikiText"/>, so that method should be called in preference to this one, if appropriate.</para>
 		/// <para>Template parameters added through this method will automatically have their values escaped.</para>
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<(string? Name, string Value)> parameters)
@@ -356,7 +250,7 @@
 							.Append('=');
 					}
 
-					sb.Append(EscapeParameterValue(value));
+					sb.Append(this.EscapeParameterValue(value));
 				}
 
 				if (addTrailingLine)
@@ -370,10 +264,7 @@
 			return this.TemplateNodeFromWikiText(sb.ToString());
 		}
 
-		/// <summary>Creates a new <see cref="ITemplateNode"/> from the provided text.</summary>
-		/// <param name="text">The text of the template, including surrounding braces (<c>{{...}}</c>).</param>
-		/// <returns>A new template node.</returns>
-		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single template (e.g., <c>{{Template}}</c>, or any variant thereof).</exception>
+		/// <inheritdoc/>
 		public ITemplateNode TemplateNodeFromWikiText([Localizable(false)] string text) => this.SingleNode<ITemplateNode>(text);
 		#endregion
 
@@ -413,6 +304,31 @@
 
 		/// <inheritdoc/>
 		public virtual ITextNode TextNode(string text) => new TextNode(text);
+		#endregion
+
+		#region Private Methods
+		private string EscapeParameterText(string? value, bool escapeEquals)
+		{
+			if (value is null)
+			{
+				return string.Empty;
+			}
+
+			var nodes = this.Parse(value);
+			foreach (var node in nodes)
+			{
+				if (node is ITextNode textNode)
+				{
+					textNode.Text = textNode.Text.Replace("|", this.PipeEscape, StringComparison.Ordinal);
+					if (escapeEquals)
+					{
+						textNode.Text = textNode.Text.Replace("=", this.EqualsEscape, StringComparison.Ordinal);
+					}
+				}
+			}
+
+			return nodes.ToRaw();
+		}
 		#endregion
 	}
 }
