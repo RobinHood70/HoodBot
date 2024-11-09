@@ -69,7 +69,7 @@
 		private static Dictionary<string, string> ReadDisambigs()
 		{
 			Dictionary<string, string> disambigs = new(StringComparer.Ordinal);
-			var disambigLines = File.ReadAllLines(Starfield.ModFolder + "Term Disambigs.txt");
+			var disambigLines = File.ReadAllLines(GameInfo.Starfield.ModFolder + "Term Disambigs.txt");
 			foreach (var line in disambigLines)
 			{
 				var split = line.Split(TextArrays.Tab);
@@ -135,7 +135,7 @@
 
 		private void LoadMenus()
 		{
-			var csv = new CsvFile(Starfield.ModFolder + "Tmlm.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Tmlm.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
@@ -217,7 +217,7 @@
 		{
 			var disambigs = ReadDisambigs();
 			var retval = new Dictionary<Title, Terminal>();
-			var csv = new CsvFile(Starfield.ModFolder + "Term.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Term.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};

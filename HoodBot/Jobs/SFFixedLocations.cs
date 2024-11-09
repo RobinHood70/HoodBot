@@ -142,7 +142,7 @@
 		#region Private Static Methods
 		private void GetRefUses()
 		{
-			var refUsesFile = new CsvFile(Starfield.ModFolder + "RefUses.csv")
+			var refUsesFile = new CsvFile(GameInfo.Starfield.ModFolder + "RefUses.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};

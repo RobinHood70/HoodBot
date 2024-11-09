@@ -45,7 +45,7 @@
 		private static Dictionary<Title, Npcs> GetNPCs(Site site, Dictionary<string, string> races, HashSet<string> fauna)
 		{
 			var items = new Dictionary<Title, Npcs>();
-			var csv = new CsvFile(Starfield.ModFolder + "Npcs.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Npcs.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
@@ -146,7 +146,7 @@
 		private static HashSet<string> GetFauna()
 		{
 			var fauna = new HashSet<string>(StringComparer.Ordinal);
-			var csv = new CsvFile(Starfield.ModFolder + "Fauna.csv");
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Fauna.csv");
 			foreach (var row in csv.ReadRows())
 			{
 				fauna.Add(row["EditorID"]);
@@ -175,8 +175,8 @@
 		private static Dictionary<string, string> GetRaces()
 		{
 			var dict = new Dictionary<string, string>(StringComparer.Ordinal);
-			GetRaces(dict, Starfield.BaseFolder);
-			GetRaces(dict, Starfield.ModFolder);
+			GetRaces(dict, GameInfo.Starfield.BaseFolder);
+			GetRaces(dict, GameInfo.Starfield.ModFolder);
 
 			return dict;
 		}

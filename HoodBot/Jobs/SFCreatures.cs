@@ -176,7 +176,7 @@
 
 		private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
 		{
-			var csv = new CsvFile(Starfield.ModFolder + "Fauna.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Fauna.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};

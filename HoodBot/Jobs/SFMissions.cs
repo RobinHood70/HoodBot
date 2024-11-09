@@ -16,9 +16,9 @@
 	internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
 		#region Private Static Fields
-		private static readonly string DisambigFileName = Starfield.ModFolder + "Quests Disambigs.txt";
-		private static readonly string QuestsFileName = Starfield.ModFolder + "Quests.csv";
-		private static readonly string StagesFileName = Starfield.ModFolder + "QuestStages.csv";
+		private static readonly string DisambigFileName = GameInfo.Starfield.ModFolder + "Quests Disambigs.txt";
+		private static readonly string QuestsFileName = GameInfo.Starfield.ModFolder + "Quests.csv";
+		private static readonly string StagesFileName = GameInfo.Starfield.ModFolder + "QuestStages.csv";
 		#endregion
 
 		#region Constructors

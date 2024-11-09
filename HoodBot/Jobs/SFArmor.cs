@@ -36,7 +36,7 @@
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()
 		{
 			var items = new Dictionary<Title, List<CsvRow>>();
-			var csv = new CsvFile(Starfield.ModFolder + "Armors.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Armors.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};

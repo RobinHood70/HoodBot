@@ -79,9 +79,9 @@
 			{
 				page.Text =
 					"{{Minimal|Skill}}";
-				if (Eso.ModTemplateName.Length > 0)
+				if (GameInfo.Eso.ModTemplateName.Length > 0)
 				{
-					page.Text += "{{Mod Header|" + Eso.ModTemplateName + "}}\n";
+					page.Text += GameInfo.Eso.ModHeader + '\n';
 				}
 
 				page.Text +=

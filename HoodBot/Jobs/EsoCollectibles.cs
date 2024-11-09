@@ -195,9 +195,9 @@
 					tag.Name.OrdinalEquals("nowiki") &&
 					tag.InnerText?.Trim() is string blankTemplate)
 				{
-					return Eso.ModTemplate.Length == 0
+					return GameInfo.Eso.ModTemplate.Length == 0
 						? blankTemplate
-						: "{{Mod Header|{" + Eso.ModTemplateName + "}}" + blankTemplate;
+						: GameInfo.Eso.ModHeader + blankTemplate;
 				}
 			}
 

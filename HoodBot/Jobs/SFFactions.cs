@@ -44,7 +44,7 @@
 
 		protected override IDictionary<Title, Redirect> LoadItems()
 		{
-			var newFactions = GetFactions(Starfield.ModFolder);
+			var newFactions = GetFactions(GameInfo.Starfield.ModFolder);
 			if (newFactions.Count == 0)
 			{
 				return new Dictionary<Title, Redirect>();
@@ -90,9 +90,9 @@
 				.Append("{{Factions\n")
 				.Append($"|edid={faction.EditorId}\n")
 				.Append($"|formid={formId}\n");
-			if (Starfield.ModTemplate.Length > 0)
+			if (GameInfo.Starfield.ModTemplate.Length > 0)
 			{
-				sb.Append($"|dlctemplate={Starfield.ModTemplate}\n");
+				sb.Append($"|dlctemplate={GameInfo.Starfield.ModTemplate}\n");
 			}
 
 			if (addHeader)
@@ -210,8 +210,8 @@
 						{
 							var link = new SiteLink(title);
 							var linkText = link.AsLink(LinkFormat.PipeTrick);
-							var modTemplate = member.FromMod ? Starfield.ModTemplate : string.Empty;
-							listTemplate.Add(linkText + Starfield.ModTemplate);
+							var modTemplate = member.FromMod ? GameInfo.Starfield.ModTemplate : string.Empty;
+							listTemplate.Add(linkText + GameInfo.Starfield.ModTemplate);
 						}
 					}
 
@@ -270,9 +270,9 @@
 							sections.Add(string.Empty, factionHeader);
 						}
 
-						var title = Starfield.ModTemplate.Length == 0
+						var title = GameInfo.Starfield.ModTemplate.Length == 0
 							? faction.SectionName
-							: $"{{{{Anchor|{faction.SectionName}}}}}{Starfield.ModTemplate}";
+							: $"{{{{Anchor|{faction.SectionName}}}}}{GameInfo.Starfield.ModTemplate}";
 						section = Section.FromText(factory, title, sectionText);
 						sections.Add(faction.SectionName, section);
 					}
@@ -293,7 +293,7 @@
 		{
 			var members = new Dictionary<string, Members>(StringComparer.Ordinal);
 			this.LoadNpcsFromFile(members, false);
-			if (!Starfield.BaseFolder.OrdinalEquals(Starfield.ModFolder))
+			if (!GameInfo.Starfield.BaseFolder.OrdinalEquals(GameInfo.Starfield.ModFolder))
 			{
 				this.LoadNpcsFromFile(members, true);
 			}
@@ -308,7 +308,7 @@
 			var retval = new Dictionary<Title, SectionCollection>();
 			foreach (var page in existing)
 			{
-				if (Starfield.BaseFolder.OrdinalEquals(Starfield.ModFolder))
+				if (GameInfo.Starfield.BaseFolder.OrdinalEquals(GameInfo.Starfield.ModFolder))
 				{
 					page.Text = string.Empty;
 				}
@@ -365,10 +365,10 @@
 		private void LoadNpcsFromFile(Dictionary<string, Members> members, bool fromMod)
 		{
 			var folder = fromMod
-				? Starfield.ModFolder
-				: Starfield.BaseFolder;
+				? GameInfo.Starfield.ModFolder
+				: GameInfo.Starfield.BaseFolder;
 			var factionsByFormId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-			foreach (var faction in GetFactions(Starfield.BaseFolder))
+			foreach (var faction in GetFactions(GameInfo.Starfield.BaseFolder))
 			{
 				factionsByFormId.Add(faction.FormId, faction.SectionName);
 			}

@@ -67,7 +67,7 @@
 				}
 
 				sb
-					.Append(Starfield.ModTemplate)
+					.Append(GameInfo.Starfield.ModTemplate)
 					.Append(" || ")
 					.Append(effect.FormId)
 					.Append(" || ")
@@ -103,7 +103,7 @@
 		private static Effects LoadEffects()
 		{
 			var retval = new Effects();
-			var effectsFile = new CsvFile(Starfield.ModFolder + "Effects.csv");
+			var effectsFile = new CsvFile(GameInfo.Starfield.ModFolder + "Effects.csv");
 			foreach (var row in effectsFile.ReadRows())
 			{
 				var effect = new Effect(

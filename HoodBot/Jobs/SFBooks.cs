@@ -58,7 +58,7 @@
 		protected override IDictionary<Title, Book> LoadItems()
 		{
 			var retval = new Dictionary<Title, Book>();
-			var csv = new CsvFile(Starfield.ModFolder + "Books.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Books.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
@@ -123,7 +123,7 @@
 		private static string GetBookText(string formId)
 		{
 			// This is a horrible way to replace things, but it's simple and speed is not a factor for the relatively small number of books.
-			var orig = File.ReadAllText($@"{Starfield.ModFolder}Books\0x{formId}.txt", Encoding.GetEncoding(1252));
+			var orig = File.ReadAllText($@"{GameInfo.Starfield.ModFolder}Books\0x{formId}.txt", Encoding.GetEncoding(1252));
 			if (orig.Length == 0)
 			{
 				return string.Empty;

@@ -47,7 +47,7 @@
 		internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 		{
 			var items = new Dictionary<Title, Planet>();
-			var csv = new CsvFile(Starfield.ModFolder + "Planets_Infobox.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Planets_Infobox.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
@@ -171,7 +171,7 @@
 		private static Dictionary<string, ICollection<string>> GetBiomes()
 		{
 			var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
-			var csv = new CsvFile(Starfield.ModFolder + "biomesplanets.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "biomesplanets.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252),
 				HasHeader = false
@@ -230,7 +230,7 @@
 		private void ReadWip3(Dictionary<Title, Planet> items)
 		{
 			var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
-			var csv = new CsvFile(Starfield.ModFolder + "sfcreatures_-_wip3.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "sfcreatures_-_wip3.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};

@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -35,7 +34,7 @@
 		protected override IDictionary<Title, List<CsvRow>> LoadItems()
 		{
 			var items = new Dictionary<Title, List<CsvRow>>();
-			var csv = new CsvFile(Starfield.ModFolder + "Weapons.csv")
+			var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Weapons.csv")
 			{
 				Encoding = Encoding.GetEncoding(1252)
 			};
