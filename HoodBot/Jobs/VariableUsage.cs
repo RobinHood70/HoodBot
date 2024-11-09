@@ -5,9 +5,9 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using RobinHood70.WikiCommon.Parser.Basic;
 
 	[method: JobInfo("Variable Usage")]
 	internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
@@ -77,7 +77,7 @@
 			// TODO: Add a dictionary that can be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
-				var factory = new WikiNodeFactory();
+				var factory = new SiteNodeFactory(this.Site);
 				var nodes = factory.Parse(page.Text);
 				var collection = new WikiNodeCollection(factory, nodes);
 				foreach (var template in collection.FindAll<ITemplateNode>())

@@ -21,7 +21,7 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser.Basic;
+	using RobinHood70.WikiCommon.Parser;
 
 	#region Public Delegates
 
@@ -1045,7 +1045,7 @@
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-		public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is LinkNode linkNode
+		public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is ILinkNode linkNode
 			? TitleFactory.FromBacklinkNode(this, linkNode).ToFullTitle()
 			: null;
 
@@ -1249,19 +1249,19 @@
 		#endregion
 
 		#region Internal Methods
-		internal LinkNode? GetRedirectFromTextInternal(string text)
+		internal ILinkNode? GetRedirectFromTextInternal(string text)
 		{
 			ArgumentNullException.ThrowIfNull(text);
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect)
 				? redirect.Aliases
 				: DefaultRedirect;
 			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-			var nodes = new WikiNodeFactory().Parse(text);
+			var nodes = new SiteNodeFactory(this).Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
 			if (nodes.Count > 1 &&
-				nodes[0] is TextNode textNode &&
-				nodes[1] is LinkNode linkNode)
+				nodes[0] is ITextNode textNode &&
+				nodes[1] is ILinkNode linkNode)
 			{
 				var searchText = textNode.Text.TrimEnd();
 
