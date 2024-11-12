@@ -14,12 +14,17 @@
 		#endregion
 
 		#region Static Properties
-		public static GameInfo Eso => new(
+		public static GameInfo Castles { get; } = new(
+			LocalConfig.BotDataSubPath(@"Castles\MonoBehaviour\"),
+			LocalConfig.BotDataSubPath(@"Castles\Update 1\"),
+			string.Empty);
+
+		public static GameInfo Eso { get; } = new(
 			LocalConfig.BotDataFolder,
 			LocalConfig.BotDataFolder,
 			string.Empty);
 
-		public static GameInfo Starfield => new(
+		public static GameInfo Starfield { get; } = new(
 			LocalConfig.BotDataSubPath(@"Starfield\"),
 			LocalConfig.BotDataSubPath(@"Starfield\ShatteredSpaceData2\ShatteredSpace\"),
 			"SS");
