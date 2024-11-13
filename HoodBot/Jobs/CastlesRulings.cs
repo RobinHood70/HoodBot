@@ -64,6 +64,12 @@
 		}
 		#endregion
 
+		#region Public Static Methods
+		public static string WikiModeReplace(string text) => CastlesStyleReplacer()
+			.Replace(text, StyleReplacer)
+			.Replace('’', '\'');
+		#endregion
+
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
@@ -104,14 +110,18 @@
 				conditionsParam.SetValue(string.Join("<br>\n", ruling.Conditions), ParameterFormat.Copy);
 			}
 
-			foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>())
+			foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>(t => t.Title.PageNameEquals("Castles Ruling/Choice")))
 			{
-				var idParam = choiceTemplate.Find("id") ?? throw new InvalidOperationException();
-				var effectsParam = choiceTemplate.Find("effects") ?? throw new InvalidOperationException();
-				var id = int.Parse(idParam.Value.ToValue(), GameCulture);
-				if (ruling.Choices.TryGetValue(id, out var choice))
+				if (choiceTemplate.Find("id") is IParameterNode idParam &&
+					choiceTemplate.Find("effects") is IParameterNode effectsParam)
 				{
-					choice.Effects = effectsParam.Value.ToRaw().Trim();
+					// var idParam = choiceTemplate.Find("id") ?? throw new InvalidOperationException();
+					// var effectsParam = choiceTemplate.Find("effects") ?? throw new InvalidOperationException();
+					var id = int.Parse(idParam.Value.ToValue(), GameCulture);
+					if (ruling.Choices.TryGetValue(id, out var choice))
+					{
+						choice.Effects = effectsParam.Value.ToRaw().Trim();
+					}
 				}
 			}
 
@@ -212,7 +222,7 @@
 			var text = this.translator.Parse(translated, true);
 			if (WikiMode)
 			{
-				text = CastlesStyleReplacer().Replace(text, StyleReplacer);
+				text = CastlesRulings.WikiModeReplace(text);
 			}
 
 			var conditions = new CastlesConditions(this.data, GameCulture);
@@ -369,7 +379,7 @@
 				var text = translator.Parse(choiceDesc, true);
 				if (WikiMode)
 				{
-					text = CastlesStyleReplacer().Replace(text, StyleReplacer);
+					text = CastlesRulings.WikiModeReplace(text);
 				}
 
 				this.SubChoices.AddRange(text.Split("<newline>"));
