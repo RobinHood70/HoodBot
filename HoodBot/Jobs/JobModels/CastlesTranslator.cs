@@ -50,6 +50,10 @@
 		public IDictionary<string, string> ParserOverrides { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 		#endregion
 
+		#region Private Properties
+		private string LangTag => this.culture.Name;
+		#endregion
+
 		#region Public Static Methods
 		public static string GetRelatonship(int index) => index < 0 || index >= Relationships.Length
 				? throw new ArgumentOutOfRangeException(nameof(index))
@@ -266,7 +270,7 @@
 
 		private void LoadLanguageDatabase()
 		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\LanguageDatabase_Gameplay_{this.culture.IetfLanguageTag}.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"LanguageDatabase_Gameplay_{this.LangTag}.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj.entries;
 			foreach (var item in items)
@@ -277,7 +281,7 @@
 
 		private void LoadRules()
 		{
-			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@$"D:\Castles\MonoBehaviour\rules_{this.culture.IetfLanguageTag}.json")) ?? throw new InvalidOperationException();
+			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(GameInfo.Castles.ModFolder + $"rules_{this.LangTag}.json")) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
 			var rules = new Dictionary<string, string>(StringComparer.Ordinal);
 			foreach (var item in items)
@@ -306,7 +310,7 @@
 
 		private void LoadSentences()
 		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\sentences_{this.culture.IetfLanguageTag}.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"sentences_{this.LangTag}.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
 			foreach (var item in items)
@@ -317,7 +321,7 @@
 
 		private void LoadTerms()
 		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\terms_{this.culture.IetfLanguageTag}.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"terms_{this.LangTag}.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
 			foreach (var item in items)
@@ -330,7 +334,7 @@
 
 		private void LoadVariations()
 		{
-			var text = File.ReadAllText(@$"D:\Castles\MonoBehaviour\variations_{this.culture.IetfLanguageTag}.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"variations_{this.LangTag}.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._rawData;
 			foreach (var item in items)

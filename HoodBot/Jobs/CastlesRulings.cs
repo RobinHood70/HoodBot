@@ -76,7 +76,7 @@
 			}
 
 			this.GetRulingGroups();
-			this.WriteRulingGroups(@"D:\Castles\Rulings.txt");
+			this.WriteRulingGroups(GameInfo.Castles.BaseFolder + "Rulings.txt");
 		}
 
 		protected override string GetEditSummary(Page page) => "Update rulings";
@@ -230,7 +230,7 @@
 
 		private Dictionary<string, dynamic> GetRulingGroups()
 		{
-			using var file = File.OpenRead(@"D:\Castles\MonoBehaviour\RulingsDefault2.json");
+			using var file = File.OpenRead(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
 			using var reader = new StreamReader(file);
 			using var jsonReader = new JsonTextReader(reader);
 

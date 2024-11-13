@@ -205,7 +205,7 @@
 		#region Private Methods
 		private void LoadGroups()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\GroupDataDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "GroupDataDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			string[] groupCats = ["_allSubjectsGroups", "_socialClassGroup", "_raceGroups"];
 			foreach (var groupCat in groupCats)
@@ -230,7 +230,7 @@
 				this.propGroups[i] = [];
 			}
 
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\PropDataDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "PropDataDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._props;
 			foreach (var item in items)
@@ -249,7 +249,7 @@
 
 		private void LoadRulingFlags()
 		{
-			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(@"D:\Castles\MonoBehaviour\RulingsDefault2.json")) ?? throw new InvalidOperationException();
+			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(GameInfo.Castles.ModFolder + "RulingsDefault2.json")) ?? throw new InvalidOperationException();
 			var items = obj._rulingFlagDefinitions;
 			foreach (var item in items)
 			{
@@ -261,7 +261,7 @@
 
 		private void LoadQuests()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\QuestData.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "QuestData.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._quests;
 			foreach (var item in items)
@@ -275,7 +275,7 @@
 
 		private void LoadSubjectArchetypes()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\SubjectArchetypesDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "SubjectArchetypesDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._subjectArchetypesList;
 			foreach (var item in items)
@@ -306,7 +306,7 @@
 
 		private void LoadTags()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\TagDataDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "TagDataDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._tags;
 			foreach (var item in items)
@@ -319,7 +319,7 @@
 
 		private void LoadTaskPools()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\TasksDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "TasksDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			var items = obj._missionTaskPools;
 			foreach (var item in items)
@@ -335,7 +335,7 @@
 
 		private void LoadTraits()
 		{
-			var text = File.ReadAllText(@"D:\Castles\MonoBehaviour\TraitDataDefault2.json");
+			var text = File.ReadAllText(GameInfo.Castles.ModFolder + "TraitDataDefault2.json");
 			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
 			string[] traitCats = ["_dramaticTraits", "_jealousTraits", "_mightyTraits", "_deftTraits", "_lazyTraits", "_musicianTraits", "_academicTraits", "_generousTraits", "_bullyTraits", "_emotionalTraits", "_attentiveTraits", "_hauntedTraits", "_inspiringTraits", "_jesterTraits", "_pyromaniacTraits", "_stunningTraits", "_theatricalTraits", "_adamantTraits", "_preciseTraits", "_recklessTraits", "_leaderTraits", "_followerTraits", "_heartlessTraits", "_treacherousTraits", "_intenseTraits", "_gourmetTraits", "_influentialTraits", "_durableTraits", "_tribalTraits"];
 			foreach (var traitCat in traitCats)
