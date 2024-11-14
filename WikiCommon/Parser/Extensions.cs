@@ -24,7 +24,7 @@
 		/// <summary>Change trailing space to a single carriage return.</summary>
 		OnePerLine,
 
-		/// <summary>Replace leading and trailing space with the spacing from the previous parameter of the same type.</summary>
+		/// <summary>Replace leading and trailing space with the existing spacing, if the parameter already exists, or the spacing from the previous parameter of the same type (anon or named) for parameters that don't yet exist.</summary>
 		Copy,
 	}
 	#endregion
@@ -32,10 +32,8 @@
 	/// <summary>Parser extensions class.</summary>
 	public static class Extensions
 	{
-		#region Fields
+		#region Static Fields
 		private static readonly Regex AttribRegex = new(@"\b(?<key>\w+)\s*=?\s*(""(?<value>[^""]*)""|'(?<value>[^']*)'|(?<value>\w+))", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		private static readonly Regex LeadingSpace = new(@"\A\s*", RegexOptions.None, Globals.DefaultRegexTimeout);
-		private static readonly Regex TrailingSpace = new(@"\s*\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region IBacklink Methods
@@ -150,26 +148,25 @@
 
 		/// <summary>Sets the value to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the value of.</param>
-		/// <param name="value">The value.</param>
-		/// <param name="format">The desired parameter format.</param>
-		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat format)
+		/// <param name="value">The value. May not be null.</param>
+		/// <param name="paramFormat">The desired parameter format.</param>
+		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat paramFormat)
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
+			ArgumentNullException.ThrowIfNull(value);
 			var paramValue = parameter.Value;
-			value ??= string.Empty;
-			if (format is ParameterFormat.Copy or ParameterFormat.NoChange)
+			if (paramFormat == ParameterFormat.Copy)
 			{
-				var (leading, trailing) = GetSurroundingSpace(paramValue.ToValue());
-				value = TrimValue(value, format);
+				var embedded = EmbeddedValue.FindWhitespace(paramValue.ToValue());
+				value = TrimValue(value, paramFormat);
 				paramValue.Clear();
-				paramValue.AddParsed(leading + value + trailing);
+				paramValue.AddParsed(embedded.Before + value + embedded.After);
 				return;
 			}
 
-			value = TrimValue(value, format);
-			var nodes = parameter.Factory.Parse(value);
+			value = TrimValue(value, paramFormat);
 			paramValue.Clear();
-			paramValue.AddRange(nodes);
+			paramValue.AddParsed(value);
 		}
 
 		/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
@@ -793,9 +790,9 @@
 		{
 			ArgumentNullException.ThrowIfNull(template);
 			newTitle ??= string.Empty;
-			var (leading, trailing) = GetSurroundingSpace(template.TitleNodes.ToValue());
+			var embedded = EmbeddedValue.FindWhitespace(template.TitleNodes.ToValue());
 			template.TitleNodes.Clear();
-			template.TitleNodes.AddText(leading + newTitle + trailing);
+			template.TitleNodes.AddText(embedded.Before + newTitle + embedded.After);
 		}
 
 		/// <summary>Sorts parameters in the order specified.</summary>
@@ -870,40 +867,13 @@
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
-		/// <param name="format">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
 		/// <param name="removeIfEmpty">If set to <see langword="true"/> and <paramref name="value"/> is an empty string, remove the parameter. Otherwise, the parameter will only be removed if <paramref name="value"/> is <see langword="null"/>.</param>
 		/// <returns>The added parameter.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat format, bool removeIfEmpty)
+		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeIfEmpty)
 		{
-			ArgumentNullException.ThrowIfNull(template);
-			ArgumentNullException.ThrowIfNull(name);
-			IParameterNode retval;
-			if (value == null || (removeIfEmpty && value.Length == 0))
-			{
-				template.Remove(name);
-				return null;
-			}
-
-			if (template.Find(name) is IParameterNode existing)
-			{
-				existing.SetValue(value, format);
-				return existing;
-			}
-
-			var index = format == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
-			if (index == -1)
-			{
-				value = TrimValue(value, format);
-				retval = template.Factory.ParameterNodeFromParts(name, value);
-				template.Parameters.Add(retval);
-				return retval;
-			}
-
-			var previous = template.Parameters[index];
-			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
-			template.Parameters.Insert(index + 1, retval);
-			return retval;
+			return template.UpdateOrRemove(name, value, paramFormat, value is null || (removeIfEmpty && value.Length == 0));
 		}
 
 		/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
@@ -921,6 +891,7 @@
 		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
 		public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
 		{
+			ArgumentNullException.ThrowIfNull(template);
 			var param = template.Find(name);
 			if (param is IParameterNode parameter)
 			{
@@ -933,6 +904,47 @@
 			}
 
 			return template.Add(name, value, paramFormat);
+		}
+
+		/// <summary>Updates a parameter, or removes it if <paramref name="removeCondition"/> is <see langword="true"/>.</summary>
+		/// <param name="template">The template to alter.</param>
+		/// <param name="name">The name of the parameter to update or remove.</param>
+		/// <param name="value">The value to update to.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
+		/// <param name="removeCondition">Whether the parameter should be removed.</param>
+		public static IParameterNode? UpdateOrRemove(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeCondition)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(name);
+			if (removeCondition)
+			{
+				template.Remove(name);
+				return null;
+			}
+
+			// "value is null" is a valid removeCondition, so we only throw after the remove condition has been checked.
+			ArgumentNullException.ThrowIfNull(value);
+			if (template.Find(name) is IParameterNode retval)
+			{
+				retval.SetValue(value, paramFormat);
+				return retval;
+			}
+
+			var index = paramFormat == ParameterFormat.Copy
+				? template.FindCopyParameter(false)
+				: -1;
+			if (index == -1)
+			{
+				value = TrimValue(value, paramFormat);
+				retval = template.Factory.ParameterNodeFromParts(name, value);
+				template.Parameters.Add(retval);
+				return retval;
+			}
+
+			var previous = template.Parameters[index];
+			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
+			template.Parameters.Insert(index + 1, retval);
+			return retval;
 		}
 
 		/// <summary>Returns the value of a template parameter or the default value.</summary>
@@ -1181,28 +1193,10 @@
 			return -1;
 		}
 
-		private static (string Leading, string Trailing) GetSurroundingSpace(string old)
-		{
-			string trailingLine;
-			if (old.Length > 0 && old[^1] == '\n')
-			{
-				trailingLine = "\n";
-				old = old[0..^1];
-			}
-			else
-			{
-				trailingLine = string.Empty;
-			}
-
-			var leadingMatch = LeadingSpace.Match(old);
-			var trailingMatch = TrailingSpace.Match(old);
-			return (leadingMatch.Value, ((leadingMatch.Index == trailingMatch.Index) ? string.Empty : trailingMatch.Value) + trailingLine);
-		}
-
 		private static string TrimValue(string? value, ParameterFormat paramFormat)
 		{
 			value ??= string.Empty;
-			value = paramFormat switch
+			return paramFormat switch
 			{
 				ParameterFormat.NoChange => value,
 				ParameterFormat.PackedTrail => value.TrimEnd(),
@@ -1211,7 +1205,6 @@
 				ParameterFormat.Copy => value.Trim(),
 				_ => value,
 			};
-			return value;
 		}
 		#endregion
 	}
