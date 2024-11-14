@@ -108,8 +108,7 @@
 			template.RemoveDuplicates();
 			template.Remove("update");
 
-			var factory = new SiteNodeFactory(page.Site);
-			UpdateParameter(factory, template, "line", this.SkillLine);
+			template.Update("line", this.SkillLine, ParameterFormat.OnePerLine, true);
 			var iconValue = MakeIcon(this.SkillLine, this.Name);
 
 			// Special cases
@@ -133,10 +132,10 @@
 						$" ({DestructionTypes[i]})")
 					: string.Empty;
 				var newValue = IconValueFixup(template.Find(iconName), iconValue + destType);
-				UpdateParameter(factory, template, iconName, newValue);
+				template.Update(iconName, newValue, ParameterFormat.OnePerLine, true);
 			}
 
-			this.UpdateTemplate(factory, template);
+			this.UpdateTemplate(template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 			parser.UpdatePage();
 
@@ -211,20 +210,14 @@
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value)
+		protected static void UpdateParameter(SiteTemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
-			var valueNodes = factory.Parse(value.Trim());
-			template.Update(name, valueNodes.ToRaw(), ParameterFormat.OnePerLine, true);
-		}
-
-		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
-		{
-			var valueNodes = factory.Parse(value.Trim());
-			var collection = new WikiNodeCollection(factory, valueNodes);
+			var factory = template.Factory;
+			var collection = new WikiNodeCollection(factory, factory.Parse(value.Trim()));
 			if (usedList != null)
 			{
 				EsoReplacer.ReplaceGlobal(collection);
-				EsoReplacer.ReplaceEsoLinks(factory.Site, collection);
+				EsoReplacer.ReplaceEsoLinks(collection);
 				EsoReplacer.ReplaceFirstLink(collection, usedList);
 				if (skillName != null)
 				{
@@ -234,23 +227,10 @@
 
 			template.Update(name, collection.ToRaw(), ParameterFormat.OnePerLine, true);
 		}
-
-		protected static void UpdateParameter(SiteNodeFactory factory, ITemplateNode template, string name, string value, bool removeCondition)
-		{
-			ArgumentNullException.ThrowIfNull(template);
-			if (removeCondition)
-			{
-				template.Remove(name);
-			}
-			else
-			{
-				UpdateParameter(factory, template, name, value);
-			}
-		}
 		#endregion
 
 		#region Protected Abstratct Methods
-		protected abstract void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template);
+		protected abstract void UpdateTemplate(SiteTemplateNode template);
 		#endregion
 	}
 }

@@ -164,7 +164,7 @@
 			sb.Remove(sb.Length - 5, 4);
 			SiteParser parser = new(page, sb.ToString());
 			EsoReplacer.ReplaceGlobal(parser);
-			EsoReplacer.ReplaceEsoLinks(this.Site, parser);
+			EsoReplacer.ReplaceEsoLinks(parser);
 			EsoReplacer.ReplaceFirstLink(parser, usedList);
 
 			// Now that we're done parsing, re-add the IgnoreNodes.

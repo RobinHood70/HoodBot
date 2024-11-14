@@ -87,26 +87,25 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
+		protected override void UpdateTemplate(SiteTemplateNode template)
 		{
-			ArgumentNullException.ThrowIfNull(factory);
 			ArgumentNullException.ThrowIfNull(template);
 			var baseMorph = this.morphs[0];
 			var baseRank = baseMorph.Ranks[^1];
-			UpdateParameter(factory, template, "id", baseRank.Id.ToStringInvariant());
+			template.Update("id", baseRank.Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 			var baseSkillCost = Cost.GetCostText(baseRank.Costs);
-			this.UpdateMorphs(factory, template, baseMorph, baseSkillCost);
-			UpdateParameter(factory, template, "casttime", FormatSeconds(baseMorph.CastingTime));
-			UpdateParameter(factory, template, "linerank", this.learnedLevel.ToStringInvariant());
-			UpdateParameter(factory, template, "cost", baseSkillCost);
+			this.UpdateMorphs(template, baseMorph, baseSkillCost);
+			template.Update("casttime", FormatSeconds(baseMorph.CastingTime), ParameterFormat.OnePerLine, true);
+			template.Update("linerank", this.learnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
+			template.Update("cost", baseSkillCost, ParameterFormat.OnePerLine, true);
 			if (template.Find("cost")?.Value is WikiNodeCollection paramValue)
 			{
 				// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
 				EsoReplacer.ReplaceGlobal(paramValue);
-				EsoReplacer.ReplaceEsoLinks(factory.Site, paramValue);
+				EsoReplacer.ReplaceEsoLinks(paramValue);
 			}
 
-			UpdateParameter(factory, template, "range", FormatMeters(baseRank.Range), baseRank.Range.OrdinalEquals("0"));
+			template.UpdateOrRemove("range", FormatMeters(baseRank.Range), ParameterFormat.OnePerLine, baseRank.Range.OrdinalEquals("0"));
 
 			if (baseRank.Radius.OrdinalEquals("0"))
 			{
@@ -130,16 +129,16 @@
 				}
 			}
 
-			UpdateParameter(factory, template, "duration", FormatSeconds(baseRank.Duration), baseRank.Duration.OrdinalEquals("0"));
-			UpdateParameter(factory, template, "channeltime", FormatSeconds(baseRank.ChannelTime), baseRank.ChannelTime.OrdinalEquals("0"));
-			UpdateParameter(factory, template, "target", baseMorph.Target);
-			UpdateParameter(factory, template, "type", this.skillType, this.skillType.OrdinalEquals("Active"));
+			template.UpdateOrRemove("duration", FormatSeconds(baseRank.Duration), ParameterFormat.OnePerLine, baseRank.Duration.OrdinalEquals("0"));
+			template.UpdateOrRemove("channeltime", FormatSeconds(baseRank.ChannelTime), ParameterFormat.OnePerLine, baseRank.ChannelTime.OrdinalEquals("0"));
+			template.Update("target", baseMorph.Target, ParameterFormat.OnePerLine, true);
+			template.UpdateOrRemove("type", this.skillType, ParameterFormat.OnePerLine, this.skillType.OrdinalEquals("Active"));
 		}
 
 		#endregion
 
 		#region Private Methods
-		private void UpdateMorph(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter)
+		private void UpdateMorph(SiteTemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter)
 		{
 			var baseRank = baseMorph.Ranks[^1];
 			List<string> descriptions = [];
@@ -169,10 +168,11 @@
 				descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 			}
 
+			var culture = template.Title.Site.Culture;
 			var morphRadius = Morph.NowrapSameString(morph.Ranks.Select(r => r.Radius));
 			if (!morphRadius.OrdinalEquals(baseRank.Radius) && !morphRadius.OrdinalEquals("0") && !morph.Target.OrdinalEquals("Self"))
 			{
-				var word = template.Find("radius", "area")?.Name?.ToValue().UpperFirst(factory.Site.Culture) ?? "Area";
+				var word = template.Find("radius", "area")?.Name?.ToValue().UpperFirst(culture) ?? "Area";
 				descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 			}
 
@@ -194,24 +194,24 @@
 			}
 
 			var paramName = "desc" + morphNum;
-			UpdateParameter(factory, template, paramName, extras + (morph.Description ?? string.Empty), usedList, this.Name);
+			UpdateParameter(template, paramName, extras + (morph.Description ?? string.Empty), usedList, this.Name);
 			if (morphCounter > 0)
 			{
 				var morphName = "morph" + morphNum;
-				UpdateParameter(factory, template, morphName + "name", morph.Name);
-				UpdateParameter(factory, template, morphName + "id", morph.Ranks[^1].Id.ToStringInvariant());
+				template.Update(morphName + "name", morph.Name, ParameterFormat.OnePerLine, true);
+				template.Update(morphName + "id", morph.Ranks[^1].Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 				var iconValue = MakeIcon(this.SkillLine, morph.Name);
-				UpdateParameter(factory, template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon"), iconValue));
-				UpdateParameter(factory, template, morphName + "desc", morph.EffectLine, usedList, this.Name);
+				template.Update(morphName + "icon", IconValueFixup(template.Find(morphName + "icon"), iconValue), ParameterFormat.OnePerLine, true);
+				UpdateParameter(template, morphName + "desc", morph.EffectLine, usedList, this.Name);
 			}
 		}
 
-		private void UpdateMorphs(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost)
+		private void UpdateMorphs(SiteTemplateNode template, Morph baseMorph, string baseSkillCost)
 		{
-			TitleCollection usedList = new(factory.Site);
+			TitleCollection usedList = new(template.Title.Site);
 			for (var morphCounter = 0; morphCounter < this.morphs.Count; morphCounter++)
 			{
-				this.UpdateMorph(factory, template, baseMorph, baseSkillCost, usedList, morphCounter);
+				this.UpdateMorph(template, baseMorph, baseSkillCost, usedList, morphCounter);
 			}
 		}
 		#endregion

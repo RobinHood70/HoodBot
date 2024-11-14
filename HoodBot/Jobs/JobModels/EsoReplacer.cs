@@ -132,10 +132,15 @@
 			}
 		}
 
-		public static void ReplaceEsoLinks(Site site, WikiNodeCollection nodes)
+		public static void ReplaceEsoLinks(WikiNodeCollection nodes)
 		{
+			if (nodes.Factory is not SiteNodeFactory factory)
+			{
+				// Requiring this cuts back enormously on passing redundant parameters.
+				throw new ArgumentException("Factory attached to nodes collection must be a SiteNodeFactory.", nameof(nodes));
+			}
+
 			// Iterating manually rather than with WikiNodeCollection methods, since the list is being altered as we go.
-			var factory = nodes.Factory;
 			for (var i = 0; i < nodes.Count; i++)
 			{
 				if (nodes[i] is ITextNode textNode)
@@ -185,7 +190,7 @@
 					ICollection<Match> matches = EsoLinks.Matches(text);
 					if (matches.Count > 0)
 					{
-						WikiNodeCollection newNodes = new(factory);
+						WikiNodeCollection newNodes = new(nodes.Factory);
 						var startPos = 0;
 						foreach (var match in matches)
 						{
@@ -194,7 +199,7 @@
 								newNodes.AddText(text[startPos..match.Index]);
 							}
 
-							newNodes.Add(ReplaceTemplatableText(match, site));
+							newNodes.Add(ReplaceTemplatableText(match, factory));
 							startPos = match.Index + match.Length;
 						}
 
@@ -442,11 +447,10 @@
 			return retval;
 		}
 
-		private static IWikiNode ReplaceTemplatableText(Match match, Site site)
+		private static IWikiNode ReplaceTemplatableText(Match match, SiteNodeFactory factory)
 		{
-			var type = match.Groups["type"].Value.UpperFirst(CultureInfo.InvariantCulture);
+			var type = match.Groups["type"].Value.UpperFirst(factory.Site.Culture);
 			var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
-			SiteNodeFactory factory = new(site);
 			var templateNode = resistType.Length > 1
 				? factory.TemplateNodeFromParts("ESO Resistance Link", (null, resistType[0]))
 				: factory.TemplateNodeFromParts("ESO " + type + " Link");

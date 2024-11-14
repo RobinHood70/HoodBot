@@ -81,22 +81,21 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
+		protected override void UpdateTemplate(SiteTemplateNode template)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			UpdateParameter(factory, template, "type", "Passive");
-			UpdateParameter(factory, template, "id", this.ranks[^1].Id.ToStringInvariant());
-			TitleCollection usedList = new(factory.Site);
-
+			template.Update("type", "Passive", ParameterFormat.OnePerLine, true);
+			template.Update("id", this.ranks[^1].Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
+			TitleCollection usedList = new(template.Title.Site);
 			foreach (var rank in this.ranks)
 			{
 				var rankText = rank.RankNum.ToStringInvariant();
 				var paramName = "desc" + (rank.RankNum == 1 ? string.Empty : rankText);
 				var description = this.FormatRankDescription(rank);
-				UpdateParameter(factory, template, paramName, description, usedList, this.Name);
+				UpdateParameter(template, paramName, description, usedList, this.Name);
 				if (rank is PassiveRank passiveRank)
 				{
-					UpdateParameter(factory, template, "linerank" + rankText, passiveRank.LearnedLevel.ToStringInvariant());
+					template.Update("linerank" + rankText, passiveRank.LearnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 				}
 			}
 		}
