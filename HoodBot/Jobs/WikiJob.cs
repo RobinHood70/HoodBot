@@ -17,7 +17,7 @@
 	}
 	#endregion
 
-	public abstract class WikiJob : IMessageSource, ISiteSpecific
+	public abstract class WikiJob : IMessageSource
 	{
 		#region Fields
 		private readonly JobManager jobManager;

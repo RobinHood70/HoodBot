@@ -3,13 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
-	public sealed class Namespace : IEquatable<Namespace>, ISiteSpecific
+	public sealed class Namespace : IEquatable<Namespace>
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;

@@ -70,7 +70,7 @@
 	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
 	/// <remarks>Initializes a new instance of the <see cref="TitleData{TTitle, TThis}" /> class.</remarks>
 	/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
-	public abstract class TitleData<TTitle, TThis>([NotNull, ValidatedNotNull] Site site) : TitleCollection<TTitle>(site), IWikiData<TThis>, ISiteSpecific
+	public abstract class TitleData<TTitle, TThis>([NotNull, ValidatedNotNull] Site site) : TitleCollection<TTitle>(site), IWikiData<TThis>
 		where TTitle : ITitle
 		where TThis : TitleData<TTitle, TThis>, IWikiData<TThis>
 	{

@@ -14,7 +14,7 @@
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
-	public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>, ISiteSpecific
+	public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>
 		where T : ITitle
 	{
 		#region Public Constructors

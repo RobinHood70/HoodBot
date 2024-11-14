@@ -2,11 +2,10 @@
 {
 	using System;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Represents information about an interwiki entry.</summary>
-	public class InterwikiEntry : ISiteSpecific
+	public class InterwikiEntry
 	{
 		#region Constructors
 
