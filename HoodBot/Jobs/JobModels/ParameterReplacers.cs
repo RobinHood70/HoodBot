@@ -13,7 +13,6 @@
 
 	public delegate void ParameterReplacer(Page page, SiteTemplateNode template);
 
-	/// <summary>Underlying job to move pages. This partial class contains the parameter replacer methods, while the other one contains the job logic.</summary>
 	public class ParameterReplacers
 	{
 		#region Fields
