@@ -83,34 +83,42 @@
 		/// <returns>An EmbeddedValue with the whitespace extracted.</returns>
 		public static EmbeddedValue FindWhitespace(string? value)
 		{
-			var before = string.Empty;
-			var after = string.Empty;
-			if (value != null)
+			if (string.IsNullOrEmpty(value))
 			{
-				// We do "after" first so that if the entire string is whitespace and includes a line-terminator, that's seen as the end of the line, not the beginning.
-				int index;
-				for (index = value.Length; index > 0 && char.IsWhiteSpace(value[index - 1]); index--)
-				{
-				}
-
-				if (index < value.Length)
-				{
-					after = value[index..];
-					value = value[..index];
-				}
-
-				for (index = 0; index < value.Length && char.IsWhiteSpace(value[index]); index++)
-				{
-				}
-
-				if (index > 0)
-				{
-					before = value[..index];
-					value = value[index..];
-				}
+				return new EmbeddedValue();
 			}
 
-			return new EmbeddedValue(before, value, after);
+			int lineEnd = -1;
+			var beforeIndex = 0;
+			while (beforeIndex < value.Length && value[beforeIndex] is var c && char.IsWhiteSpace(c))
+			{
+				if (c == '\n')
+				{
+					lineEnd = beforeIndex;
+				}
+
+				++beforeIndex;
+			}
+
+			// Value is entirely whitespace
+			if (beforeIndex >= value.Length)
+			{
+				if (lineEnd > 0 && value[lineEnd - 1] == '\r')
+				{
+					--lineEnd;
+				}
+
+				return new EmbeddedValue(value[..lineEnd], string.Empty, value[lineEnd..]);
+			}
+
+			var afterIndex = value.Length - 1;
+			while (afterIndex > beforeIndex && char.IsWhiteSpace(value[afterIndex]))
+			{
+				--afterIndex;
+			}
+
+			afterIndex++;
+			return new EmbeddedValue(value[..beforeIndex], value[beforeIndex..afterIndex], value[afterIndex..]);
 		}
 		#endregion
 
