@@ -186,12 +186,38 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
-			.Replace("0h", string.Empty, StringComparison.Ordinal)
-			.Replace(" 0m", string.Empty, StringComparison.Ordinal)
-			.Replace(".0", string.Empty, StringComparison.Ordinal)
-			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
-			.Trim();
+		private static string FormatTimeSpan(TimeSpan allJobsTimer)
+		{
+			var retval = allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture);
+			if (retval.StartsWith("0h ", StringComparison.Ordinal))
+			{
+				retval = retval[3..];
+				if (retval.StartsWith("0m ", StringComparison.Ordinal))
+				{
+					retval = retval[3..];
+				}
+			}
+
+			if (retval.EndsWith(".0s", StringComparison.Ordinal))
+			{
+				retval = retval.Remove(retval.Length - 3, 2);
+			}
+
+			if (retval.EndsWith(" 0s", StringComparison.Ordinal))
+			{
+				retval = retval[..^3];
+			}
+
+			if (retval.EndsWith(" 0m", StringComparison.Ordinal))
+			{
+				retval = retval[..^3];
+			}
+
+
+			return retval
+				.Replace(".0", string.Empty, StringComparison.Ordinal)
+				.Replace(" 0s", string.Empty, StringComparison.Ordinal);
+		}
 		#endregion
 
 		#region Private Methods
