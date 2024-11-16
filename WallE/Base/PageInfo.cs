@@ -19,9 +19,10 @@ namespace RobinHood70.WallE.Base
 	public class PageInfo
 	{
 		#region Constructors
-		internal PageInfo(Uri? canonicalUrl, string? contentModel, long counter, string? displayTitle, Uri? editUrl, PageInfoFlags flags, Uri? fullUrl, string? language, long lastRevisionId, int length, DateTime? notificationTimestamp, string? preload, List<ProtectionsItem> protections, IReadOnlyList<string> restrictionTypes, DateTime? startTimestamp, long subjectId, long talkId, Dictionary<string, bool> testActions, Dictionary<string, string> tokens, DateTime? touched, long watchers)
+		internal PageInfo(Uri? canonicalUrl, string? contentFormat, string? contentModel, long counter, string? displayTitle, Uri? editUrl, PageInfoFlags flags, Uri? fullUrl, string? language, string? languageDir, string? languageHtmlCode, long lastRevisionId, int length, DateTime? notificationTimestamp, string? preload, List<ProtectionsItem> protections, IReadOnlyList<string> restrictionTypes, DateTime? startTimestamp, long subjectId, long talkId, Dictionary<string, bool> testActions, Dictionary<string, string> tokens, DateTime? touched, long watchers)
 		{
 			this.CanonicalUrl = canonicalUrl;
+			this.ContentFormat = contentFormat;
 			this.ContentModel = contentModel;
 			this.Counter = counter;
 			this.DisplayTitle = displayTitle;
@@ -29,6 +30,8 @@ namespace RobinHood70.WallE.Base
 			this.Flags = flags;
 			this.FullUrl = fullUrl;
 			this.Language = language;
+			this.LanguageDir = languageDir;
+			this.LanguageHtmlCode = languageHtmlCode;
 			this.LastRevisionId = lastRevisionId;
 			this.Length = length;
 			this.NotificationTimestamp = notificationTimestamp;
@@ -48,6 +51,8 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public Uri? CanonicalUrl { get; }
 
+		public string? ContentFormat { get; }
+
 		public string? ContentModel { get; }
 
 		public long Counter { get; }
@@ -61,6 +66,10 @@ namespace RobinHood70.WallE.Base
 		public Uri? FullUrl { get; }
 
 		public string? Language { get; }
+
+		public string? LanguageDir { get; }
+
+		public string? LanguageHtmlCode { get; }
 
 		public long LastRevisionId { get; }
 

@@ -107,6 +107,7 @@
 
 			this.Output = new PageInfo(
 				canonicalUrl: (Uri?)parent["canonicalurl"],
+				contentFormat: (string?)parent["contentformat"],
 				contentModel: (string?)parent["contentmodel"],
 				counter: counter,
 				displayTitle: (string?)parent["displaytitle"],
@@ -118,6 +119,8 @@
 					("watched", PageInfoFlags.Watched)),
 				fullUrl: (Uri?)parent["fullurl"],
 				language: (string?)parent["pagelanguage"],
+				languageDir: (string?)parent["pagelanguagedir"],
+				languageHtmlCode: (string?)parent["pagelanguagehtmlcode"],
 				lastRevisionId: (long?)parent["lastrevid"] ?? 0,
 				length: (int?)parent["length"] ?? 0,
 				notificationTimestamp: parent["notificationtimestamp"].GetNullableDate(),
