@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -147,7 +146,7 @@
 				else
 				{
 					allTitles.Add(page.Title.FullPageName());
-					this.disambigs.Add(TitleFactory.FromValidated(title.Namespace, title.PageName), disambig);
+					this.disambigs.Add(title, disambig);
 				}
 			}
 
