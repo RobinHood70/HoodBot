@@ -40,7 +40,7 @@
 
 		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
 		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
-		public bool IsLocal => this.Interwiki?.LocalWiki != false;
+		public bool IsLocal => this.Interwiki is null || this.Interwiki.LocalWiki;
 
 		/// <inheritdoc/>
 		public Title Title { get; }

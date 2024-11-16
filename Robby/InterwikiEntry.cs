@@ -54,14 +54,6 @@
 		public Site Site { get; }
 		#endregion
 
-		#region Public Static Methods
-
-		/// <summary>Evaluates an interwiki entry to determine if it's local.</summary>
-		/// <param name="iw">The interwiki to evaluate.</param>
-		/// <returns><see langword="true"/> if the entry is either null or <see cref="LocalWiki"/> is true.</returns>
-		public static bool IsLocal(InterwikiEntry? iw) => iw?.LocalWiki != false;
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Guesses the LocalWiki setting based on the server path.</summary>
