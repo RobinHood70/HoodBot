@@ -1,14 +1,39 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
+	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+
+	/// <summary>Enumeration of the different textual parts of a link.</summary>
+	[Flags]
+	public enum TitlePartType
+	{
+		/// <summary>Do not include any parts of the original text (for future use).</summary>
+		None = 0,
+
+		/// <summary>The original interwiki text on the title.</summary>
+		Interwiki = 1 << 0,
+
+		/// <summary>The original namespace text of the title.</summary>
+		Namespace = 1 << 1,
+
+		/// <summary>The original page name text of the title.</summary>
+		PageName = 1 << 2,
+
+		/// <summary>The original fragment text of the title.</summary>
+		Fragment = 1 << 3,
+
+		/// <summary>Include all parts of the original text (for future use).</summary>
+		All = Interwiki | Namespace | PageName | Fragment
+	}
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
 	public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	{
 		#region Private Fields
+		private readonly Dictionary<TitlePartType, string> originalParts = [];
 		private Title? title;
 		#endregion
 
@@ -37,48 +62,50 @@
 
 			WikiTextUtilities.TrimCruft(pageName);
 			var (key, remaining, forced) = SplitPageName(pageName);
-			var isMainPage = false;
 			if (!forced && key.Length == 0)
 			{
-				this.ForcedNamespaceLink = forced;
 				pageName = remaining;
 			}
 			else if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 			{
 				this.Namespace = ns;
+				this.originalParts.Add(TitlePartType.Namespace, key);
 				this.ForcedNamespaceLink = forced;
 				pageName = remaining;
 			}
-			else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key.ToLower(site.Culture), out var iw))
+			else if (site.InterwikiMap?.TryGetValue(key.ToLower(site.Culture), out var iw) == true)
 			{
+				this.originalParts.Add(TitlePartType.Interwiki, key);
 				this.Interwiki = iw;
 				this.ForcedInterwikiLink = forced;
 				if (iw.LocalWiki)
 				{
-					if (remaining.Length == 0 && site.MainPage is FullTitle mp)
+					if (remaining.Length == 0 && site.MainPage is IFullTitle mp)
 					{
-						this.Interwiki = mp.Interwiki ?? iw;
+						// A link like [[:en:]] returns the title in MediaWiki:Mainpage and respects both interwiki and fragment, so we copy the full thing over.
+						this.originalParts.Add(TitlePartType.PageName, string.Empty);
+						this.Interwiki = mp.Interwiki;
 						this.Namespace = mp.Title.Namespace;
-						pageName = mp.Title.PageName;
+						this.PageName = mp.Title.PageName;
 						this.Fragment = mp.Fragment;
-						isMainPage = true;
+						return;
 					}
-					else
+
+					var before = remaining;
+					(key, remaining, forced) = SplitPageName(remaining);
+					if (forced)
 					{
-						var before = remaining;
-						(key, remaining, forced) = SplitPageName(remaining);
-						if (forced)
-						{
-							// Second colon in a row. MediaWiki invalidates this, but for now, this is designed to always succeed, so return page name in main space with leading colon.
-							this.Namespace = site[MediaWikiNamespaces.Main];
-							this.ForcedNamespaceLink = false;
-							pageName = before;
-						}
-						else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
-						{
-							this.Namespace = ns2;
-							pageName = remaining;
-						}
+						// Second colon in a row. MediaWiki invalidates this, but for now, this is designed to always succeed, so return page name in main space with leading colon.
+						this.Namespace = site[MediaWikiNamespaces.Main];
+						this.originalParts.Add(TitlePartType.Namespace, string.Empty);
+						this.ForcedNamespaceLink = false;
+						pageName = before;
+					}
+					else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
+					{
+						this.Namespace = ns2;
+						this.originalParts.Add(TitlePartType.Namespace, key);
+						pageName = remaining;
 					}
 				}
 				else
@@ -87,40 +114,32 @@
 				}
 			}
 
-			if (!isMainPage)
+			var split = pageName.Split(TextArrays.Octothorpe, 2);
+			if (split.Length == 2)
 			{
-				var split = pageName.Split(TextArrays.Octothorpe, 2);
-				if (split.Length == 2)
-				{
-					this.Fragment = split[1];
-					pageName = split[0].TrimEnd();
-				}
+				this.Fragment = split[1];
+				this.originalParts.Add(TitlePartType.Fragment, this.Fragment);
+				pageName = split[0].TrimEnd();
 			}
 
-			if (this.Namespace == null)
+			var isLocal = this.IsLocal;
+			if (this.Namespace is null)
 			{
-				if (this.IsLocal)
-				{
-					this.Namespace = site[defaultNamespace];
-					this.Coerced = true;
-				}
-				else
-				{
-					this.Namespace = site[MediaWikiNamespaces.Main];
-				}
+				this.Namespace = site[isLocal ? defaultNamespace : MediaWikiNamespaces.Main];
+				this.Coerced = isLocal;
 			}
 
-			this.PageName = isMainPage || !InterwikiEntry.IsLocal(this.Interwiki)
-				? pageName
-				: this.Namespace.CapitalizePageName(pageName);
+			this.PageName = isLocal
+				? this.Namespace.CapitalizePageName(pageName)
+				: pageName;
+			this.originalParts.Add(TitlePartType.PageName, pageName);
 		}
 
 		private TitleFactory(Namespace ns, string pageName)
 		{
 			// Shortcut constructor for times when a pre-validated, local page is provided. Capitalization is also handled for semi-validated cases, such as modifications to an existing pagename or other known-good cases.
 			this.Namespace = ns;
-
-			pageName = ns.CapitalizePageName(pageName);
+			this.originalParts.Add(TitlePartType.Namespace, ns.CanonicalName);
 			var split = pageName.Split(TextArrays.Octothorpe, 2);
 			if (split.Length == 2)
 			{
@@ -128,7 +147,8 @@
 				pageName = split[0].TrimEnd();
 			}
 
-			this.PageName = pageName;
+			this.originalParts.Add(TitlePartType.PageName, pageName);
+			this.PageName = ns.CapitalizePageName(pageName);
 		}
 		#endregion
 
@@ -151,11 +171,15 @@
 		public InterwikiEntry? Interwiki { get; }
 
 		/// <summary>Gets a value indicating whether this object represents the local wiki (either via being a direct link or local interwiki link.</summary>
-		public bool IsLocal => this.Interwiki?.LocalWiki != false;
+		public bool IsLocal => this.Interwiki is null || this.Interwiki.LocalWiki;
 
 		/// <summary>Gets the namespace object for the title.</summary>
 		/// <value>The namespace.</value>
 		public Namespace Namespace { get; }
+
+		/// <summary>Gets the original namespace for the title.</summary>
+		/// <value>The namespace as originally specified. This could be an alias or case variant.</value>
+		public IReadOnlyDictionary<TitlePartType, string> OriginalParts => this.originalParts;
 
 		/// <summary>Gets a value indicating whether the namespace is displayed as part of the name.</summary>
 		/// <value><see langword="true"/> if no namespace is present; otherwise, <see langword="false"/>.</value>
