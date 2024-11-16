@@ -94,14 +94,24 @@
 
 		#region IList<IWikiNode> Extensions
 
-		/// <summary>Converts the <see cref="WikiNodeCollection"/> to raw text.</summary>
-		/// <param name="nodes">The nodes to convert.</param>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public static string ToRaw(this IList<IWikiNode> nodes) => WikiTextVisitor.Raw(nodes);
+		/// <summary>Converts the <see cref="IWikiNode"/> to raw text.</summary>
+		/// <param name="node">The node to convert.</param>
+		/// <returns>The converted node.</returns>
+		public static string ToRaw(this IWikiNode node) => WikiTextVisitor.Raw(node);
 
-		/// <summary>Converts the <see cref="WikiNodeCollection"/> to it's value text.</summary>
+		/// <summary>Converts the node collection to raw text.</summary>
 		/// <param name="nodes">The nodes to convert.</param>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		/// <returns>The converted nodes.</returns>
+		public static string ToRaw(this IEnumerable<IWikiNode> nodes) => WikiTextVisitor.Raw(nodes);
+
+		/// <summary>Converts the node to its value text.</summary>
+		/// <param name="node">The node to convert.</param>
+		/// <returns>The converted node.</returns>
+		public static string ToValue(this IWikiNode node) => WikiTextVisitor.Value(node);
+
+		/// <summary>Converts the node collection to its value text.</summary>
+		/// <param name="nodes">The nodes to convert.</param>
+		/// <returns>The converted nodes.</returns>
 		public static string ToValue(this IList<IWikiNode> nodes) => WikiTextVisitor.Value(nodes);
 		#endregion
 
