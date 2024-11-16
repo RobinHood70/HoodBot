@@ -1231,7 +1231,7 @@
 		public virtual string SanitizePageName(string pageName)
 		{
 			pageName = Regex.Replace(pageName, @"#<>\[\]\|{}", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
-			pageName = Regex.Replace(pageName, "`´’ʻʾʿ᾿῾‘’c", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
+			pageName = Regex.Replace(pageName, "`´’ʻʾʿ᾿῾‘’", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
 			pageName = Regex.Replace(pageName, "“”„“«»", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
 			pageName = Regex.Replace(pageName, " {2,}", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
 
