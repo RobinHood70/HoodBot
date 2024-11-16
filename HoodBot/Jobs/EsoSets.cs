@@ -361,7 +361,7 @@
 
 						items = items[1..];
 						var text = bonusSplit[1].Trim();
-						text = RegexLibrary.WhitespaceToSpace(text);
+						text = RegexLibrary.PruneExcessWhitespace(text);
 						if (text.StartsWith(this.Name, StringComparison.Ordinal))
 						{
 							text = text[this.Name.Length..].TrimStart();

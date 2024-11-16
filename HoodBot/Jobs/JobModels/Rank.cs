@@ -43,7 +43,7 @@
 				}
 			}
 
-			this.Description = RegexLibrary.WhitespaceToSpace(description);
+			this.Description = RegexLibrary.PruneExcessWhitespace(description);
 		}
 		#endregion
 
