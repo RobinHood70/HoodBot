@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
@@ -21,6 +22,7 @@
 		private readonly List<Revision> revisions = [];
 		private readonly List<Title> templates = [];
 		private Uri? canonicalPath;
+		private CultureInfo? culture;
 		private Revision? currentRevision;
 		private Uri? editPath;
 		private bool? isRedirect;
@@ -107,6 +109,7 @@
 				if (pageItem.Info is PageInfo info)
 				{
 					this.canonicalPath = info.CanonicalUrl;
+					this.culture = Globals.GetCulture(info.Language);
 					this.CurrentRevisionId = info.LastRevisionId;
 					this.editPath = info.EditUrl;
 					this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
@@ -188,6 +191,15 @@
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
 		public IReadOnlyList<Category> Categories => this.categories;
+
+		/// <summary>Gets or sets the page language.</summary>
+		/// <value>The page language, represented as a .NET CultureInfo object. If not available, returns <see cref="Site.Culture"/> instead.</value>
+		/// <remarks>Setting this to <see langword="null"/> will force the Site value to be used.</remarks>
+		public CultureInfo Culture
+		{
+			get => this.culture ?? this.Site.Culture;
+			set => this.culture = value;
+		}
 
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
