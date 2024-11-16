@@ -64,15 +64,13 @@
 		/// <returns>The wiki text of the collection.</returns>
 		public string Build(IEnumerable<IWikiNode>? nodes)
 		{
-			this.builder.Clear();
-			if (nodes != null)
+			if (nodes is null)
 			{
-				foreach (var node in nodes)
-				{
-					node.Accept(this);
-				}
+				return string.Empty;
 			}
 
+			this.builder.Clear();
+			this.Visit(nodes);
 			return this.builder.ToString();
 		}
 		#endregion
@@ -178,7 +176,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(WikiNodeCollection nodes)
+		public void Visit(IEnumerable<IWikiNode> nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			foreach (var node in nodes)

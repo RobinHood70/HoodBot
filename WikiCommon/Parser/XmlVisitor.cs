@@ -39,7 +39,7 @@
 		}
 		#endregion
 
-		#region IVisitor Methods
+		#region IWikiNodeVisitor Methods
 
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
@@ -97,7 +97,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(WikiNodeCollection nodes)
+		public void Visit(IEnumerable<IWikiNode> nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
 			foreach (var node in nodes)

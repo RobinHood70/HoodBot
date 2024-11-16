@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
+	using System.Collections.Generic;
+
 	/// <summary>Represents an <see cref="IWikiNode"/> visitor.</summary>
 	public interface IWikiNodeVisitor
 	{
@@ -23,9 +25,9 @@
 		/// <param name="node">The node.</param>
 		void Visit(ILinkNode node);
 
-		/// <summary>Visits the specified <see cref="WikiNodeCollection"/>.</summary>
+		/// <summary>Visits the specified node collection.</summary>
 		/// <param name="nodes">The node collection.</param>
-		void Visit(WikiNodeCollection nodes);
+		void Visit(IEnumerable<IWikiNode> nodes);
 
 		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
 		/// <param name="node">The node.</param>
