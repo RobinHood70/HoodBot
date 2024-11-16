@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -274,6 +275,24 @@
 			ArgumentNullException.ThrowIfNull(defaultNamespace);
 			ArgumentNullException.ThrowIfNull(pageName);
 			return new(defaultNamespace.Site, defaultNamespace.Id, WikiTextUtilities.DecodeAndNormalize(pageName));
+		}
+
+		/// <summary>Removes invalid characters from a page name and replaces quote-like characters with straight quotes.</summary>
+		/// <param name="pageName">The page name to sanitize.</param>
+		/// <param name="extended">If <see langword="false"/>, only the characters <c>&lt;&gt;[]|{}</c> are stripped out. If <see langword="true"/>, the previous replacements will occur along with converting all quote-like characters to straight quotes and reducing multiple spaces to just one.</param>
+		/// <returns>The original title with special characters replaced or removed as appropriate.</returns>
+		/// <remarks>Although illegal as part of a page name, <c>#</c> symbols are not removed under the assumption that they indicate a fragment.</remarks>
+		public static string SanitizePageName(string pageName, bool extended)
+		{
+			pageName = Regex.Replace(pageName, @"<>\[\]\|{}", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
+			if (extended)
+			{
+				pageName = Regex.Replace(pageName, "`´’ʻʾʿ᾿῾‘’", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
+				pageName = Regex.Replace(pageName, "“”„“«»", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
+				pageName = RegexLibrary.PruneExcessSpaces(pageName);
+			}
+
+			return pageName;
 		}
 		#endregion
 

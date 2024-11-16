@@ -60,7 +60,7 @@
 			this.Id = collectible ? (long)row["itemId"] : (int)row["itemId"];
 			var titleName = EsoLog.ConvertEncoding((string)row["name"]);
 			titleName = titleName.TrimEnd(',');
-			titleName = site.SanitizePageName(titleName);
+			titleName = TitleFactory.SanitizePageName(titleName, true);
 			this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
 			if (!this.Title.PageNameEquals(titleName))
 			{
