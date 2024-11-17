@@ -16,7 +16,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiNodeFactory"/> class.</summary>
-		protected WikiNodeFactory()
+		public WikiNodeFactory()
 		{
 		}
 		#endregion
