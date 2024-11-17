@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -23,7 +24,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoResult
 	{
 		#region Constructors
-		internal SiteInfoResult(SiteInfoGeneral? general, IReadOnlyDictionary<string, object> defaultOptions, SiteInfoSkin? defaultSkin, IReadOnlyList<SiteInfoExtensions> extensions, IReadOnlyList<string> extensionTags, IReadOnlyList<string> fileExtensions, IReadOnlyList<string> functionHooks, IReadOnlyList<SiteInfoInterwikiMap> interwikiMap, IReadOnlyList<SiteInfoLag> lagInfo, IReadOnlyList<SiteInfoLanguage> languages, IReadOnlyList<SiteInfoLibrary> libraries, IReadOnlyList<SiteInfoMagicWord> magicWords, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases, IReadOnlyList<string> protocols, SiteInfoRestriction? restrictions, SiteInfoRights? rights, IReadOnlyList<SiteInfoSubscribedHook> subscribedHooks, IReadOnlyList<SiteInfoSkin> skins, IReadOnlyList<SiteInfoSpecialPageAlias> specialPageAliases, SiteInfoStatistics? statistics, IReadOnlyList<SiteInfoUserGroup> userGroups, IReadOnlyList<string> variables)
+		internal SiteInfoResult(SiteInfoGeneral? general, IReadOnlyDictionary<string, object> defaultOptions, SiteInfoSkin? defaultSkin, IReadOnlyList<SiteInfoExtensions> extensions, IReadOnlyList<string> extensionTags, IReadOnlyList<string> fileExtensions, IReadOnlyList<string> functionHooks, IReadOnlyList<SiteInfoInterwikiMap> interwikiMap, IReadOnlyList<SiteInfoLag> lagInfo, IReadOnlyList<SiteInfoLanguage> languages, IReadOnlyList<SiteInfoLibrary> libraries, IReadOnlyList<MagicWord> magicWords, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases, IReadOnlyList<string> protocols, SiteInfoRestriction? restrictions, SiteInfoRights? rights, IReadOnlyList<SiteInfoSubscribedHook> subscribedHooks, IReadOnlyList<SiteInfoSkin> skins, IReadOnlyList<SiteInfoSpecialPageAlias> specialPageAliases, SiteInfoStatistics? statistics, IReadOnlyList<SiteInfoUserGroup> userGroups, IReadOnlyList<string> variables)
 		{
 			this.General = general;
 			this.DefaultOptions = defaultOptions;
@@ -76,7 +77,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<SiteInfoLibrary> Libraries { get; internal set; }
 
-		public IReadOnlyList<SiteInfoMagicWord> MagicWords { get; internal set; }
+		public IReadOnlyList<MagicWord> MagicWords { get; internal set; }
 
 		public IReadOnlyList<SiteInfoNamespace> Namespaces { get; internal set; }
 

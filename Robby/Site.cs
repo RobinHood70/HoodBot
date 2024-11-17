@@ -1229,7 +1229,7 @@
 		internal ILinkNode? GetRedirectFromTextInternal(string text)
 		{
 			ArgumentNullException.ThrowIfNull(text);
-			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect)
+			var redirectAliases = this.magicWords.TryGetValue("redirect", out var redirect)
 				? redirect.Aliases
 				: DefaultRedirect;
 			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
@@ -1464,7 +1464,7 @@
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
 			{
-				this.magicWords.Add(word.Name, new MagicWord(word));
+				this.magicWords.Add(word.Name, word);
 			}
 
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");

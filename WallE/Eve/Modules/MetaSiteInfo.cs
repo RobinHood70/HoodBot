@@ -235,17 +235,17 @@
 			return retval;
 		}
 
-		private static List<SiteInfoMagicWord> GetMagicWords(JToken parent)
+		private static List<MagicWord> GetMagicWords(JToken parent)
 		{
 			if (parent["magicwords"] is not JToken node)
 			{
 				return [];
 			}
 
-			List<SiteInfoMagicWord> retval = [];
+			List<MagicWord> retval = [];
 			foreach (var result in node)
 			{
-				retval.Add(new SiteInfoMagicWord(
+				retval.Add(new MagicWord(
 					name: result.MustHaveString("name"),
 					aliases: result.MustHaveList<string>("aliases"),
 					caseSensitive: result["case-sensitive"].GetBCBool()));
