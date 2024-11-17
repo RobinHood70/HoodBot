@@ -213,7 +213,6 @@
 				retval = retval[..^3];
 			}
 
-
 			return retval
 				.Replace(".0", string.Empty, StringComparison.Ordinal)
 				.Replace(" 0s", string.Empty, StringComparison.Ordinal);

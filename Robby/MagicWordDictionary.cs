@@ -21,7 +21,6 @@
 					this.Add(word.CaseSensitive, alias, word);
 				}
 			}
-
 		}
 	}
 }

@@ -9,7 +9,6 @@
 	/// <param name="caseSensitive">The case-sensitivity of the magic word.</param>
 	public sealed class MagicWord(string name, IReadOnlyList<string> aliases, bool caseSensitive)
 	{
-
 		/// <summary>Gets any aliases for the word.</summary>
 		/// <value>The list of aliases.</value>
 		public IReadOnlyCollection<string> Aliases { get; } = aliases;
