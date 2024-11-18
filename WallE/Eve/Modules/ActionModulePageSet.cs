@@ -250,7 +250,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Static Methods
-		private static void AddToDictionary(JToken? token, IDictionary<string, string> dict)
+		private static void AddToDictionary(JToken? token, Dictionary<string, string> dict)
 		{
 			if (token != null)
 			{

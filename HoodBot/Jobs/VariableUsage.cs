@@ -191,7 +191,7 @@
 
 			public string Set { get; } = string.Empty;
 
-			public IReadOnlyList<string> Variables { get; }
+			public List<string> Variables { get; }
 		}
 		#endregion
 	}

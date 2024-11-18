@@ -203,7 +203,7 @@
 			ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
 			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
-			List<ProtectInputItem> protections = new(2);
+			var protections = new List<ProtectInputItem>(2);
 			if (editProtection is not null)
 			{
 				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = wikiExpiry });
@@ -232,7 +232,7 @@
 
 			duration ??= "infinite";
 
-			List<ProtectInputItem> protections = new(2);
+			var protections = new List<ProtectInputItem>(2);
 			if (editProtection != null)
 			{
 				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = duration });
@@ -276,7 +276,7 @@
 			return result.Protections.Count == inputCount;
 		}
 
-		private static ChangeStatus Protect([NotNull][ValidatedNotNull] Title title, string reason, ICollection<ProtectInputItem> protections)
+		private static ChangeStatus Protect([NotNull][ValidatedNotNull] Title title, string reason, List<ProtectInputItem> protections)
 		{
 			ArgumentNullException.ThrowIfNull(reason);
 			ArgumentNullException.ThrowIfNull(protections);

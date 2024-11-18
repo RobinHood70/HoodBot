@@ -233,7 +233,7 @@
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
 		public void LoadUserInfo()
 		{
-			UsersInput input = new(new[] { this.Name })
+			UsersInput input = new([this.Name])
 			{
 				Properties = UsersProperties.All
 			};

@@ -203,17 +203,17 @@
 		/// <summary>Finds the first template that matches the provided title.</summary>
 		/// <param name="find">The name of the template to find.</param>
 		/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-		public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates([find]).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="find">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates(new[] { find }).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates([find]).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string findName) => this.FindSiteTemplates(new[] { findName });
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string findName) => this.FindSiteTemplates([findName]);
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="findName">The template to find.</param>
@@ -221,7 +221,7 @@
 		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName)
 		{
 			ArgumentNullException.ThrowIfNull(findName);
-			return this.FindSiteTemplates(new[] { findName.FullPageName() });
+			return this.FindSiteTemplates([findName.FullPageName()]);
 		}
 
 		/// <summary>Finds all templates that match the provided title.</summary>

@@ -67,7 +67,7 @@
 
 		public string? UserRightsToken(string userName)
 		{
-			UsersInput usersInput = new(new[] { userName })
+			UsersInput usersInput = new([userName])
 			{
 				GetRightsToken = true,
 			};

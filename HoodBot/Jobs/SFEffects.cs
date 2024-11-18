@@ -33,7 +33,7 @@
 			this.NewPageText = this.GetNewPageText;
 			var effects = new Effects();
 			var effectsPage = this.Site.LoadPage("Starfield:Effects") ?? throw new InvalidOperationException();
-			var rows = (IReadOnlyList<Match>)EffectsRowFinder().Matches(effectsPage.Text);
+			var rows = EffectsRowFinder().Matches(effectsPage.Text);
 			LoadExistingEffects(effects, rows);
 			var newEfects = LoadNewEffects(effects);
 			var retval = new Dictionary<Title, Effect>();

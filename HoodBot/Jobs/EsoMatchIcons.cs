@@ -330,7 +330,7 @@
 
 			public Page Page { get; }
 
-			public ICollection<IWikiNode>? PostSummary { get; }
+			public List<IWikiNode>? PostSummary { get; }
 
 			public string PostText { get; } = string.Empty;
 

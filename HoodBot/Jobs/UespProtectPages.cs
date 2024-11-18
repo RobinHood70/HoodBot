@@ -570,7 +570,7 @@
 		#endregion
 
 		#region Private Methods
-		private List<ProtectedTitle> LoadPageNames(ICollection<int> spacesToLoad)
+		private List<ProtectedTitle> LoadPageNames(HashSet<int> spacesToLoad)
 		{
 			List<ProtectedTitle> titlesToProtect = [];
 			UespNamespaceList nsList = new(this.Site);
