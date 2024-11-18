@@ -1,17 +1,14 @@
 ﻿namespace RobinHood70.WallE.Test
 {
-#pragma warning disable MA0025 // Implement the functionality instead of throwing NotImplementedException
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 
 	/// <inheritdoc/>
-	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
 	public class WikiAbstractionLayer : IWikiAbstractionLayer
 	{
 		// Only the basics are implemented for now; the rest can come later, as needed.
@@ -491,5 +488,4 @@
 			unreadText: null);
 		#endregion
 	}
-#pragma warning restore MA0025 // Implement the functionality instead of throwing NotImplementedException
 }

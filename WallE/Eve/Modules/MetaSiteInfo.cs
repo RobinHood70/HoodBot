@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -13,7 +12,6 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling", Justification = "SiteInfo is inherently complex.")]
 	internal sealed class MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input) : QueryModule<SiteInfoInput, SiteInfoResult>(wal, input, null), IContinuableQueryModule
 	{
 		#region Public Override Properties

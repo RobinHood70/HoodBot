@@ -54,7 +54,6 @@
 		/// <summary>Initializes a new instance of the <see cref="WikiAbstractionLayer" /> class.</summary>
 		/// <param name="client">The internet client.</param>
 		/// <param name="apiUri">The URI to api.php.</param>
-		[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "As above.")]
 		public WikiAbstractionLayer(IMediaWikiClient client, Uri apiUri)
 		{
 			ArgumentNullException.ThrowIfNull(client);
