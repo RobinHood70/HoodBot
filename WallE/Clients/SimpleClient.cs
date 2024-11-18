@@ -41,7 +41,6 @@ namespace RobinHood70.WallE.Clients
 
 		public SimpleClient(string? contactInfo, string? cookiesLocation, ICredentials? credentials, CancellationToken cancellationToken)
 		{
-			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
 			var resolver = new DefaultContractResolver
 			{
@@ -68,8 +67,9 @@ namespace RobinHood70.WallE.Clients
 			};
 
 			var headers = client.DefaultRequestHeaders;
-			headers.UserAgent.ParseAdd(this.UserAgent);
 			headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
+			headers.ExpectContinue = false;
+			headers.UserAgent.ParseAdd(this.UserAgent);
 			this.httpClient = client;
 		}
 		#endregion
