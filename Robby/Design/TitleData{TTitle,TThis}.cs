@@ -244,7 +244,7 @@
 			List<string> typeList = [];
 			foreach (var protType in protectionTypes.GetUniqueFlags())
 			{
-				if (Enum.GetName(typeof(ProtectionTypes), protType) is string name)
+				if (Enum.GetName(protType) is string name)
 				{
 					typeList.Add(name.ToLowerInvariant());
 				}
