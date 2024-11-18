@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
-	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 
