@@ -284,11 +284,11 @@
 		/// <remarks>Although illegal as part of a page name, <c>#</c> symbols are not removed under the assumption that they indicate a fragment.</remarks>
 		public static string SanitizePageName(string pageName, bool extended)
 		{
-			pageName = Regex.Replace(pageName, @"<>\[\]\|{}", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
+			pageName = Regex.Replace(pageName, @"[<>\[\]\|{}]", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
 			if (extended)
 			{
-				pageName = Regex.Replace(pageName, "`´’ʻʾʿ᾿῾‘’", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
-				pageName = Regex.Replace(pageName, "“”„“«»", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
+				pageName = Regex.Replace(pageName, "[`´’ʻʾʿ᾿῾‘’]", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
+				pageName = Regex.Replace(pageName, "[“”„“«»]", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
 				pageName = RegexLibrary.PruneExcessSpaces(pageName);
 			}
 
