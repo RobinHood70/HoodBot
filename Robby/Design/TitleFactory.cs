@@ -120,7 +120,7 @@
 			var split = pageName.Split(TextArrays.Octothorpe, 2);
 			if (split.Length == 2)
 			{
-				this.Fragment = split[1];
+				this.Fragment = split[1].Replace('_', ' ').TrimEnd();
 				this.originalParts.Add(TitlePartType.Fragment, this.Fragment);
 				pageName = split[0].TrimEnd();
 			}
