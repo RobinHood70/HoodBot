@@ -5,13 +5,8 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
-	internal sealed class SFPlanets : CreateOrUpdateJob<CsvRow>
+	internal sealed class SFPlanets(JobManager jobManager) : CreateOrUpdateJob<CsvRow>(jobManager)
 	{
-		public SFPlanets(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
-
 		protected override string? Disambiguator { get; }
 
 		protected override string GetEditSummary(Page page)
