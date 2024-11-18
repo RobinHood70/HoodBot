@@ -93,6 +93,7 @@
 					this.ignoredElements.Add(IncludeOnlyTag);
 					allTags.Add(IncludeOnlyTag);
 					break;
+				case InclusionType.Raw:
 				default:
 					this.includeIgnores = true;
 					this.ignoredTags.UnionWith([NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag]);

@@ -25,6 +25,8 @@ namespace RobinHood70.WallE.Clients
 		#endregion
 
 		#region Protected Override Methods
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0010:Add missing cases", Justification = "Number of missing cases is prohibitively long.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "Number of missing cases is prohibitively long.")]
 		protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
 			HttpResponseMessage retval;
@@ -34,7 +36,6 @@ namespace RobinHood70.WallE.Clients
 			}
 			catch (HttpRequestException hre) when (hre.InnerException is SocketException se)
 			{
-#pragma warning disable IDE0072 // Add missing cases
 				var responseCode = se.SocketErrorCode switch
 				{
 					SocketError.ConnectionRefused => HttpStatusCode.Forbidden,
@@ -42,7 +43,6 @@ namespace RobinHood70.WallE.Clients
 					SocketError.TimedOut => HttpStatusCode.RequestTimeout,
 					_ => HttpStatusCode.BadRequest
 				};
-#pragma warning restore IDE0072 // Add missing cases
 
 				return new HttpResponseMessage(responseCode);
 			}
@@ -65,6 +65,8 @@ namespace RobinHood70.WallE.Clients
 					case HttpStatusCode.Unauthorized:
 					case > HttpStatusCode.OK and < HttpStatusCode.Ambiguous:
 						return retval;
+					default:
+						break;
 				}
 
 				TimeSpan retryAfter;

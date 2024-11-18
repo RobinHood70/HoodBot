@@ -66,6 +66,8 @@
 
 					this.IsLoaded = true;
 					break;
+				default:
+					break;
 			}
 
 			void PopulateBacklinks(PageItem pageItem)

@@ -476,6 +476,8 @@
 					}
 
 					break;
+				default:
+					break;
 			}
 		}
 
@@ -503,6 +505,8 @@
 						this.TrimStart();
 					}
 
+					break;
+				default:
 					break;
 			}
 		}

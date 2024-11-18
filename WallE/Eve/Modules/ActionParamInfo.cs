@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -239,6 +240,7 @@
 			return new RawMessageInfo(messageList);
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0010:Add missing cases", Justification = "Number of missing cases is long.")]
 		private static MessageItem GetMessage(JToken message)
 		{
 			// TODO: Perhaps add functionality to handle cases of parameter substitution (parameterList => num=1, comma-separated list, parameters) and perhaps even other advanced outputs, if any.
@@ -258,7 +260,6 @@
 							case JTokenType.Array:
 								// No known instances of this happening, but it may be possible, so just add the raw JSON text for now.
 								parameterList.Add(parameter.ToString());
-								System.Diagnostics.Debug.WriteLine("Array: " + parameter.ToString());
 								break;
 							case JTokenType.Object:
 								List<string> mergeList = [];
@@ -271,7 +272,7 @@
 								break;
 							default:
 								// Nothing else should be possible, so if it happens, just send it to the debug window for now.
-								System.Diagnostics.Debug.WriteLine(parameter.Type.ToString() + ": " + parameter.ToString());
+								Debug.WriteLine(parameter.Type.ToString() + ": " + parameter.ToString());
 								break;
 						}
 					}

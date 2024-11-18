@@ -149,6 +149,8 @@
 							}
 
 							break;
+						default:
+							break;
 					}
 				}
 			}
@@ -197,6 +199,8 @@
 							this.Result.Add("revisiontype", revisionType);
 							valOffset++;
 							offsetText = new string(valOffset, 1);
+							break;
+						default:
 							break;
 					}
 
