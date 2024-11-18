@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -31,7 +31,7 @@
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.152">
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.179">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>

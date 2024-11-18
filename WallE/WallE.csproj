@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
 		<RootNamespace>RobinHood70.WallE</RootNamespace>
@@ -25,7 +25,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.152">
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.179">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>

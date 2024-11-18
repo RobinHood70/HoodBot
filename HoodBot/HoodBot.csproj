@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
-		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
@@ -30,16 +30,16 @@
 		<None Include="Old Jobs\*" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.152">
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.179">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-	  <PackageReference Include="Microsoft.Playwright" Version="1.44.0" />
-	  <PackageReference Include="MySql.Data" Version="8.4.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+	  <PackageReference Include="Microsoft.Playwright" Version="1.48.0" />
+	  <PackageReference Include="MySql.Data" Version="9.1.0" />
 	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
