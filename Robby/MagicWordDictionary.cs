@@ -15,7 +15,6 @@
 			ArgumentNullException.ThrowIfNull(words);
 			foreach (var word in words)
 			{
-				this.Add(word.CaseSensitive, word.Name, word);
 				foreach (var alias in word.Aliases)
 				{
 					this.Add(word.CaseSensitive, alias, word);
