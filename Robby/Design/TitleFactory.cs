@@ -8,6 +8,7 @@
 	using RobinHood70.WikiCommon.Parser;
 
 	#region Public Enumerations
+
 	/// <summary>Enumeration of the different textual parts of a link.</summary>
 	[Flags]
 	public enum TitlePartType
@@ -42,28 +43,12 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class. Assumes title could include interwiki and/or fragment.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
 		private TitleFactory(Site site, int defaultNamespace, string pageName)
 		{
-			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
-			static (string Key, string PageName, bool Forced) SplitPageName(string pageName)
-			{
-				var forced = pageName.Length > 0 && pageName[0] == ':';
-				if (forced)
-				{
-					pageName = pageName[1..].TrimStart();
-				}
-
-				var split = pageName.Split(TextArrays.Colon, 2);
-				return split.Length == 2
-					? (split[0].TrimEnd(), split[1].TrimStart(), forced)
-					: (string.Empty, pageName, forced);
-			}
-
-			WikiTextUtilities.TrimCruft(pageName);
 			var (key, remaining, forced) = SplitPageName(pageName);
 			if (!forced && key.Length == 0)
 			{
@@ -128,14 +113,46 @@
 			var isLocal = this.IsLocal;
 			if (this.Namespace is null)
 			{
-				this.Namespace = site[isLocal ? defaultNamespace : MediaWikiNamespaces.Main];
-				this.Coerced = isLocal;
+				var nsid = isLocal ? defaultNamespace : MediaWikiNamespaces.Main;
+				this.Namespace = site[nsid];
+				this.Coerced =
+					isLocal &&
+					defaultNamespace != MediaWikiNamespaces.Main &&
+					nsid != MediaWikiNamespaces.Main;
 			}
 
 			this.PageName = isLocal
 				? this.Namespace.CapitalizePageName(pageName)
 				: pageName;
 			this.originalParts.Add(TitlePartType.PageName, pageName);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class. Assumes title only contains namespace and page name.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="fullPageName">Name of the page.</param>
+		private TitleFactory(Site site, string fullPageName)
+		{
+			var (key, remaining, forced) = SplitPageName(fullPageName);
+			if (!forced && key.Length == 0)
+			{
+				fullPageName = remaining;
+			}
+			else if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
+			{
+				this.Namespace = ns;
+				this.originalParts.Add(TitlePartType.Namespace, key);
+				this.ForcedNamespaceLink = forced;
+				fullPageName = remaining;
+			}
+
+			if (this.Namespace is null)
+			{
+				this.Namespace = site[MediaWikiNamespaces.Main];
+				this.Coerced = forced;
+			}
+
+			this.PageName = fullPageName;
+			this.originalParts.Add(TitlePartType.PageName, fullPageName);
 		}
 
 		private TitleFactory(Namespace ns, string pageName)
@@ -218,7 +235,7 @@
 
 		#region Public Static Methods
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class from the site, namespace ID, and <b>validated</b> full page name.</summary>
 		/// <param name="site">The site the page is on.</param>
 		/// <param name="nsId">The namespace the page should resolve to. If the resolved namespace doesn't match, this will throw an error.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
@@ -228,7 +245,7 @@
 			ArgumentNullException.ThrowIfNull(fullPageName);
 			if (nsId is null)
 			{
-				return FromUnvalidated(site, fullPageName);
+				return FromValidated(site, fullPageName);
 			}
 
 			TitleFactory retval = new(site, MediaWikiNamespaces.Main, fullPageName);
@@ -249,6 +266,41 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromUnvalidated(Site site, string pageName) =>
+			TitleFactory.FromUnvalidated(site, MediaWikiNamespaces.Main, pageName);
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The namespace the page is in.</param>
+		/// <param name="defaultNamespace">The default namespace for the page; if pageName starts with a namespace name, this parameter will be ignored.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromUnvalidated(Site site, int defaultNamespace, string pageName)
+		{
+			ArgumentNullException.ThrowIfNull(site);
+			ArgumentNullException.ThrowIfNull(pageName);
+			pageName = WikiTextUtilities.TrimCruft(pageName);
+			var retval = new TitleFactory(site, defaultNamespace, pageName);
+			return retval.IsValid(false)
+				? retval
+				: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="defaultNamespace">The default namespace for the page; if pageName starts with a namespace name, this parameter will be ignored.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromUnvalidated(Namespace defaultNamespace, string pageName)
+		{
+			ArgumentNullException.ThrowIfNull(defaultNamespace);
+			ArgumentNullException.ThrowIfNull(pageName);
+			pageName = WikiTextUtilities.TrimCruft(pageName);
+			var retval = new TitleFactory(defaultNamespace.Site, defaultNamespace.Id, pageName);
+			return retval.IsValid(false)
+				? retval
+				: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
 		/// <remarks>This method bypasses some of the checks the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., is ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
@@ -260,23 +312,14 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Site site, string pageName)
+		/// <param name="site">The site the page is on.</param>
+		/// <param name="fullPageName">The full name of the page.</param>
+		/// <remarks>This method bypasses some of the checks the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., is ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
+		public static TitleFactory FromValidated(Site site, string fullPageName)
 		{
 			ArgumentNullException.ThrowIfNull(site);
-			ArgumentNullException.ThrowIfNull(pageName);
-			return new(site, MediaWikiNamespaces.Main, WikiTextUtilities.DecodeAndNormalize(pageName));
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="defaultNamespace">The default namespace for the page; if pageName starts with a namespace name, this parameter will be ignored.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Namespace defaultNamespace, string pageName)
-		{
-			ArgumentNullException.ThrowIfNull(defaultNamespace);
-			ArgumentNullException.ThrowIfNull(pageName);
-			return new(defaultNamespace.Site, defaultNamespace.Id, WikiTextUtilities.DecodeAndNormalize(pageName));
+			ArgumentNullException.ThrowIfNull(fullPageName);
+			return new(site, fullPageName);
 		}
 
 		/// <summary>Removes invalid characters from a page name and replaces quote-like characters with straight quotes.</summary>
@@ -303,6 +346,73 @@
 		/// <summary>Gets the full page name of a title.</summary>
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
 		public string FullPageName() => this.Namespace.DecoratedName() + this.PageName;
+
+		/// <summary>Checks that the title is valid.</summary>
+		/// <param name="allowRelative">If <see langword="true"/>, zero-length page names will not trigger an error.</param>
+		/// <value><see langword="true"/> if the page name contains no illegal characters; otherwise, <see langword="false"/>.</value>
+		/// <remarks>Currently, the only requirement for validity is that the <see cref="PageName"/> property not contain any illegal characters. Legality is roughly based on $wgLegalTitleChars, but is not precisely identical, so bizarre use of Unicode characters could slip through, where they wouldn't do so on MediaWiki itself. Titles in File space have the additional characters from $wgIllegalFileChars checked.</remarks>
+		public bool IsValid(bool allowRelative)
+		{
+			var pageName = this.PageName;
+			if (!allowRelative && pageName.Length == 0)
+			{
+				return this.Interwiki is not null || this.Namespace == MediaWikiNamespaces.Main;
+			}
+
+			if (pageName.Length > (this.Namespace == MediaWikiNamespaces.Special ? 512 : 255))
+			{
+				return false;
+			}
+
+			if (pageName.Contains('.', StringComparison.Ordinal) && (
+				string.Equals(pageName, ".", StringComparison.Ordinal) ||
+				string.Equals(pageName, "..", StringComparison.Ordinal) ||
+				pageName.StartsWith("./", StringComparison.Ordinal) ||
+				pageName.StartsWith("../", StringComparison.Ordinal) ||
+				pageName.Contains("/./", StringComparison.Ordinal) ||
+				pageName.Contains("/../", StringComparison.Ordinal) ||
+				pageName.EndsWith("/.", StringComparison.Ordinal) ||
+				pageName.EndsWith("/..", StringComparison.Ordinal)))
+			{
+				return false;
+			}
+
+			if (pageName.Contains("~~~", StringComparison.Ordinal))
+			{
+				return false;
+			}
+
+			var version = this.Namespace.Site.Version;
+			var illegalChars = @"\x00-\x1F\x7F#<>\[\]\|{}";
+			if (this.Namespace == MediaWikiNamespaces.File)
+			{
+				illegalChars += version >= new Version(1, 28)
+					? @":/\\"
+					: ":";
+			}
+			else if (this.Namespace == MediaWikiNamespaces.User)
+			{
+				if (version >= new Version(1, 40))
+				{
+					illegalChars += "@:>=";
+				}
+				else if (version >= new Version(1, 39))
+				{
+					illegalChars += "@:>";
+				}
+				else if (version >= new Version(1, 26))
+				{
+					illegalChars += "@:";
+				}
+				else if (version >= new Version(1, 15))
+				{
+					illegalChars += '@';
+				}
+			}
+
+			var illegalRegex = new Regex('[' + illegalChars + ']', RegexOptions.None, Globals.DefaultRegexTimeout);
+			return !illegalRegex.Match(pageName).Success;
+		}
 		#endregion
 
 		#region Public Override Methods
@@ -330,6 +440,22 @@
 		/// <summary>Converts the current title to a <see cref="Robby.Title"/>.</summary>
 		/// <returns>A new SiteLink with the relevant properties set.</returns>
 		public Title ToTitle() => (Title)this;
+		#endregion
+
+		#region Private Static Methods
+		private static (string Key, string PageName, bool Forced) SplitPageName(string pageName)
+		{
+			var forced = pageName.Length > 0 && pageName[0] == ':';
+			if (forced)
+			{
+				pageName = pageName[1..].TrimStart();
+			}
+
+			var split = pageName.Split(TextArrays.Colon, 2);
+			return split.Length == 2
+				? (split[0].TrimEnd(), split[1].TrimStart(), forced)
+				: (string.Empty, pageName, forced);
+		}
 		#endregion
 	}
 }
