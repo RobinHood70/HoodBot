@@ -966,8 +966,8 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				AllPagesInput generator = new() { Namespace = ns };
-				WatchInput input = new(generator) { Unwatch = unwatch };
+				AllPagesInput generatorInput = new() { Namespace = ns };
+				WatchInput input = new(generatorInput) { Unwatch = unwatch };
 				var pages = this.Watch(input);
 				var result = pages.Count == 0
 					? ChangeStatus.NoEffect
