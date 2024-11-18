@@ -7,6 +7,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
+	#region Public Enumerations
 	/// <summary>Enumeration of the different textual parts of a link.</summary>
 	[Flags]
 	public enum TitlePartType
@@ -29,6 +30,7 @@
 		/// <summary>Include all parts of the original text (for future use).</summary>
 		All = Interwiki | Namespace | PageName | Fragment
 	}
+	#endregion
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
 	public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
