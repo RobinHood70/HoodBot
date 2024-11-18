@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Threading;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 
@@ -11,7 +13,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			const int maxTimes = 5;
+			const int maxTimes = 0;
 			this.ProgressMaximum = maxTimes;
 			for (var i = 1; i <= maxTimes; i++)
 			{
@@ -19,6 +21,13 @@
 				this.Progress++;
 				this.StatusWriteLine($"Sleep: ( {i} / {maxTimes} )");
 			}
+
+			var context = new Context(this.Site)
+			{
+				Title = TitleFactory.FromUnvalidated(this.Site, "Main Page")
+			};
+
+			this.StatusWriteLine(ParseToText.Build("The main page is named {{PAGENAME}}", context));
 		}
 		#endregion
 
