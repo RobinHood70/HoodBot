@@ -1,20 +1,27 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Net.Http;
+	using System.Net.Http.Headers;
 
-	/// <summary>Formats a Request object as <see cref="MultipartFormDataContent"/>.</summary>
+	/// <summary>Formats a Request object as <see cref="MultipartContent"/>.</summary>
 	public sealed class RequestVisitorHttpContentMultipart : IParameterVisitor
 	{
+		//// This class works around scope warnings by essentially recreating MultipartFormDataContent internally. Adding to the internal list then copying that list to the return value in Build() avoids said warnings when adding new ByteArrayContent or StringContent to an IDisposable. I'm not sure why this works, though, since adding new content objects directly in the Build loop instead of from the List causes the same warnings. One way or the other, all the content objects are disposed of by the MultipartContent object, so it shouldn't be a concern.
+
+		#region Constants
+		private const string FormData = "form-data";
+		#endregion
+
 		#region Fields
-		private readonly MultipartFormDataContent multipartData;
+		private readonly List<HttpContent> multipartData = [];
 		private readonly bool supportsUnitSeparator;
 		#endregion
 
 		#region Constructors
-		private RequestVisitorHttpContentMultipart(MultipartFormDataContent multipartData, bool supportsUnitSeparator)
+		private RequestVisitorHttpContentMultipart(bool supportsUnitSeparator)
 		{
-			this.multipartData = multipartData;
 			this.supportsUnitSeparator = supportsUnitSeparator;
 		}
 		#endregion
@@ -23,30 +30,39 @@
 
 		/// <summary>Builds the specified request.</summary>
 		/// <param name="request">The request.</param>
-		/// <returns>A <see cref="MultipartFormDataContent"/> object representing the parameters.</returns>
-		public static MultipartFormDataContent Build(Request request)
+		/// <returns>A <see cref="MultipartContent"/> object representing the parameters.</returns>
+		public static MultipartContent Build(Request request)
 		{
-			// Note: the returned data should be iterated over and each individual HttpContent should be disposed.
 			ArgumentNullException.ThrowIfNull(request);
-			MultipartFormDataContent data = [];
-			RequestVisitorHttpContentMultipart visitor = new(data, request.SupportsUnitSeparator);
+			var visitor = new RequestVisitorHttpContentMultipart(request.SupportsUnitSeparator);
 			request.Build(visitor);
 
-			return data;
+			var retval = new MultipartContent(FormData);
+			foreach (var param in visitor.multipartData)
+			{
+				retval.Add(param);
+			}
+
+			return retval;
 		}
 		#endregion
 
 		#region IParameterVisitor Methods
-
-		// All HttpContent wants to be disposed, but can't be during each individual part of the build process. So instead, we dispose of all of it when this object is disposed of.
-#pragma warning disable CA2000 // Dispose objects before losing scope: Disposed by multipart object itself.
 
 		/// <summary>Visits the specified FileParameter object.</summary>
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
-			this.multipartData.Add(new ByteArrayContent(parameter.GetData()), parameter.Name, parameter.FileName);
+			var content = new ByteArrayContent(parameter.GetData());
+			content.Headers.ContentDisposition = new ContentDispositionHeaderValue(FormData)
+			{
+				Name = parameter.Name,
+				FileName = parameter.FileName,
+				FileNameStar = parameter.FileName
+			};
+
+			this.multipartData.Add(content);
 		}
 
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
@@ -56,7 +72,13 @@
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
-			this.multipartData.Add(new StringContent(value), parameter.Name);
+			var content = new StringContent(value);
+			content.Headers.ContentDisposition = new ContentDispositionHeaderValue(FormData)
+			{
+				Name = parameter.Name
+			};
+
+			this.multipartData.Add(content);
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
@@ -64,9 +86,14 @@
 		public void Visit(StringParameter parameter)
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
-			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
+			var content = new StringContent(parameter.Value);
+			content.Headers.ContentDisposition = new ContentDispositionHeaderValue(FormData)
+			{
+				Name = parameter.Name
+			};
+
+			this.multipartData.Add(content);
 		}
-#pragma warning restore CA2000
 		#endregion
 	}
 }
