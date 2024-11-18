@@ -11,6 +11,7 @@
 	using System.IO;
 	using System.Net;
 	using System.Runtime.CompilerServices;
+	using System.Text.RegularExpressions;
 	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
@@ -84,6 +85,7 @@
 		private TitleCollection? deletionCategories;
 		private IReadOnlySet<Title>? disambiguationTemplates;
 		private TitleCollection? discussionPages;
+		private string? generator;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private FullTitle? mainPage;
 		private string? mainPageName;
@@ -91,7 +93,6 @@
 		private string? scriptPath;
 		private string? serverName;
 		private string? siteName;
-		private string? version;
 		#endregion
 
 		#region Constructors
@@ -187,6 +188,11 @@
 		/// <value>The filter pages.</value>
 		public TitleCollection FilterPages { get; }
 
+		/// <summary>Gets the MediaWiki version of the wiki, including any text.</summary>
+		/// <value>The MediaWiki version of the wiki.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
+		public string Generator => this.generator ?? throw NoSite();
+
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
 		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
@@ -239,8 +245,8 @@
 
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
-		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-		public string Version => this.version ?? throw NoSite();
+		/// <remarks>If null, the wiki has not yet been initialized.</remarks>
+		public Version? Version { get; private set; }
 		#endregion
 
 		#region Public Indexers
@@ -1449,7 +1455,9 @@
 			this.Culture = Globals.GetCulture(general.Language);
 			this.siteName = general.SiteName;
 			this.serverName = general.ServerName;
-			this.version = general.Generator;
+			this.generator = general.Generator;
+			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, Globals.DefaultRegexTimeout).Trim(TextArrays.Period);
+			this.Version = new Version(versionFudged);
 			var path = general.ArticlePath;
 			var basePath = general.BasePage[..(general.BasePage.IndexOf(server, StringComparison.Ordinal) + server.Length)]; // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
 			this.baseArticlePath = path.StartsWith('/') ? basePath + path : path;
@@ -1556,7 +1564,8 @@
 			this.namespaces = null;
 			this.serverName = null;
 			this.siteName = null;
-			this.version = null;
+			this.generator = null;
+			this.Version = null;
 		}
 		#endregion
 	}
