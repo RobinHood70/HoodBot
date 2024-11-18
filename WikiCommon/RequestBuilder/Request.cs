@@ -276,7 +276,6 @@
 		public Request AddFlags<T>(string name, T values)
 			where T : struct, Enum
 		{
-			ArgumentNullException.ThrowIfNull(values);
 			var type = values.GetType();
 			foreach (var prop in values.GetUniqueFlags())
 			{
