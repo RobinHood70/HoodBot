@@ -78,22 +78,22 @@
 		#region IVisitor Methods
 
 		/// <inheritdoc/>
-		public void Visit(IArgumentNode node)
+		public void Visit(IArgumentNode argument)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			if (this.raw || node.DefaultValue == null)
+			ArgumentNullException.ThrowIfNull(argument);
+			if (this.raw || argument.DefaultValue == null)
 			{
 				this.builder.Append("{{{");
-				node.Name.Accept(this);
-				if (node.DefaultValue != null)
+				argument.Name.Accept(this);
+				if (argument.DefaultValue != null)
 				{
 					this.builder.Append('|');
-					node.DefaultValue.Accept(this);
+					argument.DefaultValue.Accept(this);
 				}
 
-				if (this.raw && node.ExtraValues != null)
+				if (this.raw && argument.ExtraValues != null)
 				{
-					foreach (var value in node.ExtraValues)
+					foreach (var value in argument.ExtraValues)
 					{
 						value.Accept(this);
 					}
@@ -103,50 +103,50 @@
 			}
 			else
 			{
-				node.DefaultValue.Accept(this);
+				argument.DefaultValue.Accept(this);
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ICommentNode node)
+		public void Visit(ICommentNode comment)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(comment);
 			if (this.raw)
 			{
-				this.builder.Append(node.Comment);
+				this.builder.Append(comment.Comment);
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node)
+		public void Visit(IHeaderNode header)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			var equalsSigns = new string('=', node.Level);
+			ArgumentNullException.ThrowIfNull(header);
+			var equalsSigns = new string('=', header.Level);
 			this.builder.Append(equalsSigns);
-			node.Title.Accept(this);
+			header.Title.Accept(this);
 			this.builder.Append(equalsSigns);
-			node.Comment?.Accept(this);
+			header.Comment?.Accept(this);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IIgnoreNode node)
+		public void Visit(IIgnoreNode ignore)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(ignore);
 			if (this.raw)
 			{
-				this.builder.Append(node.Value);
+				this.builder.Append(ignore.Value);
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ILinkNode node)
+		public void Visit(ILinkNode link)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(link);
 			if (this.raw)
 			{
 				this.builder.Append("[[");
-				node.TitleNodes.Accept(this);
-				foreach (var param in node.Parameters)
+				link.TitleNodes.Accept(this);
+				foreach (var param in link.Parameters)
 				{
 					param.Accept(this);
 				}
@@ -155,9 +155,9 @@
 			}
 			else
 			{
-				if (node.Parameters.Count > 0)
+				if (link.Parameters.Count > 0)
 				{
-					foreach (var parameter in node.Parameters)
+					foreach (var parameter in link.Parameters)
 					{
 						if (parameter.Name is not null)
 						{
@@ -170,7 +170,7 @@
 				}
 				else
 				{
-					node.TitleNodes.Accept(this);
+					link.TitleNodes.Accept(this);
 				}
 			}
 		}
@@ -186,30 +186,30 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IParameterNode node)
+		public void Visit(IParameterNode parameter)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(parameter);
 			this.builder.Append('|');
-			if (node.Name is not null)
+			if (parameter.Name is not null)
 			{
-				node.Name.Accept(this);
+				parameter.Name.Accept(this);
 				this.builder.Append('=');
 			}
 
-			node.Value.Accept(this);
+			parameter.Value.Accept(this);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITagNode node)
+		public void Visit(ITagNode tag)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(tag);
 			if (this.raw)
 			{
 				this.builder
 					.Append('<')
-					.Append(node.Name)
-					.Append(node.Attributes);
-				if (node.SelfClosed)
+					.Append(tag.Name)
+					.Append(tag.Attributes);
+				if (tag.SelfClosed)
 				{
 					this.builder.Append("/>");
 				}
@@ -218,19 +218,19 @@
 					// TODO: Check what happens with <br> vs. <br/> vs. <br></br>. Do they all work properly?
 					this.builder
 						.Append('>')
-						.Append(node.InnerText)
-						.Append(node.Close);
+						.Append(tag.InnerText)
+						.Append(tag.Close);
 				}
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITemplateNode node)
+		public void Visit(ITemplateNode template)
 		{
 			this.builder.Append("{{");
-			ArgumentNullException.ThrowIfNull(node);
-			node.TitleNodes.Accept(this);
-			foreach (var param in node.Parameters)
+			ArgumentNullException.ThrowIfNull(template);
+			template.TitleNodes.Accept(this);
+			foreach (var param in template.Parameters)
 			{
 				param.Accept(this);
 			}
@@ -239,10 +239,10 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node)
+		public void Visit(ITextNode text)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			this.builder.Append(node.Text);
+			ArgumentNullException.ThrowIfNull(text);
+			this.builder.Append(text.Text);
 		}
 		#endregion
 	}

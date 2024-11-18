@@ -42,16 +42,16 @@
 		#region IWikiNodeVisitor Methods
 
 		/// <inheritdoc/>
-		public void Visit(IArgumentNode node)
+		public void Visit(IArgumentNode argument)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(argument);
 			this
 				.BuildTagOpen("tplarg", null, false)
-				.BuildTag("title", null, node.Name)
-				.BuildTag("default", null, node.DefaultValue);
-			if (node.ExtraValues != null)
+				.BuildTag("title", null, argument.Name)
+				.BuildTag("default", null, argument.DefaultValue);
+			if (argument.ExtraValues != null)
 			{
-				foreach (var value in node.ExtraValues)
+				foreach (var value in argument.ExtraValues)
 				{
 					this.Visit(value);
 				}
@@ -61,34 +61,34 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ICommentNode node)
+		public void Visit(ICommentNode comment)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			this.BuildValueNode("comment", node.Comment);
+			ArgumentNullException.ThrowIfNull(comment);
+			this.BuildValueNode("comment", comment.Comment);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node)
+		public void Visit(IHeaderNode header)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = node.Level }, node.Title);
+			ArgumentNullException.ThrowIfNull(header);
+			this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = header.Level }, header.Title);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IIgnoreNode node)
+		public void Visit(IIgnoreNode ignore)
 		{
-			ArgumentNullException.ThrowIfNull(node);
-			this.BuildValueNode("ignore", node.Value);
+			ArgumentNullException.ThrowIfNull(ignore);
+			this.BuildValueNode("ignore", ignore.Value);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ILinkNode node)
+		public void Visit(ILinkNode link)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(link);
 			this
 				.BuildTagOpen("link", null, false)
-				.BuildTag("title", null, node.TitleNodes); // Title is always emitted, even if empty.
-			foreach (var part in node.Parameters)
+				.BuildTag("title", null, link.TitleNodes); // Title is always emitted, even if empty.
+			foreach (var part in link.Parameters)
 			{
 				part.Accept(this);
 			}
@@ -107,14 +107,14 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IParameterNode node)
+		public void Visit(IParameterNode parameter)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(parameter);
 			this.BuildTagOpen("part", null, false);
-			if (!node.Anonymous)
+			if (!parameter.Anonymous)
 			{
 				this
-					.BuildTag("name", null, node.Name)
+					.BuildTag("name", null, parameter.Name)
 					.Indent();
 				this.builder.Append('=');
 			}
@@ -124,39 +124,39 @@
 			}
 
 			this
-				.BuildTag("value", null, node.Value)
+				.BuildTag("value", null, parameter.Value)
 				.BuildTagClose("part");
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITagNode node)
+		public void Visit(ITagNode tag)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(tag);
 			this
 				.BuildTagOpen("ext", null, false)
-				.BuildValueNode("name", node.Name)
-				.BuildValueNode("attr", node.Attributes);
-			if (node.InnerText != null)
+				.BuildValueNode("name", tag.Name)
+				.BuildValueNode("attr", tag.Attributes);
+			if (tag.InnerText != null)
 			{
-				this.BuildValueNode("inner", node.InnerText);
+				this.BuildValueNode("inner", tag.InnerText);
 			}
 
-			if (node.Close != null)
+			if (tag.Close != null)
 			{
-				this.BuildValueNode("close", node.Close);
+				this.BuildValueNode("close", tag.Close);
 			}
 
 			this.BuildTagClose("ext");
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITemplateNode node)
+		public void Visit(ITemplateNode template)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(template);
 			this
 				.BuildTagOpen("template", null, false)
-				.BuildTag("title", null, node.TitleNodes); // Title is always emitted, even if empty.
-			foreach (var part in node.Parameters)
+				.BuildTag("title", null, template.TitleNodes); // Title is always emitted, even if empty.
+			foreach (var part in template.Parameters)
 			{
 				part.Accept(this);
 			}
@@ -165,11 +165,11 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node)
+		public void Visit(ITextNode text)
 		{
-			ArgumentNullException.ThrowIfNull(node);
+			ArgumentNullException.ThrowIfNull(text);
 			this.Indent();
-			this.builder.Append(HtmlEncoder.Default.Encode(node.Text.Replace(' ', '_')));
+			this.builder.Append(HtmlEncoder.Default.Encode(text.Text.Replace(' ', '_')));
 		}
 		#endregion
 
