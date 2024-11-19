@@ -56,7 +56,9 @@
 			this.builder.Clear();
 			ArgumentNullException.ThrowIfNull(node);
 			node.Accept(this);
-			return this.builder.ToString();
+			var retval = this.builder.ToString();
+			this.builder.Clear();
+			return retval;
 		}
 
 		/// <summary>Builds the specified node or node collection into wiki text.</summary>
@@ -71,7 +73,9 @@
 
 			this.builder.Clear();
 			this.Visit(nodes);
-			return this.builder.ToString();
+			var retval = this.builder.ToString();
+			this.builder.Clear();
+			return retval;
 		}
 		#endregion
 

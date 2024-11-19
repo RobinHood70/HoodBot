@@ -27,6 +27,7 @@
 		public string Build(IEnumerable<IWikiNode> nodes)
 		{
 			ArgumentNullException.ThrowIfNull(nodes);
+			this.builder.Clear();
 			this.BuildTagOpen("root", null, false);
 			foreach (var node in nodes)
 			{
@@ -34,8 +35,9 @@
 			}
 
 			this.BuildTagClose("root");
-
-			return this.builder.ToString();
+			var retval = this.builder.ToString();
+			this.builder.Clear();
+			return retval;
 		}
 		#endregion
 
