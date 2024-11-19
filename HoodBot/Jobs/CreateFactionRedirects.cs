@@ -75,7 +75,7 @@
 		#region Private Methods
 		private void CreatePage(Page factionPage, string factionName, string section)
 		{
-			if (factionName.Contains("{{", System.StringComparison.Ordinal))
+			if (factionName.Contains("{{", StringComparison.Ordinal))
 			{
 				this.StatusWriteLine("Ignoring " + factionName);
 				return;

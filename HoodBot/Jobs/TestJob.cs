@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
+	using System.Diagnostics;
 	using System.Threading;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -27,7 +28,12 @@
 				Title = TitleFactory.FromUnvalidated(this.Site, "Main Page")
 			};
 
-			this.StatusWriteLine(ParseToText.Build("{{{1|Hello World!}}} The current {{Sic|{{{test|page}}}|pg}} is {{PAGENAME}}. This [[SomePage|link]] should be stripped.", context));
+			this.StatusWriteLine(ParseToText.Build("{{{1|Hello World!}}} The current {{Sic|{{{test|page}}}|pg}} is {{FULLPAGENAME}}. This [[SomePage|link]] should be stripped.", context));
+
+			foreach (var word in context.UnhandledMagicWords)
+			{
+				Debug.WriteLine("Unhandled: " + word);
+			}
 		}
 		#endregion
 

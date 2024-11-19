@@ -269,7 +269,7 @@
 		/// <param name="site">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
 		public static TitleFactory FromUnvalidated(Site site, string pageName) =>
-			TitleFactory.FromUnvalidated(site, MediaWikiNamespaces.Main, pageName);
+			FromUnvalidated(site, MediaWikiNamespaces.Main, pageName);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The namespace the page is in.</param>

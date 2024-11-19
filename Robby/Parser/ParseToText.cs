@@ -51,12 +51,12 @@
 		public void Visit(IArgumentNode argument)
 		{
 			ArgumentNullException.ThrowIfNull(argument);
-			var argName = ParseToText.Build(argument.Name, context).Trim();
+			var argName = Build(argument.Name, context).Trim();
 			var text = this.Stack.Parameters.TryGetValue(argName, out var paramValue)
 				? paramValue
 				: argument.DefaultValue is null
 					? null
-					: ParseToText.Build(argument.DefaultValue, context);
+					: Build(argument.DefaultValue, context);
 			this.builder.Append(text);
 		}
 
@@ -70,8 +70,8 @@
 		{
 			ArgumentNullException.ThrowIfNull(header);
 			var equals = new string('=', header.Level);
-			var text = ParseToText.Build(header.Title, context, this.Stack);
-			var comment = ParseToText.Build(header.Comment, context, this.Stack);
+			var text = Build(header.Title, context, this.Stack);
+			var comment = Build(header.Comment, context, this.Stack);
 			this.builder.Append(string.Concat(equals, text, equals, comment));
 		}
 
@@ -86,7 +86,7 @@
 			var siteLink = SiteLink.FromLinkNode(this.Context.Site, link);
 			if (siteLink.Text is not null)
 			{
-				var text = ParseToText.Build(siteLink.Text, this.Context, this.Stack);
+				var text = Build(siteLink.Text, this.Context, this.Stack);
 				this.builder.Append(text);
 			}
 		}
@@ -196,10 +196,10 @@
 				}
 				else
 				{
-					key = ParseToText.Build(paramNode.Name, this.Context, this.Stack);
+					key = Build(paramNode.Name, this.Context, this.Stack);
 				}
 
-				var value = ParseToText.Build(paramNode.Value, this.Context, this.Stack);
+				var value = Build(paramNode.Value, this.Context, this.Stack);
 				parameters.Add(key, value);
 			}
 
