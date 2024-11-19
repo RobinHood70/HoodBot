@@ -28,8 +28,18 @@
 		/// <param name="x">The first title to compare.</param>
 		/// <param name="y">The second title to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public static int DirectCompare(Title x, Title y)
+		public static int DirectCompare(Title? x, Title? y)
 		{
+			if (x is null)
+			{
+				return y is null ? 0 : -1;
+			}
+
+			if (y is null)
+			{
+				return 1;
+			}
+
 			var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
 			return nsCompare == 0
 				? x.Namespace.ComparePageNames(x.PageName, y.PageName)
@@ -43,13 +53,7 @@
 		/// <param name="x">The first title to compare.</param>
 		/// <param name="y">The second title to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(ITitle? x, ITitle? y) => x == null
-			? y == null
-				? 0
-				: -1
-			: y == null
-				? 1
-				: DirectCompare(x.Title, y.Title);
+		public int Compare(ITitle? x, ITitle? y) => DirectCompare(x?.Title, y?.Title);
 
 		/// <inheritdoc/>
 		public bool Equals(ITitle? x, ITitle? y) => x is null
