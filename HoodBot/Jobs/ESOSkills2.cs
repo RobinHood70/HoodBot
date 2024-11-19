@@ -1,16 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Threading.Tasks;
 	using Microsoft.Playwright;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
 	[method: JobInfo("Get Skills 2")]
-	[SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "False hit.")]
-	internal sealed class EsoSkills2(JobManager jobManager) : CreateOrUpdateJob<EsoSkills2.Skill>(jobManager)
+	internal sealed class EsoSkills2(JobManager jobManager) : CreateOrUpdateJob<Skill>(jobManager)
 	{
 		#region Protected Override Properties
 		protected override string? Disambiguator => "skill";
@@ -19,7 +17,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Create/update skill";
 
-		protected override bool IsValid(SiteParser parser, Skill item) => throw new NotImplementedException();
+		protected override bool IsValid(SiteParser parser, Skill item) => parser.FindSiteTemplate(Skill.SummaryTemplate) is not null;
 
 		protected override IDictionary<Title, Skill> LoadItems()
 		{
@@ -41,10 +39,6 @@
 			await page.GotoAsync("https://www.bing.com").ConfigureAwait(false);
 			await browser.CloseAsync().ConfigureAwait(false);
 		}
-		#endregion
-
-		#region Internal Records
-		internal sealed record Skill(string SkillId);
 		#endregion
 	}
 }

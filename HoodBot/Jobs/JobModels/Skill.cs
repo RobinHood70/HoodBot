@@ -21,8 +21,8 @@
 
 	internal abstract class Skill
 	{
-		#region Private Constants
-		private const string TemplateName = "Online Skill Summary";
+		#region Public Constants
+		public const string SummaryTemplate = "Online Skill Summary";
 		#endregion
 
 		#region Static Fields
@@ -85,7 +85,7 @@
 				}
 
 				page.Text +=
-					"{{" + TemplateName + "}}\n" +
+					"{{" + SummaryTemplate + "}}\n" +
 					"\n" +
 					"<!--\n" +
 					"==Notes==\n" +
@@ -96,10 +96,10 @@
 
 			SiteParser oldPage = new(page);
 			SiteParser parser = new(page);
-			List<SiteTemplateNode> skillSummaries = new(parser.FindSiteTemplates(TemplateName));
+			List<SiteTemplateNode> skillSummaries = new(parser.FindSiteTemplates(SummaryTemplate));
 			if (skillSummaries.Count != 1)
 			{
-				return "Incorrect number of {{" + TemplateName + "}} matches on " + this.PageName;
+				return "Incorrect number of {{" + SummaryTemplate + "}} matches on " + this.PageName;
 			}
 
 			var template = skillSummaries[0];
