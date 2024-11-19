@@ -70,8 +70,8 @@
 		{
 			ArgumentNullException.ThrowIfNull(word);
 			ArgumentNullException.ThrowIfNull(func);
-			var title = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, word);
-			this.templateResolvers.Add(title, func);
+			var templateTitle = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, word);
+			this.templateResolvers.Add(templateTitle, func);
 		}
 
 		public void AddVariableMethod(string word, MagicWordMethod func)
@@ -121,8 +121,8 @@
 			}
 
 			// Template
-			var title = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, name);
-			return this.templateResolvers.TryGetValue(title, out var templateFunc)
+			var templateTitle = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, name);
+			return this.templateResolvers.TryGetValue(templateTitle, out var templateFunc)
 				? templateFunc
 				: null;
 		}
