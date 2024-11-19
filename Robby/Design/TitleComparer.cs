@@ -19,15 +19,29 @@
 
 		/// <summary>Gets the singleton instance.</summary>
 		/// <value>The instance.</value>
-		/// <remarks>Note that this is a pseudo-singleton, in that a new instance will be created for each type.</remarks>
 		public static TitleComparer Instance { get; } = new TitleComparer();
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Compares two <see cref="Title"/>s and returns a value indicating whether one is less than, equal to, or greater than the other.</summary>
+		/// <param name="x">The first title to compare.</param>
+		/// <param name="y">The second title to compare.</param>
+		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
+		public static int DirectCompare(Title x, Title y)
+		{
+			var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
+			return nsCompare == 0
+				? x.Namespace.ComparePageNames(x.PageName, y.PageName)
+				: nsCompare;
+		}
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.</summary>
-		/// <param name="x">The first object to compare.</param>
-		/// <param name="y">The second object to compare.</param>
+		/// <summary>Compares two <see cref="ITitle"/>s and returns a value indicating whether one is less than, equal to, or greater than the other.</summary>
+		/// <param name="x">The first title to compare.</param>
+		/// <param name="y">The second title to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
 		public int Compare(ITitle? x, ITitle? y) => x == null
 			? y == null
@@ -35,7 +49,7 @@
 				: -1
 			: y == null
 				? 1
-				: Title.SortComparer(x.Title, y.Title);
+				: DirectCompare(x.Title, y.Title);
 
 		/// <inheritdoc/>
 		public bool Equals(ITitle? x, ITitle? y) => x is null

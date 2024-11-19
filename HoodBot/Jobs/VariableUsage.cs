@@ -5,6 +5,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -94,8 +95,8 @@
 				}
 			}
 
-			this.loadCalls.Sort((x, y) => Title.Compare(x.Page, y.Page));
-			this.saveCalls.Sort((x, y) => Title.Compare(x.Page, y.Page));
+			this.loadCalls.Sort((x, y) => TitleComparer.Instance.Compare(x.Page, y.Page));
+			this.saveCalls.Sort((x, y) => TitleComparer.Instance.Compare(x.Page, y.Page));
 		}
 
 		private void WriteFile(bool isLoadCall)

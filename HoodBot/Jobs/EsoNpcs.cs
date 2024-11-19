@@ -112,7 +112,7 @@
 
 		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => x.Npc.Title is Title xTitle
 				? y.Npc.Title is Title yTitle
-					? Title.Compare(xTitle, yTitle)
+					? TitleComparer.Instance.Compare(xTitle, yTitle)
 					: 1
 				: y.Npc.Title is null
 					? 0

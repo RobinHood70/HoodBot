@@ -1,6 +1,4 @@
-﻿#pragma warning disable CA1036 // Override methods on comparable types
-// Comparison semantics make no sense outside of sorting, so we strictly implement CompareTo and nothing else.
-namespace RobinHood70.Robby
+﻿namespace RobinHood70.Robby
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
@@ -10,8 +8,7 @@ namespace RobinHood70.Robby
 	using RobinHood70.WikiCommon;
 
 	/// <summary>A structure to hold page Title information.</summary>
-	[SuppressMessage("Rules", "MA0097:A class that implements IComparable<T> or IComparable should override comparison operators", Justification = "While sorting makes some sense for a Title, <> comparison operators are likely to be a mistake for PageName comparison.")]
-	public sealed class Title : IComparable<Title>, IEquatable<Title>, ITitle
+	public sealed class Title : IEquatable<Title>, ITitle
 	{
 		#region Private Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -58,13 +55,6 @@ namespace RobinHood70.Robby
 		{
 			throw new InvalidOperationException();
 		}
-		#endregion
-
-		#region Public Static Properties
-
-		/// <summary>Gets a <see cref="Comparison{T}"/> intended for sorting purposes only.</summary>
-		/// <remarks>This is defined as a Comparison rather than making the class IComparable since less-than/greater-than semantics don't really make sense outside of sorting.</remarks>
-		public static Comparison<Title> SortComparer => new(Compare);
 		#endregion
 
 		#region Public Properties
@@ -117,20 +107,6 @@ namespace RobinHood70.Robby
 
 		#region Public Static Methods
 
-		/// <summary>Compares two <see cref="Title"/>s and returns an integer indicating the sort position of the first relative to the second.</summary>
-		/// <param name="x">The first Title.</param>
-		/// <param name="y">The second Title.</param>
-		/// <returns>An integer indicating whether the first Title is less than (-1), equal to (0), or greater than (1) the second Title.</returns>
-		/// <exception cref="InvalidOperationException">Thrown when the Site values don't match.</exception>
-		/// <remarks>This is not implemented as an IComparer because less-than/greater-than semantics only really apply in the context of sorting. The Comparer is made public primarily for the convenience of other sorting methods.</remarks>
-		public static int Compare(Title? x, Title? y) => Globals.GenericComparer(x, y, (x, y) =>
-			{
-				var nsCompare = Namespace.Compare(x.Namespace, y.Namespace);
-				return nsCompare != 0
-					? nsCompare
-					: x.Namespace.ComparePageNames(x.PageName, y.PageName);
-			});
-
 		/// <summary>Trims the disambiguator off of a string (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The page name to modify.</param>
 		/// <returns>The text with the final paranthetical text removed.</returns>
@@ -149,20 +125,6 @@ namespace RobinHood70.Robby
 		public string BasePageName() => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
 				? this.PageName[..subPageLoc]
 				: this.PageName;
-
-		/// <inheritdoc/>
-		public int CompareTo(Title? other)
-		{
-			if (other is null)
-			{
-				return 1;
-			}
-
-			var nsCompare = Namespace.Compare(this.Namespace, other.Namespace);
-			return nsCompare == 0
-				? this.Namespace.ComparePageNames(this.PageName, other.PageName)
-				: nsCompare;
-		}
 
 		/// <summary>Determines whether the specified <see cref="Title"/> is equal to the current one.</summary>
 		/// <param name="other">The Title to compare with the current one.</param>
@@ -266,4 +228,3 @@ namespace RobinHood70.Robby
 		#endregion
 	}
 }
-#pragma warning restore CA1036 // Override methods on comparable types

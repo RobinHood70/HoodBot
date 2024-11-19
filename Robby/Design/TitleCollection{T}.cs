@@ -316,8 +316,8 @@
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public void Sort()
 		{
-			var list = (List<T>)this.Items;
-			list.Sort((x, y) => x.Title.CompareTo(y.Title));
+			var list = (List<ITitle>)this.Items;
+			list.Sort(TitleComparer.Instance);
 		}
 		#endregion
 
