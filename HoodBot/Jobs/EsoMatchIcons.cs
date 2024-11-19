@@ -74,6 +74,7 @@
 				Globals.ThrowIfNull(latestRevision.Sha1, nameof(latestRevision), nameof(latestRevision.Sha1));
 				this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
 				SiteParser parser = new(page);
+				FindLicense(parser); // TODO: This is a dummy line put in here to shut up the nag until I can come back to this.
 				this.ReplaceLicense(parser);
 				PageParts parts = new(filePage);
 				if (foundIcons == null || foundIcons.Count == 0)
