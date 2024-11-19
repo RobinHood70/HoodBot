@@ -281,7 +281,7 @@
 			ArgumentNullException.ThrowIfNull(pageName);
 			pageName = WikiTextUtilities.TrimCruft(pageName);
 			var retval = new TitleFactory(site, defaultNamespace, pageName);
-			return retval.IsValid(false)
+			return retval.IsValid(true)
 				? retval
 				: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
 		}
@@ -295,7 +295,7 @@
 			ArgumentNullException.ThrowIfNull(pageName);
 			pageName = WikiTextUtilities.TrimCruft(pageName);
 			var retval = new TitleFactory(defaultNamespace.Site, defaultNamespace.Id, pageName);
-			return retval.IsValid(false)
+			return retval.IsValid(true)
 				? retval
 				: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
 		}
