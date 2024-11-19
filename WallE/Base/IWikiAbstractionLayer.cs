@@ -3,6 +3,7 @@
 	/* The documentation in this and class is somewhat minimal and repetitive; documentation in the various input, result, and module classes is virtually non-existent. This is due to the fact that much of it is already documented on MediaWiki's website. I have provided links to the relevant pages here in favour of wasting time documenting a lot of classes with duplicate information. */
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
@@ -59,6 +60,7 @@
 
 	/// <summary>An interface for abstraction layers to implement most MediaWiki functionality.</summary>
 	/// <remarks>While centered around the API, the intent is that alternate versions could be created that implement the same or reduced feature set using other methods, such as using index.php or a direct-to-database layer.</remarks>
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Not much to be done while maintaining the ease of abstraction (e.g., using index.php or a database layer). If anyone has a better design, I'm all ears!")]
 	public interface IWikiAbstractionLayer
 	{
 		#region Events

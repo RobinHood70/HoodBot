@@ -6,6 +6,7 @@
 	using System.Collections.Immutable;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using System.Net;
@@ -57,6 +58,7 @@
 
 	/// <summary>Represents a single wiki site.</summary>
 	/// <seealso cref="IMessageSource" />
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{
 		#region Private Constants
