@@ -7,16 +7,21 @@
 	using RobinHood70.WikiCommon;
 
 	#region Public Delegates
-	public delegate string? MagicWordMethod(Context context, TemplateStack stack);
+
+	/// <summary>Delegate for a method that handles any type of magic word or template.</summary>
+	/// <param name="context">The context to parse the magic word under.</param>
+	/// <param name="stack">The template stack.</param>
+	/// <returns>A string representing the return value of the magic word or template.</returns>
+	public delegate string? MagicWordHandler(Context context, TemplateStack stack);
 	#endregion
 
 	/// <summary>A class that holds various context information for parsing. All properties except Site are optional; parsing will be skipped for any elements that rely on properties that are set to <see langword="null"/>.</summary>
 	public sealed class Context
 	{
 		#region Fields
-		private readonly MixedSensitivityDictionary<MagicWordMethod> parserFunctionResolvers = [];
-		private readonly Dictionary<Title, MagicWordMethod> templateResolvers = new(TitleComparer.Instance);
-		private readonly MixedSensitivityDictionary<MagicWordMethod> variableResolvers = [];
+		private readonly MixedSensitivityDictionary<MagicWordHandler> parserFunctionHandlers = [];
+		private readonly Dictionary<Title, MagicWordHandler> templateHandlers = new(TitleComparer.Instance);
+		private readonly MixedSensitivityDictionary<MagicWordHandler> variableHandlers = [];
 		private Title? title;
 		#endregion
 
@@ -27,13 +32,13 @@
 		public Context(Site site)
 		{
 			this.Site = site;
-			this.AddParserFunctionMethod("namespace", NamespacePF);
-			this.AddParserFunctionMethod("pagename", PageNamePF);
+			this.AddParserFunctionHandler("namespace", NamespacePF);
+			this.AddParserFunctionHandler("pagename", PageNamePF);
 
-			this.AddTemplateMethod("Sic", SicTemplate);
+			this.AddTemplateHandler("Sic", SicTemplate);
 
-			this.AddVariableMethod("namespace", NamespaceVar);
-			this.AddVariableMethod("pagename", PageNameVar);
+			this.AddVariableHandler("namespace", NamespaceVar);
+			this.AddVariableHandler("pagename", PageNameVar);
 		}
 		#endregion
 
@@ -55,37 +60,50 @@
 		#endregion
 
 		#region Public Methods
-		public void AddParserFunctionMethod(string word, MagicWordMethod func)
+
+		/// <summary>Adds a new parser function handler.</summary>
+		/// <param name="word">The magic word associated with the parser function.</param>
+		/// <param name="handler">The handler that resolves the parser function.</param>
+		public void AddParserFunctionHandler(string word, MagicWordHandler handler)
 		{
 			ArgumentNullException.ThrowIfNull(word);
-			ArgumentNullException.ThrowIfNull(func);
+			ArgumentNullException.ThrowIfNull(handler);
 			var mw = this.Site.MagicWords[word];
 			foreach (var alias in mw.Aliases)
 			{
-				this.parserFunctionResolvers.Add(mw.CaseSensitive, alias, func);
+				this.parserFunctionHandlers.Add(mw.CaseSensitive, alias, handler);
 			}
 		}
 
-		public void AddTemplateMethod(string word, MagicWordMethod func)
+		/// <summary>Adds a new template handler.</summary>
+		/// <param name="word">The template name. For templates outside template space, specify the namespace just as you would on a wiki.</param>
+		/// <param name="handler">The handler that resolves the template.</param>
+		public void AddTemplateHandler(string word, MagicWordHandler handler)
 		{
 			ArgumentNullException.ThrowIfNull(word);
-			ArgumentNullException.ThrowIfNull(func);
+			ArgumentNullException.ThrowIfNull(handler);
 			var templateTitle = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, word);
-			this.templateResolvers.Add(templateTitle, func);
+			this.templateHandlers.Add(templateTitle, handler);
 		}
 
-		public void AddVariableMethod(string word, MagicWordMethod func)
+		/// <summary>Adds a new variable handler.</summary>
+		/// <param name="word">The magic word associated with the variable.</param>
+		/// <param name="handler">The handler that resolves the variable.</param>
+		public void AddVariableHandler(string word, MagicWordHandler handler)
 		{
 			ArgumentNullException.ThrowIfNull(word);
-			ArgumentNullException.ThrowIfNull(func);
+			ArgumentNullException.ThrowIfNull(handler);
 			var mw = this.Site.MagicWords[word];
 			foreach (var alias in mw.Aliases)
 			{
-				this.variableResolvers.Add(mw.CaseSensitive, alias, func);
+				this.variableHandlers.Add(mw.CaseSensitive, alias, handler);
 			}
 		}
 
-		public MagicWordMethod? GetMagicWordFunction(TemplateStack stack)
+		/// <summary>Finds the appropriate magic word handler based on the template details found on the current level of the stack.</summary>
+		/// <param name="stack">The stack that contains the template information.</param>
+		/// <returns>A suitable handler or <see langword="null"/> if no handler was found.</returns>
+		public MagicWordHandler? FindMagicWordHandler(TemplateStack stack)
 		{
 			ArgumentNullException.ThrowIfNull(stack);
 			var name = stack.Name;
@@ -100,9 +118,9 @@
 			// Variable
 			if (stack.FirstArgument is null &&
 				stack.Parameters.Count == 0 &&
-				this.variableResolvers.TryGetValue(name, out var varFunc))
+				this.variableHandlers.TryGetValue(name, out var handler))
 			{
-				return varFunc;
+				return handler;
 			}
 
 			// TODO: msg, msgnw, raw
@@ -115,15 +133,15 @@
 
 			// Parser Function
 			if (stack.FirstArgument is not null &&
-				this.parserFunctionResolvers.TryGetValue(name, out var pfFunc))
+				this.parserFunctionHandlers.TryGetValue(name, out handler))
 			{
-				return pfFunc;
+				return handler;
 			}
 
 			// Template
 			var templateTitle = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, name);
-			return this.templateResolvers.TryGetValue(templateTitle, out var templateFunc)
-				? templateFunc
+			return this.templateHandlers.TryGetValue(templateTitle, out handler)
+				? handler
 				: null;
 		}
 		#endregion

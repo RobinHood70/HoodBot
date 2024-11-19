@@ -18,19 +18,33 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the parsing context.</summary>
 		public Context Context => context;
 
+		/// <summary>Gets the template stack.</summary>
 		public TemplateStack Stack => stack;
 
-		public string Text => this.builder.ToString();
+		/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
+		/// <remarks>The magic words in the list will always be the ID of the magic word rather than the text used on the page (e.g., aliases and capitalization variants).</remarks>
+		public SortedSet<string> UnhandledMagicWords { get; } = [];
 		#endregion
 
 		#region Public Static Methods
+
+		/// <summary>Builds the plain text from a text string.</summary>
+		/// <param name="text">The text to parse.</param>
+		/// <param name="context">The context to parse with.</param>
+		/// <returns>The parsed text.</returns>
 		public static string Build(string text, Context context) => (text is null || text.Length == 0)
 			? string.Empty
 			: Build(new WikiNodeFactory().Parse(text), context);
 
-		public static string Build(IEnumerable<IWikiNode> nodes, Context context) => Build(nodes, context, TemplateStack.NewRoot());
+		/// <summary>Builds the plain text from a text string.</summary>
+		/// <param name="nodes">The pre-parsed text to parse.</param>
+		/// <param name="context">The context to parse with.</param>
+		/// <returns>The parsed text.</returns>
+		public static string Build(IEnumerable<IWikiNode> nodes, Context context) => Build(nodes, context, TemplateStack.CreateRoot());
 		#endregion
 
 		#region IWikiNodeVisitor Methods
@@ -114,11 +128,16 @@
 			ArgumentNullException.ThrowIfNull(template);
 			var newStack = this.AddToStack(template, this.Stack);
 			string? text = null;
-			if (this.Context.GetMagicWordFunction(newStack) is MagicWordMethod func)
+			if (this.Context.FindMagicWordHandler(newStack) is MagicWordHandler handler)
 			{
-				text = func(context, newStack);
+				text = handler(context, newStack);
+			}
+			else
+			{
+				this.UnhandledMagicWords.Add(this.Stack.Name);
 			}
 
+			// Not simply in an else clause since handler could be found and return null to indicate invalid syntax.
 			text ??= template.ToRaw();
 			this.builder.Append(text);
 		}
@@ -129,6 +148,12 @@
 			ArgumentNullException.ThrowIfNull(text);
 			this.builder.Append(text.Text);
 		}
+		#endregion
+
+		#region Public Override Methods
+
+		/// <inheritdoc/>
+		public override string ToString() => this.builder.ToString();
 		#endregion
 
 		#region Private Static Methods
@@ -145,11 +170,20 @@
 
 			var parser = new ParseToText(context, stack);
 			parser.Visit(nodes);
-			return parser.Text;
+			return parser.ToString();
 		}
 		#endregion
 
 		#region Private Methods
+		private TemplateStack AddToStack(ITemplateNode template, TemplateStack parent)
+		{
+			var resolvedName = Build(template.TitleNodes, this.Context);
+			var split = resolvedName.Split(TextArrays.Colon, 2);
+			var firstArg = split.Length == 2 ? split[1] : null;
+			var parameters = this.BuildParameters(template);
+			return new TemplateStack(split[0], firstArg, parameters, parent);
+		}
+
 		private Dictionary<string, string> BuildParameters(ITemplateNode template)
 		{
 			var parameters = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -172,15 +206,6 @@
 			}
 
 			return parameters;
-		}
-
-		private TemplateStack AddToStack(ITemplateNode template, TemplateStack parent)
-		{
-			var resolvedName = Build(template.TitleNodes, this.Context);
-			var split = resolvedName.Split(TextArrays.Colon, 2);
-			var firstArg = split.Length == 2 ? split[1] : null;
-			var parameters = this.BuildParameters(template);
-			return new TemplateStack(split[0], firstArg, parameters, parent);
 		}
 		#endregion
 	}

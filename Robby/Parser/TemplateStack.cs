@@ -10,8 +10,12 @@
 	/// <param name="Parent">The parent TemplateContext object.</param>
 	public record TemplateStack(string Name, string? FirstArgument, IDictionary<string, string> Parameters, TemplateStack? Parent)
 	{
+		/// <summary>Gets the number of TemplateStacks above this one.</summary>
 		public int Depth { get; } = Parent is null ? 0 : Parent.Depth + 1;
 
-		public static TemplateStack NewRoot() => new(string.Empty, null, new Dictionary<string, string>(StringComparer.Ordinal), null);
+		/// <summary>Creates a new root TemplateStack.</summary>
+		/// <returns>A new TemplateStack with all empty parameters.</returns>
+		/// <remarks>The dictionary is initialized as normal rather than using an ImmutableDictionary.Empty to allow future implementation of magic words like MetaTemplate's {{#local}} and similar that can define pseudo-parameters at the root level.</remarks>
+		public static TemplateStack CreateRoot() => new(string.Empty, null, new Dictionary<string, string>(StringComparer.Ordinal), null);
 	}
 }
