@@ -13,7 +13,7 @@
 	/// <param name="context">The parsing context information.</param>
 	/// <param name="stack">The template stack.</param>
 	/// <remarks>Initializes a new instance of the <see cref="ParseToText"/> class.</remarks>
-	public sealed class ParseToText(Context context, TemplateStack stack) : IWikiNodeVisitor
+	public sealed class ParseToText(Context context, MagicWordFrame stack) : IWikiNodeVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder = new();
@@ -25,7 +25,7 @@
 		public Context Context => context;
 
 		/// <summary>Gets the template stack.</summary>
-		public TemplateStack Stack => stack;
+		public MagicWordFrame Stack => stack;
 		#endregion
 
 		#region Public Static Methods
@@ -42,7 +42,7 @@
 		/// <param name="nodes">The pre-parsed text to parse.</param>
 		/// <param name="context">The context to parse with.</param>
 		/// <returns>The parsed text.</returns>
-		public static string Build(IEnumerable<IWikiNode> nodes, Context context) => Build(nodes, context, TemplateStack.CreateRoot());
+		public static string Build(IEnumerable<IWikiNode> nodes, Context context) => Build(nodes, context, MagicWordFrame.CreateRoot());
 		#endregion
 
 		#region IWikiNodeVisitor Methods
@@ -130,10 +130,6 @@
 			{
 				text = handler(context, newStack);
 			}
-			else
-			{
-				context.UnhandledMagicWords.Add(this.Stack.Name);
-			}
 
 			// Not simply in an else clause since handler could be found and return null to indicate invalid syntax.
 			text ??= template.ToRaw();
@@ -155,11 +151,11 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string Build(string text, Context context, TemplateStack stack) => (text is null || text.Length == 0)
+		private static string Build(string text, Context context, MagicWordFrame stack) => (text is null || text.Length == 0)
 			? string.Empty
 			: Build(new WikiNodeFactory().Parse(text), context, stack);
 
-		private static string Build(IEnumerable<IWikiNode> nodes, Context context, TemplateStack stack)
+		private static string Build(IEnumerable<IWikiNode> nodes, Context context, MagicWordFrame stack)
 		{
 			if (nodes is null)
 			{
@@ -173,13 +169,11 @@
 		#endregion
 
 		#region Private Methods
-		private TemplateStack AddToStack(ITemplateNode template, TemplateStack parent)
+		private MagicWordFrame AddToStack(ITemplateNode template, MagicWordFrame parent)
 		{
-			var resolvedName = Build(template.TitleNodes, this.Context);
-			var split = resolvedName.Split(TextArrays.Colon, 2);
-			var firstArg = split.Length == 2 ? split[1] : null;
+			var name = Build(template.TitleNodes, this.Context);
 			var parameters = this.BuildParameters(template);
-			return new TemplateStack(split[0], firstArg, parameters, parent);
+			return new MagicWordFrame(name, parameters, parent);
 		}
 
 		private Dictionary<string, string> BuildParameters(ITemplateNode template)

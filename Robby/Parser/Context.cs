@@ -12,7 +12,7 @@
 	/// <param name="context">The context to parse the magic word under.</param>
 	/// <param name="stack">The template stack.</param>
 	/// <returns>A string representing the return value of the magic word or template.</returns>
-	public delegate string? MagicWordHandler(Context context, TemplateStack stack);
+	public delegate string? MagicWordHandler(Context context, MagicWordFrame stack);
 	#endregion
 
 	/// <summary>A class that holds various context information for parsing. All properties except Site are optional; parsing will be skipped for any elements that rely on properties that are set to <see langword="null"/>.</summary>
@@ -107,7 +107,7 @@
 		/// <summary>Finds the appropriate magic word handler based on the template details found on the current level of the stack.</summary>
 		/// <param name="stack">The stack that contains the template information.</param>
 		/// <returns>A suitable handler or <see langword="null"/> if no handler was found.</returns>
-		public MagicWordHandler? FindMagicWordHandler(TemplateStack stack)
+		public MagicWordHandler? FindMagicWordHandler(MagicWordFrame stack)
 		{
 			ArgumentNullException.ThrowIfNull(stack);
 			var name = stack.Name;
@@ -120,9 +120,7 @@
 			}
 
 			// Variable
-			if (stack.FirstArgument is null &&
-				stack.Parameters.Count == 0 &&
-				this.variableHandlers.TryGetValue(name, out var handler))
+			if (stack.MayBeVariable && this.variableHandlers.TryGetValue(name, out var handler))
 			{
 				return handler;
 			}
@@ -136,7 +134,7 @@
 			}
 
 			// Parser Function
-			if (stack.FirstArgument is not null &&
+			if (stack.IsParserFunction &&
 				this.parserFunctionHandlers.TryGetValue(name, out handler))
 			{
 				return handler;
@@ -144,28 +142,32 @@
 
 			// Template
 			var templateTitle = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, name);
-			return this.templateHandlers.TryGetValue(templateTitle, out handler)
-				? handler
-				: null;
+			if (this.templateHandlers.TryGetValue(templateTitle, out handler))
+			{
+				return handler;
+			}
+
+			this.UnhandledMagicWords.Add(name);
+			return null;
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static string? NamespacePF(Context context, TemplateStack stack) =>
+		private static string? NamespacePF(Context context, MagicWordFrame stack) =>
 			stack.FirstArgument?.Length > 0
 				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).Namespace.CanonicalName
 				: string.Empty;
 
-		private static string? NamespaceVar(Context context, TemplateStack stack) => context.Title?.Namespace.CanonicalName;
+		private static string? NamespaceVar(Context context, MagicWordFrame stack) => context.Title?.Namespace.CanonicalName;
 
-		private static string? PageNamePF(Context context, TemplateStack stack) =>
+		private static string? PageNamePF(Context context, MagicWordFrame stack) =>
 			stack.FirstArgument?.Length > 0
 				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).PageName
 				: string.Empty;
 
-		private static string? PageNameVar(Context context, TemplateStack stack) => context.Title?.PageName;
+		private static string? PageNameVar(Context context, MagicWordFrame stack) => context.Title?.PageName;
 
-		private static string? SicTemplate(Context context, TemplateStack stack) =>
+		private static string? SicTemplate(Context context, MagicWordFrame stack) =>
 			stack.Parameters.TryGetValue("1", out var value)
 				? value
 				: string.Empty;
