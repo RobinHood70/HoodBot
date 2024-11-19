@@ -7,6 +7,8 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
+	// TODO: In theory, it should be possible to use a single StringBuilder passed to each instance, but this is more complext than it appears at first glance, since sometimes strings need to be built but not added to the builder (e.g., processing {{{ {{TemplateGives1}}|Hello}}}}} where the "1" should be fully built but not added.
+
 	/// <summary>Parses wikitext and converts what it can to plain text.</summary>
 	/// <param name="context">The parsing context information.</param>
 	/// <param name="stack">The template stack.</param>
@@ -24,10 +26,6 @@
 
 		/// <summary>Gets the template stack.</summary>
 		public TemplateStack Stack => stack;
-
-		/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
-		/// <remarks>The magic words in the list will always be the ID of the magic word rather than the text used on the page (e.g., aliases and capitalization variants).</remarks>
-		public SortedSet<string> UnhandledMagicWords { get; } = [];
 		#endregion
 
 		#region Public Static Methods
@@ -134,7 +132,7 @@
 			}
 			else
 			{
-				this.UnhandledMagicWords.Add(this.Stack.Name);
+				context.UnhandledMagicWords.Add(this.Stack.Name);
 			}
 
 			// Not simply in an else clause since handler could be found and return null to indicate invalid syntax.

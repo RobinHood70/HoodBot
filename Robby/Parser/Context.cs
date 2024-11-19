@@ -57,6 +57,10 @@
 			get => this.title ?? this.Page?.Title;
 			init => this.title = value;
 		}
+
+		/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
+		/// <remarks>The magic words in the list will always be the ID of the magic word rather than the text used on the page (e.g., aliases and capitalization variants).</remarks>
+		public SortedSet<string> UnhandledMagicWords { get; } = [];
 		#endregion
 
 		#region Public Methods
