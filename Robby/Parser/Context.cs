@@ -59,8 +59,8 @@
 		}
 
 		/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
-		/// <remarks>The magic words in the list will always be the ID of the magic word rather than the text used on the page (e.g., aliases and capitalization variants).</remarks>
-		public SortedSet<string> UnhandledMagicWords { get; } = [];
+		/// <remarks>The list is always fully case sensitive, since it cannot be known if these are names in template space or case-sensitive words.</remarks>
+		public SortedSet<string> UnhandledMagicWords { get; } = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Public Methods
