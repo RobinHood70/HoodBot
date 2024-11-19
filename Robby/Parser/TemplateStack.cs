@@ -10,6 +10,8 @@
 	/// <param name="Parent">The parent TemplateContext object.</param>
 	public record TemplateStack(string Name, string? FirstArgument, IDictionary<string, string> Parameters, TemplateStack? Parent)
 	{
+		public int Depth { get; } = Parent is null ? 0 : Parent.Depth + 1;
+
 		public static TemplateStack NewRoot() => new(string.Empty, null, new Dictionary<string, string>(StringComparer.Ordinal), null);
 	}
 }
