@@ -27,7 +27,7 @@
 				Title = TitleFactory.FromUnvalidated(this.Site, "Main Page")
 			};
 
-			this.StatusWriteLine(ParseToText.Build("The main page is named {{PAGENAME}}", context));
+			this.StatusWriteLine(ParseToText.Build("{{{1|Hello World!}}} The current {{Sic|{{{test|page}}}|pg}} is {{PAGENAME}}. This [[SomePage|link]] should be stripped.", context));
 		}
 		#endregion
 

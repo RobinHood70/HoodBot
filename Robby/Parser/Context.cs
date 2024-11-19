@@ -6,17 +6,18 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	#region Global Delegates
-	public delegate string? TemplateFunction(string name, string? firstArg, IDictionary<string, string> parameters, Context context);
+	#region Public Delegates
+	public delegate string? MagicWordMethod(Context context, TemplateStack stack);
 	#endregion
 
 	/// <summary>A class that holds various context information for parsing. All properties except Site are optional; parsing will be skipped for any elements that rely on properties that are set to <see langword="null"/>.</summary>
 	public sealed class Context
 	{
 		#region Fields
-		private readonly MixedSensitivityDictionary<TemplateFunction> parserFunctionResolvers = [];
-		private readonly Dictionary<Title, TemplateFunction> templateResolvers = new(TitleComparer.Instance);
-		private readonly MixedSensitivityDictionary<TemplateFunction> variableResolvers = [];
+		private readonly MixedSensitivityDictionary<MagicWordMethod> parserFunctionResolvers = [];
+		private readonly Dictionary<Title, MagicWordMethod> templateResolvers = new(TitleComparer.Instance);
+		private readonly MixedSensitivityDictionary<MagicWordMethod> variableResolvers = [];
+		private Title? title;
 		#endregion
 
 		#region Constructors
@@ -26,35 +27,69 @@
 		public Context(Site site)
 		{
 			this.Site = site;
-			this.AddMagicWord(true, "namespace", NamespacePF);
-			this.AddMagicWord(false, "namespace", NamespaceVar);
-			this.AddMagicWord(true, "pagename", PageNamePF);
-			this.AddMagicWord(false, "pagename", PageNameVar);
+			this.AddParserFunctionMethod("namespace", NamespacePF);
+			this.AddParserFunctionMethod("pagename", PageNamePF);
+
+			this.AddTemplateMethod("Sic", SicTemplate);
+
+			this.AddVariableMethod("namespace", NamespaceVar);
+			this.AddVariableMethod("pagename", PageNameVar);
 		}
 		#endregion
 
 		#region Public Properties
 
+		/// <summary>Gets the <see cref="Page"/> to use for magic words like {{PAGENAME}}.</summary>
+		public Page? Page { get; init; }
+
 		/// <summary>Gets the Site object.</summary>
 		public Site Site { get; }
 
-		/// <summary>Gets the object to use for parsing {{PAGENAME}} and similar variables. Note that this can be any type of <see cref="ITitle"/>, with a <see cref="Page"/> providing the most context information to the parser.</summary>
-		public ITitle? Title { get; init; }
+		/// <summary>Gets the title to use for magic words like {{PAGENAME}}.</summary>
+		/// <remarks>Title does not need to be specified explicitly if <see cref="Page"/> is set.</remarks>
+		public Title? Title
+		{
+			get => this.title ?? this.Page?.Title;
+			init => this.title = value;
+		}
 		#endregion
 
 		#region Public Methods
-		public void AddMagicWord(bool isParserFunction, string word, TemplateFunction func)
+		public void AddParserFunctionMethod(string word, MagicWordMethod func)
 		{
-			var dict = isParserFunction ? this.parserFunctionResolvers : this.variableResolvers;
+			ArgumentNullException.ThrowIfNull(word);
+			ArgumentNullException.ThrowIfNull(func);
 			var mw = this.Site.MagicWords[word];
 			foreach (var alias in mw.Aliases)
 			{
-				dict.Add(mw.CaseSensitive, alias, func);
+				this.parserFunctionResolvers.Add(mw.CaseSensitive, alias, func);
 			}
 		}
 
-		public TemplateFunction? GetMagicWordFunction(string name, bool? hasArgs)
+		public void AddTemplateMethod(string word, MagicWordMethod func)
 		{
+			ArgumentNullException.ThrowIfNull(word);
+			ArgumentNullException.ThrowIfNull(func);
+			var title = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, word);
+			this.templateResolvers.Add(title, func);
+		}
+
+		public void AddVariableMethod(string word, MagicWordMethod func)
+		{
+			ArgumentNullException.ThrowIfNull(word);
+			ArgumentNullException.ThrowIfNull(func);
+			var mw = this.Site.MagicWords[word];
+			foreach (var alias in mw.Aliases)
+			{
+				this.variableResolvers.Add(mw.CaseSensitive, alias, func);
+			}
+		}
+
+		public MagicWordMethod? GetMagicWordFunction(TemplateStack stack)
+		{
+			ArgumentNullException.ThrowIfNull(stack);
+			var name = stack.Name;
+
 			// TODO: safesubst, subst
 			if (string.Equals(name, "subst", StringComparison.OrdinalIgnoreCase) ||
 				string.Equals(name, "safesubst", StringComparison.OrdinalIgnoreCase))
@@ -63,10 +98,11 @@
 			}
 
 			// Variable
-			if (hasArgs != true &&
-				this.variableResolvers.TryGetValue(name, out var value))
+			if (stack.FirstArgument is null &&
+				stack.Parameters.Count == 0 &&
+				this.variableResolvers.TryGetValue(name, out var varFunc))
 			{
-				return value;
+				return varFunc;
 			}
 
 			// TODO: msg, msgnw, raw
@@ -78,32 +114,39 @@
 			}
 
 			// Parser Function
-			if (hasArgs != false && this.parserFunctionResolvers.TryGetValue(name, out value))
+			if (stack.FirstArgument is not null &&
+				this.parserFunctionResolvers.TryGetValue(name, out var pfFunc))
 			{
-				return value;
+				return pfFunc;
 			}
 
 			// Template
 			var title = TitleFactory.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, name);
-			this.templateResolvers.TryGetValue(title, out value);
-			return value;
+			return this.templateResolvers.TryGetValue(title, out var templateFunc)
+				? templateFunc
+				: null;
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static string? NamespacePF(string name, string? firstArg, IDictionary<string, string> parameters, Context context) =>
-			firstArg is null || firstArg.Length == 0
-				? string.Empty
-				: TitleFactory.FromUnvalidated(context.Site, firstArg).Namespace.CanonicalName;
+		private static string? NamespacePF(Context context, TemplateStack stack) =>
+			stack.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).Namespace.CanonicalName
+				: string.Empty;
 
-		private static string? NamespaceVar(string name, string? firstArg, IDictionary<string, string> parameters, Context context) => context.Title?.Title.PageName;
+		private static string? NamespaceVar(Context context, TemplateStack stack) => context.Title?.Namespace.CanonicalName;
 
-		private static string? PageNamePF(string name, string? firstArg, IDictionary<string, string> parameters, Context context) =>
-			firstArg is null || firstArg.Length == 0
-				? string.Empty
-				: TitleFactory.FromUnvalidated(context.Site, firstArg).Namespace.CanonicalName;
+		private static string? PageNamePF(Context context, TemplateStack stack) =>
+			stack.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).PageName
+				: string.Empty;
 
-		private static string? PageNameVar(string name, string? firstArg, IDictionary<string, string> parameters, Context context) => context.Title?.Title.PageName;
+		private static string? PageNameVar(Context context, TemplateStack stack) => context.Title?.PageName;
+
+		private static string? SicTemplate(Context context, TemplateStack stack) =>
+			stack.Parameters.TryGetValue("1", out var value)
+				? value
+				: string.Empty;
 		#endregion
 	}
 }
