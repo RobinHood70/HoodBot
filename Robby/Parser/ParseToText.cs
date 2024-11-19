@@ -56,7 +56,11 @@
 		/// <inheritdoc/>
 		public void Visit(IHeaderNode header)
 		{
-			throw new System.NotImplementedException();
+			ArgumentNullException.ThrowIfNull(header);
+			var equals = new string('=', header.Level);
+			var text = ParseToText.Build(header.Title, context, this.Stack);
+			var comment = ParseToText.Build(header.Comment, context, this.Stack);
+			this.builder.Append(string.Concat(equals, text, equals, comment));
 		}
 
 		/// <inheritdoc/>
@@ -93,13 +97,15 @@
 		/// <inheritdoc/>
 		public void Visit(IParameterNode parameter)
 		{
-			throw new System.NotImplementedException();
+			throw new NotSupportedException("This should never be hit, since neither template nor link parsing ever call it.");
 		}
 
 		/// <inheritdoc/>
 		public void Visit(ITagNode tag)
 		{
-			throw new System.NotImplementedException();
+			// For now, we just return the inner text under the assumption that tags will be things like <s><i><b> and so forth. More complex decision-making can be added later if needed.
+			ArgumentNullException.ThrowIfNull(tag);
+			this.builder.Append(tag.InnerText);
 		}
 
 		/// <inheritdoc/>
