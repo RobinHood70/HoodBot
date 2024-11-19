@@ -60,6 +60,7 @@
 
 	/// <summary>An interface for abstraction layers to implement most MediaWiki functionality.</summary>
 	/// <remarks>While centered around the API, the intent is that alternate versions could be created that implement the same or reduced feature set using other methods, such as using index.php or a direct-to-database layer.</remarks>
+	[SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Not much to be done while maintaining the ease of abstraction (e.g., using index.php or a database layer). If anyone has a better design, I'm all ears!")]
 	public interface IWikiAbstractionLayer
 	{

@@ -1,4 +1,5 @@
-﻿#pragma warning disable MA0025 // Implement the functionality instead of throwing NotImplementedException
+﻿#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable MA0025 // Implement the functionality instead of throwing NotImplementedException
 namespace RobinHood70.WallE.Test
 {
 	using System;
@@ -492,4 +493,3 @@ namespace RobinHood70.WallE.Test
 		#endregion
 	}
 }
-#pragma warning restore MA0025 // Implement the functionality instead of throwing NotImplementedException

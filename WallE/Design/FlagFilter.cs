@@ -1,7 +1,7 @@
-﻿#pragma warning disable SA1402 // File may only contain a single class; Justification = It makes sense here to have these in one file, and avoids having file names that don't match class names.
-namespace RobinHood70.WallE.Design
+﻿namespace RobinHood70.WallE.Design
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 
 	/// <summary>A static class whose only purpose is to create a FlagFilter using type inference.</summary>
@@ -24,6 +24,8 @@ namespace RobinHood70.WallE.Design
 	/// <remarks>Initializes a new instance of the <see cref="FlagFilter{T}" /> class.</remarks>
 	/// <param name="siteVersion">The site version.</param>
 	/// <param name="originalValue">The original value.</param>
+	[SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
+	[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Appropriate enough here rather than creating mini file for first class.")]
 	public sealed class FlagFilter<T>(int siteVersion, T originalValue)
 		where T : struct, Enum
 	{

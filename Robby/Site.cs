@@ -58,6 +58,7 @@
 
 	/// <summary>Represents a single wiki site.</summary>
 	/// <seealso cref="IMessageSource" />
+	[SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{

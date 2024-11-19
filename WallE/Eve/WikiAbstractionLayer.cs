@@ -19,6 +19,7 @@
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
+	[SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
 	public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, IMaxLaggable, ITokenGenerator
 	{
