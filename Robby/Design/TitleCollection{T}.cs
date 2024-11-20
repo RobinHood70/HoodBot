@@ -313,11 +313,12 @@
 
 		#region Public Abstract Methods
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
+		/// <summary>Sorts the items in the <see cref="TitleCollection{T}">collection</see> by namespace, then pagename.</summary>
 		public void Sort()
 		{
-			var list = (List<ITitle>)this.Items;
-			list.Sort(TitleComparer.Instance);
+			// Casting to a List<ITitle> fails with Page objects, for example, causing TitleComparer.Instance to be incompatible. Instead, we cast Items to what it is underneath the hood and use DirectCompare on the resulting objects.
+			var list = (List<T>)this.Items;
+			list.Sort((t1, t2) => TitleComparer.DirectCompare(t1.Title, t2.Title));
 		}
 		#endregion
 
