@@ -6,16 +6,4 @@
 # Code files
 [*.{cs,vb}]
 
-dotnet_diagnostic.CA1303.severity = none
-dotnet_diagnostic.CA1305.severity = none
-dotnet_diagnostic.CA1501.severity = none
-dotnet_diagnostic.CA1812.severity = none
-
 dotnet_diagnostic.MA0076.severity = none
-
-dotnet_diagnostic.SA1601.severity = none
-dotnet_diagnostic.SA1611.severity = none
-dotnet_diagnostic.SA1615.severity = none
-dotnet_diagnostic.SA1617.severity = none
-dotnet_diagnostic.SA1618.severity = none
-dotnet_diagnostic.SA1619.severity = none
