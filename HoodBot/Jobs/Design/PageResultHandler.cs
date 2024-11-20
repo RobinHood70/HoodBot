@@ -10,8 +10,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
-		/// <param name="site">The site the results page is on.</param>
-		/// <param name="pageName">The page name to save results to.</param>
+		/// <param name="title">The title of the results page.</param>
 		public PageResultHandler(Title title)
 		{
 			this.Title = title;

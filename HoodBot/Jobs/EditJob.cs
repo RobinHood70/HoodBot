@@ -109,7 +109,6 @@
 
 		#region Protected Abstract Methods
 
-		/// <summary>Gets the edit summary to use for the given page.</summary>
 		protected abstract string GetEditSummary(Page page);
 
 		protected abstract void LoadPages();
@@ -133,6 +132,7 @@
 		}
 
 		/// <summary>The action to take when there's an edit conflict on a page.</summary>
+		/// <param name="page">The page affected.</param>
 		/// <returns><see langword="true"/> if the handler handled the conflict; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed. If the method returns false, an error will be thrown.</remarks>
 		protected virtual bool OnEditConflict(Page page) => true; // Assumes OnLoad/OnMissing have sufficiently handled required edits.

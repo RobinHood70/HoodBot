@@ -39,11 +39,8 @@
 
 		#region Internal Methods
 
-		/// <summary>
-		/// Planets_infobox.csv
-		/// Per https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951.
-		/// </summary>
-		/// <remarks>PlanetId,StarId,Name,System,Orbits,Type,Gravity,Temperature_Class,Temperature_Degrees,Atmosphere_Pressure,Atmosphere_Type,Magnetosphere,Fauna,Flora,Water,Traits.</remarks>
+		// From Planets_infobox.csv per https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951.
+		// PlanetId, StarId, Name, System, Orbits, Type, Gravity, Temperature_Class, Temperature_Degrees, Atmosphere_Pressure, Atmosphere_Type, Magnetosphere, Fauna, Flora, Water, Traits
 		internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 		{
 			var items = new Dictionary<Title, Planet>();
