@@ -62,17 +62,17 @@
 
 		#region Public Methods
 
-		/// <summary>This is a shortcut method to get the title of the section's header.</summary>
+		/// <summary>Gets the text title of the section's header.</summary>
 		/// <returns>The section's title.</returns>
-		public string? GetFullTitle() => this.Header is null
+		public string? GetRawTitle() => this.Header is null
 			? null
 			: WikiTextVisitor.Raw(this.Header);
 
-		/// <summary>This is a shortcut method to get the title of the section's header.</summary>
+		/// <summary>Gets the text title of the section's header. The title will be stripped of cruft and trimmed so that it's suitable for searching.</summary>
 		/// <returns>The section's title.</returns>
 		public string? GetTitle() => this.Header is null
 			? null
-			: WikiTextVisitor.Raw(this.Header.Title).Trim();
+			: WikiTextVisitor.Value(this.Header.Title).Trim();
 		#endregion
 
 		#region Public Override Methods
@@ -80,7 +80,7 @@
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			var title = this.GetFullTitle();
+			var title = this.GetRawTitle();
 			var text = this.Content?.Count > 0
 				? WikiTextVisitor.Raw(this.Content[0])
 				: string.Empty;
