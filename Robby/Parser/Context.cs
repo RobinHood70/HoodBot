@@ -10,9 +10,9 @@
 
 	/// <summary>Delegate for a method that handles any type of magic word or template.</summary>
 	/// <param name="context">The context to parse the magic word under.</param>
-	/// <param name="stack">The template stack.</param>
+	/// <param name="frame">The template frame.</param>
 	/// <returns>A string representing the return value of the magic word or template.</returns>
-	public delegate string? MagicWordHandler(Context context, MagicWordFrame stack);
+	public delegate string? MagicWordHandler(Context context, MagicWordFrame frame);
 	#endregion
 
 	/// <summary>A class that holds various context information for parsing. All properties except Site are optional; parsing will be skipped for any elements that rely on properties that are set to <see langword="null"/>.</summary>
@@ -111,37 +111,37 @@
 			}
 		}
 
-		/// <summary>Finds the appropriate magic word handler based on the template details found on the current level of the stack.</summary>
-		/// <param name="stack">The stack that contains the template information.</param>
+		/// <summary>Finds the appropriate magic word handler based on the template details found on the current level of the frame.</summary>
+		/// <param name="frame">The frame that contains the template information.</param>
 		/// <returns>A suitable handler or <see langword="null"/> if no handler was found.</returns>
-		public MagicWordHandler? FindMagicWordHandler(MagicWordFrame stack)
+		public MagicWordHandler? FindMagicWordHandler(MagicWordFrame frame)
 		{
-			ArgumentNullException.ThrowIfNull(stack);
-			var name = stack.Name;
+			ArgumentNullException.ThrowIfNull(frame);
+			var name = frame.Name;
 
 			// TODO: safesubst, subst
-			if (string.Equals(name, "subst", StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(name, "safesubst", StringComparison.OrdinalIgnoreCase))
+			if (name.OrdinalEquals("subst") ||
+				name.OrdinalEquals("safesubst"))
 			{
 				return null;
 			}
 
 			// Variable
-			if (stack.MayBeVariable && this.variableHandlers.TryGetValue(name, out var handler))
+			if (frame.MayBeVariable && this.variableHandlers.TryGetValue(name, out var handler))
 			{
 				return handler;
 			}
 
 			// TODO: msg, msgnw, raw
-			if (string.Equals(name, "msg", StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(name, "msgnw", StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(name, "raw", StringComparison.OrdinalIgnoreCase))
+			if (name.OrdinalEquals("msg") ||
+				name.OrdinalEquals("msgnw") ||
+				name.OrdinalEquals("raw"))
 			{
 				return null;
 			}
 
 			// Parser Function
-			if (stack.IsParserFunction &&
+			if (frame.IsParserFunction &&
 				this.parserFunctionHandlers.TryGetValue(name, out handler))
 			{
 				return handler;
@@ -160,38 +160,38 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string? FullPageNamePF(Context context, MagicWordFrame stack) =>
-			stack.FirstArgument?.Length > 0
-				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).FullPageName()
+		private static string? FullPageNamePF(Context context, MagicWordFrame frame) =>
+			frame.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, frame.FirstArgument).FullPageName()
 				: string.Empty;
 
-		private static string? FullPageNameVar(Context context, MagicWordFrame stack) => context.Title?.FullPageName();
+		private static string? FullPageNameVar(Context context, MagicWordFrame frame) => context.Title?.FullPageName();
 
-		private static string? Ignore(Context context, MagicWordFrame stack) => string.Empty;
+		private static string? Ignore(Context context, MagicWordFrame frame) => string.Empty;
 
-		private static string? NamespacePF(Context context, MagicWordFrame stack) =>
-			stack.FirstArgument?.Length > 0
-				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).Namespace.CanonicalName
+		private static string? NamespacePF(Context context, MagicWordFrame frame) =>
+			frame.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, frame.FirstArgument).Namespace.CanonicalName
 				: string.Empty;
 
-		private static string? NamespaceVar(Context context, MagicWordFrame stack) => context.Title?.Namespace.CanonicalName;
+		private static string? NamespaceVar(Context context, MagicWordFrame frame) => context.Title?.Namespace.CanonicalName;
 
-		private static string? PageNamePF(Context context, MagicWordFrame stack) =>
-			stack.FirstArgument?.Length > 0
-				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).PageName
+		private static string? PageNamePF(Context context, MagicWordFrame frame) =>
+			frame.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, frame.FirstArgument).PageName
 				: string.Empty;
 
-		private static string? PageNameVar(Context context, MagicWordFrame stack) => context.Title?.PageName;
+		private static string? PageNameVar(Context context, MagicWordFrame frame) => context.Title?.PageName;
 
-		private static string? Pipe(Context context, MagicWordFrame stack) => "|";
+		private static string? Pipe(Context context, MagicWordFrame frame) => "|";
 
-		private static string? ReturnFirstParameter(Context context, MagicWordFrame stack) =>
-			stack.Parameters.TryGetValue("1", out var value)
+		private static string? ReturnFirstParameter(Context context, MagicWordFrame frame) =>
+			frame.Parameters.TryGetValue("1", out var value)
 				? value
 				: string.Empty;
 
-		private static string? ReturnSecondParameter(Context context, MagicWordFrame stack) =>
-			stack.Parameters.TryGetValue("2", out var value)
+		private static string? ReturnSecondParameter(Context context, MagicWordFrame frame) =>
+			frame.Parameters.TryGetValue("2", out var value)
 				? value
 				: string.Empty;
 		#endregion

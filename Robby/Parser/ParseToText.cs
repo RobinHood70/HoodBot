@@ -11,9 +11,9 @@
 
 	/// <summary>Parses wikitext and converts what it can to plain text.</summary>
 	/// <param name="context">The parsing context information.</param>
-	/// <param name="stack">The template stack.</param>
+	/// <param name="frame">The template stack.</param>
 	/// <remarks>Initializes a new instance of the <see cref="ParseToText"/> class.</remarks>
-	public sealed class ParseToText(Context context, MagicWordFrame stack) : IWikiNodeVisitor
+	public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNodeVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder = new();
@@ -24,8 +24,8 @@
 		/// <summary>Gets the parsing context.</summary>
 		public Context Context => context;
 
-		/// <summary>Gets the template stack.</summary>
-		public MagicWordFrame Stack => stack;
+		/// <summary>Gets the magic word frame.</summary>
+		public MagicWordFrame Frame => frame;
 		#endregion
 
 		#region Public Static Methods
@@ -52,7 +52,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(argument);
 			var argName = Build(argument.Name, context).Trim();
-			var text = this.Stack.Parameters.TryGetValue(argName, out var paramValue)
+			var text = this.Frame.Parameters.TryGetValue(argName, out var paramValue)
 				? paramValue
 				: argument.DefaultValue is null
 					? null
@@ -70,8 +70,8 @@
 		{
 			ArgumentNullException.ThrowIfNull(header);
 			var equals = new string('=', header.Level);
-			var text = Build(header.Title, context, this.Stack);
-			var comment = Build(header.Comment, context, this.Stack);
+			var text = Build(header.Title, context, this.Frame);
+			var comment = Build(header.Comment, context, this.Frame);
 			this.builder.Append(string.Concat(equals, text, equals, comment));
 		}
 
@@ -86,7 +86,7 @@
 			var siteLink = SiteLink.FromLinkNode(this.Context.Site, link);
 			if (siteLink.Text is not null)
 			{
-				var text = Build(siteLink.Text, this.Context, this.Stack);
+				var text = Build(siteLink.Text, this.Context, this.Frame);
 				this.builder.Append(text);
 			}
 		}
@@ -124,11 +124,11 @@
 		public void Visit(ITemplateNode template)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			var newStack = this.AddToStack(template, this.Stack);
+			var newFrame = this.CreateFrame(template, this.Frame);
 			string? text = null;
-			if (this.Context.FindMagicWordHandler(newStack) is MagicWordHandler handler)
+			if (this.Context.FindMagicWordHandler(newFrame) is MagicWordHandler handler)
 			{
-				text = handler(context, newStack);
+				text = handler(context, newFrame);
 			}
 
 			// Not simply in an else clause since handler could be found and return null to indicate invalid syntax.
@@ -151,25 +151,25 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string Build(string text, Context context, MagicWordFrame stack) => (text is null || text.Length == 0)
+		private static string Build(string text, Context context, MagicWordFrame frame) => (text is null || text.Length == 0)
 			? string.Empty
-			: Build(new WikiNodeFactory().Parse(text), context, stack);
+			: Build(new WikiNodeFactory().Parse(text), context, frame);
 
-		private static string Build(IEnumerable<IWikiNode> nodes, Context context, MagicWordFrame stack)
+		private static string Build(IEnumerable<IWikiNode> nodes, Context context, MagicWordFrame frame)
 		{
 			if (nodes is null)
 			{
 				return string.Empty;
 			}
 
-			var parser = new ParseToText(context, stack);
+			var parser = new ParseToText(context, frame);
 			parser.Visit(nodes);
 			return parser.ToString();
 		}
 		#endregion
 
 		#region Private Methods
-		private MagicWordFrame AddToStack(ITemplateNode template, MagicWordFrame parent)
+		private MagicWordFrame CreateFrame(ITemplateNode template, MagicWordFrame parent)
 		{
 			var name = Build(template.TitleNodes, this.Context);
 			var parameters = this.BuildParameters(template);
@@ -190,10 +190,10 @@
 				}
 				else
 				{
-					key = Build(paramNode.Name, this.Context, this.Stack);
+					key = Build(paramNode.Name, this.Context, this.Frame);
 				}
 
-				var value = Build(paramNode.Value, this.Context, this.Stack);
+				var value = Build(paramNode.Value, this.Context, this.Frame);
 				parameters.Add(key, value);
 			}
 
