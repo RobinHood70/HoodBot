@@ -84,15 +84,13 @@
 				}
 
 				var sectionHeader = parser.Factory.HeaderNodeFromParts(2, "Similar Images");
+				var template = parser.Factory.TemplateNodeFromParts("Similar Images", true, (null, title.PageName));
 				var nodes = new WikiNodeCollection(parser.Factory);
-				var template = parser.Factory.TemplateNodeFromParts("Similar Images");
-				template.Add(title.PageName);
-				sections[insertSection - 1].Content.AddText("\n\n");
 				nodes.AddText("\n");
 				nodes.Add(template);
 				nodes.AddText("\n\n");
 				var similarImages = new Section(sectionHeader, nodes);
-				sections.Insert(insertSection, similarImages);
+				sections.InsertWithSpaceBefore(insertSection, similarImages);
 				parser.FromSections(sections);
 				parser.UpdatePage();
 				page.Text = page.Text.Replace("\n\n\n==Similar Images==", "\n\n==Similar Images==", StringComparison.Ordinal);

@@ -7,13 +7,15 @@
 	public class SectionCollection : List<Section>
 	{
 		#region Constructors
-		public SectionCollection(int level)
-			: this(level, null)
+		public SectionCollection(IWikiNodeFactory factory, int level)
+			: this(factory, level, null)
 		{
 		}
 
-		public SectionCollection(int level, IEnumerable<Section>? sections)
+		public SectionCollection(IWikiNodeFactory factory, int level, IEnumerable<Section>? sections)
 		{
+			ArgumentNullException.ThrowIfNull(factory);
+			this.Factory = factory;
 			if (sections is not null)
 			{
 				this.AddRange(sections);
@@ -26,6 +28,8 @@
 		#endregion
 
 		#region Public Properties
+		public IWikiNodeFactory Factory { get; }
+
 		public int Level { get; }
 		#endregion
 
@@ -75,9 +79,9 @@
 			}
 		}
 
-		public Section? FindFirst(string name) => FindFirst(name, StringComparer.Ordinal, 0);
+		public Section? FindFirst(string name) => this.FindFirst(name, StringComparer.Ordinal, 0);
 
-		public Section? FindFirst(string name, int startIndex) => FindFirst(name, StringComparer.Ordinal, startIndex);
+		public Section? FindFirst(string name, int startIndex) => this.FindFirst(name, StringComparer.Ordinal, startIndex);
 
 		public Section? FindFirst(string name, StringComparer comparer, int startIndex)
 		{
@@ -96,9 +100,9 @@
 			return enumerator.MoveNext() ? enumerator.Current : null;
 		}
 
-		public int IndexOf(string name) => IndexOf(name, StringComparer.Ordinal, 0);
+		public int IndexOf(string name) => this.IndexOf(name, StringComparer.Ordinal, 0);
 
-		public int IndexOf(string name, int startIndex) => IndexOf(name, StringComparer.Ordinal, startIndex);
+		public int IndexOf(string name, int startIndex) => this.IndexOf(name, StringComparer.Ordinal, startIndex);
 
 		public int IndexOf(string name, StringComparer comparer, int startIndex)
 		{
@@ -125,7 +129,7 @@
 		public int IndexOf(ICollection<string> names, int startIndex)
 		{
 			ArgumentNullException.ThrowIfNull(names);
-			for (var i = 0; i < this.Count; i++)
+			for (var i = startIndex; i < this.Count; i++)
 			{
 				var title = this[i].GetTitle();
 				if (title is not null && names.Contains(title))
@@ -135,6 +139,20 @@
 			}
 
 			return -1;
+		}
+
+		public void InsertWithSpaceBefore(int index, Section section, string spaceBefore = "\n\n")
+		{
+			ArgumentNullException.ThrowIfNull(section);
+			ArgumentNullException.ThrowIfNull(spaceBefore);
+			if (index > 0 && this.Count > 0)
+			{
+				var previous = this[index - 1].Content;
+				previous.TrimEnd();
+				previous.AddText(spaceBefore);
+			}
+
+			this.Insert(index, section);
 		}
 		#endregion
 	}

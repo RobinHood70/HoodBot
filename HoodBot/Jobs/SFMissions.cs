@@ -126,24 +126,19 @@
 		{
 			var sections = parser.ToSections(2);
 			Section? summary = null;
-			foreach (var section in sections)
+			foreach (var section in sections.FindAll("Official Summary", StringComparer.OrdinalIgnoreCase, 0))
 			{
-				if (section.GetTitle().OrdinalICEquals("Official Summary"))
+				var text = section.Content.ToRaw();
+				if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))
 				{
-					var text = section.Content.ToRaw();
-					if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))
-					{
-						return;
-					}
-
-					summary = section;
-					break;
+					return;
 				}
+
+				summary = section;
+				break;
 			}
 
 			var lead = sections[0].Content;
-			lead.TrimEnd();
-			lead.AddText("\n\n");
 			if (summary is null)
 			{
 				summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
@@ -152,13 +147,11 @@
 				{
 					var stub = lead[stubIndex];
 					lead.RemoveAt(stubIndex);
-					lead.TrimEnd();
-					lead.AddText("\n\n");
 					summary.Content.AddText("\n\n");
 					summary.Content.Add(stub);
 				}
 
-				sections.Insert(1, summary);
+				sections.InsertWithSpaceBefore(1, summary);
 			}
 
 			parser.FromSections(sections);

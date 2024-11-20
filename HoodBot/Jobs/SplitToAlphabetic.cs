@@ -118,7 +118,7 @@
 					var sortTitle = this.replacements.GetValueOrDefault(sectionTitle, sectionTitle);
 					if (!newSections.TryGetValue(sortTitle[0], out var sectionList))
 					{
-						sectionList = new SectionCollection(sections.Level);
+						sectionList = new SectionCollection(sections.Factory, sections.Level);
 						newSections.Add(sortTitle[0], sectionList);
 					}
 

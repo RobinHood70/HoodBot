@@ -111,7 +111,7 @@
 		/// <returns>An enumeration of the sections of the page.</returns>
 		public SectionCollection ToSections(int level)
 		{
-			var sections = new SectionCollection(level);
+			var sections = new SectionCollection(this.Factory, level);
 			var section = new Section(null, new WikiNodeCollection(this.Factory));
 			foreach (var node in this)
 			{
