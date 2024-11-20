@@ -32,11 +32,18 @@
 		public Context(Site site)
 		{
 			this.Site = site;
+			this.AddParserFunctionHandler("fullpagename", FullPageNamePF);
 			this.AddParserFunctionHandler("namespace", NamespacePF);
 			this.AddParserFunctionHandler("pagename", PageNamePF);
 
-			this.AddTemplateHandler("Sic", SicTemplate);
+			this.AddTemplateHandler("FC", ReturnSecondParameter);
+			this.AddTemplateHandler("Hover", ReturnSecondParameter);
+			this.AddTemplateHandler("Huh", Ignore);
+			this.AddTemplateHandler("Pipe", Pipe);
+			this.AddTemplateHandler("Sic", ReturnFirstParameter);
 
+			this.AddVariableHandler("!", Pipe);
+			this.AddVariableHandler("fullpagename", FullPageNameVar);
 			this.AddVariableHandler("namespace", NamespaceVar);
 			this.AddVariableHandler("pagename", PageNameVar);
 		}
@@ -153,6 +160,15 @@
 		#endregion
 
 		#region Private Static Methods
+		private static string? FullPageNamePF(Context context, MagicWordFrame stack) =>
+			stack.FirstArgument?.Length > 0
+				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).FullPageName()
+				: string.Empty;
+
+		private static string? FullPageNameVar(Context context, MagicWordFrame stack) => context.Title?.FullPageName();
+
+		private static string? Ignore(Context context, MagicWordFrame stack) => string.Empty;
+
 		private static string? NamespacePF(Context context, MagicWordFrame stack) =>
 			stack.FirstArgument?.Length > 0
 				? TitleFactory.FromUnvalidated(context.Site, stack.FirstArgument).Namespace.CanonicalName
@@ -167,8 +183,15 @@
 
 		private static string? PageNameVar(Context context, MagicWordFrame stack) => context.Title?.PageName;
 
-		private static string? SicTemplate(Context context, MagicWordFrame stack) =>
+		private static string? Pipe(Context context, MagicWordFrame stack) => "|";
+
+		private static string? ReturnFirstParameter(Context context, MagicWordFrame stack) =>
 			stack.Parameters.TryGetValue("1", out var value)
+				? value
+				: string.Empty;
+
+		private static string? ReturnSecondParameter(Context context, MagicWordFrame stack) =>
+			stack.Parameters.TryGetValue("2", out var value)
 				? value
 				: string.Empty;
 		#endregion
