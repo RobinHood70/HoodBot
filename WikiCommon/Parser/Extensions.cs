@@ -650,12 +650,15 @@
 			ArgumentNullException.ThrowIfNull(template);
 			ArgumentNullException.ThrowIfNull(parameterNames);
 
+			var comparison = ignoreCase
+				? StringComparison.OrdinalIgnoreCase
+				: StringComparison.Ordinal;
 			var paramList = new List<(string Name, IParameterNode Value)>(template.GetResolvedParameters());
 			foreach (var param in parameterNames)
 			{
 				for (var i = paramList.Count - 1; i >= 0; i--)
 				{
-					if (string.Equals(paramList[i].Name, param, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+					if (paramList[i].Name.Equals(param, comparison))
 					{
 						return paramList[i].Value;
 					}

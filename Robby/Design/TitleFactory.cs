@@ -365,8 +365,8 @@
 			}
 
 			if (pageName.Contains('.', StringComparison.Ordinal) && (
-				string.Equals(pageName, ".", StringComparison.Ordinal) ||
-				string.Equals(pageName, "..", StringComparison.Ordinal) ||
+				pageName.Equals(".", StringComparison.Ordinal) ||
+				pageName.Equals("..", StringComparison.Ordinal) ||
 				pageName.StartsWith("./", StringComparison.Ordinal) ||
 				pageName.StartsWith("../", StringComparison.Ordinal) ||
 				pageName.Contains("/./", StringComparison.Ordinal) ||
