@@ -104,11 +104,13 @@
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>
+		/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
 		public SectionCollection ToSections() => this.ToSections(6);
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
 		/// <returns>An enumeration of the sections of the page.</returns>
+		/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
 		public SectionCollection ToSections(int level)
 		{
 			var sections = new SectionCollection(this.Factory, level);

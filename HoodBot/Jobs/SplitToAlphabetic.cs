@@ -118,7 +118,11 @@
 					var sortTitle = this.replacements.GetValueOrDefault(sectionTitle, sectionTitle);
 					if (!newSections.TryGetValue(sortTitle[0], out var sectionList))
 					{
-						sectionList = new SectionCollection(sections.Factory, sections.Level);
+						sectionList = new SectionCollection(sections.Factory, sections.Level)
+						{
+							Comparer = StringComparer.Create(this.Site.Culture, false)
+						};
+
 						newSections.Add(sortTitle[0], sectionList);
 					}
 
