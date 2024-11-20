@@ -85,30 +85,29 @@
 		public void Visit(IArgumentNode argument)
 		{
 			ArgumentNullException.ThrowIfNull(argument);
-			if (this.raw || argument.DefaultValue == null)
-			{
-				this.builder.Append("{{{");
-				argument.Name.Accept(this);
-				if (argument.DefaultValue != null)
-				{
-					this.builder.Append('|');
-					argument.DefaultValue.Accept(this);
-				}
-
-				if (this.raw && argument.ExtraValues != null)
-				{
-					foreach (var value in argument.ExtraValues)
-					{
-						value.Accept(this);
-					}
-				}
-
-				this.builder.Append("}}}");
-			}
-			else
+			if (!this.raw && argument.DefaultValue != null)
 			{
 				argument.DefaultValue.Accept(this);
+				return;
 			}
+
+			this.builder.Append("{{{");
+			argument.Name.Accept(this);
+			if (argument.DefaultValue != null)
+			{
+				this.builder.Append('|');
+				argument.DefaultValue.Accept(this);
+			}
+
+			if (this.raw && argument.ExtraValues != null)
+			{
+				foreach (var value in argument.ExtraValues)
+				{
+					value.Accept(this);
+				}
+			}
+
+			this.builder.Append("}}}");
 		}
 
 		/// <inheritdoc/>
@@ -156,26 +155,25 @@
 				}
 
 				this.builder.Append("]]");
+				return;
+			}
+
+			if (link.Parameters.Count > 0)
+			{
+				foreach (var parameter in link.Parameters)
+				{
+					if (parameter.Name is not null)
+					{
+						parameter.Name.Accept(this);
+						this.builder.Append('=');
+					}
+
+					parameter.Value.Accept(this);
+				}
 			}
 			else
 			{
-				if (link.Parameters.Count > 0)
-				{
-					foreach (var parameter in link.Parameters)
-					{
-						if (parameter.Name is not null)
-						{
-							parameter.Name.Accept(this);
-							this.builder.Append('=');
-						}
-
-						parameter.Value.Accept(this);
-					}
-				}
-				else
-				{
-					link.TitleNodes.Accept(this);
-				}
+				link.TitleNodes.Accept(this);
 			}
 		}
 
@@ -207,24 +205,26 @@
 		public void Visit(ITagNode tag)
 		{
 			ArgumentNullException.ThrowIfNull(tag);
-			if (this.raw)
+			if (!this.raw)
 			{
+				return;
+			}
+
+			this.builder
+				.Append('<')
+				.Append(tag.Name)
+				.Append(tag.Attributes);
+			if (tag.SelfClosed)
+			{
+				this.builder.Append("/>");
+			}
+			else
+			{
+				// TODO: Check what happens with <br> vs. <br/> vs. <br></br>. Do they all work properly?
 				this.builder
-					.Append('<')
-					.Append(tag.Name)
-					.Append(tag.Attributes);
-				if (tag.SelfClosed)
-				{
-					this.builder.Append("/>");
-				}
-				else
-				{
-					// TODO: Check what happens with <br> vs. <br/> vs. <br></br>. Do they all work properly?
-					this.builder
-						.Append('>')
-						.Append(tag.InnerText)
-						.Append(tag.Close);
-				}
+					.Append('>')
+					.Append(tag.InnerText)
+					.Append(tag.Close);
 			}
 		}
 
