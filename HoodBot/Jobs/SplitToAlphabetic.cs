@@ -73,7 +73,7 @@
 		#endregion
 
 		#region Private Methods
-		private Page CreatePage(KeyValuePair<char, List<Section>> entry)
+		private Page CreatePage(KeyValuePair<char, SectionCollection> entry)
 		{
 			Page page;
 			var pageTitle = "Lore:Fish " + entry.Key;
@@ -107,9 +107,9 @@
 			return page;
 		}
 
-		private SortedList<char, List<Section>> GroupSections(IList<Section> sections)
+		private SortedList<char, SectionCollection> GroupSections(SectionCollection sections)
 		{
-			var newSections = new SortedList<char, List<Section>>();
+			var newSections = new SortedList<char, SectionCollection>();
 			foreach (var section in sections)
 			{
 				var sectionTitle = section.GetTitle();
@@ -118,7 +118,7 @@
 					var sortTitle = this.replacements.GetValueOrDefault(sectionTitle, sectionTitle);
 					if (!newSections.TryGetValue(sortTitle[0], out var sectionList))
 					{
-						sectionList = [];
+						sectionList = new SectionCollection(sections.Level);
 						newSections.Add(sortTitle[0], sectionList);
 					}
 

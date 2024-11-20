@@ -141,7 +141,7 @@
 			return factions;
 		}
 
-		private static void UpdateFromSections(Dictionary<Title, SectionCollection> factionSections)
+		private static void UpdateFromSections(Dictionary<Title, SectionDictionary> factionSections)
 		{
 			foreach (var (title, sections) in factionSections)
 			{
@@ -160,7 +160,7 @@
 		#endregion
 
 		#region Private Methods
-		private void AddFactionPages(Dictionary<Title, SectionCollection> existing)
+		private void AddFactionPages(Dictionary<Title, SectionDictionary> existing)
 		{
 			foreach (var item in existing.Values)
 			{
@@ -169,7 +169,7 @@
 			}
 		}
 
-		private void AddMembersToExistingFactions(Dictionary<Title, SectionCollection> existing, Dictionary<string, Members> allMembers)
+		private void AddMembersToExistingFactions(Dictionary<Title, SectionDictionary> existing, Dictionary<string, Members> allMembers)
 		{
 			foreach (var (edid, newMembers) in allMembers)
 			{
@@ -232,7 +232,7 @@
 			}
 		}
 
-		private void AddSectionsToExisting(Dictionary<Title, SectionCollection> factionSections, List<Faction> factions)
+		private void AddSectionsToExisting(Dictionary<Title, SectionDictionary> factionSections, List<Faction> factions)
 		{
 			var groupedSections = new Dictionary<string, List<Faction>>(StringComparer.OrdinalIgnoreCase);
 			foreach (var faction in factions)
@@ -301,11 +301,11 @@
 			return members;
 		}
 
-		private Dictionary<Title, SectionCollection> GetFactionPages()
+		private Dictionary<Title, SectionDictionary> GetFactionPages()
 		{
 			var titles = PageLetterMenu.GetTitles(this.Site, PageLetterPrefix, false);
 			var existing = new PageCollection(this.Site).GetTitles(titles);
-			var retval = new Dictionary<Title, SectionCollection>();
+			var retval = new Dictionary<Title, SectionDictionary>();
 			foreach (var page in existing)
 			{
 				if (GameInfo.Starfield.BaseFolder.OrdinalEquals(GameInfo.Starfield.ModFolder))
@@ -313,7 +313,7 @@
 					page.Text = string.Empty;
 				}
 
-				var sortedSections = new SectionCollection(page);
+				var sortedSections = new SectionDictionary(page);
 				retval.Add(page.Title, sortedSections);
 			}
 
@@ -469,10 +469,11 @@
 			}
 		}
 
-		private sealed class SectionCollection : SortedDictionary<string, Section>
+		// This class is mostly for readability, so we don't have to specify SortedDictionary<> all over the place.
+		private sealed class SectionDictionary : SortedDictionary<string, Section>
 		{
 			// Convenience class to allow sections to travel with their parent parser.
-			public SectionCollection(Page page)
+			public SectionDictionary(Page page)
 				: base(StringComparer.OrdinalIgnoreCase)
 			{
 				this.Parser = new SiteParser(page);

@@ -54,12 +54,9 @@
 		{
 			var parser = new SiteParser(page);
 			var sections = parser.ToSections(2);
-			foreach (var section in sections)
+			if (sections.FindFirst(SectionName) is not null)
 			{
-				if (section.GetTitle().OrdinalEquals(SectionName))
-				{
-					return;
-				}
+				return;
 			}
 
 			if (sections.Count == 1)
@@ -117,7 +114,7 @@
 			parser.UpdatePage();
 		}
 
-		private void CreateFooterSection(IList<Section> sections)
+		private void CreateFooterSection(SectionCollection sections)
 		{
 			var lastContent = sections[0].Content;
 			for (int nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)

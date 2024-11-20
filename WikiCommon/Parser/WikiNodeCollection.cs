@@ -104,15 +104,15 @@
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		public IList<Section> ToSections() => this.ToSections(6);
+		public SectionCollection ToSections() => this.ToSections(6);
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		public IList<Section> ToSections(int level)
+		public SectionCollection ToSections(int level)
 		{
-			var sections = new List<Section>();
-			Section section = new(null, new WikiNodeCollection(this.Factory));
+			var sections = new SectionCollection(level);
+			var section = new Section(null, new WikiNodeCollection(this.Factory));
 			foreach (var node in this)
 			{
 				if (node is IHeaderNode header && header.Level <= level)

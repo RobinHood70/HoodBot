@@ -46,7 +46,7 @@
 
 		protected override void ParseText(SiteParser parser)
 		{
-			var sections = new List<Section>(parser.ToSections());
+			var sections = parser.ToSections();
 			foreach (var section in FindFurnishings(sections))
 			{
 				if (section.Content.Find<SiteTemplateNode>(template => template.Title.PageNameEquals("ESO House Furnishings")) is not null)
@@ -116,7 +116,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static IEnumerable<Section> FindFurnishings(IEnumerable<Section> sections)
+		private static IEnumerable<Section> FindFurnishings(SectionCollection sections)
 		{
 			foreach (var section in sections)
 			{

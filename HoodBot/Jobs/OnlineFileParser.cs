@@ -212,26 +212,15 @@
 			return template;
 		}
 
-		private static Section? FindSummary(SiteParser parser, IList<Section> sections)
+		private static Section? FindSummary(SiteParser parser, SectionCollection sections)
 		{
-			Section? summary = null;
-			var summarySections = 0;
-			foreach (var section in sections)
-			{
-				var title = section.GetTitle();
-				if (title is not null && SummaryNames.Contains(title))
-				{
-					summary = section; // Set to last Summary section
-					summarySections++; // ...but count all of them.
-				}
-			}
-
-			if (summarySections > 1)
+			var summarySections = new List<Section>(sections.FindAll(SummaryNames));
+			if (summarySections.Count > 1)
 			{
 				Debug.WriteLine("Multiple summaries on " + parser.Title.FullPageName());
 			}
 
-			return summary;
+			return summarySections.Count == 0 ? null : summarySections[^1];
 		}
 
 		private static List<string> GetFilenames(SiteParser parser, List<string> parameters, string original)

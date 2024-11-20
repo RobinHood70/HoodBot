@@ -76,15 +76,11 @@
 			var parser = new SiteParser(page);
 			if (parser.FindSiteTemplate("Similar Images") is null)
 			{
-				var sections = new List<Section>(parser.ToSections());
-				var insertSection = 1;
-				for (var i = 0; i < sections.Count; i++)
+				var sections = parser.ToSections();
+				var insertSection = sections.IndexOf("Summary") + 1;
+				if (insertSection == 0)
 				{
-					if (sections[i].GetTitle().OrdinalEquals("Summary"))
-					{
-						insertSection = i + 1;
-						break;
-					}
+					insertSection = 1;
 				}
 
 				var sectionHeader = parser.Factory.HeaderNodeFromParts(2, "Similar Images");
