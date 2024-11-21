@@ -45,10 +45,11 @@
 		public static Section FromText(IWikiNodeFactory factory, int level, string? header, string content)
 		{
 			ArgumentNullException.ThrowIfNull(factory);
+			content ??= string.Empty;
 			var headerNode = (header is null || level == 0)
 				? null
 				: factory.HeaderNodeFromParts(level, header);
-			if (headerNode is not null)
+			if (headerNode is not null && (content.Length == 0 || content[0] != '\n'))
 			{
 				content = "\n" + content;
 			}
