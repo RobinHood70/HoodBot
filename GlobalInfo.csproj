@@ -9,4 +9,7 @@
 		<Nullable>enable</Nullable>
 		<Product>HoodBot</Product>
 	</PropertyGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
+	</ItemGroup>
 </Project>
