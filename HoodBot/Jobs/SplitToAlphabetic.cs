@@ -120,7 +120,7 @@
 					{
 						sectionList = new SectionCollection(sections.Factory, sections.Level)
 						{
-							Comparer = StringComparer.Create(this.Site.Culture, false)
+							Comparer = this.Site.GetStringComparer(false)
 						};
 
 						newSections.Add(sortTitle[0], sectionList);

@@ -371,6 +371,11 @@
 		/// <returns>The specified <see cref="PageNameComparer"/>.</returns>
 		public PageNameComparer GetPageNameComparer(bool caseSensitive) => this.pageNameComparers[caseSensitive ? 1 : 0];
 
+		/// <summary>Gets a <see cref="StringComparer"/> based on the site's culture.</summary>
+		/// <param name="ignoreCase"><see langword="true"/> to specify that comparison operations be case-insensitive; <see langword="false"/> to specify that comparison operations be case-sensitive.</param>
+		/// <returns>A <see cref="StringComparer"/> based on the site's culture.</returns>
+		public StringComparer GetStringComparer(bool ignoreCase) => StringComparer.Create(this.Culture, ignoreCase);
+
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
 		public IReadOnlyList<Block> LoadBlocks() => this.LoadBlocks(new BlocksInput());
