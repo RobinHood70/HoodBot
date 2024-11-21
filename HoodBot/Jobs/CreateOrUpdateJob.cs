@@ -17,6 +17,8 @@
 		protected Action<SiteParser, T>? OnExists { get; set; }
 
 		protected Action<SiteParser, T>? OnUpdate { get; set; }
+
+		protected PageLoadOptions? PageLoadOptions { get; set; }
 		#endregion
 
 		#region Protected Abstract Properties
@@ -92,7 +94,7 @@
 
 		private void GetBasePages(IDictionary<Title, T> items, List<SiteParser> parsedPages, TitleCollection remaining)
 		{
-			var found = new PageCollection(this.Site);
+			var found = new PageCollection(this.Site, this.PageLoadOptions);
 			found.GetTitles(remaining);
 			foreach (var page in found)
 			{
