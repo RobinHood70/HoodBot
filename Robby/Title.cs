@@ -198,7 +198,7 @@
 		/// <returns>The name of the subpage.</returns>
 		public string SubPageName() =>
 			this.Namespace.AllowsSubpages &&
-			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
+			this.PageName.LastIndexOf('/') + 1 is var subPageLoc &&
 			subPageLoc > 0
 				? this.PageName[subPageLoc..]
 				: this.PageName;

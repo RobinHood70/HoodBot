@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
-	using System;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;

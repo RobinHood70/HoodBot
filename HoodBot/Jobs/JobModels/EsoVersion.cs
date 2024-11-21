@@ -14,7 +14,7 @@
 		public int ActiveVersion => this.Pts ? this.Version - 1 : this.Version;
 
 		// Two times the version, minus one if it's PTS
-		public int SortOrder => this.Version << 1 - (this.Pts ? 1 : 0);
+		public int SortOrder => this.Pts ? this.Version : this.Version << 1;
 
 		public string Text => this.Version.ToStringInvariant() + (this.Pts ? "pts" : string.Empty);
 		#endregion
