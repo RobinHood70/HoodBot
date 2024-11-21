@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.IO;
 	using Newtonsoft.Json;
 
@@ -25,13 +26,12 @@
 		private readonly Dictionary<int, string> rulingFlags = [];
 		private readonly Dictionary<int, string> taskPools = [];
 		private readonly Dictionary<int, string> traits = [];
-		private readonly CastlesTranslator translator;
 		#endregion
 
 		#region Constructors
-		public CastlesData(CastlesTranslator translator)
+		public CastlesData(CultureInfo culture)
 		{
-			this.translator = translator;
+			this.Translator = new CastlesTranslator(culture);
 			this.LoadGroups();
 			this.LoadPropData();
 			this.LoadQuests();
@@ -47,6 +47,8 @@
 		public Dictionary<int, string> Groups { get; } = [];
 
 		public Dictionary<int, string> Tags { get; } = [];
+
+		public CastlesTranslator Translator { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -215,7 +217,7 @@
 				{
 					var id = (int)item._groupUid.id;
 					var title = (string)item._displayName;
-					if (this.translator.GetLanguageEntry(title) is string desc)
+					if (this.Translator.GetLanguageEntry(title) is string desc)
 					{
 						this.Groups.Add(id, desc);
 					}
@@ -237,7 +239,7 @@
 			{
 				var id = (int)item._propUid.id;
 				var title = (string)item._displayName;
-				if (this.translator.GetLanguageEntry(title) is string desc)
+				if (this.Translator.GetLanguageEntry(title) is string desc)
 				{
 					this.propData.Add(id, desc);
 					var group = (int)item._propGroupData._propGroup;
@@ -268,7 +270,7 @@
 			{
 				var id = (int)item._questUid.id;
 				var title = (string)item._nameLocalizationKey;
-				var desc = this.translator.GetLanguageEntry(title) ?? (title + NotFound);
+				var desc = this.Translator.GetLanguageEntry(title) ?? (title + NotFound);
 				this.quests.Add(id, desc);
 			}
 		}
@@ -283,14 +285,14 @@
 				// Not all names are language entries, so warnings coming from this function are normal.
 				var id = (int)item._subjectArchetypeUid.id;
 				var firstName = (string)item._firstname;
-				if (firstName.Length > 0 && this.translator.GetLanguageEntry(firstName) is string translationFirst)
+				if (firstName.Length > 0 && this.Translator.GetLanguageEntry(firstName) is string translationFirst)
 				{
 					firstName = translationFirst;
 				}
 
 				var lastName = (string)item._lastname;
 				lastName = lastName.Replace("\u200B", string.Empty, StringComparison.Ordinal);
-				if (lastName.Length > 0 && this.translator.GetLanguageEntry(lastName) is string translationLast)
+				if (lastName.Length > 0 && this.Translator.GetLanguageEntry(lastName) is string translationLast)
 				{
 					lastName = translationLast;
 				}
@@ -326,7 +328,7 @@
 			{
 				var id = (int)item._taskPoolUid.id;
 				var title = (string)item._name;
-				if (this.translator.GetLanguageEntry(title) is string desc)
+				if (this.Translator.GetLanguageEntry(title) is string desc)
 				{
 					this.taskPools.Add(id, desc);
 				}
@@ -345,7 +347,7 @@
 				{
 					var id = (int)item._traitUid.id;
 					var title = (string)item._title;
-					if (this.translator.GetLanguageEntry(title) is string desc)
+					if (this.Translator.GetLanguageEntry(title) is string desc)
 					{
 						this.traits.Add(id, desc);
 					}
