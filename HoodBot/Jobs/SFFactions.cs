@@ -215,7 +215,7 @@
 						}
 					}
 
-					for (int i = 0; i < listTemplate.Parameters.Count - 1; i++)
+					for (var i = 0; i < listTemplate.Parameters.Count - 1; i++)
 					{
 						var parameter = listTemplate.Parameters[i];
 						parameter.Value.Trim();

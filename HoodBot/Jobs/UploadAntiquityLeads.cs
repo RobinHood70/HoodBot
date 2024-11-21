@@ -47,7 +47,7 @@
 
 		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
-			string? idText = template.GetValue("id");
+			var idText = template.GetValue("id");
 			if (idText is not null)
 			{
 				var id = int.Parse(idText, CultureInfo.CurrentCulture);

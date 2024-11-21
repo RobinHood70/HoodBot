@@ -81,9 +81,9 @@
 			var ns = title.Namespace.SubjectSpace;
 			var subSpaces = this.byNs[ns.Id];
 			var pageName = title.PageName;
-			for (int i = 0; i < subSpaces.Count - 1; i++)
+			for (var i = 0; i < subSpaces.Count - 1; i++)
 			{
-				UespNamespace? uespNs = subSpaces[i];
+				var uespNs = subSpaces[i];
 				var modName = uespNs.ModName;
 				if (pageName.Length > modName.Length && pageName[modName.Length] == '/')
 				{

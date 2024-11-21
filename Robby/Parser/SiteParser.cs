@@ -277,7 +277,7 @@
 		/// <param name="title">The title of the template.</param>
 		public void RemoveTemplates(Title title)
 		{
-			for (int i = this.Count - 1; i >= 0; i--)
+			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				var node = this[i];
 				if (node is SiteTemplateNode template && template.Title == title)

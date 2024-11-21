@@ -81,8 +81,8 @@
 			var newParser = new SiteParser(page);
 			newParser.FromSections(entry.Value);
 			var refTemplates = newParser.FindSiteTemplates("Ref");
-			bool hasRefs = false;
-			bool hasUol = false;
+			var hasRefs = false;
+			var hasUol = false;
 			foreach (var template in refTemplates)
 			{
 				hasRefs = true;

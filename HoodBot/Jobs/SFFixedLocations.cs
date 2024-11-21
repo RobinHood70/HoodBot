@@ -117,7 +117,7 @@
 		private void CreateFooterSection(SectionCollection sections)
 		{
 			var lastContent = sections[0].Content;
-			for (int nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)
+			for (var nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)
 			{
 				if (lastContent[nodeIndex] is SiteTemplateNode template &&
 					this.footerTemplates.Contains(template.Title))

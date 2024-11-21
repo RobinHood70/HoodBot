@@ -88,7 +88,7 @@
 				return new EmbeddedValue();
 			}
 
-			int lineEnd = -1;
+			var lineEnd = -1;
 			var beforeIndex = 0;
 			while (beforeIndex < value.Length && value[beforeIndex] is var c && char.IsWhiteSpace(c))
 			{

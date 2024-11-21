@@ -24,7 +24,7 @@
 		protected override void Main()
 		{
 			this.GetIcons(EsoLog.LatestDBUpdate(false));
-			PageCollection pages = this.GetPages();
+			var pages = this.GetPages();
 			var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
 			this.ParsePageInfo(pages, items, false);
 			this.ParsePageInfo(pages, items, true);
