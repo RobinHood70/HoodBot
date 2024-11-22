@@ -28,7 +28,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
-		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.179">

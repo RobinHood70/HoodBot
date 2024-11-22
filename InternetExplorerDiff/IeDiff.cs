@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.InternetExplorerDiff
 {
 	using System;
+	using System.Collections.Generic;
 	using System.ComponentModel.Composition;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
@@ -11,7 +12,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.InternetExplorerDiff.Properties;
-	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
 
 	[Export(typeof(IPlugin))]
@@ -77,24 +77,14 @@
 			this.ieProcess = Process.GetProcessById(processId32);
 
 			Uri uri = new(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
-			Request request = new(uri, RequestType.Post, false);
-			request
-				.Add("wpDiff", "Show changes")
-				.Add("wpTextbox1", diff.Text)
-				.AddIf("wpMinoredit", "1", diff.IsMinor)
-				.Add("wpSummary", diff.EditSummary)
-				.Add("wpAutoSummary", string.Empty.GetHash(HashType.Md5))
-				.Add("wpEditToken", diff.EditToken)
-				.Add("wpStarttime", IndexDateTime(diff.StartTimestamp))
-				.Add("wpEdittime", IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now));
-			var postData = RequestVisitorUrl.Build(request);
+			var postData = CreatePostData(diff);
 			var byteData = Encoding.UTF8.GetBytes(postData);
 			var error = true;
 			do
 			{
 				try
 				{
-					ie.Navigate(request.Uri.AbsoluteUri, empty, empty, byteData, headers);
+					ie.Navigate(uri.AbsoluteUri, empty, empty, byteData, headers);
 					error = false;
 				}
 				catch (COMException)
@@ -113,6 +103,37 @@
 		#endregion
 
 		#region Private Methods
+		private static string CreatePostData(DiffContent diff)
+		{
+			var parameters = new Dictionary<string, string?>(StringComparer.Ordinal)
+			{
+				["wpDiff"] = "Show changes",
+				["wpTextbox1"] = diff.Text,
+				["wpMinoredit"] = diff.IsMinor ? "1" : null,
+				["wpSummary"] = diff.EditSummary,
+				["wpAutoSummary"] = string.Empty.GetHash(HashType.Md5),
+				["wpEditToken"] = diff.EditToken,
+				["wpStarttime"] = IndexDateTime(diff.StartTimestamp),
+				["wpEdittime"] = IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now)
+			};
+
+			var postData = new StringBuilder();
+			foreach (var (key, value) in parameters)
+			{
+				if (value is not null)
+				{
+					postData
+						.Append('&')
+						.Append(key)
+						.Append('=')
+						.Append(Globals.EscapeDataString(value));
+				}
+			}
+
+			postData.Remove(0, 1);
+			return postData.ToString();
+		}
+
 		[return: NotNullIfNotNull(nameof(dt))]
 		private static string? IndexDateTime(DateTime? dt) => dt?.ToUniversalTime().ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 		#endregion
