@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
-		<DocumentationFile>bin\WallE.XML</DocumentationFile>
+		<DocumentationFile>bin\HoodBotPlugins.XML</DocumentationFile>
 		<RootNamespace>RobinHood70.HoodBotPlugins</RootNamespace>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>latest</AnalysisLevel>
