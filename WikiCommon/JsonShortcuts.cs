@@ -32,10 +32,23 @@
 			return token[name] ?? throw new InvalidDataException();
 		}
 
+		/// <summary>Attempts to get the named JToken object as a double and throws if it's not present.</summary>
+		/// <param name="token">The token to use.</param>
+		/// <param name="name">The name to search for.</param>
+		/// <returns>The named JToken object as a double.</returns>
+		/// <exception cref="InvalidDataException">Thrown if the value is not found.</exception>
+		public static double MustHaveDouble([NotNull] this JToken token, string name)
+		{
+			ArgumentNullException.ThrowIfNull(token);
+			ArgumentNullException.ThrowIfNull(name);
+			var obj = token[name] ?? throw new InvalidDataException();
+			return (double)obj;
+		}
+
 		/// <summary>Attempts to get the named JToken object as an integer and throws if it's not present.</summary>
 		/// <param name="token">The token to use.</param>
 		/// <param name="name">The name to search for.</param>
-		/// <returns>The named JToken object.</returns>
+		/// <returns>The named JToken object as an integer.</returns>
 		/// <exception cref="InvalidDataException">Thrown if the value is not found.</exception>
 		public static int MustHaveInt([NotNull] this JToken token, string name)
 		{
@@ -43,6 +56,19 @@
 			ArgumentNullException.ThrowIfNull(name);
 			var obj = token[name] ?? throw new InvalidDataException();
 			return (int)obj;
+		}
+
+		/// <summary>Attempts to get the named JToken object as a long and throws if it's not present.</summary>
+		/// <param name="token">The token to use.</param>
+		/// <param name="name">The name to search for.</param>
+		/// <returns>The named JToken object as a long.</returns>
+		/// <exception cref="InvalidDataException">Thrown if the value is not found.</exception>
+		public static long MustHaveLong([NotNull] this JToken token, string name)
+		{
+			ArgumentNullException.ThrowIfNull(token);
+			ArgumentNullException.ThrowIfNull(name);
+			var obj = token[name] ?? throw new InvalidDataException();
+			return (long)obj;
 		}
 
 		/// <summary>Attempts to get the named JToken object as a string and throws if it's not present or the value is null.</summary>
