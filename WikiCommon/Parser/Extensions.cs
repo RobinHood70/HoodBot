@@ -795,7 +795,7 @@
 			ArgumentNullException.ThrowIfNull(template);
 			ArgumentNullException.ThrowIfNull(parameterName);
 			ArgumentNullException.ThrowIfNull(condition);
-			return condition(template.Find("parameterName")?.Value) && Remove(template, parameterName);
+			return condition(template.Find(parameterName)?.Value) && Remove(template, parameterName);
 		}
 
 		/// <summary>Finds the parameters with the given name and removes it.</summary>
