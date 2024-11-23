@@ -194,7 +194,7 @@
 		{
 			var list =
 				txInfo.Variation ? this.GetVariations(txInfo) :
-				txInfo.Term ? this.GetTerm(txInfo, txInfo.Id) :
+				txInfo.Term ? this.GetTerm(txInfo.Id, txInfo) :
 				txInfo.Personal ? GetPersonal(txInfo) :
 				null;
 			if (list is null || list.Count == 0)
@@ -213,7 +213,7 @@
 			return list;
 		}
 
-		private List<string>? GetTerm(CastlesTxInfo txInfo, string id, [CallerMemberName] string caller = "")
+		private List<string>? GetTerm(string id, CastlesTxInfo txInfo, [CallerMemberName] string caller = "")
 		{
 			if (!this.terms.TryGetValue(id, out var term))
 			{
@@ -271,7 +271,7 @@
 			{
 				foreach (var variation in variations)
 				{
-					if (this.GetTerm(txInfo, variation) is List<string> value)
+					if (this.GetTerm(variation, txInfo) is List<string> value)
 					{
 						retval.AddRange(value);
 					}
