@@ -317,10 +317,10 @@ internal sealed class CastlesTranslator
 
 		// Definite articles
 		articleInfo = new ArticleInfo(
-			rules["article.indefinite.format"],
-			rules["article.indefinite.starts"],
-			rules["article.indefinite.exception.format"],
-			rules["article.indefinite.exception.starts"]);
+			rules["article.definite.format"],
+			rules["article.definite.starts"],
+			rules["article.definite.exception.format"],
+			rules["article.definite.exception.starts"]);
 		this.articleInfos.Add(true, articleInfo);
 	}
 
@@ -370,14 +370,19 @@ internal sealed class CastlesTranslator
 	#region Private Classes
 	private sealed class ArticleInfo(string articles, string articleStarts, string exceptions, string exceptionStarts)
 	{
+		#region Constants
+		private const string MatchAnything = "";
+		private const string MatchNothing = "_^";
+		#endregion
+
 		#region Public Properties
 		public string[] Articles { get; } = articles.Split(TextArrays.Pipe);
 
-		public Regex ArticleStarts { get; } = new Regex($@"\A({articleStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		public Regex ArticleStarts { get; } = new Regex(articleStarts.Length == 0 ? MatchAnything : $@"\A({articleStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
 		public string[] Exceptions { get; } = exceptions.Split(TextArrays.Pipe);
 
-		public Regex ExceptionStarts { get; } = new Regex($@"\A({exceptionStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		public Regex ExceptionStarts { get; } = new Regex(exceptionStarts.Length == 0 ? MatchNothing : $@"\A({exceptionStarts})", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Public Methods
