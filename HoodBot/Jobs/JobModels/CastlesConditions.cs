@@ -3,7 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
 
 	internal sealed class CastlesConditions(CastlesData data, CultureInfo gameCulture) : List<string>
 	{
@@ -12,60 +14,60 @@
 		#endregion
 
 		#region Public Methods
-		public void AddChoiceInfo(dynamic choice)
+		public void AddChoiceInfo(JToken choice)
 		{
-			this.AddActivationConditions(choice._rulingChoiceActivationConditions);
+			this.AddActivationConditions(choice.MustHave("_rulingChoiceActivationConditions"));
 			this.AddResult(this.GetRulerAssassinationChance(choice));
-			this.AddEffectFlagsResult(data.GetRulingFlags("Effect Flags", choice._effectRulingFlags));
-			this.AddEffectFlagsResult(data.GetRulingFlags("Ruler Flags", choice._effectRulerRulingFlags));
-			this.AddEffectFlagsResult(data.GetRulingFlags("Requester Flags", choice._effectRequesterRulingFlags));
-			this.AddEffectFlagsResult(data.GetRulingFlags("Co-Requester Flags", choice._effectCoRequesterRulingFlags));
-			this.AddGenericConditions("Requester ", choice._requesterConditions);
-			this.AddGenericConditions("Co-Requester ", choice._coRequesterConditions);
-			var killChance = (int)choice._subjectKillPercentChance;
+			this.AddEffectFlagsResult(data.GetRulingFlags("Effect Flags", choice.MustHave("_effectRulingFlags")));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Ruler Flags", choice.MustHave("_effectRulerRulingFlags")));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Requester Flags", choice.MustHave("_effectRequesterRulingFlags")));
+			this.AddEffectFlagsResult(data.GetRulingFlags("Co-Requester Flags", choice.MustHave("_effectCoRequesterRulingFlags")));
+			this.AddGenericConditions("Requester ", choice.MustHave("_requesterConditions"));
+			this.AddGenericConditions("Co-Requester ", choice.MustHave("_coRequesterConditions"));
+			var killChance = choice.MustHaveInt("_subjectKillPercentChance");
 			if (killChance > 0)
 			{
 				this.AddResult("Subject Kill Chance: " + killChance.ToStringInvariant() + '%');
 			}
 
-			this.AddInt("Subject Killer: ", choice._subjectKiller);
-			this.AddInt("Subject Killed: ", choice._subjectKilled);
-			var range = GetRangeText((int)choice._subjectKillMinDelaySecs, (int)choice._subjectKillMaxDelaySecs);
+			this.AddInt("Subject Killer: ", choice.MustHave("_subjectKiller"));
+			this.AddInt("Subject Killed: ", choice.MustHave("_subjectKilled"));
+			var range = GetRangeText(choice.MustHaveInt("_subjectKillMinDelaySecs"), choice.MustHaveInt("_subjectKillMaxDelaySecs"));
 			if (range is not null)
 			{
 				this.AddResult($"Subject Kill Delay: {range} seconds");
 			}
 
-			this.AddBool("Allow Costs to Reduce to Inventory Amount: ", choice._allowCostsToReduceToInventoryAmount);
-			this.AddInt("Send Next Subject to Throne Line Delay: ", choice._sendNextSubjectToThroneLineDelay);
+			this.AddBool("Allow Costs to Reduce to Inventory Amount: ", choice.MustHave("_allowCostsToReduceToInventoryAmount"));
+			this.AddInt("Send Next Subject to Throne Line Delay: ", choice.MustHave("_sendNextSubjectToThroneLineDelay"));
 		}
 
-		public void AddRulingInfo(dynamic ruling)
+		public void AddRulingInfo(JToken ruling)
 		{
 			// Different ruling groups have different conditions, but follow the same overall structure, so check each property for existence.
-			if (ruling._rulingActivationConditions is not null)
+			if (ruling["_rulingActivationConditions"] is not null)
 			{
-				this.AddActivationConditions(ruling._rulingActivationConditions);
+				this.AddActivationConditions(ruling.MustHave("_rulingActivationConditions"));
 			}
 
-			if (ruling._requesterConditions is not null)
+			if (ruling["_requesterConditions"] is not null)
 			{
-				this.AddGenericConditions("Ruling Requester ", ruling._requesterConditions);
+				this.AddGenericConditions("Ruling Requester ", ruling.MustHave("_requesterConditions"));
 			}
 
-			if (ruling._coRequesterConditions is not null)
+			if (ruling["_coRequesterConditions"] is not null)
 			{
-				this.AddGenericConditions("Ruling Co-requester ", ruling._coRequesterConditions);
+				this.AddGenericConditions("Ruling Co-requester ", ruling.MustHave("_coRequesterConditions"));
 			}
 
-			if (ruling._randomWeight is not null)
+			if (ruling["_randomWeight"] is not null)
 			{
-				this.AddDecimal("Random Weight: ", ruling._randomWeight);
+				this.AddDecimal("Random Weight: ", ruling.MustHave("_randomWeight"));
 			}
 
-			if (ruling._trigger is not null)
+			if (ruling["_trigger"] is not null)
 			{
-				this.AddInt("Trigger: ", ruling._trigger);
+				this.AddInt("Trigger: ", ruling.MustHave("_trigger"));
 			}
 		}
 		#endregion
@@ -175,23 +177,20 @@
 			return GetRangeText(gt, lt, string.Empty, string.Empty, trailer);
 		}
 
-		private static string? GetRelationshipConditions(string intro, dynamic relationships)
+		private static string? GetRelationshipConditions(string intro, JToken relationships)
 		{
-			if (relationships.Count == 0)
-			{
-				return null;
-			}
-
 			var list = new List<string>();
 			foreach (var relationship in relationships)
 			{
-				var value = CastlesTranslator.GetRelatonship((int)relationship._relationshipToOtherSubject);
-				var subject = CastlesTranslator.GetRequester((int)relationship._otherSubject);
-				var condition = (int)relationship._condition == 0 ? "not " : string.Empty;
+				var value = CastlesTranslator.GetRelatonship(relationship.MustHaveInt("_relationshipToOtherSubject"));
+				var subject = CastlesTranslator.GetRequester(relationship.MustHaveInt("_otherSubject"));
+				var condition = relationship.MustHaveInt("_condition") == 0 ? "not " : string.Empty;
 				list.Add($"relationship to {subject} is {condition}{value}");
 			}
 
-			return intro + string.Join(CastlesData.CommaSpace, list);
+			return list.Count == 0
+				? null
+				: intro + string.Join(CastlesData.CommaSpace, list);
 		}
 
 		private static string GetTime(TimeSpan time)
@@ -270,46 +269,45 @@
 		#endregion
 
 		#region Private Methods
-		private void AddActivationConditions(dynamic conditions)
+		private void AddActivationConditions(JToken conditions)
 		{
-			var time = (double)conditions._minRecurrenceTimeSec;
+			var time = conditions.MustHaveDouble("_minRecurrenceTimeSec");
 			if (time > 0)
 			{
 				var ts = TimeSpan.FromSeconds(time);
 				this.AddResult("Min. Recurrence Time: " + GetTime(ts));
 			}
 
-			var id = (int)conditions._groupUid._uid.id;
+			var id = conditions.MustHave("_groupUid").MustHave("_uid").MustHaveInt("id");
 			if (id != 0)
 			{
 				this.AddResult("Group: " + data.Groups[id]);
 			}
 
-			this.AddResult("Group Happiness ", GetRangeTextGTLT((int)conditions._groupHappinessGreaterThan, (int)conditions._groupHappinessLessThan, string.Empty));
-			this.AddTags('>', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesGreaterThan);
-			this.AddTags('<', (int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, conditions._perCastleLevelTagQuantitiesLessThan);
-			this.AddResult("Dynasty Level ", GetRangeTextGTLT((int)conditions._castleLevelGreaterThan, (int)conditions._castleLevelLessThan, string.Empty));
-			this.AddResult(data.GetRulingFlags("Ruling Flags", conditions._rulingFlags));
-			this.AddGenericConditions("Ruler ", conditions._rulerConditions);
-			this.AddBool("Alliance Member: ", conditions._allianceMember);
-			this.AddResult(data.GetPropConditions("Placed Prop - Any of: ", conditions._anyOfPlacedPropConditions));
-			this.AddResult(data.GetPropConditions("Placed Prop - All of: ", conditions._allOfPlacedPropConditions));
-			//// AddResult(list, this.GetEventConditions("Castle Events - Any of: ", conditions._anyOfCastleWideEventConditions));
-			//// AddResult(list, this.GetEventConditions("Castle Events - All of: ", conditions._allOfCastleWideEventConditions));
-			this.AddResult(data.GetArchetypes("Present in Castle - Any of: ", conditions._anyOfPresentInCastleSubjectArchetypeConditions));
-			this.AddResult(data.GetArchetypes("Present in Castle - All of: ", conditions._allOfPresentInCastleSubjectArchetypeConditions));
-			this.AddResult("Oil ", GetRangeTextGTLT((int)conditions._oilPercentageGreaterThan, (int)conditions._oilPercentageLessThan, "%"));
-			this.AddResult("Food ", GetRangeTextGTLT((int)conditions._foodPercentageGreaterThan, (int)conditions._foodPercentageLessThan, "%"));
-			this.AddResult(data.GetQuestConditions("Quests - Any of: ", conditions._anyOfCompletedQuestConditions));
-			this.AddResult(data.GetQuestConditions("Quests - All of: ", conditions._allOfCompletedQuestConditions));
+			this.AddResult("Group Happiness ", GetRangeTextGTLT(conditions.MustHaveInt("_groupHappinessGreaterThan"), conditions.MustHaveInt("_groupHappinessLessThan"), string.Empty));
+			this.AddTags('>', conditions.MustHaveInt("_castleLevelGreaterThan"), conditions.MustHaveInt("_castleLevelLessThan"), conditions.MustHave("_perCastleLevelTagQuantitiesGreaterThan"));
+			this.AddTags('<', conditions.MustHaveInt("_castleLevelGreaterThan"), conditions.MustHaveInt("_castleLevelLessThan"), conditions.MustHave("_perCastleLevelTagQuantitiesLessThan"));
+			this.AddResult("Dynasty Level ", GetRangeTextGTLT(conditions.MustHaveInt("_castleLevelGreaterThan"), conditions.MustHaveInt("_castleLevelLessThan"), string.Empty));
+			this.AddResult(data.GetRulingFlags("Ruling Flags", conditions.MustHave("_rulingFlags")));
+			this.AddGenericConditions("Ruler ", conditions.MustHave("_rulerConditions"));
+			this.AddBool("Alliance Member: ", conditions.MustHave("_allianceMember"));
+			this.AddResult(data.GetPropConditions("Placed Prop - Any of: ", conditions.MustHave("_anyOfPlacedPropConditions")));
+			this.AddResult(data.GetPropConditions("Placed Prop - All of: ", conditions.MustHave("_allOfPlacedPropConditions")));
+			//// AddResult(list, this.GetEventConditions("Castle Events - Any of: ", conditions.MustHave("_anyOfCastleWideEventConditions")));
+			//// AddResult(list, this.GetEventConditions("Castle Events - All of: ", conditions.MustHave("_allOfCastleWideEventConditions")));
+			this.AddResult(data.GetArchetypes("Present in Castle - Any of: ", conditions.MustHave("_anyOfPresentInCastleSubjectArchetypeConditions")));
+			this.AddResult(data.GetArchetypes("Present in Castle - All of: ", conditions.MustHave("_allOfPresentInCastleSubjectArchetypeConditions")));
+			this.AddResult("Oil ", GetRangeTextGTLT(conditions.MustHaveInt("_oilPercentageGreaterThan"), conditions.MustHaveInt("_oilPercentageLessThan"), "%"));
+			this.AddResult("Food ", GetRangeTextGTLT(conditions.MustHaveInt("_foodPercentageGreaterThan"), conditions.MustHaveInt("_foodPercentageLessThan"), "%"));
+			this.AddResult(data.GetQuestConditions("Quests - Any of: ", conditions.MustHave("_anyOfCompletedQuestConditions")));
+			this.AddResult(data.GetQuestConditions("Quests - All of: ", conditions.MustHave("_allOfCompletedQuestConditions")));
 			//// Ignored as unused: _inProgressUnclaimedTask
-			this.AddResult(data.GetTaskPools("In-progress unclaimed task pool: ", conditions._inProgressUnclaimedTaskPool));
+			this.AddResult(data.GetTaskPools("In-progress unclaimed task pool: ", conditions.MustHave("_inProgressUnclaimedTaskPool")));
 		}
 
-		private void AddBool(string text, dynamic value)
+		private void AddBool(string text, JToken value)
 		{
-			var valueInt = (int)value;
-			if (valueInt != 0)
+			if ((int)value != 0)
 			{
 				this.Add(text + "Yes");
 			}
@@ -324,7 +322,7 @@
 			}
 		}
 
-		private void AddDecimal(string text, dynamic value)
+		private void AddDecimal(string text, JToken value)
 		{
 			var valueFloat = (float)value;
 			if (valueFloat != 0.0)
@@ -341,10 +339,10 @@
 			}
 		}
 
-		private void AddGenericConditions(string intro, dynamic conditions)
+		private void AddGenericConditions(string intro, JToken conditions)
 		{
-			this.AddInt(intro + "gender is ", conditions._gender);
-			var time = (int)conditions._ageGreaterThanSecs;
+			this.AddInt(intro + "gender is ", conditions.MustHave("_gender"));
+			var time = conditions.MustHaveInt("_ageGreaterThanSecs");
 			if (time > 0)
 			{
 				var ts = DaysToYears(time);
@@ -352,7 +350,7 @@
 				this.AddResult($"{intro}is older than {text}");
 			}
 
-			time = (int)conditions._ageLessThanSecs;
+			time = conditions.MustHaveInt("_ageLessThanSecs");
 			if (time > 0)
 			{
 				var ts = DaysToYears(time);
@@ -360,25 +358,25 @@
 				this.AddResult($"{intro}is younger than {text}");
 			}
 
-			this.AddResult(intro + "Happiness ", GetRangeTextGTLT((int)conditions._happinessGreaterThan, (int)conditions._happinessLessThan, string.Empty));
-			this.AddResult(data.GetRulingFlags(intro + "Subject Ruling Flags", conditions._subjectRulingFlags));
-			this.AddResult(data.GetTraits(intro + "Traits include any of: ", conditions._anyOfTraitConditions));
-			this.AddResult(data.GetTraits(intro + "Traits include all of: ", conditions._allOfTraitConditions));
-			this.AddResult(CastlesData.GetRaces(intro + "Race is ", conditions._anyOfRaceConditions));
-			this.AddResult(CastlesData.GetRaces(intro + "Race is not ", conditions._allOfRaceConditions));
-			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions._anyOfAssignedToPropConditions));
-			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions._allOfAssignedToPropConditions));
-			this.AddResult(data.GetArchetypes(intro + "Any of: ", conditions._anyOfArchetypeConditions));
-			this.AddResult(data.GetArchetypes(intro + "Not any of: ", conditions._allOfArchetypeConditions));
-			this.AddResult(GetRelationshipConditions(intro + "Any of: ", conditions._anyOfRelationshipConditions));
-			this.AddResult(GetRelationshipConditions(intro + "All of: ", conditions._allOfRelationshipConditions));
-			this.AddInt(intro + "Last Subject Killer: ", conditions._lastSubjectKiller);
-			this.AddResult(data.GetGroups(intro + "Group any of: ", conditions._anyOfGroupConditions));
-			this.AddResult(data.GetGroups(intro + "Group all of: ", conditions._allOfGroupConditions));
-			this.AddResult(data.GetPropConditions(intro + "Requester any of same props: ", conditions._anyOfRequesterAssignedToSamePropConditions));
+			this.AddResult(intro + "Happiness ", GetRangeTextGTLT(conditions.MustHaveInt("_happinessGreaterThan"), conditions.MustHaveInt("_happinessLessThan"), string.Empty));
+			this.AddResult(data.GetRulingFlags(intro + "Subject Ruling Flags", conditions.MustHave("_subjectRulingFlags")));
+			this.AddResult(data.GetTraits(intro + "Traits include any of: ", conditions.MustHave("_anyOfTraitConditions")));
+			this.AddResult(data.GetTraits(intro + "Traits include all of: ", conditions.MustHave("_allOfTraitConditions")));
+			this.AddResult(CastlesData.GetRaces(intro + "Race is ", conditions.MustHave("_anyOfRaceConditions")));
+			this.AddResult(CastlesData.GetRaces(intro + "Race is not ", conditions.MustHave("_allOfRaceConditions")));
+			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions.MustHave("_anyOfAssignedToPropConditions")));
+			this.AddResult(data.GetPropConditions(intro + "Props: ", conditions.MustHave("_allOfAssignedToPropConditions")));
+			this.AddResult(data.GetArchetypes(intro + "Any of: ", conditions.MustHave("_anyOfArchetypeConditions")));
+			this.AddResult(data.GetArchetypes(intro + "Not any of: ", conditions.MustHave("_allOfArchetypeConditions")));
+			this.AddResult(GetRelationshipConditions(intro + "Any of: ", conditions.MustHave("_anyOfRelationshipConditions")));
+			this.AddResult(GetRelationshipConditions(intro + "All of: ", conditions.MustHave("_allOfRelationshipConditions")));
+			this.AddInt(intro + "Last Subject Killer: ", conditions.MustHave("_lastSubjectKiller"));
+			this.AddResult(data.GetGroups(intro + "Group any of: ", conditions.MustHave("_anyOfGroupConditions")));
+			this.AddResult(data.GetGroups(intro + "Group all of: ", conditions.MustHave("_allOfGroupConditions")));
+			this.AddResult(data.GetPropConditions(intro + "Requester any of same props: ", conditions.MustHave("_anyOfRequesterAssignedToSamePropConditions")));
 		}
 
-		private void AddInt(string text, dynamic value)
+		private void AddInt(string text, JToken value)
 		{
 			var valueInt = (int)value;
 			if (valueInt != 0)
@@ -403,29 +401,23 @@
 			}
 		}
 
-		private void AddTags(char sign, int castleLevelGT, int castleLevelLT, dynamic items)
+		private void AddTags(char sign, int castleLevelGT, int castleLevelLT, JToken items)
 		{
-			if (items.Count == 0)
-			{
-				return;
-			}
-
 			var last = new Dictionary<int, int>();
 			var minLevel = 1;
-			int level;
+			var level = 0;
 			var index = 0;
 			var current = new Dictionary<int, int>();
 			var listCount = this.Count;
-			do
+			foreach (var item in items)
 			{
-				var item = items[index];
-				level = item._castleLevel;
-				var tagQuantities = item._tagQuantities;
+				level = item.MustHaveInt("_castleLevel");
+				var tagQuantities = item.MustHave("_tagQuantities");
 				current.Clear();
 				foreach (var tag in tagQuantities)
 				{
-					var tagId = (int)tag._anyOfItemsWithTagId._uid.id;
-					var quantity = (int)tag._quantity;
+					var tagId = tag.MustHave("_anyOfItemsWithTagId").MustHave("_uid").MustHaveInt("id");
+					var quantity = tag.MustHaveInt("_quantity");
 					current[tagId] = quantity;
 				}
 
@@ -456,7 +448,6 @@
 
 				index++;
 			}
-			while (index < items.Count);
 
 			if (this.Count == listCount && level == 1)
 			{
@@ -474,16 +465,16 @@
 			}
 		}
 
-		private string? GetRulerAssassinationChance(dynamic choice)
+		private string? GetRulerAssassinationChance(JToken choice)
 		{
-			var chance = (int)choice._rulerAssassinationPercentChance;
+			var chance = choice.MustHaveInt("_rulerAssassinationPercentChance");
 			if (chance == 0)
 			{
 				return null;
 			}
 
 			var result = "Ruler Assassination Chance: " + chance.ToString("n0", gameCulture) + '%';
-			var range = GetRangeText((int)choice._rulerAssassinationMinDelaySecs, (int)choice._rulerAssassinationMaxDelaySecs);
+			var range = GetRangeText(choice.MustHaveInt("_rulerAssassinationMinDelaySecs"), choice.MustHaveInt("_rulerAssassinationMaxDelaySecs"));
 			if (range is not null)
 			{
 				result += $" (delay: {range} seconds)";

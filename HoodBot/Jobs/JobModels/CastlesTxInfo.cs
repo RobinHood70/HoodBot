@@ -88,7 +88,7 @@
 				{
 					case 'A':
 						// Indefinite Article
-						this.Capitalize = true;
+						this.Capitalize = Capitalization.FirstWord;
 						this.ArticleType = false;
 						break;
 					case 'a':
@@ -96,11 +96,12 @@
 						this.ArticleType = false;
 						break;
 					case 'c':
-						// Unknown
+						// Capitalize All
+						this.Capitalize = Capitalization.TitleCase;
 						break;
 					case 'D':
 						// Unknown
-						this.Capitalize = true;
+						this.Capitalize = Capitalization.FirstWord;
 						this.ArticleType = true;
 						break;
 					case 'd':
@@ -123,12 +124,19 @@
 		}
 		#endregion
 
+		#region public Enumerations
+		public enum Capitalization
+		{
+			None,
+			FirstWord,
+			TitleCase
+		}
+		#endregion
+
 		#region Public Properties
 		public bool? ArticleType { get; }
 
-		public string BracedId => '{' + this.Id + '}';
-
-		public bool Capitalize { get; }
+		public Capitalization Capitalize { get; }
 
 		public string Id { get; }
 
@@ -147,8 +155,6 @@
 		public string Target { get; } = string.Empty;
 
 		public bool Term { get; }
-
-		public bool Source { get; }
 
 		public bool Variation { get; }
 		#endregion

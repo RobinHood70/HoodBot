@@ -3,13 +3,14 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
-	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
-	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.HoodBot.Jobs.JobModels.CastlesTxInfo;
 
 	internal sealed class CastlesTranslator
 	{
@@ -75,8 +76,9 @@
 			return result;
 		}
 
-		public string? GetSentence(string id, [CallerMemberName] string caller = "")
+		public string? GetSentence([NotNull] string? id, [CallerMemberName] string caller = "")
 		{
+			ArgumentNullException.ThrowIfNull(id);
 			if (!this.sentences.TryGetValue(id, out var value))
 			{
 				Debug.WriteLine($"Sentence not found: {id} in {caller}()");
@@ -166,6 +168,28 @@
 		#endregion
 
 		#region Private Methods
+		private static string Capitalize(string retval, Capitalization capitalize, CultureInfo culture)
+		{
+			return capitalize switch
+			{
+				Capitalization.None => retval,
+				Capitalization.FirstWord => retval.UpperFirst(culture),
+				Capitalization.TitleCase => ToTitleCase(retval, culture),
+				_ => retval
+			};
+
+			static string ToTitleCase(string input, CultureInfo culture)
+			{
+				var words = input.Split(TextArrays.Space);
+				for (var i = 0; i < words.Length; i++)
+				{
+					words[i] = words[i].UpperFirst(culture);
+				}
+
+				return string.Join(' ', words);
+			}
+		}
+
 		private List<string> GetList(CastlesTxInfo txInfo)
 		{
 			var list =
@@ -209,22 +233,15 @@
 			for (var i = 0; i < 4; i++)
 			{
 				var word = term[i];
+				if (txInfo.ArticleType is bool articleType)
+				{
+					word = this.articleInfos[articleType].AddArticleToWord(word, txInfo);
+				}
+
+				word = Capitalize(word, txInfo.Capitalize, this.culture);
 				if (include[i] && !list.Contains(word, StringComparer.Ordinal))
 				{
 					list.Add(word);
-				}
-			}
-
-			if (txInfo.ArticleType is bool articleType)
-			{
-				for (var i = 0; i < list.Count; i++)
-				{
-					list[i] = this.articleInfos[articleType].AddArticleToWord(
-						list[i],
-						txInfo.Male ?? true,
-						txInfo.Singular ?? throw new InvalidOperationException(),
-						txInfo.Capitalize,
-						this.culture);
 				}
 			}
 
@@ -270,24 +287,23 @@
 
 		private void LoadLanguageDatabase()
 		{
-			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"LanguageDatabase_Gameplay_{this.LangTag}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj.entries;
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + $"LanguageDatabase_Gameplay_{this.LangTag}.json");
+			var items = obj.MustHave("entries");
 			foreach (var item in items)
 			{
-				this.languageEntries.TryAdd((string)item.key, (string)item.entry);
+				this.languageEntries.TryAdd(item.MustHaveString("key"), item.MustHaveString("entry"));
 			}
 		}
 
 		private void LoadRules()
 		{
-			dynamic obj = JsonConvert.DeserializeObject(File.ReadAllText(GameInfo.Castles.ModFolder + $"rules_{this.LangTag}.json")) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + $"rules_{this.LangTag}.json");
+			var items = obj.MustHave("_rawData");
 			var rules = new Dictionary<string, string>(StringComparer.Ordinal);
 			foreach (var item in items)
 			{
-				var key = (string)item._referenceId;
-				var value = (string)item._data;
+				var key = item.MustHaveString("_referenceId");
+				var value = item.MustHaveString("_data");
 				rules.Add(key, value);
 			}
 
@@ -310,36 +326,33 @@
 
 		private void LoadSentences()
 		{
-			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"sentences_{this.LangTag}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + $"sentences_{this.LangTag}.json");
+			var items = obj.MustHave("_rawData");
 			foreach (var item in items)
 			{
-				this.sentences.Add((string)item._referenceId, (string)item._data);
+				this.sentences.Add(item.MustHaveString("_referenceId"), item.MustHaveString("_data"));
 			}
 		}
 
 		private void LoadTerms()
 		{
-			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"terms_{this.LangTag}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + $"terms_{this.LangTag}.json");
+			var items = obj.MustHave("_rawData");
 			foreach (var item in items)
 			{
-				var data = (string)item._data;
+				var data = item.MustHaveString("_data");
 				var split = data.Split(TextArrays.Pipe);
-				this.terms.Add((string)item._referenceId, split);
+				this.terms.Add(item.MustHaveString("_referenceId"), split);
 			}
 		}
 
 		private void LoadVariations()
 		{
-			var text = File.ReadAllText(GameInfo.Castles.ModFolder + $"variations_{this.LangTag}.json");
-			dynamic obj = JsonConvert.DeserializeObject(text) ?? throw new InvalidOperationException();
-			var items = obj._rawData;
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + $"variations_{this.LangTag}.json");
+			var items = obj.MustHave("_rawData");
 			foreach (var item in items)
 			{
-				var data = (string)item._data;
+				var data = item.MustHaveString("_data");
 				var split = data.Split(TextArrays.Comma);
 				var varList = new List<string>(split.Length);
 				foreach (var id in split)
@@ -349,7 +362,7 @@
 					varList.Add(stripped);
 				}
 
-				this.variations.Add((string)item._referenceId, [.. varList]);
+				this.variations.Add(item.MustHaveString("_referenceId"), [.. varList]);
 			}
 		}
 		#endregion
@@ -368,21 +381,16 @@
 			#endregion
 
 			#region Public Methods
-			public string AddArticleToWord(string word, bool male, bool singular, bool capitalize, CultureInfo culture)
+			public string AddArticleToWord(string input, CastlesTxInfo txInfo)
 			{
-				var declension = (male ? 0 : 2) + (singular ? 0 : 1);
+				var declension = (txInfo.Male == false ? 2 : 0) + (txInfo.Singular == false ? 1 : 0);
 
 				// Checks must be in this exact order - do not optimize.
 				var retval =
-					this.ExceptionStarts.Match(word).Success ? this.Exceptions[declension] :
-					this.ArticleStarts.Match(word).Success ? this.Articles[declension] :
+					this.ExceptionStarts.Match(input).Success ? this.Exceptions[declension] :
+					this.ArticleStarts.Match(input).Success ? this.Articles[declension] :
 					this.Exceptions[declension];
-				if (capitalize)
-				{
-					retval = retval.UpperFirst(culture);
-				}
-
-				return retval.Replace("{0}", word, StringComparison.Ordinal);
+				return retval.Replace("{0}", input, StringComparison.Ordinal);
 			}
 			#endregion
 		}

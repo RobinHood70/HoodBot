@@ -1,36 +1,54 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.CodeDom.Compiler;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Collections.ObjectModel;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
 	using System.Text.RegularExpressions;
-	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed partial class CastlesRulings : EditJob
+	internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.Ruling>
 	{
+		#region Private Constants
+		private const string RulingTemplate = "Castles Ruling";
+		#endregion
+
 		#region Static Fields
 		private static readonly CultureInfo GameCulture = new("en-US");
 		private static readonly string[] RulingsGroupNames = ["_requiredRulings", "_randomRulings", "_personalRulings", "_instantRulings", "_rewardRulings"];
+		private static readonly Regex StartingLetters = new("^[A-Z]+", RegexOptions.None, Globals.DefaultRegexTimeout);
 		private static readonly Dictionary<string, string> StyleReplacements = new(StringComparer.Ordinal)
 		{
-			["item"] = "A7762E",
-			["highlight"] = "A7762E",
-			["prop"] = "C69C5F",
-			["joke"] = "7B2235",
-			["positive"] = "49790C",
-			["negative"] = "BC322E",
+			/*
+				<style=dropcap>
+				<style=epic>
+				<style=health>
+				<style=link>
+				<style=magicka>
+				<style=quote>
+				<style=stamina>
+				<style=subject>
+				<style=trait>
+			*/
 			["fire"] = "BF4A26",
 			["frost"] = "385D82",
+			["highlight"] = "A7762E",
+			["item"] = "A7762E",
+			["joke"] = "7B2235",
+			["negative"] = "BC322E",
+			["positive"] = "49790C",
+			["prop"] = "C69C5F",
 			["shock"] = "512E55",
 		};
 
@@ -44,14 +62,12 @@
 			["RoyalAddress"] = "{{Hover|{0}|<Royal Address>}}",
 			["SR030_RulerFamilyMember"] = "{{Hover|{0}|<random family member>}}",
 		};
-
-		private static readonly bool WikiMode = true;
 		#endregion
 
 		#region Fields
-		private readonly CastlesData data;
-		private readonly Dictionary<string, Ruling> rulings = new(StringComparer.Ordinal);
-		private readonly CastlesTranslator translator;
+		private readonly Context context;
+		private readonly CastlesData data = new(GameCulture);
+		private readonly StringComparer subComparer;
 		#endregion
 
 		#region Constructors
@@ -59,9 +75,15 @@
 		public CastlesRulings(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.translator = new CastlesTranslator(GameCulture);
-			this.data = new CastlesData(this.translator);
+			this.context = new Context(this.Site);
+			this.NewPageText = GetNewPageText;
+			this.OnUpdate = this.UpdateRuling;
+			this.subComparer = this.Site.GetStringComparer(false);
 		}
+		#endregion
+
+		#region Protected Override Properties
+		protected override string? Disambiguator => null;
 		#endregion
 
 		#region Public Static Methods
@@ -71,218 +93,153 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLoadPages()
+		protected override void AfterLoadPages()
 		{
-			if (WikiMode)
+			var sorted = new SortedSet<string>(this.context.UnhandledMagicWords, StringComparer.Ordinal);
+			foreach (var item in sorted)
 			{
-				foreach (var (key, value) in TxInfoOverrides)
-				{
-					this.translator.ParserOverrides[key] = value;
-				}
+				Debug.WriteLine("Unhandled: " + item);
 			}
-
-			this.GetRulingGroups();
-			this.WriteRulingGroups(GameInfo.Castles.BaseFolder + "Rulings.txt");
 		}
 
 		protected override string GetEditSummary(Page page) => "Update rulings";
 
-		protected override void LoadPages()
+		protected override bool IsValid(SiteParser parser, Ruling item) => parser.FindSiteTemplate(RulingTemplate) is not null;
+
+		protected override IDictionary<Title, Ruling> LoadItems()
 		{
-			this.LoadAndSortPages();
-			this.CreateRulingsPages();
+			foreach (var (key, value) in TxInfoOverrides)
+			{
+				this.data.Translator.ParserOverrides[key] = value;
+			}
+
+			var rulings = this.GetRulingGroups();
+			this.UpdateRulingsPage(rulings);
+
+			return rulings;
 		}
+		#endregion
 
-		protected override void PageLoaded(Page page)
+		#region Private Static Methods
+		[GeneratedRegex(@"<style=(?<style>\w+)>(?<content>.*?)</style>", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, Globals.DefaultGeneratedRegexTimeout)]
+		private static partial Regex CastlesStyleReplacer();
+
+		private static string CreateSectionText(TitleCollection titles)
 		{
-			var rulingName = page.Title.SubPageName();
-			var ruling = this.rulings[rulingName];
-
-			var parser = new SiteParser(page);
-			var template = parser.FindSiteTemplate("Castles Ruling") ?? throw new InvalidOperationException();
-			var textParam = template.Find("text") ?? throw new InvalidOperationException();
-			var conditionsParam = template.Find("conditions") ?? throw new InvalidOperationException();
-			var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
-
-			textParam.SetValue(ruling.Text, ParameterFormat.Copy);
-			if (ruling.Conditions.Count > 0)
+			if (titles.Count == 0)
 			{
-				conditionsParam.SetValue(string.Join("<br>\n", ruling.Conditions), ParameterFormat.Copy);
+				return "\n";
 			}
 
-			foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>(t => t.Title.PageNameEquals("Castles Ruling/Choice")))
-			{
-				if (choiceTemplate.Find("id") is IParameterNode idParam &&
-					choiceTemplate.Find("effects") is IParameterNode effectsParam)
-				{
-					// var idParam = choiceTemplate.Find("id") ?? throw new InvalidOperationException();
-					// var effectsParam = choiceTemplate.Find("effects") ?? throw new InvalidOperationException();
-					var id = int.Parse(idParam.Value.ToValue(), GameCulture);
-					if (ruling.Choices.TryGetValue(id, out var choice))
-					{
-						choice.Effects = effectsParam.Value.ToRaw().Trim();
-					}
-				}
-			}
-
+			titles.Sort();
 			var sb = new StringBuilder();
-			foreach (var choice in ruling.Choices)
+			var lastTitle = string.Empty;
+			foreach (var title in titles)
 			{
-				BuildChoice(sb, choice);
+				var startingLetters = StartingLetters.Match(title.SubPageName()).Value;
+				if (startingLetters.OrdinalEquals("R"))
+				{
+					startingLetters = "RR";
+				}
+
+				if (!startingLetters.OrdinalEquals(lastTitle))
+				{
+					lastTitle = startingLetters;
+					if (sb.Length > 0)
+					{
+						sb.Append('\n');
+					}
+
+					sb
+						.Append("\n====")
+						.Append(startingLetters)
+						.Append("====");
+				}
+
+				sb
+					.Append("\n{{")
+					.Append(title.FullPageName())
+					.Append("}}");
 			}
 
-			choiceParam.SetValue(sb.ToString(), ParameterFormat.Copy);
-			parser.UpdatePage();
+			sb.Append("\n\n");
+			return sb.ToString();
 		}
 
-		protected override void PageMissing(Page page) => page.Text =
+		private static ITemplateNode UpdateChoiceTemplate(Choice choice, SiteParser parser, Dictionary<int, ITemplateNode> choiceDictionary, FlatteningComparer comparer)
+		{
+			if (!choiceDictionary.TryGetValue(choice.Id, out var template))
+			{
+				template = parser.Factory.TemplateNodeFromParts(
+					"Castles Ruling/Choice",
+					true,
+					("id", choice.Id.ToStringInvariant()),
+					("text", string.Empty),
+					("conditions", string.Empty),
+					("effects", string.Empty),
+					("flageffects", string.Empty));
+			}
+
+			template.LooseUpdate("text", string.Join(" ''or''<br>\n", choice.SubChoices), ParameterFormat.OnePerLine, comparer);
+			if (choice.Conditions.Count > 0)
+			{
+				template.LooseUpdate("conditions", string.Join("<br>\n", choice.Conditions), ParameterFormat.OnePerLine, comparer);
+			}
+
+			if (choice.EffectFlags.Count > 0)
+			{
+				template.LooseUpdate("flageffects", string.Join("<br>\n", choice.EffectFlags), ParameterFormat.OnePerLine, comparer);
+			}
+
+			return template;
+		}
+
+		private static string GetNewPageText(Title title, Ruling ruling) =>
 			"{{Castles Ruling\n" +
 			"|text=\n" +
 			"|conditions=\n" +
 			"|choices=\n" +
 			"}}";
-		#endregion
 
-		#region Private Static Methods
-		[GeneratedRegex(@"<style=(?<style>\w+)>(?<content>.*?)</style>", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, 10000)]
-		private static partial Regex CastlesStyleReplacer();
-
-		private static string StyleReplacer(Match match)
+		private static List<Ruling> GetNewRulingsList(Dictionary<Title, Ruling> rulings, IReadOnlyList<Title> templates)
 		{
-			var style = match.Groups["style"].Value;
-			return !StyleReplacements.TryGetValue(style, out var colour)
-				? match.Value
-				: $"{{{{FC|#{colour}|{match.Groups["content"].Value}}}}}";
-		}
-		#endregion
-
-		#region Private Methods
-		private static string BuildChoice(StringBuilder sb, Choice choice)
-		{
-			sb
-				.Append("{{Castles Ruling/Choice")
-				.Append("\n|id=")
-				.Append(choice.Id)
-				.Append("\n|text=")
-				.AppendJoin(" ''or''<br>\n", choice.SubChoices);
-			if (choice.Conditions.Count > 0)
+			var retval = new List<Ruling>();
+			foreach (var ruling in rulings)
 			{
-				sb.Append("\n|conditions=")
-				.AppendJoin("<br>\n", choice.Conditions);
-			}
-
-			sb
-				.Append("\n|effects=")
-				.Append(choice.Effects);
-			if (choice.EffectFlags.Count > 0)
-			{
-				sb.Append("\n|flageffects=")
-				.AppendJoin("<br>\n", choice.EffectFlags);
-			}
-
-			sb.Append("}}\n");
-
-			return sb.ToString();
-		}
-
-		private void CreateRulingsPages()
-		{
-			var groups = this.RulingsToGroups();
-			var sb = new StringBuilder();
-			foreach (var groupName in RulingsGroupNames)
-			{
-				var friendly = groupName
-					.Replace("_", string.Empty, StringComparison.Ordinal)
-					.Replace("Rulings", string.Empty, StringComparison.Ordinal)
-					.UpperFirst(GameCulture);
-				sb.Append($"=={friendly}==\n");
-				var group = groups[groupName];
-				foreach (var ruling in group)
+				if (!templates.Contains(ruling.Key))
 				{
-					sb
-						.Append("{{")
-						.Append(ruling.PageName)
-						.Append("}}\n");
-				}
-
-				sb.Append('\n');
-			}
-
-			this.Pages.Add(this.Site.CreatePage("Castles:Rulings", sb.ToString()));
-		}
-
-		private Ruling GetRuling(string group, dynamic rulingObject)
-		{
-			var descId = (string)rulingObject._rulingDescription;
-			if (this.translator.GetSentence(descId) is not string translated)
-			{
-				translated = descId + CastlesData.NotFound;
-			}
-
-			var text = this.translator.Parse(translated, true);
-			if (WikiMode)
-			{
-				text = CastlesRulings.WikiModeReplace(text);
-			}
-
-			var conditions = new CastlesConditions(this.data, GameCulture);
-			conditions.AddRulingInfo(rulingObject);
-			var choices = new Choices();
-			foreach (var choiceObject in rulingObject._rulingChoices)
-			{
-				choices.Add(new Choice(choiceObject, this.data, this.translator));
-			}
-
-			var name = (string)rulingObject._debugRulingName;
-			name = WikiTextUtilities.DecodeAndNormalize(name);
-			return new Ruling(group, name, text, conditions, choices);
-		}
-
-		private Dictionary<string, dynamic> GetRulingGroups()
-		{
-			using var file = File.OpenRead(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
-			using var reader = new StreamReader(file);
-			using var jsonReader = new JsonTextReader(reader);
-
-			var retVal = new Dictionary<string, dynamic>(StringComparer.Ordinal);
-			var serializer = new JsonSerializer();
-			dynamic obj = serializer.Deserialize(jsonReader) ?? throw new InvalidOperationException();
-			foreach (var rulingsGroupName in RulingsGroupNames)
-			{
-				var rulingList = new SortedList<string, Ruling>(StringComparer.Ordinal);
-				var group = obj[rulingsGroupName];
-				if (group is not null)
-				{
-					foreach (var rulingObject in group)
-					{
-						var localRuling = this.GetRuling(rulingsGroupName, rulingObject);
-						rulingList.Add(localRuling.Name, localRuling);
-						this.rulings.Add(localRuling.Name, localRuling);
-					}
+					retval.Add(ruling.Value);
 				}
 			}
 
-			return retVal;
+			retval.Sort((r1, r2) => r1.Name.CompareTo(r2.Name));
+
+			return retval;
 		}
 
-		private void LoadAndSortPages()
+		private static Section GetUnsortedSection(SectionCollection sections)
 		{
-			var titles = new TitleCollection(this.Site);
-			foreach (var (_, ruling) in this.rulings)
+			if (sections.FindFirst("Unsorted") is Section section)
 			{
-				titles.Add(ruling.PageName);
+				return section;
 			}
 
-			this.Pages.GetTitles(titles);
-			this.Pages.Sort();
+			var insertLoc = sections.IndexOf("Gallery");
+			if (insertLoc == -1)
+			{
+				insertLoc = sections.Count;
+			}
+
+			section = Section.FromText(sections.Factory, "Unsorted", string.Empty);
+			sections.InsertWithSpaceBefore(insertLoc, section);
+			return section;
 		}
 
-		private Dictionary<string, List<Ruling>> RulingsToGroups()
+		private static Dictionary<string, List<Ruling>> RulingsToGroups(List<Ruling> rulings)
 		{
 			var retval = new Dictionary<string, List<Ruling>>(StringComparer.Ordinal);
-			foreach (var page in this.Pages)
+			foreach (var ruling in rulings)
 			{
-				var ruling = this.rulings[page.Title.SubPageName()];
 				if (!retval.TryGetValue(ruling.Group, out var rulingList))
 				{
 					rulingList = [];
@@ -295,92 +252,175 @@
 			return retval;
 		}
 
-		private void WriteRulingGroups(string fileName)
+		private static string StyleReplacer(Match match)
 		{
-			using var memStream = new MemoryStream();
-			using var baseStream = File.CreateText(fileName);
-			using var stream = new IndentedTextWriter(baseStream);
-			var rulingGroups = new Dictionary<string, List<Ruling>>(StringComparer.Ordinal);
-			foreach (var (rulingName, ruling) in this.rulings)
-			{
-				if (!rulingGroups.TryGetValue(ruling.Group, out var rulingList))
-				{
-					rulingList = [];
-					rulingGroups[ruling.Group] = rulingList;
-				}
-
-				rulingList.Add(ruling);
-			}
-
-			foreach (var (groupName, group) in rulingGroups)
-			{
-				stream.WriteLine(groupName);
-				stream.Indent++;
-				foreach (var ruling in group)
-				{
-					stream.WriteLine(ruling.Text);
-					stream.Indent++;
-					foreach (var entry in ruling.Conditions)
-					{
-						stream.WriteLine(entry);
-					}
-
-					foreach (var choice in ruling.Choices)
-					{
-						for (var i = 0; i < choice.SubChoices.Count; i++)
-						{
-							var start = i == 0 ? "* " : "  ";
-							var end = i < (choice.SubChoices.Count - 1) ? " <OR>" : string.Empty;
-							var subChoice = choice.SubChoices[i];
-							stream.WriteLine(start + subChoice + end);
-						}
-
-						stream.Indent++;
-						foreach (var entry in choice.Conditions)
-						{
-							stream.WriteLine(entry);
-						}
-
-						foreach (var entry in choice.EffectFlags)
-						{
-							stream.WriteLine(entry);
-						}
-
-						stream.Indent--;
-					}
-
-					stream.Indent--;
-					stream.WriteLine();
-				}
-
-				stream.Indent--;
-			}
+			var style = match.Groups["style"].Value;
+			return !StyleReplacements.TryGetValue(style, out var colour)
+				? match.Value
+				: $"{{{{FC|#{colour}|{match.Groups["content"].Value}}}}}";
 		}
 		#endregion
 
-		#region Private Classes
-		private sealed class Choice
+		#region Private Methods
+		private void AddNewRulings(Dictionary<string, TitleCollection> subSectionDict, List<Ruling> newRulings)
+		{
+			var groups = RulingsToGroups(newRulings);
+			foreach (var (groupName, rulingList) in groups)
+			{
+				var friendly = groupName
+					.Replace("_", string.Empty, StringComparison.Ordinal)
+					.Replace("Rulings", string.Empty, StringComparison.Ordinal)
+					.UpperFirst(GameCulture);
+				if (!subSectionDict.TryGetValue(friendly, out var titles))
+				{
+					titles = new TitleCollection(this.Site);
+					subSectionDict.Add(friendly, titles);
+				}
+
+				foreach (var ruling in rulingList)
+				{
+					titles.Add(ruling.PageName);
+				}
+			}
+		}
+
+		private Dictionary<Title, Ruling> GetRulingGroups()
+		{
+			var retval = new Dictionary<Title, Ruling>(TitleComparer.Instance);
+			var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
+			foreach (var rulingsGroupName in RulingsGroupNames)
+			{
+				if (obj[rulingsGroupName] is JToken group)
+				{
+					foreach (var rulingObject in group)
+					{
+						var localRuling = new Ruling(rulingsGroupName, rulingObject, this.data);
+						retval.Add(TitleFactory.FromUnvalidated(this.Site, localRuling.PageName), localRuling);
+					}
+				}
+			}
+
+			return retval;
+		}
+
+		private Page GetRulingsPage()
+		{
+			var pages = PageCollection.Unlimited(this.Site, PageModules.Default | PageModules.Templates, false);
+			pages.GetTitles("Castles:Rulings");
+			var rulingsPage = pages[0];
+			return rulingsPage;
+		}
+
+		private Dictionary<string, TitleCollection> GetSubSections(Section unsortedSection)
+		{
+			var retval = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
+			foreach (var section in unsortedSection.Content.ToSections(3))
+			{
+				var titles = new TitleCollection(this.Site);
+				var transclusions = section.Content.FindAll<ITemplateNode>();
+				foreach (var transclusion in transclusions)
+				{
+					var titleText = transclusion.TitleNodes.ToValue();
+					titles.Add(titleText);
+				}
+
+				retval.Add(section.GetTitle() ?? string.Empty, titles);
+			}
+
+			return retval;
+		}
+
+		private string RemoveCruftBeforeCompare(string arg) => arg
+			.Replace("<br>", string.Empty, StringComparison.Ordinal)
+			.Trim();
+
+		private void UpdateRuling(SiteParser parser, Ruling ruling)
+		{
+			this.context.Page = parser.Page;
+			var comparer = new FlatteningComparer(this.context, this.subComparer)
+			{
+				ParseBeforeStringCompare = this.RemoveCruftBeforeCompare
+			};
+
+			var template = parser.FindSiteTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
+			template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
+
+			if (ruling.Conditions.Count > 0)
+			{
+				var newConditions = string.Join("<br>\n", ruling.Conditions);
+				template.LooseUpdate("conditions", newConditions, ParameterFormat.OnePerLine, comparer);
+			}
+
+			var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
+			var choiceDictionary = new Dictionary<int, ITemplateNode>();
+			foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>(t => t.Title.PageNameEquals("Castles Ruling/Choice")))
+			{
+				if (choiceTemplate.Find("id")?.Value.ToValue().Trim() is string choiceId)
+				{
+					choiceDictionary.Add(int.Parse(choiceId, this.Site.Culture), choiceTemplate);
+				}
+			}
+
+			var newNodes = new WikiNodeCollection(parser.Factory);
+			foreach (var choice in ruling.Choices)
+			{
+				var choiceTemplate = UpdateChoiceTemplate(choice, parser, choiceDictionary, comparer);
+				newNodes.Add(choiceTemplate);
+				newNodes.AddText("\n");
+			}
+
+			choiceParam.Value.Clear();
+			choiceParam.Value.AddRange(newNodes);
+		}
+
+		private void UpdateRulingsPage(Dictionary<Title, Ruling> rulings)
+		{
+			var rulingsPage = this.GetRulingsPage();
+			this.Pages.Add(rulingsPage);
+
+			var parser = new SiteParser(rulingsPage);
+			var sections = parser.ToSections(2);
+			var unsortedSection = GetUnsortedSection(sections);
+			var subSectionDict = this.GetSubSections(unsortedSection);
+			var newRulings = GetNewRulingsList(rulings, rulingsPage.Templates);
+			this.AddNewRulings(subSectionDict, newRulings);
+
+			var newSections = new SectionCollection(parser.Factory, 3);
+			foreach (var (sectionName, titles) in subSectionDict)
+			{
+				var sectionText = CreateSectionText(titles);
+				var nullName = sectionName.Length == 0 ? null : sectionName;
+				var newSection = Section.FromText(parser.Factory, 3, nullName, sectionText);
+				newSections.Add(newSection);
+			}
+
+			unsortedSection.Content.FromSections(newSections);
+			parser.FromSections(sections);
+			parser.UpdatePage();
+		}
+		#endregion
+
+		#region Internal Classes
+		internal sealed class Choice
 		{
 			#region Fields
 			private readonly CastlesData data;
 			#endregion
 
 			#region Constructors
-			public Choice(dynamic choiceObject, CastlesData data, CastlesTranslator translator)
+			public Choice(JToken choiceObject, CastlesData data)
 			{
 				this.data = data;
-				this.Id = (int)choiceObject._rulingChoiceTemplateUid.id;
-				var choiceShort = (string)choiceObject._rulingChoiceDescription;
-				if (translator.GetSentence(choiceShort) is not string choiceDesc)
+				var uid = choiceObject.MustHave("_rulingChoiceTemplateUid");
+				this.Id = (int?)uid["id"] ?? 0;
+				var choiceShort = choiceObject.MustHaveString("_rulingChoiceDescription") ?? throw new InvalidDataException();
+				if (data.Translator.GetSentence(choiceShort) is not string choiceDesc)
 				{
 					choiceDesc = choiceShort + CastlesData.NotFound;
 				}
 
-				var text = translator.Parse(choiceDesc, true);
-				if (WikiMode)
-				{
-					text = CastlesRulings.WikiModeReplace(text);
-				}
+				var text = data.Translator.Parse(choiceDesc, true);
+				text = WikiModeReplace(text);
 
 				this.SubChoices.AddRange(text.Split("<newline>"));
 				var conditions = new CastlesConditions(this.data, GameCulture);
@@ -395,32 +435,51 @@
 
 			public List<string> EffectFlags { get; }
 
-			public string? Effects { get; set; }
-
 			public int Id { get; }
 
 			public List<string> SubChoices { get; } = [];
 			#endregion
 		}
 
-		private sealed class Choices : KeyedCollection<int, Choice>
+		internal sealed class Choices : KeyedCollection<int, Choice>
 		{
 			protected override int GetKeyForItem(Choice item) => item.Id;
 		}
 
-		private sealed class Ruling(string group, string name, string text, List<string> conditions, Choices choices)
+		internal sealed class Ruling
 		{
-			public Choices Choices { get; } = choices;
+			public Ruling(string group, JToken rulingObject, CastlesData data)
+			{
+				this.Group = group;
+				this.Name = WikiTextUtilities.DecodeAndNormalize(rulingObject.MustHaveString("_debugRulingName") ?? string.Empty);
 
-			public List<string> Conditions { get; } = conditions;
+				var descId = rulingObject.MustHaveString("_rulingDescription");
+				if (data.Translator.GetSentence(descId) is not string translated)
+				{
+					translated = descId + CastlesData.NotFound;
+				}
 
-			public string Group { get; } = group;
+				this.Text = WikiModeReplace(data.Translator.Parse(translated, true));
+				this.Conditions = new CastlesConditions(data, GameCulture);
+				this.Conditions.AddRulingInfo(rulingObject);
+				var rulingChoices = rulingObject.MustHave("_rulingChoices");
+				foreach (var choiceObject in rulingChoices)
+				{
+					this.Choices.Add(new Choice(choiceObject, data));
+				}
+			}
 
-			public string Name { get; } = name;
+			public Choices Choices { get; } = [];
+
+			public CastlesConditions Conditions { get; }
+
+			public string Group { get; }
+
+			public string Name { get; }
 
 			public string PageName => "Castles:Rulings/" + this.Name;
 
-			public string Text { get; } = text;
+			public string Text { get; }
 		}
 		#endregion
 	}
