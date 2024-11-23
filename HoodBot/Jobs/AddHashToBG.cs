@@ -22,7 +22,7 @@
 			{
 				if (template.Parameters.Count >= 1 &&
 					template.Find(1) is IParameterNode parameter &&
-					parameter.Value.ToValue() is string hex &&
+					parameter.GetValue() is string hex &&
 					hex.Length == 6 &&
 					int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
 				{

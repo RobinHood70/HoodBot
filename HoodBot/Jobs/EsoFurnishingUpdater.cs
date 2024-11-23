@@ -183,7 +183,7 @@
 		{
 			if (template.Find("behavior") is IParameterNode behavior)
 			{
-				var list = new List<string>(behavior.Value.ToRaw().Split(TextArrays.Comma));
+				var list = new List<string>(behavior.GetValue().Split(TextArrays.Comma));
 				for (var i = list.Count - 1; i >= 0; i--)
 				{
 					list[i] = list[i].Trim();
@@ -329,8 +329,7 @@
 			if (template.Find(plural, parameterName) is IParameterNode param)
 			{
 				param.SetName(plural);
-				var curValue = param.Value;
-				var curText = curValue.ToRaw();
+				var curText = param.GetValue();
 				var splitOn = curText.Contains('~', StringComparison.Ordinal) ? '~' : ',';
 				var split = curText.Split(splitOn, StringSplitOptions.None);
 				var list = new List<(string Name, int Value)>(split.Length / 2);

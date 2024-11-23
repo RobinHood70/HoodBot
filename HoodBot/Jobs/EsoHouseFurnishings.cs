@@ -169,7 +169,7 @@
 					case ";*":
 						if (parsedLine[1] is SiteTemplateNode furnishing && furnishing.Title.PageNameEquals("Furnishing Link"))
 						{
-							var link = furnishing.Find(1)?.Value.ToRaw();
+							var link = furnishing.GetRaw(1);
 							var (_, count) = SplitLine(line);
 							itemList.Add($"~{link}~{count}");
 							return null;

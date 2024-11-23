@@ -24,7 +24,7 @@
 		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
 		{
 			var op = template.Find("orbital_position");
-			if (op is not null && op.Value.ToRaw().Trim().Length > 0)
+			if (op is not null && op.GetRaw().Length > 0)
 			{
 				template.Remove("order");
 			}

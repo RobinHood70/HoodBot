@@ -117,6 +117,24 @@
 
 		#region IParameterNode Extensions
 
+		/// <summary>Get the trimmed raw value of the parameter.</summary>
+		/// <param name="parameter">The parameter to work on.</param>
+		/// <returns>The trimmed raw text of the parameter value.</returns>
+		public static string GetRaw(this IParameterNode parameter)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			return parameter.Value.ToRaw().Trim();
+		}
+
+		/// <summary>Get the trimmed value of the parameter.</summary>
+		/// <param name="parameter">The parameter to work on.</param>
+		/// <returns>The trimmed text of the parameter value.</returns>
+		public static string GetValue(this IParameterNode parameter)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			return parameter.Value.ToValue().Trim();
+		}
+
 		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
 		/// <param name="parameter">The parameter.</param>
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
@@ -127,6 +145,25 @@
 			1 => parameter.Value[0] is ITextNode textNode && textNode.Text.TrimStart().Length == 0,
 			_ => false,
 		};
+
+		/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
+		/// <param name="parameter">The parameter to alter.</param>
+		/// <param name="value">The value to update to.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
+		/// <param name="comparer">The string comparer to define loose equality.</param>
+		/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
+		public static void LooseUpdate(this IParameterNode parameter, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+		{
+			ArgumentNullException.ThrowIfNull(parameter);
+			ArgumentNullException.ThrowIfNull(value);
+			ArgumentNullException.ThrowIfNull(comparer);
+			var oldText = parameter.GetRaw();
+			value = parameter.Factory.EscapeParameterText(value, parameter.Name is null);
+			if (!comparer.Equals(oldText, value.Trim()))
+			{
+				parameter.SetValueNoEscape(value, paramFormat);
+			}
+		}
 
 		/// <summary>Sets the name to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
@@ -160,8 +197,15 @@
 		/// <param name="parameter">The parameter to set the value of.</param>
 		/// <param name="value">The value. May not be null.</param>
 		/// <param name="paramFormat">The desired parameter format.</param>
-		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat paramFormat)
+		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat paramFormat) => SetValueNoEscape(parameter, parameter?.Factory.EscapeParameterText(value, parameter.Name is null), paramFormat);
+
+		/// <summary>Special-purpose version of SetValue that sets the value without escaping it.</summary>
+		/// <param name="parameter">The parameter to set the value of.</param>
+		/// <param name="value">The value. May not be null.</param>
+		/// <param name="paramFormat">The desired parameter format.</param>
+		public static void SetValueNoEscape(this IParameterNode parameter, string? value, ParameterFormat paramFormat)
 		{
+			// This method uses a different name rather than a boolean choice, since it will be very rare that you wouldn't want to escape the value.
 			ArgumentNullException.ThrowIfNull(parameter);
 			ArgumentNullException.ThrowIfNull(value);
 			var paramValue = parameter.Value;
@@ -185,25 +229,8 @@
 		{
 			ArgumentNullException.ThrowIfNull(parameter);
 			return parameter.Name is WikiNodeCollection name
-				? name.ToRaw() + '=' + parameter.Value.ToRaw()
-				: parameter.Value.ToRaw();
-		}
-
-		/// <summary>Returns the value of a template parameter or the default value.</summary>
-		/// <param name="parameter">The parameter.</param>
-		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
-		public static string ValueOrDefault(this IParameterNode? parameter, string defaultValue)
-		{
-			if (parameter?.Value is not WikiNodeCollection nullNodes || nullNodes.Count == 0)
-			{
-				return defaultValue;
-			}
-
-			var retval = nullNodes.ToRaw();
-			return retval.Trim().Length == 0
-				? defaultValue
-				: retval;
+				? name.ToRaw() + '=' + parameter.GetRaw()
+				: parameter.GetRaw();
 		}
 		#endregion
 
@@ -519,24 +546,24 @@
 			return retval;
 		}
 
-		/// <summary>Get the raw value of a parameter or null.</summary>
+		/// <summary>Get the trimmed raw value of a parameter or <see langword="null"/> if not found.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="number">The numbered parameter to search for.</param>
-		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		/// <returns>The trimmed raw text of the parameter value or <see langword="null"/> if not found.</returns>
 		public static string? GetRaw(this ITemplateNode template, int number)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			return template.Find(number)?.Value.ToRaw().Trim();
+			return template.Find(number)?.GetRaw();
 		}
 
-		/// <summary>Get the raw value of a parameter or null.</summary>
+		/// <summary>Get the trimmed raw value of a parameter or <see langword="null"/> if not found.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to search for.</param>
-		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		/// <returns>The trimmed raw text of the parameter value or <see langword="null"/> if not found.</returns>
 		public static string? GetRaw(this ITemplateNode template, string name)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			return template.Find(name)?.Value.ToRaw().Trim();
+			return template.Find(name)?.GetRaw();
 		}
 
 		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
@@ -558,24 +585,24 @@
 			}
 		}
 
-		/// <summary>Get the value of a parameter or null.</summary>
+		/// <summary>Get the trimmed value of a parameter or <see langword="null"/> if not found.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="number">The numbered parameter to search for.</param>
-		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		/// <returns>The trimmed text of the parameter value or <see langword="null"/> if not found.</returns>
 		public static string? GetValue(this ITemplateNode template, int number)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			return template.Find(number)?.Value.ToValue().Trim();
+			return template.Find(number)?.GetValue();
 		}
 
-		/// <summary>Get the value of a parameter or null.</summary>
+		/// <summary>Get the trimmed value of a parameter or null.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to search for.</param>
-		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		/// <returns>The trimmed text of the parameter value or <see langword="null"/> if not found.</returns>
 		public static string? GetValue(this ITemplateNode template, string name)
 		{
 			ArgumentNullException.ThrowIfNull(template);
-			return template.Find(name)?.Value.ToValue().Trim();
+			return template.Find(name)?.GetValue();
 		}
 
 		/// <summary>Determines whether any parameters have numeric names.</summary>
@@ -608,16 +635,9 @@
 			ArgumentNullException.ThrowIfNull(template);
 			ArgumentNullException.ThrowIfNull(name);
 			ArgumentNullException.ThrowIfNull(value);
-			ArgumentNullException.ThrowIfNull(comparer);
-			ArgumentNullException.ThrowIfNull(template);
 			if (template.Find(name) is IParameterNode parameter)
 			{
-				var oldText = parameter.Value.ToRaw().Trim();
-				if (!comparer.Equals(oldText, value.Trim()))
-				{
-					parameter.SetValue(value, paramFormat);
-				}
-
+				parameter.LooseUpdate(value, paramFormat, comparer);
 				return parameter;
 			}
 
@@ -894,9 +914,7 @@
 		/// <param name="parameterName">The parameter name.</param>
 		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
-			template?.Find(parameterName)?.Value is WikiNodeCollection nullNodes &&
-			nullNodes.Count != 0 &&
-			nullNodes.ToRaw().Trim().Length != 0;
+			template?.GetRaw(parameterName)?.Length != 0;
 
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="template">The template to work on.</param>
@@ -937,7 +955,7 @@
 			var param = template.Find(name);
 			if (param is IParameterNode parameter)
 			{
-				if (parameter.Value.ToValue().Trim().Length == 0)
+				if (parameter.GetValue().Length == 0)
 				{
 					parameter.SetValue(value, paramFormat);
 				}
@@ -988,24 +1006,6 @@
 			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 			template.Parameters.Insert(index + 1, retval);
 			return retval;
-		}
-
-		/// <summary>Returns the value of a template parameter or the default value.</summary>
-		/// <param name="template">The template to search.</param>
-		/// <param name="parameterName">The parameter name.</param>
-		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
-		/// <returns>The value of the parameter, if found, or <paramref name="defaultValue"/> if not.</returns>
-		public static string ValueOrDefault(this ITemplateNode? template, string parameterName, string defaultValue)
-		{
-			if (template?.Find(parameterName)?.Value is not WikiNodeCollection nullNodes || nullNodes.Count == 0)
-			{
-				return defaultValue;
-			}
-
-			var retval = nullNodes.ToRaw();
-			return retval.Trim().Length == 0
-				? defaultValue
-				: retval;
 		}
 		#endregion
 

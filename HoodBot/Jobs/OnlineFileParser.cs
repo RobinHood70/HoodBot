@@ -268,7 +268,7 @@
 					node = en.Find(1);
 				}
 
-				return (node ?? desc).Value.ToRaw();
+				return (node ?? desc).GetRaw();
 			}
 
 			return null;

@@ -343,6 +343,7 @@
 			};
 
 			var template = parser.FindSiteTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
+
 			template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
 
 			if (ruling.Conditions.Count > 0)
@@ -355,7 +356,7 @@
 			var choiceDictionary = new Dictionary<int, ITemplateNode>();
 			foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>(t => t.Title.PageNameEquals("Castles Ruling/Choice")))
 			{
-				if (choiceTemplate.Find("id")?.Value.ToValue().Trim() is string choiceId)
+				if (choiceTemplate.GetValue("id") is string choiceId)
 				{
 					choiceDictionary.Add(int.Parse(choiceId, this.Site.Culture), choiceTemplate);
 				}

@@ -196,7 +196,7 @@
 		{
 			if (parameter != null)
 			{
-				var currentValue = parameter.Value.ToValue().Trim();
+				var currentValue = parameter.GetValue();
 				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
 				{
 					return oldValue;

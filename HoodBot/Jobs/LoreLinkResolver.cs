@@ -68,14 +68,14 @@
 				{
 					var ns = this.GetNamespace(linkTemplate, page.Title);
 					string term;
-					if (linkTemplate.Find($"{ns.Id}link")?.Value is WikiNodeCollection overridden)
+					if (linkTemplate.GetRaw($"{ns.Id}link") is string idLink)
 					{
-						term = overridden.ToRaw().Trim();
+						term = idLink;
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site, term));
 					}
-					else if (linkTemplate.Find(1)?.Value is WikiNodeCollection nodes)
+					else if (linkTemplate.GetRaw(1) is string term1)
 					{
-						term = nodes.ToRaw().Trim();
+						term = term1;
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.BaseNamespace, term));
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(ns.Parent, term));
 						findTitles.TryAdd(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], term));
@@ -142,9 +142,8 @@
 				return TitleFactory.FromUnvalidated(this.Site, overridden.ToRaw());
 			}
 
-			if (linkTemplate.Find(1)?.Value is WikiNodeCollection nodes)
+			if (linkTemplate.GetRaw(1) is string pageName)
 			{
-				var pageName = nodes.ToRaw();
 				Title fullName = TitleFactory.FromUnvalidated(ns.BaseNamespace, pageName);
 				Title parentName = TitleFactory.FromUnvalidated(ns.Parent, pageName);
 				Title loreName = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Lore], pageName);
@@ -192,7 +191,7 @@
 		{
 			if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
 			{
-				var lookup = nsBase.Value.ToValue();
+				var lookup = nsBase.GetValue();
 				return this.nsList[lookup];
 			}
 
@@ -218,8 +217,8 @@
 			}
 
 			var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
-				? displayNode.Value.ToRaw()
-				: Title.ToLabelName(linkNode.Value.ToRaw());
+				? displayNode.GetRaw()
+				: Title.ToLabelName(linkNode.GetRaw());
 			return new List<IWikiNode>([parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText)]);
 		}
 

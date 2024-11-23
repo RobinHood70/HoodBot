@@ -36,7 +36,7 @@
 		{
 			if (template.Find("image") is IParameterNode image)
 			{
-				var value = image.Value.ToRaw().Trim();
+				var value = image.GetRaw();
 				if (value.Length > 0 &&
 					!value.StartsWith("<!--", StringComparison.Ordinal) &&
 					!value.OrdinalICEquals("none"))

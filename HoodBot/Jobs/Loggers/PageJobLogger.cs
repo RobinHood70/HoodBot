@@ -117,7 +117,7 @@
 				sameTaskText &&
 				string.IsNullOrEmpty(entry.GetValue(3)) &&
 				this.logInfo.Title.OrdinalEquals(entry.GetValue(1)) &&
-				this.logInfo.Details.OrdinalEquals(entry.Find("info")?.Value.ToValue() ?? string.Empty))
+				this.logInfo.Details.OrdinalEquals(entry.GetValue("info") ?? string.Empty))
 			{
 				return;
 			}

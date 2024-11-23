@@ -164,10 +164,10 @@
 					switch (param.Name?.ToValue())
 					{
 						case null:
-							variables.Add(param.Value.ToRaw());
+							variables.Add(param.GetRaw());
 							break;
 						case "set":
-							this.Set = param.Value.ToRaw();
+							this.Set = param.GetRaw();
 							break;
 						case "if":
 						case "ifnot":

@@ -117,7 +117,7 @@
 				var newValue = FormatMeters(baseRank.Radius);
 				if (template.Find("radius", "area") is IParameterNode radiusParam)
 				{
-					var oldValue = radiusParam.Value.ToValue().Trim();
+					var oldValue = radiusParam.GetValue();
 					if (oldValue.OrdinalICEquals(newValue))
 					{
 						radiusParam.SetValue(newValue, ParameterFormat.Copy);

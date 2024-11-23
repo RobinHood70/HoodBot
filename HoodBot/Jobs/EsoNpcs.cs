@@ -191,7 +191,7 @@
 					locText += '\n';
 					if (template.Find(name) is IParameterNode loc)
 					{
-						var value = loc.Value.ToValue().TrimEnd();
+						var value = loc.GetValue();
 						if (!value.OrdinalEquals(locText))
 						{
 							loc.SetValue(loc.IsNullOrWhitespace() ? locText : (value + ", " + locText), ParameterFormat.Copy);
@@ -270,7 +270,7 @@
 							template.Find("ship").IsNullOrWhitespace() &&
 							template.Find("store").IsNullOrWhitespace() &&
 							template.Find("loc") is IParameterNode loc &&
-							(loc.IsNullOrWhitespace() || loc.Value.ToValue().OrdinalICEquals("{{huh}}")))
+							(loc.IsNullOrWhitespace() || loc.GetValue().OrdinalICEquals("{{huh}}")))
 						{
 							this.npcCollection.Add(npc);
 						}

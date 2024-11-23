@@ -113,7 +113,7 @@
 			var nameParam = template.Find("name", "1");
 			var name = nameParam is null
 				? page.Title.PageName
-				: nameParam.Value.ToValue().Trim();
+				: nameParam.GetValue();
 			this.GenericIconWithDefault(page, template, $"ON-icon-lead-{name}.png");
 		}
 
@@ -135,19 +135,18 @@
 			}
 
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(nsParam?.Value.ToValue(), page.Title) is not UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(nsParam?.GetValue(), page.Title) is not UespNamespace oldNs)
 			{
 				return;
 			}
 
-			var oldTitle = link.Value.ToValue();
+			var oldTitle = link.GetValue();
 			var searchTitle = TitleFactory.FromUnvalidated(page.Site, oldNs.Full + oldTitle);
 			if (!this.globalUpdates.TryGetValue(searchTitle, out var toTitle))
 			{
 				return;
 			}
 
-			link.Value.Clear();
 			link.SetValue(toTitle.PageName, ParameterFormat.Copy);
 			if (this.NamespaceList.FromTitle(toTitle) is not UespNamespace newNs || !oldNs.Id.OrdinalEquals(newNs.Id))
 			{
@@ -210,7 +209,7 @@
 			}
 
 			this.PageNameReplace(this.site[MediaWikiNamespaces.File], param);
-			if (addedDefault && param.Value.ToRaw().Trim().OrdinalEquals(defaultValue))
+			if (addedDefault && param.GetRaw().OrdinalEquals(defaultValue))
 			{
 				template.Remove("icon");
 			}
@@ -225,7 +224,7 @@
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
 			var nsParam = template.Find("ns_base", "ns_id");
-			if (this.NamespaceList.GetNsBase(nsParam?.Value.ToValue(), page.Title) is UespNamespace oldNs)
+			if (this.NamespaceList.GetNsBase(nsParam?.GetValue(), page.Title) is UespNamespace oldNs)
 			{
 				var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
 				var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
@@ -245,17 +244,16 @@
 		protected void DefaultLoreFirst(Page page, SiteTemplateNode template)
 		{
 			var nsParam = template.Find("ns_base", "ns_id");
-			var baseName = nsParam?.Value.ToValue().Trim() ?? "Lore";
+			var baseName = nsParam?.GetValue() ?? "Lore";
 			var nsBase = this.NamespaceList[baseName];
-			if (template.Find(1)?.Value is not WikiNodeCollection pageName ||
-				!this.globalUpdates.TryGetValue(nsBase.GetTitle(pageName.ToValue().Trim()), out var target) ||
+			if (template.Find(1) is not IParameterNode pageNameParam ||
+				!this.globalUpdates.TryGetValue(nsBase.GetTitle(pageNameParam.GetValue()), out var target) ||
 				this.NamespaceList.FromTitle(target) is not UespNamespace targetNsBase)
 			{
 				return;
 			}
 
-			pageName.Clear();
-			pageName.AddText(target.PageName);
+			pageNameParam.SetValue(target.PageName, ParameterFormat.NoChange);
 			template.Remove("ns_base");
 			template.Remove("ns_id");
 			if (!targetNsBase.Base.OrdinalEquals("Lore"))
@@ -296,7 +294,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(page);
 			if (param != null
-				&& TitleFactory.FromUnvalidated(page.Site, param.Value.ToValue()) is var from
+				&& TitleFactory.FromUnvalidated(page.Site, param.GetValue()) is var from
 				&& this.globalUpdates.TryGetValue(from, out var to))
 			{
 				param.SetValue(to.Namespace.DecoratedName() + to.PageName, ParameterFormat.Copy);
@@ -339,7 +337,7 @@
 		{
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
-				Title from = TitleFactory.FromUnvalidated(page.Title.Namespace, param.Value.ToValue());
+				Title from = TitleFactory.FromUnvalidated(page.Title.Namespace, param.GetValue());
 				if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Namespace)
 				{
 					param.SetValue(to.PageName, ParameterFormat.Copy);
@@ -354,7 +352,7 @@
 			var ns2 = rep2 ? replacement2.To.Namespace : null; */
 			if (param != null)
 			{
-				var paramValue = param.Value.ToValue().Trim();
+				var paramValue = param.GetValue();
 				var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
 				if (this.globalUpdates.TryGetValue(findTitle, out var target) &&
 					target.Namespace == ns)

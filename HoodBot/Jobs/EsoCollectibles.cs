@@ -263,7 +263,7 @@
 				{
 					foreach (var parameter in template.ParameterCluster(2))
 					{
-						var title = parameter[0].Value.ToRaw();
+						var title = parameter[0].GetValue();
 						if (!this.crateTiers.TryGetValue(title, out var allTiers))
 						{
 							allTiers = [];

@@ -57,7 +57,7 @@
 					fileParam = template.Factory.ParameterNodeFromParts("originalfilename", string.Empty);
 				}
 
-				var existing = fileParam.Value.ToValue();
+				var existing = fileParam.GetValue();
 				fileNames.UnionWith(existing.Split(TextArrays.Comma));
 				fileNames.Remove(string.Empty);
 				fileParam.SetValue(string.Join(',', fileNames), ParameterFormat.OnePerLine);
@@ -84,8 +84,8 @@
 			var anons = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 			foreach (var cluster in template.ParameterCluster(2))
 			{
-				var key = cluster[0].Value.ToRaw().Trim();
-				var value = cluster[1].Value.ToRaw().Trim();
+				var key = cluster[0].GetRaw();
+				var value = cluster[1].GetRaw();
 				anons.Add(key + '\t' + value);
 			}
 

@@ -346,7 +346,7 @@
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					var sourceTitle = TitleFactory.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue()).ToTitle();
+					var sourceTitle = TitleFactory.FromUnvalidated(parser.Site, existing.Parameters[index].GetValue()).ToTitle();
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageNameEquals(title.BasePageName()))
 					{
 						existing.Parameters.RemoveAt(index);

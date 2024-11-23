@@ -29,7 +29,7 @@
 
 		/// <summary>Gets or sets the text to use when escaping pipes.</summary>
 		/// <value>The pipe escape text.</value>
-		public string PipeEscape { get; set; } = "{{!}}";
+		public string PipeEscape { get; set; } = "{{Pipe}}";
 		#endregion
 
 		#region Public Methods
@@ -51,15 +51,29 @@
 		/// <inheritdoc/>
 		public IArgumentNode ArgumentNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<IArgumentNode>(wikiText);
 
-		/// <summary>Escapes any pipes and equals signs in the value.</summary>
-		/// <param name="value">The text to escape.</param>
-		/// <returns>The escaped text.</returns>
-		public string EscapeParameterName(string? value) => this.EscapeParameterText(value, false);
+		/// <inheritdoc/>
+		public string EscapeParameterText(string? value, bool escapeEquals)
+		{
+			if (value is null)
+			{
+				return string.Empty;
+			}
 
-		/// <summary>Escapes any pipes and equals signs in the value.</summary>
-		/// <param name="value">The text to escape.</param>
-		/// <returns>The escaped text.</returns>
-		public string EscapeParameterValue(string? value) => this.EscapeParameterText(value, true);
+			var nodes = this.Parse(value);
+			foreach (var node in nodes)
+			{
+				if (node is ITextNode textNode)
+				{
+					textNode.Text = textNode.Text.Replace("|", this.PipeEscape, StringComparison.Ordinal);
+					if (escapeEquals)
+					{
+						textNode.Text = textNode.Text.Replace("=", this.EqualsEscape, StringComparison.Ordinal);
+					}
+				}
+			}
+
+			return nodes.ToRaw();
+		}
 
 		/// <inheritdoc/>
 		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNodeFromParts(level, text, string.Empty);
@@ -243,14 +257,14 @@
 					}
 
 					sb.Append('|');
-					if (name != null)
+					if (name is not null)
 					{
 						sb
 							.Append(name)
 							.Append('=');
 					}
 
-					sb.Append(this.EscapeParameterValue(value));
+					sb.Append(this.EscapeParameterText(value, name is null));
 				}
 
 				if (addTrailingLine)
@@ -304,31 +318,6 @@
 
 		/// <inheritdoc/>
 		public virtual ITextNode TextNode(string text) => new TextNode(text);
-		#endregion
-
-		#region Private Methods
-		private string EscapeParameterText(string? value, bool escapeEquals)
-		{
-			if (value is null)
-			{
-				return string.Empty;
-			}
-
-			var nodes = this.Parse(value);
-			foreach (var node in nodes)
-			{
-				if (node is ITextNode textNode)
-				{
-					textNode.Text = textNode.Text.Replace("|", this.PipeEscape, StringComparison.Ordinal);
-					if (escapeEquals)
-					{
-						textNode.Text = textNode.Text.Replace("=", this.EqualsEscape, StringComparison.Ordinal);
-					}
-				}
-			}
-
-			return nodes.ToRaw();
-		}
 		#endregion
 	}
 }
