@@ -317,10 +317,10 @@ internal sealed class CastlesTranslator
 
 		// Definite articles
 		articleInfo = new ArticleInfo(
-			rules["article.indefinite.format"],
-			rules["article.indefinite.starts"],
-			rules["article.indefinite.exception.format"],
-			rules["article.indefinite.exception.starts"]);
+			rules["article.definite.format"],
+			rules["article.definite.starts"],
+			rules["article.definite.exception.format"],
+			rules["article.definite.exception.starts"]);
 		this.articleInfos.Add(true, articleInfo);
 	}
 
