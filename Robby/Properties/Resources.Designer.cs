@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.Robby.Properties {
+namespace RobinHood70.Robby.Properties; 
     using System;
     
     
@@ -195,4 +195,3 @@ namespace RobinHood70.Robby.Properties {
             }
         }
     }
-}

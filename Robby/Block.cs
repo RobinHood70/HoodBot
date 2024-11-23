@@ -1,59 +1,58 @@
-﻿namespace RobinHood70.Robby
+﻿namespace RobinHood70.Robby;
+
+using System;
+using RobinHood70.WikiCommon;
+
+/// <summary>Stores all information about a wiki block.</summary>
+public class Block
 {
-	using System;
-	using RobinHood70.WikiCommon;
+	#region Constructors
 
-	/// <summary>Stores all information about a wiki block.</summary>
-	public class Block
+	/// <summary>Initializes a new instance of the <see cref="Block"/> class.</summary>
+	/// <param name="user">The blocked user.</param>
+	/// <param name="by">Who the block was performed by.</param>
+	/// <param name="reason">The reason for the block.</param>
+	/// <param name="startTime">The start time of the block.</param>
+	/// <param name="expiry">When the block expires.</param>
+	/// <param name="flags">The block flags.</param>
+	/// <param name="automatic">if set to <see langword="true"/>, indicates that this was an auto-block by the wiki itself.</param>
+	protected internal Block(User? user, User? by, string? reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 	{
-		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="Block"/> class.</summary>
-		/// <param name="user">The blocked user.</param>
-		/// <param name="by">Who the block was performed by.</param>
-		/// <param name="reason">The reason for the block.</param>
-		/// <param name="startTime">The start time of the block.</param>
-		/// <param name="expiry">When the block expires.</param>
-		/// <param name="flags">The block flags.</param>
-		/// <param name="automatic">if set to <see langword="true"/>, indicates that this was an auto-block by the wiki itself.</param>
-		protected internal Block(User? user, User? by, string? reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
-		{
-			this.Automatic = automatic;
-			this.BlockedBy = by;
-			this.Expiry = expiry;
-			this.Flags = flags;
-			this.Reason = reason;
-			this.StartTime = startTime;
-			this.User = user;
-		}
-		#endregion
-
-		/// <summary>Gets a value indicating whether the block was made automatically by the wiki software.</summary>
-		/// <value><see langword="true"/> if it was an automatic block; otherwise, <see langword="false"/>.</value>
-		public bool Automatic { get; }
-
-		/// <summary>Gets the blocking user.</summary>
-		/// <value>The user this user was blocked by.</value>
-		public User? BlockedBy { get; }
-
-		/// <summary>Gets the date and time the block expires. DateTime.Max is used to represent an indefinite block.</summary>
-		/// <value>The date and time the block expires.</value>
-		public DateTime Expiry { get; }
-
-		/// <summary>Gets the block options.</summary>
-		/// <value>The block options.</value>
-		public BlockFlags Flags { get; }
-
-		/// <summary>Gets the reason the user was blocked.</summary>
-		/// <value>The reason the user was blocked.</value>
-		public string? Reason { get; }
-
-		/// <summary>Gets the time when the block was placed. DateTime.Min is used to represent unknown start times (usually only on very old or damaged wikis).</summary>
-		/// <value>The start time of the block.</value>
-		public DateTime StartTime { get; }
-
-		/// <summary>Gets the user who was blocked.</summary>
-		/// <value>The user who was blocked.</value>
-		public User? User { get; }
+		this.Automatic = automatic;
+		this.BlockedBy = by;
+		this.Expiry = expiry;
+		this.Flags = flags;
+		this.Reason = reason;
+		this.StartTime = startTime;
+		this.User = user;
 	}
+	#endregion
+
+	/// <summary>Gets a value indicating whether the block was made automatically by the wiki software.</summary>
+	/// <value><see langword="true"/> if it was an automatic block; otherwise, <see langword="false"/>.</value>
+	public bool Automatic { get; }
+
+	/// <summary>Gets the blocking user.</summary>
+	/// <value>The user this user was blocked by.</value>
+	public User? BlockedBy { get; }
+
+	/// <summary>Gets the date and time the block expires. DateTime.Max is used to represent an indefinite block.</summary>
+	/// <value>The date and time the block expires.</value>
+	public DateTime Expiry { get; }
+
+	/// <summary>Gets the block options.</summary>
+	/// <value>The block options.</value>
+	public BlockFlags Flags { get; }
+
+	/// <summary>Gets the reason the user was blocked.</summary>
+	/// <value>The reason the user was blocked.</value>
+	public string? Reason { get; }
+
+	/// <summary>Gets the time when the block was placed. DateTime.Min is used to represent unknown start times (usually only on very old or damaged wikis).</summary>
+	/// <value>The start time of the block.</value>
+	public DateTime StartTime { get; }
+
+	/// <summary>Gets the user who was blocked.</summary>
+	/// <value>The user who was blocked.</value>
+	public User? User { get; }
 }

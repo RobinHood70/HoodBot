@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.WikiCommon.Properties {
+namespace RobinHood70.WikiCommon.Properties; 
     using System;
     
     
@@ -78,4 +78,3 @@ namespace RobinHood70.WikiCommon.Properties {
             }
         }
     }
-}

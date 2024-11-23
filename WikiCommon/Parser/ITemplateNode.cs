@@ -1,8 +1,7 @@
-﻿namespace RobinHood70.WikiCommon.Parser
+﻿namespace RobinHood70.WikiCommon.Parser;
+
+/// <summary>Represents a link, including embedded images.</summary>
+public interface ITemplateNode : IBacklinkNode, IWikiNode
 {
-	/// <summary>Represents a link, including embedded images.</summary>
-	public interface ITemplateNode : IBacklinkNode, IWikiNode
-	{
-		// Deliberately empty, as there's no new functionality to add, but ILinkNode, ITemplateNode, and IBacklinkNode logically represent different things.
-	}
+	// Deliberately empty, as there's no new functionality to add, but ILinkNode, ITemplateNode, and IBacklinkNode logically represent different things.
 }

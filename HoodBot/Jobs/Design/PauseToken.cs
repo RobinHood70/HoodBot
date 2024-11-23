@@ -1,38 +1,37 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Design
+﻿namespace RobinHood70.HoodBot.Jobs.Design;
+
+using System;
+using System.Threading.Tasks;
+
+public readonly struct PauseToken(PauseTokenSource source) : IEquatable<PauseToken>
 {
-	using System;
-	using System.Threading.Tasks;
+	#region Fields
+	private readonly PauseTokenSource source = source;
+	#endregion
 
-	public readonly struct PauseToken(PauseTokenSource source) : IEquatable<PauseToken>
-	{
-		#region Fields
-		private readonly PauseTokenSource source = source;
-		#endregion
+	#region Public Static Properties
+	public static PauseToken None { get; }
+	#endregion
 
-		#region Public Static Properties
-		public static PauseToken None { get; }
-		#endregion
+	#region Public Properties
+	public bool IsPaused => this.source?.IsPaused ?? false;
+	#endregion
 
-		#region Public Properties
-		public bool IsPaused => this.source?.IsPaused ?? false;
-		#endregion
+	#region Public Operators
+	public static bool operator ==(PauseToken left, PauseToken right) => left.Equals(right);
 
-		#region Public Operators
-		public static bool operator ==(PauseToken left, PauseToken right) => left.Equals(right);
+	public static bool operator !=(PauseToken left, PauseToken right) => !left.Equals(right);
+	#endregion
 
-		public static bool operator !=(PauseToken left, PauseToken right) => !left.Equals(right);
-		#endregion
+	#region Public Methods
+	public bool Equals(PauseToken other) => this.source == other.source;
 
-		#region Public Methods
-		public bool Equals(PauseToken other) => this.source == other.source;
+	public Task WaitWhilePausedAsync() => this.IsPaused ? this.source.WaitWhilePausedAsync() : PauseTokenSource.CompletedTask;
+	#endregion
 
-		public Task WaitWhilePausedAsync() => this.IsPaused ? this.source.WaitWhilePausedAsync() : PauseTokenSource.CompletedTask;
-		#endregion
+	#region Public Override Methods
+	public override bool Equals(object? obj) => obj is PauseToken token && this.Equals(token);
 
-		#region Public Override Methods
-		public override bool Equals(object? obj) => obj is PauseToken token && this.Equals(token);
-
-		public override int GetHashCode() => this.source?.GetHashCode() ?? 0;
-		#endregion
-	}
+	public override int GetHashCode() => this.source?.GetHashCode() ?? 0;
+	#endregion
 }

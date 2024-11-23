@@ -1,25 +1,24 @@
-﻿namespace RobinHood70.HoodBot.Uesp
+﻿namespace RobinHood70.HoodBot.Uesp;
+
+using System;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
+
+internal static class MetaTemplateExtensions
 {
-	using System;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
+	public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables) => CreateMetaPageCollection(site, pageModules, followRedirects, true, variables);
 
-	internal static class MetaTemplateExtensions
+	public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, bool gameSpaceOnly, params string[] variables)
 	{
-		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables) => CreateMetaPageCollection(site, pageModules, followRedirects, true, variables);
-
-		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, bool gameSpaceOnly, params string[] variables)
+		ArgumentNullException.ThrowIfNull(site);
+		PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
 		{
-			ArgumentNullException.ThrowIfNull(site);
-			PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
+			PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
 			{
-				PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
-				{
-					GameSpaceOnly = gameSpaceOnly
-				}
-			};
+				GameSpaceOnly = gameSpaceOnly
+			}
+		};
 
-			return new PageCollection(site, pageLoadOptions);
-		}
+		return new PageCollection(site, pageLoadOptions);
 	}
 }

@@ -1,15 +1,14 @@
-﻿namespace RobinHood70.HoodBot.Views
-{
-	using System.Windows;
+﻿namespace RobinHood70.HoodBot.Views;
 
-	/// <summary>Interaction logic for MainWindow.xaml.</summary>
-	public partial class MainWindow : Window
+using System.Windows;
+
+/// <summary>Interaction logic for MainWindow.xaml.</summary>
+public partial class MainWindow : Window
+{
+	#region Constructors
+	public MainWindow()
 	{
-		#region Constructors
-		public MainWindow()
-		{
-			this.InitializeComponent();
-		}
-		#endregion
+		this.InitializeComponent();
 	}
+	#endregion
 }

@@ -1,27 +1,26 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs;
+
+using System.Collections.Generic;
+using RobinHood70.CommonCode;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Parser;
+
+internal sealed class SFPlanets(JobManager jobManager) : CreateOrUpdateJob<CsvRow>(jobManager)
 {
-	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
+	protected override string? Disambiguator { get; }
 
-	internal sealed class SFPlanets(JobManager jobManager) : CreateOrUpdateJob<CsvRow>(jobManager)
+	protected override string GetEditSummary(Page page)
 	{
-		protected override string? Disambiguator { get; }
+		return string.Empty;
+	}
 
-		protected override string GetEditSummary(Page page)
-		{
-			return string.Empty;
-		}
+	protected override bool IsValid(SiteParser parser, CsvRow item)
+	{
+		return false;
+	}
 
-		protected override bool IsValid(SiteParser parser, CsvRow item)
-		{
-			return false;
-		}
-
-		protected override IDictionary<Title, CsvRow> LoadItems()
-		{
-			return new Dictionary<Title, CsvRow>();
-		}
+	protected override IDictionary<Title, CsvRow> LoadItems()
+	{
+		return new Dictionary<Title, CsvRow>();
 	}
 }

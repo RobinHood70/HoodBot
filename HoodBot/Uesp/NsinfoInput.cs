@@ -1,7 +1,6 @@
-﻿namespace RobinHood70.HoodBot.Uesp
+﻿namespace RobinHood70.HoodBot.Uesp;
+
+internal sealed class NsinfoInput
 {
-	internal sealed class NsinfoInput
-	{
-		// Empty class for now; future expansion possible.
-	}
+	// Empty class for now; future expansion possible.
 }

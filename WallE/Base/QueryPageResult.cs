@@ -1,28 +1,27 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
+namespace RobinHood70.WallE.Base;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+public class QueryPageResult : ReadOnlyCollection<QueryPageItem>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
-
-	public class QueryPageResult : ReadOnlyCollection<QueryPageItem>
+	#region Constructors
+	internal QueryPageResult(IList<QueryPageItem> list, bool cached, DateTime? cachedTimestamp, int maxResults)
+		: base(list)
 	{
-		#region Constructors
-		internal QueryPageResult(IList<QueryPageItem> list, bool cached, DateTime? cachedTimestamp, int maxResults)
-			: base(list)
-		{
-			this.Cached = cached;
-			this.CachedTimestamp = cachedTimestamp;
-			this.MaxResults = maxResults;
-		}
-		#endregion
-
-		#region Public Properties
-		public bool Cached { get; }
-
-		public DateTime? CachedTimestamp { get; }
-
-		public int MaxResults { get; }
-		#endregion
+		this.Cached = cached;
+		this.CachedTimestamp = cachedTimestamp;
+		this.MaxResults = maxResults;
 	}
+	#endregion
+
+	#region Public Properties
+	public bool Cached { get; }
+
+	public DateTime? CachedTimestamp { get; }
+
+	public int MaxResults { get; }
+	#endregion
 }

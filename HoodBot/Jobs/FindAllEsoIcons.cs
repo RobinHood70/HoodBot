@@ -1,38 +1,37 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs;
+
+using System.Diagnostics;
+using RobinHood70.HoodBot.Jobs.JobModels;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
+using RobinHood70.WikiCommon;
+
+[method: JobInfo("Find All ESO Icons", "ESO")]
+internal sealed class FindAllEsoIcons(JobManager jobManager) : EditJob(jobManager)
 {
-	using System.Diagnostics;
-	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon;
+	protected override string GetEditSummary(Page page) => "Add Online File";
 
-	[method: JobInfo("Find All ESO Icons", "ESO")]
-	internal sealed class FindAllEsoIcons(JobManager jobManager) : EditJob(jobManager)
+	protected override void LoadPages()
 	{
-		protected override string GetEditSummary(Page page) => "Add Online File";
-
-		protected override void LoadPages()
+		var checksums = EsoSpace.GetIconChecksums();
+		var pages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info | PageModules.FileInfo));
+		pages.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Exclude, "ON-icon-achievement-R");
+		foreach (var page in pages)
 		{
-			var checksums = EsoSpace.GetIconChecksums();
-			var pages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info | PageModules.FileInfo));
-			pages.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Exclude, "ON-icon-achievement-R");
-			foreach (var page in pages)
+			if (page is FilePage file)
 			{
-				if (page is FilePage file)
+				foreach (var fileRev in file.FileRevisions)
 				{
-					foreach (var fileRev in file.FileRevisions)
+					if (fileRev.Sha1 is not null && checksums.TryGetValue(fileRev.Sha1, out var fileList))
 					{
-						if (fileRev.Sha1 is not null && checksums.TryGetValue(fileRev.Sha1, out var fileList))
-						{
-							Debug.WriteLine(file.Title.FullPageName() + " matched " + string.Join(", ", fileList));
-						}
+						Debug.WriteLine(file.Title.FullPageName() + " matched " + string.Join(", ", fileList));
 					}
 				}
 			}
 		}
+	}
 
-		protected override void PageLoaded(Page page)
-		{
-		}
+	protected override void PageLoaded(Page page)
+	{
 	}
 }

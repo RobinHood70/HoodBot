@@ -1,14 +1,13 @@
-﻿namespace RobinHood70.HoodBot.Design
+﻿namespace RobinHood70.HoodBot.Design;
+
+using Newtonsoft.Json.Linq;
+
+internal interface IJsonSubSetting<T>
+	where T : new()
 {
-	using Newtonsoft.Json.Linq;
+	#region Methods
+	public void FromJson(JToken json);
 
-	internal interface IJsonSubSetting<T>
-		where T : new()
-	{
-		#region Methods
-		public void FromJson(JToken json);
-
-		public JToken ToJson();
-		#endregion
-	}
+	public JToken ToJson();
+	#endregion
 }

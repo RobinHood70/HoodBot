@@ -1,11 +1,10 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot;
+
+public interface IParameterFetcher
 {
-	public interface IParameterFetcher
-	{
-		void ClearParameters();
+	void ClearParameters();
 
-		void GetParameters();
+	void GetParameters();
 
-		void SetParameters();
-	}
+	void SetParameters();
 }

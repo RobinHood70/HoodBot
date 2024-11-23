@@ -1,80 +1,79 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
-{
-	using System;
-	using System.Collections.Generic;
+namespace RobinHood70.WallE.Base;
 
-	#region Public Enumerations
-	[Flags]
-	public enum RevisionFlags
+using System;
+using System.Collections.Generic;
+
+#region Public Enumerations
+[Flags]
+public enum RevisionFlags
+{
+	None = 0,
+	Anonymous = 1,
+	CommentHidden = 1 << 1,
+	Minor = 1 << 2,
+	Sha1Hidden = 1 << 3,
+	Suppressed = 1 << 4,
+	TextHidden = 1 << 5,
+	UserHidden = 1 << 6,
+	BadContentFormat = 1 << 7,
+	BadContentFormatForParseTree = 1 << 8,
+}
+#endregion
+
+public class RevisionItem
+{
+	#region Constructors
+	internal RevisionItem(string? comment, RevisionFlags flags, long parentId, string? parsedComment, string? parseTree, long revisionId, string? rollbackToken, string? sha1, long size, IReadOnlyDictionary<string, SlotItem> slots, IReadOnlyList<string> tags, DateTime? timestamp, string? user, long userId)
 	{
-		None = 0,
-		Anonymous = 1,
-		CommentHidden = 1 << 1,
-		Minor = 1 << 2,
-		Sha1Hidden = 1 << 3,
-		Suppressed = 1 << 4,
-		TextHidden = 1 << 5,
-		UserHidden = 1 << 6,
-		BadContentFormat = 1 << 7,
-		BadContentFormatForParseTree = 1 << 8,
+		this.Comment = comment;
+		this.Flags = flags;
+		this.ParentId = parentId;
+		this.ParsedComment = parsedComment;
+		this.ParseTree = parseTree;
+		this.RevisionId = revisionId;
+		this.RollbackToken = rollbackToken;
+		this.Sha1 = sha1;
+		this.Size = size;
+		this.Slots = slots;
+		this.Tags = tags;
+		this.Timestamp = timestamp;
+		this.User = user;
+		this.UserId = userId;
 	}
 	#endregion
 
-	public class RevisionItem
-	{
-		#region Constructors
-		internal RevisionItem(string? comment, RevisionFlags flags, long parentId, string? parsedComment, string? parseTree, long revisionId, string? rollbackToken, string? sha1, long size, IReadOnlyDictionary<string, SlotItem> slots, IReadOnlyList<string> tags, DateTime? timestamp, string? user, long userId)
-		{
-			this.Comment = comment;
-			this.Flags = flags;
-			this.ParentId = parentId;
-			this.ParsedComment = parsedComment;
-			this.ParseTree = parseTree;
-			this.RevisionId = revisionId;
-			this.RollbackToken = rollbackToken;
-			this.Sha1 = sha1;
-			this.Size = size;
-			this.Slots = slots;
-			this.Tags = tags;
-			this.Timestamp = timestamp;
-			this.User = user;
-			this.UserId = userId;
-		}
-		#endregion
+	#region Public Properties
+	public string? Comment { get; }
 
-		#region Public Properties
-		public string? Comment { get; }
+	public string? ContentFormat { get; }
 
-		public string? ContentFormat { get; }
+	public string? ContentModel { get; }
 
-		public string? ContentModel { get; }
+	public RevisionFlags Flags { get; }
 
-		public RevisionFlags Flags { get; }
+	public long ParentId { get; }
 
-		public long ParentId { get; }
+	public string? ParsedComment { get; }
 
-		public string? ParsedComment { get; }
+	public string? ParseTree { get; }
 
-		public string? ParseTree { get; }
+	public long RevisionId { get; }
 
-		public long RevisionId { get; }
+	public string? RollbackToken { get; }
 
-		public string? RollbackToken { get; }
+	public string? Sha1 { get; }
 
-		public string? Sha1 { get; }
+	public long Size { get; }
 
-		public long Size { get; }
+	public IReadOnlyDictionary<string, SlotItem> Slots { get; }
 
-		public IReadOnlyDictionary<string, SlotItem> Slots { get; }
+	public IReadOnlyList<string>? Tags { get; }
 
-		public IReadOnlyList<string>? Tags { get; }
+	public DateTime? Timestamp { get; }
 
-		public DateTime? Timestamp { get; }
+	public long UserId { get; }
 
-		public long UserId { get; }
-
-		public string? User { get; }
-		#endregion
-	}
+	public string? User { get; }
+	#endregion
 }

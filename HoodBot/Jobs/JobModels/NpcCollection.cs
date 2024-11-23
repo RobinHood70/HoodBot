@@ -1,99 +1,98 @@
-﻿namespace RobinHood70.HoodBot.Jobs.JobModels
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using RobinHood70.Robby;
+
+internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
-	using System.Diagnostics;
-	using RobinHood70.Robby;
+	#region Public Properties
+	public IList<NpcData> Duplicates { get; } = [];
+	#endregion
 
-	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
+	#region Public Methods
+
+	public void GetLocations(Site site)
 	{
-		#region Public Properties
-		public IList<NpcData> Duplicates { get; } = [];
-		#endregion
-
-		#region Public Methods
-
-		public void GetLocations(Site site)
+		ArgumentNullException.ThrowIfNull(site);
+		List<long> npcIds = new(this.Count);
+		foreach (var npc in this)
 		{
-			ArgumentNullException.ThrowIfNull(site);
-			List<long> npcIds = new(this.Count);
-			foreach (var npc in this)
+			if (npc.UnknownLocations.Count == 0)
 			{
-				if (npc.UnknownLocations.Count == 0)
-				{
-					npcIds.Add(npc.Id);
-				}
-			}
-
-			if (npcIds.Count > 0)
-			{
-				foreach (var npc in EsoLog.GetNpcLocations(npcIds))
-				{
-					Place place = new(npc.Zone);
-					this[npc.Id].UnknownLocations.Add(place, npc.LocCount);
-				}
+				npcIds.Add(npc.Id);
 			}
 		}
 
-		public void ParseLocations(PlaceCollection places)
+		if (npcIds.Count > 0)
 		{
-			foreach (var npc in this)
+			foreach (var npc in EsoLog.GetNpcLocations(npcIds))
 			{
-				if (npc.Title is not null)
+				Place place = new(npc.Zone);
+				this[npc.Id].UnknownLocations.Add(place, npc.LocCount);
+			}
+		}
+	}
+
+	public void ParseLocations(PlaceCollection places)
+	{
+		foreach (var npc in this)
+		{
+			if (npc.Title is not null)
+			{
+				Dictionary<Place, int> locCopy = new(npc.UnknownLocations);
+				foreach (var kvp in locCopy)
 				{
-					Dictionary<Place, int> locCopy = new(npc.UnknownLocations);
-					foreach (var kvp in locCopy)
+					var key = kvp.Key;
+					try
 					{
-						var key = kvp.Key;
-						try
+						if (places[key.TitleName] is Place place)
 						{
-							if (places[key.TitleName] is Place place)
-							{
-								npc.Places.Add(place, kvp.Value);
-								npc.UnknownLocations.Remove(key);
-							}
-							else
-							{
-								Debug.WriteLine($"Location not found: {key}");
-							}
+							npc.Places.Add(place, kvp.Value);
+							npc.UnknownLocations.Remove(key);
 						}
-						catch (InvalidOperationException)
+						else
 						{
-							Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.DataName}");
+							Debug.WriteLine($"Location not found: {key}");
 						}
+					}
+					catch (InvalidOperationException)
+					{
+						Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.DataName}");
 					}
 				}
 			}
 		}
-
-		public void Sort() => (this.Items as List<NpcData>)?.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-
-		public NpcData? ValueOrDefault(long key)
-		{
-			if (this.Dictionary != null)
-			{
-				return this.Dictionary.TryGetValue(key, out var item) ? item : default;
-			}
-
-			foreach (var testItem in this)
-			{
-				if (this.GetKeyForItem(testItem) == key)
-				{
-					return testItem;
-				}
-			}
-
-			return default;
-		}
-		#endregion
-
-		#region Protected Override Methods
-		protected override long GetKeyForItem(NpcData item)
-		{
-			ArgumentNullException.ThrowIfNull(item);
-			return item.Id;
-		}
-		#endregion
 	}
+
+	public void Sort() => (this.Items as List<NpcData>)?.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+
+	public NpcData? ValueOrDefault(long key)
+	{
+		if (this.Dictionary != null)
+		{
+			return this.Dictionary.TryGetValue(key, out var item) ? item : default;
+		}
+
+		foreach (var testItem in this)
+		{
+			if (this.GetKeyForItem(testItem) == key)
+			{
+				return testItem;
+			}
+		}
+
+		return default;
+	}
+	#endregion
+
+	#region Protected Override Methods
+	protected override long GetKeyForItem(NpcData item)
+	{
+		ArgumentNullException.ThrowIfNull(item);
+		return item.Id;
+	}
+	#endregion
 }

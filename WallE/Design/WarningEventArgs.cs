@@ -1,19 +1,18 @@
-﻿namespace RobinHood70.WallE.Design
+﻿namespace RobinHood70.WallE.Design;
+
+using System;
+using RobinHood70.WallE.Base;
+
+/// <summary>Event arguments for MediaWiki warnings.</summary>
+/// <seealso cref="EventArgs" />
+/// <remarks>Initializes a new instance of the <see cref="WarningEventArgs" /> class.</remarks>
+/// <param name="warning">The warning.</param>
+public class WarningEventArgs(ErrorItem warning) : EventArgs
 {
-	using System;
-	using RobinHood70.WallE.Base;
+	#region Public Properties
 
-	/// <summary>Event arguments for MediaWiki warnings.</summary>
-	/// <seealso cref="EventArgs" />
-	/// <remarks>Initializes a new instance of the <see cref="WarningEventArgs" /> class.</remarks>
-	/// <param name="warning">The warning.</param>
-	public class WarningEventArgs(ErrorItem warning) : EventArgs
-	{
-		#region Public Properties
-
-		/// <summary>Gets the warning object.</summary>
-		/// <value>The warning object.</value>
-		public ErrorItem Warning { get; } = warning;
-		#endregion
-	}
+	/// <summary>Gets the warning object.</summary>
+	/// <value>The warning object.</value>
+	public ErrorItem Warning { get; } = warning;
+	#endregion
 }

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.HoodBot.Properties {
+namespace RobinHood70.HoodBot.Properties; 
     using System;
     
     
@@ -384,4 +384,3 @@ namespace RobinHood70.HoodBot.Properties {
             }
         }
     }
-}

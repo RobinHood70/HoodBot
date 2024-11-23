@@ -1,13 +1,12 @@
-﻿namespace RobinHood70.HoodBot.Views
-{
-	using System.Windows;
+﻿namespace RobinHood70.HoodBot.Views;
 
-	/// <summary>Interaction logic for EditSettings.xaml.</summary>
-	public partial class SettingsWindow : Window
+using System.Windows;
+
+/// <summary>Interaction logic for EditSettings.xaml.</summary>
+public partial class SettingsWindow : Window
+{
+	public SettingsWindow()
 	{
-		public SettingsWindow()
-		{
-			this.InitializeComponent();
-		}
+		this.InitializeComponent();
 	}
 }

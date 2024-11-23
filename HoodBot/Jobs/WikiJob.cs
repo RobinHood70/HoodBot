@@ -1,183 +1,182 @@
-﻿namespace RobinHood70.HoodBot.Jobs
-{
-	using System;
-	using System.Threading;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Loggers;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
+﻿namespace RobinHood70.HoodBot.Jobs;
 
-	#region Public Enumerations
-	public enum JobType
+using System;
+using System.Threading;
+using RobinHood70.CommonCode;
+using RobinHood70.HoodBot.Jobs.Design;
+using RobinHood70.HoodBot.Jobs.Loggers;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
+
+#region Public Enumerations
+public enum JobType
+{
+	ReadOnly,
+	UnloggedWrite,
+	Write
+}
+#endregion
+
+public abstract class WikiJob : IMessageSource
+{
+	#region Fields
+	private readonly JobManager jobManager;
+	private readonly string logName;
+	private int progress;
+	private int progressMaximum = 1;
+	#endregion
+
+	#region Constructors
+	protected WikiJob(JobManager jobManager, JobType jobType)
 	{
-		ReadOnly,
-		UnloggedWrite,
-		Write
+		ArgumentNullException.ThrowIfNull(jobManager);
+		this.jobManager = jobManager;
+		this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
+		this.logName = this.GetType().Name.UnCamelCase();
+		this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
+		this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
+		this.JobType = jobType;
 	}
 	#endregion
 
-	public abstract class WikiJob : IMessageSource
+	#region Public Events
+	public event StrongEventHandler<WikiJob, EventArgs>? Completed;
+
+	public event StrongEventHandler<WikiJob, EventArgs>? Started;
+	#endregion
+
+	#region Public Properties
+	public JobType JobType { get; }
+
+	public JobLogger? Logger { get; protected set; }
+
+	public int Progress
 	{
-		#region Fields
-		private readonly JobManager jobManager;
-		private readonly string logName;
-		private int progress;
-		private int progressMaximum = 1;
-		#endregion
-
-		#region Constructors
-		protected WikiJob(JobManager jobManager, JobType jobType)
+		get => this.progress;
+		protected set
 		{
-			ArgumentNullException.ThrowIfNull(jobManager);
-			this.jobManager = jobManager;
-			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
-			this.logName = this.GetType().Name.UnCamelCase();
-			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
-			this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
-			this.JobType = jobType;
+			this.progress = value;
+			this.UpdateProgress();
 		}
-		#endregion
-
-		#region Public Events
-		public event StrongEventHandler<WikiJob, EventArgs>? Completed;
-
-		public event StrongEventHandler<WikiJob, EventArgs>? Started;
-		#endregion
-
-		#region Public Properties
-		public JobType JobType { get; }
-
-		public JobLogger? Logger { get; protected set; }
-
-		public int Progress
-		{
-			get => this.progress;
-			protected set
-			{
-				this.progress = value;
-				this.UpdateProgress();
-			}
-		}
-
-		public int ProgressMaximum
-		{
-			get => this.progressMaximum;
-			protected set
-			{
-				this.progressMaximum = value <= 0 ? 1 : value;
-				this.UpdateProgress();
-			}
-		}
-
-		public double ProgressPercent => (double)this.progress / this.progressMaximum;
-
-		public Site Site { get; }
-		#endregion
-
-		#region Public Virtual Properties
-		public virtual string LogDetails => string.Empty;
-
-		public virtual string LogName => this.logName;
-		#endregion
-
-		#region Protected Properties
-		protected ResultHandler? Results { get; set; }
-		#endregion
-
-		#region Public Methods
-		public void ClearStatus() => this.StatusWrite(null);
-
-		public void Execute()
-		{
-			this.BeforeMain();
-			this.Main();
-			this.JobCompleted();
-		}
-
-		public void ResetProgress(int progressMax)
-		{
-			this.Progress = 0;
-			this.ProgressMaximum = progressMax;
-		}
-
-		public void StatusWrite(string? status)
-		{
-			this.jobManager.UpdateStatus(status);
-			this.FlowControl();
-		}
-
-		public void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
-
-		public void Warn(string warning) => this.Site.PublishWarning(this, warning);
-
-		public void Write(string text) => this.Results?.Write(text);
-
-		public void WriteLine() => this.WriteLine(string.Empty);
-
-		public void WriteLine(string text) => this.Write(text + '\n');
-		#endregion
-
-		#region Protected Methods
-		protected void SetResultDescription(string title)
-		{
-			if (this.Results != null)
-			{
-				this.Results.Description = this.Results.Description == null ? title : this.Results.Description + "; " + title;
-			}
-		}
-		#endregion
-
-		#region Protected Abstract Methods
-		protected abstract void Main();
-		#endregion
-
-		#region Protected Virtual Methods
-		protected virtual void BeforeLogging()
-		{
-		}
-
-		protected virtual void BeforeMain()
-		{
-			this.Started?.Invoke(this, EventArgs.Empty);
-			this.BeforeLogging();
-			if (this.Logger != null && this.JobType == JobType.Write)
-			{
-				LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
-				this.Logger.AddLogEntry(logInfo);
-			}
-		}
-
-		protected virtual void FlowControl()
-		{
-			if (this.jobManager.PauseToken is PauseToken pause && pause.IsPaused)
-			{
-				pause.WaitWhilePausedAsync().Wait(this.jobManager.CancelToken);
-			}
-
-			if (this.jobManager.CancelToken is CancellationToken token &&
-				token != CancellationToken.None)
-			{
-				token.ThrowIfCancellationRequested();
-			}
-		}
-
-		protected virtual void JobCompleted()
-		{
-			if (this.Logger is not null && this.JobType == JobType.Write)
-			{
-				this.Logger.EndLogEntry();
-			}
-
-			this.Results?.Save();
-			this.Completed?.Invoke(this, EventArgs.Empty);
-		}
-
-		protected virtual void UpdateProgress()
-		{
-			this.jobManager.UpdateProgress(this.ProgressPercent);
-			this.FlowControl();
-		}
-		#endregion
 	}
+
+	public int ProgressMaximum
+	{
+		get => this.progressMaximum;
+		protected set
+		{
+			this.progressMaximum = value <= 0 ? 1 : value;
+			this.UpdateProgress();
+		}
+	}
+
+	public double ProgressPercent => (double)this.progress / this.progressMaximum;
+
+	public Site Site { get; }
+	#endregion
+
+	#region Public Virtual Properties
+	public virtual string LogDetails => string.Empty;
+
+	public virtual string LogName => this.logName;
+	#endregion
+
+	#region Protected Properties
+	protected ResultHandler? Results { get; set; }
+	#endregion
+
+	#region Public Methods
+	public void ClearStatus() => this.StatusWrite(null);
+
+	public void Execute()
+	{
+		this.BeforeMain();
+		this.Main();
+		this.JobCompleted();
+	}
+
+	public void ResetProgress(int progressMax)
+	{
+		this.Progress = 0;
+		this.ProgressMaximum = progressMax;
+	}
+
+	public void StatusWrite(string? status)
+	{
+		this.jobManager.UpdateStatus(status);
+		this.FlowControl();
+	}
+
+	public void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
+
+	public void Warn(string warning) => this.Site.PublishWarning(this, warning);
+
+	public void Write(string text) => this.Results?.Write(text);
+
+	public void WriteLine() => this.WriteLine(string.Empty);
+
+	public void WriteLine(string text) => this.Write(text + '\n');
+	#endregion
+
+	#region Protected Methods
+	protected void SetResultDescription(string title)
+	{
+		if (this.Results != null)
+		{
+			this.Results.Description = this.Results.Description == null ? title : this.Results.Description + "; " + title;
+		}
+	}
+	#endregion
+
+	#region Protected Abstract Methods
+	protected abstract void Main();
+	#endregion
+
+	#region Protected Virtual Methods
+	protected virtual void BeforeLogging()
+	{
+	}
+
+	protected virtual void BeforeMain()
+	{
+		this.Started?.Invoke(this, EventArgs.Empty);
+		this.BeforeLogging();
+		if (this.Logger != null && this.JobType == JobType.Write)
+		{
+			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
+			this.Logger.AddLogEntry(logInfo);
+		}
+	}
+
+	protected virtual void FlowControl()
+	{
+		if (this.jobManager.PauseToken is PauseToken pause && pause.IsPaused)
+		{
+			pause.WaitWhilePausedAsync().Wait(this.jobManager.CancelToken);
+		}
+
+		if (this.jobManager.CancelToken is CancellationToken token &&
+			token != CancellationToken.None)
+		{
+			token.ThrowIfCancellationRequested();
+		}
+	}
+
+	protected virtual void JobCompleted()
+	{
+		if (this.Logger is not null && this.JobType == JobType.Write)
+		{
+			this.Logger.EndLogEntry();
+		}
+
+		this.Results?.Save();
+		this.Completed?.Invoke(this, EventArgs.Empty);
+	}
+
+	protected virtual void UpdateProgress()
+	{
+		this.jobManager.UpdateProgress(this.ProgressPercent);
+		this.FlowControl();
+	}
+	#endregion
 }

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.InternetExplorerDiff.Properties {
+namespace RobinHood70.InternetExplorerDiff.Properties; 
     using System;
     
     
@@ -69,4 +69,3 @@ namespace RobinHood70.InternetExplorerDiff.Properties {
             }
         }
     }
-}

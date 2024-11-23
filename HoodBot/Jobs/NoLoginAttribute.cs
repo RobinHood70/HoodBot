@@ -1,14 +1,13 @@
-﻿namespace RobinHood70.HoodBot.Jobs
-{
-	using System;
+﻿namespace RobinHood70.HoodBot.Jobs;
 
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Constructor)]
-	public sealed class NoLoginAttribute : Attribute
+using System;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Constructor)]
+public sealed class NoLoginAttribute : Attribute
+{
+	#region Constructors
+	public NoLoginAttribute()
 	{
-		#region Constructors
-		public NoLoginAttribute()
-		{
-		}
-		#endregion
 	}
+	#endregion
 }

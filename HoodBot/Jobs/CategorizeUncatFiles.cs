@@ -1,115 +1,114 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs;
+
+using System;
+using RobinHood70.CommonCode;
+using RobinHood70.HoodBot.Uesp;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Parser;
+using RobinHood70.WikiCommon.Parser;
+
+[method: JobInfo("Categorize Uncategorized Files", "Maintenance")]
+public class CategorizeUncatFiles(JobManager jobManager) : ParsedPageJob(jobManager)
 {
-	using System;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
+	#region Static Fields
+	private static readonly char[] Dash = ['-'];
+	#endregion
 
-	[method: JobInfo("Categorize Uncategorized Files", "Maintenance")]
-	public class CategorizeUncatFiles(JobManager jobManager) : ParsedPageJob(jobManager)
+	#region Fields
+	private readonly UespNamespaceList nsList = new(jobManager.Site);
+	#endregion
+
+	#region Public Override Properties
+	public override string LogName => "Categorize Uncategorized Files";
+	#endregion
+
+	#region Protected Override Methods
+	protected override string GetEditSummary(Page page) => "Add category";
+
+	protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
+
+	protected override void ParseText(SiteParser parser)
 	{
-		#region Static Fields
-		private static readonly char[] Dash = ['-'];
-		#endregion
-
-		#region Fields
-		private readonly UespNamespaceList nsList = new(jobManager.Site);
-		#endregion
-
-		#region Public Override Properties
-		public override string LogName => "Categorize Uncategorized Files";
-		#endregion
-
-		#region Protected Override Methods
-		protected override string GetEditSummary(Page page) => "Add category";
-
-		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
-
-		protected override void ParseText(SiteParser parser)
+		ArgumentNullException.ThrowIfNull(parser);
+		var headerFound = false;
+		foreach (var header in parser.HeaderNodes)
 		{
-			ArgumentNullException.ThrowIfNull(parser);
-			var headerFound = false;
-			foreach (var header in parser.HeaderNodes)
+			var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
+			if (title.OrdinalEquals("Licensing"))
 			{
-				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
-				if (title.OrdinalEquals("Licensing"))
-				{
-					headerFound = true;
-				}
-				else if (title.EndsWith(':'))
-				{
-					headerFound = true;
-					header.Title.Clear();
-					header.Title.AddText("== Licensing ==");
-				}
+				headerFound = true;
 			}
-
-			if (this.CategoryFromName(parser.Page.Title.PageName) is string cat)
+			else if (title.EndsWith(':'))
 			{
-				if (!headerFound)
-				{
-					var nodes = parser;
-					var factory = parser.Factory;
-					if (nodes.Count > 0)
-					{
-						nodes.AddText("\n\n");
-					}
-
-					nodes.Add(factory.HeaderNodeFromParts(2, " Licensing "));
-					nodes.AddText("\n");
-					nodes.Add(factory.TemplateNodeFromParts("Sfwimage"));
-				}
-
-				// Debug.WriteLine($"*{cat}: [[:{parsedPage.Context.FullPageName}|]]");
-				parser.AddCategory(cat, false);
+				headerFound = true;
+				header.Title.Clear();
+				header.Title.AddText("== Licensing ==");
 			}
 		}
-		#endregion
 
-		#region Private Methods
-		private string? CategoryFromName(string pageName)
+		if (this.CategoryFromName(parser.Page.Title.PageName) is string cat)
 		{
-			var split = pageName.Split(Dash, 4);
-			if (split.Length >= 3 &&
-				this.nsList.TryGetValue(split[0], out var uespNamespace))
+			if (!headerFound)
 			{
-				var next = 1;
-				var itemCat = split[next];
-				if (split.Length == 4 && itemCat.OrdinalICEquals("icon"))
+				var nodes = parser;
+				var factory = parser.Factory;
+				if (nodes.Count > 0)
 				{
-					next++;
-					itemCat += '-' + split[next];
+					nodes.AddText("\n\n");
 				}
 
-				itemCat = itemCat.ToLowerInvariant();
-				var cat = itemCat switch
-				{
-					/*
-					"armor" or "icon-armor" => "Icons-Armor",
-					"clothing" or "icon-clothing" => "Icons-Clothing",
-					"ing" or "icon-ingredient" => "Icons-Ingredients",
-					"map" => "Map Images",
-					"mmw" => "Morrowind Modding Wiki Images",
-					"npc" => "NPC Images",
-					"quest" => "Quest Images",
-					"weapon" or "icon-weapon" => "Icons-Weapons",
-					"place" => "Place Images",
-					"interior" => "Interior Images",
-					*/
-					"item" => "Item Images",
-					_ => null,
-				};
-
-				if (cat != null)
-				{
-					return uespNamespace.Category + '-' + cat;
-				}
+				nodes.Add(factory.HeaderNodeFromParts(2, " Licensing "));
+				nodes.AddText("\n");
+				nodes.Add(factory.TemplateNodeFromParts("Sfwimage"));
 			}
 
-			return null;
+			// Debug.WriteLine($"*{cat}: [[:{parsedPage.Context.FullPageName}|]]");
+			parser.AddCategory(cat, false);
 		}
-		#endregion
 	}
+	#endregion
+
+	#region Private Methods
+	private string? CategoryFromName(string pageName)
+	{
+		var split = pageName.Split(Dash, 4);
+		if (split.Length >= 3 &&
+			this.nsList.TryGetValue(split[0], out var uespNamespace))
+		{
+			var next = 1;
+			var itemCat = split[next];
+			if (split.Length == 4 && itemCat.OrdinalICEquals("icon"))
+			{
+				next++;
+				itemCat += '-' + split[next];
+			}
+
+			itemCat = itemCat.ToLowerInvariant();
+			var cat = itemCat switch
+			{
+				/*
+				"armor" or "icon-armor" => "Icons-Armor",
+				"clothing" or "icon-clothing" => "Icons-Clothing",
+				"ing" or "icon-ingredient" => "Icons-Ingredients",
+				"map" => "Map Images",
+				"mmw" => "Morrowind Modding Wiki Images",
+				"npc" => "NPC Images",
+				"quest" => "Quest Images",
+				"weapon" or "icon-weapon" => "Icons-Weapons",
+				"place" => "Place Images",
+				"interior" => "Interior Images",
+				*/
+				"item" => "Item Images",
+				_ => null,
+			};
+
+			if (cat != null)
+			{
+				return uespNamespace.Category + '-' + cat;
+			}
+		}
+
+		return null;
+	}
+	#endregion
 }

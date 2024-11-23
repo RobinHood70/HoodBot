@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.WallE.Properties {
+namespace RobinHood70.WallE.Properties; 
     using System;
     
     
@@ -330,4 +330,3 @@ namespace RobinHood70.WallE.Properties {
             }
         }
     }
-}

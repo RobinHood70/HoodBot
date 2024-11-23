@@ -1,104 +1,103 @@
-﻿namespace RobinHood70.WallE.Eve.Modules
+﻿namespace RobinHood70.WallE.Eve.Modules;
+
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using RobinHood70.CommonCode;
+using RobinHood70.WikiCommon.RequestBuilder;
+
+internal sealed class ContinueModule1 : ContinueModule
 {
-	using System;
-	using System.Collections.Generic;
-	using Newtonsoft.Json.Linq;
-	using RobinHood70.CommonCode;
-	using RobinHood70.WikiCommon.RequestBuilder;
+	#region Public Constants
+	public const string ContinueName = "query-continue";
+	#endregion
 
-	internal sealed class ContinueModule1 : ContinueModule
+	#region Fields
+	private readonly HashSet<string> modules = new(StringComparer.Ordinal);
+
+	private string? currentGeneratorValue;
+	private string? savedGeneratorValue;
+	#endregion
+
+	#region Public Override Properties
+	public override int MinimumVersion => 109;
+
+	public override string Name => ContinueName;
+	#endregion
+
+	#region Public Override Methods
+	public override void BuildRequest(Request request)
 	{
-		#region Public Constants
-		public const string ContinueName = "query-continue";
-		#endregion
+		ArgumentNullException.ThrowIfNull(request);
 
-		#region Fields
-		private readonly HashSet<string> modules = new(StringComparer.Ordinal);
-
-		private string? currentGeneratorValue;
-		private string? savedGeneratorValue;
-		#endregion
-
-		#region Public Override Properties
-		public override int MinimumVersion => 109;
-
-		public override string Name => ContinueName;
-		#endregion
-
-		#region Public Override Methods
-		public override void BuildRequest(Request request)
+		// Check if query continue type has been set manually or a previous result did not emit a query-continue.
+		if (this.Continues)
 		{
-			ArgumentNullException.ThrowIfNull(request);
+			Globals.ThrowIfNull(this.GeneratorContinue, nameof(ContinueModule1), nameof(this.GeneratorContinue));
 
-			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
-			if (this.Continues)
+			// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
+			request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);
+			foreach (var entry in this.ContinueEntries)
 			{
-				Globals.ThrowIfNull(this.GeneratorContinue, nameof(ContinueModule1), nameof(this.GeneratorContinue));
-
-				// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
-				request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);
-				foreach (var entry in this.ContinueEntries)
-				{
-					request.AddOrChangeIfNotNull(entry.Key, entry.Value);
-				}
-
-				this.Continues = false;
+				request.AddOrChangeIfNotNull(entry.Key, entry.Value);
 			}
+
+			this.Continues = false;
 		}
+	}
 
-		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
+	public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
+	{
+		var result = parent?[this.Name];
+		if (result == null || result.Type == JTokenType.Null)
 		{
-			var result = parent?[this.Name];
-			if (result == null || result.Type == JTokenType.Null)
-			{
-				return this;
-			}
-
-			// True by default for cases when there's no query-continue in the result and therefore DeserializeMain() isn't called.
-			this.BatchComplete = true;
-			this.Continues = true;
-			this.ContinueEntries.Clear();
-			this.modules.Clear();
-			foreach (var module in result.Children<JProperty>())
-			{
-				foreach (var param in module.Value.Children<JProperty>())
-				{
-					if (param.Name.OrdinalEquals(this.GeneratorContinue))
-					{
-						this.savedGeneratorValue = (string?)param.Value;
-					}
-					else
-					{
-						if (this.GeneratorContinue?.Length > 0)
-						{
-							this.BatchComplete = false;
-						}
-
-						this.modules.Add(module.Name);
-						this.ContinueEntries[param.Name] = (string?)param.Value;
-					}
-				}
-			}
-
-			if (this.BatchComplete)
-			{
-				this.currentGeneratorValue = this.savedGeneratorValue;
-			}
-
 			return this;
 		}
-		#endregion
 
-		#region Protected Internal Override Methods
-		public override void BeforePageSetSubmit(IPageSetGenerator pageSet)
+		// True by default for cases when there's no query-continue in the result and therefore DeserializeMain() isn't called.
+		this.BatchComplete = true;
+		this.Continues = true;
+		this.ContinueEntries.Clear();
+		this.modules.Clear();
+		foreach (var module in result.Children<JProperty>())
 		{
-			base.BeforePageSetSubmit(pageSet);
-			if (pageSet is ActionQueryPageSet query)
+			foreach (var param in module.Value.Children<JProperty>())
 			{
-				query.InactiveModules.Clear();
-				query.InactiveModules.UnionWith(this.modules);
+				if (param.Name.OrdinalEquals(this.GeneratorContinue))
+				{
+					this.savedGeneratorValue = (string?)param.Value;
+				}
+				else
+				{
+					if (this.GeneratorContinue?.Length > 0)
+					{
+						this.BatchComplete = false;
+					}
+
+					this.modules.Add(module.Name);
+					this.ContinueEntries[param.Name] = (string?)param.Value;
+				}
 			}
 		}
-		#endregion
+
+		if (this.BatchComplete)
+		{
+			this.currentGeneratorValue = this.savedGeneratorValue;
+		}
+
+		return this;
 	}
+	#endregion
+
+	#region Protected Internal Override Methods
+	public override void BeforePageSetSubmit(IPageSetGenerator pageSet)
+	{
+		base.BeforePageSetSubmit(pageSet);
+		if (pageSet is ActionQueryPageSet query)
+		{
+			query.InactiveModules.Clear();
+			query.InactiveModules.UnionWith(this.modules);
+		}
+	}
+	#endregion
 }

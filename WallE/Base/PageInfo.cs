@@ -1,101 +1,100 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
-{
-	using System;
-	using System.Collections.Generic;
+namespace RobinHood70.WallE.Base;
 
-	#region Public Enumerations
-	[Flags]
-	public enum PageInfoFlags
+using System;
+using System.Collections.Generic;
+
+#region Public Enumerations
+[Flags]
+public enum PageInfoFlags
+{
+	None = 0,
+	New = 1,
+	Readable = 1 << 1,
+	Redirect = 1 << 2,
+	Watched = 1 << 3
+}
+#endregion
+
+public class PageInfo
+{
+	#region Constructors
+	internal PageInfo(Uri? canonicalUrl, string? contentFormat, string? contentModel, long counter, string? displayTitle, Uri? editUrl, PageInfoFlags flags, Uri? fullUrl, string? language, string? languageDir, string? languageHtmlCode, long lastRevisionId, int length, DateTime? notificationTimestamp, string? preload, List<ProtectionsItem> protections, IReadOnlyList<string> restrictionTypes, DateTime? startTimestamp, long subjectId, long talkId, Dictionary<string, bool> testActions, Dictionary<string, string> tokens, DateTime? touched, long watchers)
 	{
-		None = 0,
-		New = 1,
-		Readable = 1 << 1,
-		Redirect = 1 << 2,
-		Watched = 1 << 3
+		this.CanonicalUrl = canonicalUrl;
+		this.ContentFormat = contentFormat;
+		this.ContentModel = contentModel;
+		this.Counter = counter;
+		this.DisplayTitle = displayTitle;
+		this.EditUrl = editUrl;
+		this.Flags = flags;
+		this.FullUrl = fullUrl;
+		this.Language = language;
+		this.LanguageDir = languageDir;
+		this.LanguageHtmlCode = languageHtmlCode;
+		this.LastRevisionId = lastRevisionId;
+		this.Length = length;
+		this.NotificationTimestamp = notificationTimestamp;
+		this.Preload = preload;
+		this.Protections = protections;
+		this.RestrictionTypes = restrictionTypes;
+		this.StartTimestamp = startTimestamp;
+		this.SubjectId = subjectId;
+		this.TalkId = talkId;
+		this.TestActions = testActions;
+		this.Tokens = tokens;
+		this.Touched = touched;
+		this.Watchers = watchers;
 	}
 	#endregion
 
-	public class PageInfo
-	{
-		#region Constructors
-		internal PageInfo(Uri? canonicalUrl, string? contentFormat, string? contentModel, long counter, string? displayTitle, Uri? editUrl, PageInfoFlags flags, Uri? fullUrl, string? language, string? languageDir, string? languageHtmlCode, long lastRevisionId, int length, DateTime? notificationTimestamp, string? preload, List<ProtectionsItem> protections, IReadOnlyList<string> restrictionTypes, DateTime? startTimestamp, long subjectId, long talkId, Dictionary<string, bool> testActions, Dictionary<string, string> tokens, DateTime? touched, long watchers)
-		{
-			this.CanonicalUrl = canonicalUrl;
-			this.ContentFormat = contentFormat;
-			this.ContentModel = contentModel;
-			this.Counter = counter;
-			this.DisplayTitle = displayTitle;
-			this.EditUrl = editUrl;
-			this.Flags = flags;
-			this.FullUrl = fullUrl;
-			this.Language = language;
-			this.LanguageDir = languageDir;
-			this.LanguageHtmlCode = languageHtmlCode;
-			this.LastRevisionId = lastRevisionId;
-			this.Length = length;
-			this.NotificationTimestamp = notificationTimestamp;
-			this.Preload = preload;
-			this.Protections = protections;
-			this.RestrictionTypes = restrictionTypes;
-			this.StartTimestamp = startTimestamp;
-			this.SubjectId = subjectId;
-			this.TalkId = talkId;
-			this.TestActions = testActions;
-			this.Tokens = tokens;
-			this.Touched = touched;
-			this.Watchers = watchers;
-		}
-		#endregion
+	#region Public Properties
+	public Uri? CanonicalUrl { get; }
 
-		#region Public Properties
-		public Uri? CanonicalUrl { get; }
+	public string? ContentFormat { get; }
 
-		public string? ContentFormat { get; }
+	public string? ContentModel { get; }
 
-		public string? ContentModel { get; }
+	public long Counter { get; }
 
-		public long Counter { get; }
+	public string? DisplayTitle { get; }
 
-		public string? DisplayTitle { get; }
+	public Uri? EditUrl { get; }
 
-		public Uri? EditUrl { get; }
+	public PageInfoFlags Flags { get; }
 
-		public PageInfoFlags Flags { get; }
+	public Uri? FullUrl { get; }
 
-		public Uri? FullUrl { get; }
+	public string? Language { get; }
 
-		public string? Language { get; }
+	public string? LanguageDir { get; }
 
-		public string? LanguageDir { get; }
+	public string? LanguageHtmlCode { get; }
 
-		public string? LanguageHtmlCode { get; }
+	public long LastRevisionId { get; }
 
-		public long LastRevisionId { get; }
+	public int Length { get; }
 
-		public int Length { get; }
+	public DateTime? NotificationTimestamp { get; }
 
-		public DateTime? NotificationTimestamp { get; }
+	public string? Preload { get; }
 
-		public string? Preload { get; }
+	public IReadOnlyList<ProtectionsItem> Protections { get; }
 
-		public IReadOnlyList<ProtectionsItem> Protections { get; }
+	public IReadOnlyList<string> RestrictionTypes { get; }
 
-		public IReadOnlyList<string> RestrictionTypes { get; }
+	public DateTime? StartTimestamp { get; }
 
-		public DateTime? StartTimestamp { get; }
+	public long SubjectId { get; }
 
-		public long SubjectId { get; }
+	public long TalkId { get; }
 
-		public long TalkId { get; }
+	public IReadOnlyDictionary<string, bool> TestActions { get; }
 
-		public IReadOnlyDictionary<string, bool> TestActions { get; }
+	public IReadOnlyDictionary<string, string> Tokens { get; }
 
-		public IReadOnlyDictionary<string, string> Tokens { get; }
+	public DateTime? Touched { get; }
 
-		public DateTime? Touched { get; }
-
-		public long Watchers { get; }
-		#endregion
-	}
+	public long Watchers { get; }
+	#endregion
 }

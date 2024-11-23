@@ -1,7 +1,6 @@
-﻿namespace RobinHood70.WikiCommon.Parser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements;
+
+internal sealed class DividerPiece : Piece
 {
-	internal sealed class DividerPiece : Piece
-	{
-		public int Position { get; set; } = -1;
-	}
+	public int Position { get; set; } = -1;
 }

@@ -1,13 +1,12 @@
-﻿namespace RobinHood70.HoodBot.Jobs.JobModels
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
+
+public class Synergy(string skill, string text, string synergyLink)
 {
-	public class Synergy(string skill, string text, string synergyLink)
-	{
-		#region Public Properties
-		public string Skill { get; } = skill;
+	#region Public Properties
+	public string Skill { get; } = skill;
 
-		public string Text { get; } = text;
+	public string Text { get; } = text;
 
-		public string SynergyLink { get; } = synergyLink;
-		#endregion
-	}
+	public string SynergyLink { get; } = synergyLink;
+	#endregion
 }

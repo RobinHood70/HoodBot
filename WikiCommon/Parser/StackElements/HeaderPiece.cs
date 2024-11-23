@@ -1,9 +1,8 @@
-﻿namespace RobinHood70.WikiCommon.Parser.StackElements
-{
-	internal sealed class HeaderPiece : Piece
-	{
-		public int CommentEnd { get; set; } = -1;
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements;
 
-		public int VisualEnd { get; set; } = -1;
-	}
+internal sealed class HeaderPiece : Piece
+{
+	public int CommentEnd { get; set; } = -1;
+
+	public int VisualEnd { get; set; } = -1;
 }

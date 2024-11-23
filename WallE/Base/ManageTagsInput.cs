@@ -1,39 +1,38 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
-{
-	using System;
+namespace RobinHood70.WallE.Base;
 
-	#region Public Enumerations
-	public enum TagOperation
+using System;
+
+#region Public Enumerations
+public enum TagOperation
+{
+	Create,
+	Delete,
+	Activate,
+	Deactivate
+}
+#endregion
+
+public class ManageTagsInput
+{
+	#region Constructors
+	public ManageTagsInput(TagOperation operation, string tag)
 	{
-		Create,
-		Delete,
-		Activate,
-		Deactivate
+		ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+		this.Operation = operation;
+		this.Tag = tag;
 	}
 	#endregion
 
-	public class ManageTagsInput
-	{
-		#region Constructors
-		public ManageTagsInput(TagOperation operation, string tag)
-		{
-			ArgumentException.ThrowIfNullOrWhiteSpace(tag);
-			this.Operation = operation;
-			this.Tag = tag;
-		}
-		#endregion
+	#region Public Properties
+	public bool IgnoreWarnings { get; set; }
 
-		#region Public Properties
-		public bool IgnoreWarnings { get; set; }
+	public TagOperation Operation { get; }
 
-		public TagOperation Operation { get; }
+	public string? Reason { get; set; }
 
-		public string? Reason { get; set; }
+	public string Tag { get; }
 
-		public string Tag { get; }
-
-		public string? Token { get; set; }
-		#endregion
-	}
+	public string? Token { get; set; }
+	#endregion
 }
