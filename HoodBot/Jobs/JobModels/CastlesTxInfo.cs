@@ -87,12 +87,12 @@ internal sealed class CastlesTxInfo
 			switch (tag[0])
 			{
 				case 'A':
-					// Indefinite Article
+					// Indefinite article
 					this.Capitalize = Capitalization.FirstWord;
 					this.ArticleType = false;
 					break;
 				case 'a':
-					// Indefinite Article
+					// indefinite article
 					this.ArticleType = false;
 					break;
 				case 'c':
@@ -100,11 +100,12 @@ internal sealed class CastlesTxInfo
 					this.Capitalize = Capitalization.TitleCase;
 					break;
 				case 'D':
-					// Unknown
+					// Definite article
 					this.Capitalize = Capitalization.FirstWord;
 					this.ArticleType = true;
 					break;
 				case 'd':
+					// definite article
 					this.ArticleType = true;
 					break;
 				case 'o':
