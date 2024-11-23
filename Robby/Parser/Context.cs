@@ -21,6 +21,7 @@
 		#region Fields
 		private readonly MixedSensitivityDictionary<MagicWordHandler> parserFunctionHandlers = [];
 		private readonly Dictionary<Title, MagicWordHandler> templateHandlers = new(TitleComparer.Instance);
+		private readonly HashSet<string> unhandledMagicWords = new(StringComparer.Ordinal);
 		private readonly MixedSensitivityDictionary<MagicWordHandler> variableHandlers = [];
 		private Title? title;
 		#endregion
@@ -36,6 +37,7 @@
 			this.AddParserFunctionHandler("namespace", NamespacePF);
 			this.AddParserFunctionHandler("pagename", PageNamePF);
 
+			this.AddTemplateHandler("Castles Happiness", Ignore);
 			this.AddTemplateHandler("FC", ReturnSecondParameter);
 			this.AddTemplateHandler("Hover", ReturnSecondParameter);
 			this.AddTemplateHandler("Huh", Ignore);
@@ -51,23 +53,23 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the <see cref="Page"/> to use for magic words like {{PAGENAME}}.</summary>
-		public Page? Page { get; init; }
+		/// <summary>Gets or sets the <see cref="Page"/> to use for magic words like {{PAGENAME}}.</summary>
+		public Page? Page { get; set; }
 
 		/// <summary>Gets the Site object.</summary>
 		public Site Site { get; }
 
-		/// <summary>Gets the title to use for magic words like {{PAGENAME}}.</summary>
+		/// <summary>Gets or sets the title to use for magic words like {{PAGENAME}}.</summary>
 		/// <remarks>Title does not need to be specified explicitly if <see cref="Page"/> is set.</remarks>
 		public Title? Title
 		{
 			get => this.title ?? this.Page?.Title;
-			init => this.title = value;
+			set => this.title = value;
 		}
 
 		/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
 		/// <remarks>The list is always fully case sensitive, since it cannot be known if these are names in template space or case-sensitive words.</remarks>
-		public SortedSet<string> UnhandledMagicWords { get; } = new(StringComparer.Ordinal);
+		public IReadOnlyCollection<string> UnhandledMagicWords => this.unhandledMagicWords;
 		#endregion
 
 		#region Public Methods
@@ -154,7 +156,7 @@
 				return handler;
 			}
 
-			this.UnhandledMagicWords.Add(name);
+			this.unhandledMagicWords.Add(name);
 			return null;
 		}
 		#endregion
