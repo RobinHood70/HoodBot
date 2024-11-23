@@ -595,6 +595,35 @@
 			return false;
 		}
 
+		/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
+		/// <param name="template">The template to alter.</param>
+		/// <param name="name">The name of the parameter to update or remove.</param>
+		/// <param name="value">The value to update to.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
+		/// <param name="comparer">The string comparer to define loose equality.</param>
+		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
+		/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
+		public static IParameterNode? LooseUpdate(this ITemplateNode template, string name, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+		{
+			ArgumentNullException.ThrowIfNull(template);
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(value);
+			ArgumentNullException.ThrowIfNull(comparer);
+			ArgumentNullException.ThrowIfNull(template);
+			if (template.Find(name) is IParameterNode parameter)
+			{
+				var oldText = parameter.Value.ToRaw().Trim();
+				if (!comparer.Equals(oldText, value.Trim()))
+				{
+					parameter.SetValue(value, paramFormat);
+				}
+
+				return parameter;
+			}
+
+			return template.Add(name, value, paramFormat);
+		}
+
 		/// <summary>Gets template parameters grouped into clusters based on their index.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="length">The length of each cluster.</param>
@@ -925,6 +954,7 @@
 		/// <param name="value">The value to update to.</param>
 		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <param name="removeCondition">Whether the parameter should be removed.</param>
+		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
 		public static IParameterNode? UpdateOrRemove(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeCondition)
 		{
 			ArgumentNullException.ThrowIfNull(template);
@@ -964,7 +994,7 @@
 		/// <param name="template">The template to search.</param>
 		/// <param name="parameterName">The parameter name.</param>
 		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
+		/// <returns>The value of the parameter, if found, or <paramref name="defaultValue"/> if not.</returns>
 		public static string ValueOrDefault(this ITemplateNode? template, string parameterName, string defaultValue)
 		{
 			if (template?.Find(parameterName)?.Value is not WikiNodeCollection nullNodes || nullNodes.Count == 0)
