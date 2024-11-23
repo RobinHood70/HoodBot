@@ -151,11 +151,11 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string Build(string text, Context context, MagicWordFrame frame) => (text is null || text.Length == 0)
+		private static string Build(string? text, Context context, MagicWordFrame frame) => (text is null || text.Length == 0)
 			? string.Empty
 			: Build(new WikiNodeFactory().Parse(text), context, frame);
 
-		private static string Build(IEnumerable<IWikiNode> nodes, Context context, MagicWordFrame frame)
+		private static string Build(IEnumerable<IWikiNode>? nodes, Context context, MagicWordFrame frame)
 		{
 			if (nodes is null)
 			{
