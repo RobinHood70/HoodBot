@@ -259,10 +259,10 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-/HoodBot/connections.config
-/HoodBotOld
-/HoodBot/connectionStrings.json
-/HoodBot/UserSettings.json
-/HoodBot/UserSettings.json
+
+# Custom
 /CommonCode.dll
+/HoodBot/connections.config
+/HoodBot/connectionStrings.json
 /HoodBot/Jobs/ImportBlocksFilter.txt
+/HoodBot/UserSettings.json
