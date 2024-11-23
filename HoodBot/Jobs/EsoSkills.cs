@@ -8,6 +8,8 @@ using RobinHood70.HoodBot.Jobs.Design;
 using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
+using RobinHood70.Robby.Parser;
+using RobinHood70.WikiCommon.Parser;
 
 internal sealed class EsoSkills : EditJob
 {
@@ -92,7 +94,7 @@ internal sealed class EsoSkills : EditJob
 	protected override void BeforeLoadPages()
 	{
 		this.StatusWriteLine("Fetching data");
-		EsoReplacer.Initialize(this);
+		UespReplacer.Initialize(this);
 		this.version = EsoLog.LatestDBUpdate(false);
 		var prevVersion = EsoSpace.GetPatchVersion(this, "botskills");
 		if (prevVersion >= this.version)
@@ -117,7 +119,7 @@ internal sealed class EsoSkills : EditJob
 
 	protected override void JobCompleted()
 	{
-		EsoReplacer.ShowUnreplaced();
+		UespReplacer.ShowUnreplaced();
 		base.JobCompleted();
 	}
 
@@ -141,10 +143,13 @@ internal sealed class EsoSkills : EditJob
 	protected override void PageLoaded(Page page)
 	{
 		var skill = this.skills[page.Title.FullPageName()];
-		var result = skill.UpdatePageText(page);
-		if (result is not null)
+		var oldPage = new SiteParser(page, InclusionType.Transcluded, false);
+		var newPage = new SiteParser(page, InclusionType.Transcluded, false);
+		skill.UpdatePageText(newPage);
+		var replacer = new UespReplacer(this.Site, oldPage, newPage);
+		foreach (var warning in replacer.Compare(newPage.Title.FullPageName()))
 		{
-			this.Warn(result);
+			this.Warn(warning);
 		}
 	}
 	#endregion

@@ -73,8 +73,9 @@ internal abstract class Skill
 	#endregion
 
 	#region Public Methods
-	public string? UpdatePageText(Page page)
+	public void UpdatePageText(SiteParser parser)
 	{
+		var page = parser.Page;
 		if (page.IsMissing)
 		{
 			page.Text =
@@ -94,15 +95,12 @@ internal abstract class Skill
 				"{{Online Skills " + this.Class + "}}";
 		}
 
-		SiteParser oldPage = new(page);
-		SiteParser parser = new(page);
-		List<SiteTemplateNode> skillSummaries = new(parser.FindSiteTemplates(SummaryTemplate));
-		if (skillSummaries.Count != 1)
+		var template = parser.FindSiteTemplate(SummaryTemplate);
+		if (template is null)
 		{
-			return "Incorrect number of {{" + SummaryTemplate + "}} matches on " + this.PageName;
+			return;
 		}
 
-		var template = skillSummaries[0];
 		template.TitleNodes.Trim();
 		template.TitleNodes.AddText("\n");
 		template.RemoveDuplicates();
@@ -138,18 +136,6 @@ internal abstract class Skill
 		this.UpdateTemplate(template);
 		template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 		parser.UpdatePage();
-
-		EsoReplacer replacer = new(page.Site);
-		var newLinks = replacer.CheckNewLinks(oldPage, parser);
-		if (newLinks.Count > 0)
-		{
-			return EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links");
-		}
-
-		var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
-		return newTemplates.Count > 0
-			? EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates")
-			: null;
 	}
 	#endregion
 
@@ -216,12 +202,12 @@ internal abstract class Skill
 		var collection = new WikiNodeCollection(factory, factory.Parse(value.Trim()));
 		if (usedList != null)
 		{
-			EsoReplacer.ReplaceGlobal(collection);
-			EsoReplacer.ReplaceEsoLinks(collection);
-			EsoReplacer.ReplaceFirstLink(collection, usedList);
+			UespReplacer.ReplaceGlobal(collection);
+			UespReplacer.ReplaceEsoLinks(collection);
+			UespReplacer.ReplaceFirstLink(collection, usedList);
 			if (skillName != null)
 			{
-				EsoReplacer.ReplaceSkillLinks(collection, skillName);
+				UespReplacer.ReplaceSkillLinks(collection, skillName);
 			}
 		}
 

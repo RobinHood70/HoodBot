@@ -72,7 +72,7 @@ internal sealed class EsoSets : EditJob
 
 	protected override void BeforeLoadPages()
 	{
-		EsoReplacer.Initialize(this);
+		UespReplacer.Initialize(this);
 		this.StatusWriteLine("Fetching data");
 
 		PageCollection catPages = new(this.Site, PageModules.Info, true);
@@ -102,7 +102,7 @@ internal sealed class EsoSets : EditJob
 
 	protected override void JobCompleted()
 	{
-		EsoReplacer.ShowUnreplaced();
+		UespReplacer.ShowUnreplaced();
 		base.JobCompleted();
 	}
 
@@ -163,28 +163,20 @@ internal sealed class EsoSets : EditJob
 
 		sb.Remove(sb.Length - 5, 4);
 		SiteParser parser = new(page, sb.ToString());
-		EsoReplacer.ReplaceGlobal(parser);
-		EsoReplacer.ReplaceEsoLinks(parser);
-		EsoReplacer.ReplaceFirstLink(parser, usedList);
+		UespReplacer.ReplaceGlobal(parser);
+		UespReplacer.ReplaceEsoLinks(parser);
+		UespReplacer.ReplaceFirstLink(parser, usedList);
 
 		// Now that we're done parsing, re-add the IgnoreNodes.
 		parser.Insert(0, firstNode);
 		parser.Add(lastNode);
-
-		EsoReplacer replacer = new(this.Site);
-		var newLinks = replacer.CheckNewLinks(oldPage, parser);
-		if (newLinks.Count > 0)
+		var replacer = new UespReplacer(this.Site, oldPage, parser);
+		foreach (var warning in replacer.Compare(parser.Title.FullPageName()))
 		{
-			this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links"));
+			this.Warn(warning);
 		}
 
-		var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
-		if (newTemplates.Count > 0)
-		{
-			this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates"));
-		}
-
-		setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, parser);
+		setData.IsNonTrivial = replacer.IsNonTrivialChange();
 		parser.UpdatePage();
 	}
 	#endregion

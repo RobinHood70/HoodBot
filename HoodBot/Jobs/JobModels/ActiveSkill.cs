@@ -101,8 +101,8 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 		if (template.Find("cost")?.Value is WikiNodeCollection paramValue)
 		{
 			// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
-			EsoReplacer.ReplaceGlobal(paramValue);
-			EsoReplacer.ReplaceEsoLinks(paramValue);
+			UespReplacer.ReplaceGlobal(paramValue);
+			UespReplacer.ReplaceEsoLinks(paramValue);
 		}
 
 		template.UpdateOrRemove("range", FormatMeters(baseRank.Range), ParameterFormat.OnePerLine, baseRank.Range.OrdinalEquals("0"));

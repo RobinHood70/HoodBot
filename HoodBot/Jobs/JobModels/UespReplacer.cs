@@ -14,7 +14,7 @@ using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 using static RobinHood70.WikiCommon.Searches;
 
-internal sealed class EsoReplacer
+internal sealed class UespReplacer
 {
 	#region Static Fields
 	private static readonly Regex EsoLinks = new(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh\}\}|\{\{Nowrap[^}]*\}\})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
@@ -31,13 +31,21 @@ internal sealed class EsoReplacer
 
 	#region Fields
 	private readonly Site site;
+	private readonly WikiNodeCollection oldNodes;
+	private readonly WikiNodeCollection newNodes;
 	#endregion
 
 	#region Constructors
-	public EsoReplacer(Site site)
+	public UespReplacer(Site site, WikiNodeCollection oldNodes, WikiNodeCollection newNodes)
 	{
 		ArgumentNullException.ThrowIfNull(site);
+		ArgumentNullException.ThrowIfNull(oldNodes);
+		ArgumentNullException.ThrowIfNull(newNodes);
 		this.site = site;
+		this.oldNodes = oldNodes.Clone();
+		this.oldNodes.RemoveAll<IIgnoreNode>();
+		this.newNodes = newNodes.Clone();
+		this.newNodes.RemoveAll<IIgnoreNode>();
 		this.RemoveableTemplates = new TitleCollection(
 			site,
 			MediaWikiNamespaces.Template,
@@ -64,43 +72,6 @@ internal sealed class EsoReplacer
 	#endregion
 
 	#region Public Static Methods
-	public static string ConstructWarning(SiteParser oldPage, SiteParser newPage, ICollection<Title> titles, string warningType)
-	{
-		ArgumentNullException.ThrowIfNull(oldPage);
-		ArgumentNullException.ThrowIfNull(newPage);
-		ArgumentNullException.ThrowIfNull(titles);
-		ArgumentNullException.ThrowIfNull(warningType);
-		var nodes = oldPage.Clone();
-		nodes.RemoveAll<IIgnoreNode>();
-		var oldText = nodes.ToRaw().Trim();
-		nodes = newPage.Clone();
-		nodes.RemoveAll<IIgnoreNode>();
-		var newText = nodes.ToRaw().Trim();
-		var warning = new StringBuilder()
-			.Append("Watch for ")
-			.Append(warningType)
-			.Append(" on ")
-			.AppendLine(newPage.Page.Title.FullPageName())
-			.Append(warningType.UpperFirst(newPage.Site.Culture))
-			.Append(": ");
-		foreach (var link in titles)
-		{
-			warning
-				.Append(link)
-				.Append(", ");
-		}
-
-		warning
-			.Remove(warning.Length - 2, 2)
-			.AppendLine()
-			.AppendLine("Old Text:")
-			.AppendLine(oldText)
-			.AppendLine("New Text:")
-			.AppendLine(newText)
-			.AppendLine();
-		return warning.ToString();
-	}
-
 	public static void Initialize(WikiJob job)
 	{
 		if (!initialized)
@@ -190,21 +161,21 @@ internal sealed class EsoReplacer
 				var matches = EsoLinks.Matches(text);
 				if (matches.Count > 0)
 				{
-					WikiNodeCollection newNodes = new(nodes.Factory);
+					WikiNodeCollection replacementNodes = new(nodes.Factory);
 					var startPos = 0;
 					foreach (var match in (ICollection<Match>)matches)
 					{
 						if (match.Index > startPos)
 						{
-							newNodes.AddText(text[startPos..match.Index]);
+							replacementNodes.AddText(text[startPos..match.Index]);
 						}
 
-						newNodes.Add(ReplaceTemplatableText(match, factory));
+						replacementNodes.Add(ReplaceTemplatableText(match, factory));
 						startPos = match.Index + match.Length;
 					}
 
-					nodes.InsertRange(i, newNodes);
-					i += newNodes.Count;
+					nodes.InsertRange(i, replacementNodes);
+					i += replacementNodes.Count;
 					if (startPos == text.Length)
 					{
 						nodes.RemoveAt(i);
@@ -244,7 +215,7 @@ internal sealed class EsoReplacer
 			if (nodes[i] is ITextNode textNode)
 			{
 				var text = textNode.Text;
-				WikiNodeCollection newNodes = new(factory);
+				WikiNodeCollection replacementNodes = new(factory);
 				var startPos = 0;
 				for (var currentPos = 0; currentPos < text.Length; currentPos++)
 				{
@@ -256,12 +227,12 @@ internal sealed class EsoReplacer
 							UnreplacedList.Remove(replacement.From);
 							if (currentPos > startPos)
 							{
-								newNodes.AddText(text[startPos..currentPos]);
+								replacementNodes.AddText(text[startPos..currentPos]);
 							}
 
 							foreach (var node in replacement.To)
 							{
-								newNodes.Add(node);
+								replacementNodes.Add(node);
 							}
 
 							startPos = currentPos + fromLength;
@@ -271,10 +242,10 @@ internal sealed class EsoReplacer
 					}
 				}
 
-				if (newNodes.Count > 0)
+				if (replacementNodes.Count > 0)
 				{
-					nodes.InsertRange(i, newNodes);
-					i += newNodes.Count;
+					nodes.InsertRange(i, replacementNodes);
+					i += replacementNodes.Count;
 					if (startPos == text.Length)
 					{
 						nodes.RemoveAt(i);
@@ -316,16 +287,16 @@ internal sealed class EsoReplacer
 
 	#region Public Methods
 
-	public ICollection<Title> CheckNewLinks(SiteParser oldPage, SiteParser newPage)
+	public ICollection<Title> CheckNewLinks()
 	{
 		HashSet<Title> oldLinks = [];
-		foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
+		foreach (var node in this.oldNodes.FindAll<ILinkNode>(null, false, true, 0))
 		{
 			var siteLink = SiteLink.FromLinkNode(this.site, node);
 			oldLinks.Add(siteLink.Title);
 		}
 
-		foreach (var node in newPage.FindAll<ILinkNode>(null, false, true, 0))
+		foreach (var node in this.newNodes.FindAll<ILinkNode>(null, false, true, 0))
 		{
 			var siteLink = SiteLink.FromLinkNode(this.site, node);
 			oldLinks.Remove(siteLink.Title);
@@ -334,15 +305,15 @@ internal sealed class EsoReplacer
 		return oldLinks;
 	}
 
-	public ICollection<Title> CheckNewTemplates(SiteParser oldPage, SiteParser newPage)
+	public ICollection<Title> CheckNewTemplates()
 	{
 		HashSet<Title> oldTemplates = [];
-		foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
+		foreach (var node in this.oldNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
 			oldTemplates.Add(TitleFactory.FromBacklinkNode(this.site, node));
 		}
 
-		foreach (var node in newPage.FindAll<ITemplateNode>(null, false, true, 0))
+		foreach (var node in this.newNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
 			oldTemplates.Remove(TitleFactory.FromBacklinkNode(this.site, node));
 		}
@@ -353,18 +324,26 @@ internal sealed class EsoReplacer
 		return oldTemplates;
 	}
 
-	public bool IsNonTrivialChange(SiteParser oldPage, SiteParser newPage)
+	public IEnumerable<string> Compare(string location)
 	{
-		var oldText = this.StrippedTextFromNodes(oldPage);
-		var newText = this.StrippedTextFromNodes(newPage);
-		return !oldText.OrdinalICEquals(newText);
+		var newLinks = this.CheckNewLinks();
+		if (newLinks.Count > 0)
+		{
+			yield return this.ConstructWarning(location, newLinks, "links");
+		}
+
+		var newTemplates = this.CheckNewTemplates();
+		if (newTemplates.Count > 0)
+		{
+			yield return this.ConstructWarning(location, newTemplates, "templates");
+		}
 	}
 
-	public void RemoveTrivialTemplates(WikiNodeCollection oldNodes)
+	public bool IsNonTrivialChange()
 	{
-		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
-
-		oldNodes.RemoveAll<ITemplateNode>(IsRemovable);
+		var oldText = this.StrippedTextFromNodes(this.oldNodes);
+		var newText = this.StrippedTextFromNodes(this.newNodes);
+		return !oldText.OrdinalICEquals(newText);
 	}
 	#endregion
 
@@ -490,10 +469,47 @@ internal sealed class EsoReplacer
 	#endregion
 
 	#region Private Methods
+	private string ConstructWarning(string location, IEnumerable<Title> titles, string warningType)
+	{
+		ArgumentNullException.ThrowIfNull(titles);
+		ArgumentNullException.ThrowIfNull(warningType);
+		var oldText = this.oldNodes.ToRaw().Trim();
+		var newText = this.newNodes.ToRaw().Trim();
+		var warning = new StringBuilder()
+			.Append("Watch for ")
+			.Append(warningType)
+			.Append(" on ")
+			.AppendLine(location)
+			.Append(warningType.UpperFirst(CultureInfo.CurrentCulture))
+			.Append(": ");
+		foreach (var link in titles)
+		{
+			warning
+				.Append(link)
+				.Append(", ");
+		}
+
+		warning
+			.Remove(warning.Length - 2, 2)
+			.AppendLine()
+			.AppendLine("Old Text:")
+			.AppendLine(oldText)
+			.AppendLine("New Text:")
+			.AppendLine(newText)
+			.AppendLine();
+		return warning.ToString();
+	}
+
+	private void RemoveTrivialTemplates(WikiNodeCollection nodes)
+	{
+		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
+
+		nodes.RemoveAll<ITemplateNode>(IsRemovable);
+	}
+
 	private string StrippedTextFromNodes(WikiNodeCollection nodes)
 	{
 		var onlyNodes = nodes.Clone();
-		onlyNodes.RemoveAll<IIgnoreNode>();
 		this.RemoveTrivialTemplates(onlyNodes);
 		var retval = onlyNodes.ToRaw();
 		retval = NumberStripper.Replace(retval, string.Empty);
