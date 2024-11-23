@@ -379,6 +379,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		var rulingsPage = this.GetRulingsPage();
 		this.Pages.Add(rulingsPage);
 
+		var oldPage = new SiteParser(rulingsPage);
 		var parser = new SiteParser(rulingsPage);
 		var sections = parser.ToSections(2);
 		var unsortedSection = GetUnsortedSection(sections);
@@ -398,6 +399,11 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		unsortedSection.Content.FromSections(newSections);
 		parser.FromSections(sections);
 		parser.UpdatePage();
+		var replacer = new UespReplacer(this.Site, oldPage, parser);
+		foreach (var warning in replacer.Compare(parser.Title.FullPageName()))
+		{
+			this.Warn(warning);
+		}
 	}
 	#endregion
 
