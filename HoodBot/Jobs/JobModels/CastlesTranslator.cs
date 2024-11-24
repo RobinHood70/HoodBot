@@ -107,7 +107,7 @@ internal sealed class CastlesTranslator
 				var newTerm = string.Join(sep, list);
 				if (txInfo.Parent.Length > 0)
 				{
-					newTerm = $"{txInfo.Parent}: {newTerm}";
+					newTerm = $"{newTerm} (saved as \"{txInfo.Parent}\")";
 					parentheses = true; // If parent exists, force parentheses on
 				}
 				else
@@ -131,7 +131,7 @@ internal sealed class CastlesTranslator
 			}
 			else if (txInfo.Target.Length > 0)
 			{
-				braceSplit[braceIndex] = $"(same as {txInfo.Target}, above)";
+				braceSplit[braceIndex] = $"(same as \"{txInfo.Target}\", above)";
 			}
 		}
 

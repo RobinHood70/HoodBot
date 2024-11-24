@@ -55,7 +55,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	private static readonly Dictionary<string, string> TxInfoOverrides = new(StringComparer.Ordinal)
 	{
 		["BookTitles"] = "{{Hover|{0}|<random book title>}}",
-		["FirstEdition_Variations"] = "{{Hover|{0}|first edition}}",
+		["FirstEdition_Variations"] = "{{Hover|{0}|<first edition>}}",
 		["INN001_EstablishmentName"] = "<random inn name>",
 		["PR006_Joke_Variations"] = "<random joke>",
 		["PR020_Dish_Variations"] = "{{Hover|{0}|<random dish>}}",
