@@ -280,10 +280,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(pageName);
 		pageName = WikiTextUtilities.TrimCruft(pageName);
-		var retval = new TitleFactory(site, defaultNamespace, pageName);
-		return retval.IsValid(true)
-			? retval
-			: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
+		return new TitleFactory(site, defaultNamespace, pageName);
 	}
 
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
@@ -294,10 +291,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 		ArgumentNullException.ThrowIfNull(defaultNamespace);
 		ArgumentNullException.ThrowIfNull(pageName);
 		pageName = WikiTextUtilities.TrimCruft(pageName);
-		var retval = new TitleFactory(defaultNamespace.Site, defaultNamespace.Id, pageName);
-		return retval.IsValid(true)
-			? retval
-			: throw new InvalidOperationException("Malformed PageName: " + retval.PageName);
+		return new TitleFactory(defaultNamespace.Site, defaultNamespace.Id, pageName);
 	}
 
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
@@ -350,7 +344,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	/// <summary>Checks that the title is valid.</summary>
 	/// <param name="allowRelative">If <see langword="true"/>, zero-length page names will not trigger an error.</param>
 	/// <value><see langword="true"/> if the page name contains no illegal characters; otherwise, <see langword="false"/>.</value>
-	/// <remarks>Currently, the only requirement for validity is that the <see cref="PageName"/> property not contain any illegal characters. Legality is roughly based on $wgLegalTitleChars, but is not precisely identical, so bizarre use of Unicode characters could slip through, where they wouldn't do so on MediaWiki itself. Titles in File space have the additional characters from $wgIllegalFileChars checked.</remarks>
+	/// <remarks>Currently, the only requirements for validity are that the <see cref="PageName"/> property be of a suitable length (namespace dependent) and not contain any illegal characters. Legality is roughly based on $wgLegalTitleChars, but is not precisely identical, so bizarre use of Unicode characters could slip through, where they wouldn't do so on MediaWiki itself. Titles in File space have the additional characters from $wgIllegalFileChars checked.</remarks>
 	public bool IsValid(bool allowRelative)
 	{
 		var pageName = this.PageName;
