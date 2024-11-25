@@ -1,15 +1,14 @@
 ﻿namespace RobinHood70.Robby.Parser;
 
-//// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that aceepts Site and emits Site-specific wrappers around SiteTemplateNode and SiteLinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, SiteTemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
+//// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that aceepts Site and emits Site-specific wrappers around ITemplateNode and ILinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, ITemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 /// <summary>This is a higher-level parser that works on a WikiNodeCollection, but adds functionality to resolve magic words and templates within the context of the page.</summary>
 public class SiteParser : WikiNodeCollection, ITitle
@@ -46,8 +45,9 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 	/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
-		: base(FactoryFromPage(page))
+		: base(new WikiNodeFactory())
 	{
+		ArgumentNullException.ThrowIfNull(page);
 		this.Page = page;
 		this.Site = page.Site;
 		var nodes = this.Factory.Parse(text, inclusionType, strictInclusion);
@@ -93,24 +93,24 @@ public class SiteParser : WikiNodeCollection, ITitle
 	public bool AddCategory(string category, bool newLineBefore)
 	{
 		ArgumentNullException.ThrowIfNull(category);
-		var catTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category);
 		var lastCategoryIndex = -1;
 		for (var i = 0; i < this.Count; i++)
 		{
-			if (this[i] is SiteLinkNode link &&
-				link.Title.Namespace == MediaWikiNamespaces.Category)
+			if (this[i] is ILinkNode link &&
+				TitleFactory.FromBacklinkNode(this.Site, link).Title is var title &&
+				title.Namespace == MediaWikiNamespaces.Category)
 			{
-				if (TitleFactory.FromBacklinkNode(this.Site, link).Title == catTitle)
+				if (title.PageNameEquals(category))
 				{
 					return false;
 				}
 
-				lastCategoryIndex = i + 1;
+				lastCategoryIndex = i;
 			}
 		}
 
-		var newCat = this.Factory.LinkNodeFromParts(catTitle.ToString());
-		if (lastCategoryIndex == -1)
+		lastCategoryIndex++;
+		if (lastCategoryIndex == 0)
 		{
 			if (this.Count > 0)
 			{
@@ -128,136 +128,115 @@ public class SiteParser : WikiNodeCollection, ITitle
 			lastCategoryIndex++;
 		}
 
-		this.Insert(lastCategoryIndex, newCat);
+		this.Insert(lastCategoryIndex, this.Factory.LinkNodeFromParts(this.Site[MediaWikiNamespaces.Category].Name + ':' + category));
 		return true;
 	}
 
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
+	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public SiteLinkNode? FindSiteLink(string find) => this.FindSiteLink((IFullTitle)TitleFactory.FromUnvalidated(this.Site, find));
-
-	/// <summary>Finds the first link that matches the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
-	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public SiteLinkNode? FindSiteLink(Title find) => this.FindSiteLinks(find).FirstOrDefault();
-
-	/// <summary>Finds the first link that matches the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
-	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public SiteLinkNode? FindSiteLink(IFullTitle find) => this.FindSiteLinks(find).FirstOrDefault();
-
-	/// <summary>Finds all links that match the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
-	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public IEnumerable<SiteLinkNode> FindSiteLinks(string find)
+	public ILinkNode? FindLink(string find)
 	{
 		var title = TitleFactory.FromUnvalidated(this.Site, find);
-		return (title.Fragment is not null || title.Interwiki is not null)
-			? this.FindSiteLinks(title.ToFullTitle())
-			: this.FindSiteLinks(title.Title);
+		return (title.Fragment is null && title.Interwiki is null)
+			? this.FindLink(title.Title)
+			: this.FindLink(title.ToFullTitle());
 	}
 
-	/// <summary>Finds all links that match the provided title.</summary>
+
+	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public IEnumerable<SiteLinkNode> FindSiteLinks(Title find)
+	public ILinkNode? FindLink(Title find) => find is null
+		? null
+		: this.FindLink(link => link.GetTitle(this.Site) == find);
+
+	/// <summary>Finds the first link that matches the provided title.</summary>
+	/// <param name="find">The title to find.</param>
+	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
+	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
+	public ILinkNode? FindLink(IFullTitle find) => find is null
+		? null
+		: this.FindLink(link => TitleFactory.FromBacklinkNode(this.Site, link).FullEquals(find));
+
+
+	/// <summary>Finds all links that match the provided title.</summary>
+	/// <param name="find">The title to find.</param>
+	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
+	public IEnumerable<ILinkNode> FindLinks(string find)
 	{
-		if (find is not null)
-		{
-			foreach (var link in this.LinkNodes)
-			{
-				var linkTitle = TitleFactory.FromBacklinkNode(this.Site, link).Title;
-				if (linkTitle == find)
-				{
-					yield return (SiteLinkNode)link;
-				}
-			}
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, find);
+		return (title.Fragment is null && title.Interwiki is null)
+			? this.FindLinks(title.Title)
+			: this.FindLinks(title.ToFullTitle());
 	}
 
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
+	public IEnumerable<ILinkNode> FindLinks(Title find) => find is null
+		? []
+		: this.FindLinks(link => link.GetTitle(this.Site) == find);
+
+	/// <summary>Finds all links that match the provided title.</summary>
+	/// <param name="find">The title to find.</param>
+	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public IEnumerable<SiteLinkNode> FindSiteLinks(IFullTitle find)
-	{
-		if (find is not null)
-		{
-			foreach (var link in this.LinkNodes)
-			{
-				FullTitle linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
-				if (linkTitle.FullEquals(find))
-				{
-					yield return (SiteLinkNode)link;
-				}
-			}
-		}
-	}
+	public IEnumerable<ILinkNode> FindLinks(IFullTitle find) => find is null
+		? []
+		: this.FindLinks(link => TitleFactory.FromBacklinkNode(this.Site, link).FullEquals(find));
 
 	/// <summary>Finds the first template that matches the provided title.</summary>
 	/// <param name="find">The name of the template to find.</param>
-	/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-	public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates([find]).FirstOrDefault();
+	/// <returns>The first <see cref="ITemplateNode"/> that matches the title provided, if found.</returns>
+	public ITemplateNode? FindTemplate(string find) => this.FindTemplate(TitleFactory.FromTemplate(this.Site, find));
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public SiteTemplateNode? FindSiteTemplate(Title find) => this.FindSiteTemplates([find]).FirstOrDefault();
+	public ITemplateNode? FindTemplate(Title find) => find is null
+		? null
+		: this.FindTemplate(link => link.GetTitle(this.Site) == find);
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="findName">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<SiteTemplateNode> FindSiteTemplates(string findName) => this.FindSiteTemplates([findName]);
+	public IEnumerable<ITemplateNode> FindTemplates(string findName) => this.FindTemplates(TitleFactory.FromTemplate(this.Site, findName));
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="findName">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title findName)
+	public IEnumerable<ITemplateNode> FindTemplates(Title findName)
 	{
 		ArgumentNullException.ThrowIfNull(findName);
-		return this.FindSiteTemplates([findName.FullPageName()]);
+		return this.FindTemplates(template => template.GetTitle(this.Site) == findName);
 	}
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="findNames">The templates to find.</param>
-	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<string> findNames)
+	/// <returns>The templates that match the provided titles, if any.</returns>
+	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<string> findNames)
 	{
 		ArgumentNullException.ThrowIfNull(findNames);
 		var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, findNames);
-		return this.FindSiteTemplates(titles);
+		return this.FindTemplates(titles);
 	}
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="findNames">The templates to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
+	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<Title> findNames)
 	{
 		ArgumentNullException.ThrowIfNull(findNames);
-		return FindSiteTemplates(findNames);
+		return FindTemplatesInternal(findNames);
 
-		IEnumerable<SiteTemplateNode> FindSiteTemplates(IEnumerable<Title> findNames)
-		{
-			foreach (var templateNode in this.TemplateNodes)
-			{
-				if (templateNode is SiteTemplateNode siteTemplate)
-				{
-					foreach (var find in findNames)
-					{
-						if (siteTemplate.Title == find)
-						{
-							yield return siteTemplate;
-						}
-					}
-				}
-			}
-		}
+		IEnumerable<ITemplateNode> FindTemplatesInternal(IEnumerable<Title> findNames) => this.FindTemplates(
+			templateNode =>
+			new TitleCollection(this.Site, findNames).Contains(templateNode.GetTitle(this.Site)));
 	}
 
 	/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
@@ -277,10 +256,11 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="title">The title of the template.</param>
 	public void RemoveTemplates(Title title)
 	{
+		ArgumentNullException.ThrowIfNull(title);
 		for (var i = this.Count - 1; i >= 0; i--)
 		{
 			var node = this[i];
-			if (node is SiteTemplateNode template && template.Title == title)
+			if (node is ITemplateNode template && template.GetTitle(this.Site) == title)
 			{
 				this.RemoveAt(i);
 				var afterNewLine = i == 0 ||
@@ -314,13 +294,5 @@ public class SiteParser : WikiNodeCollection, ITitle
 
 	/// <summary>Updates the <see cref="Page"/>'s <see cref="Page.Text">text</see> to the parser's contents.</summary>
 	public void UpdatePage() => this.Page.Text = this.ToRaw();
-	#endregion
-
-	#region Private Static Methods
-	private static SiteNodeFactory FactoryFromPage([NotNull] Page page)
-	{
-		ArgumentNullException.ThrowIfNull(page);
-		return new SiteNodeFactory(page.Site);
-	}
 	#endregion
 }

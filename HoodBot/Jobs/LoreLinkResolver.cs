@@ -13,10 +13,14 @@ using RobinHood70.WikiCommon.Parser;
 
 internal sealed class LoreLinkResolver : ParsedPageJob
 {
+	#region Static Fields
+	#endregion
+
 	#region Fields
-	private readonly UespNamespaceList nsList;
-	private readonly PageCollection targetPages;
 	private readonly PageCollection backlinkPages;
+	private readonly UespNamespaceList nsList;
+	private readonly Title loreLinkTemplate;
+	private readonly PageCollection targetPages;
 
 	#endregion
 
@@ -25,8 +29,9 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 	public LoreLinkResolver(JobManager jobManager)
 		: base(jobManager)
 	{
-		this.nsList = new UespNamespaceList(this.Site);
 		this.backlinkPages = new PageCollection(this.Site, PageModules.Info);
+		this.nsList = new UespNamespaceList(this.Site);
+		this.loreLinkTemplate = TitleFactory.FromTemplate(this.Site, "Lore Link");
 		this.targetPages = new PageCollection(this.Site, PageModules.Info);
 	}
 	#endregion
@@ -39,7 +44,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 			.Select(ns => ns.BaseNamespace.Id);
 		var linkTitles = new TitleCollection(this.Site);
 		linkTitles.SetLimitations(LimitationType.OnlyAllow, limits);
-		linkTitles.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
+		linkTitles.GetBacklinks(this.loreLinkTemplate.FullPageName(), BacklinksTypes.EmbeddedIn);
 		//// linkTitles.Add("Lore:Ghost");
 
 		// Book Header gets all book variants in one request.
@@ -64,7 +69,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		foreach (var page in this.Pages)
 		{
 			var parser = new SiteParser(page);
-			foreach (var linkTemplate in parser.FindSiteTemplates("Lore Link"))
+			foreach (var linkTemplate in parser.FindTemplates(this.loreLinkTemplate))
 			{
 				var ns = this.GetNamespace(linkTemplate, page.Title);
 				string term;
@@ -135,7 +140,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		return null;
 	}
 
-	private Title? ResolveTemplate(SiteTemplateNode linkTemplate, UespNamespace ns)
+	private Title? ResolveTemplate(ITemplateNode linkTemplate, UespNamespace ns)
 	{
 		if (linkTemplate.Find($"{ns.Id}link")?.Value is WikiNodeCollection overridden)
 		{
@@ -187,7 +192,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		return fullSet;
 	}
 
-	private UespNamespace GetNamespace(SiteTemplateNode linkTemplate, Title title)
+	private UespNamespace GetNamespace(ITemplateNode linkTemplate, Title title)
 	{
 		if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
 		{
@@ -200,8 +205,8 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 
 	private List<IWikiNode>? LinkReplace(IWikiNode node, SiteParser parser)
 	{
-		if (node is not SiteTemplateNode linkTemplate ||
-			!linkTemplate.Title.PageNameEquals("Lore Link"))
+		if (node is not ITemplateNode linkTemplate ||
+			linkTemplate.GetTitle(parser.Site) != this.loreLinkTemplate)
 		{
 			return null;
 		}

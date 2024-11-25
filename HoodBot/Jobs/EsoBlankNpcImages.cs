@@ -16,9 +16,9 @@ internal sealed class EsoBlankNpcImages(JobManager jobManager) : TemplateUsage(
 	#region Protected Override Methods
 	protected override bool ShouldAddPage(SiteParser parser) =>
 		parser.Page.Title.Namespace == UespNamespaces.Online &&
-		parser.FindSiteTemplate("Template:Mod Header") is null;
+		parser.FindTemplate("Template:Mod Header") is null;
 
-	protected override bool ShouldAddTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override bool ShouldAddTemplate(ITemplateNode template, SiteParser parser)
 	{
 		static bool IsWhitespace(IWikiNode node) =>
 			node is ITextNode text && text.Text.Trim().Length == 0;

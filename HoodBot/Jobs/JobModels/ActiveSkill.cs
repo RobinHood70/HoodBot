@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
 internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
@@ -87,14 +87,15 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 	#endregion
 
 	#region Protected Override Methods
-	protected override void UpdateTemplate(SiteTemplateNode template)
+	protected override void UpdateTemplate(Site site, ITemplateNode template)
 	{
+		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(template);
 		var baseMorph = this.morphs[0];
 		var baseRank = baseMorph.Ranks[^1];
 		template.Update("id", baseRank.Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 		var baseSkillCost = Cost.GetCostText(baseRank.Costs);
-		this.UpdateMorphs(template, baseMorph, baseSkillCost);
+		this.UpdateMorphs(site, template, baseMorph, baseSkillCost);
 		template.Update("casttime", FormatSeconds(baseMorph.CastingTime), ParameterFormat.OnePerLine, true);
 		template.Update("linerank", this.learnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 		template.Update("cost", baseSkillCost, ParameterFormat.OnePerLine, true);
@@ -102,7 +103,7 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 		{
 			// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
 			UespReplacer.ReplaceGlobal(paramValue);
-			UespReplacer.ReplaceEsoLinks(paramValue);
+			UespReplacer.ReplaceEsoLinks(site, paramValue);
 		}
 
 		template.UpdateOrRemove("range", FormatMeters(baseRank.Range), ParameterFormat.OnePerLine, baseRank.Range.OrdinalEquals("0"));
@@ -138,7 +139,7 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 	#endregion
 
 	#region Private Methods
-	private void UpdateMorph(SiteTemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter)
+	private void UpdateMorph(ITemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter, CultureInfo culture)
 	{
 		var baseRank = baseMorph.Ranks[^1];
 		List<string> descriptions = [];
@@ -168,7 +169,6 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 			descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 		}
 
-		var culture = template.Title.Site.Culture;
 		var morphRadius = Morph.NowrapSameString(morph.Ranks.Select(r => r.Radius));
 		if (!morphRadius.OrdinalEquals(baseRank.Radius) && !morphRadius.OrdinalEquals("0") && !morph.Target.OrdinalEquals("Self"))
 		{
@@ -206,12 +206,12 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 		}
 	}
 
-	private void UpdateMorphs(SiteTemplateNode template, Morph baseMorph, string baseSkillCost)
+	private void UpdateMorphs(Site site, ITemplateNode template, Morph baseMorph, string baseSkillCost)
 	{
-		TitleCollection usedList = new(template.Title.Site);
+		TitleCollection usedList = new(site);
 		for (var morphCounter = 0; morphCounter < this.morphs.Count; morphCounter++)
 		{
-			this.UpdateMorph(template, baseMorph, baseSkillCost, usedList, morphCounter);
+			this.UpdateMorph(template, baseMorph, baseSkillCost, usedList, morphCounter, site.Culture);
 		}
 	}
 	#endregion

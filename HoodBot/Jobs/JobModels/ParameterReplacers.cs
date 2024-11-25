@@ -7,11 +7,10 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
-public delegate void ParameterReplacer(Page page, SiteTemplateNode template);
+public delegate void ParameterReplacer(Page page, ITemplateNode template);
 
 public class ParameterReplacers
 {
@@ -76,7 +75,7 @@ public class ParameterReplacers
 
 	public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 	{
-		var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.Template], name);
+		var title = TitleFactory.FromTemplate(this.site, name);
 		if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 		{
 			currentReplacers = [];
@@ -89,7 +88,7 @@ public class ParameterReplacers
 		}
 	}
 
-	public void ReplaceAll(Page page, SiteTemplateNode template)
+	public void ReplaceAll(Page page, ITemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		foreach (var action in this.generalReplacers)
@@ -97,7 +96,7 @@ public class ParameterReplacers
 			action(page, template);
 		}
 
-		if (this.templateReplacers.TryGetValue(template.Title, out var replacementActions))
+		if (this.templateReplacers.TryGetValue(template.GetTitle(page.Site), out var replacementActions))
 		{
 			foreach (var action in replacementActions)
 			{
@@ -108,7 +107,7 @@ public class ParameterReplacers
 	#endregion
 
 	#region Protected Methods
-	protected void AntiquityRow(Page page, SiteTemplateNode template)
+	protected void AntiquityRow(Page page, ITemplateNode template)
 	{
 		var nameParam = template.Find("name", "1");
 		var name = nameParam is null
@@ -117,7 +116,7 @@ public class ParameterReplacers
 		this.GenericIconWithDefault(page, template, $"ON-icon-lead-{name}.png");
 	}
 
-	protected void BasicNpc(Page page, SiteTemplateNode template)
+	protected void BasicNpc(Page page, ITemplateNode template)
 	{
 		if (this.NamespaceList.FromTitle(page.Title) is UespNamespace nsPage)
 		{
@@ -125,7 +124,7 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void BulletLink(Page page, SiteTemplateNode template)
+	protected void BulletLink(Page page, ITemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(template);
@@ -171,9 +170,9 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void CategoryFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.Category], template.Find(1));
+	protected void CategoryFirst(Page page, ITemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.Category], template.Find(1));
 
-	protected void CatFooter(Page page, SiteTemplateNode template)
+	protected void CatFooter(Page page, ITemplateNode template)
 	{
 		foreach (var param in template.FindAll("Prev", "Prev2", "Next", "Next2", "Conc", "Up"))
 		{
@@ -181,23 +180,23 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void EsoAntiquityReplacer(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("img"));
+	protected void EsoAntiquityReplacer(Page page, ITemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("img"));
 
-	protected void EsoNpc(Page page, SiteTemplateNode template)
+	protected void EsoNpc(Page page, ITemplateNode template)
 	{
 		this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("condition"));
 		this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("race"));
 	}
 
-	protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
+	protected void FullPageNameFirst(Page page, ITemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 
-	protected void FurnishingLink(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find(1));
+	protected void FurnishingLink(Page page, ITemplateNode template) => this.FurnishingLinkReplace(template.Find(1));
 
-	protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
+	protected void GameBookGeneral(Page page, ITemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
 
-	protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.File], template.Find("icon"));
+	protected void GenericIcon(Page page, ITemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.File], template.Find("icon"));
 
-	protected void GenericIconWithDefault(Page page, SiteTemplateNode template, string defaultValue)
+	protected void GenericIconWithDefault(Page page, ITemplateNode template, string defaultValue)
 	{
 		var param = template.Find("icon");
 		var addedDefault = false;
@@ -215,18 +214,18 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void GenericImage(Page page, SiteTemplateNode template)
+	protected void GenericImage(Page page, ITemplateNode template)
 	{
 		this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image"));
 		this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("img"));
 	}
 
-	protected void Icon(Page page, SiteTemplateNode template)
+	protected void Icon(Page page, ITemplateNode template)
 	{
 		var nsParam = template.Find("ns_base", "ns_id");
 		if (this.NamespaceList.GetNsBase(nsParam?.GetValue(), page.Title) is UespNamespace oldNs)
 		{
-			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
+			var iconName = UespFunctions.IconAbbreviation(oldNs, template);
 			var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
 			if (this.globalUpdates.TryGetValue(title, out var toTitle))
 			{
@@ -241,7 +240,7 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void DefaultLoreFirst(Page page, SiteTemplateNode template)
+	protected void DefaultLoreFirst(Page page, ITemplateNode template)
 	{
 		var nsParam = template.Find("ns_base", "ns_id");
 		var baseName = nsParam?.GetValue() ?? "Lore";
@@ -253,7 +252,7 @@ public class ParameterReplacers
 			return;
 		}
 
-		pageNameParam.SetValue(target.PageName, ParameterFormat.NoChange);
+		pageNameParam.SetValue(target.PageName, ParameterFormat.Verbatim);
 		template.Remove("ns_base");
 		template.Remove("ns_id");
 		if (!targetNsBase.Base.OrdinalEquals("Lore"))
@@ -262,9 +261,9 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find(1));
+	protected void LoreFirst(Page page, ITemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find(1));
 
-	protected void MultipleImages(Page page, SiteTemplateNode template)
+	protected void MultipleImages(Page page, ITemplateNode template)
 	{
 		this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image1"));
 		this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image2"));
@@ -278,7 +277,7 @@ public class ParameterReplacers
 		this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image10"));
 	}
 
-	protected void NpcSummary(Page page, SiteTemplateNode template)
+	protected void NpcSummary(Page page, ITemplateNode template)
 	{
 		if (this.NamespaceList.FromTitle(page.Title) is UespNamespace nsPage)
 		{
@@ -286,7 +285,7 @@ public class ParameterReplacers
 		}
 	}
 
-	protected void PageNameFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Title.Namespace, template.Find(1));
+	protected void PageNameFirst(Page page, ITemplateNode template) => this.PageNameReplace(page.Title.Namespace, template.Find(1));
 	#endregion
 
 	#region Private Methods
@@ -333,7 +332,7 @@ public class ParameterReplacers
 		}
 	}
 
-	private void PageNameAllNumeric(Page page, SiteTemplateNode template)
+	private void PageNameAllNumeric(Page page, ITemplateNode template)
 	{
 		foreach (var (_, param) in template.GetNumericParameters())
 		{

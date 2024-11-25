@@ -171,10 +171,14 @@ public class EsoMatchIcons : EditJob
 		List<SiteLink> retval = [];
 		for (var i = 0; i < parser.Count; i++)
 		{
-			if (parser[i] is SiteLinkNode link && link.Title.Namespace == MediaWikiNamespaces.Category)
+			if (parser[i] is ILinkNode link)
 			{
-				retval.Add(SiteLink.FromLinkNode(site, link));
-				parser.RemoveAt(i);
+				var siteLink = SiteLink.FromLinkNode(site, link);
+				if (siteLink.Title.Namespace == MediaWikiNamespaces.Category)
+				{
+					retval.Add(siteLink);
+					parser.RemoveAt(i);
+				}
 			}
 		}
 
@@ -263,11 +267,28 @@ public class EsoMatchIcons : EditJob
 
 	private void ReplaceLicense(SiteParser parsedPage)
 	{
-		if (parsedPage.Find<SiteTemplateNode>(template => this.licenseTemplates.Contains(template.Title)) is SiteTemplateNode license)
+		var found = false;
+		var i = 0;
+		while (i < parsedPage.Count)
 		{
-			license.TitleNodes.Clear();
-			license.TitleNodes.AddText("Zenimage");
-			license.Parameters.Clear();
+			if (parsedPage[i] is ITemplateNode template &&
+				this.licenseTemplates.Contains(template.GetTitle(this.Site)))
+			{
+				if (found)
+				{
+					parsedPage.RemoveAt(i);
+					i--;
+				}
+				else
+				{
+					template.TitleNodes.Clear();
+					template.TitleNodes.AddText("Zenimage");
+					template.Parameters.Clear();
+					found = true;
+				}
+			}
+
+			i++;
 		}
 	}
 	#endregion

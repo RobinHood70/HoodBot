@@ -109,10 +109,10 @@
 		private static void DoBookSummary(SiteParser parser, HashSet<string> loreBooks)
 		{
 			var nodes = parser;
-			var i = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
+			var i = nodes.FindIndex<ITemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
 			if (i != -1)
 			{
-				var template = (SiteTemplateNode)parser[i];
+				var template = (ITemplateNode)parser[i];
 				template.Title.Clear();
 				template.Title.AddText("Game Book\n");
 				if ((template.Find("Fancy") ?? template.Find("fancy")) is IParameterNode fancy)

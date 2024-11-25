@@ -35,15 +35,15 @@
 		protected override void LoadPages()
 		{
 			var botFolder = UespSite.GetBotDataFolder(this.fileName);
-			var parser = new SiteNodeFactory(this.Site).Parse(File.ReadAllText(botFolder));
+			var parser = new WikiNodeFactory().Parse(File.ReadAllText(botFolder));
 			for (var i = 0; i < parser.Count; i += 4)
 			{
 				CheckText(parser, i + 1);
 				CheckText(parser, i + 3);
 				var header = (IHeaderNode)parser[i];
-				if (header.Title.Count < 3 || header.Title[1] is not SiteLinkNode link)
+				if (header.Title.Count < 3 || header.Title[1] is not ILinkNode link)
 				{
-					link = (SiteLinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.GetTitle(true));
+					link = (ILinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.GetTitle(true));
 				}
 
 				var template = (ITemplateNode)parser[i + 2];

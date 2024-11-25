@@ -40,7 +40,7 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create terminal page";
 
-	protected override bool IsValid(SiteParser parser, Terminal item) => parser.FindSiteTemplate("Terminal Summary") is not null;
+	protected override bool IsValid(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
 
 	protected override IDictionary<Title, Terminal> LoadItems()
 	{

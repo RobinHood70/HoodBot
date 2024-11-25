@@ -29,7 +29,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create weapon page";
 
-	protected override bool IsValid(SiteParser parser, List<CsvRow> item) => parser.FindSiteTemplate("Item Summary") is not null;
+	protected override bool IsValid(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
 
 	protected override IDictionary<Title, List<CsvRow>> LoadItems()
 	{
@@ -78,9 +78,9 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 			.Append("}}\n");
 	}
 
-	private static SiteTemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
+	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
 	{
-		var templates = parser.FindSiteTemplates("Item Summary");
+		var templates = parser.FindTemplates("Item Summary");
 		foreach (var template in templates)
 		{
 			var edid = template.GetValue("editorid")?.Trim();
@@ -107,7 +107,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	private static void UpdateWeapon(SiteParser parser, List<CsvRow> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Item Summary"));
+		var insertPos = parser.FindIndex<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
 		foreach (var row in list)
 		{
 			if (FindMatchingTemplate(parser, row) is null)

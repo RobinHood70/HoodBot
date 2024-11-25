@@ -197,7 +197,7 @@ internal sealed class EsoSkills : EditJob
 			currentSkill.AddData(row);
 		}
 
-		foreach (var (_, skill) in retval)
+		foreach (var skill in retval.Values)
 		{
 			skill.PostProcess();
 			errors |= skill.Check();

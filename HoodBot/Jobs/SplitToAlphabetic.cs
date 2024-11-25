@@ -80,7 +80,7 @@ internal sealed class SplitToAlphabetic : EditJob
 		page = this.Site.CreatePage(pageTitle);
 		var newParser = new SiteParser(page);
 		newParser.FromSections(entry.Value);
-		var refTemplates = newParser.FindSiteTemplates("Ref");
+		var refTemplates = newParser.FindTemplates("Ref");
 		var hasRefs = false;
 		var hasUol = false;
 		foreach (var template in refTemplates)
@@ -96,10 +96,10 @@ internal sealed class SplitToAlphabetic : EditJob
 		newParser.TrimEnd();
 		if (hasRefs)
 		{
-			newParser.AddParsed("\n\n==References==\n<references/>");
+			newParser.AppendParsed("\n\n==References==\n<references/>");
 			if (hasUol)
 			{
-				newParser.AddParsed("\n{{UOL}}\n<references group=UOL/>");
+				newParser.AppendParsed("\n{{UOL}}\n<references group=UOL/>");
 			}
 		}
 

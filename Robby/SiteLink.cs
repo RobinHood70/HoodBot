@@ -6,10 +6,10 @@ using System.Globalization;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Parser;
 using RobinHood70.Robby.Properties;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 #region Public Enumerations
 
@@ -344,21 +344,23 @@ public class SiteLink : ILinkTitle
 	#region Public Static Methods
 
 	/// <summary>Returns all the links in a gallery node.</summary>
+	/// <param name="site">The site the gallery is from.</param>
 	/// <param name="factory">The factory to use to create internal links.</param>
 	/// <param name="tag">The gallery tag to work on.</param>
 	/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
-	public static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
+	public static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, ITagNode tag)
 	{
+		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(factory);
 		ArgumentNullException.ThrowIfNull(tag);
-		return FromGalleryNode(factory, tag);
+		return FromGalleryNode(site, factory, tag);
 
-		static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
+		static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, ITagNode tag)
 		{
 			if (tag.InnerText?.Trim() is string innerText &&
 						innerText.Length > 0)
 			{
-				var ns = factory.Site[MediaWikiNamespaces.File];
+				var ns = site[MediaWikiNamespaces.File];
 				var lines = innerText.Split(TextArrays.LineFeed);
 				foreach (var line in lines)
 				{
@@ -383,7 +385,7 @@ public class SiteLink : ILinkTitle
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(link);
 		link = WikiTextUtilities.DecodeAndNormalize(link);
-		var linkNode = CreateLinkNode(site, link);
+		var linkNode = CreateLinkNode(link);
 		return FromLinkNode(site[MediaWikiNamespaces.File], linkNode);
 	}
 
@@ -430,7 +432,7 @@ public class SiteLink : ILinkTitle
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(link);
-		var linkNode = CreateLinkNode(site, link);
+		var linkNode = CreateLinkNode(link);
 		return FromLinkNode(site, linkNode);
 	}
 
@@ -582,7 +584,7 @@ public class SiteLink : ILinkTitle
 			values.Add(text);
 		}
 
-		return new SiteNodeFactory(this.Title.Site).LinkNodeFromParts(this.LinkTarget(false), values);
+		return new WikiNodeFactory().LinkNodeFromParts(this.LinkTarget(false), values);
 	}
 
 	/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
@@ -667,7 +669,7 @@ public class SiteLink : ILinkTitle
 	#endregion
 
 	#region Private Static Methods
-	private static ILinkNode CreateLinkNode(Site site, string link)
+	private static ILinkNode CreateLinkNode(string link)
 	{
 		// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
 		var removeSpace = false;
@@ -677,7 +679,7 @@ public class SiteLink : ILinkTitle
 			link = "[[" + link + " ]]";
 		}
 
-		var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
+		var linkNode = new WikiNodeFactory().LinkNodeFromWikiText(link);
 		if (removeSpace)
 		{
 			TrimTrailingSpace(linkNode);

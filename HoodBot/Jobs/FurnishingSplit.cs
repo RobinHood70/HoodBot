@@ -63,7 +63,7 @@ public class FurnishingSplit(JobManager jobManager) : ParsedPageJob(jobManager)
 			pageIssues.Add("does not end in .jpg");
 		}
 
-		if (parser.FindSiteTemplate("Furnishing Summary") == null)
+		if (parser.FindTemplate("Furnishing Summary") == null)
 		{
 			pageIssues.Add("does not have a Furnishing Summary");
 		}

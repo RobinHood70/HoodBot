@@ -104,14 +104,14 @@ public class PageJobLogger : JobLogger
 		SiteParser parser = new(this.logPage);
 		var factory = parser.Factory;
 		var sameTaskText = UpdateCurrentStatus(parser, this.status);
-		var firstEntry = parser.FindIndex<SiteTemplateNode>(template => template.Title.PageNameEquals("/Entry"));
+		var firstEntry = parser.FindIndex<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
 		if (firstEntry == -1)
 		{
 			// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.
 			throw BadLogPage;
 		}
 
-		var entry = (SiteTemplateNode)parser[firstEntry];
+		var entry = (ITemplateNode)parser[firstEntry];
 		if (
 			this.end == null &&
 			sameTaskText &&

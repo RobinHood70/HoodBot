@@ -128,7 +128,7 @@
 		private static string RemoveTemplate(WikiNodeCollection nodes, int templateIndex)
 		{
 			nodes.RemoveAt(templateIndex);
-			var placeHolder = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Placeholder"));
+			var placeHolder = nodes.FindIndex<ITemplateNode>(node => node.TitleValue.PageNameEquals("Placeholder"));
 			if (placeHolder != -1)
 			{
 				nodes.RemoveAt(placeHolder);
@@ -151,17 +151,17 @@
 			SiteParser originalParser = new(page);
 			SortedDictionary<string, string> skills = new(StringComparer.Ordinal);
 			SortedDictionary<string, string> materials = new(StringComparer.Ordinal);
-			var templateIndex = originalParser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
+			var templateIndex = originalParser.FindIndex<ITemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
 			if (templateIndex > -1)
 			{
-				var originalTemplate = (SiteTemplateNode)originalParser[templateIndex];
+				var originalTemplate = (ITemplateNode)originalParser[templateIndex];
 				var collectible = originalTemplate.Find("collectible");
 				var originalParams = originalTemplate.Parameters.ToKeyValue();
 
 				page.Text = RemoveTemplate(originalParser, templateIndex);
 				this.filePages.Add(page);
 				SiteParser parser = new(page, string.Empty);
-				var newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
+				var newTemplate = (ITemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
 				parser.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
 				parser.Add(newTemplate);
 				var autoPagename = "ON-" + (collectible is null ? "item-" : string.Empty) + "furnishing-";

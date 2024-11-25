@@ -9,9 +9,9 @@ using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 using static RobinHood70.WikiCommon.Searches;
 
 internal sealed class UespReplacer
@@ -30,7 +30,6 @@ internal sealed class UespReplacer
 	#endregion
 
 	#region Fields
-	private readonly Site site;
 	private readonly WikiNodeCollection oldNodes;
 	private readonly WikiNodeCollection newNodes;
 	#endregion
@@ -41,7 +40,7 @@ internal sealed class UespReplacer
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(oldNodes);
 		ArgumentNullException.ThrowIfNull(newNodes);
-		this.site = site;
+		this.Site = site;
 		this.oldNodes = oldNodes.Clone();
 		this.oldNodes.RemoveAll<IIgnoreNode>();
 		this.newNodes = newNodes.Clone();
@@ -69,6 +68,8 @@ internal sealed class UespReplacer
 
 	#region Public Properties
 	public TitleCollection RemoveableTemplates { get; }
+
+	public Site Site { get; }
 	#endregion
 
 	#region Public Static Methods
@@ -97,21 +98,16 @@ internal sealed class UespReplacer
 				throw new InvalidOperationException("Tables are missing on the replacements page!");
 			}
 
-			GetMatches(jobSite, replaceFirst.Value, ReplaceFirstList);
-			GetMatches(jobSite, replaceAll.Value, ReplaceAllList);
+			GetMatches(replaceFirst.Value, ReplaceFirstList);
+			GetMatches(replaceAll.Value, ReplaceAllList);
 			initialized = true;
 		}
 	}
 
-	public static void ReplaceEsoLinks(WikiNodeCollection nodes)
+	public static void ReplaceEsoLinks(Site site, WikiNodeCollection nodes)
 	{
-		if (nodes.Factory is not SiteNodeFactory factory)
-		{
-			// Requiring this cuts back enormously on passing redundant parameters.
-			throw new ArgumentException("Factory attached to nodes collection must be a SiteNodeFactory.", nameof(nodes));
-		}
-
 		// Iterating manually rather than with WikiNodeCollection methods, since the list is being altered as we go.
+		var searchTitles = new TitleCollection(site, "Template:Huh", "Template:Nowrap");
 		for (var i = 0; i < nodes.Count; i++)
 		{
 			if (nodes[i] is ITextNode textNode)
@@ -121,9 +117,8 @@ internal sealed class UespReplacer
 				// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 				var text = textNode.Text;
 				if (i > 0 &&
-					nodes[i - 1] is SiteTemplateNode previous &&
-					(previous.Title.PageNameEquals("huh")
-					|| previous.Title.PageNameEquals("nowrap")))
+					nodes[i - 1] is ITemplateNode previous &&
+					searchTitles.Contains(previous.GetTitle(site)))
 				{
 					text = WikiTextVisitor.Raw(previous) + text;
 					var boldStart = false;
@@ -158,19 +153,19 @@ internal sealed class UespReplacer
 					}
 				}
 
-				var matches = EsoLinks.Matches(text);
+				var matches = (ICollection<Match>)EsoLinks.Matches(text);
 				if (matches.Count > 0)
 				{
 					WikiNodeCollection replacementNodes = new(nodes.Factory);
 					var startPos = 0;
-					foreach (var match in (ICollection<Match>)matches)
+					foreach (var match in matches)
 					{
 						if (match.Index > startPos)
 						{
 							replacementNodes.AddText(text[startPos..match.Index]);
 						}
 
-						replacementNodes.Add(ReplaceTemplatableText(match, factory));
+						replacementNodes.Add(ReplaceTemplatableText(site, match, nodes.Factory));
 						startPos = match.Index + match.Length;
 					}
 
@@ -196,11 +191,11 @@ internal sealed class UespReplacer
 		ArgumentNullException.ThrowIfNull(usedList);
 		for (var i = 0; i < nodes.Count; i++)
 		{
-			if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is WikiNodeCollection newNodes)
+			if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is WikiNodeCollection linkNodes)
 			{
 				nodes.RemoveAt(i);
-				nodes.InsertRange(i, newNodes);
-				i += newNodes.Count - 1;
+				nodes.InsertRange(i, linkNodes);
+				i += linkNodes.Count - 1;
 			}
 		}
 	}
@@ -292,13 +287,13 @@ internal sealed class UespReplacer
 		HashSet<Title> oldLinks = [];
 		foreach (var node in this.oldNodes.FindAll<ILinkNode>(null, false, true, 0))
 		{
-			var siteLink = SiteLink.FromLinkNode(this.site, node);
+			var siteLink = SiteLink.FromLinkNode(this.Site, node);
 			oldLinks.Add(siteLink.Title);
 		}
 
 		foreach (var node in this.newNodes.FindAll<ILinkNode>(null, false, true, 0))
 		{
-			var siteLink = SiteLink.FromLinkNode(this.site, node);
+			var siteLink = SiteLink.FromLinkNode(this.Site, node);
 			oldLinks.Remove(siteLink.Title);
 		}
 
@@ -310,16 +305,16 @@ internal sealed class UespReplacer
 		HashSet<Title> oldTemplates = [];
 		foreach (var node in this.oldNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
-			oldTemplates.Add(TitleFactory.FromBacklinkNode(this.site, node));
+			oldTemplates.Add(TitleFactory.FromBacklinkNode(this.Site, node));
 		}
 
 		foreach (var node in this.newNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
-			oldTemplates.Remove(TitleFactory.FromBacklinkNode(this.site, node));
+			oldTemplates.Remove(TitleFactory.FromBacklinkNode(this.Site, node));
 		}
 
 		// Always ignore these
-		oldTemplates.Remove(TitleFactory.FromUnvalidated(this.site, "Huh"));
+		oldTemplates.Remove(TitleFactory.FromUnvalidated(this.Site, "Huh"));
 
 		return oldTemplates;
 	}
@@ -348,10 +343,10 @@ internal sealed class UespReplacer
 	#endregion
 
 	#region Private Static Methods
-	private static void GetMatches(Site site, string tableText, List<EsoReplacement> list)
+	private static void GetMatches(string tableText, List<EsoReplacement> list)
 	{
 		IEnumerable<Match> matches = ReplacementFinder.Matches(tableText);
-		SiteNodeFactory factory = new(site);
+		var factory = new WikiNodeFactory();
 		foreach (var match in matches)
 		{
 			var from = match.Groups["from"].Value;
@@ -426,9 +421,9 @@ internal sealed class UespReplacer
 		return retval;
 	}
 
-	private static IWikiNode ReplaceTemplatableText(Match match, SiteNodeFactory factory)
+	private static IWikiNode ReplaceTemplatableText(Site site, Match match, IWikiNodeFactory factory)
 	{
-		var type = match.Groups["type"].Value.UpperFirst(factory.Site.Culture);
+		var type = match.Groups["type"].Value.UpperFirst(site.Culture);
 		var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
 		var templateNode = resistType.Length > 1
 			? factory.TemplateNodeFromParts("ESO Resistance Link", (null, resistType[0]))
@@ -502,7 +497,7 @@ internal sealed class UespReplacer
 
 	private void RemoveTrivialTemplates(WikiNodeCollection nodes)
 	{
-		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
+		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.Site, node));
 
 		nodes.RemoveAll<ITemplateNode>(IsRemovable);
 	}

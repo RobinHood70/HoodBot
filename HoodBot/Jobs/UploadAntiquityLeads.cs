@@ -45,7 +45,7 @@ internal sealed class UploadAntiquityLeads(JobManager jobManager) : TemplateJob(
 		this.Pages.GetBacklinks("Template:Online Furnishing Antiquity/Row", BacklinksTypes.EmbeddedIn, false, Filter.Exclude);
 	}
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		var idText = template.GetValue("id");
 		if (idText is not null)
@@ -72,7 +72,7 @@ internal sealed class UploadAntiquityLeads(JobManager jobManager) : TemplateJob(
 	private static void UpdateFilePage(Title from, Page to)
 	{
 		var parser = new SiteParser(to);
-		if (EsoSpace.FindOrCreateOnlineFile(parser) is not SiteTemplateNode template)
+		if (EsoSpace.FindOrCreateOnlineFile(parser) is not ITemplateNode template)
 		{
 			// Template should ALWAYS be found, but in the unlikely event of a major change, display warning and continue.
 			Debug.WriteLine("Template not found on " + to.Title.FullPageName());

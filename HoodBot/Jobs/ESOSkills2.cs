@@ -17,7 +17,7 @@ internal sealed class EsoSkills2(JobManager jobManager) : CreateOrUpdateJob<Skil
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update skill";
 
-	protected override bool IsValid(SiteParser parser, Skill item) => parser.FindSiteTemplate(Skill.SummaryTemplate) is not null;
+	protected override bool IsValid(SiteParser parser, Skill item) => parser.FindTemplate(Skill.SummaryTemplate) is not null;
 
 	protected override IDictionary<Title, Skill> LoadItems()
 	{

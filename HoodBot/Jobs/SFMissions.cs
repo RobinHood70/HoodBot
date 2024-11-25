@@ -19,6 +19,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	private static readonly string DisambigFileName = GameInfo.Starfield.ModFolder + "Quests Disambigs.txt";
 	private static readonly string QuestsFileName = GameInfo.Starfield.ModFolder + "Quests.csv";
 	private static readonly string StagesFileName = GameInfo.Starfield.ModFolder + "QuestStages.csv";
+	private readonly TitleCollection searchTitles;
 	#endregion
 
 	#region Constructors
@@ -29,6 +30,10 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		this.NewPageText = GetNewPageText;
 		this.OnUpdate = UpdateMission;
+		this.searchTitles = new TitleCollection(
+			this.Site,
+			"Template:Stub",
+			"Template:Starfield Trackers Alliance Mission");
 	}
 	#endregion
 
@@ -106,23 +111,24 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		return sb.ToString();
 	}
 
-	private static void DoStages(SiteParser parser, List<Stage> stages)
+	private void DoStages(SiteParser parser, List<Stage> stages)
 	{
-		var stagesTemplate = parser.FindSiteTemplate("Mission Entries");
-		if (stagesTemplate is null)
+		if (parser.FindTemplate("Mission Entries") is not null)
 		{
-			var insertLoc = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub") || t.Title.PageNameEquals("Starfield Trackers Alliance Mission"));
-			if (insertLoc == -1)
-			{
-				insertLoc = parser.Count;
-			}
-
-			var missionEntries = BuildStageSection(stages);
-			parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
+			return;
 		}
+
+		var insertLoc = parser.FindIndex<ITemplateNode>(t => this.searchTitles.Contains(t.GetTitle(parser.Site)));
+		if (insertLoc == -1)
+		{
+			insertLoc = parser.Count;
+		}
+
+		var missionEntries = BuildStageSection(stages);
+		parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
 	}
 
-	private static void DoSummary(SiteParser parser, string missionSummary)
+	private void DoSummary(SiteParser parser, string missionSummary)
 	{
 		var sections = parser.ToSections(2);
 		Section? summary = null;
@@ -142,7 +148,8 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		if (summary is null)
 		{
 			summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
-			var stubIndex = lead.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub") || t.Title.PageNameEquals("Starfield Trackers Alliance Mission"));
+			var stubIndex = lead.FindIndex<ITemplateNode>(t =>
+				this.searchTitles.Contains(t.GetTitle(this.Site)));
 			if (stubIndex != -1)
 			{
 				var stub = lead[stubIndex];
@@ -157,9 +164,9 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		parser.FromSections(sections);
 	}
 
-	private static SiteTemplateNode? FindTemplate(SiteParser parser, Mission item)
+	private static ITemplateNode? FindTemplate(SiteParser parser, Mission item)
 	{
-		var template = parser.FindSiteTemplate("Mission Header");
+		var template = parser.FindTemplate("Mission Header");
 		return (template?.GetValue("ID")?.Trim()).OrdinalEquals(item.EditorId)
 			? template
 			: null;
@@ -238,7 +245,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			.Trim();
 	}
 
-	private static void UpdateMission(SiteParser parser, Mission item)
+	private void UpdateMission(SiteParser parser, Mission item)
 	{
 		var template = FindTemplate(parser, item);
 		if (template is null)
@@ -255,12 +262,12 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 		if (item.Summary.Length > 0)
 		{
-			DoSummary(parser, item.Summary);
+			this.DoSummary(parser, item.Summary);
 		}
 
 		if (item.Stages.Count > 0)
 		{
-			DoStages(parser, item.Stages);
+			this.DoStages(parser, item.Stages);
 		}
 	}
 	#endregion
@@ -292,7 +299,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		foreach (var page in backlinks)
 		{
 			var parser = new SiteParser(page);
-			var template = parser.FindSiteTemplate("Mission Header");
+			var template = parser.FindTemplate("Mission Header");
 			if (template?.GetRaw("ID") is string edid &&
 				edid.Length > 0 &&
 				!existing.TryAdd(edid, page.Title))

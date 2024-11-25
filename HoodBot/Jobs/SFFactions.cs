@@ -10,6 +10,7 @@ using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 {
@@ -105,9 +106,9 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		return sb.ToString();
 	}
 
-	private static void ConfirmInitialHeader(Section section)
+	private void ConfirmInitialHeader(Section section)
 	{
-		if (section.Content.Find<SiteTemplateNode>(t => t.Title.PageNameEquals("Factions")) is SiteTemplateNode firstFaction)
+		if (section.Content.Find<ITemplateNode>(t => t.GetTitle(this.Site).PageNameEquals("Factions")) is ITemplateNode firstFaction)
 		{
 			firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
 		}
@@ -171,28 +172,31 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 	private void AddMembersToExistingFactions(Dictionary<Title, SectionDictionary> existing, Dictionary<string, Members> allMembers)
 	{
+		var factionMembersTitle = TitleFactory.FromTemplate(this.Site, "Factions/Members");
+		var factionTitle = TitleFactory.FromTemplate(this.Site, "Factions");
+		var listTitle = TitleFactory.FromTemplate(this.Site, "List");
 		foreach (var (edid, newMembers) in allMembers)
 		{
 			foreach (var item in existing.Values)
 			{
 				var parser = item.Parser;
-				if (parser.Find<SiteTemplateNode>(t =>
-					t.Title.PageNameEquals("Factions") &&
-					t.GetValue("edid").OrdinalICEquals(edid)) is not SiteTemplateNode template)
+				if (parser.Find<ITemplateNode>(t =>
+					t.GetTitle(this.Site) == factionTitle &&
+					t.GetValue("edid").OrdinalICEquals(edid)) is not ITemplateNode template)
 				{
 					continue;
 				}
 
 				var membersNode = template.AddIfNotExists("members", "{{Factions/Members\n  }}", ParameterFormat.Packed);
-				var factionMembersTemplate = membersNode.Value.Find<SiteTemplateNode>(t => t.Title.PageNameEquals("Factions/Members")) ?? throw new InvalidOperationException();
+				var factionMembersTemplate = membersNode.Value.FindTemplate(t => t.GetTitle(this.Site) == factionMembersTitle) ?? throw new InvalidOperationException();
 				var factionMembersNode = factionMembersTemplate.AddIfNotExists("members", string.Empty, ParameterFormat.Packed);
-				if (factionMembersNode.Value.Find<SiteTemplateNode>(t => t.Title.PageNameEquals("List")) is not SiteTemplateNode listTemplate)
+				if (factionMembersNode.Value.Find<ITemplateNode>(t => t.GetTitle(this.Site) == listTitle) is not ITemplateNode listTemplate)
 				{
-					listTemplate = (SiteTemplateNode)factionMembersNode.Factory.TemplateNodeFromParts("List");
+					listTemplate = factionMembersNode.Factory.TemplateNodeFromParts("List");
 					factionMembersNode.Value.Add(listTemplate);
 				}
 
-				var sep = listTemplate.AddIfNotExists("sep", "\", \"", ParameterFormat.NoChange);
+				var sep = listTemplate.AddIfNotExists("sep", "\", \"", ParameterFormat.Verbatim);
 				var ignoreMembers = new HashSet<Title>();
 				foreach (var (_, parameter) in listTemplate.GetNumericParameters())
 				{
@@ -246,7 +250,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 			list.Add(faction);
 		}
 
-		var factory = new SiteNodeFactory(this.Site);
+		var factory = new WikiNodeFactory();
 		foreach (var (sectionName, list) in groupedSections)
 		{
 			list.Sort((f1, f2) => f1.EditorId.CompareTo(f2.EditorId));
@@ -260,7 +264,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				if (section is not null)
 				{
 					ConfirmInitialHeader(section);
-					section.Content.AddParsed(sectionText);
+					section.Content.AppendParsed(sectionText);
 				}
 				else
 				{

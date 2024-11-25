@@ -258,47 +258,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		return remainder;
 	}
 
-	private static string? GetInfoText(SiteTemplateNode info)
-	{
-		if (info.Find("description") is IParameterNode desc)
-		{
-			IParameterNode? node = null;
-			if (desc.Value.Find<SiteTemplateNode>(value => value.Title.PageNameEquals("En")) is SiteTemplateNode en)
-			{
-				node = en.Find(1);
-			}
-
-			return (node ?? desc).GetRaw();
-		}
-
-		return null;
-	}
-
 	private static bool IsCollectibleLink(string description) => description.StartsWith("{{Item Link", StringComparison.OrdinalIgnoreCase) && description.Contains("collectid", StringComparison.Ordinal);
-
-	private static IList<IWikiNode>? NodeReplacer(IWikiNode node)
-	{
-		switch (node)
-		{
-			case IHeaderNode headerNode:
-				var title = headerNode.GetTitle(true);
-				if (LicenseNames.Contains(title))
-				{
-					return [];
-				}
-
-				break;
-			case SiteTemplateNode templateNode:
-				if (templateNode.Title.PageNameEquals("Zenimage"))
-				{
-					return [];
-				}
-
-				break;
-		}
-
-		return null;
-	}
 
 	private static string SanitizeText(string text)
 	{
@@ -331,6 +291,35 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	#endregion
 
 	#region Private Methods
+	private string? GetInfoText(ITemplateNode info) =>
+		info.Find("description") is not IParameterNode desc ? null :
+		desc.Value.FindTemplate(t => t.GetTitle(this.Site) == "Template:En") is ITemplateNode en && en.Find(1) is IParameterNode enValue ? enValue.ToRaw() :
+		desc.GetRaw();
+
+	private IList<IWikiNode>? NodeReplacer(IWikiNode node)
+	{
+		switch (node)
+		{
+			case IHeaderNode headerNode:
+				var title = headerNode.GetTitle(true);
+				if (LicenseNames.Contains(title))
+				{
+					return [];
+				}
+
+				break;
+			case ITemplateNode templateNode:
+				if (templateNode.GetTitle(this.Site).PageNameEquals("Zenimage"))
+				{
+					return [];
+				}
+
+				break;
+		}
+
+		return null;
+	}
+
 	private void ParseDescription(SiteParser parser, List<string> parameters, string description)
 	{
 		if (description.Length > 0 && description[^1] != '\n')
@@ -412,11 +401,11 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	private bool ParseSummary(SiteParser parser, Section summary)
 	{
 		string? text = null;
-		var infoOffset = summary.Content.FindIndex<SiteTemplateNode>(n => n.Title.PageNameEquals("Information"));
+		var infoOffset = summary.Content.FindIndex<ITemplateNode>(n => n.GetTitle(this.Site).PageNameEquals("Information"));
 		if (infoOffset != -1)
 		{
-			var info = (SiteTemplateNode)summary.Content[infoOffset];
-			text = GetInfoText(info);
+			var info = (ITemplateNode)summary.Content[infoOffset];
+			text = this.GetInfoText(info);
 		}
 
 		text ??= summary.Content.ToRaw();
@@ -441,7 +430,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	private void UpdateText(Page page, string text)
 	{
 		SiteParser parser = new(page, text);
-		if (parser.FindSiteTemplate("Online File") is not null)
+		if (parser.FindTemplate("Online File") is not null)
 		{
 			return;
 		}
@@ -451,7 +440,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		if (this.ParseSummary(parser, summary))
 		{
 			parser.FromSections(sections);
-			parser.Replace(NodeReplacer, false);
+			parser.Replace(this.NodeReplacer, false);
 			parser.UpdatePage();
 			page.Text = Regex.Replace(page.Text, "\n{3,}", "\n\n", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			page.Text = page.Text.Replace("]]\n\n[[", "]]\n[[", StringComparison.Ordinal);

@@ -10,7 +10,6 @@ using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
-using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
 internal sealed class SFFixedLocations : EditJob
@@ -32,7 +31,7 @@ internal sealed class SFFixedLocations : EditJob
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		this.footerTemplates = new TitleCollection(this.Site)
 		{
-			new Title(this.Site[MediaWikiNamespaces.Template], "Stub")
+			TitleFactory.FromTemplate(this.Site, "Stub")
 		};
 
 		var sfSite = (UespSite)jobManager.Site;
@@ -119,8 +118,8 @@ internal sealed class SFFixedLocations : EditJob
 		var lastContent = sections[0].Content;
 		for (var nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)
 		{
-			if (lastContent[nodeIndex] is SiteTemplateNode template &&
-				this.footerTemplates.Contains(template.Title))
+			if (lastContent[nodeIndex] is ITemplateNode template &&
+				this.footerTemplates.Contains(template.GetTitle(this.Site)))
 			{
 				var footerSection = new Section(null, new WikiNodeCollection(lastContent.Factory));
 				footerSection.Content.AddRange(lastContent[nodeIndex..]);

@@ -636,7 +636,7 @@ public abstract class MovePagesJob : EditJob
 				this.UpdateLinkNode(page, link, this.isRedirectLink);
 				this.isRedirectLink = false;
 				break;
-			case SiteTemplateNode template:
+			case ITemplateNode template:
 				this.UpdateTemplateNode(page, template);
 				break;
 		}
@@ -783,12 +783,12 @@ public abstract class MovePagesJob : EditJob
 		}
 	}
 
-	protected virtual void UpdateTemplateNode(Page page, SiteTemplateNode template)
+	protected virtual void UpdateTemplateNode(Page page, ITemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(template);
-		var fullTitle = new FullTitle(template.Title);
-		if (this.linkUpdates.TryGetValue(fullTitle.Title, out var to))
+		var title = TitleFactory.FromBacklinkNode(this.Site, template).Title;
+		if (this.linkUpdates.TryGetValue(title, out var to))
 		{
 			var nameText = to.Namespace == MediaWikiNamespaces.Template
 				? to.PageName

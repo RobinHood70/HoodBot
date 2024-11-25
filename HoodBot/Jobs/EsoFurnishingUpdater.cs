@@ -126,7 +126,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 
 	protected override string GetEditSummary(Page page) => "Update info from ESO database";
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		ArgumentNullException.ThrowIfNull(parser);
 		if (this.GenericTemplateFixes(template))
@@ -139,7 +139,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 	#endregion
 
 	#region Private Static Methods
-	private static void CheckBehavior(SiteTemplateNode template, Furnishing furnishing)
+	private static void CheckBehavior(ITemplateNode template, Furnishing furnishing)
 	{
 		if (furnishing.Behavior is not null && furnishing.Behavior.Length > 0)
 		{
@@ -155,7 +155,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private static void CheckIcon(SiteTemplateNode template, string labelName)
+	private static void CheckIcon(ITemplateNode template, string labelName)
 	{
 		var fileName = labelName.Replace(':', ',');
 		if (template.GetValue("icon").OrdinalEquals($"ON-icon-furnishing-{fileName}.png"))
@@ -164,7 +164,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private static string CheckName(SiteTemplateNode template, string labelName)
+	private static string CheckName(ITemplateNode template, string labelName)
 	{
 		if (template.GetValue("name") is string nameValue)
 		{
@@ -179,7 +179,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		return labelName;
 	}
 
-	private static void FixBehavior(SiteTemplateNode template)
+	private static void FixBehavior(ITemplateNode template)
 	{
 		if (template.Find("behavior") is IParameterNode behavior)
 		{
@@ -203,9 +203,9 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 	#endregion
 
 	#region Private Methods
-	private void CheckImage(SiteTemplateNode template, string name, string link)
+	private void CheckImage(ITemplateNode template, string name, string link)
 	{
-		var fileSpace = template.Title.Site[MediaWikiNamespaces.File];
+		var fileSpace = this.Site[MediaWikiNamespaces.File];
 		var imageName = Furnishing.ImageName(name);
 		if (template.GetValue("image") is string imageValue)
 		{
@@ -270,7 +270,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private Furnishing? FindFurnishing(SiteTemplateNode template, Page page, string labelName)
+	private Furnishing? FindFurnishing(ITemplateNode template, Page page, string labelName)
 	{
 		Furnishing? retval = null;
 		if (long.TryParse(template.GetValue("id"), NumberStyles.None, page.Site.Culture, out var id))
@@ -302,7 +302,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		return retval;
 	}
 
-	private void FixBundles(SiteTemplateNode template)
+	private void FixBundles(ITemplateNode template)
 	{
 		if (template.Find("bundles") is IParameterNode bundles)
 		{
@@ -323,7 +323,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private void FixList(SiteTemplateNode template, string parameterName)
+	private void FixList(ITemplateNode template, string parameterName)
 	{
 		var plural = parameterName + "s";
 		if (template.Find(plural, parameterName) is IParameterNode param)
@@ -370,7 +370,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private void FurnishingFixes(SiteTemplateNode template, Page? page)
+	private void FurnishingFixes(ITemplateNode template, Page? page)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		var labelName = page.Title.LabelName();
@@ -487,7 +487,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		}
 	}
 
-	private bool GenericTemplateFixes(SiteTemplateNode template)
+	private bool GenericTemplateFixes(ITemplateNode template)
 	{
 		template.Remove("animated");
 		template.Remove("audible");

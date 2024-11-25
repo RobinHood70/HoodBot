@@ -11,11 +11,16 @@ using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
+using RobinHood70.WikiCommon.Parser;
 
 // CONSIDER: Should redirects from EDID pages be to EDID targets with Anchor including both Name and EDID?
 [method: JobInfo("Effects", "Starfield")]
 internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJob<SFEffects.Effect>(jobManager)
 {
+	#region Fields
+	private readonly Title effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
+	#endregion
+
 	#region Protected Override Properties
 	protected override string? Disambiguator => "effect";
 	#endregion
@@ -25,14 +30,14 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 
 	protected override bool IsValid(SiteParser parser, Effect item) =>
 		parser.Page.IsRedirect &&
-		parser.LinkNodes.First() is SiteLinkNode linkNode &&
-		linkNode.Title == "Starfield:Effects";
+		parser.LinkNodes.First() is ILinkNode linkNode &&
+		linkNode.GetTitle(parser.Site) == this.effectsTitle;
 
 	protected override IDictionary<Title, Effect> LoadItems()
 	{
 		this.NewPageText = this.GetNewPageText;
 		var effects = new Effects();
-		var effectsPage = this.Site.LoadPage("Starfield:Effects") ?? throw new InvalidOperationException();
+		var effectsPage = this.Site.LoadPage(this.effectsTitle) ?? throw new InvalidOperationException();
 		var rows = EffectsRowFinder().Matches(effectsPage.Text);
 		LoadExistingEffects(effects, rows);
 		var newEfects = LoadNewEffects(effects);

@@ -71,71 +71,6 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	#region Public Methods
 
-	/// <summary>Adds a blank line to the end of the Nodes collection.</summary>
-	public void AppendLine() => this.AddText("\n");
-
-	/// <summary>Adds a full line of text to the end of the Nodes collection.</summary>
-	/// <param name="text">The text.</param>
-	/// <seealso cref="AddText(string)"/>
-	public void AppendLine(string text) => this.AddText(text + '\n');
-
-	/// <summary>Replaces all current content with the content of the sections provided.</summary>
-	/// <param name="sections">The new sections for the page.</param>
-	public void FromSections(IEnumerable<Section> sections)
-	{
-		ArgumentNullException.ThrowIfNull(sections);
-		this.Clear();
-		foreach (var section in sections)
-		{
-			if (section.Header is IHeaderNode header)
-			{
-				this.Add(header);
-			}
-
-			this.AddRange(section.Content);
-		}
-	}
-
-	/// <summary>Finds the first header with the specified text.</summary>
-	/// <param name="headerText">Name of the header.</param>
-	/// <returns>The first header with the specified text.</returns>
-	/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-	public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
-
-	/// <summary>Splits a page into its individual sections. </summary>
-	/// <returns>An enumeration of the sections of the page.</returns>
-	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
-	public SectionCollection ToSections() => this.ToSections(6);
-
-	/// <summary>Splits a page into its individual sections. </summary>
-	/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
-	/// <returns>An enumeration of the sections of the page.</returns>
-	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
-	public SectionCollection ToSections(int level)
-	{
-		var sections = new SectionCollection(this.Factory, level);
-		var section = new Section(null, new WikiNodeCollection(this.Factory));
-		foreach (var node in this)
-		{
-			if (node is IHeaderNode header && header.Level <= level)
-			{
-				if (section.Header != null || section.Content.Count > 0)
-				{
-					sections.Add(section);
-				}
-
-				section = new Section(header, new WikiNodeCollection(this.Factory));
-			}
-			else
-			{
-				section.Content.Add(node);
-			}
-		}
-
-		sections.Add(section);
-		return sections;
-	}
-
 	/// <summary>Accepts a visitor to process the node.</summary>
 	/// <param name="visitor">The visiting class.</param>
 	public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
@@ -161,7 +96,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
 	/// <param name="text">The text to be added.</param>
-	public void AddParsed([Localizable(false)] string text)
+	public void AppendParsed([Localizable(false)] string text)
 	{
 		var newNodes = this.Factory.Parse(text);
 		this.AddRange(newNodes);
@@ -325,6 +260,45 @@ public class WikiNodeCollection : List<IWikiNode>
 	public int FindLastIndex<T>(int startIndex)
 		where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindLastIndex(startIndex, item => item is T);
 
+	/// <summary>Finds a single link node, non-recursively, that satisfies the condition.</summary>
+	/// <param name="condition">The condition the link node must satisfy.</param>
+	/// <returns>The first link node that satisfies the condition.</returns>
+	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
+	public ILinkNode? FindLink(Predicate<ILinkNode> condition) => this.Find(condition);
+
+	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+	/// <param name="condition">The condition to match.</param>
+	/// <value>The header nodes.</value>
+	public IEnumerable<ILinkNode> FindLinks(Predicate<ILinkNode> condition) => this.FindAll<ILinkNode>(condition);
+
+	/// <summary>Finds a single link node, non-recursively, that satisfies the condition.</summary>
+	/// <param name="condition">The condition the link node must satisfy.</param>
+	/// <returns>The first link node that satisfies the condition.</returns>
+	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
+	public ITemplateNode? FindTemplate(Predicate<ITemplateNode> condition) => this.Find(condition);
+
+	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+	/// <param name="condition">The condition to match.</param>
+	/// <value>The header nodes.</value>
+	public IEnumerable<ITemplateNode> FindTemplates(Predicate<ITemplateNode> condition) => this.FindAll<ITemplateNode>(condition);
+
+	/// <summary>Replaces all current content with the content of the sections provided.</summary>
+	/// <param name="sections">The new sections for the page.</param>
+	public void FromSections(IEnumerable<Section> sections)
+	{
+		ArgumentNullException.ThrowIfNull(sections);
+		this.Clear();
+		foreach (var section in sections)
+		{
+			if (section.Header is IHeaderNode header)
+			{
+				this.Add(header);
+			}
+
+			this.AddRange(section.Content);
+		}
+	}
+
 	/// <summary>Determines if the collection has any nodes of the specified type.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
 	/// <returns><see langword="true"/> if any nodes of the specified type were found; otherwise, <see langword="false"/>.</returns>
@@ -337,6 +311,46 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <returns><see langword="true"/> if any nodes of the specified type were found that satisfied the specified condition; otherwise, <see langword="false"/>.</returns>
 	public bool Has<T>(Predicate<T>? condition)
 		where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
+
+	/// <summary>Finds the first header with the specified text.</summary>
+	/// <param name="headerText">Name of the header.</param>
+	/// <returns>The first header with the specified text.</returns>
+	/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+	public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
+
+	/// <summary>Splits a page into its individual sections. </summary>
+	/// <returns>An enumeration of the sections of the page.</returns>
+	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
+	public SectionCollection ToSections() => this.ToSections(6);
+
+	/// <summary>Splits a page into its individual sections. </summary>
+	/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
+	/// <returns>An enumeration of the sections of the page.</returns>
+	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
+	public SectionCollection ToSections(int level)
+	{
+		var sections = new SectionCollection(this.Factory, level);
+		var section = new Section(null, new WikiNodeCollection(this.Factory));
+		foreach (var node in this)
+		{
+			if (node is IHeaderNode header && header.Level <= level)
+			{
+				if (section.Header != null || section.Content.Count > 0)
+				{
+					sections.Add(section);
+				}
+
+				section = new Section(header, new WikiNodeCollection(this.Factory));
+			}
+			else
+			{
+				section.Content.Add(node);
+			}
+		}
+
+		sections.Add(section);
+		return sections;
+	}
 
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>

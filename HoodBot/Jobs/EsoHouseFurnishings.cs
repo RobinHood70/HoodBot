@@ -49,7 +49,7 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 		var sections = parser.ToSections();
 		foreach (var section in FindFurnishings(sections))
 		{
-			if (section.Content.Find<SiteTemplateNode>(template => template.Title.PageNameEquals("ESO House Furnishings")) is not null)
+			if (section.Content.FindTemplate(template => template.GetTitle(parser.Site).PageNameEquals("ESO House Furnishings")) is not null)
 			{
 				this.WriteLine($"* [[{parser.Page.Title.FullPageName()}]] has already been converted.");
 				continue;
@@ -167,7 +167,7 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 					return null;
 				case ":*":
 				case ";*":
-					if (parsedLine[1] is SiteTemplateNode furnishing && furnishing.Title.PageNameEquals("Furnishing Link"))
+					if (parsedLine[1] is ITemplateNode furnishing && furnishing.GetTitle(this.Site) == "Template:Furnishing Link")
 					{
 						var link = furnishing.GetRaw(1);
 						var (_, count) = SplitLine(line);

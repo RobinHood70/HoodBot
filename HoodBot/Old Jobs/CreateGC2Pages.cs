@@ -237,8 +237,8 @@
 		private static void UpdatePage(SiteParser parser, Field field)
 		{
 			var nodes = parser;
-			var start = nodes.FindIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/Start", StringComparison.Ordinal)) + 1;
-			var end = parser.FindLastIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/End", StringComparison.Ordinal));
+			var start = nodes.FindIndex<ITemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/Start", StringComparison.Ordinal)) + 1;
+			var end = parser.FindLastIndex<ITemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/End", StringComparison.Ordinal));
 			if (start == 0 || end == -1)
 			{
 				return;

@@ -58,15 +58,15 @@
 
 		protected abstract Page GetPageForItem(KeyValuePair<TKey, TItem> item);
 
-		protected abstract SiteTemplateNode GetTemplateFromParser(SiteParser parser);
+		protected abstract ITemplateNode GetTemplateFromParser(SiteParser parser);
 
 		protected abstract TItem NewItem(IDataRecord record);
 
 		protected abstract Page NewPage(Title pageName);
 
-		protected abstract void ParseTemplate(SiteTemplateNode template, SiteParser parser);
+		protected abstract void ParseTemplate(ITemplateNode template, SiteParser parser);
 
-		protected abstract void UpdateTemplateFromItem(SiteTemplateNode template, KeyValuePair<TKey, TItem> item);
+		protected abstract void UpdateTemplateFromItem(ITemplateNode template, KeyValuePair<TKey, TItem> item);
 		#endregion
 	}
 }

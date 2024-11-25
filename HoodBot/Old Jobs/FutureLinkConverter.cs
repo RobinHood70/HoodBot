@@ -76,7 +76,7 @@
 		private WikiNodeCollection? ReplaceNode(IWikiNode node, SiteParser parser)
 		{
 			WikiNodeCollection? retval = null;
-			if (node is SiteTemplateNode template &&
+			if (node is ITemplateNode template &&
 				template.TitleValue.PageNameEquals("Future Link"))
 			{
 				var nsBaseValue = template.Find("ns_base", "ns_id")?.Value.ToValue().Trim();

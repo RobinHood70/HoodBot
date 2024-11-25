@@ -157,7 +157,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 
 	private TitleFactory(Namespace ns, string pageName)
 	{
-		// Shortcut constructor for times when a pre-validated, local page is provided. Capitalization is also handled for semi-validated cases, such as modifications to an existing pagename or other known-good cases.
+		// Shortcut constructor for times when a local page is known to be in the provided namespace. Capitalization is handled for semi-validated cases, such as modifications to an existing pagename or other known-good cases.
 		this.Namespace = ns;
 		this.originalParts.Add(TitlePartType.Namespace, ns.CanonicalName);
 		var split = pageName.Split(TextArrays.Octothorpe, 2);
@@ -265,11 +265,21 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 		return FromUnvalidated(site[MediaWikiNamespaces.Main], node.GetTitleText());
 	}
 
+	/// <summary>Shortcut method to create a <see cref="Title"/> from a template name.</summary>
+	/// <param name="site">The site the template is from.</param>
+	/// <param name="templateName">The template name.</param>
+	/// <returns>A <see cref="Title"/> that defaults to being in Template namespace unless <paramref name="templateName"/> dictates otherwise.</returns>
+	public static Title FromTemplate(Site site, string templateName)
+	{
+		ArgumentNullException.ThrowIfNull(site);
+		return FromUnvalidated(site[MediaWikiNamespaces.Template], templateName);
+	}
+
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 	/// <param name="site">The namespace the page is in.</param>
-	/// <param name="pageName">Name of the page.</param>
-	public static TitleFactory FromUnvalidated(Site site, string pageName) =>
-		FromUnvalidated(site, MediaWikiNamespaces.Main, pageName);
+	/// <param name="fullPageName">Name of the page.</param>
+	public static TitleFactory FromUnvalidated(Site site, string fullPageName) =>
+		FromUnvalidated(site, MediaWikiNamespaces.Main, fullPageName);
 
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 	/// <param name="site">The namespace the page is in.</param>
@@ -294,10 +304,10 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 		return new TitleFactory(defaultNamespace.Site, defaultNamespace.Id, pageName);
 	}
 
-	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class from a known namespace and page name.</summary>
 	/// <param name="ns">The namespace the page is in.</param>
 	/// <param name="pageName">Name of the page.</param>
-	/// <remarks>This method bypasses some of the checks the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., is ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
+	/// <remarks>This method bypasses much of the parsing that the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., if ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
 	public static TitleFactory FromValidated(Namespace ns, string pageName)
 	{
 		ArgumentNullException.ThrowIfNull(ns);
@@ -308,12 +318,12 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 	/// <param name="site">The site the page is on.</param>
 	/// <param name="fullPageName">The full name of the page.</param>
-	/// <remarks>This method bypasses some of the checks the unvalidated method uses. The page name will always be in the namespace provided, even if it looks like it should be elsewhere (e.g., is ns is "Template" and pageName is "File:BadIdea", the title will be "Template:File:BadIdea".</remarks>
+	/// <remarks>This method bypasses much of the parsing that the unvalidated method uses and assumes that fullPageName represents only a local namespace and page name with no interwiki or anchor components.</remarks>
 	public static TitleFactory FromValidated(Site site, string fullPageName)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(fullPageName);
-		return new(site, fullPageName);
+		return new TitleFactory(site, fullPageName);
 	}
 
 	/// <summary>Removes invalid characters from a page name and replaces quote-like characters with straight quotes.</summary>

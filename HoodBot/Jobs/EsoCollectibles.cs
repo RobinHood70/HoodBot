@@ -87,7 +87,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 			collectible.Crates.AddRange(crateInfo);
 		}
 
-		if (parser.FindSiteTemplate(TemplateName) is SiteTemplateNode template)
+		if (parser.FindTemplate(TemplateName) is ITemplateNode template)
 		{
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
@@ -188,7 +188,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
 		{
 			var extract = new SiteParser(page);
-			var pre = extract.FindSiteTemplate("Pre");
+			var pre = extract.FindTemplate("Pre");
 			if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
 				nodes.Count > 0 &&
 				nodes[0] is ITagNode tag &&
@@ -253,13 +253,14 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	{
 		SiteParser parser = new(crate);
 		//// var tier = string.Empty;
+		var cardListTemplate = TitleFactory.FromTemplate(this.Site, "ESO Crate Card List");
 		foreach (var node in parser)
 		{
 			if (node is IHeaderNode)
 			{
 				//// tier = GetSectionTitle(header);
 			}
-			else if (node is SiteTemplateNode template && template.Title.PageNameEquals("ESO Crate Card List"))
+			else if (node is ITemplateNode template && template.GetTitle(this.Site) == cardListTemplate)
 			{
 				foreach (var parameter in template.ParameterCluster(2))
 				{

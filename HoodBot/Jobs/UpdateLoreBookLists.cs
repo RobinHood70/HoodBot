@@ -34,7 +34,7 @@ public class UpdateLoreBookLists(JobManager jobManager) : EditJob(jobManager)
 		foreach (var page in loreBookPages)
 		{
 			SiteParser parser = new(page);
-			foreach (var template in parser.FindSiteTemplates(TemplateName))
+			foreach (var template in parser.FindTemplates(TemplateName))
 			{
 				if (template.GetValue(2) is string value)
 				{
@@ -55,40 +55,39 @@ public class UpdateLoreBookLists(JobManager jobManager) : EditJob(jobManager)
 
 	protected override void PageLoaded(Page page)
 	{
-		SiteParser parser = new(page);
+		var parser = new SiteParser(page);
 		var factory = parser.Factory;
-		var first = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(TemplateName));
-		var last = parser.FindLastIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(TemplateName));
-		if (first != -1)
-		{
-			List<IWikiNode> newNodes = [];
-			parser.RemoveRange(first, last + 1 - first);
-			var letter = page.Title.PageName[6..];
-			var entries = this.pageBooks[letter];
-			foreach (var entry in entries)
-			{
-				var template = factory.TemplateNodeFromParts(TemplateName, (null, entry));
-				if (this.titleOverrides.TryGetValue(entry, out var linkTitle))
-				{
-					template.Add(linkTitle);
-				}
-
-				newNodes.Add(template);
-				newNodes.Add(factory.TextNode("\n"));
-			}
-
-			if (newNodes.Count > 0)
-			{
-				newNodes.RemoveAt(newNodes.Count - 1);
-			}
-
-			parser.InsertRange(first, newNodes);
-			parser.UpdatePage();
-		}
-		else
+		var templateTitle = TitleFactory.FromTemplate(this.Site, TemplateName);
+		var first = parser.FindIndex<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
+		var last = parser.FindLastIndex<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
+		if (first == -1)
 		{
 			throw new InvalidOperationException();
 		}
+
+		var newNodes = new WikiNodeCollection(parser.Factory);
+		parser.RemoveRange(first, last + 1 - first);
+		var letter = page.Title.PageName[6..];
+		var entries = this.pageBooks[letter];
+		foreach (var entry in entries)
+		{
+			var template = factory.TemplateNodeFromParts(TemplateName, (null, entry));
+			if (this.titleOverrides.TryGetValue(entry, out var linkTitle))
+			{
+				template.Add(linkTitle);
+			}
+
+			newNodes.Add(template);
+			newNodes.AddText("\n");
+		}
+
+		if (newNodes.Count > 0)
+		{
+			newNodes.RemoveAt(newNodes.Count - 1);
+		}
+
+		parser.InsertRange(first, newNodes);
+		parser.UpdatePage();
 	}
 	#endregion
 

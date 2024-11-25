@@ -21,7 +21,7 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Use orbital_position instead of order";
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		var op = template.Find("orbital_position");
 		if (op is not null && op.GetRaw().Length > 0)

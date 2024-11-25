@@ -37,7 +37,7 @@ internal static class EsoSpace
 	public static ITemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
 	{
 		ArgumentNullException.ThrowIfNull(parser);
-		if (parser.FindSiteTemplate("Online File") is not ITemplateNode template)
+		if (parser.FindTemplate("Online File") is not ITemplateNode template)
 		{
 			template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
 			parser.Insert(0, template);
@@ -66,13 +66,13 @@ internal static class EsoSpace
 		return template;
 	}
 
-	public static void AddToOnlineFile(SiteTemplateNode template, string linkType, string linkValue) =>
+	public static void AddToOnlineFile(ITemplateNode template, string linkType, string linkValue) =>
 		AddToOnlineFile(template, (linkType, linkValue));
 
-	public static void AddToOnlineFile(SiteTemplateNode template, params (string Type, string Value)[] links) =>
+	public static void AddToOnlineFile(ITemplateNode template, params (string Type, string Value)[] links) =>
 		AddToOnlineFile(template, (IList<(string Type, string Value)>)links);
 
-	public static void AddToOnlineFile(SiteTemplateNode template, IList<(string Type, string Value)> links)
+	public static void AddToOnlineFile(ITemplateNode template, IList<(string Type, string Value)> links)
 	{
 		// CONSIDER: This is kludgy - it clears and reinserts the entire parameter list every time to ensure correct format and sorting. Might want to rewrite as separate routines that get the SortedSet (or even revert to a list), clear the anonymous parameters, and update from list. That way, caller can optimize flow as needed.
 		ArgumentNullException.ThrowIfNull(template);
@@ -238,9 +238,9 @@ internal static class EsoSpace
 		var paramName = pageType;
 		var patchPage = GetPatchPage(job);
 		var parser = new SiteParser(patchPage);
-		if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
+		if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 		{
-			param.SetValue(version.Text, ParameterFormat.NoChange);
+			param.SetValue(version.Text, ParameterFormat.Verbatim);
 			parser.UpdatePage();
 			patchPage.Save("Update " + paramName, true);
 		}

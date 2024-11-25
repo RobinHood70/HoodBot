@@ -104,7 +104,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 	protected override string GetEditSummary(Page page) => "Update rulings";
 
-	protected override bool IsValid(SiteParser parser, Ruling item) => parser.FindSiteTemplate(RulingTemplate) is not null;
+	protected override bool IsValid(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
 
 	protected override IDictionary<Title, Ruling> LoadItems()
 	{
@@ -342,7 +342,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 			ParseBeforeStringCompare = this.RemoveCruftBeforeCompare
 		};
 
-		var template = parser.FindSiteTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
+		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
 
 		template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
 
@@ -354,7 +354,8 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
 		var choiceDictionary = new Dictionary<int, ITemplateNode>();
-		foreach (var choiceTemplate in choiceParam.Value.FindAll<SiteTemplateNode>(t => t.Title.PageNameEquals("Castles Ruling/Choice")))
+		var searchTemplate = TitleFactory.FromTemplate(this.Site, "Castles Ruling/Choice");
+		foreach (var choiceTemplate in choiceParam.Value.FindAll<ITemplateNode>(t => t.GetTitle(this.Site) == searchTemplate))
 		{
 			if (choiceTemplate.GetValue("id") is string choiceId)
 			{

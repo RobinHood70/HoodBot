@@ -17,7 +17,7 @@ public class LabelNameRemover(JobManager jobManager) : TemplateJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Remove redundant imgdesc";
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		if (template.Find("titlename") != null)
 		{

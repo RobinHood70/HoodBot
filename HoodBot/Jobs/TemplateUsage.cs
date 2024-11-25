@@ -1,10 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using RobinHood70.CommonCode;
-
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -73,7 +71,7 @@ internal class TemplateUsage : WikiJob
 	#region Protected Virtual Methods
 	protected virtual bool ShouldAddPage(SiteParser parser) => true;
 
-	protected virtual bool ShouldAddTemplate(SiteTemplateNode template, SiteParser parser) => true;
+	protected virtual bool ShouldAddTemplate(ITemplateNode template, SiteParser parser) => true;
 	#endregion
 
 	#region Private Static Methods
@@ -94,20 +92,20 @@ internal class TemplateUsage : WikiJob
 	#endregion
 
 	#region Private Methods
-	private void AddPage(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, SiteParser parser)
+	private void AddPage(List<PageTemplate> templates, Dictionary<string, string> paramTranslator, SiteParser parser)
 	{
-		foreach (var template in parser.FindAll<SiteTemplateNode>())
+		foreach (var template in parser.FindAll<ITemplateNode>())
 		{
-			if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.Title))
+			if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.GetTitle(this.Site)))
 			{
 				this.AddTemplate(templates, paramTranslator, parser, template);
 			}
 		}
 	}
 
-	private void AddTemplate(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, SiteParser parser, SiteTemplateNode template)
+	private void AddTemplate(List<PageTemplate> templates, Dictionary<string, string> paramTranslator, SiteParser parser, ITemplateNode template)
 	{
-		templates.Add((parser.Page.Title, template));
+		templates.Add(new PageTemplate(parser.Title, template));
 		foreach (var (name, _) in template.GetResolvedParameters())
 		{
 			if (paramTranslator.TryAdd(name, name))
@@ -138,9 +136,9 @@ internal class TemplateUsage : WikiJob
 		}
 	}
 
-	private List<(Title Page, ITemplateNode Template)> ExtractTemplates(PageCollection pages)
+	private List<PageTemplate> ExtractTemplates(PageCollection pages)
 	{
-		List<(Title Page, ITemplateNode Template)> templates = [];
+		var templates = new List<PageTemplate>();
 		Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 		foreach (var page in pages)
 		{
@@ -154,7 +152,7 @@ internal class TemplateUsage : WikiJob
 		return templates;
 	}
 
-	private void WriteFile(List<(Title Page, ITemplateNode Template)> results, string location)
+	private void WriteFile(List<PageTemplate> results, string location)
 	{
 		var csvFile = new CsvFile(location)
 		{
@@ -176,4 +174,9 @@ internal class TemplateUsage : WikiJob
 		csvFile.Save();
 	}
 	#endregion
+
+	#region Private Classes
+	private sealed record class PageTemplate(Title Page, ITemplateNode Template);
+	#endregion
+
 }

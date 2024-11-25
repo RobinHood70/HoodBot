@@ -1,10 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
-
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
-
 using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
@@ -305,8 +303,8 @@ internal sealed class UespProtectPages : EditJob
 	private static void AddFooter(SiteParser parser, PageProtection protection)
 	{
 		var footer = protection.Footer;
-		var footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
-		if (parser.FindSiteTemplate(footerTemplate.Title.PageName) is SiteTemplateNode existing)
+		var footerTemplate = (ITemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
+		if (parser.FindTemplate(footerTemplate.GetTitle(parser.Site)) is ITemplateNode existing)
 		{
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddRange(footerTemplate.TitleNodes);
@@ -329,11 +327,12 @@ internal sealed class UespProtectPages : EditJob
 			header = header.Replace("<date>", replaceDate, StringComparison.Ordinal);
 		}
 
-		var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
-		var index = nodes.FindIndex<SiteTemplateNode>(node => node.Title == headerTemplate.Title);
+		var headerTemplate = nodes.Factory.TemplateNodeFromWikiText(header);
+		var headerTitle = headerTemplate.GetTitle(parser.Site);
+		var index = nodes.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == headerTitle);
 		if (index != -1)
 		{
-			var existing = (SiteTemplateNode)nodes[index];
+			var existing = (ITemplateNode)nodes[index];
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddRange(headerTemplate.TitleNodes);
 			nodes.RemoveAt(index);
@@ -373,33 +372,23 @@ internal sealed class UespProtectPages : EditJob
 
 	private static int AddJavascriptProtection(SiteParser parser, PageProtection protection, int insertPos)
 	{
-		ITemplateNode protectionTemplate;
-		var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(ProtectionTemplateName));
+		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
+		var currentPos = parser.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
-			if (currentPos > 0 && parser[currentPos - 1] is ITextNode textNode && textNode.Text.Equals("// ", StringComparison.Ordinal))
-			{
-				protectionTemplate = (ITemplateNode)parser[currentPos];
-				protectionTemplate.TitleNodes.Clear();
-				protectionTemplate.TitleNodes.AddText(ProtectionTemplateName);
-				protectionTemplate.Remove("edit");
-				protectionTemplate.Remove("move");
-				protectionTemplate.Remove("2");
-				protectionTemplate.Remove("1");
-
-				// Remove existing template and parameter values, then put them where we want them.
-				parser.RemoveRange(0, 2);
-			}
-			else
-			{
-				throw new InvalidOperationException("Javascript protection is malformed. Please fix by hand.");
-			}
+			parser.RemoveAt(currentPos);
 		}
-		else
+
+		if (parser.Count > 0 && parser[insertPos] is ITextNode text && text.Text.StartsWith("//", StringComparison.Ordinal))
 		{
-			protectionTemplate = parser.Factory.TemplateNodeFromParts(ProtectionTemplateName);
+			text.Text = text.Text[2..].TrimStart();
+			if (text.Text.Length == 0)
+			{
+				parser.RemoveAt(insertPos);
+			}
 		}
 
+		var protectionTemplate = parser.Factory.TemplateNodeFromParts(ProtectionTemplateName);
 		protectionTemplate.Add(ProtectionString[protection.EditProtection].ToLowerInvariant());
 		if (protection.MoveProtection != protection.EditProtection)
 		{
@@ -413,7 +402,7 @@ internal sealed class UespProtectPages : EditJob
 		};
 		parser.InsertRange(insertPos, newNodes);
 
-		return insertPos + 2;
+		return 2;
 	}
 
 	private static int AddStandardProtection(SiteParser parser, PageProtection protection, int insertPos)
@@ -473,10 +462,11 @@ internal sealed class UespProtectPages : EditJob
 
 	private static int RemoveProtectionTemplate(SiteParser parser, int insertPos)
 	{
-		var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.Title.PageNameEquals(ProtectionTemplateName));
+		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
+		var currentPos = parser.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
-			var existing = (SiteTemplateNode)parser[currentPos];
+			var existing = (ITemplateNode)parser[currentPos];
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddText(ProtectionTemplateName);
 			existing.Remove("edit");

@@ -6,7 +6,6 @@ using System.Data;
 using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
 internal sealed class PassiveSkill : Skill
@@ -81,12 +80,13 @@ internal sealed class PassiveSkill : Skill
 	#endregion
 
 	#region Protected Override Methods
-	protected override void UpdateTemplate(SiteTemplateNode template)
+	protected override void UpdateTemplate(Site site, ITemplateNode template)
 	{
+		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(template);
 		template.Update("type", "Passive", ParameterFormat.OnePerLine, true);
 		template.Update("id", this.ranks[^1].Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
-		TitleCollection usedList = new(template.Title.Site);
+		TitleCollection usedList = new(site);
 		foreach (var rank in this.ranks)
 		{
 			var rankText = rank.RankNum.ToStringInvariant();

@@ -29,7 +29,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLoadPages()
 		{
-			var factory = new SiteNodeFactory(this.Site);
+			var factory = new WikiNodeFactory();
 			var entryPages = PageCollection.Unlimited(this.Site);
 			entryPages.GetNamespace(MediaWikiNamespaces.User, Filter.Exclude, "HoodBot/Legends Images");
 			foreach (var entry in entryPages)
@@ -39,7 +39,7 @@
 					var nodes = factory.Parse(section);
 					var collection = new WikiNodeCollection(factory, nodes);
 					Title? first = null;
-					foreach (var linkNode in collection.FindAll<SiteLinkNode>(null, false, false, 0))
+					foreach (var linkNode in collection.FindAll<ILinkNode>(null, false, false, 0))
 					{
 						var title = linkNode.Title;
 						this.allTitles.Add(title);
@@ -74,7 +74,7 @@
 		private static void AddSimilarImages(Page page, Title title)
 		{
 			var parser = new SiteParser(page);
-			if (parser.FindSiteTemplate("Similar Images") is null)
+			if (parser.FindTemplate("Similar Images") is null)
 			{
 				var sections = parser.ToSections();
 				var insertSection = sections.IndexOf("Summary") + 1;

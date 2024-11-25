@@ -54,7 +54,7 @@ internal sealed class WrongRace(JobManager jobManager) : WikiJob(jobManager, Job
 			foreach (var npcPage in nameBackLinkPages)
 			{
 				var parser = new SiteParser(npcPage);
-				foreach (var template in parser.FindSiteTemplates(templates))
+				foreach (var template in parser.FindTemplates(templates))
 				{
 					var race = template.GetValue("race");
 					var altRace = RaceAlternates.TryGetValue(wantedRace, out var race2) ? race2 : string.Empty;

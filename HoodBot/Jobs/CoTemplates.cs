@@ -3,7 +3,6 @@
 using System.Diagnostics;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.WikiCommon;
 
 internal sealed class CoTemplates : WikiJob
 {
@@ -12,8 +11,8 @@ internal sealed class CoTemplates : WikiJob
 	public CoTemplates(JobManager jobManager, string template1, string template2)
 		: base(jobManager, JobType.ReadOnly)
 	{
-		this.Title1 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template1);
-		this.Title2 = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], template2);
+		this.Title1 = TitleFactory.FromTemplate(this.Site, template1);
+		this.Title2 = TitleFactory.FromTemplate(this.Site, template2);
 	}
 	#endregion
 

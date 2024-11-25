@@ -97,7 +97,7 @@
 					if (headerNode.Level == 3 &&
 						!IgnoredHeaders.Contains(headerNode.GetTitle(true), StringComparer.OrdinalIgnoreCase))
 					{
-						foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
+						foreach (var link in headerNode.Title.FindAll<ILinkNode>())
 						{
 							titles.Add(link.TitleValue);
 						}

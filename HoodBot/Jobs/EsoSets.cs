@@ -162,22 +162,23 @@ internal sealed class EsoSets : EditJob
 		}
 
 		sb.Remove(sb.Length - 5, 4);
-		SiteParser parser = new(page, sb.ToString());
-		UespReplacer.ReplaceGlobal(parser);
-		UespReplacer.ReplaceEsoLinks(parser);
-		UespReplacer.ReplaceFirstLink(parser, usedList);
+
+		var newPage = new SiteParser(page, sb.ToString());
+		var replacer = new UespReplacer(this.Site, oldPage, newPage);
+		UespReplacer.ReplaceGlobal(newPage);
+		UespReplacer.ReplaceEsoLinks(this.Site, newPage);
+		UespReplacer.ReplaceFirstLink(newPage, usedList);
 
 		// Now that we're done parsing, re-add the IgnoreNodes.
-		parser.Insert(0, firstNode);
-		parser.Add(lastNode);
-		var replacer = new UespReplacer(this.Site, oldPage, parser);
-		foreach (var warning in replacer.Compare(parser.Title.FullPageName()))
+		newPage.Insert(0, firstNode);
+		newPage.Add(lastNode);
+		foreach (var warning in replacer.Compare(newPage.Title.FullPageName()))
 		{
 			this.Warn(warning);
 		}
 
 		setData.IsNonTrivial = replacer.IsNonTrivialChange();
-		parser.UpdatePage();
+		newPage.UpdatePage();
 	}
 	#endregion
 

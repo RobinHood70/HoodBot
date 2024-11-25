@@ -114,7 +114,7 @@ public abstract class LinkFinderJob : ParsedPageJob
 				section.Add(parser.Page.Title, links);
 			}
 
-			foreach (var link in parser.FindSiteLinks(title))
+			foreach (var link in parser.FindLinks(title))
 			{
 				if (this.CheckLink(link) &&
 					WikiTextVisitor.Raw(link) is var textTitle &&
@@ -126,7 +126,7 @@ public abstract class LinkFinderJob : ParsedPageJob
 		}
 	}
 
-	protected virtual bool CheckLink(SiteLinkNode link) =>
+	protected virtual bool CheckLink(ILinkNode link) =>
 		!(
 			this.sectionLinksOnly &&
 			SiteLink.FromLinkNode(this.Site, link) is var linkTitle &&

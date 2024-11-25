@@ -47,7 +47,7 @@ public class UpdateMounts(JobManager jobManager) : EditJob(jobManager)
 		{
 			this.ids.Remove(idPageName);
 			SiteParser parser = new(page);
-			if (parser.FindSiteTemplate("Online Collectible Summary") is ITemplateNode template)
+			if (parser.FindTemplate("Online Collectible Summary") is ITemplateNode template)
 			{
 				template.Update("id", id.ToStringInvariant());
 				parser.UpdatePage();

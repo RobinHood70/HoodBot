@@ -30,7 +30,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create variant redirect"; // "Create/update creature page";
 
-	protected override bool IsValid(SiteParser parser, Creature item) => parser.FindSiteTemplate("Creature Summary") is not null;
+	protected override bool IsValid(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
 
 	protected override IDictionary<Title, Creature> LoadItems()
 	{
@@ -73,7 +73,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 	}
 
-	private static void UpdateLoc(SiteTemplateNode template, Creature item)
+	private void UpdateLoc(ITemplateNode template, Creature item)
 	{
 		// Remove loc if it's a link and duplicates planet
 		if (template.Find("loc") is IParameterNode loc)
@@ -81,7 +81,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 			if (loc.Value.Count == 2 &&
 			loc.Value[0] is ILinkNode linkNode)
 			{
-				var link = SiteLink.FromLinkNode(template.Title.Site, linkNode);
+				var link = SiteLink.FromLinkNode(this.Site, linkNode);
 				foreach (var row in item.Variants)
 				{
 					if (link.Text.OrdinalICEquals(row["Planet"]))
@@ -94,7 +94,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 	}
 
-	private static void UpdateTemplate(SiteTemplateNode template, CsvRow row)
+	private static void UpdateTemplate(ITemplateNode template, CsvRow row)
 	{
 		template.Update("baseid", row["FormID"]);
 		//// template.Update("species", row["Race"]);
@@ -127,9 +127,10 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	{
 		var newNodes = new WikiNodeCollection(parser.Factory);
 		var insertPos = parser.FindIndex<IHeaderNode>(0);
+		var stubTemplate = TitleFactory.FromTemplate(parser.Site, "Stub");
 		if (insertPos == -1)
 		{
-			insertPos = parser.FindIndex<SiteTemplateNode>(t => t.Title.PageNameEquals("Stub"));
+			insertPos = parser.FindIndex<ITemplateNode>(t => t.GetTitle(parser.Site) == stubTemplate);
 			if (insertPos == -1)
 			{
 				insertPos = parser.Count;
@@ -143,7 +144,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		newNodes.AddText("\n");
 		foreach (var variant in item.Variants)
 		{
-			var template = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Creature Variant");
+			var template = (ITemplateNode)parser.Factory.TemplateNodeFromParts("Creature Variant");
 			UpdateTemplate(template, variant);
 			newNodes.Add(template);
 			newNodes.AddText("\n");
@@ -160,7 +161,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		foreach (var page in existing)
 		{
 			var parser = new SiteParser(page);
-			var template = parser.FindSiteTemplate("Creature Summary");
+			var template = parser.FindTemplate("Creature Summary");
 			if (template is not null)
 			{
 				var name = template.GetRaw("titlename") ?? page.Title.LabelName();
@@ -202,7 +203,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 
 	private void UpdateCreature(SiteParser parser, Creature item)
 	{
-		var cs = parser.FindSiteTemplate("Creature Summary");
+		var cs = parser.FindTemplate("Creature Summary");
 		if (cs is not null)
 		{
 			cs.Remove("resp");
@@ -233,7 +234,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 			}
 		}
 
-		if (parser.FindSiteTemplate("Creature Variant") is null && item.Variants.Count > 1)
+		if (parser.FindTemplate("Creature Variant") is null && item.Variants.Count > 1)
 		{
 			AddVariants(parser, item);
 		}

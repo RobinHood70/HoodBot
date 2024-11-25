@@ -16,6 +16,7 @@ internal sealed class CreateFactionRedirects : EditJob
 
 	#region Fields
 	private readonly PageCollection allTitles;
+	private readonly Title factionsTemplate;
 	private string? nsFull;
 	#endregion
 
@@ -25,6 +26,7 @@ internal sealed class CreateFactionRedirects : EditJob
 		: base(jobManager)
 	{
 		this.allTitles = new PageCollection(this.Site, PageModules.Info);
+		this.factionsTemplate = TitleFactory.FromTemplate(this.Site, "Factions");
 	}
 	#endregion
 
@@ -54,7 +56,7 @@ internal sealed class CreateFactionRedirects : EditJob
 				}
 
 				this.CreatePage(factionPage, headerTitle, headerTitle);
-				var factionTemplates = section.Content.FindAll<SiteTemplateNode>(template => template.Title.PageNameEquals("Factions"));
+				var factionTemplates = section.Content.FindAll<ITemplateNode>(template => template.GetTitle(this.Site) == this.factionsTemplate);
 				foreach (var node in factionTemplates)
 				{
 					var edid = node.GetRaw("edid");

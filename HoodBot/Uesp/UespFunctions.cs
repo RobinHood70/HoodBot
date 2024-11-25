@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using RobinHood70.Robby.Parser;
-using RobinHood70.WikiCommon;
+using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon.Parser;
 
 public static class UespFunctions
@@ -61,31 +61,27 @@ public static class UespFunctions
 		"Redguard Names"
 	];
 
-	public static string IconAbbreviation(string nsId, SiteTemplateNode template)
+	public static string IconAbbreviation(UespNamespace ns, ITemplateNode template)
 	{
-		var templateTitle = template.Title;
-		if (templateTitle.Namespace != MediaWikiNamespaces.Template ||
-			!templateTitle.PageNameEquals("Icon") ||
-			template.GetValue(1) is not string iconType ||
-			template.GetValue(2) is not string iconName)
-		{
-			throw new InvalidOperationException();
-		}
-
-		var extension = template.GetValue(4) ?? "png";
-
-		return IconAbbreviation(nsId, iconType, iconName, extension);
+		ArgumentNullException.ThrowIfNull(ns);
+		ArgumentNullException.ThrowIfNull(template);
+		return
+			template.GetTitle(ns.Site) == TitleFactory.FromTemplate(ns.Site, "Icon") &&
+			template.GetValue(1) is string iconType &&
+			template.GetValue(2) is string iconName
+				? IconAbbreviation(ns, iconType, iconName, template.GetValue(4) ?? "png")
+				: throw new InvalidOperationException();
 	}
 
-	public static string IconAbbreviation(string nsId, string iconType, string icon) => IconAbbreviation(nsId, iconType, icon, "png");
+	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon) => IconAbbreviation(ns, iconType, icon, "png");
 
-	public static string IconAbbreviation(string nsId, string iconType, string icon, string extension)
+	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon, string extension)
 	{
-		ArgumentNullException.ThrowIfNull(nsId);
+		ArgumentNullException.ThrowIfNull(ns);
 		ArgumentNullException.ThrowIfNull(iconType);
 		ArgumentNullException.ThrowIfNull(icon);
 		ArgumentNullException.ThrowIfNull(extension);
-		return nsId + "-icon-" + IconNameFromAbbreviation(iconType) + icon + '.' + extension;
+		return ns.Id + "-icon-" + IconNameFromAbbreviation(iconType) + icon + '.' + extension;
 	}
 
 	public static (UespNamespace? Ns, string? Abbr, string? Name, string? Ext) AbbreviationFromIconName(UespNamespaceList nsList, string iconName)

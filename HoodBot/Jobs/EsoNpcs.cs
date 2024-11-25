@@ -12,6 +12,7 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 // TODO: This job is a serious mess and needs an overhaul. Some has already been done, but it needs a lot more. There's also a lot of page data being loaded from the wiki. Can this be done better by checking a category (either before loading the page data or instead of it)?
 internal sealed class EsoNpcs : EditJob
@@ -94,7 +95,7 @@ internal sealed class EsoNpcs : EditJob
 			var placeInfo = EsoSpace.PlaceInfo;
 
 			var parser = new SiteParser(page);
-			if (parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
+			if (parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
 			{
 				UpdateLocations(npc, template, parser.Factory, placeInfo);
 				parser.UpdatePage();
@@ -261,7 +262,7 @@ internal sealed class EsoNpcs : EditJob
 			if (issue == null)
 			{
 				SiteParser parsed = new(page);
-				var template = parsed.FindSiteTemplate("Online NPC Summary");
+				var template = parsed.FindTemplate("Online NPC Summary");
 				if (this.allowUpdates)
 				{
 					if (template?.Find("city").IsNullOrWhitespace() == true &&
@@ -384,7 +385,7 @@ internal sealed class EsoNpcs : EditJob
 			("faction", string.Empty)
 		];
 
-		var factory = new SiteNodeFactory(this.Site);
+		var factory = new WikiNodeFactory();
 		var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 		UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
 

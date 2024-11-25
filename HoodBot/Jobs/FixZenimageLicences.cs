@@ -6,6 +6,7 @@ using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
+using RobinHood70.WikiCommon.Parser;
 
 [method: JobInfo("Fix Zenimage licences", "Maintenance")]
 public class FixZenimageLicences(JobManager jobManager) : TemplateJob(jobManager)
@@ -37,7 +38,7 @@ public class FixZenimageLicences(JobManager jobManager) : TemplateJob(jobManager
 		this.Pages.GetTitles(goodTitles);
 	}
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		template.TitleNodes.Clear();
 		template.TitleNodes.AddText("Zenimage");

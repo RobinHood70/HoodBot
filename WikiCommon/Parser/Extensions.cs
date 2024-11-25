@@ -12,8 +12,8 @@ using RobinHood70.CommonCode;
 /// <summary>The format to use when adding new parameters or reformatting existing ones.</summary>
 public enum ParameterFormat
 {
-	/// <summary>Parameter values will not be changed.</summary>
-	NoChange,
+	/// <summary>Parameter whitespace will not be changed.</summary>
+	Verbatim,
 
 	/// <summary>Remove all trailing whitespace.</summary>
 	PackedTrail,
@@ -209,18 +209,21 @@ public static class Extensions
 		ArgumentNullException.ThrowIfNull(parameter);
 		ArgumentNullException.ThrowIfNull(value);
 		var paramValue = parameter.Value;
-		if (paramFormat == ParameterFormat.Copy)
+		value ??= string.Empty;
+		if (paramFormat != ParameterFormat.Verbatim)
 		{
-			var embedded = EmbeddedValue.FindWhitespace(paramValue.ToValue());
-			value = TrimValue(value, paramFormat);
-			paramValue.Clear();
-			paramValue.AddParsed(embedded.Before + value + embedded.After);
-			return;
+			var oldValue = paramValue.ToRaw();
+			value = value.Trim();
+			if (paramFormat != ParameterFormat.Copy)
+			{
+				oldValue = TrimValue(oldValue, paramFormat);
+			}
+
+			value = EmbeddedValue.CopyWhitespace(oldValue, value);
 		}
 
-		value = TrimValue(value, paramFormat);
 		paramValue.Clear();
-		paramValue.AddParsed(value);
+		paramValue.AppendParsed(value);
 	}
 
 	/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
@@ -941,7 +944,7 @@ public static class Extensions
 	/// <param name="name">The name of the parameter to update.</param>
 	/// <param name="value">The value to update the parameter to.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.NoChange);
+	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.Verbatim);
 
 	/// <summary>Updates a parameter with the specified value if it is blank or does not exist.</summary>
 	/// <param name="template">The template to update.</param>
@@ -1241,7 +1244,7 @@ public static class Extensions
 		value ??= string.Empty;
 		return paramFormat switch
 		{
-			ParameterFormat.NoChange => value,
+			ParameterFormat.Verbatim => value,
 			ParameterFormat.PackedTrail => value.TrimEnd(),
 			ParameterFormat.Packed => value.Trim(),
 			ParameterFormat.OnePerLine => value.TrimEnd() + '\n',

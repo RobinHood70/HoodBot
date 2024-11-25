@@ -28,12 +28,12 @@
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			SortedDictionary<int, int> powerCount = [];
-			if (parser.FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
+			if (parser.FindTemplate("Legends Deck Summary") is not ITemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}
 
-			foreach (var template in parser.FindSiteTemplates("Decklist"))
+			foreach (var template in parser.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
 				List<IParameterNode> specialParams = new(template.FindAll("skipQuantity", "skipNotes"));

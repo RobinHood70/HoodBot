@@ -78,6 +78,18 @@ public sealed class EmbeddedValue : IEquatable<EmbeddedValue>
 
 	#region Public Static Methods
 
+	/// <summary>Copies the surrounding whitespace from the old value to the new value and returns the resulting string.</summary>
+	/// <param name="from">The value to copy from.</param>
+	/// <param name="to">The value to add whitespace to.</param>
+	/// <returns>The new value.</returns>
+	/// <remarks>Any existing space on the <paramref name="to"/> value will be retained and added to.</remarks>
+	public static string CopyWhitespace(string? from, string? to)
+	{
+		var embeddedValue = FindWhitespace(from);
+		embeddedValue.Value = to ?? string.Empty;
+		return embeddedValue.ToString();
+	}
+
 	/// <summary>Returns the value provided as an <see cref="EmbeddedValue"/> with leading and trailing whitespace moved into the <see cref="Before"/> and <see cref="After"/> properties.</summary>
 	/// <param name="value">The value to split.</param>
 	/// <returns>An EmbeddedValue with the whitespace extracted.</returns>

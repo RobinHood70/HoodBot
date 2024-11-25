@@ -134,10 +134,10 @@
 					case ITextNode text:
 						sb.Append(text.Text);
 						break;
-					case SiteLinkNode link:
+					case ILinkNode link:
 						sb.Append(WikiTextVisitor.Raw(link.Parameters)[1..]);
 						break;
-					case SiteTemplateNode template:
+					case ITemplateNode template:
 						sb.Append(TrimHeader(template));
 						break;
 				}
@@ -153,8 +153,8 @@
 		private static void ParseCollectible(CollectibleInfo collectible, SiteParser parser)
 		{
 			var page = parser.Page;
-			var templateIndex = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
-			var template = (SiteTemplateNode)parser[templateIndex];
+			var templateIndex = parser.FindIndex<ITemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
+			var template = (ITemplateNode)parser[templateIndex];
 			var removeParens = page.PageName.Split(" (", 2)[0];
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
@@ -210,7 +210,7 @@
 			parser.UpdatePage();
 		}
 
-		private static string TrimHeader(SiteTemplateNode template) => template.TitleValue.PageName switch
+		private static string TrimHeader(ITemplateNode template) => template.TitleValue.PageName switch
 		{
 			"Anchor" or "Item Link" => template.GetValue(1) ?? string.Empty,
 			"ESO Quality Color" => template.GetValue(2) ?? string.Empty,
@@ -220,8 +220,8 @@
 		private static bool ValidateSection(Section section) =>
 			section.Content is var content
 			&& content.Has<ITextNode>(text => DescriptionFinder.IsMatch(text.Text))
-			&& (content.Has<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Icon"))
-				|| content.Has<SiteLinkNode>(link => link.TitleValue.Namespace == MediaWikiNamespaces.File));
+			&& (content.Has<ITemplateNode>(template => template.TitleValue.PageNameEquals("Icon"))
+				|| content.Has<ILinkNode>(link => link.TitleValue.Namespace == MediaWikiNamespaces.File));
 		#endregion
 
 		#region Private Methods
@@ -254,7 +254,7 @@
 				? parser
 				: new SiteParser(this.Site.CreatePage(newPage.DisambigName, this.blankText));
 
-			static bool ParserHasTemplate(SiteParser parser) => parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			static bool ParserHasTemplate(SiteParser parser) => parser.Has<ITemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 		}
 
 		private void GetCrownCrates()
@@ -277,7 +277,7 @@
 				{
 					//// tier = GetSectionTitle(header);
 				}
-				else if (node is SiteTemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
+				else if (node is ITemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
 				{
 					foreach (var parameter in template.ParameterCluster(2))
 					{
@@ -472,30 +472,30 @@
 						case ITextNode text:
 							this.NewContent.AddText(DescriptionReplacer.Replace(text.Text, string.Empty));
 							break;
-						case SiteLinkNode link when
+						case ILinkNode link when
 							link.TitleValue.Namespace == MediaWikiNamespaces.File &&
 							link.TitleValue.PageName.StartsWith("ON-icon-", StringComparison.Ordinal):
 							iconCount++;
 							iconOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case SiteLinkNode link when
+						case ILinkNode link when
 							link.TitleValue.Namespace == MediaWikiNamespaces.File:
 							fileCount++;
 							fileOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case SiteTemplateNode template when template.TitleValue.PageNameEquals("ESO Crowns"):
+						case ITemplateNode template when template.TitleValue.PageNameEquals("ESO Crowns"):
 							this.Acquisition = "Crown Store";
 							this.Price = template;
 							this.NewContent.Add(node);
 							break;
-						case SiteTemplateNode template when template.TitleValue.PageNameEquals("Icon"):
+						case ITemplateNode template when template.TitleValue.PageNameEquals("Icon"):
 							iconCount++;
 							iconOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case SiteTemplateNode template when
+						case ITemplateNode template when
 							template.TitleValue.PageNameEquals("NewLeft") ||
 							template.TitleValue.PageNameEquals("NewLine"):
 							// Do nothing
@@ -506,7 +506,7 @@
 					}
 				}
 
-				if (fileCount == 1 && this.NewContent[fileOffset] is SiteLinkNode imageLink)
+				if (fileCount == 1 && this.NewContent[fileOffset] is ILinkNode imageLink)
 				{
 					this.Image = imageLink.TitleValue.PageName[0..^4];
 					var link = SiteLink.FromLinkNode(site, imageLink);
@@ -523,8 +523,8 @@
 				{
 					var fileName = this.NewContent[iconOffset] switch
 					{
-						SiteTemplateNode iconTemplate => UespFunctions.IconAbbreviation("ON", iconTemplate),
-						SiteLinkNode iconLink => iconLink.TitleValue.PageName,
+						ITemplateNode iconTemplate => UespFunctions.IconAbbreviation("ON", iconTemplate),
+						ILinkNode iconLink => iconLink.TitleValue.PageName,
 						_ => throw new InvalidOperationException(),
 					};
 					fileName = fileName[0..^4];
@@ -565,7 +565,7 @@
 
 			public string NickName { get; }
 
-			public SiteTemplateNode? Price { get; }
+			public ITemplateNode? Price { get; }
 
 			public string? Tier { get; }
 

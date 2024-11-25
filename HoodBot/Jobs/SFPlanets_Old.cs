@@ -91,7 +91,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update planet";
 
-	protected override bool IsValid(SiteParser parser, Planet data) => parser.FindSiteTemplate("Planet Infobox") is not null;
+	protected override bool IsValid(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
 
 	protected override IDictionary<Title, Planet> LoadItems()
 	{
@@ -124,7 +124,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 
 	private static void UpdatePlanet(SiteParser parser, Planet item)
 	{
-		var template = parser.FindSiteTemplate("Planet Infobox") ?? throw new InvalidOperationException();
+		var template = parser.FindTemplate("Planet Infobox") ?? throw new InvalidOperationException();
 		var biomes = item.Biomes.Count == 0
 			? string.Empty
 			: ("\n* " + string.Join("\n* ", item.Biomes));

@@ -1,14 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
-
 	[method: JobInfo("List Similar Images", "Legends")]
 	internal sealed class LegendsSimilarList(JobManager jobManager) : TemplateJob(jobManager)
 	{
@@ -28,7 +19,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Add \"Card art\" to unlabeled gallery images";
 
-		protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+		protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 		{
 			if (this.resultCount == 0 && this.Results is PageResultHandler pageResults)
 			{

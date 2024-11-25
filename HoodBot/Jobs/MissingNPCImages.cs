@@ -32,7 +32,7 @@ public class MissingNPCImages(JobManager jobManager) : TemplateJob(jobManager)
 
 	protected override string GetEditSummary(Page page) => "Comment out missing images";
 
-	protected override void ParseTemplate(SiteTemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		if (template.Find("image") is IParameterNode image)
 		{
@@ -43,7 +43,7 @@ public class MissingNPCImages(JobManager jobManager) : TemplateJob(jobManager)
 			{
 				if (!this.allFiles.Contains("File:" + value))
 				{
-					image.SetValue("<!--" + value + "-->", ParameterFormat.NoChange);
+					image.SetValue("<!--" + value + "-->", ParameterFormat.Verbatim);
 				}
 			}
 		}

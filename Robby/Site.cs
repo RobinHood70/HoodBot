@@ -22,6 +22,7 @@ using RobinHood70.WallE.Clients;
 using RobinHood70.WallE.Design;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 #region Public Delegates
 
@@ -1245,7 +1246,7 @@ public class Site : IMessageSource
 			? redirect.Aliases
 			: DefaultRedirect;
 		HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-		var nodes = new SiteNodeFactory(this).Parse(text);
+		var nodes = new WikiNodeFactory().Parse(text);
 
 		// Is the text of the format TextNode, LinkNode?
 		if (nodes.Count > 1 &&

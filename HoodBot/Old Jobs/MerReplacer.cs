@@ -90,7 +90,7 @@
 			foreach (var page in this.Pages)
 			{
 				SiteParser parsedPage = new(page);
-				foreach (var link in parsedPage.FindAll<SiteLinkNode>())
+				foreach (var link in parsedPage.FindAll<ILinkNode>())
 				{
 					var pageName = link.TitleValue.PageName;
 					if (this.merPages.Contains(link.TitleValue))

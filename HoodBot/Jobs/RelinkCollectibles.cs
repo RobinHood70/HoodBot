@@ -116,7 +116,7 @@ public class RelinkCollectibles : MovePagesJob
 	#region Private Methods
 	private PageCollection GetPages(IEnumerable<string> collectionTitles)
 	{
-		var plm = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], "PageLetterMenu");
+		var plm = TitleFactory.FromTemplate(this.Site, "PageLetterMenu");
 		var collectionPages = new PageCollection(this.Site, PageModules.Templates);
 		collectionPages.GetTitles(collectionTitles);
 
