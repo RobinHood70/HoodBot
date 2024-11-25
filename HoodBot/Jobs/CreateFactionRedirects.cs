@@ -56,7 +56,7 @@ internal sealed class CreateFactionRedirects : EditJob
 				}
 
 				this.CreatePage(factionPage, headerTitle, headerTitle);
-				var factionTemplates = section.Content.FindAll<ITemplateNode>(template => template.GetTitle(this.Site) == this.factionsTemplate);
+				var factionTemplates = section.Content.FindTemplates(this.factionsTemplate);
 				foreach (var node in factionTemplates)
 				{
 					var edid = node.GetRaw("edid");

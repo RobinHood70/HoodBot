@@ -201,7 +201,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			return;
 		}
 
-		var insertLoc = parser.FindIndex<ITemplateNode>(t => this.searchTitles.Contains(t.GetTitle(parser.Site)));
+		var insertLoc = parser.IndexOf<ITemplateNode>(t => this.searchTitles.Contains(t.GetTitle(parser.Site)));
 		if (insertLoc == -1)
 		{
 			insertLoc = parser.Count;
@@ -231,7 +231,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		if (summary is null)
 		{
 			summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
-			var stubIndex = lead.FindIndex<ITemplateNode>(t =>
+			var stubIndex = lead.IndexOf<ITemplateNode>(t =>
 				this.searchTitles.Contains(t.GetTitle(this.Site)));
 			if (stubIndex != -1)
 			{

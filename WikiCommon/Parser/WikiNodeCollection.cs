@@ -120,14 +120,23 @@ public class WikiNodeCollection : List<IWikiNode>
 		return new WikiNodeCollection(this.Factory, nodes);
 	}
 
+	/// <summary>Determines if the collection has any nodes of the specified type.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <returns><see langword="true"/> if any nodes of the specified type were found; otherwise, <see langword="false"/>.</returns>
+	public bool Contains<T>()
+		where T : IWikiNode => this.Find<T>() is not null;
+
+	/// <summary>Determines if the collection has any nodes of the specified type that satisfy the conditions given.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <param name="condition">The condition a given node must satisfy.</param>
+	/// <returns><see langword="true"/> if any nodes of the specified type were found that satisfied the specified condition; otherwise, <see langword="false"/>.</returns>
+	public bool Contains<T>(Predicate<T>? condition)
+		where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
+
 	/// <summary>Copies the surrounding whitespace from the current WikiNodeCollection to the provided value.</summary>
 	/// <param name="value">The value to format.</param>
 	/// <returns>The value with the same surrounding whitespace as the provided WikiNodeCollection.</returns>
-	public string CopyFormatTo(string? value)
-	{
-		var (leading, trailing) = this.ToValue().GetSurroundingWhitespace();
-		return leading + value + trailing;
-	}
+	public string CopyFormatTo(string? value) => EmbeddedValue.CopyWhitespace(this.ToValue(), value);
 
 	/// <summary>Finds the first node of the specified type.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -223,52 +232,6 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 	}
 
-	/// <summary>Finds the index of the first node of type T that satisfies the predicate.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="match">The predicate.</param>
-	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="match"/>, if found; otherwise, -1.</returns>
-	public int FindIndex<T>(Predicate<T> match)
-		where T : IWikiNode => this.FindIndex(item => item is T typedItem && match(typedItem));
-
-	/// <summary>Finds the index of the first node of type T that satisfies the predicate.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="startIndex">The index at which to start the search.</param>
-	/// <param name="match">The predicate to match.</param>
-	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="match"/>, if found; otherwise, -1.</returns>
-	public int FindIndex<T>(int startIndex, Predicate<T> match)
-		where T : IWikiNode => this.FindIndex(startIndex, item => item is T typedItem && match(typedItem));
-
-	/// <summary>Finds the index of the next node of the specified type.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="startIndex">The start index.</param>
-	/// <returns>The zero-based index of the next node of the specified type, if found; otherwise, -1.</returns>
-	/// <remarks>This method will not throw an exception if <paramref name="startIndex"/> is beyond the end of the collection. This is for convenience if the previous item of the same type was the last node in the collection.</remarks>
-	public int FindIndex<T>(int startIndex)
-		where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindIndex(startIndex, item => item is T);
-
-	/// <summary>Finds the last index of the first node of type T that satisfies the predicate.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="match">The predicate.</param>
-	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="match"/>, if found; otherwise, -1.</returns>
-	public int FindLastIndex<T>(Predicate<T> match)
-		where T : IWikiNode => this.FindLastIndex(item => item is T typedItem && match(typedItem));
-
-	/// <summary>Finds the last index of the first node of type T that satisfies the predicate.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="startIndex">The index at which to start the search.</param>
-	/// <param name="match">The predicate to match.</param>
-	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="match"/>, if found; otherwise, -1.</returns>
-	public int FindLastIndex<T>(int startIndex, Predicate<T> match)
-		where T : IWikiNode => this.FindLastIndex(startIndex, item => item is T typedItem && match(typedItem));
-
-	/// <summary>Finds the last index of the next node of the specified type.</summary>
-	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="startIndex">The start index.</param>
-	/// <returns>The zero-based index of the next node of the specified type, if found; otherwise, -1.</returns>
-	/// <remarks>This method will not throw an exception if <paramref name="startIndex"/> is beyond the end of the collection. This is for convenience if the previous item of the same type was the last node in the collection.</remarks>
-	public int FindLastIndex<T>(int startIndex)
-		where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindLastIndex(startIndex, item => item is T);
-
 	/// <summary>Finds a single link node, non-recursively, that satisfies the condition.</summary>
 	/// <param name="condition">The condition the link node must satisfy.</param>
 	/// <returns>The first link node that satisfies the condition.</returns>
@@ -276,7 +239,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	public ILinkNode? FindLink(Predicate<ILinkNode> condition) => this.Find(condition);
 
 	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
-	/// <param name="condition">The condition to match.</param>
+	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
 	public IEnumerable<ILinkNode> FindLinks(Predicate<ILinkNode> condition) => this.FindAll<ILinkNode>(condition);
 
@@ -287,7 +250,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	public ITemplateNode? FindTemplate(Predicate<ITemplateNode> condition) => this.Find(condition);
 
 	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
-	/// <param name="condition">The condition to match.</param>
+	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
 	public IEnumerable<ITemplateNode> FindTemplates(Predicate<ITemplateNode> condition) => this.FindAll<ITemplateNode>(condition);
 
@@ -308,24 +271,34 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 	}
 
-	/// <summary>Determines if the collection has any nodes of the specified type.</summary>
+	/// <summary>Finds the index of the first node of type T that satisfies the predicate.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <returns><see langword="true"/> if any nodes of the specified type were found; otherwise, <see langword="false"/>.</returns>
-	public bool Has<T>()
-		where T : IWikiNode => this.Find<T>() is not null;
+	/// <param name="condition">The predicate.</param>
+	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="condition"/>, if found; otherwise, -1.</returns>
+	public int IndexOf<T>(Predicate<T> condition)
+		where T : IWikiNode => this.FindIndex(item => item is T typedItem && condition(typedItem));
 
-	/// <summary>Determines if the collection has any nodes of the specified type that satisfy the conditions given.</summary>
+	/// <summary>Finds the index of the first node of type T that satisfies the predicate.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy.</param>
-	/// <returns><see langword="true"/> if any nodes of the specified type were found that satisfied the specified condition; otherwise, <see langword="false"/>.</returns>
-	public bool Has<T>(Predicate<T>? condition)
-		where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
+	/// <param name="startIndex">The index at which to start the search.</param>
+	/// <param name="condition">The predicate to condition.</param>
+	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="condition"/>, if found; otherwise, -1.</returns>
+	public int IndexOf<T>(int startIndex, Predicate<T> condition)
+		where T : IWikiNode => this.FindIndex(startIndex, item => item is T typedItem && condition(typedItem));
+
+	/// <summary>Finds the index of the next node of the specified type.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <param name="startIndex">The start index.</param>
+	/// <returns>The zero-based index of the next node of the specified type, if found; otherwise, -1.</returns>
+	/// <remarks>This method will not throw an exception if <paramref name="startIndex"/> is beyond the end of the collection. This is for convenience if the previous item of the same type was the last node in the collection.</remarks>
+	public int IndexOf<T>(int startIndex)
+		where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindIndex(startIndex, item => item is T);
 
 	/// <summary>Finds the first header with the specified text.</summary>
 	/// <param name="headerText">Name of the header.</param>
 	/// <returns>The first header with the specified text.</returns>
 	/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-	public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
+	public int IndexOfHeader(string headerText) => this.IndexOf<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
 
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
@@ -352,6 +325,29 @@ public class WikiNodeCollection : List<IWikiNode>
 			}
 		}
 	}
+
+	/// <summary>Finds the last index of the first node of type T that satisfies the predicate.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <param name="condition">The predicate.</param>
+	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="condition"/>, if found; otherwise, -1.</returns>
+	public int LastIndexOf<T>(Predicate<T> condition)
+		where T : IWikiNode => this.FindLastIndex(item => item is T typedItem && condition(typedItem));
+
+	/// <summary>Finds the last index of the first node of type T that satisfies the predicate.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <param name="startIndex">The index at which to start the search.</param>
+	/// <param name="condition">The predicate to condition.</param>
+	/// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by <paramref name="condition"/>, if found; otherwise, -1.</returns>
+	public int LastIndexOf<T>(int startIndex, Predicate<T> condition)
+		where T : IWikiNode => this.FindLastIndex(startIndex, item => item is T typedItem && condition(typedItem));
+
+	/// <summary>Finds the last index of the next node of the specified type.</summary>
+	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+	/// <param name="startIndex">The start index.</param>
+	/// <returns>The zero-based index of the next node of the specified type, if found; otherwise, -1.</returns>
+	/// <remarks>This method will not throw an exception if <paramref name="startIndex"/> is beyond the end of the collection. This is for convenience if the previous item of the same type was the last node in the collection.</remarks>
+	public int LastIndexOf<T>(int startIndex)
+		where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindLastIndex(startIndex, item => item is T);
 
 	/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 	/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>

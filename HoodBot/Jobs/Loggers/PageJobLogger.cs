@@ -81,8 +81,8 @@ public class PageJobLogger : JobLogger
 	#region Private Methods
 	private static bool UpdateCurrentStatus(SiteParser parser, string status)
 	{
-		var currentTask = parser.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals("Current Task"));
-		var taskLog = parser.FindIndex<IHeaderNode>(currentTask + 1);
+		var currentTask = parser.IndexOf<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals("Current Task"));
+		var taskLog = parser.IndexOf<IHeaderNode>(currentTask + 1);
 		if (currentTask == -1 || taskLog == -1)
 		{
 			throw BadLogPage;
@@ -104,7 +104,7 @@ public class PageJobLogger : JobLogger
 		SiteParser parser = new(this.logPage);
 		var factory = parser.Factory;
 		var sameTaskText = UpdateCurrentStatus(parser, this.status);
-		var firstEntry = parser.FindIndex<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
+		var firstEntry = parser.IndexOf<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
 		if (firstEntry == -1)
 		{
 			// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.

@@ -105,11 +105,11 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	private static void AddVariants(SiteParser parser, Creature item)
 	{
 		var newNodes = new WikiNodeCollection(parser.Factory);
-		var insertPos = parser.FindIndex<IHeaderNode>(0);
+		var insertPos = parser.IndexOf<IHeaderNode>(0);
 		var stubTemplate = TitleFactory.FromTemplate(parser.Site, "Stub");
 		if (insertPos == -1)
 		{
-			insertPos = parser.FindIndex<ITemplateNode>(t => t.GetTitle(parser.Site) == stubTemplate);
+			insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == stubTemplate);
 			if (insertPos == -1)
 			{
 				insertPos = parser.Count;
@@ -123,7 +123,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		newNodes.AddText("\n");
 		foreach (var variant in item.Variants)
 		{
-			var template = (ITemplateNode)parser.Factory.TemplateNodeFromParts("Creature Variant");
+			var template = parser.Factory.TemplateNodeFromParts("Creature Variant");
 			UpdateTemplate(template, variant);
 			newNodes.Add(template);
 			newNodes.AddText("\n");

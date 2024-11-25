@@ -317,7 +317,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		foreach (var section in unsortedSection.Content.ToSections(3))
 		{
 			var titles = new TitleCollection(this.Site);
-			var transclusions = section.Content.FindAll<ITemplateNode>();
+			var transclusions = section.Content.TemplateNodes;
 			foreach (var transclusion in transclusions)
 			{
 				var titleText = transclusion.TitleNodes.ToValue();
@@ -355,7 +355,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
 		var choiceDictionary = new Dictionary<int, ITemplateNode>();
 		var searchTemplate = TitleFactory.FromTemplate(this.Site, "Castles Ruling/Choice");
-		foreach (var choiceTemplate in choiceParam.Value.FindAll<ITemplateNode>(t => t.GetTitle(this.Site) == searchTemplate))
+		foreach (var choiceTemplate in choiceParam.Value.FindTemplates(searchTemplate))
 		{
 			if (choiceTemplate.GetValue("id") is string choiceId)
 			{

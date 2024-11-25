@@ -58,8 +58,8 @@ public class UpdateLoreBookLists(JobManager jobManager) : EditJob(jobManager)
 		var parser = new SiteParser(page);
 		var factory = parser.Factory;
 		var templateTitle = TitleFactory.FromTemplate(this.Site, TemplateName);
-		var first = parser.FindIndex<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
-		var last = parser.FindLastIndex<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
+		var first = parser.IndexOf<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
+		var last = parser.LastIndexOf<ITemplateNode>(node => node.GetTitle(this.Site) == templateTitle);
 		if (first == -1)
 		{
 			throw new InvalidOperationException();

@@ -94,7 +94,7 @@ internal class TemplateUsage : WikiJob
 	#region Private Methods
 	private void AddPage(List<PageTemplate> templates, Dictionary<string, string> paramTranslator, SiteParser parser)
 	{
-		foreach (var template in parser.FindAll<ITemplateNode>())
+		foreach (var template in parser.TemplateNodes)
 		{
 			if (this.ShouldAddTemplate(template, parser) && this.allTemplateNames.Contains(template.GetTitle(this.Site)))
 			{

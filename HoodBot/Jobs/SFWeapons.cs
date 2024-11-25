@@ -107,7 +107,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	private static void UpdateWeapon(SiteParser parser, List<CsvRow> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.FindIndex<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
+		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
 		foreach (var row in list)
 		{
 			if (FindMatchingTemplate(parser, row) is null)

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
@@ -47,11 +48,12 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 	protected override void ParseText(SiteParser parser)
 	{
 		var sections = parser.ToSections();
+		var searchTitle = TitleFactory.FromValidated(this.Site, "Template:ESO House Furnishings");
 		foreach (var section in FindFurnishings(sections))
 		{
-			if (section.Content.FindTemplate(template => template.GetTitle(parser.Site).PageNameEquals("ESO House Furnishings")) is not null)
+			if (section.Content.FindTemplate(searchTitle) is not null)
 			{
-				this.WriteLine($"* [[{parser.Page.Title.FullPageName()}]] has already been converted.");
+				this.WriteLine($"* [[{parser.Title}]] has already been converted.");
 				continue;
 			}
 

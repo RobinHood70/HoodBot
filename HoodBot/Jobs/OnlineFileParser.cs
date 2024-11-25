@@ -293,7 +293,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	#region Private Methods
 	private string? GetInfoText(ITemplateNode info) =>
 		info.Find("description") is not IParameterNode desc ? null :
-		desc.Value.FindTemplate(t => t.GetTitle(this.Site) == "Template:En") is ITemplateNode en && en.Find(1) is IParameterNode enValue ? enValue.ToRaw() :
+		desc.Value.FindTemplate(this.Site, "En") is ITemplateNode en && en.Find(1) is IParameterNode enValue ? enValue.ToRaw() :
 		desc.GetRaw();
 
 	private IList<IWikiNode>? NodeReplacer(IWikiNode node)
@@ -401,7 +401,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	private bool ParseSummary(SiteParser parser, Section summary)
 	{
 		string? text = null;
-		var infoOffset = summary.Content.FindIndex<ITemplateNode>(n => n.GetTitle(this.Site).PageNameEquals("Information"));
+		var infoOffset = summary.Content.IndexOf<ITemplateNode>(n => n.GetTitle(this.Site).PageNameEquals("Information"));
 		if (infoOffset != -1)
 		{
 			var info = (ITemplateNode)summary.Content[infoOffset];

@@ -1,5 +1,4 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -202,16 +201,12 @@ internal abstract class Skill
 		ArgumentNullException.ThrowIfNull(value);
 		ArgumentNullException.ThrowIfNull(usedList);
 		ArgumentNullException.ThrowIfNull(skillName);
-		var factory = template.Factory;
-		var collection = new WikiNodeCollection(factory, factory.Parse(value.Trim()));
-		if (usedList != null)
-		{
-			UespReplacer.ReplaceGlobal(collection);
-			UespReplacer.ReplaceEsoLinks(usedList.Site, collection);
-			UespReplacer.ReplaceFirstLink(collection, usedList);
-			UespReplacer.ReplaceSkillLinks(collection, skillName);
-		}
+		var collection = WikiNodeCollection.NewFrom(template, value.Trim());
 
+		UespReplacer.ReplaceGlobal(collection);
+		UespReplacer.ReplaceEsoLinks(usedList.Site, collection);
+		UespReplacer.ReplaceFirstLink(collection, usedList);
+		UespReplacer.ReplaceSkillLinks(collection, skillName);
 		template.Update(name, collection.ToRaw(), ParameterFormat.OnePerLine, true);
 	}
 	#endregion

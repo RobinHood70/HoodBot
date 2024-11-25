@@ -118,7 +118,7 @@ public class EsoMatchIcons : EditJob
 		}
 
 		summaryIndex++;
-		summaryEnd = parser.FindIndex<HeaderNode>(summaryIndex);
+		summaryEnd = parser.IndexOf<HeaderNode>(summaryIndex);
 		if (summaryEnd == -1)
 		{
 			summaryEnd = parser.Count;
@@ -138,7 +138,7 @@ public class EsoMatchIcons : EditJob
 		}
 
 		summaryIndex++;
-		summaryEnd = parser.FindIndex<HeaderNode>(summaryIndex);
+		summaryEnd = parser.IndexOf<HeaderNode>(summaryIndex);
 		if (summaryEnd == -1)
 		{
 			summaryEnd = parser.Count;

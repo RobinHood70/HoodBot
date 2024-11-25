@@ -6,9 +6,9 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
+using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
-using RobinHood70.WikiCommon.Parser.Basic;
 
 [method: JobInfo("Variable Usage")]
 internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
@@ -78,10 +78,8 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 		// TODO: Add a dictionary that can be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 		foreach (var page in pages)
 		{
-			var factory = new WikiNodeFactory();
-			var nodes = factory.Parse(page.Text);
-			var collection = new WikiNodeCollection(factory, nodes);
-			foreach (var template in collection.FindAll<ITemplateNode>())
+			var parser = new SiteParser(page);
+			foreach (var template in parser.TemplateNodes)
 			{
 				var name = template.GetTitleText();
 				if (name.StartsWith("#load", StringComparison.OrdinalIgnoreCase))
@@ -95,8 +93,8 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 			}
 		}
 
-		this.loadCalls.Sort((x, y) => TitleComparer.Instance.Compare(x.Page, y.Page));
-		this.saveCalls.Sort((x, y) => TitleComparer.Instance.Compare(x.Page, y.Page));
+		this.loadCalls.Sort(TitleComparer.Instance);
+		this.saveCalls.Sort(TitleComparer.Instance);
 	}
 
 	private void WriteFile(bool isLoadCall)
@@ -121,7 +119,7 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 		{
 			List<string> cells = new(call.Variables.Count + 3)
 			{
-				call.Page.PageName
+				call.Title.PageName
 			};
 
 			if (isLoadCall)
@@ -140,14 +138,15 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 	#endregion
 
 	#region Private Classes
-	private sealed class LoadSaveCall
+	private sealed class LoadSaveCall : ITitle
 	{
-		public LoadSaveCall(Title page, ITemplateNode loadSave)
+		#region Constructors
+		public LoadSaveCall(Title title, ITemplateNode loadSave)
 		{
 			List<string> variables = [];
-			this.Page = page;
-			var title = loadSave.TitleNodes.ToRaw();
-			var split = title.Split(TextArrays.Colon, 2);
+			this.Title = title;
+			var templateTitle = loadSave.TitleNodes.ToRaw();
+			var split = templateTitle.Split(TextArrays.Colon, 2);
 			var name = split[0];
 			var first = split[1];
 			if (name.OrdinalICEquals("#load"))
@@ -185,14 +184,17 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 
 			this.Variables = variables;
 		}
+		#endregion
 
+		#region Public Properties
 		public string LoadPage { get; } = string.Empty;
 
-		public Title Page { get; }
+		public Title Title { get; }
 
 		public string Set { get; } = string.Empty;
 
 		public List<string> Variables { get; }
+		#endregion
 	}
 	#endregion
 }

@@ -141,7 +141,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 	private static void UpdateArmor(SiteParser parser, List<CsvRow> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.FindIndex<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
+		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
 		foreach (var row in list)
 		{
 			if (FindMatchingTemplate(parser, row) is null)

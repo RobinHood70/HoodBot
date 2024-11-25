@@ -303,7 +303,7 @@ internal sealed class UespProtectPages : EditJob
 	private static void AddFooter(SiteParser parser, PageProtection protection)
 	{
 		var footer = protection.Footer;
-		var footerTemplate = (ITemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
+		var footerTemplate = parser.Factory.TemplateNodeFromWikiText(footer);
 		if (parser.FindTemplate(footerTemplate.GetTitle(parser.Site)) is ITemplateNode existing)
 		{
 			existing.TitleNodes.Clear();
@@ -329,7 +329,7 @@ internal sealed class UespProtectPages : EditJob
 
 		var headerTemplate = nodes.Factory.TemplateNodeFromWikiText(header);
 		var headerTitle = headerTemplate.GetTitle(parser.Site);
-		var index = nodes.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == headerTitle);
+		var index = nodes.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == headerTitle);
 		if (index != -1)
 		{
 			var existing = (ITemplateNode)nodes[index];
@@ -373,7 +373,7 @@ internal sealed class UespProtectPages : EditJob
 	private static int AddJavascriptProtection(SiteParser parser, PageProtection protection, int insertPos)
 	{
 		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
-		var currentPos = parser.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
+		var currentPos = parser.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
 			parser.RemoveAt(currentPos);
@@ -418,7 +418,7 @@ internal sealed class UespProtectPages : EditJob
 	private static string GetDate(SiteParser parser)
 	{
 		var minDate = DateTime.MaxValue;
-		foreach (var node in parser.FindAll<ITextNode>())
+		foreach (var node in parser.TextNodes)
 		{
 			foreach (var match in (IEnumerable<Match>)Dates.Matches(node.Text))
 			{
@@ -463,7 +463,7 @@ internal sealed class UespProtectPages : EditJob
 	private static int RemoveProtectionTemplate(SiteParser parser, int insertPos)
 	{
 		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
-		var currentPos = parser.FindIndex<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
+		var currentPos = parser.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
 			var existing = (ITemplateNode)parser[currentPos];
@@ -495,7 +495,7 @@ internal sealed class UespProtectPages : EditJob
 		// Figure out where to put a new Protection tempalte: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
 		if (page.IsRedirect)
 		{
-			insertPos = nodes.FindIndex<ILinkNode>(0) + 1;
+			insertPos = nodes.IndexOf<ILinkNode>(0) + 1;
 			nodes.InsertRange(insertPos, [nodes.Factory.TextNode("\n")]);
 			insertPos++;
 		}

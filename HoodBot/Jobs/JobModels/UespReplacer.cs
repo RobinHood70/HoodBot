@@ -256,7 +256,7 @@ internal sealed class UespReplacer
 
 	public static void ReplaceSkillLinks(WikiNodeCollection nodes, string skillName)
 	{
-		foreach (var textNode in nodes.FindAll<ITextNode>())
+		foreach (var textNode in nodes.TextNodes)
 		{
 			foreach (var synergy in ReplacementData.Synergies)
 			{

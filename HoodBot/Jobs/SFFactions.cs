@@ -172,7 +172,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 			foreach (var item in existing.Values)
 			{
 				var parser = item.Parser;
-				if (parser.Find<ITemplateNode>(t =>
+				if (parser.FindTemplate(t =>
 					t.GetTitle(this.Site) == factionTitle &&
 					t.GetValue("edid").OrdinalICEquals(edid)) is not ITemplateNode template)
 				{
@@ -180,9 +180,9 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				}
 
 				var membersNode = template.AddIfNotExists("members", "{{Factions/Members\n  }}", ParameterFormat.Packed);
-				var factionMembersTemplate = membersNode.Value.FindTemplate(t => t.GetTitle(this.Site) == factionMembersTitle) ?? throw new InvalidOperationException();
+				var factionMembersTemplate = membersNode.Value.FindTemplate(factionMembersTitle) ?? throw new InvalidOperationException();
 				var factionMembersNode = factionMembersTemplate.AddIfNotExists("members", string.Empty, ParameterFormat.Packed);
-				if (factionMembersNode.Value.Find<ITemplateNode>(t => t.GetTitle(this.Site) == listTitle) is not ITemplateNode listTemplate)
+				if (factionMembersNode.Value.FindTemplate(listTitle) is not ITemplateNode listTemplate)
 				{
 					listTemplate = factionMembersNode.Factory.TemplateNodeFromParts("List");
 					factionMembersNode.Value.Add(listTemplate);
@@ -278,7 +278,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 	private void ConfirmInitialHeader(Section section)
 	{
-		if (section.Content.Find<ITemplateNode>(t => t.GetTitle(this.Site).PageNameEquals("Factions")) is ITemplateNode firstFaction)
+		if (section.Content.FindTemplate(this.Site, "Factions") is ITemplateNode firstFaction)
 		{
 			firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
 		}
