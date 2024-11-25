@@ -235,18 +235,6 @@ public static class ParserHelpers
 		}
 	}
 
-	/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
-	/// <param name="nodes">The node collection to work on.</param>
-	/// <param name="site">The site being worked with.</param>
-	/// <param name="text">The text to parse.</param>
-	/// <returns>A new WikiNodeCollection created from the text.</returns>
-	public static IList<IWikiNode> Parse(this WikiNodeCollection nodes, Site site, string? text)
-	{
-		ArgumentNullException.ThrowIfNull(nodes);
-		ArgumentNullException.ThrowIfNull(site);
-		return nodes.Factory.Parse(text);
-	}
-
 	/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="site">The site being worked with.</param>

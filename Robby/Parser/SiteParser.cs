@@ -118,11 +118,6 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <returns>The templates that match the provided titles, if any.</returns>
 	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<string> find) => this.FindTemplates(this.Site, find);
 
-	/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
-	/// <param name="text">The text to parse.</param>
-	/// <returns>A new WikiNodeCollection created from the text.</returns>
-	public IList<IWikiNode> Parse(string? text) => this.Parse(this.Site, text);
-
 	/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
 	/// <param name="find">The name of the template.</param>
 	public void RemoveTemplates(string find) => this.RemoveTemplates(this.Site, find);

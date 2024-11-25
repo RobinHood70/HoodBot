@@ -46,14 +46,6 @@ public class WikiNodeCollection : List<IWikiNode>
 	}
 	#endregion
 
-	#region Public Static Methods
-	public static WikiNodeCollection NewFrom(IParentNode node, string? value)
-	{
-		ArgumentNullException.ThrowIfNull(node);
-		return new WikiNodeCollection(node.Factory, node.Factory.Parse(value));
-	}
-	#endregion
-
 	#region Public Properties
 
 	/// <summary>Gets the <see cref="IWikiNodeFactory"/> used to create new nodes.</summary>
@@ -75,6 +67,19 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Gets the <see cref="ITextNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
 	public IEnumerable<ITextNode> TextNodes => this.FindAll<ITextNode>();
+	#endregion
+
+	#region Public Static Methods
+
+	/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class from an exising <see cref="IParentNode"/>.</summary>
+	/// <param name="node">The node to copy from.</param>
+	/// <param name="value">The value to parse.</param>
+	/// <returns>A new <see cref="WikiNodeCollection"/> based on the node provided.</returns>
+	public static WikiNodeCollection NewFrom(IParentNode node, string? value)
+	{
+		ArgumentNullException.ThrowIfNull(node);
+		return new WikiNodeCollection(node.Factory, node.Factory.Parse(value));
+	}
 	#endregion
 
 	#region Public Methods
@@ -104,11 +109,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
 	/// <param name="text">The text to be added.</param>
-	public void AppendParsed([Localizable(false)] string text)
-	{
-		var newNodes = this.Factory.Parse(text);
-		this.AddRange(newNodes);
-	}
+	public void AppendParsed([Localizable(false)] string text) => this.AddRange(this.Factory.Parse(text));
 
 	/// <summary>Creates a shallow copy of the collection.</summary>
 	/// <returns>A shallow copy of all nodes in the collection, along with the factory.</returns>
@@ -326,49 +327,12 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
 	public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
 
-	/// <summary>Splits a page into its individual sections. </summary>
-	/// <returns>An enumeration of the sections of the page.</returns>
-	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
-	public SectionCollection ToSections() => this.ToSections(6);
-
-	/// <summary>Splits a page into its individual sections. </summary>
-	/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
-	/// <returns>An enumeration of the sections of the page.</returns>
-	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
-	public SectionCollection ToSections(int level)
-	{
-		var sections = new SectionCollection(this.Factory, level);
-		var section = new Section(null, new WikiNodeCollection(this.Factory));
-		foreach (var node in this)
-		{
-			if (node is IHeaderNode header && header.Level <= level)
-			{
-				if (section.Header != null || section.Content.Count > 0)
-				{
-					sections.Add(section);
-				}
-
-				section = new Section(header, new WikiNodeCollection(this.Factory));
-			}
-			else
-			{
-				section.Content.Add(node);
-			}
-		}
-
-		sections.Add(section);
-		return sections;
-	}
-
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
 	/// <param name="index">This index at which to insert the text.</param>
 	/// <param name="text">The text.</param>
-	public void InsertParsed(int index, [Localizable(false)] string text)
-	{
-		var newNodes = this.Factory.Parse(text);
-		this.InsertRange(index, newNodes);
-	}
+	public void InsertParsed(int index, [Localizable(false)] string text) =>
+		this.InsertRange(index, this.Factory.Parse(text));
 
 	/// <summary>Adds text to the end of the collection.</summary>
 	/// <param name="index">This index at which to insert the text.</param>
@@ -412,6 +376,11 @@ public class WikiNodeCollection : List<IWikiNode>
 			}
 		}
 	}
+
+	/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
+	/// <param name="text">The text to parse.</param>
+	/// <returns>A new WikiNodeCollection created from the text.</returns>
+	public IList<IWikiNode> Parse(string? text) => this.Factory.Parse(text);
 
 	/// <summary>Removes all nodes of the given type.</summary>
 	/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -466,6 +435,40 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 	/// </remarks>
 	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
+
+	/// <summary>Splits a page into its individual sections. </summary>
+	/// <returns>An enumeration of the sections of the page.</returns>
+	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
+	public SectionCollection ToSections() => this.ToSections(6);
+
+	/// <summary>Splits a page into its individual sections. </summary>
+	/// <param name="level">Only split on sections of this level or less (i.e., a value of 2 splits on levels 1 and 2).</param>
+	/// <returns>An enumeration of the sections of the page.</returns>
+	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
+	public SectionCollection ToSections(int level)
+	{
+		var sections = new SectionCollection(this.Factory, level);
+		var section = new Section(null, new WikiNodeCollection(this.Factory));
+		foreach (var node in this)
+		{
+			if (node is IHeaderNode header && header.Level <= level)
+			{
+				if (section.Header != null || section.Content.Count > 0)
+				{
+					sections.Add(section);
+				}
+
+				section = new Section(header, new WikiNodeCollection(this.Factory));
+			}
+			else
+			{
+				section.Content.Add(node);
+			}
+		}
+
+		sections.Add(section);
+		return sections;
+	}
 
 	/// <summary>Trims whitespace from the beginning and end of the collection.</summary>
 	/// <remarks>Note that this is a naive implementation that only looks at the first and last nodes of the collection. It is therefore recommended that you use <see cref="MergeText(bool)"/> first. This implementation also does not recurse, although this is unlikely to be an issue except in corner cases (e.g., a header node with trailing whitespace as the last entry in the collection).</remarks>
