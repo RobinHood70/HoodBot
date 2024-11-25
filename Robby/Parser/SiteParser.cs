@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 using RobinHood70.WikiCommon.Parser.Basic;
 
@@ -90,194 +89,43 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="newLineBefore">Whether to add a new line before the category.</param>
 	/// <returns><see langword="true"/> if the category was added to the page; <see langword="false"/> if was already on the page.</returns>
 	/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
-	public bool AddCategory(string category, bool newLineBefore)
-	{
-		ArgumentNullException.ThrowIfNull(category);
-		var lastCategoryIndex = -1;
-		for (var i = 0; i < this.Count; i++)
-		{
-			if (this[i] is ILinkNode link &&
-				TitleFactory.FromBacklinkNode(this.Site, link).Title is var title &&
-				title.Namespace == MediaWikiNamespaces.Category)
-			{
-				if (title.PageNameEquals(category))
-				{
-					return false;
-				}
-
-				lastCategoryIndex = i;
-			}
-		}
-
-		lastCategoryIndex++;
-		if (lastCategoryIndex == 0)
-		{
-			if (this.Count > 0)
-			{
-				// makes sure two LFs are added no matter what, since newLineBefore adds a LF already
-				this.AddText(newLineBefore ? "\n" : "\n\n");
-			}
-
-			lastCategoryIndex = this.Count;
-			//// this.Nodes.Add(newCat);
-		}
-
-		if (newLineBefore && lastCategoryIndex > 0)
-		{
-			this.Insert(lastCategoryIndex, this.Factory.TextNode("\n"));
-			lastCategoryIndex++;
-		}
-
-		this.Insert(lastCategoryIndex, this.Factory.LinkNodeFromParts(this.Site[MediaWikiNamespaces.Category].Name + ':' + category));
-		return true;
-	}
+	public bool AddCategory(string category, bool newLineBefore) => this.AddCategory(this.Site, category, newLineBefore);
 
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="find">The title to find.</param>
 	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public ILinkNode? FindLink(string find)
-	{
-		var title = TitleFactory.FromUnvalidated(this.Site, find);
-		return (title.Fragment is null && title.Interwiki is null)
-			? this.FindLink(title.Title)
-			: this.FindLink(title.ToFullTitle());
-	}
-
-	/// <summary>Finds the first link that matches the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
-	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public ILinkNode? FindLink(Title find) => find is null
-		? null
-		: this.FindLink(link => link.GetTitle(this.Site) == find);
-
-	/// <summary>Finds the first link that matches the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
-	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public ILinkNode? FindLink(IFullTitle find) => find is null
-		? null
-		: this.FindLink(link => TitleFactory.FromBacklinkNode(this.Site, link).FullEquals(find));
+	public ILinkNode? FindLink(string find) => this.FindLink(this.Site, find);
 
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="find">The title to find.</param>
 	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public IEnumerable<ILinkNode> FindLinks(string find)
-	{
-		var title = TitleFactory.FromUnvalidated(this.Site, find);
-		return (title.Fragment is null && title.Interwiki is null)
-			? this.FindLinks(title.Title)
-			: this.FindLinks(title.ToFullTitle());
-	}
-
-	/// <summary>Finds all links that match the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
-	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public IEnumerable<ILinkNode> FindLinks(Title find) => find is null
-		? []
-		: this.FindLinks(link => link.GetTitle(this.Site) == find);
-
-	/// <summary>Finds all links that match the provided title.</summary>
-	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
-	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public IEnumerable<ILinkNode> FindLinks(IFullTitle find) => find is null
-		? []
-		: this.FindLinks(link => TitleFactory.FromBacklinkNode(this.Site, link).FullEquals(find));
+	public IEnumerable<ILinkNode> FindLinks(string find) => this.FindLinks(this.Site, find);
 
 	/// <summary>Finds the first template that matches the provided title.</summary>
 	/// <param name="find">The name of the template to find.</param>
 	/// <returns>The first <see cref="ITemplateNode"/> that matches the title provided, if found.</returns>
-	public ITemplateNode? FindTemplate(string find) => this.FindTemplate(TitleFactory.FromTemplate(this.Site, find));
+	public ITemplateNode? FindTemplate(string find) => this.FindTemplate(this.Site, find);
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public ITemplateNode? FindTemplate(Title find) => find is null
-		? null
-		: this.FindTemplate(link => link.GetTitle(this.Site) == find);
+	public IEnumerable<ITemplateNode> FindTemplates(string find) => this.FindTemplates(this.Site, find);
 
 	/// <summary>Finds all templates that match the provided title.</summary>
-	/// <param name="findName">The template to find.</param>
-	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(string findName) => this.FindTemplates(TitleFactory.FromTemplate(this.Site, findName));
-
-	/// <summary>Finds all templates that match the provided title.</summary>
-	/// <param name="findName">The template to find.</param>
-	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(Title findName)
-	{
-		ArgumentNullException.ThrowIfNull(findName);
-		return this.FindTemplates(template => template.GetTitle(this.Site) == findName);
-	}
-
-	/// <summary>Finds all templates that match the provided title.</summary>
-	/// <param name="findNames">The templates to find.</param>
+	/// <param name="find">The templates to find.</param>
 	/// <returns>The templates that match the provided titles, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<string> findNames)
-	{
-		ArgumentNullException.ThrowIfNull(findNames);
-		var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, findNames);
-		return this.FindTemplates(titles);
-	}
-
-	/// <summary>Finds all templates that match the provided title.</summary>
-	/// <param name="findNames">The templates to find.</param>
-	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<Title> findNames)
-	{
-		ArgumentNullException.ThrowIfNull(findNames);
-		return FindTemplatesInternal(findNames);
-
-		IEnumerable<ITemplateNode> FindTemplatesInternal(IEnumerable<Title> findNames) => this.FindTemplates(
-			templateNode =>
-			new TitleCollection(this.Site, findNames).Contains(templateNode.GetTitle(this.Site)));
-	}
+	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<string> find) => this.FindTemplates(this.Site, find);
 
 	/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
 	/// <param name="text">The text to parse.</param>
 	/// <returns>A new WikiNodeCollection created from the text.</returns>
-	public IList<IWikiNode> Parse(string text) => this.Factory.Parse(text);
+	public IList<IWikiNode> Parse(string? text) => this.Parse(this.Site, text);
 
 	/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
-	/// <param name="templateName">The name of the template.</param>
-	public void RemoveTemplates(string templateName)
-	{
-		var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], templateName);
-		this.RemoveTemplates(title);
-	}
-
-	/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
-	/// <param name="title">The title of the template.</param>
-	public void RemoveTemplates(Title title)
-	{
-		ArgumentNullException.ThrowIfNull(title);
-		for (var i = this.Count - 1; i >= 0; i--)
-		{
-			var node = this[i];
-			if (node is ITemplateNode template && template.GetTitle(this.Site) == title)
-			{
-				this.RemoveAt(i);
-				var afterNewLine = i == 0 ||
-					(this[i - 1] is ITextNode textBefore &&
-					textBefore.Text.Length > 0 &&
-					textBefore.Text[^1] == '\n');
-				if (afterNewLine &&
-					i < this.Count &&
-					this[i] is ITextNode textAfter)
-				{
-					textAfter.Text = textAfter.Text.TrimStart();
-					if (textAfter.Text.Length == 0)
-					{
-						this.RemoveAt(i);
-					}
-				}
-			}
-		}
-	}
+	/// <param name="find">The name of the template.</param>
+	public void RemoveTemplates(string find) => this.RemoveTemplates(this.Site, find);
 
 	/// <summary>Reparses the existing page text with new inclusion parameters.</summary>
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
