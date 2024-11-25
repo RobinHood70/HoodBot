@@ -46,6 +46,14 @@ public class WikiNodeCollection : List<IWikiNode>
 	}
 	#endregion
 
+	#region Public Static Methods
+	public static WikiNodeCollection NewFrom(IParentNode node, string? value)
+	{
+		ArgumentNullException.ThrowIfNull(node);
+		return new WikiNodeCollection(node.Factory, node.Factory.Parse(value));
+	}
+	#endregion
+
 	#region Public Properties
 
 	/// <summary>Gets the <see cref="IWikiNodeFactory"/> used to create new nodes.</summary>
