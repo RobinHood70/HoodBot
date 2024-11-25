@@ -197,8 +197,8 @@ internal sealed class EsoSets : EditJob
 	#region Private Methods
 	private void GenerateReport()
 	{
-		var nonTrivial = new SortedDictionary<Title, string>();
-		var trivial = new SortedDictionary<Title, string>();
+		var nonTrivial = new SortedDictionary<Title, string>(TitleComparer.Instance);
+		var trivial = new SortedDictionary<Title, string>(TitleComparer.Instance);
 		StringBuilder sb = new();
 		foreach (var (title, set) in this.sets)
 		{
