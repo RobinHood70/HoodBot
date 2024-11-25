@@ -346,7 +346,7 @@ internal sealed class UespReplacer
 	private static void GetMatches(string tableText, List<EsoReplacement> list)
 	{
 		IEnumerable<Match> matches = ReplacementFinder.Matches(tableText);
-		var factory = new WikiNodeFactory();
+		var factory = WikiNodeFactory.DefaultInstance;
 		foreach (var match in matches)
 		{
 			var from = match.Groups["from"].Value;

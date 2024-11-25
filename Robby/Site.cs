@@ -1246,7 +1246,7 @@ public class Site : IMessageSource
 			? redirect.Aliases
 			: DefaultRedirect;
 		HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-		var nodes = new WikiNodeFactory().Parse(text);
+		var nodes = WikiNodeFactory.DefaultInstance.Parse(text);
 
 		// Is the text of the format TextNode, LinkNode?
 		if (nodes.Count > 1 &&

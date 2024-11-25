@@ -13,6 +13,12 @@ using RobinHood70.WikiCommon.Properties;
 /// <seealso cref="IWikiNodeFactory" />
 public class WikiNodeFactory : IWikiNodeFactory
 {
+	#region Public Static Properties
+
+	/// <summary>Gets a static <see cref="WikiNodeFactory"/> with the default property values.</summary>
+	public static WikiNodeFactory DefaultInstance { get; } = new WikiNodeFactory();
+	#endregion
+
 	#region Public Properties
 
 	/// <summary>Gets or sets the text to use when escaping equals signs.</summary>

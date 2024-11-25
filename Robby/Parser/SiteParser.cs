@@ -44,7 +44,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 	/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
-		: base(new WikiNodeFactory())
+		: base(WikiNodeFactory.DefaultInstance)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		this.Page = page;

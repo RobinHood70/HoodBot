@@ -242,7 +242,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 			list.Add(faction);
 		}
 
-		var factory = new WikiNodeFactory();
+		var factory = WikiNodeFactory.DefaultInstance;
 		foreach (var (sectionName, list) in groupedSections)
 		{
 			list.Sort((f1, f2) => f1.EditorId.CompareTo(f2.EditorId));

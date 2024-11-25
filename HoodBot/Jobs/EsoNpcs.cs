@@ -385,7 +385,7 @@ internal sealed class EsoNpcs : EditJob
 			("faction", string.Empty)
 		];
 
-		var factory = new WikiNodeFactory();
+		var factory = WikiNodeFactory.DefaultInstance;
 		var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 		UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
 

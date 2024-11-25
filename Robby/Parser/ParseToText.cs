@@ -36,7 +36,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	/// <returns>The parsed text.</returns>
 	public static string Build(string text, Context context) => (text is null || text.Length == 0)
 		? string.Empty
-		: Build(new WikiNodeFactory().Parse(text), context);
+		: Build(WikiNodeFactory.DefaultInstance.Parse(text), context);
 
 	/// <summary>Builds the plain text from a text string.</summary>
 	/// <param name="nodes">The pre-parsed text to parse.</param>
@@ -153,7 +153,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	#region Private Static Methods
 	private static string Build(string? text, Context context, MagicWordFrame frame) => (text is null || text.Length == 0)
 		? string.Empty
-		: Build(new WikiNodeFactory().Parse(text), context, frame);
+		: Build(WikiNodeFactory.DefaultInstance.Parse(text), context, frame);
 
 	private static string Build(IEnumerable<IWikiNode>? nodes, Context context, MagicWordFrame frame)
 	{

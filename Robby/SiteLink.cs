@@ -584,7 +584,7 @@ public class SiteLink : ILinkTitle
 			values.Add(text);
 		}
 
-		return new WikiNodeFactory().LinkNodeFromParts(this.LinkTarget(false), values);
+		return WikiNodeFactory.DefaultInstance.LinkNodeFromParts(this.LinkTarget(false), values);
 	}
 
 	/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
@@ -679,7 +679,7 @@ public class SiteLink : ILinkTitle
 			link = "[[" + link + " ]]";
 		}
 
-		var linkNode = new WikiNodeFactory().LinkNodeFromWikiText(link);
+		var linkNode = WikiNodeFactory.DefaultInstance.LinkNodeFromWikiText(link);
 		if (removeSpace)
 		{
 			TrimTrailingSpace(linkNode);
