@@ -109,7 +109,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
 	/// <param name="text">The text to be added.</param>
-	public void AppendParsed([Localizable(false)] string text) => this.AddRange(this.Factory.Parse(text));
+	public void AddParsed([Localizable(false)] string text) => this.AddRange(this.Factory.Parse(text));
 
 	/// <summary>Creates a shallow copy of the collection.</summary>
 	/// <returns>A shallow copy of all nodes in the collection, along with the factory.</returns>

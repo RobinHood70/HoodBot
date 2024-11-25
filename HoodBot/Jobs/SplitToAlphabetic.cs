@@ -96,10 +96,10 @@ internal sealed class SplitToAlphabetic : EditJob
 		newParser.TrimEnd();
 		if (hasRefs)
 		{
-			newParser.AppendParsed("\n\n==References==\n<references/>");
+			newParser.AddParsed("\n\n==References==\n<references/>");
 			if (hasUol)
 			{
-				newParser.AppendParsed("\n{{UOL}}\n<references group=UOL/>");
+				newParser.AddParsed("\n{{UOL}}\n<references group=UOL/>");
 			}
 		}
 

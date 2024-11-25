@@ -223,7 +223,7 @@ public static class Extensions
 		}
 
 		paramValue.Clear();
-		paramValue.AppendParsed(value);
+		paramValue.AddParsed(value);
 	}
 
 	/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>

@@ -256,7 +256,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				if (section is not null)
 				{
 					this.ConfirmInitialHeader(section);
-					section.Content.AppendParsed(sectionText);
+					section.Content.AddParsed(sectionText);
 				}
 				else
 				{
