@@ -29,7 +29,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		this.NewPageText = GetNewPageText;
-		this.OnUpdate = UpdateMission;
+		this.OnUpdate = this.UpdateMission;
 		this.searchTitles = new TitleCollection(
 			this.Site,
 			"Template:Stub",
@@ -109,59 +109,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 		sb.Append("}}\n\n");
 		return sb.ToString();
-	}
-
-	private void DoStages(SiteParser parser, List<Stage> stages)
-	{
-		if (parser.FindTemplate("Mission Entries") is not null)
-		{
-			return;
-		}
-
-		var insertLoc = parser.FindIndex<ITemplateNode>(t => this.searchTitles.Contains(t.GetTitle(parser.Site)));
-		if (insertLoc == -1)
-		{
-			insertLoc = parser.Count;
-		}
-
-		var missionEntries = BuildStageSection(stages);
-		parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
-	}
-
-	private void DoSummary(SiteParser parser, string missionSummary)
-	{
-		var sections = parser.ToSections(2);
-		Section? summary = null;
-		foreach (var section in sections.FindAll("Official Summary", StringComparer.OrdinalIgnoreCase, 0))
-		{
-			var text = section.Content.ToRaw();
-			if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))
-			{
-				return;
-			}
-
-			summary = section;
-			break;
-		}
-
-		var lead = sections[0].Content;
-		if (summary is null)
-		{
-			summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
-			var stubIndex = lead.FindIndex<ITemplateNode>(t =>
-				this.searchTitles.Contains(t.GetTitle(this.Site)));
-			if (stubIndex != -1)
-			{
-				var stub = lead[stubIndex];
-				lead.RemoveAt(stubIndex);
-				summary.Content.AddText("\n\n");
-				summary.Content.Add(stub);
-			}
-
-			sections.InsertWithSpaceBefore(1, summary);
-		}
-
-		parser.FromSections(sections);
 	}
 
 	private static ITemplateNode? FindTemplate(SiteParser parser, Mission item)
@@ -244,35 +191,62 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			.Replace(']', ')')
 			.Trim();
 	}
+	#endregion
 
-	private void UpdateMission(SiteParser parser, Mission item)
+	#region Private Methods
+	private void DoStages(SiteParser parser, List<Stage> stages)
 	{
-		var template = FindTemplate(parser, item);
-		if (template is null)
+		if (parser.FindTemplate("Mission Entries") is not null)
 		{
 			return;
 		}
 
-		template.Update("ID", item.EditorId);
-		var labelName = parser.Page.Title.LabelName();
-		if (!labelName.OrdinalEquals(item.Name))
+		var insertLoc = parser.FindIndex<ITemplateNode>(t => this.searchTitles.Contains(t.GetTitle(parser.Site)));
+		if (insertLoc == -1)
 		{
-			template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+			insertLoc = parser.Count;
 		}
 
-		if (item.Summary.Length > 0)
-		{
-			this.DoSummary(parser, item.Summary);
-		}
-
-		if (item.Stages.Count > 0)
-		{
-			this.DoStages(parser, item.Stages);
-		}
+		var missionEntries = BuildStageSection(stages);
+		parser.Insert(insertLoc, parser.Factory.TextNode(missionEntries));
 	}
-	#endregion
 
-	#region Private Methods
+	private void DoSummary(SiteParser parser, string missionSummary)
+	{
+		var sections = parser.ToSections(2);
+		Section? summary = null;
+		foreach (var section in sections.FindAll("Official Summary", StringComparer.OrdinalIgnoreCase, 0))
+		{
+			var text = section.Content.ToRaw();
+			if (text.Contains(missionSummary, StringComparison.OrdinalIgnoreCase))
+			{
+				return;
+			}
+
+			summary = section;
+			break;
+		}
+
+		var lead = sections[0].Content;
+		if (summary is null)
+		{
+			summary = Section.FromText(parser.Factory, 2, "Official Summary", $"''\"{missionSummary}\"''");
+			var stubIndex = lead.FindIndex<ITemplateNode>(t =>
+				this.searchTitles.Contains(t.GetTitle(this.Site)));
+			if (stubIndex != -1)
+			{
+				var stub = lead[stubIndex];
+				lead.RemoveAt(stubIndex);
+				summary.Content.AddText("\n\n");
+				summary.Content.Add(stub);
+			}
+
+			sections.InsertWithSpaceBefore(1, summary);
+		}
+
+		parser.FromSections(sections);
+	}
+
 	private Dictionary<string, Title> LoadExisting()
 	{
 		/* var exclusions = new TitleCollection(
@@ -366,6 +340,32 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		}
 
 		return retval;
+	}
+
+	private void UpdateMission(SiteParser parser, Mission item)
+	{
+		var template = FindTemplate(parser, item);
+		if (template is null)
+		{
+			return;
+		}
+
+		template.Update("ID", item.EditorId);
+		var labelName = parser.Page.Title.LabelName();
+		if (!labelName.OrdinalEquals(item.Name))
+		{
+			template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+		}
+
+		if (item.Summary.Length > 0)
+		{
+			this.DoSummary(parser, item.Summary);
+		}
+
+		if (item.Stages.Count > 0)
+		{
+			this.DoStages(parser, item.Stages);
+		}
 	}
 	#endregion
 

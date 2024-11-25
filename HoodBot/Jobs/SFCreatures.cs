@@ -73,27 +73,6 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 	}
 
-	private void UpdateLoc(ITemplateNode template, Creature item)
-	{
-		// Remove loc if it's a link and duplicates planet
-		if (template.Find("loc") is IParameterNode loc)
-		{
-			if (loc.Value.Count == 2 &&
-			loc.Value[0] is ILinkNode linkNode)
-			{
-				var link = SiteLink.FromLinkNode(this.Site, linkNode);
-				foreach (var row in item.Variants)
-				{
-					if (link.Text.OrdinalICEquals(row["Planet"]))
-					{
-						template.Remove("loc");
-						break;
-					}
-				}
-			}
-		}
-	}
-
 	private static void UpdateTemplate(ITemplateNode template, CsvRow row)
 	{
 		template.Update("baseid", row["FormID"]);
@@ -219,7 +198,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 
 			if (item.Variants.Count < 2)
 			{
-				UpdateLoc(cs, item);
+				this.UpdateLoc(cs, item);
 				UpdateTemplate(cs, item.Variants[0]);
 			}
 			else
@@ -251,6 +230,27 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 
 		parser.UpdatePage();
+	}
+
+	private void UpdateLoc(ITemplateNode template, Creature item)
+	{
+		// Remove loc if it's a link and duplicates planet
+		if (template.Find("loc") is IParameterNode loc)
+		{
+			if (loc.Value.Count == 2 &&
+			loc.Value[0] is ILinkNode linkNode)
+			{
+				var link = SiteLink.FromLinkNode(this.Site, linkNode);
+				foreach (var row in item.Variants)
+				{
+					if (link.Text.OrdinalICEquals(row["Planet"]))
+					{
+						template.Remove("loc");
+						break;
+					}
+				}
+			}
+		}
 	}
 	#endregion
 

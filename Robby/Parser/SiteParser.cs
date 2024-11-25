@@ -144,7 +144,6 @@ public class SiteParser : WikiNodeCollection, ITitle
 			: this.FindLink(title.ToFullTitle());
 	}
 
-
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="find">The title to find.</param>
 	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
@@ -160,7 +159,6 @@ public class SiteParser : WikiNodeCollection, ITitle
 	public ILinkNode? FindLink(IFullTitle find) => find is null
 		? null
 		: this.FindLink(link => TitleFactory.FromBacklinkNode(this.Site, link).FullEquals(find));
-
 
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="find">The title to find.</param>

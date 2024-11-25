@@ -153,12 +153,12 @@ internal sealed class UespReplacer
 					}
 				}
 
-				var matches = (ICollection<Match>)EsoLinks.Matches(text);
+				var matches = EsoLinks.Matches(text);
 				if (matches.Count > 0)
 				{
 					WikiNodeCollection replacementNodes = new(nodes.Factory);
 					var startPos = 0;
-					foreach (var match in matches)
+					foreach (var match in (ICollection<Match>)matches)
 					{
 						if (match.Index > startPos)
 						{

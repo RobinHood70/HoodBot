@@ -209,10 +209,6 @@ internal abstract class Skill
 			UespReplacer.ReplaceGlobal(collection);
 			UespReplacer.ReplaceEsoLinks(usedList.Site, collection);
 			UespReplacer.ReplaceFirstLink(collection, usedList);
-			if (skillName is null)
-			{
-			}
-
 			UespReplacer.ReplaceSkillLinks(collection, skillName);
 		}
 

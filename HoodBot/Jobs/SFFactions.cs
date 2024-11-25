@@ -106,14 +106,6 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		return sb.ToString();
 	}
 
-	private void ConfirmInitialHeader(Section section)
-	{
-		if (section.Content.Find<ITemplateNode>(t => t.GetTitle(this.Site).PageNameEquals("Factions")) is ITemplateNode firstFaction)
-		{
-			firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
-		}
-	}
-
 	private static List<Faction> GetFactions(string folder)
 	{
 		var csv = new CsvFile(folder + "Factions.csv")
@@ -263,7 +255,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				var sectionText = BuildSectionText(faction, groupExists || list.Count > 1);
 				if (section is not null)
 				{
-					ConfirmInitialHeader(section);
+					this.ConfirmInitialHeader(section);
 					section.Content.AppendParsed(sectionText);
 				}
 				else
@@ -281,6 +273,14 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 					sections.Add(faction.SectionName, section);
 				}
 			}
+		}
+	}
+
+	private void ConfirmInitialHeader(Section section)
+	{
+		if (section.Content.Find<ITemplateNode>(t => t.GetTitle(this.Site).PageNameEquals("Factions")) is ITemplateNode firstFaction)
+		{
+			firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
 		}
 	}
 
