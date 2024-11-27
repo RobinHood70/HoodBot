@@ -36,14 +36,14 @@ internal abstract class OpenCloseElement : StackElement
 	protected List<IWikiNode> Backtrack(int matchingCount)
 	{
 		var newPiece = new Piece();
-		newPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)));
+		newPiece.Nodes.Add(this.Stack.Factory.TextNode(new string(this.open, matchingCount)));
 		var oldPiece = this.DividerPieces[0];
 		newPiece.MergeText(oldPiece.Nodes);
 		var pieceCount = this.DividerPieces.Count;
 		for (var j = 1; j < pieceCount; j++)
 		{
 			oldPiece = this.DividerPieces[j];
-			newPiece.AddLiteral(this.Stack.NodeFactory, "|");
+			newPiece.AddLiteral(this.Stack.Factory, "|");
 			newPiece.MergeText(oldPiece.Nodes);
 		}
 
@@ -55,7 +55,7 @@ internal abstract class OpenCloseElement : StackElement
 		var count = this.Stack.Text.Span(found, this.Stack.Index, this.length);
 		if (count < 2)
 		{
-			this.CurrentPiece.AddLiteral(this.Stack.NodeFactory, new string(found, count));
+			this.CurrentPiece.AddLiteral(this.Stack.Factory, new string(found, count));
 			this.Stack.Index += count;
 			return count;
 		}
@@ -63,7 +63,7 @@ internal abstract class OpenCloseElement : StackElement
 		List<IParameterNode> parameters = [];
 		var pieceCount = this.DividerPieces.Count;
 		var matchingCount = (found == ']' || count == 2) ? 2 : 3;
-		var factory = this.Stack.NodeFactory;
+		var factory = this.Stack.Factory;
 		for (var i = 1; i < pieceCount; i++)
 		{
 			var nvPiece = this.DividerPieces[i];
@@ -102,7 +102,7 @@ internal abstract class OpenCloseElement : StackElement
 			}
 			else
 			{
-				this.Stack.Top.CurrentPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, this.length)));
+				this.Stack.Top.CurrentPiece.Nodes.Add(this.Stack.Factory.TextNode(new string(this.open, this.length)));
 			}
 		}
 

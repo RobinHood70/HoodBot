@@ -20,7 +20,7 @@ internal sealed class HeaderElement : StackElement
 	internal HeaderElement(WikiStack stack, int length)
 		: base(stack)
 	{
-		this.CurrentPiece.Nodes.Add(stack.NodeFactory.TextNode(new string('=', length)));
+		this.CurrentPiece.Nodes.Add(stack.Factory.TextNode(new string('=', length)));
 		this.length = length;
 		this.startPos = stack.Index;
 	}
@@ -41,49 +41,54 @@ internal sealed class HeaderElement : StackElement
 
 	internal override void Parse(char found)
 	{
-		var stack = this.Stack;
 		if (found == '\n')
 		{
-			var text = stack.Text;
-			var piece = this.CurrentPiece;
-			var searchStart = stack.Index - text.SpanReverse(CommentWhiteSpace, stack.Index);
-			if (searchStart > 0 && searchStart - 1 == piece.CommentEnd)
-			{
-				searchStart = piece.VisualEnd - text.SpanReverse(CommentWhiteSpace, searchStart);
-			}
-
-			var equalsLength = text.SpanReverse('=', searchStart);
-			if (equalsLength > 0)
-			{
-				var endPos = searchStart - equalsLength;
-				var count = endPos == this.startPos
-					? equalsLength < 3
-						? 0
-						: Math.Min(6, (equalsLength - 1) / 2)
-					: Math.Min(equalsLength, this.length);
-
-				if (count > 0)
-				{
-					// TODO: Remove subparser if possible. Should work like templates and links with linear processing.
-					var subparser = this.Stack.NodeFactory;
-					var innerStart = this.startPos + count;
-					var innerText = text[innerStart..(searchStart - count)];
-					var headerNodes = subparser.Parse(innerText);
-					var commentNodes = searchStart < stack.Index ? subparser.Parse(text[searchStart..stack.Index]) : [];
-					var header = this.Stack.NodeFactory.HeaderNode(count, headerNodes, commentNodes);
-					stack.Pop();
-					stack.Top.CurrentPiece.Nodes.Add(header);
-					return;
-				}
-			}
-
-			stack.Pop();
-			stack.Top.CurrentPiece.MergeText(piece.Nodes);
+			this.ParseClose();
 		}
 		else
 		{
-			stack.ParseCharacter(found);
+			this.Stack.ParseCharacter(found);
 		}
+	}
+
+	internal void ParseClose()
+	{
+		var stack = this.Stack;
+		var text = stack.Text;
+		var piece = this.CurrentPiece;
+		var searchStart = stack.Index - text.SpanReverse(CommentWhiteSpace, stack.Index);
+		if (searchStart > 0 && searchStart - 1 == piece.CommentEnd)
+		{
+			searchStart = piece.VisualEnd - text.SpanReverse(CommentWhiteSpace, searchStart);
+		}
+
+		var equalsLength = text.SpanReverse('=', searchStart);
+		if (equalsLength > 0)
+		{
+			var endPos = searchStart - equalsLength;
+			var count = endPos == this.startPos
+				? equalsLength < 3
+					? 0
+					: Math.Min(6, (equalsLength - 1) / 2)
+				: Math.Min(equalsLength, this.length);
+
+			if (count > 0)
+			{
+				// TODO: Remove subparser if possible. Should work like templates and links with linear processing.
+				var subparser = this.Stack.Factory;
+				var innerStart = this.startPos + count;
+				var innerText = text[innerStart..(searchStart - count)];
+				var headerNodes = subparser.Parse(innerText);
+				var commentNodes = searchStart < stack.Index ? subparser.Parse(text[searchStart..stack.Index]) : [];
+				var header = this.Stack.Factory.HeaderNode(count, headerNodes, commentNodes);
+				stack.Pop();
+				stack.Top.CurrentPiece.Nodes.Add(header);
+				return;
+			}
+		}
+
+		stack.Pop();
+		stack.Top.CurrentPiece.MergeText(piece.Nodes);
 	}
 	#endregion
 }

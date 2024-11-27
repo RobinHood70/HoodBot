@@ -42,12 +42,12 @@ internal sealed class TemplateElement(WikiStack stack, int braceLength) : OpenCl
 				lastDivider.Position = lastDivider.Nodes.Count;
 				if (this.DividerPieces.Count == 1)
 				{
-					lastDivider.AddLiteral(this.Stack.NodeFactory, "=");
+					lastDivider.AddLiteral(this.Stack.Factory, "=");
 				}
 				else
 				{
 					// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. This could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.
-					lastDivider.Nodes.Add(this.Stack.NodeFactory.IgnoreNode("="));
+					lastDivider.Nodes.Add(this.Stack.Factory.IgnoreNode("="));
 				}
 
 				this.Stack.Index++;

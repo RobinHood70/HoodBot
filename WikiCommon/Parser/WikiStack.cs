@@ -63,7 +63,7 @@ public sealed class WikiStack
 	public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion)
 	{
 		ArgumentNullException.ThrowIfNull(factory);
-		this.NodeFactory = factory;
+		this.Factory = factory;
 
 		// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 		this.array = new StackElement[StartSize];
@@ -81,8 +81,19 @@ public sealed class WikiStack
 		{
 			case InclusionType.Transcluded:
 				this.includeIgnores = !strictInclusion;
-				this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
-				this.findOnlyinclude = this.enableOnlyInclude;
+				if (text.Contains(OnlyIncludeTagClose, StringComparison.OrdinalIgnoreCase) &&
+					text.IndexOf(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase) is var index &&
+					index >= 0)
+				{
+					if (strictInclusion)
+					{
+						this.Index = index;
+					}
+
+					this.enableOnlyInclude = true;
+					this.findOnlyinclude = true;
+				}
+
 				this.ignoredTags.UnionWith([IncludeOnlyTag, "/" + IncludeOnlyTag]);
 				this.ignoredElements.Add(NoIncludeTag);
 				allTags.Add(NoIncludeTag);
@@ -127,7 +138,7 @@ public sealed class WikiStack
 	#region Internal Properties
 	internal int Index { get; set; }
 
-	internal IWikiNodeFactory NodeFactory { get; }
+	internal IWikiNodeFactory Factory { get; }
 
 	internal string Text { get; }
 
@@ -168,13 +179,14 @@ public sealed class WikiStack
 		switch (found)
 		{
 			case '\n':
-				this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "\n");
+				this.Top.CurrentPiece.AddLiteral(this.Factory, "\n");
 				this.Index++;
 				this.ParseLineStart();
 				break;
 			case '<':
 				if (this.enableOnlyInclude && string.Compare(this.Text, this.Index, OnlyIncludeTagClose, 0, OnlyIncludeTagClose.Length, StringComparison.OrdinalIgnoreCase) == 0)
 				{
+					// In case there are multiple <onlyinclude> tags, we turn searching back on.
 					this.findOnlyinclude = true;
 				}
 				else if (string.Compare(this.Text, this.Index + 1, "!--", 0, 3, StringComparison.Ordinal) == 0)
@@ -189,7 +201,7 @@ public sealed class WikiStack
 					var tagMatch = this.tagsRegex.Match(this.Text, this.Index + 1);
 					if (!tagMatch.Success || !this.FoundTag(tagMatch.Value))
 					{
-						this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "<");
+						this.Top.CurrentPiece.AddLiteral(this.Factory, "<");
 						this.Index++;
 					}
 				}
@@ -207,7 +219,7 @@ public sealed class WikiStack
 				}
 				else
 				{
-					this.Top.CurrentPiece.AddLiteral(this.NodeFactory, new string(found, countFound));
+					this.Top.CurrentPiece.AddLiteral(this.Factory, new string(found, countFound));
 				}
 
 				this.Index += countFound;
@@ -256,7 +268,7 @@ public sealed class WikiStack
 		var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal);
 		if (endPos == -1)
 		{
-			piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[this.Index..]));
+			piece.Nodes.Add(this.Factory.CommentNode(this.Text[this.Index..]));
 			this.Index = this.textLength;
 			return false;
 		}
@@ -284,7 +296,7 @@ public sealed class WikiStack
 			for (var j = 0; j < lastComment; j++)
 			{
 				cmt = comments[j];
-				piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
+				piece.Nodes.Add(this.Factory.CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
 			}
 
 			cmt = comments[lastComment];
@@ -301,8 +313,8 @@ public sealed class WikiStack
 			{
 				cmt = comments[j];
 				var start = j == 0 ? this.Index : cmt.Start;
-				piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[start..cmt.End]));
-				piece.Nodes.Add(this.NodeFactory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
+				piece.Nodes.Add(this.Factory.CommentNode(this.Text[start..cmt.End]));
+				piece.Nodes.Add(this.Factory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
 			}
 
 			cmt = comments[lastComment];
@@ -320,7 +332,7 @@ public sealed class WikiStack
 			header.CommentEnd = endPos - 1;
 		}
 
-		piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[startPos..endPos]));
+		piece.Nodes.Add(this.Factory.CommentNode(this.Text[startPos..endPos]));
 		this.Index = endPos;
 
 		return retval;
@@ -351,7 +363,7 @@ public sealed class WikiStack
 		var tagEndPos = this.Text.IndexOf('>', attrStart);
 		if (tagEndPos == -1)
 		{
-			piece.AddLiteral(this.NodeFactory, "<");
+			piece.AddLiteral(this.Factory, "<");
 			this.Index++;
 			return false;
 		}
@@ -360,7 +372,7 @@ public sealed class WikiStack
 		{
 			if (this.includeIgnores)
 			{
-				piece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
+				piece.Nodes.Add(this.Factory.IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
 			}
 
 			this.Index = tagEndPos + 1;
@@ -399,7 +411,7 @@ public sealed class WikiStack
 			else
 			{
 				this.Index = tagEndPos + 1;
-				piece.AddLiteral(this.NodeFactory, this.Text[tagStartPos..this.Index]);
+				piece.AddLiteral(this.Factory, this.Text[tagStartPos..this.Index]);
 				this.noMoreClosingTag.Add(tagOpen);
 				return true;
 			}
@@ -409,13 +421,13 @@ public sealed class WikiStack
 		{
 			if (this.includeIgnores)
 			{
-				piece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[tagStartPos..this.Index]));
+				piece.Nodes.Add(this.Factory.IgnoreNode(this.Text[tagStartPos..this.Index]));
 			}
 		}
 		else
 		{
 			var attr = attrEnd > attrStart ? this.Text[attrStart..attrEnd] : null;
-			piece.Nodes.Add(this.NodeFactory.TagNode(tagOpen, attr, inner, tagClose));
+			piece.Nodes.Add(this.Factory.TagNode(tagOpen, attr, inner, tagClose));
 		}
 
 		return true;
@@ -440,7 +452,7 @@ public sealed class WikiStack
 			return;
 		}
 
-		if (this.Text[0] == '=')
+		if (!this.findOnlyinclude && this.Text[this.Index] == '=')
 		{
 			this.ParseLineStart();
 		}
@@ -454,19 +466,19 @@ public sealed class WikiStack
 				{
 					if (this.includeIgnores)
 					{
-						this.Top.CurrentPiece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..]));
+						this.Top.CurrentPiece.Nodes.Add(this.Factory.IgnoreNode(this.Text[this.Index..]));
 					}
 
 					break;
 				}
 
-				var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
+				startPos += OnlyIncludeTagOpen.Length; // past-the-end
 				if (this.includeIgnores)
 				{
-					this.Top.CurrentPiece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..tagEndPos]));
+					this.Top.CurrentPiece.Nodes.Add(this.Factory.IgnoreNode(this.Text[this.Index..startPos]));
 				}
 
-				this.Index = tagEndPos;
+				this.Index = startPos;
 				this.findOnlyinclude = false;
 			}
 
@@ -479,7 +491,7 @@ public sealed class WikiStack
 
 			if (literalOffset != this.Index)
 			{
-				this.Top.CurrentPiece.AddLiteral(this.NodeFactory, this.Text[this.Index..literalOffset]);
+				this.Top.CurrentPiece.AddLiteral(this.Factory, this.Text[this.Index..literalOffset]);
 				this.Index = literalOffset;
 				if (this.Index >= this.textLength)
 				{
@@ -490,8 +502,10 @@ public sealed class WikiStack
 			this.Top.Parse(this.CurrentCharacter);
 		}
 
-		var lastHeader = this.Top as HeaderElement;
-		lastHeader?.Parse('\n');
+		if (this.Top is HeaderElement lastHeader)
+		{
+			lastHeader.ParseClose();
+		}
 	}
 	#endregion
 
