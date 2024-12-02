@@ -20,12 +20,13 @@ internal sealed class SFItem
 			throw new InvalidOperationException();
 		}
 
-		if (!formId.StartsWith("00", StringComparison.Ordinal))
+		this.FormId = formId[0..1] switch
 		{
-			formId = "xx" + formId[2..];
-		}
-
-		this.FormId = formId;
+			"00" => formId,
+			"FD" => "FDxx" + formId[4..],
+			"FE" => "FExxx" + formId[5..],
+			_ => "xx" + formId[2..]
+		};
 
 		this.EditorId = row["EditorID"];
 		this.Name = row["Name"];
