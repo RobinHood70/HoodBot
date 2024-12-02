@@ -38,11 +38,6 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	};
 	#endregion
 
-	#region Private Fields
-	private readonly Dictionary<string, SFItem> oldItems = new(StringComparer.Ordinal);
-	private readonly Dictionary<string, SFItem> newItems = new(StringComparer.Ordinal);
-	#endregion
-
 	#region Constructors
 	[JobInfo("Aid Items", "Starfield")]
 	public SFAidItems(JobManager jobManager)
@@ -68,15 +63,9 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 	protected override IDictionary<Title, SFItem> LoadItems()
 	{
-		foreach (var item in ReadItems(GameInfo.Starfield.BaseFolder))
-		{
-			this.oldItems.Add(item.EditorId, item);
-		}
-
 		var items = new Dictionary<Title, SFItem>();
 		foreach (var item in ReadItems(GameInfo.Starfield.ModFolder))
 		{
-			this.newItems.Add(item.EditorId, item);
 			var name = ReplacementNames.TryGetValue(item.EditorId, out var replacement)
 				? replacement
 				: item.Name;
@@ -93,6 +82,22 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 		return items;
 	}
+	#endregion
+
+	#region Private Static Methods
+	private static string GetNewPageText(Title title, SFItem item) => $$$"""
+		{{Trail|Items|Aid Items}}{{Item Summary
+		|objectid={{{item.FormId}}}
+		|editorid={{{item.EditorId}}}
+		|type=Aid Item
+		|image=<!--SF-item-{{{item.Name}}}.png-->
+		|weight={{{item.Weight}}}
+		|value={{{item.Value}}}
+		|effect=
+		|description={{{item.Description}}}
+		}}
+		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
+		""";
 
 	private static List<SFItem> ReadItems(string folder)
 	{
@@ -110,25 +115,13 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 		return retval;
 	}
-	#endregion
-
-	#region Private Static Methods
-	private static string GetNewPageText(Title title, SFItem item) => $$$"""
-		{{Trail|Items|Aid Items}}{{Item Summary
-		|objectid=
-		|editorid={{{item.EditorId}}}
-		|type=Aid Item
-		|image=
-		|weight=
-		|value=
-		|effect=
-		|description=
-		}}
-		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
-		""";
 
 	private void UpdateAidItem(SiteParser parser, SFItem item)
 	{
+		if (parser.Page.Exists)
+		{
+		}
+
 		var template = parser.FindTemplate("Item Summary") ?? throw new InvalidOperationException();
 		var pagenameParam = template.Find("pagename");
 		var pagename = pagenameParam?.GetValue();
@@ -161,13 +154,6 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		if (template.Find("effect") is IParameterNode effectParam)
 		{
 			var effectText = effectParam.GetValue();
-			this.oldItems.TryGetValue(item.EditorId, out var oldItem);
-			var oldDesc = oldItem?.Description ?? string.Empty;
-			if (oldDesc.Length > 0)
-			{
-				effectText = effectText.Replace(oldDesc, string.Empty, StringComparison.OrdinalIgnoreCase);
-			}
-
 			if (item.Description.Length > 0)
 			{
 				effectText = effectText.Replace(item.Description, string.Empty, StringComparison.OrdinalIgnoreCase);
@@ -175,14 +161,6 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 			effectText = effectText.Replace("''''", string.Empty, StringComparison.Ordinal).Trim();
 			effectParam.SetValue(effectText, ParameterFormat.OnePerLine);
-
-			if (!string.IsNullOrEmpty(oldDesc) && !string.Equals(oldDesc, item.Description, StringComparison.Ordinal))
-			{
-				Debug.WriteLine(string.Empty);
-				Debug.WriteLine("Differing descs for " + parser.Title.FullPageName());
-				Debug.WriteLine(oldDesc);
-				Debug.WriteLine(item.Description);
-			}
 		}
 
 		template.Update("description", item.Description, ParameterFormat.OnePerLine, false);

@@ -26,7 +26,7 @@ public sealed class GameInfo(string baseFolder, string modFolder, string modTemp
 
 	public static GameInfo Starfield { get; } = new(
 		LocalConfig.BotDataSubPath(@"Starfield\"),
-		LocalConfig.BotDataSubPath(@"Starfield\ShatteredSpaceData2\Starfield\"),
+		LocalConfig.BotDataSubPath(@"Starfield\ShatteredSpaceData2\ShatteredSpace\"),
 		"SS");
 	#endregion
 
