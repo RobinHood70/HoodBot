@@ -24,7 +24,7 @@ internal sealed class BulkDeleteUnused : WikiJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeLogging()
+	protected override bool BeforeLogging()
 	{
 		TitleCollection unused = new(this.Site);
 		unused.GetQueryPage("Unusedimages");
@@ -38,13 +38,13 @@ internal sealed class BulkDeleteUnused : WikiJob
 			}
 		}
 
-		this.ProgressMaximum = this.deleteTitles.Count + 1;
-		this.Progress = 1;
+		return this.deleteTitles.Count > 0;
 	}
 
 	protected override void Main()
 	{
-		this.ProgressMaximum = this.deleteTitles.Count;
+		this.ProgressMaximum = this.deleteTitles.Count + 1;
+		this.Progress = 1;
 		foreach (var title in this.deleteTitles)
 		{
 			title.Delete("Unused audio file.");

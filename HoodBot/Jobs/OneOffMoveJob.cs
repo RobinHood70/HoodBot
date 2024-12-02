@@ -9,10 +9,10 @@ using RobinHood70.WikiCommon;
 public class OneOffMoveJob(JobManager jobManager, bool updateUserSpace) : MovePagesJob(jobManager, updateUserSpace)
 {
 	#region Protected Override Methods
-	protected override void BeforeMain()
+	protected override bool BeforeMain()
 	{
 		this.MoveAction = MoveAction.None;
-		base.BeforeMain();
+		return base.BeforeMain();
 	}
 
 	protected override string GetEditSummary(Page page) => "Link past redirect";

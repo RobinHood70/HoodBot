@@ -90,9 +90,13 @@ public abstract class WikiJob : IMessageSource
 
 	public void Execute()
 	{
-		this.BeforeMain();
-		this.Main();
-		this.JobCompleted();
+		if (this.BeforeMain())
+		{
+			this.FlowControl();
+			this.Main();
+			this.FlowControl();
+			this.JobCompleted();
+		}
 	}
 
 	public void ResetProgress(int progressMax)
@@ -133,19 +137,29 @@ public abstract class WikiJob : IMessageSource
 	#endregion
 
 	#region Protected Virtual Methods
-	protected virtual void BeforeLogging()
-	{
-	}
 
-	protected virtual void BeforeMain()
+	/// <summary>Executes any code that should happen before a log entry is created.</summary>
+	/// <returns><see langword="true"/> if the job should continue; otherwise, <see langword="false"/>.</returns>
+	protected virtual bool BeforeLogging() => true;
+
+	/// <summary>Executes any code that should happen before the main code body.</summary>
+	/// <returns><see langword="true"/> if the job should continue; otherwise, <see langword="false"/>.</returns>
+	/// <remarks>If this returns <see langword="false"/>, no logging or modifications should occur.</remarks>
+	protected virtual bool BeforeMain()
 	{
 		this.Started?.Invoke(this, EventArgs.Empty);
-		this.BeforeLogging();
-		if (this.Logger != null && this.JobType == JobType.Write)
+		if (!this.BeforeLogging())
+		{
+			return false;
+		}
+
+		if (this.Logger is not null && this.JobType == JobType.Write)
 		{
 			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
 			this.Logger.AddLogEntry(logInfo);
 		}
+
+		return true;
 	}
 
 	protected virtual void FlowControl()

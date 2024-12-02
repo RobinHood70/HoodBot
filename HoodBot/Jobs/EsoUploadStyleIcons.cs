@@ -80,7 +80,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeLogging()
+	protected override bool BeforeLogging()
 	{
 		this.GetIcons(EsoLog.LatestDBUpdate(false));
 		var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
@@ -93,6 +93,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 		}
 
 		this.uploads = this.GetUploads(files);
+		return this.uploads.Count > 0;
 	}
 
 	protected override void Main()

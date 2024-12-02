@@ -37,8 +37,11 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeLoadPages()
+	protected override string GetEditSummary(Page page) => "Update LoreLink";
+
+	protected override void LoadPages()
 	{
+		// Note: this was edited without testing. Since this routine populates pages, I've moved it here from BeforeLoadPages(). Compare with previous diff for more.
 		var limits = this.nsList.Values
 			.Where(ns => ns.IsGamespace && !ns.IsPseudoNamespace)
 			.Select(ns => ns.BaseNamespace.Id);
@@ -97,16 +100,6 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		this.targetPages.GetTitles(findTitles);
 		//// If the next line is uncommented, it allows altering red links as well
 		// this.targetPages.RemoveExists(false);
-	}
-
-	protected override string GetEditSummary(Page page) => "Update LoreLink";
-
-	protected override void LoadPages()
-	{
-		foreach (var page in this.Pages)
-		{
-			this.PageLoaded(page);
-		}
 	}
 
 	/*

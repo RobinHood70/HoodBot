@@ -11,6 +11,8 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	#region Protected Properties
 	protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
+	protected bool IgnorePageCount { get; set; }
+
 	// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
 	protected PageCollection Pages { get; init; } = new PageCollection(jobManager.Site);
 
@@ -91,7 +93,7 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeLogging()
+	protected override bool BeforeLogging()
 	{
 		this.BeforeLoadPages();
 		this.Pages.PageMissing += this.Pages_PageMissing;
@@ -101,7 +103,13 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 		this.StatusWriteLine("Finished loading");
 		this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		this.Pages.PageMissing -= this.Pages_PageMissing;
-		this.AfterLoadPages();
+		if (this.IgnorePageCount || this.Pages.Count > 0)
+		{
+			this.AfterLoadPages();
+			return true;
+		}
+
+		return false;
 	}
 
 	protected override void Main() => this.SavePages();

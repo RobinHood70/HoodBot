@@ -50,6 +50,8 @@ internal sealed class BotRevert(JobManager jobManager) : EditJob(jobManager)
 				this.undos.Add(contribution.Title, contribution.Id);
 			}
 		}
+
+		this.IgnorePageCount = this.undos.Count > 0;
 	}
 
 	protected override void PageLoaded(Page page)

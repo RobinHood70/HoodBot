@@ -52,7 +52,7 @@ internal sealed class BlockChanger(JobManager jobManager) : WikiJob(jobManager, 
 		}
 	}
 
-	protected override void BeforeLogging()
+	protected override bool BeforeLogging()
 	{
 		var comparer = this.Site.Culture.CompareInfo;
 		var blocks = this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Exclude, Filter.Exclude);
@@ -64,7 +64,7 @@ internal sealed class BlockChanger(JobManager jobManager) : WikiJob(jobManager, 
 			}
 		}
 
-		this.ProgressMaximum = this.reblocks.Count;
+		return this.reblocks.Count > 0;
 	}
 	#endregion
 }

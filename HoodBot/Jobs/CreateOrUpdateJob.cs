@@ -35,6 +35,11 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 	protected override void LoadPages()
 	{
 		var items = this.LoadItems();
+		if (items.Count == 0)
+		{
+			return;
+		}
+
 		var parsedPages = new List<SiteParser>();
 		var remaining = new TitleCollection(this.Site);
 		remaining.AddRange(items.Keys);

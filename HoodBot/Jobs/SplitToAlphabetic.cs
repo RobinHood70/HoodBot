@@ -37,10 +37,10 @@ internal sealed class SplitToAlphabetic : EditJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeMain()
+	protected override bool BeforeMain()
 	{
 		base.BeforeMain();
-		this.SplitMainPage();
+		return this.SplitMainPage();
 	}
 
 	protected override string GetEditSummary(Page page) => "Update links after page split";
@@ -133,7 +133,7 @@ internal sealed class SplitToAlphabetic : EditJob
 		return newSections;
 	}
 
-	private void SplitMainPage()
+	private bool SplitMainPage()
 	{
 		if (this.Site.LoadPage(this.mainPage) is not Page page)
 		{
@@ -151,6 +151,8 @@ internal sealed class SplitToAlphabetic : EditJob
 			this.SavePage(newPage, "Create alphabetic page", false);
 			this.Progress++;
 		}
+
+		return newSections.Count > 0;
 	}
 	#endregion
 }
