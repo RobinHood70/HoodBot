@@ -224,8 +224,18 @@ public sealed class Namespace : IEquatable<Namespace>
 	/// <remarks>
 	/// <para>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</para>
 	/// <para>If both pages come from Title-based objects or are otherwise guaranteed to be normalized already, set <paramref name="normalize"/> to <see langword="false"/> for faster comparison; user-provided titles should be normalized to ensure correct matching.</para></remarks>
-	public bool PageNameEquals(string pageName1, string pageName2, bool normalize)
+	public bool PageNameEquals(string? pageName1, string? pageName2, bool normalize)
 	{
+		if (pageName1 is null)
+		{
+			return pageName2 is null;
+		}
+
+		if (pageName2 is null)
+		{
+			return false;
+		}
+
 		if (normalize)
 		{
 			pageName1 = WikiTextUtilities.DecodeAndNormalize(pageName1);
