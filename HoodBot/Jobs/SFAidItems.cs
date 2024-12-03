@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
@@ -64,7 +65,7 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	protected override IDictionary<Title, SFItem> LoadItems()
 	{
 		var items = new Dictionary<Title, SFItem>();
-		foreach (var item in ReadItems(GameInfo.Starfield.ModFolder))
+		foreach (var item in ReadItems())
 		{
 			var name = ReplacementNames.TryGetValue(item.EditorId, out var replacement)
 				? replacement
@@ -99,17 +100,23 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
 		""";
 
-	private static List<SFItem> ReadItems(string folder)
+	private static List<SFItem> ReadItems()
 	{
 		var retval = new List<SFItem>();
-		var csvFile = new CsvFile(folder + "Alchemy.csv")
+		var csvName = GameInfo.Starfield.ModFolder + "Alchemy.csv";
+		if (!File.Exists(csvName))
+		{
+			return retval;
+		}
+
+		var csvFile = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
 
 		foreach (var row in csvFile.ReadRows())
 		{
-			var item = new SFItem(row);
+			var item = new SFItem(row, "Aid Item");
 			retval.Add(item);
 		}
 

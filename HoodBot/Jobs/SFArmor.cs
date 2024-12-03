@@ -11,7 +11,7 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
+internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 {
 	#region Constructors
 	[JobInfo("Armor", "Starfield")]
@@ -31,25 +31,26 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create armor page";
 
-	protected override bool IsValid(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
+	protected override bool IsValid(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
 
-	protected override IDictionary<Title, List<CsvRow>> LoadItems()
+	protected override IDictionary<Title, List<SFItem>> LoadItems()
 	{
-		var items = new Dictionary<Title, List<CsvRow>>();
+		var items = new Dictionary<Title, List<SFItem>>();
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Armors.csv")
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
 
-		csv.Load();
-		foreach (var row in csv)
+		foreach (var row in csv.ReadRows())
 		{
 			var name = row["Name"];
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 			if (name.Length > 0 && !name.Contains('_', StringComparison.Ordinal))
 			{
 				var itemList = items.TryGetValue(title, out var list) ? list : [];
-				itemList.Add(row);
+				var itemType = GetItemType(row);
+				var armor = new SFItem(row, itemType);
+				itemList.Add(armor);
 				items[title] = itemList;
 			}
 		}
@@ -59,18 +60,17 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 	#endregion
 
 	#region Private Static Methods
-	private static void BuildTemplate(StringBuilder sb, CsvRow armor)
+	private static void BuildTemplate(StringBuilder sb, SFItem armor)
 	{
-		var itemType = GetItemType(armor);
 		sb
 			.Append("{{Item Summary\n")
-			.Append($"|objectid={armor["FormID"][2..]}\n")
-			.Append($"|editorid={armor["EditorID"].Trim()}\n")
-			.Append($"|type={itemType}\n")
+			.Append($"|objectid={armor.FormId}\n")
+			.Append($"|editorid={armor.EditorId}\n")
+			.Append($"|type={armor.Type}\n")
 			.Append("|image=\n")
 			.Append("|imgdesc=\n")
-			.Append($"|weight={armor["Weight"]}\n")
-			.Append($"|value={armor["Value"]}\n")
+			.Append($"|weight={armor.Weight.ToStringInvariant()}\n")
+			.Append($"|value={armor.Value.ToStringInvariant()}\n")
 			.Append("|physical={{Huh}}\n")
 			.Append("|energy={{Huh}}\n")
 			.Append("|electromagnetic={{Huh}}\n")
@@ -81,13 +81,13 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 			.Append("}}");
 	}
 
-	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
+	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, SFItem item)
 	{
 		var templates = parser.FindTemplates("Item Summary");
 		foreach (var template in templates)
 		{
 			var edid = template.GetValue("editorid")?.Trim();
-			if (edid.OrdinalICEquals(row["EditorID"]))
+			if (edid.OrdinalICEquals(item.EditorId))
 			{
 				return template;
 			}
@@ -96,7 +96,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 		return null;
 	}
 
-	private static string? GetItemType(CsvRow armor)
+	private static string GetItemType(CsvRow armor)
 	{
 		var nameEdid = armor["Name"] + '/' + armor["EditorID"].Trim();
 		var itemType =
@@ -106,9 +106,9 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 			nameEdid.Contains("Helmet", StringComparison.Ordinal) ? "Helmet" :
 			nameEdid.Contains("Pack", StringComparison.Ordinal) ? "Pack" :
 			nameEdid.Contains("Spacesuit", StringComparison.OrdinalIgnoreCase) ? "Spacesuit" :
-			null;
+			string.Empty;
 
-		if (itemType is null)
+		if (itemType.Length == 0)
 		{
 			Debug.WriteLine("Item type not found: " + nameEdid);
 		}
@@ -116,7 +116,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 		return itemType;
 	}
 
-	private static string GetNewPageText(Title title, List<CsvRow> item)
+	private static string GetNewPageText(Title title, List<SFItem> item)
 	{
 		var sb = new StringBuilder();
 		foreach (var armor in item)
@@ -124,7 +124,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 			BuildTemplate(sb, armor);
 		}
 
-		var firstType = GetItemType(item[0]);
+		var firstType = item[0].Type;
 		var link = firstType switch
 		{
 			"Apparel" => "piece of [[Starfield:Apparel|apparel]]",
@@ -135,19 +135,30 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<CsvRow>>
 			_ => null,
 		};
 
-		return $"{{{{Trail|Items|{firstType}}}}}{sb}The [[Starfield:{title.PageName}|]] is a {link}.\n\n{{{{Stub|{firstType}}}}}";
+		return $$$"""
+			{{Trail|Items|{{{firstType}}}}}{{{sb}}}
+			The [[{{{title.FullPageName()}}}|]] is a {{{link}}}.
+
+			{{Stub|{{{firstType}}}}}
+			""";
 	}
 
-	private static void UpdateArmor(SiteParser parser, List<CsvRow> list)
+	private static void UpdateArmor(SiteParser parser, List<SFItem> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
 		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
-		foreach (var row in list)
+		foreach (var item in list)
 		{
-			if (FindMatchingTemplate(parser, row) is null)
+			if (FindMatchingTemplate(parser, item) is ITemplateNode template)
+			{
+				template.Update("objectid", item.FormId);
+				template.Update("weight", item.Weight.ToStringInvariant());
+				template.Update("value", item.Value.ToStringInvariant());
+			}
+			else
 			{
 				var sb = new StringBuilder();
-				BuildTemplate(sb, row);
+				BuildTemplate(sb, item);
 				var newNodes = parser.Parse(sb.ToString());
 				parser.InsertRange(insertPos, newNodes);
 				insertPos += newNodes.Count;
