@@ -23,7 +23,7 @@ public class WikiNodeFactory : IWikiNodeFactory
 
 	/// <summary>Gets or sets the text to use when escaping equals signs.</summary>
 	/// <value>The equals sign escape text.</value>
-	public string EqualsEscape { get; set; } = "&#61;";
+	public string EqualsEscape { get; set; } = "{{=}}";
 
 	/// <summary>Gets or sets the text to use when escaping pipes.</summary>
 	/// <value>The pipe escape text.</value>
