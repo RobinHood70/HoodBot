@@ -107,10 +107,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IParameterNode parameter)
-	{
-		throw new NotSupportedException("This should never be hit, since neither template nor link parsing ever call it.");
-	}
+	public void Visit(IParameterNode parameter) => throw new NotSupportedException("This should never be hit, since neither template nor link parsing ever call it.");
 
 	/// <inheritdoc/>
 	public void Visit(ITagNode tag)
