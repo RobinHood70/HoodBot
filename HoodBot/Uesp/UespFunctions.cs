@@ -8,6 +8,7 @@ using RobinHood70.WikiCommon.Parser;
 
 public static class UespFunctions
 {
+	#region Fields
 	private static readonly Dictionary<string, string> IconAbbreviations = new(StringComparer.Ordinal)
 	{
 		[string.Empty] = string.Empty,
@@ -43,7 +44,9 @@ public static class UespFunctions
 		["tr"] = "trait material-",
 		["w"] = "weapon-",
 	};
+	#endregion
 
+	#region Public Properties
 	public static string[] LoreNames { get; } =
 	[
 		"Names",
@@ -60,30 +63,9 @@ public static class UespFunctions
 		"Reachman Names",
 		"Redguard Names"
 	];
+	#endregion
 
-	public static string IconAbbreviation(UespNamespace ns, ITemplateNode template)
-	{
-		ArgumentNullException.ThrowIfNull(ns);
-		ArgumentNullException.ThrowIfNull(template);
-		return
-			template.GetTitle(ns.Site) == TitleFactory.FromTemplate(ns.Site, "Icon") &&
-			template.GetValue(1) is string iconType &&
-			template.GetValue(2) is string iconName
-				? IconAbbreviation(ns, iconType, iconName, template.GetValue(4) ?? "png")
-				: throw new InvalidOperationException();
-	}
-
-	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon) => IconAbbreviation(ns, iconType, icon, "png");
-
-	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon, string extension)
-	{
-		ArgumentNullException.ThrowIfNull(ns);
-		ArgumentNullException.ThrowIfNull(iconType);
-		ArgumentNullException.ThrowIfNull(icon);
-		ArgumentNullException.ThrowIfNull(extension);
-		return ns.Id + "-icon-" + IconNameFromAbbreviation(iconType) + icon + '.' + extension;
-	}
-
+	#region Public Methods
 	public static (UespNamespace? Ns, string? Abbr, string? Name, string? Ext) AbbreviationFromIconName(UespNamespaceList nsList, string iconName)
 	{
 		ArgumentNullException.ThrowIfNull(iconName);
@@ -151,6 +133,47 @@ public static class UespFunctions
 		return (null, null, null, null);
 	}
 
+	public static string FixFormId(string formId)
+	{
+		if (formId.StartsWith("0x", StringComparison.Ordinal))
+		{
+			formId = formId[2..];
+		}
+
+		return formId.Length != 8
+			? throw new InvalidOperationException()
+			: formId[..2].ToUpperInvariant() switch
+			{
+				"00" => formId,
+				"FD" => "FDxx" + formId[4..],
+				"FE" => "FExxx" + formId[5..],
+				_ => "xx" + formId[2..]
+			};
+	}
+
+	public static string IconAbbreviation(UespNamespace ns, ITemplateNode template)
+	{
+		ArgumentNullException.ThrowIfNull(ns);
+		ArgumentNullException.ThrowIfNull(template);
+		return
+			template.GetTitle(ns.Site) == TitleFactory.FromTemplate(ns.Site, "Icon") &&
+			template.GetValue(1) is string iconType &&
+			template.GetValue(2) is string iconName
+				? IconAbbreviation(ns, iconType, iconName, template.GetValue(4) ?? "png")
+				: throw new InvalidOperationException();
+	}
+
+	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon) => IconAbbreviation(ns, iconType, icon, "png");
+
+	public static string IconAbbreviation(UespNamespace ns, string iconType, string icon, string extension)
+	{
+		ArgumentNullException.ThrowIfNull(ns);
+		ArgumentNullException.ThrowIfNull(iconType);
+		ArgumentNullException.ThrowIfNull(icon);
+		ArgumentNullException.ThrowIfNull(extension);
+		return ns.Id + "-icon-" + IconNameFromAbbreviation(iconType) + icon + '.' + extension;
+	}
+
 	public static string IconNameFromAbbreviation(string iconType)
 	{
 		ArgumentNullException.ThrowIfNull(iconType);
@@ -161,4 +184,5 @@ public static class UespFunctions
 
 		return retval;
 	}
+	#endregion
 }
