@@ -223,10 +223,7 @@ internal static class EsoSpace
 			: EsoVersion.FromText(version);
 	}
 
-	public static string IconDownloadPath(EsoVersion patchVersion)
-	{
-		return $"https://esofiles.uesp.net/update-{patchVersion.Text}/icons.zip";
-	}
+	public static string IconDownloadPath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion.Text}/icons.zip";
 
 	public static void SetBotUpdateVersion(this WikiJob job, string pageType, EsoVersion version)
 	{

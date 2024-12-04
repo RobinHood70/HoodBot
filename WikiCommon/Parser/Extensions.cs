@@ -934,10 +934,7 @@ public static class Extensions
 	/// <param name="removeIfEmpty">If set to <see langword="true"/> and <paramref name="value"/> is an empty string, remove the parameter. Otherwise, the parameter will only be removed if <paramref name="value"/> is <see langword="null"/>.</param>
 	/// <returns>The added parameter.</returns>
 	/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-	public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeIfEmpty)
-	{
-		return template.UpdateOrRemove(name, value, paramFormat, value is null || (removeIfEmpty && value.Length == 0));
-	}
+	public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeIfEmpty) => template.UpdateOrRemove(name, value, paramFormat, value is null || (removeIfEmpty && value.Length == 0));
 
 	/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
 	/// <param name="template">The template to update.</param>

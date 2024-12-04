@@ -16,14 +16,8 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Remove trail already handled by template";
 
-	protected override void LoadPages()
-	{
-		this.Pages.GetBacklinks("Template:Game Book", BacklinksTypes.EmbeddedIn);
-	}
+	protected override void LoadPages() => this.Pages.GetBacklinks("Template:Game Book", BacklinksTypes.EmbeddedIn);
 
-	protected override void ParseText(SiteParser parser)
-	{
-		parser.RemoveTemplates("Trail");
-	}
+	protected override void ParseText(SiteParser parser) => parser.RemoveTemplates("Trail");
 	#endregion
 }

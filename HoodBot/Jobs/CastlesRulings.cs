@@ -235,6 +235,10 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		return section;
 	}
 
+	private static string RemoveCruftBeforeCompare(string arg) => arg
+		.Replace("<br>", string.Empty, StringComparison.Ordinal)
+		.Trim();
+
 	private static Dictionary<string, List<Ruling>> RulingsToGroups(List<Ruling> rulings)
 	{
 		var retval = new Dictionary<string, List<Ruling>>(StringComparer.Ordinal);
@@ -330,16 +334,12 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		return retval;
 	}
 
-	private string RemoveCruftBeforeCompare(string arg) => arg
-		.Replace("<br>", string.Empty, StringComparison.Ordinal)
-		.Trim();
-
 	private void UpdateRuling(SiteParser parser, Ruling ruling)
 	{
 		this.context.Page = parser.Page;
 		var comparer = new FlatteningComparer(this.context, this.subComparer)
 		{
-			ParseBeforeStringCompare = this.RemoveCruftBeforeCompare
+			ParseBeforeStringCompare = RemoveCruftBeforeCompare
 		};
 
 		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");

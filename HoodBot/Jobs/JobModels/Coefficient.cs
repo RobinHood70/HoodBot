@@ -108,10 +108,7 @@ internal sealed class Coefficient
 
 	#region Public Methods
 
-	public bool IsValid()
-	{
-		return this.A != -1 || this.B != -1 || this.C != -1;
-	}
+	public bool IsValid() => this.A != -1 || this.B != -1 || this.C != -1;
 
 	// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
 	public string SkillDamageText() => this.Mechanic switch
