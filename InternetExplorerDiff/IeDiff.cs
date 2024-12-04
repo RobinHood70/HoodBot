@@ -35,10 +35,6 @@ public class IeDiff : IDiffViewer
 	public void Compare(DiffContent diff)
 	{
 		ArgumentNullException.ThrowIfNull(diff);
-		Globals.ThrowIfNull(diff.EditPath, nameof(diff), nameof(diff.EditPath));
-		const int empty = 0;
-		const string headers = "Content-Type: application/x-www-form-urlencoded";
-
 		InternetExplorer? ie = null;
 		for (var i = 0; i < 10; i++)
 		{
@@ -75,26 +71,8 @@ public class IeDiff : IDiffViewer
 		}
 
 		this.ieProcess = Process.GetProcessById(processId32);
-
-		Uri uri = new(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
-		var postData = CreatePostData(diff);
-		var byteData = Encoding.UTF8.GetBytes(postData);
-		var error = true;
-		do
-		{
-			try
-			{
-				ie.Navigate(uri.AbsoluteUri, empty, empty, byteData, headers);
-				error = false;
-			}
-			catch (COMException)
-			{
-				Thread.Sleep(ComSleep);
-			}
-		}
-		while (error);
-
-		SafeNativeMethods.ShowWindow(hwnd, 3);
+		NavigateToDiff(diff, ie);
+		_ = SafeNativeMethods.ShowWindow(hwnd, 3);
 	}
 
 	public bool Validate() => OperatingSystem.IsWindows() && Type.GetTypeFromProgID("InternetExplorer.Application") != null;
@@ -136,5 +114,31 @@ public class IeDiff : IDiffViewer
 
 	[return: NotNullIfNotNull(nameof(dt))]
 	private static string? IndexDateTime(DateTime? dt) => dt?.ToUniversalTime().ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
+	private static void NavigateToDiff(DiffContent diff, InternetExplorer ie)
+	{
+		const int empty = 0;
+		const string headers = "Content-Type: application/x-www-form-urlencoded";
+
+		Globals.ThrowIfNull(diff.EditPath, nameof(diff), nameof(diff.EditPath));
+		Uri uri = new(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
+		var postData = CreatePostData(diff);
+		var byteData = Encoding.UTF8.GetBytes(postData);
+		var error = true;
+		do
+		{
+			try
+			{
+				ie.Navigate(uri.AbsoluteUri, empty, empty, byteData, headers);
+				error = false;
+			}
+			catch (COMException)
+			{
+				Thread.Sleep(ComSleep);
+			}
+		}
+		while (error);
+	}
+
 	#endregion
 }
