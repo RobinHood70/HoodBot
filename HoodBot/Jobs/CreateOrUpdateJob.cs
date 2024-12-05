@@ -60,7 +60,10 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 		foreach (var parser in parsedPages)
 		{
 			parser.UpdatePage();
-			this.Pages.Add(parser.Page);
+			if (parser.Page.TextModified)
+			{
+				this.Pages.Add(parser.Page);
+			}
 		}
 	}
 
