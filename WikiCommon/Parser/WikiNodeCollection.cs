@@ -71,7 +71,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	#region Public Static Methods
 
-	/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class from an exising <see cref="IParentNode"/>.</summary>
+	/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class from an existing <see cref="IParentNode"/>.</summary>
 	/// <param name="node">The node to copy from.</param>
 	/// <param name="value">The value to parse.</param>
 	/// <returns>A new <see cref="WikiNodeCollection"/> based on the node provided.</returns>
