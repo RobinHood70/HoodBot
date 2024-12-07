@@ -18,6 +18,12 @@ using RobinHood70.Robby.Parser;
 
 internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Terminal>
 {
+	#region Static Fields
+	private static readonly string DisambigsFileName = GameInfo.Starfield.ModFolder + "Term Disambigs.txt";
+	private static readonly string MenusFileName = GameInfo.Starfield.ModFolder + "Tmlm.csv";
+	private static readonly string TerminalsFileName = GameInfo.Starfield.ModFolder + "Term.csv";
+	#endregion
+
 	#region Fields
 	private readonly Dictionary<string, Menu> menus = new(StringComparer.Ordinal);
 	#endregion
@@ -30,6 +36,7 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		this.CreateOnly = Tristate.True;
 		this.NewPageText = this.GetNewPageText;
+		this.Clobber = true;
 	}
 	#endregion
 
@@ -51,6 +58,12 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 
 	#region Private Static Methods
 
+	[GeneratedRegex("(-{4,})", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex ConsecutiveDashes();
+
+	[GeneratedRegex(@"^[\*:;=]", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex Dewikify();
+
 	private static string GlobalReplace(string text)
 	{
 		if (text is null || text.Length == 0)
@@ -58,29 +71,42 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 			return string.Empty;
 		}
 
-		text = Regex.Replace(text, @"(?<!\\n)\\n(?!\\n)", "<br>", RegexOptions.None, Globals.DefaultRegexTimeout);
 		text = text
 			.Replace("\\n", "\n", StringComparison.Ordinal)
-			.Trim();
+			.TrimStart('\n')
+			.TrimEnd();
+		text = SpaceBeforeNewLine().Replace(text, "\n");
+		if (text[0] == ' ' || text.Contains("\n ", StringComparison.Ordinal))
+		{
+			text = "<div style=\"white-space:pre\">" + text + "</div>";
+		}
+
+		text = Regex.Replace(text, @"(?<!\n)\n(?!\n)", "<br>", RegexOptions.None, Globals.DefaultRegexTimeout);
+		text = ConsecutiveDashes().Replace(text, "<nowiki>$1</nowiki>");
 		text = Dewikify().Replace(text, "<nowiki/>$&");
 		return text;
 	}
 
 	private static Dictionary<string, string> ReadDisambigs()
 	{
-		Dictionary<string, string> disambigs = new(StringComparer.Ordinal);
-		var disambigLines = File.ReadAllLines(GameInfo.Starfield.ModFolder + "Term Disambigs.txt");
-		foreach (var line in disambigLines)
+		var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
+		if (File.Exists(DisambigsFileName))
 		{
-			var split = line.Split(TextArrays.Tab);
-			disambigs.Add(split[0], split[1]);
+			var disambigLines = File.ReadAllLines(DisambigsFileName);
+			foreach (var line in disambigLines)
+			{
+				var split = line.Split(TextArrays.Tab);
+				disambigs.Add(split[0], split[1]);
+			}
+
+			return disambigs;
 		}
 
 		return disambigs;
 	}
 
-	[GeneratedRegex(@"^[\*:;=]", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
-	private static partial Regex Dewikify();
+	[GeneratedRegex(@"[ \t]+\n", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex SpaceBeforeNewLine();
 	#endregion
 
 	#region Private Methods
@@ -116,12 +142,13 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 			.Append($"|edid={item.EditorId}\n")
 			.Append($"|icon=<!--{item.ImageName}-->\n")
 			.Append("|image=\n")
+			.Append("|description=\n")
 			.Append("|quest=\n")
 			.Append("|location=\n")
-			.Append("}}\n\n")
-			.Append("<Add description of terminal>\n")
+			.Append("}}\n")
+			.Append("{{NewLine}}\n")
 			.Append("== Menus ==\n")
-			.Append("{| class=wikitable\n");
+			.Append("{| class=\"wikitable sortable\"\n");
 
 		while (menuOffset < menuList.Count)
 		{
@@ -135,7 +162,12 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 
 	private void LoadMenus()
 	{
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Tmlm.csv")
+		if (!File.Exists(MenusFileName))
+		{
+			return;
+		}
+
+		var csv = new CsvFile(MenusFileName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
@@ -215,9 +247,19 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 
 	private Dictionary<Title, Terminal> ReadTerm()
 	{
-		var disambigs = ReadDisambigs();
 		var retval = new Dictionary<Title, Terminal>();
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Term.csv")
+		if (!File.Exists(TerminalsFileName))
+		{
+			return retval;
+		}
+
+		var disambigs = ReadDisambigs();
+		if (disambigs.Count == 0)
+		{
+			this.StatusWriteLine("No terminal disambiguations found. If needed, add conflicting terminals to " + DisambigsFileName);
+		}
+
+		var csv = new CsvFile(TerminalsFileName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};

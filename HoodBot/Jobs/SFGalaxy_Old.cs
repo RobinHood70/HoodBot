@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
@@ -16,7 +17,7 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 	#endregion
 
 	#region Constructors
-	[JobInfo("Galaxy", "Starfield")]
+	[JobInfo("Galaxy", "Starfield Old")]
 	public SFGalaxy_Old(JobManager jobManager)
 		: base(jobManager)
 	{
@@ -36,28 +37,34 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 
 	protected override IDictionary<Title, CsvRow> LoadItems()
 	{
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "stars.csv")
+		var items = new Dictionary<Title, CsvRow>();
+		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
+		if (File.Exists(csvName))
 		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
+			var csv = new CsvFile(csvName)
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
 
-		csv.Load();
-		foreach (var row in csv)
-		{
-			this.stars.Add(row["FormID"], row["Name"]);
+			foreach (var row in csv.ReadRows())
+			{
+				this.stars.Add(row["FormID"], row["Name"]);
+			}
 		}
 
-		var items = new Dictionary<Title, CsvRow>();
-		csv = new CsvFile(GameInfo.Starfield.ModFolder + "galaxy.csv")
+		csvName = GameInfo.Starfield.ModFolder + "galaxy.csv";
+		if (File.Exists(csvName))
 		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
+			var csv = new CsvFile(csvName)
+			{
+				Encoding = Encoding.GetEncoding(1252)
+			};
 
-		csv.Load();
-		foreach (var item in csv)
-		{
-			var name = "Starfield:" + item["Name"];
-			items.Add(TitleFactory.FromUnvalidated(this.Site, name), item);
+			foreach (var item in csv.ReadRows())
+			{
+				var name = "Starfield:" + item["Name"];
+				items.Add(TitleFactory.FromUnvalidated(this.Site, name), item);
+			}
 		}
 
 		return items;

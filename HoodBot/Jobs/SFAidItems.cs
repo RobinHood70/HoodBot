@@ -114,6 +114,7 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 			Encoding = Encoding.GetEncoding(1252)
 		};
 
+		csvFile.HeaderFieldMap["Unkown1"] = "Value";
 		foreach (var row in csvFile.ReadRows())
 		{
 			var item = new SFItem(row, "Aid Item");

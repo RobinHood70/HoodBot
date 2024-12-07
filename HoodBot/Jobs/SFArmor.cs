@@ -60,26 +60,23 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	#endregion
 
 	#region Private Static Methods
-	private static void BuildTemplate(StringBuilder sb, SFItem armor)
-	{
-		sb
-			.Append("{{Item Summary\n")
-			.Append($"|objectid={armor.FormId}\n")
-			.Append($"|editorid={armor.EditorId}\n")
-			.Append($"|type={armor.Type}\n")
-			.Append("|image=\n")
-			.Append("|imgdesc=\n")
-			.Append($"|weight={armor.Weight.ToStringInvariant()}\n")
-			.Append($"|value={armor.Value.ToStringInvariant()}\n")
-			.Append("|physical={{Huh}}\n")
-			.Append("|energy={{Huh}}\n")
-			.Append("|electromagnetic={{Huh}}\n")
-			.Append("|radiation={{Huh}}\n")
-			.Append("|thermal={{Huh}}\n")
-			.Append("|airborne={{Huh}}\n")
-			.Append("|corrosive={{Huh}}\n")
-			.Append("}}");
-	}
+	private static void BuildTemplate(StringBuilder sb, SFItem armor) => sb
+		.Append("{{Item Summary\n")
+		.Append($"|objectid={armor.FormId}\n")
+		.Append($"|editorid={armor.EditorId}\n")
+		.Append($"|type={armor.Type}\n")
+		.Append("|image=\n")
+		.Append("|imgdesc=\n")
+		.Append($"|weight={armor.Weight.ToStringInvariant()}\n")
+		.Append($"|value={armor.Value.ToStringInvariant()}\n")
+		.Append("|physical={{Huh}}\n")
+		.Append("|energy={{Huh}}\n")
+		.Append("|electromagnetic={{Huh}}\n")
+		.Append("|radiation={{Huh}}\n")
+		.Append("|thermal={{Huh}}\n")
+		.Append("|airborne={{Huh}}\n")
+		.Append("|corrosive={{Huh}}\n")
+		.Append("}}");
 
 	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, SFItem item)
 	{

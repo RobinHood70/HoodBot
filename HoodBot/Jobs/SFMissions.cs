@@ -12,11 +12,12 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 {
 	#region Private Static Fields
-	private static readonly string DisambigFileName = GameInfo.Starfield.ModFolder + "Quests Disambigs.txt";
+	private static readonly string DisambigsFileName = GameInfo.Starfield.ModFolder + "Quests Disambigs.txt";
 	private static readonly string QuestsFileName = GameInfo.Starfield.ModFolder + "Quests.csv";
 	private static readonly string StagesFileName = GameInfo.Starfield.ModFolder + "QuestStages.csv";
 	private readonly TitleCollection searchTitles;
@@ -50,15 +51,14 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	protected override IDictionary<Title, Mission> LoadItems()
 	{
 		var existing = this.LoadExisting();
-		var items = this.LoadQuests(existing);
-
-		return items;
+		return this.LoadQuests(existing);
 	}
 	#endregion
 
 	#region Private Static Methods
 	private static string BuildStageSection(List<Stage> stages)
 	{
+		var factory = new WikiNodeFactory();
 		var sb = new StringBuilder();
 		sb
 			.Append("== Mission Stages ==\n")
@@ -81,7 +81,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 				{
 					sb
 						.Append("{{Mission Comment|")
-						.Append(stage.Comment.Replace("=", "{{=}}", StringComparison.Ordinal))
+						.Append(factory.EscapeParameterText(stage.Comment, true))
 						.Append("}}");
 					if (stage.Entry.Length > 0)
 					{
@@ -90,7 +90,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 				}
 
 				sb
-					.Append(stage.Entry)
+					.Append(factory.EscapeParameterText(stage.Entry, true))
 					.Append('\n');
 			}
 		}
@@ -138,12 +138,15 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 	private static Dictionary<string, string> LoadDisambigs()
 	{
-		var disambigLines = File.ReadAllLines(DisambigFileName);
 		var disambigs = new Dictionary<string, string>(StringComparer.Ordinal);
-		foreach (var disambigLine in disambigLines)
+		if (File.Exists(DisambigsFileName))
 		{
-			var split = disambigLine.Split(TextArrays.Tab);
-			disambigs.Add(split[0], split[1]);
+			var disambigLines = File.ReadAllLines(DisambigsFileName);
+			foreach (var disambigLine in disambigLines)
+			{
+				var split = disambigLine.Split(TextArrays.Tab);
+				disambigs.Add(split[0], split[1]);
+			}
 		}
 
 		return disambigs;
@@ -288,8 +291,25 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	private Dictionary<Title, Mission> LoadQuests(Dictionary<string, Title> existing)
 	{
 		var retval = new Dictionary<Title, Mission>();
+		var questsMissing = !File.Exists(QuestsFileName);
+		var stagesMissing = !File.Exists(StagesFileName);
+		if (questsMissing && stagesMissing)
+		{
+			return retval;
+		}
+
+		if (questsMissing || stagesMissing)
+		{
+			this.StatusWriteLine("Missing either " + QuestsFileName + " or " + StagesFileName + " but not both. WTF?");
+		}
+
 		var stages = LoadStages();
 		var disambigs = LoadDisambigs();
+		if (disambigs.Count == 0)
+		{
+			this.StatusWriteLine("No quest disambiguations found. If needed, add conflicting quests to " + DisambigsFileName);
+		}
+
 		var csv = new CsvFile(QuestsFileName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
@@ -344,14 +364,13 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 	private void UpdateMission(SiteParser parser, Mission item)
 	{
-		var template = FindTemplate(parser, item);
-		if (template is null)
+		if (FindTemplate(parser, item) is not ITemplateNode template)
 		{
 			return;
 		}
 
 		template.Update("ID", item.EditorId);
-		var labelName = parser.Page.Title.LabelName();
+		var labelName = parser.Title.LabelName();
 		if (!labelName.OrdinalEquals(item.Name))
 		{
 			template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);

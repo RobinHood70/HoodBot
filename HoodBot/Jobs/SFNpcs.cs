@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -64,8 +65,6 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 				var acbs = Convert.ToInt32(row["Acbs1"], 16);
 				var gender = (acbs & 1) != 0;
 				var dead = (acbs & 0x200000) != 0;
-				var formId = row["FormID"]
-					.Replace("0x", string.Empty, StringComparison.Ordinal);
 				var raceId = row["Race"];
 				if (!races.TryGetValue(raceId, out var race))
 				{
@@ -77,7 +76,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 					? []
 					: factionText.Split(TextArrays.Comma);
 				var npc = new Npc(
-					formId,
+					UespFunctions.FixFormId(row["FormID"]),
 					editorId,
 					name,
 					race,
@@ -109,6 +108,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 			? string.Empty
 			: ("{{Faction|" + string.Join("}}, {{Faction|", npc.Factions) + "}}");
 		sb
+			.Append("\n\n{{NewLine}}\n")
 			.Append("{{NPC Summary\n")
 			.Append($"|eid={npc.EditorID}\n")
 			.Append($"|race={npc.Race}\n")
@@ -125,8 +125,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 			.Append($"|faction={factions}\n")
 			.Append("|image=\n")
 			.Append("|imgdesc=\n")
-			.Append("}}\n\n")
-			.Append("{{NewLine}}\n");
+			.Append("}}");
 	}
 
 	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, Npc search)
@@ -165,10 +164,10 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 
 		if (sb.Length > 0)
 		{
-			sb.Remove(sb.Length - 12, 12);
+			sb.Remove(0, 14);
 		}
 
-		sb.Append("{{Npc Navbox}}\n\n{{Stub|NPC}}");
+		sb.Append("\n\n{{Npc Navbox}}\n\n{{Stub|NPC}}");
 		return sb.ToString();
 	}
 
@@ -214,14 +213,15 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	private static void UpdateNpcs(SiteParser parser, Npcs item)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
+		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:NPC Summary") + 1;
 		foreach (var npc in item)
 		{
 			if (FindMatchingTemplate(parser, npc) is null)
 			{
 				var sb = new StringBuilder();
 				BuildTemplate(sb, npc);
-				var newNodes = parser.Parse(sb.ToString());
+				var text = sb.ToString();
+				var newNodes = parser.Parse(text);
 				parser.InsertRange(insertPos, newNodes);
 				insertPos += newNodes.Count;
 			}

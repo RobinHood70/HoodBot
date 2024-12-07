@@ -98,7 +98,7 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 	#endregion
 
 	#region Private Static Methods
-	[GeneratedRegex(@"\|-\s+\|\s*(NO NAME|{{Anchor\|(?<Link>\[\[.*?\]\])(?<Mod>{{.*?}})?}})\s*\|\|\s*0x(?<FormId>[x0-9A-F]{8}.*?)\s*\|\|\s*(?<EditorId>.*?)\s*\|\|(?<Comment>.*?)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
+	[GeneratedRegex(@"\|-\s+\|\s*(NO NAME|{{Anchor\|(?<Link>\[\[.*?\]\])}})(?<Mod>{{.*?}})?\s*\|\|\s*({{ID\|(?<FormId>[x0-9A-F]{8}.*?)}}|(0x)?(?<FormId>[x0-9A-F]{8}.*?))\s*\|\|\s*(?<EditorId>.*?)\s*\|\|(?<Comment>.*?)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
 	private static partial Regex EffectsRowFinder();
 
 	private static void LoadExistingEffects(Effects effects, IReadOnlyList<Match> rows)

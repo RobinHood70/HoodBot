@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,7 +24,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	#endregion
 
 	#region Constructors
-	[JobInfo("Planets", "Starfield")]
+	[JobInfo("Planets", "Starfield Old")]
 	public SFPlanets_Old(JobManager jobManager)
 		: base(jobManager)
 	{
@@ -44,7 +45,13 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	internal Dictionary<Title, Planet> ReadEchelar(Dictionary<string, ICollection<string>> biomes)
 	{
 		var items = new Dictionary<Title, Planet>();
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Planets_Infobox.csv")
+		var csvName = GameInfo.Starfield.ModFolder + "Planets_Infobox.csv";
+		if (!File.Exists(csvName))
+		{
+			return items;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
@@ -54,9 +61,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 		{
 			var id = row["Name"];
 			var biome = biomes.TryGetValue(id, out var val) ? val : [];
-			var gravity = double.TryParse(row["Gravity"], CultureInfo.CurrentCulture, out var grav)
-				? grav
-				: (double?)null;
+			_ = double.TryParse(row["Gravity"], CultureInfo.CurrentCulture, out var grav);
 			var traits = row["Traits"].Split(":", StringSplitOptions.RemoveEmptyEntries).ToArray();
 			var pressure = row["Atmosphere_Pressure"]
 				.Replace("Std", "Standard", StringComparison.Ordinal)
@@ -67,7 +72,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 				row["System"],
 				row["Orbits"],
 				row["Type"],
-				gravity,
+				grav,
 				$"{row["Temperature_Class"]} ({row["Temperature_Degrees"]}°)",
 				$"{pressure} {row["Atmosphere_Type"]}",
 				row["Magnetosphere"],
@@ -168,7 +173,13 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	private static Dictionary<string, ICollection<string>> GetBiomes()
 	{
 		var biomes = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "biomesplanets.csv")
+		var csvName = GameInfo.Starfield.ModFolder + "biomesplanets.csv";
+		if (!File.Exists(csvName))
+		{
+			return biomes;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252),
 			HasHeader = false

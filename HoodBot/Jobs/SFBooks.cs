@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -63,21 +62,11 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 			Encoding = Encoding.GetEncoding(1252)
 		};
 
+		csv.HeaderFieldMap["Title"] = "Name";
 		foreach (var row in csv.ReadRows())
 		{
-			var formId = row["FormID"][2..];
-			var editorId = row["EditorID"];
-			var value = int.Parse(row["Value"], CultureInfo.CurrentCulture);
-			var weight = double.Parse(row["Weight"], CultureInfo.CurrentCulture);
-			var bookTitle = row["Title"]
-				.Replace("#", string.Empty, StringComparison.Ordinal)
-				.Replace("<Alias=", string.Empty, StringComparison.Ordinal)
-				.Replace(">", string.Empty, StringComparison.Ordinal);
-			var model = row["Model"];
-			var text = GetBookText(formId);
-			var book = new Book(formId, editorId, bookTitle, text, value, weight, model);
-
-			var titleText = TitleOverrides.GetValueOrDefault(editorId, bookTitle);
+			var book = new Book(row);
+			var titleText = TitleOverrides.GetValueOrDefault(book.EditorId, book.Title);
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + titleText);
 			retval.Add(title, book);
 		}
@@ -123,7 +112,7 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	private static string GetBookText(string formId)
 	{
 		// This is a horrible way to replace things, but it's simple and speed is not a factor for the relatively small number of books.
-		var orig = File.ReadAllText($@"{GameInfo.Starfield.ModFolder}Books\0x{formId}.txt", Encoding.GetEncoding(1252));
+		var orig = File.ReadAllText($@"{GameInfo.Starfield.ModFolder}Books\{formId}.txt", Encoding.GetEncoding(1252));
 		if (orig.Length == 0)
 		{
 			return string.Empty;
@@ -171,6 +160,25 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	#endregion
 
 	#region Internal Classes
-	internal record struct Book(string FormId, string EditorId, string Title, string Text, int Value, double Weight, string Model);
+	internal sealed class Book : SFItem
+	{
+		#region Constructors
+		public Book(CsvRow row)
+			: base(row, "Book")
+		{
+			this.Text = GetBookText(this.OriginalFormId);
+			this.Title = this.Name
+				.Replace("#", string.Empty, StringComparison.Ordinal)
+				.Replace("<Alias=", string.Empty, StringComparison.Ordinal)
+				.Replace(">", string.Empty, StringComparison.Ordinal);
+		}
+		#endregion
+
+		#region Public Properties
+		public string Text { get; }
+
+		public string Title { get; }
+		#endregion
+	}
 	#endregion
 }

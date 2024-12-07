@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
@@ -30,7 +31,13 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	protected override IDictionary<Title, CsvRow> LoadItems()
 	{
 		var items = new Dictionary<Title, CsvRow>();
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "stars.csv")
+		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
+		if (!File.Exists(csvName))
+		{
+			return items;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};

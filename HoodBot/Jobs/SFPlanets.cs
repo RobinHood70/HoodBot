@@ -9,18 +9,9 @@ internal sealed class SFPlanets(JobManager jobManager) : CreateOrUpdateJob<CsvRo
 {
 	protected override string? Disambiguator { get; }
 
-	protected override string GetEditSummary(Page page)
-	{
-		return string.Empty;
-	}
+	protected override string GetEditSummary(Page page) => string.Empty;
 
-	protected override bool IsValid(SiteParser parser, CsvRow item)
-	{
-		return false;
-	}
+	protected override bool IsValid(SiteParser parser, CsvRow item) => false;
 
-	protected override IDictionary<Title, CsvRow> LoadItems()
-	{
-		return new Dictionary<Title, CsvRow>();
-	}
+	protected override IDictionary<Title, CsvRow> LoadItems() => new Dictionary<Title, CsvRow>();
 }
