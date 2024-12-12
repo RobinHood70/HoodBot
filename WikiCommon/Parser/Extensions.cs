@@ -146,6 +146,15 @@ public static class Extensions
 		_ => false,
 	};
 
+	/// <summary>Gets the parameter number if it's numeric.</summary>
+	/// <param name="parameter">The parameter to check.</param>
+	/// <returns>The parameter number if it's numeric; otherwise 0.</returns>
+	public static int GetNumberFromName(this IParameterNode? parameter)
+	{
+		int.TryParse(parameter?.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber);
+		return namedNumber;
+	}
+
 	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
 	/// <param name="parameter">The parameter to alter.</param>
 	/// <param name="value">The value to update to.</param>
@@ -506,7 +515,7 @@ public static class Extensions
 				{
 					yield return (++i, parameter);
 				}
-				else if (int.TryParse(parameter.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
+				else if (parameter.GetNumberFromName() is var namedNumber && namedNumber > 0)
 				{
 					yield return (namedNumber, parameter);
 				}
