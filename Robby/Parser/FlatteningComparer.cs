@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using RobinHood70.WikiCommon.Parser;
 
-/// <summary>"Flattens" text to remove wiki markup and then compares the generated text for equality.</summary>
-public class FlatteningComparer : IEqualityComparer<string>, IEqualityComparer<IEnumerable<IWikiNode>>
+/// <summary>"Flattens" text to remove wiki markup and then compares the generated text.</summary>
+public class FlatteningComparer : IComparer<string>, IEqualityComparer<string>, IEqualityComparer<IEnumerable<IWikiNode>>
 {
 	#region Fields
 	private readonly Context context;
-	private readonly IEqualityComparer<string> comparer;
+	private readonly StringComparer comparer;
 	#endregion
 
 	#region Constructors
@@ -18,7 +18,7 @@ public class FlatteningComparer : IEqualityComparer<string>, IEqualityComparer<I
 	/// <summary>Initializes a new instance of the <see cref="FlatteningComparer"/> class.</summary>
 	/// <param name="context">The context for the text parsing.</param>
 	/// <param name="subComparer">The string comparer to use to compare strings once the initial flattening has been performed (e.g., StringComparer.CurrentCulture).</param>
-	public FlatteningComparer(Context context, IEqualityComparer<string> subComparer)
+	public FlatteningComparer(Context context, StringComparer subComparer)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(subComparer);
@@ -35,6 +35,30 @@ public class FlatteningComparer : IEqualityComparer<string>, IEqualityComparer<I
 	#endregion
 
 	#region Public Methods
+
+	/// <inheritdoc/>
+	public int Compare(string? x, string? y)
+	{
+		if (x is null)
+		{
+			return y is null ? 0 : -1;
+		}
+
+		if (y is null)
+		{
+			return 1;
+		}
+
+		var flatX = ParseToText.Build(x, this.context);
+		var flatY = ParseToText.Build(y, this.context);
+		if (this.ParseBeforeStringCompare is not null)
+		{
+			flatX = this.ParseBeforeStringCompare(flatX);
+			flatY = this.ParseBeforeStringCompare(flatY);
+		}
+
+		return this.comparer.Compare(flatX, flatY);
+	}
 
 	/// <inheritdoc/>
 	public bool Equals(IEnumerable<IWikiNode>? x, IEnumerable<IWikiNode>? y)
