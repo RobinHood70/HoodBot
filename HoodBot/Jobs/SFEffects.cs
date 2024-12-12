@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,20 +41,25 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 		var effectsPage = this.Site.LoadPage(this.effectsTitle) ?? throw new InvalidOperationException();
 		var rows = EffectsRowFinder().Matches(effectsPage.Text);
 		LoadExistingEffects(effects, rows);
-		var newEfects = LoadNewEffects(effects);
-		var retval = new Dictionary<Title, Effect>();
-		foreach (var effect in newEfects)
+		var items = new Dictionary<Title, Effect>();
+		var newEffects = LoadNewEffects(effects);
+		if (newEffects.Count == 0)
+		{
+			return items;
+		}
+
+		foreach (var effect in newEffects)
 		{
 			if (effect.Link.Length > 0)
 			{
 				var siteLink = SiteLink.FromText(this.Site, effect.Link);
-				retval.TryAdd(siteLink.Title, effect);
+				items.TryAdd(siteLink.Title, effect);
 			}
 
 			if (effect.EditorId.Length > 0)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + effect.EditorId);
-				retval.TryAdd(title, effect);
+				items.TryAdd(title, effect);
 			}
 		}
 
@@ -93,7 +99,7 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 		effectsPage.Text = effectsPage.Text.Insert(startPos, sb.ToString());
 		this.Pages.Add(effectsPage);
 
-		return retval;
+		return items;
 	}
 	#endregion
 
@@ -117,6 +123,12 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 	private static List<Effect> LoadNewEffects(Effects effects)
 	{
 		var retval = new List<Effect>();
+		var csvName = GameInfo.Starfield.ModFolder + "Effects.csv";
+		if (!File.Exists(csvName))
+		{
+			return retval;
+		}
+
 		var effectsFile = new CsvFile(GameInfo.Starfield.ModFolder + "Effects.csv");
 		foreach (var row in effectsFile.ReadRows())
 		{

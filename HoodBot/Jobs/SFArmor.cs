@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
@@ -36,7 +37,13 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	protected override IDictionary<Title, List<SFItem>> LoadItems()
 	{
 		var items = new Dictionary<Title, List<SFItem>>();
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Armors.csv")
+		var csvName = GameInfo.Starfield.ModFolder + "Armors.csv";
+		if (!File.Exists(csvName))
+		{
+			return items;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};

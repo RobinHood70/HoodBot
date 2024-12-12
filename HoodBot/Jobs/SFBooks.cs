@@ -20,13 +20,13 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	{
 		["LC180Slate_CF01A"] = "Trust Nobody (A)",
 		["LC180Slate_CF01B"] = "Trust Nobody (B)",
-		["MS04_SpacerSlate01COPY0000"] = "Lair Slate: The Gold Mine (Shatter Space)",
-		["SFBGS001LC21_DataSlate_Warning"] = "Stolen Sandwich (Shatter Space)",
-		["SFBGS001_Crater_Note06"] = "Happy Birthday (Shatter Space)",
-		["SFBGS001_Dazra_AlterationClinic01"] = "Repair Notes (Shatter Space)",
+		["MS04_SpacerSlate01COPY0000"] = "Lair Slate: The Gold Mine (Shattered Space)",
+		["SFBGS001LC21_DataSlate_Warning"] = "Stolen Sandwich (Shattered Space)",
+		["SFBGS001_Crater_Note06"] = "Happy Birthday (Shattered Space)",
+		["SFBGS001_Dazra_AlterationClinic01"] = "Repair Notes (Shattered Space)",
 		["SFBGS001_Dazra_TempleSlate04"] = "Thank you (template)",
 		["SFBGS001_LC15Slate_Kalyn"] = "Thank you (Kalyn)",
-		["SFBGS001_LC27_Checklist"] = "Checklist (Shatter Space)",
+		["SFBGS001_LC27_Checklist"] = "Checklist (Shattered Space)",
 		["SFBGS001_LC48Slate_Lootlist"] = "Entrance and loot register",
 		["SFBGS001_LC48Slate_Lootlist_quest"] = "Entrance and loot register (quest version)",
 		["SFBGS001_MS04_Slate_Complete"] = "Sensor Data Collection Slate (complete)",
@@ -56,8 +56,14 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 
 	protected override IDictionary<Title, Book> LoadItems()
 	{
-		var retval = new Dictionary<Title, Book>();
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Books.csv")
+		var items = new Dictionary<Title, Book>();
+		var csvName = GameInfo.Starfield.ModFolder + "Books.csv";
+		if (!File.Exists(csvName))
+		{
+			return items;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
@@ -68,10 +74,10 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 			var book = new Book(row);
 			var titleText = TitleOverrides.GetValueOrDefault(book.EditorId, book.Title);
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + titleText);
-			retval.Add(title, book);
+			items.Add(title, book);
 		}
 
-		return retval;
+		return items;
 	}
 	#endregion
 

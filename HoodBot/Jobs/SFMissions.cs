@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -252,7 +253,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 	private Dictionary<string, Title> LoadExisting()
 	{
-		/* var exclusions = new TitleCollection(
+		var exclusions = new TitleCollection(
 			this.Site,
 			StarfieldNamespaces.Starfield,
 			"Deliver to Location",
@@ -266,12 +267,12 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			"Supply Location",
 			"Survey Planet",
 			"Trader (mission)",
-			"Transport Passenger"); */
+			"Transport Passenger");
 
 		var existing = new Dictionary<string, Title>(StringComparer.Ordinal);
 		var backlinks = new PageCollection(this.Site);
 		backlinks.GetBacklinks("Template:Mission Header", BacklinksTypes.EmbeddedIn);
-		//// backlinks.Remove(exclusions);
+		backlinks.Remove(exclusions);
 
 		foreach (var page in backlinks)
 		{

@@ -3,9 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -108,26 +110,28 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 	private static List<Faction> GetFactions(string folder)
 	{
-		var csv = new CsvFile(folder + "Factions.csv")
+		var factions = new List<Faction>();
+		var csvName = folder + "Factions.csv";
+		if (!File.Exists(csvName))
+		{
+			return factions;
+		}
+
+		var csv = new CsvFile(csvName)
 		{
 			Encoding = Encoding.GetEncoding(1252)
 		};
 
-		var factions = new List<Faction>();
 		foreach (var row in csv.ReadRows())
 		{
-			var formId = row["FormID"].Trim();
-			if (formId.StartsWith("0x", StringComparison.Ordinal))
-			{
-				formId = formId[2..];
-			}
-
+			var formId = UespFunctions.FixFormId(row["FormID"]);
 			var edid = row["EditorID"].Trim();
 			var name = row["Name"]
 				.Replace("[", string.Empty, StringComparison.Ordinal)
 				.Replace("]", string.Empty, StringComparison.Ordinal)
 				.Trim();
 			var faction = new Faction(formId, edid, name, []);
+
 			factions.Add(faction);
 		}
 
@@ -188,48 +192,63 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 					factionMembersNode.Value.Add(listTemplate);
 				}
 
-				var sep = listTemplate.AddIfNotExists("sep", "\", \"", ParameterFormat.Verbatim);
-				var ignoreMembers = new HashSet<Title>();
+				var sep = listTemplate.AddIfNotExists("sep", "\", \"\n    ", ParameterFormat.Verbatim);
+				var innerMembers = new SortedDictionary<Title, IList<IWikiNode>>(NaturalTitleComparer.Instance);
+
+				// Add existing members, using first link found as title but retaining full parsed text as value.
 				foreach (var (_, parameter) in listTemplate.GetNumericParameters())
 				{
-					foreach (var linkNode in parameter.Value.LinkNodes)
+					if (parameter.Value.Find<ILinkNode>() is ILinkNode linkNode)
 					{
 						var siteLink = SiteLink.FromLinkNode(this.Site, linkNode);
-						ignoreMembers.Add(siteLink.Title);
+						innerMembers.TryAdd(siteLink.Title, parameter.Value);
 					}
 				}
 
+				// Add new members.
 				foreach (var member in newMembers)
 				{
 					var title = this.FindNpc(member);
-					if (!ignoreMembers.Contains(title))
+					var link = new SiteLink(title);
+					var linkText = link.AsLink(LinkFormat.PipeTrick);
+					var modTemplate = member.FromMod ? GameInfo.Starfield.ModTemplate : string.Empty;
+					var nodes = parser.Factory.Parse(linkText + modTemplate);
+					innerMembers.TryAdd(title, nodes);
+				}
+
+				// Strip out all numeric parameters so we can re-add them below.
+				for (var i = listTemplate.Parameters.Count - 1; i >= 0; --i)
+				{
+					var param = listTemplate.Parameters[i];
+					if (param.Anonymous || param.GetNumberFromName() > 0)
 					{
-						var link = new SiteLink(title);
-						var linkText = link.AsLink(LinkFormat.PipeTrick);
-						var modTemplate = member.FromMod ? GameInfo.Starfield.ModTemplate : string.Empty;
-						listTemplate.Add(linkText + GameInfo.Starfield.ModTemplate);
+						listTemplate.Parameters.RemoveAt(i);
 					}
 				}
 
-				for (var i = 0; i < listTemplate.Parameters.Count - 1; i++)
+				// Re-add numeric parameters.
+				foreach (var member in innerMembers)
 				{
-					var parameter = listTemplate.Parameters[i];
-					parameter.Value.Trim();
-					parameter.Value.AddText("\n    ");
+					var param = parser.Factory.ParameterNode(null, member.Value);
+					param.Value.Trim();
+					param.Value.AddText("\n    ");
+					listTemplate.Parameters.Add(param);
 				}
 
+				// Re-format last parameter to remove spaces.
 				if (listTemplate.Parameters.Count > 0)
 				{
 					var parameter = listTemplate.Parameters[^1];
-					parameter.Value.Trim();
+					parameter.Value.TrimEnd();
 					parameter.Value.AddText("\n");
 				}
 			}
 		}
 	}
 
-	private void AddSectionsToExisting(Dictionary<Title, SectionDictionary> factionSections, List<Faction> factions)
+	private void AddSectionsToExisting(Dictionary<Title, SectionDictionary> existing, List<Faction> factions)
 	{
+		// TODO: Handle Anchor section sorting.
 		var groupedSections = new Dictionary<string, List<Faction>>(StringComparer.OrdinalIgnoreCase);
 		foreach (var faction in factions)
 		{
@@ -248,7 +267,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 			list.Sort((f1, f2) => f1.EditorId.CompareTo(f2.EditorId));
 			var keyLetter = PageLetterMenu.GetIndexFromText(sectionName);
 			var keyTitle = TitleFactory.FromUnvalidated(this.Site, PageLetterPrefix + keyLetter);
-			var sections = factionSections[keyTitle];
+			var sections = existing[keyTitle];
 			foreach (var faction in list)
 			{
 				var groupExists = sections.TryGetValue(sectionName, out var section);
@@ -478,7 +497,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	{
 		// Convenience class to allow sections to travel with their parent parser.
 		public SectionDictionary(Page page)
-			: base(StringComparer.OrdinalIgnoreCase)
+			: base(GetComparer(page))
 		{
 			this.Parser = new SiteParser(page);
 			var sections = this.Parser.ToSections(2);
@@ -493,6 +512,14 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		}
 
 		public SiteParser Parser { get; }
+
+		private static FlatteningComparer GetComparer(Page page)
+		{
+			ArgumentNullException.ThrowIfNull(page);
+			var context = new Context(page.Site);
+			context.AddTemplateHandler("SS", Context.Ignore);
+			return new FlatteningComparer(context, StringComparer.OrdinalIgnoreCase);
+		}
 	}
 	#endregion
 }
