@@ -50,14 +50,9 @@ public class WikiNodeFactory : IWikiNodeFactory
 	public IArgumentNode ArgumentNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<IArgumentNode>(wikiText);
 
 	/// <inheritdoc/>
-	public string EscapeParameterText(string? value, bool escapeEquals)
+	public void EscapeParameterNodes(IEnumerable<IWikiNode>? nodes, bool escapeEquals)
 	{
-		if (value is null)
-		{
-			return string.Empty;
-		}
-
-		var nodes = this.Parse(value);
+		ArgumentNullException.ThrowIfNull(nodes);
 		foreach (var node in nodes)
 		{
 			if (node is ITextNode textNode)
@@ -69,6 +64,18 @@ public class WikiNodeFactory : IWikiNodeFactory
 				}
 			}
 		}
+	}
+
+	/// <inheritdoc/>
+	public string EscapeParameterText(string? value, bool escapeEquals)
+	{
+		if (value is null)
+		{
+			return string.Empty;
+		}
+
+		var nodes = this.Parse(value);
+		this.EscapeParameterNodes(nodes, escapeEquals);
 
 		return nodes.ToRaw();
 	}

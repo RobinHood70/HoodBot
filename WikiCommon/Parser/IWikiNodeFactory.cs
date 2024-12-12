@@ -34,11 +34,15 @@ public interface IWikiNodeFactory
 	/// <returns>A new instance of an <see cref="ICommentNode"/> class.</returns>
 	ICommentNode CommentNode(string comment);
 
+	/// <summary>Escapes any pipes and, optionally, equals signs in the node collection.</summary>
+	/// <param name="nodes">The node collection to escape.</param>
+	/// <param name="escapeEquals">Whether or not to escape equals signs.</param>
+	void EscapeParameterNodes(IEnumerable<IWikiNode>? nodes, bool escapeEquals);
+
 	/// <summary>Escapes any pipes and, optionally, equals signs in the value.</summary>
 	/// <param name="value">The text to escape.</param>
 	/// <param name="escapeEquals">Whether or not to escape equals signs.</param>
 	/// <returns>The escaped text.</returns>
-	// TODO: Consider a WikiNode version of this so that we're not escaping, then converting back to text, then converting to WikiNodes again (and probably back to text yet again to output to the wiki).
 	string EscapeParameterText(string? value, bool escapeEquals);
 
 	/// <summary>Initializes a new instance of an <see cref="IHeaderNode"/> class.</summary>
