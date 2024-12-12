@@ -37,6 +37,7 @@ public sealed class Context
 		this.AddParserFunctionHandler("namespace", NamespacePF);
 		this.AddParserFunctionHandler("pagename", PageNamePF);
 
+		this.AddTemplateHandler("Anchor", ReturnFirstParameter);
 		this.AddTemplateHandler("Castles Happiness", Ignore);
 		this.AddTemplateHandler("FC", ReturnSecondParameter);
 		this.AddTemplateHandler("Hover", ReturnSecondParameter);
@@ -70,6 +71,26 @@ public sealed class Context
 	/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>
 	/// <remarks>The list is always fully case sensitive, since it cannot be known if these are names in template space or case-sensitive words.</remarks>
 	public IReadOnlyCollection<string> UnhandledMagicWords => this.unhandledMagicWords;
+	#endregion
+
+	#region Public Static Methods
+
+	public static string? ReturnFirstParameter(Context context, MagicWordFrame frame)
+	{
+		ArgumentNullException.ThrowIfNull(frame);
+		return frame.Parameters.TryGetValue("1", out var value)
+			? value
+			: string.Empty;
+	}
+	public static string? ReturnSecondParameter(Context context, MagicWordFrame frame)
+	{
+		ArgumentNullException.ThrowIfNull(frame);
+		return frame.Parameters.TryGetValue("2", out var value)
+			? value
+			: string.Empty;
+	}
+
+	public static string? Ignore(Context context, MagicWordFrame frame) => string.Empty;
 	#endregion
 
 	#region Public Methods
@@ -169,8 +190,6 @@ public sealed class Context
 
 	private static string? FullPageNameVar(Context context, MagicWordFrame frame) => context.Title?.FullPageName();
 
-	private static string? Ignore(Context context, MagicWordFrame frame) => string.Empty;
-
 	private static string? NamespacePF(Context context, MagicWordFrame frame) =>
 		frame.FirstArgument?.Length > 0
 			? TitleFactory.FromUnvalidated(context.Site, frame.FirstArgument).Namespace.CanonicalName
@@ -186,15 +205,5 @@ public sealed class Context
 	private static string? PageNameVar(Context context, MagicWordFrame frame) => context.Title?.PageName;
 
 	private static string? Pipe(Context context, MagicWordFrame frame) => "|";
-
-	private static string? ReturnFirstParameter(Context context, MagicWordFrame frame) =>
-		frame.Parameters.TryGetValue("1", out var value)
-			? value
-			: string.Empty;
-
-	private static string? ReturnSecondParameter(Context context, MagicWordFrame frame) =>
-		frame.Parameters.TryGetValue("2", out var value)
-			? value
-			: string.Empty;
 	#endregion
 }
