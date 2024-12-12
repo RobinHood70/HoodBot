@@ -24,17 +24,19 @@ internal class Piece
 
 	public void MergeText(List<IWikiNode> newList)
 	{
-		if (newList.Count > 0)
+		if (newList.Count == 0)
 		{
-			var merged = false;
-			var last = this.Nodes.Count - 1;
-			if (last > -1 && this.Nodes[last] is ITextNode lastNode && newList[0] is ITextNode first)
-			{
-				lastNode.Text += first.Text;
-				merged = true;
-			}
+			return;
+		}
 
-			this.Nodes.AddRange(merged ? newList.GetRange(1, newList.Count - 1) : newList);
+		if (this.Nodes.Count > 0 && this.Nodes[^1] is ITextNode lastNode && newList[0] is ITextNode first)
+		{
+			lastNode.Text += first.Text;
+			this.Nodes.AddRange(newList[1..]);
+		}
+		else
+		{
+			this.Nodes.AddRange(newList);
 		}
 	}
 	#endregion
