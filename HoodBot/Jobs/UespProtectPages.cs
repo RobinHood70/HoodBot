@@ -38,7 +38,7 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Fields
-	private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>();
+	private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>(TitleComparer.Instance);
 	private readonly List<ProtectionInfo> searchList =
 	[
 		new ProtectionInfo([MediaWikiNamespaces.Project], @"\AJavascript/.*?\.js", new PageProtection(
