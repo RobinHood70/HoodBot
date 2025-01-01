@@ -88,6 +88,23 @@ public class ParameterReplacers
 		}
 	}
 
+	public void PageNameReplace(Namespace ns, IParameterNode? param)
+	{
+		/* var title2 = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
+		var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
+		var ns2 = rep2 ? replacement2.To.Namespace : null; */
+		if (param != null)
+		{
+			var paramValue = param.GetValue();
+			var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
+			if (this.globalUpdates.TryGetValue(findTitle, out var target) &&
+				target.Namespace == ns)
+			{
+				param.SetValue(target.PageName, ParameterFormat.Copy);
+			}
+		}
+	}
+
 	public void ReplaceAll(Page page, ITemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
@@ -340,23 +357,6 @@ public class ParameterReplacers
 			if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Namespace)
 			{
 				param.SetValue(to.PageName, ParameterFormat.Copy);
-			}
-		}
-	}
-
-	private void PageNameReplace(Namespace ns, IParameterNode? param)
-	{
-		/* var title2 = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
-		var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
-		var ns2 = rep2 ? replacement2.To.Namespace : null; */
-		if (param != null)
-		{
-			var paramValue = param.GetValue();
-			var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
-			if (this.globalUpdates.TryGetValue(findTitle, out var target) &&
-				target.Namespace == ns)
-			{
-				param.SetValue(target.PageName, ParameterFormat.Copy);
 			}
 		}
 	}

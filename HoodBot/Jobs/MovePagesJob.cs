@@ -58,8 +58,6 @@ public abstract class MovePagesJob : EditJob
 	private readonly SortedDictionary<Title, DetailedActions> actions = [];
 	private readonly Dictionary<Title, Title> linkUpdates = [];
 	private readonly Dictionary<Title, Title> moves = [];
-	private readonly ParameterReplacers parameterReplacers;
-
 	private bool isRedirectLink;
 	private string? logDetails;
 	#endregion
@@ -68,7 +66,7 @@ public abstract class MovePagesJob : EditJob
 	protected MovePagesJob(JobManager jobManager, bool updateUserSpace)
 		: base(jobManager)
 	{
-		this.parameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
+		this.ParameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
 		if (updateUserSpace)
 		{
 			this.Pages.NamespaceLimitations.Remove(MediaWikiNamespaces.User);
@@ -153,6 +151,8 @@ public abstract class MovePagesJob : EditJob
 	protected MoveOptions MoveExtra { get; set; }
 
 	protected PageModules PageInfoExtraModules { get; set; }
+
+	protected ParameterReplacers ParameterReplacers { get; }
 
 	protected bool RecursiveCategoryMembers { get; set; } = true;
 
@@ -796,7 +796,7 @@ public abstract class MovePagesJob : EditJob
 			template.SetTitle(nameText);
 		}
 
-		this.parameterReplacers.ReplaceAll(page, template);
+		this.ParameterReplacers.ReplaceAll(page, template);
 	}
 
 	protected virtual void ValidateMoveActions(PageCollection fromPages)
@@ -847,7 +847,7 @@ public abstract class MovePagesJob : EditJob
 
 	private static bool IsPageOrphaned(Page page)
 	{
-		var unique = new SortedSet<Title>(page.Backlinks.Keys);
+		var unique = new SortedSet<Title>(page.Backlinks.Keys, TitleComparer.Instance);
 		return unique.Count == 0 || (unique.Count == 1 && unique.Contains(page.Title));
 	}
 
