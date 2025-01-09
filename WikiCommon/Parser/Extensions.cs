@@ -117,6 +117,15 @@ public static class Extensions
 
 	#region IParameterNode Extensions
 
+	/// <summary>Gets the parameter number if it's numeric.</summary>
+	/// <param name="parameter">The parameter to check.</param>
+	/// <returns>The parameter number if it's an integer; otherwise 0.</returns>
+	public static int GetNumberFromName(this IParameterNode? parameter)
+	{
+		int.TryParse(parameter?.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber);
+		return namedNumber;
+	}
+
 	/// <summary>Get the trimmed raw value of the parameter.</summary>
 	/// <param name="parameter">The parameter to work on.</param>
 	/// <returns>The trimmed raw text of the parameter value.</returns>
@@ -146,13 +155,13 @@ public static class Extensions
 		_ => false,
 	};
 
-	/// <summary>Gets the parameter number if it's numeric.</summary>
+	/// <summary>Determines if a parameter is numeric.</summary>
 	/// <param name="parameter">The parameter to check.</param>
-	/// <returns>The parameter number if it's numeric; otherwise 0.</returns>
-	public static int GetNumberFromName(this IParameterNode? parameter)
+	/// <returns><see langword="true"/> if the parameter is anonymous or if the parameter name is an integer; otherwise <see langword="false"/>.</returns>
+	public static bool IsNumeric(this IParameterNode? parameter)
 	{
-		int.TryParse(parameter?.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber);
-		return namedNumber;
+		ArgumentNullException.ThrowIfNull(parameter);
+		return parameter.Anonymous || parameter.GetNumberFromName() != 0;
 	}
 
 	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
