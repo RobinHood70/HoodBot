@@ -55,7 +55,7 @@ public enum MoveOptions
 public abstract class MovePagesJob : EditJob
 {
 	#region Fields
-	private readonly SortedDictionary<Title, DetailedActions> actions = [];
+	private readonly SortedDictionary<Title, DetailedActions> actions = new(TitleComparer.Instance);
 	private readonly Dictionary<Title, Title> linkUpdates = [];
 	private readonly Dictionary<Title, Title> moves = [];
 	private bool isRedirectLink;

@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
+using System;
 using System.Collections.Generic;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
@@ -15,31 +16,24 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#endregion
 
 	#region Protected Override Properties
-	protected override string TemplateName => "Planet Infobox";
+	protected override string TemplateName => "ESO Sets With";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Use orbital_position instead of order";
+	protected override string GetEditSummary(Page page) => "Remove duplicate parameters";
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
-		var op = template.Find("orbital_position");
-		if (op is not null && op.GetRaw().Length > 0)
+		var existing = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < template.Parameters.Count; i++)
 		{
-			template.Remove("order");
-		}
-		else
-		{
-			var order = template.Find("order");
-			if (op is not null && order is not null)
+			var parameter = template.Parameters[i];
+			if (parameter.Anonymous)
 			{
-				op.Value.Clear();
-				op.Value.AddRange(order.Value);
-				template.Remove("order");
-			}
-			else
-			{
-				template.RenameParameter("order", "orbital_position");
+				if (!existing.Add(parameter.GetValue()))
+				{
+					template.Parameters.RemoveAt(i);
+				}
 			}
 		}
 	}

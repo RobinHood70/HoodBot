@@ -39,6 +39,7 @@ public class ParameterReplacers
 		this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
 		this.AddTemplateReplacers("ESO Antiquity Furnishing", this.EsoAntiquityReplacer);
 		this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
+		this.AddTemplateReplacers("ESO Sets With", this.EsoSetsWith);
 		this.AddTemplateReplacers("Furnishing Crafting Entry", this.FurnishingLink);
 		this.AddTemplateReplacers("Furnishing General Entry", this.PageNameFirst);
 		this.AddTemplateReplacers("Furnishing Link", this.FurnishingLink);
@@ -306,6 +307,34 @@ public class ParameterReplacers
 	#endregion
 
 	#region Private Methods
+	private void EsoSetsWith(Page page, ITemplateNode template)
+	{
+		// Note: this code underwent significant rewrites to handle duplicates but has not been tested.
+		var existing = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < template.Parameters.Count; i++)
+		{
+			var parameter = template.Parameters[i];
+			if (!parameter.IsNumeric())
+			{
+				continue;
+			}
+
+			var value = parameter.GetValue();
+			Title from = TitleFactory.FromUnvalidated(this.site.Namespaces[MediaWikiNamespaces.Category], "Online-Sets with " + value);
+			if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Namespace)
+			{
+				value = to.PageName.Replace("Online-Sets with ", string.Empty, StringComparison.Ordinal);
+				parameter.SetValue(value, ParameterFormat.Copy);
+			}
+
+			// Remove value if it's now a duplicate.
+			if (!existing.Add(value))
+			{
+				template.Parameters.RemoveAt(i);
+			}
+		}
+	}
+
 	private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 	{
 		ArgumentNullException.ThrowIfNull(page);
