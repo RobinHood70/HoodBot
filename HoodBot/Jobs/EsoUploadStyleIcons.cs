@@ -17,6 +17,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#region Static Fields
 	private static readonly Dictionary<long, string> NameFixes = new()
 	{
+		[4528] = "Ashlander Helm",
 		[6117] = "Honor Guard Jack",
 	};
 
@@ -113,6 +114,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 					$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n";
 				var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
 				this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText, true);
+				this.Progress++;
 			}
 		}
 	}
