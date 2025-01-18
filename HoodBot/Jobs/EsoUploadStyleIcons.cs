@@ -150,7 +150,8 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 			foreach (var part in Parts)
 			{
 				var dbName = $"{style} {part.Name}";
-				if (iconLookup.TryGetValue(dbName, out var idIcon) && files.Contains(idIcon.Icon))
+				var gotValue = iconLookup.TryGetValue(dbName, out var idIcon); // Split out for debugging
+				if (gotValue && files.Contains(idIcon.Icon))
 				{
 					// We don't bother with manual duplicate checks here, since these should always be new. Upload will fail for dupes, but we ignore the warnings.
 					Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
