@@ -107,7 +107,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 				var typeUcfirst = upload.Part.Type.UpperFirst(this.Site.Culture);
 				var pageText =
 					$"{{{{Online File\n" +
-					$"|originalfile={upload.Icon}\n" +
+					$"|originalfile={RemoteIconPath}{upload.Icon}\n" +
 					$"|Collectible|{{{{Item Link|{upload.Style} {upload.Part.Name}|collectid={upload.Id}}}}}\n" +
 					"}}\n" +
 					$"[[Category:Online-Icons-{typeUcfirst}-{upload.Style}]]\n" +
