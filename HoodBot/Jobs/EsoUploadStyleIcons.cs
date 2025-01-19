@@ -10,8 +10,8 @@ using RobinHood70.HoodBot.Jobs.JobModels;
 internal sealed class EsoUploadStyleIcons : WikiJob
 {
 	#region Private Constants
-	private const string RemoteIconPath = "/esoui/art/icons/";
-	private const string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '" + RemoteIconPath + "%'";
+	private const string RemoteIconPath = "esoui/art/icons/";
+	private const string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '/" + RemoteIconPath + "%'";
 	#endregion
 
 	#region Static Fields
@@ -61,7 +61,8 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#endregion
 
 	#region Fields
-	private List<Upload>? uploads;
+	private readonly List<Upload> uploads = [];
+
 	#endregion
 
 	#region Constructors
@@ -93,29 +94,26 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 			files.Add(fileName);
 		}
 
-		this.uploads = this.GetUploads(files);
+		this.GetUploads(files);
 		return this.uploads.Count > 0;
 	}
 
 	protected override void Main()
 	{
-		if (this.uploads?.Count > 0)
+		this.ProgressMaximum = this.uploads.Count;
+		foreach (var upload in this.uploads)
 		{
-			this.ProgressMaximum = this.uploads.Count;
-			foreach (var upload in this.uploads)
-			{
-				var typeUcfirst = upload.Part.Type.UpperFirst(this.Site.Culture);
-				var pageText =
-					$"{{{{Online File\n" +
-					$"|originalfile={RemoteIconPath}{upload.Icon}\n" +
-					$"|Collectible|{{{{Item Link|{upload.Style} {upload.Part.Name}|collectid={upload.Id}}}}}\n" +
-					"}}\n" +
-					$"[[Category:Online-Icons-{typeUcfirst}-{upload.Style}]]\n" +
-					$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n";
-				var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
-				this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText, true);
-				this.Progress++;
-			}
+			var typeUcfirst = upload.Part.Type.UpperFirst(this.Site.Culture);
+			var pageText =
+				$"{{{{Online File\n" +
+				$"|originalfile={RemoteIconPath}{upload.Icon}\n" +
+				$"|Collectible|{{{{Item Link|{upload.Style} {upload.Part.Name}|collectid={upload.Id}}}}}\n" +
+				"}}\n" +
+				$"[[Category:Online-Icons-{typeUcfirst}-{upload.Style}]]\n" +
+				$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n";
+			var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
+			this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText, true);
+			this.Progress++;
 		}
 	}
 	#endregion
@@ -133,7 +131,8 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 			}
 
 			var icon = EsoLog.ConvertEncoding((string)row["icon"]);
-			iconLookup.Add(name, (id, icon[RemoteIconPath.Length..].Replace(".dds", ".png", StringComparison.Ordinal)));
+			icon = icon[(RemoteIconPath.Length + 1)..^4]; // Remove path and extension
+			iconLookup.Add(name, (id, icon));
 		}
 
 		return iconLookup;
@@ -141,9 +140,9 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#endregion
 
 	#region Private Methods
-	private List<Upload> GetUploads(HashSet<string> files)
+	private void GetUploads(HashSet<string> files)
 	{
-		List<Upload> retval = new(this.styles.Count * Parts.Count);
+		this.uploads.EnsureCapacity(this.styles.Count * Parts.Count);
 		var iconLookup = GetIcons();
 		foreach (var style in this.styles)
 		{
@@ -155,13 +154,12 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 				{
 					// We don't bother with manual duplicate checks here, since these should always be new. Upload will fail for dupes, but we ignore the warnings.
 					Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
-					retval.Add(upload);
+					this.uploads.Add(upload);
 				}
 			}
 		}
 
-		retval.TrimExcess();
-		return retval;
+		this.uploads.TrimExcess();
 	}
 	#endregion
 
@@ -182,14 +180,16 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 		#region Constructors
 		public Upload(long id, string icon, string style, Part part)
 		{
-			this.Icon = icon.Replace(".png", string.Empty, StringComparison.Ordinal);
+			this.Icon = icon;
 			this.Id = id;
 			this.Style = style;
 			this.Part = part;
 			var partType = part.Type.OrdinalEquals("weapons") ? "weapon" : part.Type;
 			this.DestinationName = $"ON-icon-{partType}-{part.Name}-{style}.png";
 		}
+		#endregion
 
+		#region Public Properties
 		public string DestinationName { get; }
 
 		public string Icon { get; }
