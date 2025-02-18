@@ -75,7 +75,11 @@ public sealed class Context
 
 	#region Public Static Methods
 
-	public static string? ReturnFirstParameter(Context context, MagicWordFrame frame)
+	/// <summary>Generic method to return the value of the first parameter.</summary>
+	/// <param name="context">The context for the template call.</param>
+	/// <param name="frame">The template frame.</param>
+	/// <returns>The parameter value, if found; otherwise, an empty string.</returns>
+	public static string ReturnFirstParameter(Context context, MagicWordFrame frame)
 	{
 		ArgumentNullException.ThrowIfNull(frame);
 		return frame.Parameters.TryGetValue("1", out var value)
@@ -83,6 +87,10 @@ public sealed class Context
 			: string.Empty;
 	}
 
+	/// <summary>Generic method to return the value of the second parameter.</summary>
+	/// <param name="context">The context for the template call.</param>
+	/// <param name="frame">The template frame.</param>
+	/// <returns>The parameter value, if found; otherwise, an empty string.</returns>
 	public static string? ReturnSecondParameter(Context context, MagicWordFrame frame)
 	{
 		ArgumentNullException.ThrowIfNull(frame);
@@ -91,6 +99,10 @@ public sealed class Context
 			: string.Empty;
 	}
 
+	/// <summary>Generic method to ignore template parsing and return an empty string.</summary>
+	/// <param name="context">(Unused) The context for the template call.</param>
+	/// <param name="frame">(Unused) The template frame.</param>
+	/// <returns>An empty string.</returns>
 	public static string? Ignore(Context context, MagicWordFrame frame) => string.Empty;
 	#endregion
 
