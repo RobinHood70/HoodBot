@@ -679,7 +679,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 		this.LoadPages(new QueryPageSetInput(input), this.RecurseCategoryHandler);
 		if (this.recurseCategories.Count > 0)
 		{
-			List<string> copy = new(this.recurseCategories);
+			List<string> copy = [.. this.recurseCategories];
 			this.recurseCategories.Clear();
 			var originalTitle = input.Title;
 			foreach (var category in copy)

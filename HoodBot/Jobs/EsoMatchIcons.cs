@@ -338,7 +338,7 @@ public class EsoMatchIcons : EditJob
 				: new List<IWikiNode>(parser.GetRange(0, index));
 			if (end < parser.Count)
 			{
-				this.PostSummary = new List<IWikiNode>(parser.GetRange(end, parser.Count - end));
+				this.PostSummary = [.. parser.GetRange(end, parser.Count - end)];
 			}
 
 			this.ParseSummary(parser, index, end);

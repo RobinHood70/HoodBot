@@ -82,6 +82,7 @@ public sealed class Context
 			? value
 			: string.Empty;
 	}
+
 	public static string? ReturnSecondParameter(Context context, MagicWordFrame frame)
 	{
 		ArgumentNullException.ThrowIfNull(frame);

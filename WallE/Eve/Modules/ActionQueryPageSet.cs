@@ -148,7 +148,7 @@ internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageI
 	{
 		ArgumentNullException.ThrowIfNull(result);
 		base.DeserializeActionExtra(result);
-		List<IQueryModule> list = new(this.AllModules);
+		List<IQueryModule> list = [.. this.AllModules];
 		if (this.Generator != null)
 		{
 			list.Add(this.Generator);

@@ -217,7 +217,12 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
 			? displayNode.GetRaw()
 			: Title.ToLabelName(linkNode.GetRaw());
-		return new List<IWikiNode>([parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText)]);
+		var retval = new List<IWikiNode>
+		{
+			parser.Factory.LinkNodeFromParts(link.LinkTarget(), displayText)
+		};
+
+		return [.. retval];
 	}
 
 	private bool NamespaceCheck(Page page, IReadOnlyDictionary<Title, BacklinksTypes> backlinks, TitleCollection titlesChecked)

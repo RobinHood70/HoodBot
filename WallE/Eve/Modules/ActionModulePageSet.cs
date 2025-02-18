@@ -128,7 +128,7 @@ public abstract class ActionModulePageSet<TInput, TOutput>(WikiAbstractionLayer 
 	#region Protected Methods
 	protected PageSetResult<TOutput> CreatePageSet(IList<TOutput> pages) => new(
 		titles: pages,
-		badRevisionIds: new List<long>(this.badRevisionIds),
+		badRevisionIds: [.. this.badRevisionIds],
 		converted: this.converted,
 		interwiki: this.interwiki,
 		normalized: this.normalized,

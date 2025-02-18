@@ -22,7 +22,7 @@ internal sealed class ActionQuery : ActionModule
 	public ActionQuery(WikiAbstractionLayer wal, IEnumerable<IQueryModule> queryModules)
 		: base(wal)
 	{
-		this.queryModules = new List<IQueryModule>(queryModules ?? []);
+		this.queryModules = [.. queryModules ?? []];
 		var props =
 			((wal.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
 			| (wal.ValidStopCheckMethods.HasAnyFlag(StopCheckMethods.TalkCheckQuery) ? UserInfoProperties.HasMsg : UserInfoProperties.None);

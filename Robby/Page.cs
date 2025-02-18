@@ -250,7 +250,7 @@ public class Page : ITitle
 				return null;
 			}
 
-			HashSet<Title> templatesHash = new(this.Templates);
+			HashSet<Title> templatesHash = [.. this.Templates];
 			templatesHash.IntersectWith(site.DisambiguationTemplates);
 
 			return templatesHash.Count > 0;

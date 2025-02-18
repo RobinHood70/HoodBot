@@ -111,7 +111,7 @@ public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>
 	/// <param name="namespaces">The namespaces to filter to.</param>
 	public void FilterToNamespaces(IEnumerable<int> namespaces)
 	{
-		HashSet<int> hash = new(namespaces);
+		HashSet<int> hash = [.. namespaces];
 		for (var i = this.Count - 1; i >= 0; i--)
 		{
 			if (!hash.Contains(this.GetKeyForItem(this[i]).Namespace.Id))
@@ -175,7 +175,7 @@ public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>
 	{
 		if (namespaces is not HashSet<int> hash)
 		{
-			hash = new(namespaces ?? []);
+			hash = [.. namespaces ?? []];
 		}
 
 		for (var i = this.Count - 1; i >= 0; i--)

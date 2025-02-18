@@ -192,7 +192,7 @@ public class Request : KeyedCollection<string, Parameter>
 	{
 		if (values != null)
 		{
-			SortedSet<int> sorted = new(values);
+			SortedSet<int> sorted = [.. values];
 			List<string> newList = new(sorted.Count);
 			foreach (var value in sorted)
 			{
@@ -214,7 +214,7 @@ public class Request : KeyedCollection<string, Parameter>
 	{
 		if (values != null)
 		{
-			SortedSet<long> sorted = new(values);
+			SortedSet<long> sorted = [.. values];
 			List<string> newList = new(sorted.Count);
 			foreach (var value in sorted)
 			{
