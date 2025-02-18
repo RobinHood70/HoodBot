@@ -1463,7 +1463,9 @@ public class Site : IMessageSource
 		this.siteName = general.SiteName;
 		this.serverName = general.ServerName;
 		this.generator = general.Generator;
-		var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, Globals.DefaultRegexTimeout).Trim(TextArrays.Period);
+		var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, Globals.DefaultRegexTimeout);
+		versionFudged = Regex.Replace(versionFudged, @"\.{2,}", ".", RegexOptions.None, Globals.DefaultRegexTimeout);
+		versionFudged = versionFudged.Trim(TextArrays.Period);
 		this.Version = new Version(versionFudged);
 		var path = general.ArticlePath;
 		var basePath = general.BasePage[..(general.BasePage.IndexOf(server, StringComparison.Ordinal) + server.Length)]; // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
