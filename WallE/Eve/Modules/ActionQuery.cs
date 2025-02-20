@@ -148,7 +148,14 @@ internal sealed class ActionQuery : ActionModule
 				throw new InvalidDataException();
 			}
 
-			this.ParseResponse(response);
+			try
+			{
+				this.ParseResponse(response);
+			}
+			catch (JsonReaderException)
+			{
+				throw new InvalidDataException();
+			}
 		}
 		while (this.continueModule?.Continues ?? false);
 	}
@@ -206,19 +213,12 @@ internal sealed class ActionQuery : ActionModule
 
 	private void ParseResponse(string response)
 	{
-		try
+		var result = ToJson(response);
+		if (result.Type == JTokenType.Object)
 		{
-			var result = ToJson(response);
-			if (result.Type == JTokenType.Object)
-			{
-				this.DeserializeAction(result);
-			}
-			else if (!(result is JArray array && array.Count == 0))
-			{
-				throw new InvalidDataException();
-			}
+			this.DeserializeAction(result);
 		}
-		catch (JsonReaderException)
+		else if (!(result is JArray array && array.Count == 0))
 		{
 			throw new InvalidDataException();
 		}
