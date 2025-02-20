@@ -49,7 +49,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 			{
 				var api = new WikiAbstractionLayer(this.client, wiki.Api!);
 				api.SendingRequest += JobManager.WalSendingRequest;
-				var site = new Site(api);
+				var site = this.JobManager.CreateSite(wiki.WikiInfo, api, this.Site.EditingEnabled);
 				site.Login(wiki.UserName, wiki.Password);
 
 				this.StatusWriteLine("Getting local blocks");
