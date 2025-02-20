@@ -36,8 +36,7 @@ public class JobManager : IDisposable
 		this.PauseToken = pauseSource.Token;
 		this.Client = this.CreateClient();
 		this.AbstractionLayer = this.CreateAbstractionLayer();
-		this.Site = this.CreateSite();
-		this.Site.EditingEnabled = editingEnabled;
+		this.Site = this.CreateSite(this.wikiInfo, this.AbstractionLayer, editingEnabled);
 	}
 	#endregion
 
@@ -76,6 +75,50 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Static Methods
+
+	public static void SiteChanging(Site sender, ChangeArgs eventArgs)
+	{
+#if DEBUG
+		ArgumentNullException.ThrowIfNull(sender);
+		ArgumentNullException.ThrowIfNull(eventArgs);
+		if (!sender.EditingEnabled)
+		{
+			Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
+			foreach (var parameter in eventArgs.Parameters)
+			{
+				Debug.Write($"  {parameter.Key} = ");
+				if (parameter.Value is string)
+				{
+					Debug.WriteLine(parameter.Value);
+				}
+				else if (parameter.Value is IEnumerable enumerable)
+				{
+					var first = true;
+					foreach (var parameterValue in enumerable)
+					{
+						if (first)
+						{
+							first = false;
+						}
+						else
+						{
+							Debug.Write(", ");
+						}
+
+						Debug.Write(parameterValue.ToString());
+					}
+
+					Debug.WriteLine(string.Empty);
+				}
+				else
+				{
+					Debug.WriteLine(parameter.Value?.ToString());
+				}
+			}
+		}
+#endif
+	}
+
 	public static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
 	public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs?.Response}");
@@ -86,11 +129,28 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Methods
+	public Site CreateSite(WikiInfo wikiInfo, IWikiAbstractionLayer abstractionLayer, bool editingEnabled)
+	{
+		// TODO: Refactor OnPagePreview (and possibly others) so that CreateSite is no longer tied into JobManager and can be safely used from within a job like ImportBlocks. Should probably work as is for now, but is definitely sketchy.
+		var retval = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier)(abstractionLayer);
+		retval.EditingEnabled = editingEnabled;
+		retval.Changing += SiteChanging;
+		retval.PagePreview += this.OnPagePreview;
+		retval.WarningOccurred += SiteWarningOccurred;
+		return retval;
+	}
 
 	public void Dispose()
 	{
 		this.Dispose(disposing: true);
 		GC.SuppressFinalize(this);
+	}
+
+	public void DisposeSite(Site site)
+	{
+		site.WarningOccurred -= SiteWarningOccurred;
+		site.PagePreview -= this.OnPagePreview;
+		site.Changing -= SiteChanging;
 	}
 
 	public void Login(string? userName, string? password, string? logPage, string? resultsPage)
@@ -174,7 +234,7 @@ public class JobManager : IDisposable
 		{
 			if (disposing)
 			{
-				this.DisposeSite();
+				this.DisposeSite(this.Site);
 				this.DisposeAbstractionLayer();
 				this.DisposeClient();
 			}
@@ -237,49 +297,6 @@ public class JobManager : IDisposable
 	protected virtual void OnUpdateProgress(double progressPercent) => this.ProgressUpdated?.Invoke(this, progressPercent);
 
 	protected virtual void OnUpdateStatus(string? status) => this.StatusUpdated?.Invoke(this, status);
-
-	protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
-	{
-#if DEBUG
-		ArgumentNullException.ThrowIfNull(sender);
-		ArgumentNullException.ThrowIfNull(eventArgs);
-		if (!sender.EditingEnabled)
-		{
-			Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
-			foreach (var parameter in eventArgs.Parameters)
-			{
-				Debug.Write($"  {parameter.Key} = ");
-				if (parameter.Value is string)
-				{
-					Debug.WriteLine(parameter.Value);
-				}
-				else if (parameter.Value is IEnumerable enumerable)
-				{
-					var first = true;
-					foreach (var parameterValue in enumerable)
-					{
-						if (first)
-						{
-							first = false;
-						}
-						else
-						{
-							Debug.Write(", ");
-						}
-
-						Debug.Write(parameterValue.ToString());
-					}
-
-					Debug.WriteLine(string.Empty);
-				}
-				else
-				{
-					Debug.WriteLine(parameter.Value?.ToString());
-				}
-			}
-		}
-#endif
-	}
 	#endregion
 
 	#region Private Methods
@@ -338,15 +355,6 @@ public class JobManager : IDisposable
 		return client;
 	}
 
-	private Site CreateSite()
-	{
-		var retval = Site.GetFactoryMethod(this.wikiInfo.SiteClassIdentifier)(this.AbstractionLayer);
-		retval.Changing += this.SiteChanging;
-		retval.PagePreview += this.OnPagePreview;
-		retval.WarningOccurred += SiteWarningOccurred;
-		return retval;
-	}
-
 	private void DisposeAbstractionLayer()
 	{
 		this.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
@@ -357,12 +365,5 @@ public class JobManager : IDisposable
 	}
 
 	private void DisposeClient() => this.Client.RequestingDelay -= this.Client_RequestingDelay;
-
-	private void DisposeSite()
-	{
-		this.Site.WarningOccurred -= SiteWarningOccurred;
-		this.Site.PagePreview -= this.OnPagePreview;
-		this.Site.Changing -= this.SiteChanging;
-	}
 	#endregion
 }

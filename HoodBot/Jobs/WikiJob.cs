@@ -20,7 +20,6 @@ public enum JobType
 public abstract class WikiJob : IMessageSource
 {
 	#region Fields
-	private readonly JobManager jobManager;
 	private readonly string logName;
 	private int progress;
 	private int progressMaximum = 1;
@@ -30,7 +29,7 @@ public abstract class WikiJob : IMessageSource
 	protected WikiJob(JobManager jobManager, JobType jobType)
 	{
 		ArgumentNullException.ThrowIfNull(jobManager);
-		this.jobManager = jobManager;
+		this.JobManager = jobManager;
 		this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 		this.logName = this.GetType().Name.UnCamelCase();
 		this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
@@ -82,6 +81,8 @@ public abstract class WikiJob : IMessageSource
 	#endregion
 
 	#region Protected Properties
+	protected JobManager JobManager { get; }
+
 	protected ResultHandler? Results { get; set; }
 	#endregion
 
@@ -107,7 +108,7 @@ public abstract class WikiJob : IMessageSource
 
 	public void StatusWrite(string? status)
 	{
-		this.jobManager.UpdateStatus(status);
+		this.JobManager.UpdateStatus(status);
 		this.FlowControl();
 	}
 
@@ -164,12 +165,12 @@ public abstract class WikiJob : IMessageSource
 
 	protected virtual void FlowControl()
 	{
-		if (this.jobManager.PauseToken is PauseToken pause && pause.IsPaused)
+		if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
 		{
-			pause.WaitWhilePausedAsync().Wait(this.jobManager.CancelToken);
+			pause.WaitWhilePausedAsync().Wait(this.JobManager.CancelToken);
 		}
 
-		if (this.jobManager.CancelToken is CancellationToken token &&
+		if (this.JobManager.CancelToken is CancellationToken token &&
 			token != CancellationToken.None)
 		{
 			token.ThrowIfCancellationRequested();
@@ -189,7 +190,7 @@ public abstract class WikiJob : IMessageSource
 
 	protected virtual void UpdateProgress()
 	{
-		this.jobManager.UpdateProgress(this.ProgressPercent);
+		this.JobManager.UpdateProgress(this.ProgressPercent);
 		this.FlowControl();
 	}
 	#endregion
