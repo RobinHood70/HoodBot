@@ -243,9 +243,9 @@ internal sealed class ImportBlocks : WikiJob
 	{
 		var wmfBlocks = new List<CommonBlock>();
 		this.StatusWriteLine("Getting WMF global blocks");
-		GetGlobalBlocks(this.client, wmfBlocks, lastRun);
+		this.GetGlobalBlocks(this.client, wmfBlocks, lastRun);
 		this.StatusWriteLine("Getting English wiki blocks");
-		GetEnWikiBlocks(this.client, wmfBlocks, lastRun);
+		this.GetEnWikiBlocks(this.client, wmfBlocks, lastRun);
 
 		return wmfBlocks;
 	}
