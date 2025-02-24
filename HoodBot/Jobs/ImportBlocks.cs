@@ -12,22 +12,19 @@ using RobinHood70.WallE.Clients;
 using RobinHood70.WallE.Eve;
 using RobinHood70.WikiCommon;
 
-[method: JobInfo("Import Blocks")]
-[method: NoLogin]
-internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
+internal sealed class ImportBlocks : WikiJob
 {
 	#region Static Fields
 	// Regex initialized from file to keep specific filters hidden from vandals.
-	private static readonly Regex BlockFilter = new(File.ReadAllText("Jobs\\ImportBlocksFilter.txt"), RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 	private static readonly Regex Ipv4Check = new(@"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<range>\/\d+)?\Z", RegexOptions.CultureInvariant, Globals.DefaultRegexTimeout);
 	private static readonly HashSet<string> Sites = new(StringComparer.Ordinal)
 	{
 		"en.uesp.net",
 		"starfieldwiki.net",
-		"ar.uesp.net",
-		"fr.uesp.net",
-		"it.uesp.net",
-		"pt.uesp.net",
+		//// "ar.uesp.net",
+		//// "fr.uesp.net",
+		//// "it.uesp.net",
+		//// "pt.uesp.net",
 		"ck.uesp.net",
 		"cs.uesp.net",
 		"falloutck.uesp.net"
@@ -35,7 +32,25 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 	#endregion
 
 	#region Fields
-	private readonly IMediaWikiClient client = jobManager.Client;
+	private readonly Regex blockFilter;
+	private readonly IMediaWikiClient client;
+	private readonly HashSet<string> exceptions = new(StringComparer.Ordinal);
+
+	[JobInfo("Import Blocks")]
+	[NoLogin]
+	public ImportBlocks(JobManager jobManager)
+		: base(jobManager, JobType.Write)
+	{
+		var blocksFile = File.ReadAllLines("Jobs\\ImportBlocksFilter.txt");
+		this.blockFilter = new(blocksFile[0], RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
+		this.exceptions.EnsureCapacity(blocksFile.Length - 1);
+		for (var i = 1; i < blocksFile.Length; i++)
+		{
+			this.exceptions.Add(blocksFile[i]);
+		}
+
+		this.client = jobManager.Client;
+	}
 	#endregion
 
 	#region Protected Override Methods
@@ -137,7 +152,24 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 	#endregion
 
 	#region Private Static Methods
-	private static void GetEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
+	private static Dictionary<string, Block> GetLocalBlocks(Site site)
+	{
+		var localBlocks = site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
+		var retval = new Dictionary<string, Block>(StringComparer.Ordinal);
+		foreach (var block in localBlocks)
+		{
+			if (block.User is not null)
+			{
+				retval.Add(block.User.Name, block);
+			}
+		}
+
+		return retval;
+	}
+	#endregion
+
+	#region Private Methods
+	private void GetEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://en.wikipedia.org/w/api.php");
 		var wmApi = new WikiAbstractionLayer(client, uri);
@@ -158,20 +190,19 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 		var result = wmApi.Blocks(input);
 		foreach (var block in result)
 		{
-			if (block.User is not null)
+			if (block.User is not null &&
+				!this.exceptions.Contains(block.User) &&
+				Ipv4Check.Match(block.User).Success &&
+				this.blockFilter.IsMatch(block.Reason ?? string.Empty))
 			{
-				if (Ipv4Check.Match(block.User).Success &&
-					BlockFilter.IsMatch(block.Reason ?? string.Empty))
-				{
-					blocks.Add(CommonBlock.FromReason(block.User, block.Expiry, block.Reason));
-				}
+				blocks.Add(CommonBlock.FromReason(block.User, block.Expiry, block.Reason));
 			}
 		}
 
 		wmApi.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
-	private static void GetGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
+	private void GetGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://meta.wikimedia.org/w/api.php");
 		var wmApi = new WikiAbstractionLayer(client, uri);
@@ -192,36 +223,18 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 		var result = wmApi.RunListQuery(list);
 		foreach (var block in result)
 		{
-			if (block.Address is not null)
+			if (block.Address is not null &&
+				!this.exceptions.Contains(block.Address) &&
+				Ipv4Check.Match(block.Address).Success &&
+				this.blockFilter.IsMatch(block.Reason ?? string.Empty))
 			{
-				if (Ipv4Check.Match(block.Address).Success &&
-					BlockFilter.IsMatch(block.Reason ?? string.Empty))
-				{
-					blocks.Add(CommonBlock.FromReason(block.Address, block.Expiry, block.Reason));
-				}
+				blocks.Add(CommonBlock.FromReason(block.Address, block.Expiry, block.Reason));
 			}
 		}
 
 		wmApi.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
-	private static Dictionary<string, Block> GetLocalBlocks(Site site)
-	{
-		var localBlocks = site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
-		var retval = new Dictionary<string, Block>(StringComparer.Ordinal);
-		foreach (var block in localBlocks)
-		{
-			if (block.User is not null)
-			{
-				retval.Add(block.User.Name, block);
-			}
-		}
-
-		return retval;
-	}
-	#endregion
-
-	#region Private Methods
 	private List<CommonBlock> GetWmfBlocks(DateTime lastRun)
 	{
 		var wmfBlocks = new List<CommonBlock>();
