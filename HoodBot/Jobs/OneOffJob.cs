@@ -1,35 +1,44 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System.Collections.Generic;
+using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.WikiCommon;
+using RobinHood70.WallE.Base;
 
 [method: JobInfo("One-Off Job")]
-internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
+internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 {
 	#region Public Override Properties
 	public override string LogName => "One-Off Job";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Update project name";
-
-	protected override void LoadPages()
+	protected override void Main()
 	{
-		var namespaces = new Uesp.UespNamespaceList(this.Site);
-		var gamespaces = new List<int>(namespaces.Count);
-		foreach (var ns in namespaces)
+		// Filter list first for better ETA
+		var cloudFlareBlocks = new List<Block>();
+		foreach (var block in this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any))
 		{
-			if (ns.Value.IsGamespace)
+			if (block.User is not null &&
+				block.Reason is string reason &&
+				reason.Contains("cloudflare", System.StringComparison.OrdinalIgnoreCase))
 			{
-				gamespaces.Add(ns.Value.BaseNamespace.Id);
+				cloudFlareBlocks.Add(block);
 			}
 		}
 
-		this.Pages.GetSearchResults("\"Province: Cyrodiil\"", WhatToSearch.Text, gamespaces);
-		this.Pages.GetSearchResults("insource:\"Province: Cyrodiil\"", WhatToSearch.Text, gamespaces);
-	}
+		this.ProgressMaximum = cloudFlareBlocks.Count;
+		foreach (var block in cloudFlareBlocks)
+		{
+			var input = new UnblockInput(block.User!.Name)
+			{
+				Reason = "Unblock Cloudflare"
+			};
 
-	protected override void PageLoaded(Page page) => page.Text = page.Text.Replace("Province: Cyrodiil", "Project Cyrodiil", System.StringComparison.OrdinalIgnoreCase);
+			this.Site.AbstractionLayer.Unblock(input);
+			this.Progress++;
+		}
+	}
 	#endregion
+
 }
