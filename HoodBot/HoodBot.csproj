@@ -30,22 +30,22 @@
 		<None Include="Old Jobs\*" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 	  <PackageReference Include="IPAddressRange" Version="6.1.0" />
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.181">
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.188">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-	  <PackageReference Include="Microsoft.Playwright" Version="1.49.0" />
-	  <PackageReference Include="MySql.Data" Version="9.1.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.2" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+	  <PackageReference Include="Microsoft.Playwright" Version="1.50.0" />
+	  <PackageReference Include="MySql.Data" Version="9.2.0" />
 	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="System.Text.Json" Version="9.0.0" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
