@@ -193,7 +193,9 @@ internal sealed class ImportBlocks : WikiJob
 			if (block.User is not null &&
 				!this.exceptions.Contains(block.User) &&
 				Ipv4Check.Match(block.User).Success &&
-				this.blockFilter.IsMatch(block.Reason ?? string.Empty))
+				block.Reason is not null &&
+				!block.Reason.Contains("cloudflare", StringComparison.OrdinalIgnoreCase) &&
+				this.blockFilter.IsMatch(block.Reason))
 			{
 				blocks.Add(CommonBlock.FromReason(block.User, block.Expiry, block.Reason));
 			}
@@ -226,7 +228,9 @@ internal sealed class ImportBlocks : WikiJob
 			if (block.Address is not null &&
 				!this.exceptions.Contains(block.Address) &&
 				Ipv4Check.Match(block.Address).Success &&
-				this.blockFilter.IsMatch(block.Reason ?? string.Empty))
+				block.Reason is not null &&
+				!block.Reason.Contains("cloudflare", StringComparison.OrdinalIgnoreCase) &&
+				this.blockFilter.IsMatch(block.Reason))
 			{
 				blocks.Add(CommonBlock.FromReason(block.Address, block.Expiry, block.Reason));
 			}
