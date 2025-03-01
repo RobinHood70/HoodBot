@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text.RegularExpressions;
+using NetTools;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Wikimedia;
 using RobinHood70.Robby;
@@ -15,8 +17,6 @@ using RobinHood70.WikiCommon;
 internal sealed class ImportBlocks : WikiJob
 {
 	#region Static Fields
-	// Regex initialized from file to keep specific filters hidden from vandals.
-	private static readonly Regex Ipv4Check = new(@"\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<range>\/\d+)?\Z", RegexOptions.CultureInvariant, Globals.DefaultRegexTimeout);
 	private static readonly HashSet<string> Sites = new(StringComparer.Ordinal)
 	{
 		"en.uesp.net",
@@ -32,24 +32,24 @@ internal sealed class ImportBlocks : WikiJob
 	#endregion
 
 	#region Fields
+
+	// Regex initialized from file to keep specific filters hidden from vandals.
 	private readonly Regex blockFilter;
 	private readonly IMediaWikiClient client;
-	private readonly HashSet<string> exceptions = new(StringComparer.Ordinal);
+	private readonly List<IPAddressRange> exceptions = [];
 
 	[JobInfo("Import Blocks")]
 	[NoLogin]
+	#endregion
+
+	#region Constructors
 	public ImportBlocks(JobManager jobManager)
 		: base(jobManager, JobType.Write)
 	{
-		var blocksFile = File.ReadAllLines("Jobs\\ImportBlocksFilter.txt");
-		this.blockFilter = new(blocksFile[0], RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
-		this.exceptions.EnsureCapacity(blocksFile.Length - 1);
-		for (var i = 1; i < blocksFile.Length; i++)
-		{
-			this.exceptions.Add(blocksFile[i]);
-		}
-
 		this.client = jobManager.Client;
+		var (regex, exceptionsText) = ParseBlocksFilter();
+		this.blockFilter = regex;
+		this.exceptions.AddRange(this.GetCloudflareExceptions());
 	}
 	#endregion
 
@@ -67,8 +67,9 @@ internal sealed class ImportBlocks : WikiJob
 				var site = this.JobManager.CreateSite(wiki.WikiInfo, api, this.Site.EditingEnabled);
 				site.Login(wiki.UserName, wiki.Password);
 
-				this.StatusWriteLine("Getting local blocks");
-				var localBlocks = GetLocalBlocks(site);
+				this.StatusWriteLine(string.Empty);
+				this.StatusWriteLine("Getting blocks for " + site.Name);
+				var localBlocks = this.GetLocalBlocks(site);
 				var lastRun = GetStartTime(wiki.UserName, localBlocks);
 				var wmfBlocks = this.GetWmfBlocks(lastRun);
 				var blockUpdates = DoSiteBlocks(wmfBlocks, localBlocks);
@@ -79,7 +80,9 @@ internal sealed class ImportBlocks : WikiJob
 			}
 		}
 	}
+	#endregion
 
+	#region Private Static Methods
 	private static BlockUpdates DoSiteBlocks(List<CommonBlock> wmfBlocks, Dictionary<string, Block> localBlocks)
 	{
 		var newBlocks = new SortedDictionary<string, CommonBlock>(StringComparer.Ordinal);
@@ -149,27 +152,18 @@ internal sealed class ImportBlocks : WikiJob
 
 		return lastRun;
 	}
-	#endregion
 
-	#region Private Static Methods
-	private static Dictionary<string, Block> GetLocalBlocks(Site site)
+	private static (Regex BlockFilterRegex, List<string> Exceptions) ParseBlocksFilter()
 	{
-		var localBlocks = site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
-		var retval = new Dictionary<string, Block>(StringComparer.Ordinal);
-		foreach (var block in localBlocks)
-		{
-			if (block.User is not null)
-			{
-				retval.Add(block.User.Name, block);
-			}
-		}
-
-		return retval;
+		var blocksFile = File.ReadAllLines("Jobs\\ImportBlocksFilter.txt");
+		var regex = new Regex(blocksFile[0], RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
+		var exceptionsText = new List<string>(blocksFile[1..]);
+		return (regex, exceptionsText);
 	}
 	#endregion
 
 	#region Private Methods
-	private void GetEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
+	private void AddEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://en.wikipedia.org/w/api.php");
 		var wmApi = new WikiAbstractionLayer(client, uri);
@@ -191,10 +185,9 @@ internal sealed class ImportBlocks : WikiJob
 		foreach (var block in result)
 		{
 			if (block.User is not null &&
-				!this.exceptions.Contains(block.User) &&
-				Ipv4Check.Match(block.User).Success &&
 				block.Reason is not null &&
-				!block.Reason.Contains("cloudflare", StringComparison.OrdinalIgnoreCase) &&
+				IPAddress.TryParse(block.User, out var addr) &&
+				!this.IsException(addr) &&
 				this.blockFilter.IsMatch(block.Reason))
 			{
 				blocks.Add(CommonBlock.FromReason(block.User, block.Expiry, block.Reason));
@@ -204,7 +197,7 @@ internal sealed class ImportBlocks : WikiJob
 		wmApi.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
-	private void GetGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
+	private void AddGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://meta.wikimedia.org/w/api.php");
 		var wmApi = new WikiAbstractionLayer(client, uri);
@@ -226,10 +219,9 @@ internal sealed class ImportBlocks : WikiJob
 		foreach (var block in result)
 		{
 			if (block.Address is not null &&
-				!this.exceptions.Contains(block.Address) &&
-				Ipv4Check.Match(block.Address).Success &&
 				block.Reason is not null &&
-				!block.Reason.Contains("cloudflare", StringComparison.OrdinalIgnoreCase) &&
+				IPAddress.TryParse(block.Address, out var addr) &&
+				!this.IsException(addr) &&
 				this.blockFilter.IsMatch(block.Reason))
 			{
 				blocks.Add(CommonBlock.FromReason(block.Address, block.Expiry, block.Reason));
@@ -239,15 +231,73 @@ internal sealed class ImportBlocks : WikiJob
 		wmApi.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
+	private IEnumerable<IPAddressRange> GetCloudflareExceptions()
+	{
+		var uri = new Uri("https://www.cloudflare.com/ips-v4/#");
+		if (this.client.Get(uri) is string exceptionsText)
+		{
+			foreach (var exception in exceptionsText.Split('\n'))
+			{
+				var ipRange = IPAddressRange.Parse(exception);
+				yield return ipRange;
+			}
+		}
+	}
+
+	private Dictionary<string, Block> GetLocalBlocks(Site site)
+	{
+		var localBlocks = site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any);
+		var retval = new Dictionary<string, Block>(StringComparer.Ordinal);
+		foreach (var block in localBlocks)
+		{
+			if (block.User?.Name is string addressText &&
+				IPAddress.TryParse(addressText, out var addr))
+			{
+				if (!this.IsException(addr))
+				{
+					if (block.Reason is not null && this.blockFilter.IsMatch(block.Reason))
+					{
+						retval.Add(block.User.Name, block);
+					}
+				}
+				else
+				{
+					// This should rarely happen—if ever—so for now, we're just unblocking while blocks are being loaded. That's really a crappy way to do it, though, so should be moved to something with a progress bar if, for some reason, it becomes a more common occurrence.
+					var input = new UnblockInput(addressText)
+					{
+						Reason = "Unblock Cloudflare"
+					};
+
+					this.Site.AbstractionLayer.Unblock(input);
+				}
+			}
+		}
+
+		return retval;
+	}
+
 	private List<CommonBlock> GetWmfBlocks(DateTime lastRun)
 	{
 		var wmfBlocks = new List<CommonBlock>();
 		this.StatusWriteLine("Getting WMF global blocks");
-		this.GetGlobalBlocks(this.client, wmfBlocks, lastRun);
+		this.AddGlobalBlocks(this.client, wmfBlocks, lastRun);
 		this.StatusWriteLine("Getting English wiki blocks");
-		this.GetEnWikiBlocks(this.client, wmfBlocks, lastRun);
+		this.AddEnWikiBlocks(this.client, wmfBlocks, lastRun);
 
 		return wmfBlocks;
+	}
+
+	private bool IsException(IPAddress addr)
+	{
+		foreach (var exception in this.exceptions)
+		{
+			if (exception.Contains(addr))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void UpdateBlocks(Site site, IDictionary<string, CommonBlock> newBlocks)
