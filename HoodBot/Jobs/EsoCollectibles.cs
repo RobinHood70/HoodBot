@@ -92,7 +92,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
 			template.UpdateIfEmpty("image", $"<!--{collectible.ImageName}-->");
-			template.UpdateIfEmpty("icon", $"<!--{collectible.IconName}-->");
+			template.UpdateIfEmpty("icon", $"{collectible.IconName}");
 			template.Update("id", collectible.Id.ToStringInvariant());
 			template.UpdateIfEmpty("description", collectible.Description);
 			template.RenameParameter("name", "nickname");
