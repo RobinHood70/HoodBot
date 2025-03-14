@@ -97,7 +97,7 @@ internal sealed class EsoNpcs : EditJob
 			var parser = new SiteParser(page);
 			if (parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
 			{
-				UpdateLocations(npc, template, parser.Factory, placeInfo);
+				UpdateLocations(npc, template, placeInfo);
 				parser.UpdatePage();
 				this.Pages.Add(page);
 			}
@@ -156,12 +156,12 @@ internal sealed class EsoNpcs : EditJob
 		return sb.ToString();
 	}
 
-	private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> placeInfos)
+	private static void UpdateLocations(NpcData npc, ITemplateNode template, IEnumerable<PlaceInfo> placeInfos)
 	{
 		foreach (var (placeType, paramName, _, variesCount) in placeInfos)
 		{
 			var placeText = npc.GetParameterValue(placeType, variesCount);
-			InsertLocation(template, factory, paramName, placeText);
+			InsertLocation(template, paramName, placeText);
 		}
 
 		if (npc.UnknownLocations.Count > 0)
@@ -182,10 +182,10 @@ internal sealed class EsoNpcs : EditJob
 				locText = "Varies";
 			}
 
-			InsertLocation(template, factory, "loc", locText);
+			InsertLocation(template, "loc", locText);
 		}
 
-		static void InsertLocation(ITemplateNode template, IWikiNodeFactory factory, string name, string locText)
+		static void InsertLocation(ITemplateNode template, string name, string locText)
 		{
 			if (locText.Length > 0)
 			{
@@ -201,7 +201,7 @@ internal sealed class EsoNpcs : EditJob
 				else
 				{
 					var index = template.FindIndex("race");
-					template.Parameters.Insert(index, factory.ParameterNodeFromParts(name, locText));
+					template.Parameters.Insert(index, template.Factory.ParameterNodeFromParts(name, locText));
 				}
 			}
 		}
@@ -387,7 +387,7 @@ internal sealed class EsoNpcs : EditJob
 
 		var factory = WikiNodeFactory.DefaultInstance;
 		var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
-		UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
+		UpdateLocations(npc, template, EsoSpace.PlaceInfo);
 
 		return new StringBuilder()
 			.Append("{{Minimal|NPC}}{{Mod Header|Gold Road}}")
