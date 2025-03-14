@@ -172,7 +172,7 @@ internal sealed class EsoNpcs : EditJob
 				SortedSet<string> list = new(StringComparer.Ordinal);
 				foreach (var place in npc.UnknownLocations)
 				{
-					list.Add(place.Key.TitleName);
+					list.Add("[[Online:" + place.Key.TitleName + "|]]");
 				}
 
 				locText = string.Join(", ", list);
