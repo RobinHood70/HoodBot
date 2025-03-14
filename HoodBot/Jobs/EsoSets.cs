@@ -164,7 +164,6 @@ internal sealed class EsoSets : EditJob
 		sb.Remove(sb.Length - 5, 4);
 
 		var newPage = new SiteParser(page, sb.ToString());
-		var replacer = new UespReplacer(this.Site, oldPage, newPage);
 		UespReplacer.ReplaceGlobal(newPage);
 		UespReplacer.ReplaceEsoLinks(this.Site, newPage);
 		UespReplacer.ReplaceFirstLink(newPage, usedList);
@@ -172,6 +171,7 @@ internal sealed class EsoSets : EditJob
 		// Now that we're done parsing, re-add the IgnoreNodes.
 		newPage.Insert(0, firstNode);
 		newPage.Add(lastNode);
+		var replacer = new UespReplacer(this.Site, oldPage, newPage);
 		foreach (var warning in replacer.Compare(newPage.Title.FullPageName()))
 		{
 			this.Warn(warning);
