@@ -51,6 +51,12 @@ internal sealed class Morph(IDataRecord row)
 			retval = ChangeType.Minor;
 		}
 
+		if (this.Ranks.Count != previous.Ranks.Count)
+		{
+			Debug.WriteLine($"[[Online:{this.Name}]] changed # of ranks between current and previous version. This is probably a sign of a bug somewhere.");
+			return ChangeType.Major;
+		}
+
 		for (var i = 0; i < this.Ranks.Count; i++)
 		{
 			var curRank = this.Ranks[i];

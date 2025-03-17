@@ -57,6 +57,13 @@ internal sealed class PassiveSkill : Skill
 			throw new InvalidOperationException();
 		}
 
+		if (this.ranks.Count != prevSkill.ranks.Count)
+		{
+			Debug.WriteLine($"[[{this.PageName}]] changed # of ranks between current and previous version. This is probably a sign of a bug somewhere.");
+			this.ChangeType = ChangeType.Major;
+			return;
+		}
+
 		var retval = ChangeType.None;
 		for (var i = 0; i < this.ranks.Count; i++)
 		{
