@@ -237,7 +237,7 @@ internal static class EsoSpace
 		var parser = new SiteParser(patchPage);
 		if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 		{
-			param.SetValue(version.Text, ParameterFormat.Verbatim);
+			param.SetValue(version.Text, ParameterFormat.OnePerLine);
 			parser.UpdatePage();
 			patchPage.Save("Update " + paramName, true);
 		}
