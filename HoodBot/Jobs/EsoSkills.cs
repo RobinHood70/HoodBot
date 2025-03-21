@@ -54,7 +54,7 @@ internal sealed class EsoSkills : EditJob
 	"INNER JOIN\n" +
 		"$ms ms ON st.abilityId = ms.id\n" +
 	"WHERE\n" +
-		/* "st.baseName = 'Lava Whip' AND\n" + */
+		/* "st.baseName = 'Reanimate' AND\n" + */
 		"ms.isPlayer AND\n" +
 		"ms.morph >= 0 AND\n" +
 		"ms.skillLine != 'Emperor'\n" +
@@ -181,6 +181,13 @@ internal sealed class EsoSkills : EditJob
 		Skill? currentSkill = null;
 		foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 		{
+			// As of Update 45, there are a bunch of skills being captured that shouldn't be. All have no prefix in skillTypeName, so check for that and skip the row if that's the case.
+			var stName = (string)row["skillTypeName"];
+			if (stName.Split("::")[0].Length == 0)
+			{
+				continue;
+			}
+
 			var isPassive = (sbyte)row["isPassive"] == 1;
 			Skill newSkill = isPassive
 				 ? new PassiveSkill(row)
