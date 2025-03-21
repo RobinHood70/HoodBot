@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System;
-using System.Collections.Generic;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
@@ -16,24 +15,20 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#endregion
 
 	#region Protected Override Properties
-	protected override string TemplateName => "ESO Sets With";
+	protected override string TemplateName => "Flora Summary";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Remove duplicate parameters";
+	protected override string GetEditSummary(Page page) => "Remove leading 0x in formid";
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
-		var existing = new HashSet<string>(StringComparer.Ordinal);
-		for (var i = 0; i < template.Parameters.Count; i++)
+		if (template.Find("formid") is IParameterNode formId)
 		{
-			var parameter = template.Parameters[i];
-			if (parameter.Anonymous)
+			var value = formId.GetValue();
+			if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
-				if (!existing.Add(parameter.GetValue()))
-				{
-					template.Parameters.RemoveAt(i);
-				}
+				formId.SetValue(value[2..], ParameterFormat.Copy);
 			}
 		}
 	}
