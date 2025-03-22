@@ -71,7 +71,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	#endregion
 
 	#region Constructors
-	[JobInfo("Castles Rulings", "|Castles")]
+	[JobInfo("Castles Rulings", "Castles")]
 	public CastlesRulings(JobManager jobManager)
 		: base(jobManager)
 	{

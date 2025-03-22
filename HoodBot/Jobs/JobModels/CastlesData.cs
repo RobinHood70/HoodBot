@@ -183,7 +183,7 @@ internal sealed class CastlesData
 	private void LoadGroups()
 	{
 		var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + "GroupDataDefault2.json");
-		string[] groupCats = ["_allSubjectsGroups", "_socialClassGroup", "_raceGroups"];
+		string[] groupCats = ["_allSubjectsGroups", "_socialClassGroup", "_raceGroups", "_lifeStageGroups"];
 		foreach (var groupCat in groupCats)
 		{
 			var items = obj.MustHave(groupCat);
