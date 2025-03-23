@@ -14,7 +14,9 @@ using RobinHood70.WallE.Clients;
 using RobinHood70.WallE.Eve;
 using RobinHood70.WikiCommon;
 
-internal sealed class ImportBlocks : WikiJob
+[method: JobInfo("Import Blocks")]
+[method: NoLogin]
+internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 {
 	#region Static Fields
 	private static readonly HashSet<string> Sites = new(StringComparer.Ordinal)
@@ -34,26 +36,34 @@ internal sealed class ImportBlocks : WikiJob
 	#region Fields
 
 	// Regex initialized from file to keep specific filters hidden from vandals.
-	private readonly Regex blockFilter;
-	private readonly IMediaWikiClient client;
+	private readonly IMediaWikiClient client = jobManager.Client;
 	private readonly List<IPAddressRange> exceptions = [];
+	private Regex blockFilter = null!; // This should never remain null during normal execution.
 
-	[JobInfo("Import Blocks")]
-	[NoLogin]
-	#endregion
-
-	#region Constructors
-	public ImportBlocks(JobManager jobManager)
-		: base(jobManager, JobType.Write)
-	{
-		this.client = jobManager.Client;
-		var (regex, exceptionsText) = ParseBlocksFilter();
-		this.blockFilter = regex;
-		this.exceptions.AddRange(this.GetCloudflareExceptions());
-	}
 	#endregion
 
 	#region Protected Override Methods
+	protected override bool BeforeMain()
+	{
+		var exceptionsList = new List<string>(this.GetCloudflareExceptions());
+		if (exceptionsList.Count == 0)
+		{
+			return false;
+		}
+
+		var blocksFile = File.ReadAllLines("Jobs\\ImportBlocksFilter.txt");
+		this.blockFilter = new Regex(blocksFile[0], RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
+		exceptionsList.AddRange(blocksFile[1..]);
+
+		foreach (var exception in exceptionsList)
+		{
+			var ipRange = IPAddressRange.Parse(exception);
+			this.exceptions.Add(ipRange);
+		}
+
+		return true;
+	}
+
 	protected override void Main()
 	{
 		// This is a little bit ugly in crossing responsibility boundaries by accessing App directly. Could also have a second copy with Settings.Load. Debatable which is better/uglier.
@@ -152,14 +162,6 @@ internal sealed class ImportBlocks : WikiJob
 
 		return lastRun;
 	}
-
-	private static (Regex BlockFilterRegex, List<string> Exceptions) ParseBlocksFilter()
-	{
-		var blocksFile = File.ReadAllLines("Jobs\\ImportBlocksFilter.txt");
-		var regex = new Regex(blocksFile[0], RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
-		var exceptionsText = new List<string>(blocksFile[1..]);
-		return (regex, exceptionsText);
-	}
 	#endregion
 
 	#region Private Methods
@@ -231,17 +233,17 @@ internal sealed class ImportBlocks : WikiJob
 		wmApi.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
-	private IEnumerable<IPAddressRange> GetCloudflareExceptions()
+	private string[] GetCloudflareExceptions()
 	{
-		var uri = new Uri("https://www.cloudflare.com/ips-v4/#");
-		if (this.client.Get(uri) is string exceptionsText)
+		var uri = new Uri("https://www.cloudflare.com/ips-v4/");
+		var retval = this.client.Get(uri);
+		if (string.IsNullOrWhiteSpace(retval))
 		{
-			foreach (var exception in exceptionsText.Split('\n'))
-			{
-				var ipRange = IPAddressRange.Parse(exception);
-				yield return ipRange;
-			}
+			this.StatusWriteLine("Unable to retrieve CloudFlare exceptions. Check if VPN is in use.");
+			return [];
 		}
+
+		return retval.Trim().Split('\n');
 	}
 
 	private Dictionary<string, Block> GetLocalBlocks(Site site)
