@@ -1,11 +1,10 @@
-﻿namespace RobinHood70.HoodBot;
+﻿namespace RobinHood70.HoodBot.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using RobinHood70.CommonCode;
-using RobinHood70.HoodBot.Jobs;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
