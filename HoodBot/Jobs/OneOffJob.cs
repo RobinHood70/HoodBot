@@ -1,43 +1,25 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.WallE.Base;
 
 [method: JobInfo("One-Off Job")]
-internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
+internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 {
 	#region Public Override Properties
 	public override string LogName => "One-Off Job";
 	#endregion
 
 	#region Protected Override Methods
-	protected override void Main()
+	protected override string GetEditSummary(Page page) => "Remove deprecated section protection";
+
+	protected override void LoadPages() => this.Pages.GetCategoryMembers("Category:Section Protection");
+
+	protected override void PageLoaded(Page page)
 	{
-		// Filter list first for better ETA
-		var cloudFlareBlocks = new List<Block>();
-		foreach (var block in this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Any, Filter.Any))
-		{
-			if (block.User is not null &&
-				block.Reason is string reason &&
-				reason.Contains("cloudflare", System.StringComparison.OrdinalIgnoreCase))
-			{
-				cloudFlareBlocks.Add(block);
-			}
-		}
-
-		this.ProgressMaximum = cloudFlareBlocks.Count;
-		foreach (var block in cloudFlareBlocks)
-		{
-			var input = new UnblockInput(block.User!.Name)
-			{
-				Reason = "Unblock Cloudflare"
-			};
-
-			this.Site.AbstractionLayer.Unblock(input);
-			this.Progress++;
-		}
+		page.Text = Regex.Replace(page.Text, @"(\[\[Category:Section Protection\]\]|{{Protection\|section}}|<protect>|<!-- preemptively added protection so the message isn't accidentally deleted -->)\s*", string.Empty, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		page.Text = Regex.Replace(page.Text, @"\s*</protect>", string.Empty, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout).Trim();
 	}
 	#endregion
 
