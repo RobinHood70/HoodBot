@@ -7,7 +7,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -115,42 +114,35 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	/// <param name="uri">The URI to download from.</param>
 	/// <param name="fileName">The filename to save to.</param>
 	/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
-	public bool DownloadFile(Uri uri, string? fileName)
+	public bool DownloadFile(Uri uri, string? fileName) => this.DownloadFileAsync(uri, fileName).Result;
+
+	public async Task<bool> DownloadFileAsync(Uri uri, string? fileName)
 	{
 		ArgumentNullException.ThrowIfNull(uri);
-		using HttpRequestMessage request = new(HttpMethod.Get, uri);
-		var maxLag = this.HonourMaxLag;
-		this.HonourMaxLag = false;
-		using var response = this.httpClient.Send(request, this.cancellationToken);
-		this.SaveCookies();
-		this.HonourMaxLag = maxLag;
+
+		// TODO: This was cobbled together from internet sources and analyzer suggestions. My async programming is weak, but there seems to me to be a lot of awaits here. Can any of it be optimized?
+		using var response = await this.httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, this.cancellationToken).ConfigureAwait(false);
 		if (!response.IsSuccessStatusCode)
 		{
 			return false;
 		}
 
-		try
+		var responseStream = await response.Content.ReadAsStreamAsync(this.cancellationToken).ConfigureAwait(false);
+		await using (responseStream.ConfigureAwait(false))
 		{
-			using var outStream = fileName is null
-				? Stream.Null
-				: File.OpenWrite(fileName);
-			response.Content.CopyTo(outStream, null, this.cancellationToken);
-			return true;
-		}
-		catch (IOException)
-		{
-		}
-		catch (UnauthorizedAccessException)
-		{
-		}
-		catch (NotSupportedException)
-		{
-		}
-		catch (SecurityException)
-		{
+			{
+				var outStream = fileName is null
+					? Stream.Null
+					: File.OpenWrite(fileName);
+				await using (outStream.ConfigureAwait(false))
+				{
+					await responseStream.CopyToAsync(outStream, this.cancellationToken).ConfigureAwait(false);
+				}
+			}
 		}
 
-		return false;
+		this.SaveCookies();
+		return true;
 	}
 
 	/// <inheritdoc/>
