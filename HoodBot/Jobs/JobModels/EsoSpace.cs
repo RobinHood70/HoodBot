@@ -54,7 +54,7 @@ internal static class EsoSpace
 			var fileNames = new SortedSet<string>(originalFileNames, StringComparer.Ordinal);
 			if (template.Find("originalfile") is not IParameterNode fileParam)
 			{
-				fileParam = template.Factory.ParameterNodeFromParts("originalfilename", string.Empty);
+				fileParam = template.Factory.ParameterNodeFromParts("originalfile", string.Empty);
 			}
 
 			var existing = fileParam.GetValue();
