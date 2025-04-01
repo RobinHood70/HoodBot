@@ -8,7 +8,9 @@ internal static class LocalConfig
 	#region Public Properties
 	public static string BotDataFolder => Environment.ExpandEnvironmentVariables("%BotData%");
 
-	public static string WikiIconsFolder => Path.Combine(BotDataFolder, "icons");
+	public static string EsoUIFolder => Path.Combine(BotDataFolder, "esoui");
+
+	public static string WikiIconsFolder => Path.Combine(EsoUIFolder, "icons");
 	#endregion
 
 	#region Public Methods
