@@ -14,7 +14,6 @@ internal sealed class InterwikiVersions(JobManager jobManager) : WikiJob(jobMana
 	protected override void Main()
 	{
 		var client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
-		client.HonourMaxLag = false;
 		client.Retries = 3;
 		this.ProgressMaximum = this.Site.InterwikiMap.Count;
 		foreach (var entry in this.Site.InterwikiMap)
