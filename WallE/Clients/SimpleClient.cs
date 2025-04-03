@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for privately visible type or member (file is not currently being maintained)
-namespace RobinHood70.WallE.Clients;
+﻿namespace RobinHood70.WallE.Clients;
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RobinHood70.CommonCode;
 
+/// <summary>Provides a simple client to work with WallE.</summary>
 public class SimpleClient : IMediaWikiClient, IDisposable
 {
 	#region Fields
@@ -28,16 +28,27 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	#endregion
 
 	#region Constructors
+
+	/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class.</summary>
+	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
 	public SimpleClient(CancellationToken cancellationToken)
 		: this(null, null, null, cancellationToken)
 	{
 	}
 
+	/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class.</summary>
+	/// <param name="cookiesLocation">The full file name of the file cookies should be stored in.</param>
+	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
 	public SimpleClient(string cookiesLocation, CancellationToken cancellationToken)
 		: this(null, cookiesLocation, null, cancellationToken)
 	{
 	}
 
+	/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class.</summary>
+	/// <param name="contactInfo">Contact info to be sent in user agent.</param>
+	/// <param name="cookiesLocation">The full file name of the file cookies should be stored in. If <see langword="null"/>, cookies will not be persisted between sessions.</param>
+	/// <param name="credentials">Authentication for <see cref="HttpClientHandler"/> if site requires a password in order to reach the wiki.</param>
+	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
 	public SimpleClient(string? contactInfo, string? cookiesLocation, ICredentials? credentials, CancellationToken cancellationToken)
 	{
 		this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
@@ -74,21 +85,29 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	#endregion
 
 	#region Events
+
+	/// <inheritdoc/>
 	public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? DelayComplete;
 
+	/// <inheritdoc/>
 	public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? RequestingDelay;
 	#endregion
 
 	#region Public Properties
 
+	/// <summary>Gets or sets the number of times a request will be retried if it fails.</summary>
 	public int Retries { get; set; } = 3;
 
+	/// <summary>Gets or sets the amount of time between retries if a request fails.</summary>
 	public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
 	private string UserAgent { get; }
 	#endregion
 
 	#region Public Methods
+
+	/// <summary>Clears all cookies for a specific URI or for all URIs.</summary>
+	/// <param name="uri">The URI whose cokies should be cleared. If <see langword="null"/>, cookies for all URIs will be cleared.</param>
 	public void ClearCookies(Uri? uri)
 	{
 		var cookies = uri is null
@@ -100,46 +119,15 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		}
 	}
 
+	/// <inheritdoc/>
 	public void Dispose()
 	{
 		this.Dispose(true);
 		GC.SuppressFinalize(this);
 	}
 
-	/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
-	/// <param name="uri">The URI to download from.</param>
-	/// <param name="fileName">The filename to save to.</param>
-	/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
+	/// <inheritdoc/>
 	public bool DownloadFile(Uri uri, string? fileName) => this.DownloadFileAsync(uri, fileName).Result;
-
-	public async Task<bool> DownloadFileAsync(Uri uri, string? fileName)
-	{
-		ArgumentNullException.ThrowIfNull(uri);
-
-		// TODO: This was cobbled together from internet sources and analyzer suggestions. My async programming is weak, but there seems to me to be a lot of awaits here. Can any of it be optimized?
-		using var response = await this.httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, this.cancellationToken).ConfigureAwait(false);
-		if (!response.IsSuccessStatusCode)
-		{
-			return false;
-		}
-
-		var responseStream = await response.Content.ReadAsStreamAsync(this.cancellationToken).ConfigureAwait(false);
-		await using (responseStream.ConfigureAwait(false))
-		{
-			{
-				var outStream = fileName is null
-					? Stream.Null
-					: File.OpenWrite(fileName);
-				await using (outStream.ConfigureAwait(false))
-				{
-					await responseStream.CopyToAsync(outStream, this.cancellationToken).ConfigureAwait(false);
-				}
-			}
-		}
-
-		this.SaveCookies();
-		return true;
-	}
 
 	/// <inheritdoc/>
 	public void ExpireAll()
@@ -152,6 +140,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 #endif
 	}
 
+	/// <inheritdoc/>
 	public string Get(Uri uri)
 	{
 		using HttpRequestMessage request = new(HttpMethod.Get, uri);
@@ -202,6 +191,9 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	#endregion
 
 	#region Protected Virtual Methods
+
+	/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+	/// <param name="disposing"><see langword="true"/> if the object is being disposed; <see langword="false"/> if it's finalizing.</param>
 	protected virtual void Dispose(bool disposing)
 	{
 		if (disposing && !this.disposed)
@@ -214,8 +206,14 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		this.disposed = true;
 	}
 
+	/// <summary>The action to be taken when after a qrequested delay has been completed.</summary>
+	/// <param name="e">The sending <see cref="DelayEventArgs"/>.</param>
+	/// <seealso cref="OnRequestingDelay(DelayEventArgs)"/>
 	protected virtual void OnDelayComplete(DelayEventArgs e) => this.DelayComplete?.Invoke(this, e);
 
+	/// <summary>The action to be taken when a delay is requested. Delays can be the result of a Retry-After header, an error, or an external process that needs to throttle communications.</summary>
+	/// <param name="e">The sending <see cref="DelayEventArgs"/>.</param>
+	/// <seealso cref="OnDelayComplete(DelayEventArgs)"/>
 	protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 	#endregion
 
@@ -235,13 +233,44 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	}
 	#endregion
 
-	#region Private Methods
-
+	#region Private Static Methods
 	private static string GetResponseText(HttpResponseMessage response)
 	{
 		using var respStream = response.Content.ReadAsStream();
 		using StreamReader reader = new(respStream);
 		return reader.ReadToEnd();
+	}
+	#endregion
+
+	#region Private Methods
+
+	private async Task<bool> DownloadFileAsync(Uri uri, string? fileName)
+	{
+		ArgumentNullException.ThrowIfNull(uri);
+
+		// TODO: This was cobbled together from internet sources and analyzer suggestions. My async programming is weak, but there seems to me to be a lot of awaits here. Can any of it be optimized?
+		using var response = await this.httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, this.cancellationToken).ConfigureAwait(false);
+		if (!response.IsSuccessStatusCode)
+		{
+			return false;
+		}
+
+		var responseStream = await response.Content.ReadAsStreamAsync(this.cancellationToken).ConfigureAwait(false);
+		await using (responseStream.ConfigureAwait(false))
+		{
+			{
+				var outStream = fileName is null
+					? Stream.Null
+					: File.OpenWrite(fileName);
+				await using (outStream.ConfigureAwait(false))
+				{
+					await responseStream.CopyToAsync(outStream, this.cancellationToken).ConfigureAwait(false);
+				}
+			}
+		}
+
+		this.SaveCookies();
+		return true;
 	}
 
 	private void LoadCookies()

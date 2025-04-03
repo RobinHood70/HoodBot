@@ -31,14 +31,14 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 
 	#region Public Events
 
-	/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
+	/// <inheritdoc/>
 	public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> DelayComplete
 	{
 		add => baseClient.DelayComplete += value;
 		remove => baseClient.DelayComplete -= value;
 	}
 
-	/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
+	/// <inheritdoc/>
 	public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay
 	{
 		add => baseClient.RequestingDelay += value;
@@ -48,13 +48,10 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 
 	#region Public Methods
 
-	/// <summary>Deletes all cookies from persistent storage and clears the cookie cache.</summary>
+	/// <inheritdoc/>
 	public void ExpireAll() => baseClient.ExpireAll();
 
-	/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
-	/// <param name="uri">The URI to download from.</param>
-	/// <param name="fileName">The filename to save to.</param>
-	/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
+	/// <inheritdoc/>
 	public bool DownloadFile(Uri uri, string? fileName)
 	{
 		this.Throttle();
@@ -64,9 +61,7 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 		return retval;
 	}
 
-	/// <summary>Gets the text of the result returned by the given URI.</summary>
-	/// <param name="uri">The URI to get.</param>
-	/// <returns>The text of the result.</returns>
+	/// <inheritdoc/>
 	public string? Get(Uri uri)
 	{
 		this.Throttle();
@@ -86,11 +81,7 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 		return retval;
 	}
 
-	/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
-	/// <param name="delayTime">The amount of time to delay for.</param>
-	/// <param name="reason">The reason for the delay, as specified by the caller.</param>
-	/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
-	/// <returns>A value indicating whether or not the delay was respected.</returns>
+	/// <inheritdoc/>
 	public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => baseClient.RequestDelay(delayTime, reason, description);
 
 	/// <inheritdoc/>
@@ -106,8 +97,7 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 
 	#region Public Override Methods
 
-	/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-	/// <returns>A <see cref="string" /> that represents this instance.</returns>
+	/// <inheritdoc/>
 	public override string ToString() => nameof(ThrottledClient);
 	#endregion
 
