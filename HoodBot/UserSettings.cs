@@ -157,11 +157,11 @@ public class UserSettings : IJsonSettings<UserSettings>
 	#endregion
 
 	#region Private Static Methods
-	private static bool IsPathValid(string filename)
+	private static bool IsPathValid(string fileName)
 	{
 		try
 		{
-			Path.GetFullPath(filename);
+			Path.GetFullPath(fileName);
 			return true;
 		}
 		catch (ArgumentException)

@@ -128,11 +128,11 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		}
 
 		var titles = new TitleCollection(this.Site);
-		foreach (var filename in File.ReadLines(@"D:\Data\HoodBot\OriginalFile.txt"))
+		foreach (var fileName in File.ReadLines(@"D:\Data\HoodBot\OriginalFile.txt"))
 		{
-			if (string.Compare(filename, "ON-", StringComparison.Ordinal) > 0)
+			if (string.Compare(fileName, "ON-", StringComparison.Ordinal) > 0)
 			{
-				titles.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], filename));
+				titles.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], fileName));
 			}
 		}
 
@@ -223,9 +223,9 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		return summarySections.Count == 0 ? null : summarySections[^1];
 	}
 
-	private static List<string> GetFilenames(SiteParser parser, List<string> parameters, string original)
+	private static List<string> GetFileNames(SiteParser parser, List<string> parameters, string original)
 	{
-		var filenames = new List<string>();
+		var fileNames = new List<string>();
 		var remainder = new List<string>();
 		var split = original.Split(TextArrays.NewLineChars);
 		foreach (var line in split)
@@ -244,7 +244,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 						newName = trimmedName;
 					}
 
-					filenames.Add(newName);
+					fileNames.Add(newName);
 				}
 			}
 			else
@@ -253,8 +253,8 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 			}
 		}
 
-		filenames.Sort(StringComparer.Ordinal);
-		parameters.Insert(0, "originalfile=" + string.Join(", ", filenames));
+		fileNames.Sort(StringComparer.Ordinal);
+		parameters.Insert(0, "originalfile=" + string.Join(", ", fileNames));
 		return remainder;
 	}
 
@@ -349,15 +349,15 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		}
 	}
 
-	private string ParseRemainder(List<string> parameters, List<string> filenames)
+	private string ParseRemainder(List<string> parameters, List<string> fileNames)
 	{
 		var remainder = string.Empty;
-		if (filenames.Count > 1)
+		if (fileNames.Count > 1)
 		{
 			int i;
-			for (i = 0; i < filenames.Count; i++)
+			for (i = 0; i < fileNames.Count; i++)
 			{
-				var line = filenames[i].Trim();
+				var line = fileNames[i].Trim();
 				if (line.Length > 0 && !line.Contains("Used for:", StringComparison.Ordinal))
 				{
 					if (line.StartsWith(':'))
@@ -385,9 +385,9 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 				}
 			}
 
-			if (i < filenames.Count)
+			if (i < fileNames.Count)
 			{
-				remainder = string.Join('\n', filenames[i..]).Trim();
+				remainder = string.Join('\n', fileNames[i..]).Trim();
 				if (remainder.Length > 0)
 				{
 					remainder += "\n\n";
@@ -418,7 +418,7 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 		var description = text[..index];
 		var original = text[index..];
 		var parameters = new List<string>();
-		var remainingLines = GetFilenames(parser, parameters, original);
+		var remainingLines = GetFileNames(parser, parameters, original);
 		this.ParseDescription(parser, parameters, description);
 		var remainder = this.ParseRemainder(parameters, remainingLines);
 		var template = CreateTemplate(summary, parameters, infoOffset, remainder);
