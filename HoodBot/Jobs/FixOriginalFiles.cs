@@ -64,12 +64,12 @@ public class FixOriginalFiles : TemplateJob
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
-		if (GetParameter(template) is not IParameterNode filename)
+		if (GetParameter(template) is not IParameterNode fileName)
 		{
 			throw new InvalidOperationException("originalfile not found: " + parser.Page.Title.PageName);
 		}
 
-		var paramValue = Sanitize(filename.GetRaw());
+		var paramValue = EsoIcons.SanitizeFileName(fileName.GetRaw());
 		if (HasSquareBrackets(parser.Title, paramValue))
 		{
 			this.StatusWriteLine("Possibly malformed originalfile: " + parser.Title.FullPageName());
@@ -87,7 +87,7 @@ public class FixOriginalFiles : TemplateJob
 			}
 		}
 
-		filename.SetValue(paramValue, ParameterFormat.Copy);
+		fileName.SetValue(paramValue, ParameterFormat.Copy);
 	}
 	#endregion
 
@@ -113,30 +113,5 @@ public class FixOriginalFiles : TemplateJob
 		!title.PageNameEquals("ON-icon-store-Sunken_Trove_Crown_Crate.png") &&
 		(paramValue.Contains('[', StringComparison.Ordinal) ||
 		paramValue.Contains(']', StringComparison.Ordinal));
-
-	private static string Sanitize(string paramValue)
-	{
-		paramValue = paramValue.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
-		if (paramValue.Length > 0 && paramValue[0] == '/')
-		{
-			paramValue = paramValue[1..];
-		}
-
-		if (paramValue.StartsWith("esoui/art/", StringComparison.OrdinalIgnoreCase))
-		{
-			paramValue = paramValue[10..];
-		}
-
-		var split = paramValue.Split('.', 2);
-		var ext = split.Length > 1 ? split[1] : string.Empty;
-		if (string.Equals(ext, "png", StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(ext, "dds", StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(ext, "jpg", StringComparison.OrdinalIgnoreCase))
-		{
-			paramValue = split[0];
-		}
-
-		return paramValue;
-	}
 	#endregion
 }
