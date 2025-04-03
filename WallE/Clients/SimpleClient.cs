@@ -81,10 +81,6 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 
 	#region Public Properties
 
-	/// <summary>Gets or sets a value indicating whether to honour maxlag requests.</summary>
-	/// <value><see langword="true"/> if maxlag requests should be honoured; otherwise, <see langword="false"/>.</value>
-	public bool HonourMaxLag { get; set; } = true;
-
 	public int Retries { get; set; } = 3;
 
 	public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
