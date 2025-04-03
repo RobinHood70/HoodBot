@@ -250,50 +250,56 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 
 	private void LoadCookies()
 	{
-		if (this.cookiesLocation is not null)
+		if (this.cookiesLocation is null)
 		{
-			try
+			return;
+		}
+
+		try
+		{
+			var cookieText = File.ReadAllText(this.cookiesLocation);
+			if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
 			{
-				var cookieText = File.ReadAllText(this.cookiesLocation);
-				if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
-				{
-					this.cookieContainer.Add(cookies);
-					this.cookiesLastUpdated = LatestCookie(cookies);
-				}
+				this.cookieContainer.Add(cookies);
+				this.cookiesLastUpdated = LatestCookie(cookies);
 			}
-			catch (NullReferenceException)
-			{
-			}
-			catch (DirectoryNotFoundException)
-			{
-			}
-			catch (FileNotFoundException)
-			{
-			}
+		}
+		catch (NullReferenceException)
+		{
+		}
+		catch (DirectoryNotFoundException)
+		{
+		}
+		catch (FileNotFoundException)
+		{
 		}
 	}
 
 	/// <summary>Saves all cookies to persistent storage.</summary>
 	private void SaveCookies()
 	{
-		if (this.cookiesLocation is not null)
+		if (this.cookiesLocation is null)
 		{
-			var cookies = this.cookieContainer.GetAllCookies();
-			var newLatestCookie = LatestCookie(cookies);
-			if (newLatestCookie > this.cookiesLastUpdated)
-			{
-				this.cookiesLastUpdated = newLatestCookie;
-				var settings = new JsonSerializerSettings();
-				var resolver = new DefaultContractResolver
-				{
-					IgnoreSerializableAttribute = false
-				};
-				settings.ContractResolver = resolver;
-
-				var jsonCookies = JsonConvert.SerializeObject(cookies, settings);
-				File.WriteAllText(this.cookiesLocation, jsonCookies);
-			}
+			return;
 		}
+
+		var cookies = this.cookieContainer.GetAllCookies();
+		var newLatestCookie = LatestCookie(cookies);
+		if (newLatestCookie <= this.cookiesLastUpdated)
+		{
+			return;
+		}
+
+		this.cookiesLastUpdated = newLatestCookie;
+		var settings = new JsonSerializerSettings();
+		var resolver = new DefaultContractResolver
+		{
+			IgnoreSerializableAttribute = false
+		};
+		settings.ContractResolver = resolver;
+
+		var jsonCookies = JsonConvert.SerializeObject(cookies, settings);
+		File.WriteAllText(this.cookiesLocation, jsonCookies);
 	}
 	#endregion
 }
