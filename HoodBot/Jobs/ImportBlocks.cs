@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -83,9 +84,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 				var lastRun = GetStartTime(wiki.UserName, localBlocks);
 				var wmfBlocks = this.GetWmfBlocks(lastRun);
 				var blockUpdates = DoSiteBlocks(wmfBlocks, localBlocks);
-
-				this.StatusWriteLine($"Applying {blockUpdates.UpdateCount} updated and {blockUpdates.NewCount} new blocks ({blockUpdates.OverlapCount} overlaps)");
-				this.UpdateBlocks(site, blockUpdates.NewBlocks);
+				this.UpdateBlocks(site, blockUpdates);
 				api.SendingRequest -= JobManager.WalSendingRequest;
 			}
 		}
@@ -105,6 +104,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 			{
 				if (newBlocks.TryGetValue(wmfBlock.Address, out var newBlock))
 				{
+					// Picks the latest expiry in the event that there are multiple blocks for the same address.
 					if (wmfBlock.Expiry > newBlock.Expiry)
 					{
 						overlapCount++;
@@ -302,18 +302,23 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 		return false;
 	}
 
-	private void UpdateBlocks(Site site, IDictionary<string, CommonBlock> newBlocks)
+	private void UpdateBlocks(Site site, BlockUpdates blockUpdates)
 	{
-		this.ResetProgress(newBlocks.Count);
-		foreach (var newBlock in newBlocks)
+		// BUG: For some reason, the status bar often shows as incomplete after the loop. Is this just a visual anomaly or is there some bug here that I can't see?
+		if (blockUpdates.Blocks.Count == 0)
+		{
+			this.StatusWriteLine("Nothing to update");
+			return;
+		}
+
+		this.StatusWriteLine($"Updating {blockUpdates.UpdateCount} blocks and adding {blockUpdates.NewCount} new blocks ({blockUpdates.OverlapCount} overlaps)");
+		this.ResetProgress(blockUpdates.Blocks.Count);
+		foreach (var newBlock in blockUpdates.Blocks)
 		{
 			var block = newBlock.Value;
-			var reason = "Webhost/proxy";
-			if (block.Source is not null)
-			{
-				reason += ": " + block.Source;
-			}
-
+			var reason = block.Source is null
+				? "Webhost/proxy"
+				: "Webhost/proxy: " + block.Source;
 			var user = new User(site, block.Address);
 			try
 			{
@@ -324,12 +329,13 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 			}
 
 			this.Progress++;
+			Debug.WriteLine(this.Progress + " / " + this.ProgressMaximum + " = " + blockUpdates.Blocks.Count);
 		}
 	}
 	#endregion
 
 	#region Private Records
-	private record struct BlockUpdates(int OverlapCount, int UpdateCount, int NewCount, IDictionary<string, CommonBlock> NewBlocks);
+	private record struct BlockUpdates(int OverlapCount, int UpdateCount, int NewCount, IDictionary<string, CommonBlock> Blocks);
 	#endregion
 
 	#region Private Classes
