@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using RobinHood70.CommonCode;
 
-internal sealed record EsoVersion(int Version, bool Pts) : IComparable, IComparable<EsoVersion>
+public sealed record EsoVersion(int Version, bool Pts) : IComparable, IComparable<EsoVersion>
 {
 	#region Public Static Properties
 	public static EsoVersion Empty => new(0, false);

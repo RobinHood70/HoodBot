@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Uesp;
@@ -197,22 +196,6 @@ internal static class EsoSpace
 		return allIcons;
 	}
 
-	public static void GetIcons(this WikiJob job, EsoVersion patchVersion)
-	{
-		var downloadPath = IconDownloadPath(patchVersion);
-		var localFile = LocalConfig.BotDataSubPath("icons.zip");
-		var extractPath = LocalConfig.WikiIconsFolder;
-
-		if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
-		{
-			job.StatusWriteLine("Updating local icons file from " + downloadPath);
-			job.Site.Download(downloadPath, localFile);
-
-			job.StatusWriteLine("Extracting icons");
-			ZipFile.ExtractToDirectory(localFile, extractPath, true);
-		}
-	}
-
 	public static EsoVersion GetPatchVersion(this WikiJob job, string paramName)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(paramName);
@@ -222,8 +205,6 @@ internal static class EsoSpace
 			? throw new InvalidOperationException($"Patch variable \"{paramName}\" not found")
 			: EsoVersion.FromText(version);
 	}
-
-	public static string IconDownloadPath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion.Text}/icons.zip";
 
 	public static void SetBotUpdateVersion(this WikiJob job, string pageType, EsoVersion version)
 	{

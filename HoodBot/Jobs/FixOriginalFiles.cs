@@ -12,6 +12,7 @@ public class FixOriginalFiles : TemplateJob
 {
 	// Note: this class is relatively slow, since it loads all pages with {{Online File}}. It could be made faster by only loading the originalfile variable and validating that, then loading only the pages that need fixed. This would, however, add a fair bit of complexity. Since this isn't likely to be a frequently run job, I've opted for simplicity for now.
 	#region Fields
+	private readonly Dictionary<string, string> iconHashes = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Dictionary<string, string> iconNames = new(StringComparer.OrdinalIgnoreCase);
 	#endregion
 
@@ -51,11 +52,17 @@ public class FixOriginalFiles : TemplateJob
 			var dir = Path.GetDirectoryName(fullName)!;
 			dir = (dir.Length >= folderLen) ? dir[folderLen..].Replace('\\', '/') : string.Empty;
 
-			if (!dupes.Contains(file) &&
-				!this.iconNames.TryAdd(file, dir))
+			if (!dupes.Contains(file))
 			{
-				dupes.Add(file);
-				this.iconNames.Remove(file);
+				if (this.iconNames.TryAdd(file, dir))
+				{
+					this.iconHashes.Add(file, EsoFiles.CalculateHash(fullName));
+				}
+				else
+				{
+					dupes.Add(file);
+					this.iconNames.Remove(file);
+				}
 			}
 		}
 
@@ -69,7 +76,7 @@ public class FixOriginalFiles : TemplateJob
 			throw new InvalidOperationException("originalfile not found: " + parser.Page.Title.PageName);
 		}
 
-		var paramValue = EsoIcons.SanitizeFileName(fileName.GetRaw());
+		var paramValue = EsoFiles.SanitizeFileName(fileName.GetRaw());
 		if (HasSquareBrackets(parser.Title, paramValue))
 		{
 			this.StatusWriteLine("Possibly malformed originalfile: " + parser.Title.FullPageName());
