@@ -10,28 +10,23 @@ using RobinHood70.WikiCommon.Parser;
 public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 {
 	#region Constants
-	private const string TemplateText = """
-		{{Cleanup-obrp-npc
+	private const string OldTemplateName = "";
+	private const string TemplateName = "Cleanup-obrp-quest";
+	private const string TemplateText = $$$"""
+		{{{{{TemplateName}}}
 		|image=
 		|imageChecked=
-		|dialogue=
-		|dialogueChecked=
-		|quests=
-		|questsChecked=
-		|services=
-		|servicesChecked=
-		|inventory=
-		|inventoryChecked=
-		|house=
-		|houseChecked=
-		|schedule=
-		|scheduleChecked=
+		|writtenBy=
+		|checkedBy=
+		|objectivesChecked=
+		|reward=
+		|rewardChecked=
 		}}
 		""";
 	#endregion
 
 	#region Public Override Properties
-	public override string LogDetails => "Add remaster NPC template";
+	public override string LogDetails => "Add remaster quest template";
 
 	public override string LogName => "One-Off Parse Job";
 	#endregion
@@ -43,17 +38,22 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		this.Shuffle = true;
 		this.Pages.AllowRedirects = CommonCode.Filter.Exclude;
-		this.Pages.GetCategoryMembers("Oblivion-NPCs", CategoryMemberTypes.Page, false);
-		this.Pages.GetCategoryMembers("Shivering-NPCs", CategoryMemberTypes.Page, false);
+		this.Pages.GetCategoryMembers("Oblivion-Quests", CategoryMemberTypes.Page, false);
+		this.Pages.GetCategoryMembers("Shivering-Quests", CategoryMemberTypes.Page, false);
 	}
 
 	protected override void ParseText(SiteParser parser)
 	{
-		var newTemplate = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], "Cleanup-obrp-npc");
+		var newTemplate = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], TemplateName);
 		if (parser.FindTemplate(newTemplate) is null)
 		{
-			var oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], "Cleanup-obnpcrp");
-			var location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
+			var location = -1;
+			if (OldTemplateName.Length > 0)
+			{
+				var oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], OldTemplateName);
+				location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
+			}
+
 			parser.InsertText(location + 1, TemplateText);
 		}
 	}
