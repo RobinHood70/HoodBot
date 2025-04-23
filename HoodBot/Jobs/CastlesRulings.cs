@@ -503,7 +503,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 			}
 		}
 
-
 		public string Text { get; }
 	}
 	#endregion

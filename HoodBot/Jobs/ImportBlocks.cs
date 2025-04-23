@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -329,7 +328,6 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 			}
 
 			this.Progress++;
-			Debug.WriteLine(this.Progress + " / " + this.ProgressMaximum + " = " + blockUpdates.Blocks.Count);
 		}
 	}
 	#endregion
