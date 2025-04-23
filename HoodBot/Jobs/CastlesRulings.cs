@@ -299,7 +299,14 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 				foreach (var rulingObject in group)
 				{
 					var localRuling = new Ruling(rulingsGroupName, rulingObject, this.data);
-					retval.Add(TitleFactory.FromUnvalidated(this.Site, localRuling.PageName), localRuling);
+					var title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
+					while (retval.ContainsKey(title))
+					{
+						localRuling.Copy++;
+						title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
+					}
+
+					retval.Add(title, localRuling);
 				}
 			}
 		}
@@ -481,11 +488,21 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 		public CastlesConditions Conditions { get; }
 
+		public int Copy { get; set; } = 1;
+
 		public string Group { get; }
 
 		public string Name { get; }
 
-		public string PageName => "Castles:Rulings/" + this.Name;
+		public string PageName
+		{
+			get
+			{
+				var copyText = this.Copy == 1 ? string.Empty : " (" + this.Copy.ToStringInvariant() + ")";
+				return "Castles:Rulings/" + this.Name + copyText;
+			}
+		}
+
 
 		public string Text { get; }
 	}
