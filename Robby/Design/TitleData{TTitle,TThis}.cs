@@ -115,6 +115,7 @@ public abstract class TitleData<TTitle, TThis>([NotNull, ValidatedNotNull] Site 
 	/// <inheritdoc/>
 	public TThis GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 	{
+		// TODO: Rejig this so subcats are retrieved separately from everything else for recursion. Otherwise, output gets polluted with possibly-undesired categories.
 		Title cat = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category);
 		CategoryMembersInput input = new(cat.FullPageName())
 		{
