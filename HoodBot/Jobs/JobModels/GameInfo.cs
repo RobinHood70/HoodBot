@@ -16,7 +16,7 @@ public sealed class GameInfo(string baseFolder, string modFolder, string modTemp
 	#region Static Properties
 	public static GameInfo Castles { get; } = new(
 		LocalConfig.BotDataSubPath(@"Castles\MonoBehaviour\"),
-		LocalConfig.BotDataSubPath(@"Castles\Update 2\"),
+		LocalConfig.BotDataSubPath(@"Castles\Update 3\"),
 		string.Empty);
 
 	public static GameInfo Eso { get; } = new(
