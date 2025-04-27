@@ -10,23 +10,23 @@ using RobinHood70.WikiCommon.Parser;
 public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 {
 	#region Constants
-	private const string OldTemplateName = "";
-	private const string TemplateName = "Cleanup-obrp-quest";
+	private const string OldTemplateName = "Cleanup-oprp";
+	private const string OldTemplateName2 = "Cleanup-obhrp";
+	private const string TemplateName = "Cleanup-obrp-place";
 	private const string TemplateText = $$$"""
 		{{{{{TemplateName}}}
-		|image=
-		|imageChecked=
 		|writtenBy=
 		|checkedBy=
-		|objectivesChecked=
-		|reward=
-		|rewardChecked=
+		|interior=
+		|interiorChecked=
+		|exterior=
+		|exteriorChecked=
 		}}
 		""";
 	#endregion
 
 	#region Public Override Properties
-	public override string LogDetails => "Add remaster quest template";
+	public override string LogDetails => "Add remaster place template";
 
 	public override string LogName => "One-Off Parse Job";
 	#endregion
@@ -38,8 +38,9 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	{
 		this.Shuffle = true;
 		this.Pages.AllowRedirects = CommonCode.Filter.Exclude;
-		this.Pages.GetCategoryMembers("Oblivion-Quests", CategoryMemberTypes.Page, false);
-		this.Pages.GetCategoryMembers("Shivering-Quests", CategoryMemberTypes.Page, false);
+		// this.Pages.GetTitles("Oblivion:Roland Jenseric's Cabin");
+		this.Pages.GetCategoryMembers("Oblivion-Places", CategoryMemberTypes.Page, false);
+		this.Pages.GetCategoryMembers("Shivering-Places", CategoryMemberTypes.Page, false);
 	}
 
 	protected override void ParseText(SiteParser parser)
@@ -52,6 +53,11 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 			{
 				var oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], OldTemplateName);
 				location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
+				if (location == -1)
+				{
+					oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], OldTemplateName2);
+					location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
+				}
 			}
 
 			parser.InsertText(location + 1, TemplateText);
