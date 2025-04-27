@@ -13,10 +13,9 @@ internal static class EsoLog
 {
 	#region Fields
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
-	private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+	private static readonly EsoVersion[] LatestVersions = { EsoVersion.Empty, EsoVersion.Empty };
+
 	private static Database? database;
-	private static EsoVersion? latestVersion;
-	private static EsoVersion? latestPtsVersion;
 	#endregion
 
 	#region Public Properties
@@ -76,36 +75,24 @@ internal static class EsoLog
 
 	public static EsoVersion LatestDBUpdate(bool includePts)
 	{
-		if (latestVersion is null || latestPtsVersion is null)
+		if (LatestVersions[0] == EsoVersion.Empty)
 		{
-			latestVersion = EsoVersion.Empty;
-			latestPtsVersion = EsoVersion.Empty;
-			var highestSort = 0;
-			var highestPtsSort = 0;
 			foreach (var table in EsoDb.ShowTables())
 			{
-				var match = UpdateFinder.Match(table);
-				if (match.Success)
+				var version = EsoVersion.FromText(table);
+				var ptsNum = version.Pts ? 1 : 0;
+
+				// Invalid values return Empty, which is the default/minimum, so no need to check for it explicitly.
+				if (version.Version > LatestVersions[ptsNum].Version)
 				{
-					var version = EsoVersion.FromText(match.Value);
-					if (version.Pts)
-					{
-						if (highestPtsSort < version.SortOrder)
-						{
-							highestPtsSort = version.SortOrder;
-							latestPtsVersion = version;
-						}
-					}
-					else if (highestSort < version.SortOrder)
-					{
-						highestSort = version.SortOrder;
-						latestVersion = version;
-					}
+					LatestVersions[ptsNum] = version;
 				}
 			}
 		}
 
-		return includePts ? latestPtsVersion : latestVersion;
+		return includePts && LatestVersions[1] > LatestVersions[0]
+			? LatestVersions[1]
+			: LatestVersions[0];
 	}
 	#endregion
 
