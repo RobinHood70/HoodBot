@@ -63,7 +63,7 @@ internal sealed class EsoSkills : EditJob
 
 	#region Fields
 	private Dictionary<string, Skill> skills = new(StringComparer.Ordinal);
-	private EsoVersion? version;
+	private EsoVersion version;
 	#endregion
 
 	#region Constructors
@@ -102,7 +102,7 @@ internal sealed class EsoSkills : EditJob
 			prevVersion = new EsoVersion(this.version.Version - 1, false);
 		}
 
-		this.skills = GetSkillList(null);
+		this.skills = GetSkillList(EsoVersion.Empty);
 		var prevSkills = GetSkillList(prevVersion);
 		foreach (var (key, skill) in this.skills)
 		{
@@ -137,7 +137,7 @@ internal sealed class EsoSkills : EditJob
 	protected override void Main()
 	{
 		base.Main();
-		EsoSpace.SetBotUpdateVersion(this, "botskills", this.version!);
+		EsoSpace.SetBotUpdateVersion(this, "botskills", this.version);
 	}
 
 	protected override void PageLoaded(Page page)
@@ -169,10 +169,10 @@ internal sealed class EsoSkills : EditJob
 		return iconChanges;
 	}
 
-	private static Dictionary<string, Skill> GetSkillList(EsoVersion? version)
+	private static Dictionary<string, Skill> GetSkillList(EsoVersion version)
 	{
 		Dictionary<string, Skill> retval = new(StringComparer.Ordinal);
-		var versionText = version is null ? string.Empty : version.Text;
+		var versionText = version.ToString();
 		var query = Query
 			.Replace("$st", SkillTable + versionText, StringComparison.Ordinal)
 			.Replace("$ms", MinedTable + versionText, StringComparison.Ordinal);

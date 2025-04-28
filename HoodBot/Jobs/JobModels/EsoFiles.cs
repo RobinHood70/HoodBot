@@ -116,7 +116,7 @@ public static class EsoFiles
 
 	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(LocalConfig.BotDataFolder, "esoui", FileSystemNames[fileType]);
 
-	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion.Text}/";
+	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
 
 	public static string RemotePath(EsoVersion patchVersion, EsoFileTypes fileType) =>
 		RemotePath(patchVersion) + FileSystemNames[fileType] + ".zip";

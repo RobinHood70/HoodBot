@@ -13,7 +13,7 @@ internal static class EsoLog
 {
 	#region Fields
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
-	private static readonly EsoVersion[] LatestVersions = { EsoVersion.Empty, EsoVersion.Empty };
+	private static readonly EsoVersion[] LatestVersions = [EsoVersion.Empty, EsoVersion.Empty];
 
 	private static Database? database;
 	#endregion
@@ -79,7 +79,7 @@ internal static class EsoLog
 		{
 			foreach (var table in EsoDb.ShowTables())
 			{
-				var version = EsoVersion.FromText(table);
+				var version = new EsoVersion(table);
 				var ptsNum = version.Pts ? 1 : 0;
 
 				// Invalid values return Empty, which is the default/minimum, so no need to check for it explicitly.

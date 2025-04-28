@@ -203,14 +203,13 @@ internal static class EsoSpace
 		var version = patchPage.GetVariable(paramName);
 		return version is null
 			? throw new InvalidOperationException($"Patch variable \"{paramName}\" not found")
-			: EsoVersion.FromText(version);
+			: new EsoVersion(version);
 	}
 
 	public static void SetBotUpdateVersion(this WikiJob job, string pageType, EsoVersion version)
 	{
 		ArgumentNullException.ThrowIfNull(job);
 		ArgumentException.ThrowIfNullOrEmpty(pageType);
-		ArgumentNullException.ThrowIfNull(version);
 
 		job.StatusWriteLine("Update bot parameters");
 		var paramName = pageType;
@@ -218,7 +217,7 @@ internal static class EsoSpace
 		var parser = new SiteParser(patchPage);
 		if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 		{
-			param.SetValue(version.Text, ParameterFormat.OnePerLine);
+			param.SetValue(version.ToString(), ParameterFormat.OnePerLine);
 			parser.UpdatePage();
 			patchPage.Save("Update " + paramName, true);
 		}
