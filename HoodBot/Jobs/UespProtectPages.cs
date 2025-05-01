@@ -10,6 +10,8 @@ using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
+// TODO: Page protection levels now being loaded in multiple places (.InfoGetProtection = true). Not sure what happened here, but check over it when feeling better so we're only loading them once.
+// TODO: !!! Sort pages before protecting them !!!
 internal sealed class UespProtectPages : EditJob
 {
 	#region Private Constants
@@ -149,6 +151,15 @@ internal sealed class UespProtectPages : EditJob
 			"{{Archive Footer}}",
 			false,
 			"archive protection policy")),
+		new ProtectionInfo([MediaWikiNamespaces.Project], @"\ANews/", new PageProtection(
+			"News",
+			ProtectionLevel.Semi,
+			ProtectionLevel.Semi,
+			AddStandardProtection,
+			string.Empty,
+			string.Empty,
+			true,
+			"highly vulnerable to vandalism")),
 	];
 	#endregion
 
@@ -158,6 +169,7 @@ internal sealed class UespProtectPages : EditJob
 		: base(jobManager)
 	{
 		this.Pages.SetLimitations(LimitationType.None);
+		this.Pages.LoadOptions.InfoGetProtection = true;
 		List<int> talkSpaces = [];
 		foreach (var ns in this.Site.Namespaces)
 		{
@@ -218,8 +230,8 @@ internal sealed class UespProtectPages : EditJob
 				this.WriteLine("| " + protection.FriendlyName);
 				this.WriteLine("| " + SiteLink.ToText(page));
 				this.WriteLine("| " + CombinedProtectionString(
-					ProtectionFromPage(page, "edit"),
-					ProtectionFromPage(page, "move")));
+					this.ProtectionFromPage(page, "edit"),
+					this.ProtectionFromPage(page, "move")));
 				this.WriteLine("| " + CombinedProtectionString(
 					protection.EditProtection,
 					protection.MoveProtection));
@@ -245,8 +257,8 @@ internal sealed class UespProtectPages : EditJob
 			var protection = protectedTitle.Protection;
 			if (currentProtectionPages.TryGetValue(protectedTitle.Title, out var page))
 			{
-				var editProtection = ProtectionFromPage(page, "edit");
-				var moveProtection = ProtectionFromPage(page, "move");
+				var editProtection = this.ProtectionFromPage(page, "edit");
+				var moveProtection = this.ProtectionFromPage(page, "move");
 				if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
 				{
 					this.pageProtections.TryAdd(page.Title, protection);
@@ -413,7 +425,9 @@ internal sealed class UespProtectPages : EditJob
 		return InsertStandardProtectionTemplate(parser, protection, insertPos, editWord, moveWord);
 	}
 
-	private static string CombinedProtectionString(ProtectionLevel editProtection, ProtectionLevel moveProtection) => editProtection == moveProtection ? ProtectionString[editProtection] : $"Edit={ProtectionString[editProtection]}, Move={ProtectionString[moveProtection]}";
+	private static string CombinedProtectionString(ProtectionLevel editProtection, ProtectionLevel moveProtection) => editProtection == moveProtection
+		? ProtectionString[editProtection]
+		: $"Edit={ProtectionString[editProtection]}, Move={ProtectionString[moveProtection]}";
 
 	private static string GetDate(SiteParser parser)
 	{
@@ -449,16 +463,6 @@ internal sealed class UespProtectPages : EditJob
 		parser.Insert(insertPos, protectionTemplate);
 		return insertPos + 1;
 	}
-
-	private static ProtectionLevel ProtectionFromPage(Page protTitle, string protectionType) =>
-		protTitle.Protections.TryGetValue(protectionType, out var protection)
-			? protection.Level switch
-			{
-				"sysop" => ProtectionLevel.Full,
-				"autoconfirmed" => ProtectionLevel.Semi,
-				_ => ProtectionLevel.None
-			}
-			: ProtectionLevel.None;
 
 	private static int RemoveProtectionTemplate(SiteParser parser, int insertPos)
 	{
@@ -506,7 +510,8 @@ internal sealed class UespProtectPages : EditJob
 		{
 			while (insertPos < nodes.Count && !(nodes[insertPos] is IIgnoreNode ignoreNode && ignoreNode.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase)))
 			{
-				if (nodes[insertPos] is ITextNode)
+				var nextNode = nodes[insertPos];
+				if (nextNode is ITextNode)
 				{
 					break;
 				}
@@ -521,8 +526,8 @@ internal sealed class UespProtectPages : EditJob
 				var newNodes = new IWikiNode[]
 				{
 					nodes.Factory.IgnoreNode("<noinclude>"),
+					nodes.Factory.TextNode("\n"),
 					nodes.Factory.IgnoreNode("</noinclude>"),
-					nodes.Factory.TextNode("\n")
 				};
 				nodes.InsertRange(0, newNodes);
 			}
@@ -609,6 +614,25 @@ internal sealed class UespProtectPages : EditJob
 		}
 
 		return retval;
+	}
+
+	private ProtectionLevel ProtectionFromPage(Page protTitle, string protectionType)
+	{
+		if (!protTitle.Protections.TryGetValue(protectionType, out var protection))
+		{
+			return ProtectionLevel.None;
+		}
+
+		switch (protection.Level)
+		{
+			case "sysop":
+				return ProtectionLevel.Full;
+			case "autoconfirmed":
+				return ProtectionLevel.Semi;
+			default:
+				this.StatusWriteLine("Unknown protection level: " + protection.Level);
+				return ProtectionLevel.Unknown;
+		}
 	}
 	#endregion
 

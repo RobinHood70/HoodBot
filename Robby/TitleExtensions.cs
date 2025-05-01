@@ -26,6 +26,9 @@ public enum ProtectionLevel
 
 	/// <summary>Change to full-protection.</summary>
 	Full,
+
+	/// <summary>A non-standard protection level was found.</summary>
+	Unknown,
 }
 #endregion
 
