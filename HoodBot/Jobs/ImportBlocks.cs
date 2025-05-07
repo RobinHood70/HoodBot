@@ -70,22 +70,34 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 		var wikis = App.UserSettings.Wikis;
 		foreach (var wiki in wikis)
 		{
-			if (wiki.WikiInfo.Api is Uri uri && Sites.Contains(uri.Host) && wiki.UserName is not null)
+			if (wiki.Api is not Uri uri || !Sites.Contains(uri.Host) || wiki.UserName is null)
 			{
-				var api = new WikiAbstractionLayer(this.client, wiki.Api!);
-				api.SendingRequest += JobManager.WalSendingRequest;
-				var site = this.JobManager.CreateSite(wiki.WikiInfo, api, this.Site.EditingEnabled);
-				site.Login(wiki.UserName, wiki.Password);
-
-				this.StatusWriteLine(string.Empty);
-				this.StatusWriteLine("Getting blocks for " + site.Name);
-				var localBlocks = this.GetLocalBlocks(site);
-				var lastRun = GetStartTime(wiki.UserName, localBlocks);
-				var wmfBlocks = this.GetWmfBlocks(lastRun);
-				var blockUpdates = DoSiteBlocks(wmfBlocks, localBlocks);
-				this.UpdateBlocks(site, blockUpdates);
-				api.SendingRequest -= JobManager.WalSendingRequest;
+				continue;
 			}
+
+			var api = new WikiAbstractionLayer(this.client, wiki.Api);
+			api.SendingRequest += JobManager.WalSendingRequest;
+
+			this.StatusWriteLine(string.Empty);
+			Site site;
+			try
+			{
+				site = this.JobManager.CreateSite(wiki.WikiInfo, api, this.Site.EditingEnabled);
+				site.Login(wiki.UserName, wiki.Password);
+				this.StatusWriteLine("Getting blocks for " + site.Name);
+			}
+			catch (InvalidDataException idEx)
+			{
+				this.StatusWriteLine($"Could not access {wiki.WikiInfo.DisplayName} ({idEx.Message})");
+				continue;
+			}
+
+			var localBlocks = this.GetLocalBlocks(site);
+			var lastRun = GetStartTime(wiki.UserName, localBlocks);
+			var wmfBlocks = this.GetWmfBlocks(lastRun);
+			var blockUpdates = DoSiteBlocks(wmfBlocks, localBlocks);
+			this.UpdateBlocks(site, blockUpdates);
+			api.SendingRequest -= JobManager.WalSendingRequest;
 		}
 	}
 	#endregion
@@ -263,13 +275,14 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 				}
 				else
 				{
-					// This should rarely happen—if ever—so for now, we're just unblocking while blocks are being loaded. That's really a crappy way to do it, though, so should be moved to something with a progress bar if, for some reason, it becomes a more common occurrence.
+					// This should rarely happen, so just unblock immediately. Should be moved to something with a progress bar if it becomes a common occurrence.
 					var input = new UnblockInput(addressText)
 					{
 						Reason = "Unblock Cloudflare"
 					};
 
-					this.Site.AbstractionLayer.Unblock(input);
+					site.AbstractionLayer.Unblock(input);
+					this.StatusWriteLine("Unblocked Cloudflare address: " + addressText);
 				}
 			}
 		}
