@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.WallE.Properties; 
+namespace RobinHood70.WallE.Properties {
     using System;
     
     
@@ -102,6 +102,15 @@ namespace RobinHood70.WallE.Properties;
         internal static string CannotDeserializeWithoutPage {
             get {
                 return ResourceManager.GetString("CannotDeserializeWithoutPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cloudflare blocking access.
+        /// </summary>
+        internal static string CloudflareBlock {
+            get {
+                return ResourceManager.GetString("CloudflareBlock", resourceCulture);
             }
         }
         
@@ -330,3 +339,4 @@ namespace RobinHood70.WallE.Properties;
             }
         }
     }
+}

@@ -154,7 +154,9 @@ internal sealed class ActionQuery : ActionModule
 			}
 			catch (JsonReaderException)
 			{
-				throw new InvalidDataException();
+				throw new InvalidDataException(response.Contains("Just a moment", StringComparison.Ordinal)
+					? EveMessages.CloudflareBlock
+					: null);
 			}
 		}
 		while (this.continueModule?.Continues ?? false);

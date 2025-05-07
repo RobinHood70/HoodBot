@@ -207,4 +207,7 @@
   <data name="OutputTypeNotHandled" xml:space="preserve">
     <value>A module returned a result type that isn't handled: {0}.</value>
   </data>
+  <data name="CloudflareBlock" xml:space="preserve">
+    <value>Cloudflare blocking access</value>
+  </data>
 </root>
