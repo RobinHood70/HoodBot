@@ -1,67 +1,109 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
+using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
-using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
 [method: JobInfo("One-Off Parse Job")]
 public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 {
-	#region Constants
-	private const string OldTemplateName = "Cleanup-oprp";
-	private const string OldTemplateName2 = "Cleanup-obhrp";
-	private const string TemplateName = "Cleanup-obrp-place";
-	private const string TemplateText = $$$"""
-		{{{{{TemplateName}}}
-		|writtenBy=
-		|checkedBy=
-		|interior=
-		|interiorChecked=
-		|exterior=
-		|exteriorChecked=
-		}}
-		""";
+	#region Static Fields
+	private static readonly Regex Header = new(@"{\|\s*class=wikitable\s*\n!\s*Planet\s*!!\s*Biomes\s*!!\s*Resource(\s*!!\s*(Outpost )?Production( Allowed)?)? *(?<tabletext>(?s:.+?))\n\|}", RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 	#endregion
 
 	#region Public Override Properties
-	public override string LogDetails => "Add remaster place template";
+	public override string LogDetails => "Replace table flora variants with templates";
 
 	public override string LogName => "One-Off Parse Job";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Add remaster template";
+	protected override string GetEditSummary(Page page) => "Replace table with templates";
 
-	protected override void LoadPages()
-	{
-		this.Shuffle = true;
-		this.Pages.AllowRedirects = CommonCode.Filter.Exclude;
-		// this.Pages.GetTitles("Oblivion:Roland Jenseric's Cabin");
-		this.Pages.GetCategoryMembers("Oblivion-Places", CategoryMemberTypes.Page, false);
-		this.Pages.GetCategoryMembers("Shivering-Places", CategoryMemberTypes.Page, false);
-	}
+	protected override void LoadPages() => this.Pages.GetCategoryMembers("Starfield-Flora");
 
 	protected override void ParseText(SiteParser parser)
 	{
-		var newTemplate = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], TemplateName);
-		if (parser.FindTemplate(newTemplate) is null)
+		this.Shuffle = true;
+		if (parser.FindTemplate("Flora Variant Table") is not null)
 		{
-			var location = -1;
-			if (OldTemplateName.Length > 0)
+			return;
+		}
+
+		var sections = parser.ToSections(2);
+		var found = false;
+		foreach (var section in sections)
+		{
+			if (string.Equals(section.Header.GetTitle(true), "Variants", System.StringComparison.Ordinal))
 			{
-				var oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], OldTemplateName);
-				location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
-				if (location == -1)
+				found = true;
+				var text = section.Content.ToRaw();
+				if (!Header.Match(text).Success)
 				{
-					oldTemplate = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], OldTemplateName2);
-					location = parser.IndexOf<ITemplateNode>(t => t.GetTitle(this.Site) == oldTemplate);
+					Debug.WriteLine("Table not found on [[" + parser.Title + "]]");
 				}
+
+				var newText = Header.Replace(text, this.Replacer);
+				section.Content.Clear();
+				section.Content.AddText(newText);
+			}
+		}
+
+		if (!found)
+		{
+			Debug.WriteLine("No variants section on [[" + parser.Title + "]]");
+		}
+
+		parser.FromSections(sections);
+	}
+
+	private string Replacer(Match match)
+	{
+		var sb = new StringBuilder(match.Value.Length);
+		sb.Append("{{Flora Variant Table|\n");
+		var rows = match.Groups["tabletext"].Value.Split("\n|-");
+		foreach (var row in rows)
+		{
+			if (row.Length == 0)
+			{
+				continue;
 			}
 
-			parser.InsertText(location + 1, TemplateText);
+			var rowText = row.Trim().TrimStart(TextArrays.Pipe);
+			var cells = new List<string>(rowText.Split("||", StringSplitOptions.TrimEntries));
+			if (cells.Count == 3 && cells[2].EndsWith("]]", StringComparison.Ordinal))
+			{
+				cells.Add(string.Empty);
+			}
+
+			if (cells.Count != 4)
+			{
+				throw new InvalidOperationException();
+			}
+
+			var planetLink = SiteLink.FromText(this.Site, cells[0]);
+			var resourceLink = SiteLink.FromText(this.Site, cells[2]);
+			sb
+				.Append("  {{Flora Variant")
+				.Append("|planet=")
+				.Append(planetLink.Title.PageName)
+				.Append("|biomes=")
+				.Append(cells[1])
+				.Append("|resource=")
+				.Append(resourceLink.Title.PageName)
+				.Append("|productionallowed=")
+				.Append(cells[3])
+				.Append("}}\n");
 		}
+
+		sb.Append("}}");
+		return sb.ToString();
 	}
 	#endregion
 }
