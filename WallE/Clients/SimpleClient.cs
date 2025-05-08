@@ -107,7 +107,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	#region Public Methods
 
 	/// <summary>Clears all cookies for a specific URI or for all URIs.</summary>
-	/// <param name="uri">The URI whose cokies should be cleared. If <see langword="null"/>, cookies for all URIs will be cleared.</param>
+	/// <param name="uri">The URI whose cookies should be cleared. If <see langword="null"/>, cookies for all URIs will be cleared.</param>
 	public void ClearCookies(Uri? uri)
 	{
 		var cookies = uri is null
@@ -206,7 +206,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		this.disposed = true;
 	}
 
-	/// <summary>The action to be taken when after a qrequested delay has been completed.</summary>
+	/// <summary>The action to be taken when after a requested delay has been completed.</summary>
 	/// <param name="e">The sending <see cref="DelayEventArgs"/>.</param>
 	/// <seealso cref="OnRequestingDelay(DelayEventArgs)"/>
 	protected virtual void OnDelayComplete(DelayEventArgs e) => this.DelayComplete?.Invoke(this, e);
