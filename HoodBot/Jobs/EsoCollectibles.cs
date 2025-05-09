@@ -80,7 +80,8 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		parser.ReplaceText(
 			"<gallery>\n</gallery>",
 			$"<gallery>\nON-crown store-{page.Title.PageName}.jpg\n</gallery>",
-			StringComparison.Ordinal);
+			StringComparison.Ordinal,
+			true);
 		var collectible = this.collectibles[page.Title] ?? throw new InvalidOperationException();
 		if (this.crateTiers.TryGetValue(collectible.Name, out var crateInfo))
 		{

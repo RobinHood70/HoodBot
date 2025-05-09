@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser;
 
-// TODO: This class still needs some work to make sure it's consistent and has all reasonably useful methods (and possibly removing any kruft).
+// TODO: This class still needs some work to make sure it's consistent and has all reasonably useful methods (and possibly removing any cruft).
 // TODO: Make this observable in some fashion. Might mean using an embedded list rather than inheriting from List<T> directly.
 // TODO: Make this fluent.
 using System;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
 /// <summary>  A delegate for the method required by the Replace method.</summary>
@@ -147,7 +148,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the remaining parameters will be returned.</param>
 	/// <returns>The first node (or the last, for reverse searches) in the collection that is of the specified type and satisfies the condition.</returns>
 	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
 	[return: MaybeNull]
@@ -156,7 +157,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the remaining parameters will be returned.</param>
 	/// <param name="reverse">Set to <see langword="true"/> to reverse the search direction.</param>
 	/// <returns>The first node (or the last, for reverse searches) in the collection that is of the specified type and satisfies the condition.</returns>
 	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
@@ -166,7 +167,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the remaining parameters will be returned.</param>
 	/// <param name="reverse">Set to <see langword="true"/> to reverse the search direction.</param>
 	/// <param name="recursive">Set to <see langword="true"/> to search all nodes recursively; otherwise, only the top level of nodes will be searched.</param>
 	/// <param name="startAt">The node to start searching at (inclusive). May be <see langword="null"/>.</param>
@@ -186,7 +187,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Finds all <see cref="LinkedListNode{T}"/>s with a <see cref="LinkedListNode{T}.Value">Value</see> of the specified type.</summary>
 	/// <typeparam name="T">The type of node to find.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the remaining parameters will be returned.</param>
 	/// <returns>The nodes in the collection that are of the specified type.</returns>
 	/// <remarks>Outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned before the <c>{{Example|example}}</c> template.</remarks>
 	public IEnumerable<T> FindAll<T>(Predicate<T>? condition)
@@ -194,7 +195,7 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Finds all <see cref="LinkedListNode{T}"/>s with a <see cref="LinkedListNode{T}.Value">Value</see> of the specified type that satisfy the condition.</summary>
 	/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+	/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the remaining parameters will be returned.</param>
 	/// <param name="reverse">Set to <see langword="true"/> to reverse the search direction.</param>
 	/// <param name="recursive">Set to <see langword="true"/> to search all nodes recursively; otherwise, only the top level of nodes will be searched.</param>
 	/// <param name="index">The node to start searching at (inclusive). May be <see langword="null"/>.</param>
@@ -378,6 +379,24 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <returns>A new WikiNodeCollection created from the text.</returns>
 	public IList<IWikiNode> Parse(string? text) => this.Factory.Parse(text);
 
+	/// <summary>Replaces text found in all ITextNode nodes.</summary>
+	/// <param name="pattern">The Regex pattern to look for.</param>
+	/// <param name="replacement">The text that should replace <paramref name="pattern"/>.</param>
+	/// <param name="options">The RegexOptions to use.</param>
+	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
+	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
+	/// </remarks>
+	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, string replacement, RegexOptions options, bool includeComments) => this.Replace(match => RegexReplacePrivate(match, pattern, replacement, options, includeComments), false);
+
+	/// <summary>Replaces text found in all ITextNode nodes.</summary>
+	/// <param name="pattern">The Regex pattern to look for.</param>
+	/// <param name="evaluator">The MatchEvaluator that should replace <paramref name="pattern"/>.</param>
+	/// <param name="options">The RegexOptions to use.</param>
+	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
+	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
+	/// </remarks>
+	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, MatchEvaluator evaluator, RegexOptions options, bool includeComments) => this.Replace(match => RegexReplacePrivate(match, pattern, evaluator, options, includeComments), false);
+
 	/// <summary>Removes all nodes of the given type.</summary>
 	/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
 	public void RemoveAll<T>()
@@ -424,13 +443,14 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 	}
 
-	/// <summary>Replaces text found in all ITextNode nodes.</summary>
+	/// <summary>Replaces text found in all ITextNode nodes and, optionally, all ICommentNodes.</summary>
 	/// <param name="oldValue">The text to look for.</param>
-	/// <param name="newValue">The text that should replace <paramref name="oldValue"/> with.</param>
+	/// <param name="newValue">The text that should replace <paramref name="oldValue"/>.</param>
 	/// <param name="comparisonType">The string comparison method to use.</param>
+	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
 	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 	/// </remarks>
-	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
+	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType, bool includeComments) => this.Replace(match => ReplaceTextPrivate(match, oldValue, newValue, comparisonType, includeComments), false);
 
 	/// <summary>Splits a page into its individual sections. </summary>
 	/// <returns>An enumeration of the sections of the page.</returns>
@@ -536,13 +556,58 @@ public class WikiNodeCollection : List<IWikiNode>
 	#endregion
 
 	#region Private Static Methods
-	private static IList<IWikiNode>? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
+	private static IList<IWikiNode>? RegexReplacePrivate(IWikiNode match, string pattern, string replacement, RegexOptions options, bool includeComments)
 	{
 		switch (match)
 		{
 			case ICommentNode comment:
-				comment.Comment = comment.Comment.Replace(from, to, comparison);
-				return [comment];
+				if (includeComments)
+				{
+					comment.Comment = Regex.Replace(comment.Comment, pattern, replacement, options, Globals.DefaultRegexTimeout);
+					return [comment];
+				}
+
+				return null;
+			case ITextNode text:
+				text.Text = Regex.Replace(text.Text, pattern, replacement, options, Globals.DefaultRegexTimeout);
+				return [text];
+			default:
+				return null;
+		}
+	}
+
+	private static IList<IWikiNode>? RegexReplacePrivate(IWikiNode match, string pattern, MatchEvaluator evaluator, RegexOptions options, bool includeComments)
+	{
+		switch (match)
+		{
+			case ICommentNode comment:
+				if (includeComments)
+				{
+					comment.Comment = Regex.Replace(comment.Comment, pattern, evaluator, options, Globals.DefaultRegexTimeout);
+					return [comment];
+				}
+
+				return null;
+			case ITextNode text:
+				text.Text = Regex.Replace(text.Text, pattern, evaluator, options, Globals.DefaultRegexTimeout);
+				return [text];
+			default:
+				return null;
+		}
+	}
+
+	private static IList<IWikiNode>? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison, bool includeComments)
+	{
+		switch (match)
+		{
+			case ICommentNode comment:
+				if (includeComments)
+				{
+					comment.Comment = comment.Comment.Replace(from, to, comparison);
+					return [comment];
+				}
+
+				return null;
 			case ITextNode text:
 				text.Text = text.Text.Replace(from, to, comparison);
 				return [text];
