@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using System;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
@@ -15,21 +14,18 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#endregion
 
 	#region Protected Override Properties
-	protected override string TemplateName => "Flora Summary";
+	protected override string TemplateName => "ESO Health";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Remove leading 0x in formid";
+	protected override string GetEditSummary(Page page) => "Update value prior to larger job";
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
-		if (template.Find("formid") is IParameterNode formId)
+		if (template.Find(1) is IParameterNode param &&
+			string.Equals(param.GetValue(), "dbh", System.StringComparison.OrdinalIgnoreCase))
 		{
-			var value = formId.GetValue();
-			if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-			{
-				formId.SetValue(value[2..], ParameterFormat.Copy);
-			}
+			param.SetValue("dbl", ParameterFormat.Copy);
 		}
 	}
 	#endregion
