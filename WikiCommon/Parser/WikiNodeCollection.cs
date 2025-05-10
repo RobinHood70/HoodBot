@@ -11,9 +11,45 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
+#region Public Delegates
+
 /// <summary>  A delegate for the method required by the Replace method.</summary>
 /// <param name="node">The node.</param>
 public delegate IList<IWikiNode>? NodeReplacer(IWikiNode node);
+#endregion
+
+#region Public Enumerations
+
+/// <summary>Locations to replace text in.</summary>
+[Flags]
+public enum ReplaceLocations
+{
+	// CONSIDER: This needs more thought about how to handle inner replacements. Currently, Text is assumed for all inner replacements. Could be new flags instead or a new parameter.
+	// CONSIDER: Include an overload to specify the method to use for custom replacement? But is that really any better than just doing the whole thing yourself?
+	// CONSIDER: Handle tags? Seems really messy.
+
+	/// <summary>Go through the motions of replacing without doing anything.</summary>
+	None = 0,
+
+	/// <summary>Replace text in comments.</summary>
+	Comments = 1,
+
+	/// <summary>Replace text in headers.</summary>
+	Headers = 1 << 1,
+
+	/// <summary>Replace text in link parameter values.</summary>
+	LinkValues = 1 << 2,
+
+	/// <summary>Replace text in template parameter values.</summary>
+	ParameterValues = 1 << 3,
+
+	/// <summary>Replace text in text.</summary>
+	Text = 1 << 4,
+
+	/// <summary>Replace everywhere.</summary>
+	All = Comments | Headers | LinkValues | ParameterValues | Text
+}
+#endregion
 
 /// <summary>A collection of <see cref="IWikiNode"/>s representing wiki text. Implemented as a linked list.</summary>
 public class WikiNodeCollection : List<IWikiNode>
@@ -383,19 +419,21 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <param name="pattern">The Regex pattern to look for.</param>
 	/// <param name="replacement">The text that should replace <paramref name="pattern"/>.</param>
 	/// <param name="options">The RegexOptions to use.</param>
-	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
+	/// <param name="replaceIn">The node types to replace.</param>
 	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 	/// </remarks>
-	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, string replacement, RegexOptions options, bool includeComments) => this.Replace(match => RegexReplacePrivate(match, pattern, replacement, options, includeComments), false);
+	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, string replacement, RegexOptions options, ReplaceLocations replaceIn) =>
+		RegexReplacePrivate(this, pattern, replacement, options, replaceIn);
 
 	/// <summary>Replaces text found in all ITextNode nodes.</summary>
 	/// <param name="pattern">The Regex pattern to look for.</param>
 	/// <param name="evaluator">The MatchEvaluator that should replace <paramref name="pattern"/>.</param>
 	/// <param name="options">The RegexOptions to use.</param>
-	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
+	/// <param name="replaceIn">The node types to replace.</param>
 	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 	/// </remarks>
-	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, MatchEvaluator evaluator, RegexOptions options, bool includeComments) => this.Replace(match => RegexReplacePrivate(match, pattern, evaluator, options, includeComments), false);
+	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, MatchEvaluator evaluator, RegexOptions options, ReplaceLocations replaceIn) =>
+		RegexReplacePrivate(this, pattern, evaluator, options, replaceIn);
 
 	/// <summary>Removes all nodes of the given type.</summary>
 	/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -447,10 +485,10 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <param name="oldValue">The text to look for.</param>
 	/// <param name="newValue">The text that should replace <paramref name="oldValue"/>.</param>
 	/// <param name="comparisonType">The string comparison method to use.</param>
-	/// <param name="includeComments"><see langword="true"/> if comments should be included in the replace.</param>
+	/// <param name="replaceIn">The node types to replace.</param>
 	/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new WikiNodeCollection that will replace the current node.
 	/// </remarks>
-	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType, bool includeComments) => this.Replace(match => ReplaceTextPrivate(match, oldValue, newValue, comparisonType, includeComments), false);
+	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType, ReplaceLocations replaceIn) => ReplaceTextPrivate(this, oldValue, newValue, comparisonType, replaceIn);
 
 	/// <summary>Splits a page into its individual sections. </summary>
 	/// <returns>An enumeration of the sections of the page.</returns>
@@ -556,63 +594,177 @@ public class WikiNodeCollection : List<IWikiNode>
 	#endregion
 
 	#region Private Static Methods
-	private static IList<IWikiNode>? RegexReplacePrivate(IWikiNode match, string pattern, string replacement, RegexOptions options, bool includeComments)
+	private static void RegexReplacePrivate(IEnumerable<IWikiNode> nodes, string pattern, string replacement, RegexOptions options, ReplaceLocations replaceIn)
 	{
-		switch (match)
+		foreach (var node in nodes)
 		{
-			case ICommentNode comment:
-				if (includeComments)
-				{
-					comment.Comment = Regex.Replace(comment.Comment, pattern, replacement, options, Globals.DefaultRegexTimeout);
-					return [comment];
-				}
+			switch (node)
+			{
+				case ICommentNode comment:
+					if (replaceIn.HasFlag(ReplaceLocations.Comments))
+					{
+						comment.Comment = Regex.Replace(comment.Comment, pattern, replacement, options, Globals.DefaultRegexTimeout);
+					}
 
-				return null;
-			case ITextNode text:
-				text.Text = Regex.Replace(text.Text, pattern, replacement, options, Globals.DefaultRegexTimeout);
-				return [text];
-			default:
-				return null;
+					break;
+				case IHeaderNode header:
+					if (replaceIn.HasFlag(ReplaceLocations.Headers))
+					{
+						RegexReplacePrivate(header.Title, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ILinkNode link:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in link.Parameters)
+						{
+							RegexReplacePrivate(param.Value, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case IParameterNode param:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						RegexReplacePrivate(param.Value, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ITemplateNode template:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in template.Parameters)
+						{
+							RegexReplacePrivate(param.Value, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case ITextNode text:
+					if (replaceIn.HasFlag(ReplaceLocations.Text))
+					{
+						text.Text = Regex.Replace(text.Text, pattern, replacement, options, Globals.DefaultRegexTimeout);
+					}
+
+					break;
+			}
 		}
 	}
 
-	private static IList<IWikiNode>? RegexReplacePrivate(IWikiNode match, string pattern, MatchEvaluator evaluator, RegexOptions options, bool includeComments)
+	private static void RegexReplacePrivate(IEnumerable<IWikiNode> nodes, string pattern, MatchEvaluator evaluator, RegexOptions options, ReplaceLocations replaceIn)
 	{
-		switch (match)
+		foreach (var node in nodes)
 		{
-			case ICommentNode comment:
-				if (includeComments)
-				{
-					comment.Comment = Regex.Replace(comment.Comment, pattern, evaluator, options, Globals.DefaultRegexTimeout);
-					return [comment];
-				}
+			switch (node)
+			{
+				case ICommentNode comment:
+					if (replaceIn.HasFlag(ReplaceLocations.Comments))
+					{
+						comment.Comment = Regex.Replace(comment.Comment, pattern, evaluator, options, Globals.DefaultRegexTimeout);
+					}
 
-				return null;
-			case ITextNode text:
-				text.Text = Regex.Replace(text.Text, pattern, evaluator, options, Globals.DefaultRegexTimeout);
-				return [text];
-			default:
-				return null;
+					break;
+				case IHeaderNode header:
+					if (replaceIn.HasFlag(ReplaceLocations.Headers))
+					{
+						RegexReplacePrivate(header.Title, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ILinkNode link:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in link.Parameters)
+						{
+							RegexReplacePrivate(param.Value, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case IParameterNode param:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						RegexReplacePrivate(param.Value, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ITemplateNode template:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in template.Parameters)
+						{
+							RegexReplacePrivate(param.Value, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case ITextNode text:
+					if (replaceIn.HasFlag(ReplaceLocations.Text))
+					{
+						text.Text = Regex.Replace(text.Text, pattern, evaluator, options, Globals.DefaultRegexTimeout);
+					}
+
+					break;
+			}
 		}
 	}
 
-	private static IList<IWikiNode>? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison, bool includeComments)
+	private static void ReplaceTextPrivate(IEnumerable<IWikiNode> nodes, string from, string to, StringComparison comparison, ReplaceLocations replaceIn)
 	{
-		switch (match)
+		foreach (var node in nodes)
 		{
-			case ICommentNode comment:
-				if (includeComments)
-				{
-					comment.Comment = comment.Comment.Replace(from, to, comparison);
-					return [comment];
-				}
+			switch (node)
+			{
+				case ICommentNode comment:
+					if (replaceIn.HasFlag(ReplaceLocations.Comments))
+					{
+						comment.Comment = comment.Comment.Replace(from, to, comparison);
+					}
 
-				return null;
-			case ITextNode text:
-				text.Text = text.Text.Replace(from, to, comparison);
-				return [text];
-			default:
-				return null;
+					break;
+				case IHeaderNode header:
+					if (replaceIn.HasFlag(ReplaceLocations.Headers))
+					{
+						ReplaceTextPrivate(header.Title, from, to, comparison, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ILinkNode link:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in link.Parameters)
+						{
+							ReplaceTextPrivate(param.Value, from, to, comparison, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case IParameterNode param:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						ReplaceTextPrivate(param.Value, from, to, comparison, replaceIn | ReplaceLocations.Text);
+					}
+
+					break;
+				case ITemplateNode template:
+					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
+					{
+						foreach (var param in template.Parameters)
+						{
+							ReplaceTextPrivate(param.Value, from, to, comparison, replaceIn | ReplaceLocations.Text);
+						}
+					}
+
+					break;
+				case ITextNode text:
+					if (replaceIn.HasFlag(ReplaceLocations.Text))
+					{
+						text.Text = text.Text.Replace(from, to, comparison);
+					}
+
+					break;
+			}
 		}
 	}
 	#endregion
