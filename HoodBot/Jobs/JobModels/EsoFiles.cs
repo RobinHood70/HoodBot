@@ -13,6 +13,10 @@ using RobinHood70.WikiCommon.Parser;
 
 public static class EsoFiles
 {
+	#region Private Constants
+	private const string FileVersionsName = "FileVersions.csv";
+	#endregion
+
 	#region Public Enumerations
 	public enum EsoFileTypes
 	{
@@ -60,6 +64,42 @@ public static class EsoFiles
 	{
 		using var stream = File.OpenRead(fileName);
 		return Globals.GetHash(stream, HashType.Sha1);
+	}
+
+	public static IDictionary<string, EsoVersion> GetIconVersions()
+	{
+		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
+		var csv = new CsvFile(fullPath);
+		var retval = new SortedDictionary<string, EsoVersion>(StringComparer.Ordinal);
+		foreach (var fileName in FileSystemNames.Values)
+		{
+			retval.Add(fileName, EsoVersion.Empty);
+		}
+
+		foreach (var row in csv.ReadRows())
+		{
+			var name = row[0];
+			var version = row[1];
+			retval[name] = new EsoVersion(version);
+		}
+
+		return retval;
+	}
+
+	public static void SaveIconVersions(IDictionary<string, EsoVersion> versions)
+	{
+		ArgumentNullException.ThrowIfNull(versions);
+		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
+		var csv = new CsvFile(fullPath);
+		foreach (var fileName in FileSystemNames)
+		{
+			versions.TryAdd(fileName.Value, EsoVersion.Empty);
+		}
+
+		foreach (var row in versions)
+		{
+			csv.Add(row.Key, row.Value.ToString());
+		}
 	}
 
 	public static void GetIcons(this WikiJob job, EsoVersion patchVersion)
