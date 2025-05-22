@@ -366,6 +366,24 @@ public class Page : ITitle
 
 	#region Public Methods
 
+	/// <summary>Gets the revision that comes immediately before the oldest revision currently in <see cref="Revisions"/>.</summary>
+	/// <remarks>If no revisions are currently loaded or no older revisions exist on the wiki, this method will fail silently. Check the count of revisions before and after to determine success.</remarks>
+	public void LoadPreviousRevision()
+	{
+		if (this.revisions.Count > 0)
+		{
+			var tempPages = PageCollection.Unlimited(this.Site, this.LoadOptions);
+			var previous = this.Revisions[^1].ParentId;
+			tempPages.GetRevisionIds([previous]);
+			if (tempPages.Count == 1 &&
+				tempPages[0] is Page tempPage &&
+				tempPage.Revisions.Count == 1)
+			{
+				this.revisions.Add(tempPage.Revisions[0]);
+			}
+		}
+	}
+
 	/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 	/// <param name="module">The module to check.</param>
 	/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>
