@@ -37,7 +37,7 @@ public class Page : ITitle
 	/// <param name="apiItem">The API item to extract information from.</param>
 	protected internal Page([NotNull, ValidatedNotNull] Title title, PageLoadOptions options, IApiTitle? apiItem)
 	{
-		// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
+		// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not quite sure how that would work and it's not the priority right now.
 		this.LoadOptions = options;
 		this.Title = title;
 		switch (apiItem)
@@ -293,7 +293,7 @@ public class Page : ITitle
 	public PageLoadOptions LoadOptions { get; } = PageLoadOptions.None;
 
 	/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> has previously been deleted.</summary>
-	/// <value><see langword="true"/> if the page has previously been deleted; toherwise, <see langword="false"/>.</value>
+	/// <value><see langword="true"/> if the page has previously been deleted; otherwise, <see langword="false"/>.</value>
 	public bool PreviouslyDeleted { get; protected set; }
 
 	/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
@@ -423,7 +423,7 @@ public class Page : ITitle
 
 		ChangeStatus ChangeFunc()
 		{
-			// Modification status re-checked here because a subscriber may have reverted the page during PublishPageTextChage.
+			// Modification status re-checked here because a subscriber may have reverted the page during PublishPageTextChange.
 			if (!this.TextModified)
 			{
 				return ChangeStatus.NoEffect;
