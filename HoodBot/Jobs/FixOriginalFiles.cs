@@ -8,22 +8,13 @@ using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-public class FixOriginalFiles : TemplateJob
+[method: JobInfo("Fix originalfile names", "ESO")]
+public class FixOriginalFiles(JobManager jobManager) : TemplateJob(jobManager)
 {
 	// Note: this class is relatively slow, since it loads all pages with {{Online File}}. It could be made faster by only loading the originalfile variable and validating that, then loading only the pages that need fixed. This would, however, add a fair bit of complexity. Since this isn't likely to be a frequently run job, I've opted for simplicity for now.
 	#region Fields
 	private readonly Dictionary<string, string> iconHashes = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Dictionary<string, string> iconNames = new(StringComparer.OrdinalIgnoreCase);
-	#endregion
-
-	#region Constructors
-
-	[JobInfo("Fix originalfile names")]
-	public FixOriginalFiles(JobManager jobManager)
-		: base(jobManager)
-	{
-		this.Shuffle = true;
-	}
 	#endregion
 
 	#region Public Override Properties
@@ -41,9 +32,7 @@ public class FixOriginalFiles : TemplateJob
 
 	protected override void LoadPages()
 	{
-		// Note: since this job scans all files, GetIcons is currently disabled. It's expected that the various icon folders will have been updated manually, based on true need rather than the bad guess that GetIcons makes.
-
-		// EsoSpace.GetIcons(this, EsoLog.LatestDBUpdate(false));
+		EsoFiles.GetIcons(this, EsoLog.LatestDBUpdate(false));
 		var dupes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		var folderLen = LocalConfig.EsoUIFolder.Length + 1;
 		foreach (var fullName in Directory.EnumerateFiles(LocalConfig.EsoUIFolder, "*.png", SearchOption.AllDirectories))
