@@ -14,18 +14,25 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#endregion
 
 	#region Protected Override Properties
-	protected override string TemplateName => "ESO Health";
+	protected override string TemplateName => "Online NPC Summary";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Update value prior to larger job";
+	protected override string GetEditSummary(Page page) => "Revert to health=1";
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
-		if (template.Find(1) is IParameterNode param &&
-			string.Equals(param.GetValue(), "dbh", System.StringComparison.OrdinalIgnoreCase))
+		if (template.Find("health") is IParameterNode health &&
+			string.Equals(health.GetValue(), "{{ESO Health|w}}", System.StringComparison.OrdinalIgnoreCase))
 		{
-			param.SetValue("dbl", ParameterFormat.Copy);
+			parser.Page.LoadPreviousRevision();
+			var prevParser = new SiteParser(parser.Page, parser.Page.Revisions[1].Text);
+			if (prevParser.FindTemplate("Online NPC Summary") is ITemplateNode prevTemplate &&
+				prevTemplate.Find("health") is IParameterNode prevHealth &&
+				string.Equals(prevHealth.GetValue(), "1", System.StringComparison.Ordinal))
+			{
+				health.SetValue("1", ParameterFormat.Copy);
+			}
 		}
 	}
 	#endregion
