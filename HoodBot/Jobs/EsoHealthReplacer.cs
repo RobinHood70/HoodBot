@@ -36,6 +36,7 @@ public class EsoHealthReplacer(JobManager jobManager) : ParsedPageJob(jobManager
 		["60370"] = "s",
 		["66121"] = "sh",
 		["66924"] = "dbt",
+		["79918"] = "jnvh",
 		["82145"] = "cyrs",
 		["103494"] = "el",
 		["108669"] = "em",
