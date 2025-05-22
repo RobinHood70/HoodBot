@@ -72,7 +72,8 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 			return;
 		}
 
-		this.StatusWriteLine("Saving pages");
+		var plural = this.Pages.Count == 1 ? string.Empty : "s";
+		this.StatusWriteLine($"Saving {this.Pages.Count} page{plural}");
 		if (this.Shuffle && !this.Site.EditingEnabled)
 		{
 			this.Pages.Shuffle();
