@@ -85,7 +85,7 @@ internal class TemplateUsage : WikiJob
 
 		foreach (var title in titles)
 		{
-			this.allTemplateNames.TryAdd(title); // Make sure the title iteself is there, in case we started at a redirect.
+			this.allTemplateNames.TryAdd(title); // Make sure the title itself is there, in case we started at a redirect.
 			this.allTemplateNames.GetBacklinks(title, BacklinksTypes.Backlinks, true, Filter.Only); // Grab immediate redirects of the page.
 		}
 	}
