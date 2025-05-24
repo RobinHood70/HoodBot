@@ -109,12 +109,12 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
 		*/
 
-		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, (IDataRecord record) => new Furnishing(record, this.Site, true)))
+		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, record => new Furnishing(record, this.Site, true)))
 		{
 			this.collectibles.Add(furnishing.Id, furnishing);
 		}
 
-		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, (IDataRecord record) => new Furnishing(record, this.Site, false)))
+		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, record => new Furnishing(record, this.Site, false)))
 		{
 			this.furnishings.Add(furnishing.Id, furnishing);
 		}
