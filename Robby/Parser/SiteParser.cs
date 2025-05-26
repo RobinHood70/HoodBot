@@ -32,7 +32,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 	/// <param name="page">The page to parse.</param>
 	/// <param name="inclusionType">The inclusion type for the text.</param>
-	/// <param name="strictInclusion"><see langword="true"/> if the output should include omitted text as <see cref="IgnoreNode"/>s or <see langword="false"/> if it should be omitted altogether.</param>
+	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</param>
 	public SiteParser(Page page, InclusionType inclusionType, bool strictInclusion)
 		: this(page, page?.Text, inclusionType, strictInclusion)
 	{
@@ -42,7 +42,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 	/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
-	/// <param name="strictInclusion"><see langword="true"/> if the output should include omitted text as <see cref="IgnoreNode"/>s or <see langword="false"/> if it should be omitted altogether.</param>
+	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</param>
 	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
 		: base(WikiNodeFactory.DefaultInstance)
 	{
@@ -77,7 +77,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <remarks>This property is a direct link to Title and will therefore change if the Title's Site does. Changing Sites within a session may produce unexpected results.</remarks>
 	public Site Site { get; }
 
-	/// <summary>Gets a value indicating whether unparsed text should be included as <see cref="IIgnoreNode"/>s or omitted altogether.</summary>
+	/// <summary>Gets a value indicating whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</summary>
 	public bool StrictInclusion { get; }
 
 	/// <summary>Gets a set of functions to evaluate templates (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
