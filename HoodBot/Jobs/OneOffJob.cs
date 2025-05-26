@@ -1,26 +1,177 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using System.Text.RegularExpressions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using RobinHood70.CommonCode;
+using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
+using RobinHood70.Robby.Parser;
+using RobinHood70.WikiCommon;
+using RobinHood70.WikiCommon.Parser;
 
 [method: JobInfo("One-Off Job")]
 internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 {
+	#region Constants
+	private const string HeaderText = "Tempering Recipe";
+	#endregion
+
+	#region Fields
+	private readonly Dictionary<string, Dictionary<string, string>> rows = new(StringComparer.Ordinal);
+	#endregion
+
 	#region Public Override Properties
+	public override string LogDetails => "Add Blades recipes";
+
 	public override string LogName => "One-Off Job";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Remove deprecated section protection";
+	protected override void AfterLoadPages()
+	{
+		foreach (var row in this.rows)
+		{
+			Debug.WriteLine(row.Key + " was never used.");
+		}
+	}
 
-	protected override void LoadPages() => this.Pages.GetCategoryMembers("Category:Section Protection");
+	protected override void BeforeLoadPages()
+	{
+		var csvFile = new CsvFile(LocalConfig.BotDataSubPath("TemperingRecipeList - Sheet 2.csv"));
+		List<string>? header = null;
+		foreach (var row in csvFile.ReadRows())
+		{
+			header ??= [.. csvFile.Header!];
+			var id = row["ID"];
+			if (id.Length == 0)
+			{
+				continue;
+			}
+
+			var key = GetKey(id, row["Divine"]);
+			var newRow = new Dictionary<string, string>(StringComparer.Ordinal);
+			for (var cellNum = 2; cellNum < row.Count; cellNum++)
+			{
+				newRow.Add(header[cellNum], row[cellNum]);
+			}
+
+			if (!this.rows.TryAdd(key, newRow))
+			{
+				Debug.WriteLine("There are multiple rows with the key: " + key);
+			}
+		}
+	}
+
+	protected override string GetEditSummary(Page page) => "Add recipes";
+
+	protected override void LoadPages() => this.Pages.GetBacklinks("Template:Blades Item Summary", BacklinksTypes.EmbeddedIn);
 
 	protected override void PageLoaded(Page page)
 	{
-		page.Text = Regex.Replace(page.Text, @"(\[\[Category:Section Protection\]\]|{{Protection\|section}}|<protect>|<!-- preemptively added protection so the message isn't accidentally deleted -->)\s*", string.Empty, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		page.Text = Regex.Replace(page.Text, @"\s*</protect>", string.Empty, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout).Trim();
+		page.Text = page.Text.Replace("</includeonly>\n<noinclude>", "</includeonly><noinclude>", StringComparison.OrdinalIgnoreCase);
+		var parser = new SiteParser(page, InclusionType.CurrentPage, false);
+		if (parser.FindTemplate("Blades Item Summary") is not ITemplateNode template)
+		{
+			Debug.WriteLine($"Template not found on page {parser.Title}.");
+			return;
+		}
+
+		var id = template.GetValue("id");
+		if (id is null)
+		{
+			Debug.WriteLine($"No ID on {parser.Title}");
+			return;
+		}
+
+		var divine = template.GetValue("divine") ?? string.Empty;
+		var key = GetKey(id, divine);
+		if (this.CreateRecipeText(key) is not string recipe)
+		{
+			return;
+		}
+
+		this.AddSection(parser, recipe);
+		parser.UpdatePage();
 	}
 	#endregion
 
+	#region Private Static Methods
+	private static string GetKey(string id, string divine) => id + (divine.Trim().Length == 0 ? string.Empty : "_divine");
+	#endregion
+
+	#region Private Methods
+	private void AddSection(SiteParser parser, string recipe)
+	{
+		var sections = parser.ToSections(3);
+		if (sections.Count > 1)
+		{
+			var header = parser.Factory.HeaderNodeFromParts(3, HeaderText);
+			var content = new WikiNodeCollection(parser.Factory, parser.Parse('\n' + recipe + "\n\n"));
+			var newSection = new Section(header, content);
+			sections.Insert(1, newSection);
+			sections[0].Content.TrimEnd();
+			sections[0].Content.AddText("\n\n");
+			parser.FromSections(sections);
+		}
+		else
+		{
+			var method = "Noinclude";
+			var index = parser.FindLastIndex(node => node is IIgnoreNode ignore && string.Equals(ignore.Value.ToLowerInvariant(), "<noinclude>", StringComparison.Ordinal)) + 1;
+			if (index == 0)
+			{
+				method = "Stub";
+				index = parser.FindIndex(node => node is ITemplateNode template && template.GetTitle(this.Site) == "Template:Stub");
+				if (index == -1)
+				{
+					method = "Append";
+					index = parser.Count;
+				}
+			}
+
+			var insertText = $"==={HeaderText}===\n" + recipe + "\n\n";
+			switch (method)
+			{
+				case "Append":
+					insertText = "<noinclude>{{NewLeft}}\n" + insertText + "</noinclude>";
+					break;
+				case "Noinclude":
+				case "Stub":
+					if (parser.FindTemplate("NewLeft") is null)
+					{
+						insertText = "{{NewLeft}}\n" + insertText;
+					}
+
+					break;
+			}
+
+			parser.InsertText(index, insertText);
+		}
+	}
+
+	private string? CreateRecipeText(string key)
+	{
+		if (!this.rows.TryGetValue(key, out var row))
+		{
+			return null;
+		}
+
+		this.rows.Remove(key); // Slow, but it'll do for this.
+		var recipe = new StringBuilder();
+		recipe.Append("{{Blades Tempering Recipe\n");
+		foreach (var kvp in row)
+		{
+			recipe
+				.Append('|')
+				.Append(kvp.Key)
+				.Append('=')
+				.Append(kvp.Value)
+				.Append('\n');
+		}
+
+		recipe.Append("}}");
+		return recipe.ToString();
+	}
+	#endregion
 }
