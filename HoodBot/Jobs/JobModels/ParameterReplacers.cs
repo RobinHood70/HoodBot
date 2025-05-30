@@ -57,6 +57,7 @@ public class ParameterReplacers
 		this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
 		this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
 		this.AddTemplateReplacers("Quest Header", this.GenericIcon);
+		this.AddTemplateReplacers("Quest Link", this.PageNameFirst);
 		this.AddTemplateReplacers("Soft Redirect", this.FullPageNameFirst);
 	}
 	#endregion
