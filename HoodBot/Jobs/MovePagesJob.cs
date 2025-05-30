@@ -309,7 +309,8 @@ public abstract class MovePagesJob : EditJob
 
 		foreach (var replacement in this.moves)
 		{
-			backlinkTitles.Add(replacement.Key);
+			// We use TryAdd here because moves may be duplicated in linkUpdates
+			backlinkTitles.TryAdd(replacement.Key);
 		}
 
 		TitleCollection leftovers = new(this.Site);
