@@ -7,16 +7,24 @@ public class OneOffMoveJob(JobManager jobManager, bool updateUserSpace) : MovePa
 	#region Protected Override Methods
 	protected override bool BeforeMain()
 	{
-		this.FollowUpActions = FollowUpActions.CheckLinksRemaining | FollowUpActions.EmitReport | FollowUpActions.FixLinks | FollowUpActions.UpdateSameNamedText | FollowUpActions.NeedsCategoryMembers;
-		this.MoveAction = MoveAction.None;
+		this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.FixLinks;
+		this.MoveAction = MoveAction.MoveSafely;
 		return base.BeforeMain();
 	}
 
-	protected override string GetEditSummary(Page page) => "Update categories";
+	protected override string GetEditSummary(Page page) => "Update links";
 
 	protected override void PopulateMoves()
 	{
-		this.AddLinkUpdate("Category:Legacy of the Dragonborn", "Category:Skyrim Mod-Legacy of the Dragonborn-Images");
+		var cat = new TitleCollection(this.Site);
+		cat.GetCategoryMembers("Online-Icons-Skill Styles", false);
+		foreach (var item in cat)
+		{
+			if (item.PageName.Contains("-skill-"))
+			{
+				this.AddMove(item, item.FullPageName().Replace("-skill-", "-skill style-"));
+			}
+		}
 	}
 	#endregion
 }
