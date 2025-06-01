@@ -982,10 +982,10 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 		this.Assert = null;
 		new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
 		this.Assert = assert;
+		this.tokenManager?.Clear();
 
 		// Re-retrieve user info since the site could conceivably still be used anonymously.
 		this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
-		this.tokenManager?.Clear();
 	}
 
 	/// <summary>Adds, removes, activates, or deactivates a page tag using the <see href="https://www.mediawiki.org/wiki/API:Managetags">Managetags</see> API module.</summary>
