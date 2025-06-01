@@ -15,7 +15,9 @@ internal sealed class ActionLogout(WikiAbstractionLayer wal) : ActionModule<Logo
 	#region Protected Override Properties
 	protected override bool GetTimeStamp => false;
 
-	protected override RequestType RequestType => RequestType.Get;
+	protected override RequestType RequestType => this.SiteVersion is >= 130
+		? RequestType.Post
+		: RequestType.Get;
 	#endregion
 
 	#region Protected Override Methods
