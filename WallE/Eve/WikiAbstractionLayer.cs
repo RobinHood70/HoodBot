@@ -899,16 +899,18 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 		var userNameSplit = input.UserName.Split(TextArrays.At);
 		var botPasswordName = userNameSplit[^1];
 
-		// Both checks are necessary because user names can legitimately contain @ signs.
-		if (this.CurrentUserInfo is UserInfoResult userInfo && (
-			userInfo.Name.OrdinalEquals(input.UserName) ||
-			userInfo.Name.OrdinalEquals(botPasswordName)))
+		if (this.CurrentUserInfo is UserInfoResult userInfo)
 		{
-			return LoginResult.AlreadyLoggedIn(userInfo.UserId, userInfo.Name);
-		}
+			// Both checks are necessary because user names can legitimately contain @ signs.
+			if (userInfo.Name.OrdinalEquals(input.UserName) ||
+				userInfo.Name.OrdinalEquals(botPasswordName))
+			{
+				return LoginResult.AlreadyLoggedIn(userInfo.UserId, userInfo.Name);
+			}
 
-		// Second logins are not allowed without first logging out in later versions of the API.
-		this.Logout(false); // Explicitly call non-clearing logout or the rest of the method will fail.
+			// Second logins are not allowed without first logging out in later versions of the API.
+			this.Logout();
+		}
 
 		input.Token ??= this.TokenManager.LoginToken();
 		var assert = this.Assert;
@@ -962,39 +964,28 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	/// <remarks>
 	/// <para>This call does not clear site data, since the user will most likely stop using the Site object after logging out anyway. This could also be a logout due to detecting that the wrong user is currently logged in, in which case most of the site information is still valid, and the user may even be intentionally access the site anonymously. Since the user's intent is unknown, it is safer not to assume it.</para>
 	/// <para>No stop checking is performed on logging out.</para></remarks>
-	public void Logout() => this.Logout(false);
-
-	/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
-	/// <param name="clear">Whether to clear all site data or not. If you intend to keep using the site even after logging out, set this to <see langword="false"/>; use <see langword="true"/> to clear all site-specific data, such as namespaces and site name.</param>
-	/// <remarks>No stop checking is performed on logging out.</remarks>
-	public void Logout(bool clear)
+	public void Logout()
 	{
-		if (this.CurrentUserInfo is UserInfoResult userInfo && (!userInfo.Flags.HasAnyFlag(UserInfoFlags.Anonymous)))
+		LogoutInput input = new();
+		if (this.SiteVersion == 0)
 		{
-			LogoutInput input = new();
-			if (this.SiteVersion >= 134)
-			{
-				input.Token = this.GetSessionToken(TokensInput.Csrf);
-			}
-
-			var assert = this.Assert;
-			this.Assert = null;
-			new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
-			this.Assert = assert;
-			//// this.Client.SaveCookies();
-
-			// Re-retrieve user info since the site could conceivably still be used anonymously.
-			this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
+			// We need the site version to know how to logout.
+			this.Initialize();
 		}
 
-		if (clear)
+		if (this.SiteVersion >= 130)
 		{
-			this.Clear();
+			input.Token = this.GetSessionToken(TokensInput.Csrf);
 		}
-		else
-		{
-			this.tokenManager?.Clear();
-		}
+
+		var assert = this.Assert;
+		this.Assert = null;
+		new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
+		this.Assert = assert;
+
+		// Re-retrieve user info since the site could conceivably still be used anonymously.
+		this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
+		this.tokenManager?.Clear();
 	}
 
 	/// <summary>Adds, removes, activates, or deactivates a page tag using the <see href="https://www.mediawiki.org/wiki/API:Managetags">Managetags</see> API module.</summary>
