@@ -82,16 +82,16 @@ public class UespSite : Site
 		}
 
 		var resultPage = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.Title.PageName + "/Results");
-		this.FilterPages.Add(resultPage);
+		this.FilterPages.TryAdd(resultPage);
 
 		this.LogTitle = TitleFactory.FromValidated(this[MediaWikiNamespaces.User], this.User.Title.PageName + "/Log");
-		this.FilterPages.Add(this.LogTitle);
+		this.FilterPages.TryAdd(this.LogTitle);
 	}
 
 	protected override void ParseInternalSiteInfo()
 	{
 		base.ParseInternalSiteInfo();
-		this.FilterPages.Add(TitleFactory.FromUnvalidated(this[MediaWikiNamespaces.Project], "Bot Requests"));
+		this.FilterPages.TryAdd(TitleFactory.FromUnvalidated(this[MediaWikiNamespaces.Project], "Bot Requests"));
 	}
 	#endregion
 }
