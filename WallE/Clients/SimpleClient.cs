@@ -15,6 +15,20 @@ using RobinHood70.CommonCode;
 /// <summary>Provides a simple client to work with WallE.</summary>
 public class SimpleClient : IMediaWikiClient, IDisposable
 {
+	#region Constants
+	private const HashType CookieHashType = HashType.Md5;
+	#endregion
+
+	#region Static Fields
+	private static readonly JsonSerializerSettings SerializerSettings = new()
+	{
+		ContractResolver = new DefaultContractResolver
+		{
+			IgnoreSerializableAttribute = false
+		}
+	};
+	#endregion
+
 	#region Fields
 	private readonly CancellationToken cancellationToken;
 	private readonly CookieContainer cookieContainer = new();
@@ -24,7 +38,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	private readonly JsonSerializerSettings jsonSettings = new();
 	private readonly HttpClientHandler webHandler;
 	private bool disposed;
-	private DateTime cookiesLastUpdated = DateTime.MinValue;
+	private string previousHash;
 	#endregion
 
 	#region Constructors
@@ -218,22 +232,6 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	#endregion
 
 	#region Private Static Methods
-	private static DateTime LatestCookie(IReadOnlyCollection<Cookie> cookies)
-	{
-		var latest = DateTime.MinValue;
-		foreach (var cookie in cookies)
-		{
-			if (cookie.TimeStamp > latest)
-			{
-				latest = cookie.TimeStamp;
-			}
-		}
-
-		return latest;
-	}
-	#endregion
-
-	#region Private Static Methods
 	private static string GetResponseText(HttpResponseMessage response)
 	{
 		using var respStream = response.Content.ReadAsStream();
@@ -286,7 +284,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 			if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
 			{
 				this.cookieContainer.Add(cookies);
-				this.cookiesLastUpdated = LatestCookie(cookies);
+				this.previousHash = Globals.GetHash(cookieText, CookieHashType);
 			}
 		}
 		catch (NullReferenceException)
@@ -308,23 +306,13 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 			return;
 		}
 
-		var cookies = this.cookieContainer.GetAllCookies();
-		var newLatestCookie = LatestCookie(cookies);
-		if (newLatestCookie <= this.cookiesLastUpdated)
+		var jsonCookies = JsonConvert.SerializeObject(this.cookieContainer.GetAllCookies(), SerializerSettings);
+		var hash = Globals.GetHash(jsonCookies, CookieHashType);
+		if (!hash.OrdinalEquals(this.previousHash))
 		{
-			return;
+			this.previousHash = hash;
+			File.WriteAllText(this.cookiesLocation, jsonCookies);
 		}
-
-		this.cookiesLastUpdated = newLatestCookie;
-		var settings = new JsonSerializerSettings();
-		var resolver = new DefaultContractResolver
-		{
-			IgnoreSerializableAttribute = false
-		};
-		settings.ContractResolver = resolver;
-
-		var jsonCookies = JsonConvert.SerializeObject(cookies, settings);
-		File.WriteAllText(this.cookiesLocation, jsonCookies);
 	}
 	#endregion
 }
