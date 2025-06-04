@@ -662,13 +662,6 @@ public class EsoQuests : EditJob
 
 		public sbyte Level { get; }
 
-		public string? Mod => this.Zone switch
-		{
-			"Southern Elsweyr" => "Dragonhold",
-			"West Weald" => "Gold Road",
-			_ => null,
-		};
-
 		public string Name { get; }
 
 		public string Objective { get; }

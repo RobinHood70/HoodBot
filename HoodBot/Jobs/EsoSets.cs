@@ -27,7 +27,7 @@ internal sealed class EsoSets : EditJob
 	#region Static Fields
 	private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 	{
-		// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
+		// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programmatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 		["Dro'Zakar's Claws"] = "Dro'zakar's Claws",
 		["Knight-errant's Mail"] = "Knight-Errant's Mail",
 		["Orpheon the Tactician"] = "Orpheon the Tactician (set)",
@@ -123,7 +123,7 @@ internal sealed class EsoSets : EditJob
 	}
 
 	protected override void PageMissing(Page page) => page.Text = blankText?
-		.Replace("«Mod Header»", "{{Mod Header|Gold Road}}", StringComparison.Ordinal)
+		.Replace("«Mod Header»", "{{Mod Header|" + EsoSpace.CurrentMod + "}}", StringComparison.Ordinal)
 		.Replace("«Set»", this.sets[page.Title].Name, StringComparison.Ordinal);
 
 	protected override void PageLoaded(Page page)
