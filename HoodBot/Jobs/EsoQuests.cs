@@ -213,11 +213,11 @@ public class EsoQuests : EditJob
 
 		var sb = new StringBuilder()
 			.Append("{{Minimal|quest}}");
-		if (quest.Mod != null)
+		if (EsoSpace.GuessMod(quest.Zone, null) is string mod)
 		{
 			sb
 				.Append("{{Mod Header|")
-				.Append(quest.Mod)
+				.Append(mod)
 				.Append("}}");
 		}
 

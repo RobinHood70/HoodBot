@@ -15,6 +15,10 @@ using RobinHood70.WikiCommon.Parser;
 
 internal static class EsoSpace
 {
+	#region Public Constants
+	public const string CurrentMod = "Season of the Worm Cult";
+	#endregion
+
 	#region Static Fields
 	private static readonly char[] CommaOrSpace = [',', ' '];
 	private static VariablesPage? patchVarPage;
@@ -33,38 +37,6 @@ internal static class EsoSpace
 	#endregion
 
 	#region Public Methods
-	public static ITemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
-	{
-		ArgumentNullException.ThrowIfNull(parser);
-		if (parser.FindTemplate("Online File") is not ITemplateNode template)
-		{
-			template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
-			parser.Insert(0, template);
-			parser.InsertText(1, "\n\n");
-		}
-
-		if (!template.TitleNodes.ToRaw().EndsWith('\n'))
-		{
-			template.TitleNodes.AddText("\n");
-		}
-
-		if (originalFileNames?.Length > 0)
-		{
-			var fileNames = new SortedSet<string>(originalFileNames, StringComparer.Ordinal);
-			if (template.Find("originalfile") is not IParameterNode fileParam)
-			{
-				fileParam = template.Factory.ParameterNodeFromParts("originalfile", string.Empty);
-			}
-
-			var existing = fileParam.GetValue();
-			fileNames.UnionWith(existing.Split(TextArrays.Comma));
-			fileNames.Remove(string.Empty);
-			fileParam.SetValue(string.Join(',', fileNames), ParameterFormat.OnePerLine);
-		}
-
-		return template;
-	}
-
 	public static void AddToOnlineFile(ITemplateNode template, string linkType, string linkValue) =>
 		AddToOnlineFile(template, (linkType, linkValue));
 
@@ -102,6 +74,38 @@ internal static class EsoSpace
 			template.Add(split[0], ParameterFormat.Packed);
 			template.Add(split[1], ParameterFormat.OnePerLine);
 		}
+	}
+
+	public static ITemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
+	{
+		ArgumentNullException.ThrowIfNull(parser);
+		if (parser.FindTemplate("Online File") is not ITemplateNode template)
+		{
+			template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
+			parser.Insert(0, template);
+			parser.InsertText(1, "\n\n");
+		}
+
+		if (!template.TitleNodes.ToRaw().EndsWith('\n'))
+		{
+			template.TitleNodes.AddText("\n");
+		}
+
+		if (originalFileNames?.Length > 0)
+		{
+			var fileNames = new SortedSet<string>(originalFileNames, StringComparer.Ordinal);
+			if (template.Find("originalfile") is not IParameterNode fileParam)
+			{
+				fileParam = template.Factory.ParameterNodeFromParts("originalfile", string.Empty);
+			}
+
+			var existing = fileParam.GetValue();
+			fileNames.UnionWith(existing.Split(TextArrays.Comma));
+			fileNames.Remove(string.Empty);
+			fileParam.SetValue(string.Join(',', fileNames), ParameterFormat.OnePerLine);
+		}
+
+		return template;
 	}
 
 	public static PlaceCollection GetPlaces(Site site)
@@ -145,6 +149,14 @@ internal static class EsoSpace
 
 		return retval;
 	}
+
+	public static string GuessMod(string? zone, string? defaultMod) => zone switch
+	{
+		"Solstice" => "Season of the Worm Cult",
+		"Southern Elsweyr" => "Dragonhold",
+		"West Weald" => "Gold Road",
+		_ => defaultMod ?? CurrentMod,
+	};
 
 	public static bool ShouldUpload(string localFileName, FilePage filePage)
 	{

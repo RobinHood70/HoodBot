@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.Design;
@@ -389,8 +390,24 @@ internal sealed class EsoNpcs : EditJob
 		var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 		UpdateLocations(npc, template, EsoSpace.PlaceInfo);
 
-		return new StringBuilder()
-			.Append("{{Minimal|NPC}}{{Mod Header|Gold Road}}")
+		var mod = EsoSpace.CurrentMod;
+		if (npc.Places.Count > 0)
+		{
+			var mainPlace = npc.Places.MaxBy(kvp => kvp.Value).Key;
+			var mainZone = mainPlace?.Zone;
+			mod = EsoSpace.GuessMod(mainZone, null);
+		}
+
+		var sb = new StringBuilder().Append("{{Minimal|NPC}}");
+		if (mod is not null)
+		{
+			sb
+				.Append("{{Mod Header|")
+				.Append(mod)
+				.Append("}}");
+		}
+
+		sb
 			.AppendLine(WikiTextVisitor.Raw(template))
 			.AppendLine()
 			.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
@@ -408,8 +425,9 @@ internal sealed class EsoNpcs : EditJob
 			.AppendLine("** Workaround")
 			.AppendLine("-->")
 			.AppendLine()
-			.AppendLine("{{Stub|NPC}}")
-			.ToString();
+			.AppendLine("{{Stub|NPC}}");
+
+		return sb.ToString();
 	}
 	#endregion
 }
