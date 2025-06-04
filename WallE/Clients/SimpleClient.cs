@@ -38,7 +38,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	private readonly JsonSerializerSettings jsonSettings = new();
 	private readonly HttpClientHandler webHandler;
 	private bool disposed;
-	private string previousHash;
+	private string? previousHash;
 	#endregion
 
 	#region Constructors
