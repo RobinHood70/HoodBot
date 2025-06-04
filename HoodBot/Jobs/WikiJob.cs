@@ -62,7 +62,7 @@ public abstract class WikiJob : IMessageSource
 	public int ProgressMaximum
 	{
 		get => this.progressMaximum;
-		protected set
+		private set
 		{
 			this.progressMaximum = value <= 0 ? 1 : value;
 			this.UpdateProgress();
@@ -104,6 +104,7 @@ public abstract class WikiJob : IMessageSource
 	{
 		this.Progress = 0;
 		this.ProgressMaximum = progressMax;
+		this.JobManager.ResetProgress();
 	}
 
 	public void StatusWrite(string? status)

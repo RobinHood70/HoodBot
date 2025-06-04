@@ -32,15 +32,14 @@ public class MainViewModel : ObservableRecipient
 	private readonly PauseTokenSource pauser = new();
 
 	private CancellationTokenSource? canceller;
-	private double completedJobs;
 	private bool editingEnabled;
 	private DateTime? eta;
 	private bool executing;
 	private bool jobParametersEnabled;
 	private Visibility jobParameterVisibility = Visibility.Hidden;
-	private DateTime jobStarted;
-	private double overallProgress;
-	private double overallProgressMax = 1;
+	private DateTime timerStarted;
+	private double progress;
+	private double progressMax = 1;
 	private MainWindowParameterFetcher? parameterFetcher; // was IParameterFetcher?
 	private string? password;
 	private Brush progressBarColor = ProgressBarGreen;
@@ -52,7 +51,7 @@ public class MainViewModel : ObservableRecipient
 	#region Constructors
 	public MainViewModel()
 	{
-		// This probably shouldn't be here but rather in some kind of initalization for all sites. For now, however, this is quick and dirty.
+		// This probably shouldn't be here but rather in some kind of initialization for all sites. For now, however, this is quick and dirty.
 		Site.RegisterSiteClass(UespSite.CreateInstance, nameof(UespSite));
 
 		this.SelectedItem = App.UserSettings.GetCurrentItem();
@@ -115,16 +114,16 @@ public class MainViewModel : ObservableRecipient
 
 	public TreeNode JobTree { get; } = JobNode.Populate();
 
-	public double OverallProgress
+	public double Progress
 	{
-		get => this.overallProgress;
-		private set => this.SetProperty(ref this.overallProgress, value);
+		get => this.progress;
+		private set => this.SetProperty(ref this.progress, value);
 	}
 
-	public double OverallProgressMax
+	public double ProgressMax
 	{
-		get => this.overallProgressMax;
-		private set => this.SetProperty(ref this.overallProgressMax, value < 1 ? 1 : value);
+		get => this.progressMax;
+		private set => this.SetProperty(ref this.progressMax, value < 1 ? 1 : value);
 	}
 
 	public string? Password
@@ -223,7 +222,7 @@ public class MainViewModel : ObservableRecipient
 	private void CancelJobs()
 	{
 		this.canceller?.Cancel();
-		this.Reset();
+		this.ResetProgress();
 		this.PauseJobs(isPaused: false);
 	}
 
@@ -248,8 +247,6 @@ public class MainViewModel : ObservableRecipient
 		}
 
 		this.ClearStatus();
-		this.completedJobs = 0;
-		this.OverallProgressMax = jobList.Count;
 
 		// This is re-initialized every time so that one cancellation doesn't auto-cancel anything you start after it. I don't believe this is necessary for pausing, though.
 		this.canceller = new();
@@ -259,6 +256,7 @@ public class MainViewModel : ObservableRecipient
 		{
 			jobManager.StartingJob += this.JobManager_StartingJob;
 			jobManager.FinishedJob += this.JobManager_FinishedJob;
+			jobManager.ProgressReset += this.JobManager_ProgressReset;
 			jobManager.ProgressUpdated += this.JobManager_ProgressUpdated;
 			jobManager.StatusUpdated += this.JobManager_StatusUpdated;
 			jobManager.PagePreview += this.SitePagePreview;
@@ -281,17 +279,18 @@ public class MainViewModel : ObservableRecipient
 			jobManager.PagePreview -= this.SitePagePreview;
 			jobManager.StatusUpdated -= this.JobManager_StatusUpdated;
 			jobManager.ProgressUpdated -= this.JobManager_ProgressUpdated;
+			jobManager.ProgressReset -= this.JobManager_ProgressReset;
 			jobManager.FinishedJob -= this.JobManager_FinishedJob;
 			jobManager.StartingJob -= this.JobManager_StartingJob;
 		}
 
-		this.Reset();
+		this.ResetProgress();
 	}
 
 	private void JobManager_StartingJob(JobManager sender, JobEventArgs eventArgs)
 	{
 		this.ProgressBarColor = ProgressBarGreen;
-		this.jobStarted = DateTime.UtcNow;
+		this.ResetProgress();
 		this.StatusWriteLine($"Starting {eventArgs.Job.Name}");
 	}
 
@@ -305,10 +304,6 @@ public class MainViewModel : ObservableRecipient
 		{
 			MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
 			Debug.WriteLine(e.StackTrace);
-		}
-		else
-		{
-			this.completedJobs++;
 		}
 	}
 
@@ -356,18 +351,18 @@ public class MainViewModel : ObservableRecipient
 		}
 	}
 
+	private void JobManager_ProgressReset(JobManager sender, EventArgs e) => this.ResetProgress();
+
 	private void JobManager_ProgressUpdated(JobManager sender, double e) => this.UpdateProgress(e);
 
 	private void JobManager_StatusUpdated(JobManager sender, string? text) => this.StatusWrite(text);
 
-	private void Reset()
+	private void ResetProgress()
 	{
-		this.OverallProgress = 0;
-		this.OverallProgressMax = 1;
+		this.Progress = 0;
+		this.ProgressMax = 1;
 		this.UtcEta = null;
-
-		this.completedJobs = 0;
-		this.jobStarted = DateTime.MinValue;
+		this.timerStarted = DateTime.UtcNow;
 	}
 
 	private void RunTest()
@@ -413,13 +408,13 @@ public class MainViewModel : ObservableRecipient
 
 	private void UpdateProgress(double progress)
 	{
-		this.OverallProgress = this.completedJobs + progress;
-		var timeDiff = DateTime.UtcNow - this.jobStarted;
-		if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
+		this.Progress = progress;
+		var timeDiff = DateTime.UtcNow - this.timerStarted;
+		if (this.Progress > 0 && timeDiff.TotalSeconds > 0)
 		{
 			try
 			{
-				this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
+				this.UtcEta = this.timerStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.ProgressMax / this.Progress));
 			}
 			catch (ArgumentOutOfRangeException)
 			{

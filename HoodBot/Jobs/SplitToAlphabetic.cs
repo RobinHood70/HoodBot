@@ -144,7 +144,7 @@ internal sealed class SplitToAlphabetic : EditJob
 		var sections = parser.ToSections(2);
 		var newSections = this.GroupSections(sections);
 		this.Progress = 0;
-		this.ProgressMaximum = newSections.Count;
+		this.ResetProgress(newSections.Count);
 		foreach (var entry in newSections)
 		{
 			var newPage = this.CreatePage(entry);

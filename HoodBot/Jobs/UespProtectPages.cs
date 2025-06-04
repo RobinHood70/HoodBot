@@ -287,7 +287,7 @@ internal sealed class UespProtectPages : EditJob
 
 		this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
 		this.Pages.Sort();
-		this.ProgressMaximum = this.Pages.Count;
+		this.ResetProgress(this.Pages.Count);
 		this.Progress = 0;
 		foreach (var page in this.Pages)
 		{
@@ -496,7 +496,7 @@ internal sealed class UespProtectPages : EditJob
 		SiteParser parser = new(page);
 		var nodes = parser;
 
-		// Figure out where to put a new Protection tempalte: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
+		// Figure out where to put a new Protection template: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
 		if (page.IsRedirect)
 		{
 			insertPos = nodes.IndexOf<ILinkNode>(0) + 1;
@@ -577,7 +577,7 @@ internal sealed class UespProtectPages : EditJob
 			}
 		}
 
-		this.ProgressMaximum = spacesToLoad.Count;
+		this.ResetProgress(spacesToLoad.Count);
 		foreach (var ns in spacesToLoad)
 		{
 			TitleCollection titles = new(this.Site);

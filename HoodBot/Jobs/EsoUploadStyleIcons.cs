@@ -100,7 +100,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 
 	protected override void Main()
 	{
-		this.ProgressMaximum = this.uploads.Count;
+		this.ResetProgress(this.uploads.Count);
 		foreach (var upload in this.uploads)
 		{
 			var typeUcfirst = upload.Part.Type.UpperFirst(this.Site.Culture);

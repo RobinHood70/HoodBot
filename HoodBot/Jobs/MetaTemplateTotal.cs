@@ -28,7 +28,7 @@ internal sealed class MetaTemplateTotal(JobManager jobManager) : WikiJob(jobMana
 		var totalPages = results.Statistics?.Pages ?? 0;
 
 		var hashes = new HashSet<Title>();
-		this.ProgressMaximum = MetaTemplateCategories.Length;
+		this.ResetProgress(MetaTemplateCategories.Length);
 		foreach (var cat in MetaTemplateCategories)
 		{
 			var titles = new TitleCollection(this.Site);

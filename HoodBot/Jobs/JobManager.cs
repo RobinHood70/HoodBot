@@ -47,6 +47,8 @@ public class JobManager : IDisposable
 
 	public event StrongEventHandler<JobManager, DiffContent>? PagePreview;
 
+	public event StrongEventHandler<JobManager, EventArgs>? ProgressReset;
+
 	public event StrongEventHandler<JobManager, double>? ProgressUpdated;
 
 	public event StrongEventHandler<JobManager, EventArgs>? StartingAllJobs;
@@ -212,6 +214,8 @@ public class JobManager : IDisposable
 		this.OnFinishedAllJobs(allSuccessful);
 	}
 
+	public void ResetProgress() => this.OnResetProgress();
+
 	public void UpdateProgress(double progressPercent) => this.OnUpdateProgress(progressPercent);
 
 	public void UpdateStatus(string? status) => this.OnUpdateStatus(status);
@@ -294,6 +298,8 @@ public class JobManager : IDisposable
 
 	protected virtual void OnStartingAllJobs() => this.StartingAllJobs?.Invoke(this, EventArgs.Empty);
 
+	protected virtual void OnResetProgress() => this.ProgressReset?.Invoke(this, EventArgs.Empty);
+
 	protected virtual void OnUpdateProgress(double progressPercent) => this.ProgressUpdated?.Invoke(this, progressPercent);
 
 	protected virtual void OnUpdateStatus(string? status) => this.StatusUpdated?.Invoke(this, status);
@@ -329,7 +335,7 @@ public class JobManager : IDisposable
 		if (abstractionLayer is IInternetEntryPoint internet)
 		{
 			internet.SendingRequest += WalSendingRequest;
-			//// internet.ResponseReceived += WalResponseRecieved;
+			//// internet.ResponseReceived += WalResponseReceived;
 		}
 
 		abstractionLayer.WarningOccurred += WalWarningOccurred;

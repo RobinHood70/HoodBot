@@ -34,7 +34,7 @@ internal sealed class WrongRace(JobManager jobManager) : WikiJob(jobManager, Job
 		var namePages = new PageCollection(this.Site, PageModules.Links);
 		namePages.GetTitles(namesPages);
 		var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, "Basic NPC Summary", "Legends NPC Summary", "Lore People Summary", "NPC Summary", "Online NPC Summary", "Shadowkey NPC Summary");
-		this.ProgressMaximum = namePages.Count;
+		this.ResetProgress(namePages.Count);
 		foreach (var page in namePages)
 		{
 			var wantedRace = page.Title.PageName.Split(TextArrays.Space)[0];

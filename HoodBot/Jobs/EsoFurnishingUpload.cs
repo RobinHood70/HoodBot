@@ -44,7 +44,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 
 		var existing = existingTitles.Load(PageModules.Info | PageModules.FileInfo);
 
-		this.ProgressMaximum = items.Count;
+		this.ResetProgress(items.Count);
 		foreach (var item in items)
 		{
 			this.CheckFileAndUpload(existing, item.Value);

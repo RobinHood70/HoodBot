@@ -22,7 +22,7 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 	protected override void Main()
 	{
 		this.StatusWriteLine("Loading pages");
-		this.ProgressMaximum = 2;
+		this.ResetProgress(2);
 		var results = PageCollection.Unlimited(this.Site);
 		results.GetNamespace(MediaWikiNamespaces.Template);
 		this.Progress++;

@@ -15,7 +15,10 @@ using RobinHood70.WikiCommon.Parser;
 internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 {
 	#region Constants
-	private const string HeaderText = "Tempering Recipe";
+	private const string FileName = "SalvagingRecipeList - Sheet1.csv";
+	private const string HeaderText = "Salvaging Recipe";
+	private const string ItemSummary = "Blades Item Summary";
+	private const string TemplateName = "Blades " + HeaderText;
 	#endregion
 
 	#region Fields
@@ -33,13 +36,13 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 	{
 		foreach (var row in this.rows)
 		{
-			Debug.WriteLine(row.Key + " was never used.");
+			Debug.WriteLine(row.Key + " not on wiki");
 		}
 	}
 
 	protected override void BeforeLoadPages()
 	{
-		var csvFile = new CsvFile(LocalConfig.BotDataSubPath("TemperingRecipeList - Sheet 2.csv"));
+		var csvFile = new CsvFile(LocalConfig.BotDataSubPath(FileName));
 		List<string>? header = null;
 		foreach (var row in csvFile.ReadRows())
 		{
@@ -66,15 +69,15 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 
 	protected override string GetEditSummary(Page page) => "Add recipes";
 
-	protected override void LoadPages() => this.Pages.GetBacklinks("Template:Blades Item Summary", BacklinksTypes.EmbeddedIn);
+	protected override void LoadPages() => this.Pages.GetBacklinks("Template:" + ItemSummary, BacklinksTypes.EmbeddedIn);
 
 	protected override void PageLoaded(Page page)
 	{
 		page.Text = page.Text.Replace("</includeonly>\n<noinclude>", "</includeonly><noinclude>", StringComparison.OrdinalIgnoreCase);
 		var parser = new SiteParser(page, InclusionType.CurrentPage, false);
-		if (parser.FindTemplate("Blades Item Summary") is not ITemplateNode template)
+		if (parser.FindTemplate(ItemSummary) is not ITemplateNode template)
 		{
-			Debug.WriteLine($"Template not found on page {parser.Title}.");
+			Debug.WriteLine($"{ItemSummary} not found on page {parser.Title}.");
 			return;
 		}
 
@@ -87,18 +90,41 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 
 		var divine = template.GetValue("divine") ?? string.Empty;
 		var key = GetKey(id, divine);
-		if (this.CreateRecipeText(key) is not string recipe)
+		if (!this.rows.TryGetValue(key, out var row))
 		{
+			Debug.WriteLine($"{parser.Title}: ID {key} not found in sheet");
 			return;
 		}
 
-		this.AddSection(parser, recipe);
+		this.AddSection(parser, CreateRecipeText(row));
+		this.rows.Remove(key); // Slow, but it'll do for this.
 		parser.UpdatePage();
 	}
 	#endregion
 
 	#region Private Static Methods
 	private static string GetKey(string id, string divine) => id + (divine.Trim().Length == 0 ? string.Empty : "_divine");
+	#endregion
+
+	#region Private Static Methods
+
+	private static string CreateRecipeText(Dictionary<string, string> row)
+	{
+		var recipe = new StringBuilder();
+		recipe.Append($"{{{{{TemplateName}\n");
+		foreach (var kvp in row)
+		{
+			recipe
+				.Append('|')
+				.Append(kvp.Key)
+				.Append('=')
+				.Append(kvp.Value)
+				.Append('\n');
+		}
+
+		recipe.Append("}}");
+		return recipe.ToString();
+	}
 	#endregion
 
 	#region Private Methods
@@ -148,30 +174,6 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 
 			parser.InsertText(index, insertText);
 		}
-	}
-
-	private string? CreateRecipeText(string key)
-	{
-		if (!this.rows.TryGetValue(key, out var row))
-		{
-			return null;
-		}
-
-		this.rows.Remove(key); // Slow, but it'll do for this.
-		var recipe = new StringBuilder();
-		recipe.Append("{{Blades Tempering Recipe\n");
-		foreach (var kvp in row)
-		{
-			recipe
-				.Append('|')
-				.Append(kvp.Key)
-				.Append('=')
-				.Append(kvp.Value)
-				.Append('\n');
-		}
-
-		recipe.Append("}}");
-		return recipe.ToString();
 	}
 	#endregion
 }

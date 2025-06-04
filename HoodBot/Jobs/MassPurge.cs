@@ -31,7 +31,7 @@ internal sealed class MassPurge : WikiJob
 	#region Protected Override Methods
 	protected override void Main()
 	{
-		this.ProgressMaximum = 1;
+		this.ResetProgress(1);
 		_ = PageCollection.Purge(this.Site, this.titles, this.purgeMethod, 5);
 		this.Progress++;
 	}

@@ -83,8 +83,7 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 			this.Pages.Sort(NaturalTitleComparer.Instance);
 		}
 
-		this.Progress = 0;
-		this.ProgressMaximum = this.Pages.Count;
+		this.ResetProgress(this.Pages.Count);
 		foreach (var page in this.Pages)
 		{
 			this.SavePage(page, this.GetEditSummary(page), this.GetIsMinorEdit(page));

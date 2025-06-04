@@ -544,7 +544,7 @@ public abstract class MovePagesJob : EditJob
 		}
 
 		var editPages = editTitles.Load();
-		this.ProgressMaximum = moveCount;
+		this.ResetProgress(moveCount);
 		foreach (var action in this.actions)
 		{
 			var to = this.moves[action.Key];

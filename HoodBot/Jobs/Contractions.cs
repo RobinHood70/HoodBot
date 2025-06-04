@@ -20,7 +20,7 @@ internal sealed class Contractions(JobManager jobManager) : WikiJob(jobManager, 
 		var nsMeta = new UespNamespaceList(this.Site);
 		var ignore = new TitleCollection(this.Site);
 		var realNamespaces = new HashSet<Namespace>();
-		this.ProgressMaximum = nsMeta.Count;
+		this.ResetProgress(nsMeta.Count);
 		foreach (var ns in nsMeta)
 		{
 			var baseNamespace = ns.Value.BaseNamespace;

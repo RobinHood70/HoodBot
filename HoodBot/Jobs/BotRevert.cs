@@ -61,7 +61,7 @@ internal sealed class BotRevert(JobManager jobManager) : EditJob(jobManager)
 
 	protected override void Main()
 	{
-		this.ProgressMaximum = this.undos.Count;
+		this.ResetProgress(this.undos.Count);
 		foreach (var undo in this.undos)
 		{
 			try

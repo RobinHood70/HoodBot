@@ -224,8 +224,8 @@
 			Grid.Column="0"
 			Grid.ColumnSpan="3"
 			Foreground="{Binding ProgressBarColor}"
-			Maximum="{Binding OverallProgressMax, Mode=OneWay}"
-			Value="{Binding OverallProgress, Mode=OneWay}" />
+			Maximum="{Binding ProgressMax, Mode=OneWay}"
+			Value="{Binding Progress, Mode=OneWay}" />
 		<Grid
 			Grid.Row="8"
 			Grid.Column="0"

@@ -15,7 +15,7 @@ internal sealed class InterwikiVersions(JobManager jobManager) : WikiJob(jobMana
 	{
 		var client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
 		client.Retries = 3;
-		this.ProgressMaximum = this.Site.InterwikiMap.Count;
+		this.ResetProgress(this.Site.InterwikiMap.Count);
 		foreach (var entry in this.Site.InterwikiMap)
 		{
 			if (!entry.LocalFarm && entry.Path.StartsWith("http", StringComparison.OrdinalIgnoreCase))

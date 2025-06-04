@@ -43,7 +43,7 @@ internal sealed class BulkDeleteUnused : WikiJob
 
 	protected override void Main()
 	{
-		this.ProgressMaximum = this.deleteTitles.Count + 1;
+		this.ResetProgress(this.deleteTitles.Count + 1);
 		this.Progress = 1;
 		foreach (var title in this.deleteTitles)
 		{
