@@ -173,7 +173,9 @@ internal sealed class EsoNpcs : EditJob
 				SortedSet<string> list = new(StringComparer.Ordinal);
 				foreach (var place in npc.UnknownLocations)
 				{
-					list.Add("[[Online:" + place.Key.TitleName + "|]]");
+					var baseTitleText = Title.ToLabelName(place.Key.TitleName);
+					var extraText = place.Key.TitleName[baseTitleText.Length..];
+					list.Add("[[Online:" + baseTitleText + '|' + baseTitleText + "]]" + extraText);
 				}
 
 				locText = string.Join(", ", list);
@@ -390,6 +392,7 @@ internal sealed class EsoNpcs : EditJob
 		var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 		UpdateLocations(npc, template, EsoSpace.PlaceInfo);
 
+		// TODO: Improve this so NPC track zones independently of place and guess based on those.
 		var mod = EsoSpace.CurrentMod;
 		if (npc.Places.Count > 0)
 		{
