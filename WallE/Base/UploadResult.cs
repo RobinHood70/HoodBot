@@ -30,7 +30,7 @@ public class UploadResult
 
 	public string Result { get; }
 
-	public IReadOnlyDictionary<string, string>? Warnings { get; }
+	public IReadOnlyDictionary<string, string> Warnings { get; }
 	#endregion
 
 	#region Public Override Methods

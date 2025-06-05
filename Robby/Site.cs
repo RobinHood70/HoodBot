@@ -1536,7 +1536,21 @@ public class Site : IMessageSource
 	/// <summary>Uploads a file.</summary>
 	/// <param name="input">The input parameters.</param>
 	/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
-	protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result.OrdinalICEquals("Success");
+	protected virtual bool Upload(UploadInput input)
+	{
+		var result = this.AbstractionLayer.Upload(input);
+		foreach (var warning in result.Warnings)
+		{
+			this.PublishWarning(this, $"{warning.Key}: {warning.Value}");
+		}
+
+		foreach (var duplicate in result.Duplicates)
+		{
+			this.PublishWarning(this, "Duplicate: " + duplicate);
+		}
+
+		return result.Result.OrdinalICEquals("Success");
+	}
 	#endregion
 
 	#region Private Static Methods
