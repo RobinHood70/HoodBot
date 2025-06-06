@@ -34,8 +34,8 @@ public class FixOriginalFiles(JobManager jobManager) : TemplateJob(jobManager)
 	{
 		EsoFiles.GetIcons(this, EsoLog.LatestDBUpdate(false));
 		var dupes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		var folderLen = LocalConfig.EsoUIFolder.Length + 1;
-		foreach (var fullName in Directory.EnumerateFiles(LocalConfig.EsoUIFolder, "*.png", SearchOption.AllDirectories))
+		var folderLen = LocalConfig.EsoUIArtFolder.Length + 1;
+		foreach (var fullName in Directory.EnumerateFiles(LocalConfig.EsoUIArtFolder, "*.png", SearchOption.AllDirectories))
 		{
 			var file = Path.GetFileNameWithoutExtension(fullName);
 			var dir = Path.GetDirectoryName(fullName)!;

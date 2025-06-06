@@ -154,7 +154,7 @@ public static class EsoFiles
 		return retval;
 	}
 
-	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(LocalConfig.BotDataFolder, "esoui", FileSystemNames[fileType]);
+	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(LocalConfig.EsoUIArtFolder, FileSystemNames[fileType]);
 
 	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
 

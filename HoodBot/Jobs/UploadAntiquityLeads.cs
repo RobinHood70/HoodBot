@@ -186,36 +186,47 @@ internal sealed class UploadAntiquityLeads(JobManager jobManager) : TemplateJob(
 			$"|Lead|{lead.Name}\n}}}}\n\n" +
 			$"[[Category:Online-Icons-Antiquity Leads]]";
 		var page = this.Site.CreatePage(lead.FileTitle, pageText);
-		var iconName = lead.Icon
-			.Replace("esoui/art/", string.Empty, StringComparison.OrdinalIgnoreCase)
-			.Replace('/', '\\');
+		var iconName = lead.Icon.Replace('/', '\\');
 		var fileName = LocalConfig.BotDataSubPath(iconName + ".png");
-		if (this.Site.Upload(fileName, lead.FileTitle, "Upload antiquity lead", page.Text) == ChangeStatus.Failure)
-		{
-			this.StatusWriteLine("File not found: " + fileName);
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, lead.FileTitle);
+		_ = this.Site.Upload(fileName, title.PageName, "Upload antiquity lead", page.Text);
 
 		return page;
 	}
 	#endregion
 
 	#region Private Classes
-	private sealed class Lead(IDataRecord row)
+	private sealed class Lead
 	{
+		#region Constructors
+		public Lead(IDataRecord row)
+		{
+			var name = (string)row["name"];
+			name = name
+				.Replace(": ", " - ", StringComparison.Ordinal)
+				.Replace(':', '-');
+			this.FileTitle = $"File:{Prefix}{name}.png";
+			this.Icon = ((string)row["icon"])[1..^4];
+			this.Id = (int)row["id"];
+			this.Name = (string)row["name"];
+			this.SetName = (string)row["setName"];
+		}
+		#endregion
+
 		#region Public Static Properties
 		public static string Prefix => "ON-icon-lead-";
 		#endregion
 
 		#region Public Properties
-		public string FileTitle { get; } = "File:" + Prefix + (string)row["name"] + ".png";
+		public string FileTitle { get; }
 
-		public string Icon { get; } = ((string)row["icon"])[1..^4];
+		public string Icon { get; }
 
-		public int Id { get; } = (int)row["id"];
+		public int Id { get; }
 
-		public string Name { get; } = (string)row["name"];
+		public string Name { get; }
 
-		public string SetName { get; } = (string)row["setName"];
+		public string SetName { get; }
 		#endregion
 
 		#region Public Static Functions
