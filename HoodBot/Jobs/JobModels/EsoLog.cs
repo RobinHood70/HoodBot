@@ -13,6 +13,7 @@ internal static class EsoLog
 {
 	#region Fields
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
+	private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	private static readonly EsoVersion[] LatestVersions = [EsoVersion.Empty, EsoVersion.Empty];
 
 	private static Database? database;
@@ -79,13 +80,17 @@ internal static class EsoLog
 		{
 			foreach (var table in EsoDb.ShowTables())
 			{
-				var version = new EsoVersion(table);
-				var ptsNum = version.Pts ? 1 : 0;
-
-				// Invalid values return Empty, which is the default/minimum, so no need to check for it explicitly.
-				if (version.Version > LatestVersions[ptsNum].Version)
+				var match = UpdateFinder.Match(table);
+				if (match.Success)
 				{
-					LatestVersions[ptsNum] = version;
+					var version = new EsoVersion(match.Value);
+					var ptsNum = version.Pts ? 1 : 0;
+
+					// Invalid values return Empty, which is the default/minimum, so no need to check for it explicitly.
+					if (version.Version > LatestVersions[ptsNum].Version)
+					{
+						LatestVersions[ptsNum] = version;
+					}
 				}
 			}
 		}
