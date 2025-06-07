@@ -381,6 +381,12 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 			return;
 		}
 
+		var wikiTitle = page.Title.LabelName();
+		if (!furnishing.Title.PageNameEquals(wikiTitle))
+		{
+			Debug.WriteLine($"Page title \"{wikiTitle}\" != furnishing title \"{furnishing.Title.PageName}\". Check for invalid ID and verify title case in game.");
+		}
+
 		this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
 		this.CheckTitle(page.Title, labelName, furnishing);
 
