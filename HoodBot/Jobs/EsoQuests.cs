@@ -206,7 +206,7 @@ public class EsoQuests : EditJob
 		var mergedStages = this.MergeStages(quest, locs);
 		var journalEntries = GetJournalEntries(mergedStages);
 		if (!string.IsNullOrEmpty(quest.EndJournalText) &&
-			!journalEntries[^1].Contains(quest.EndJournalText, StringComparison.OrdinalIgnoreCase))
+			(journalEntries.Count == 0 || !journalEntries[^1].Contains(quest.EndJournalText, StringComparison.OrdinalIgnoreCase)))
 		{
 			journalEntries.Add(quest.EndJournalText);
 		}
