@@ -20,9 +20,9 @@ public class OneOffMoveJob(JobManager jobManager, bool updateUserSpace) : MovePa
 		cat.GetCategoryMembers("Online-Icons-Skill Styles", false);
 		foreach (var item in cat)
 		{
-			if (item.PageName.Contains("-skill-"))
+			if (item.PageName.Contains("-skill-", System.StringComparison.Ordinal))
 			{
-				this.AddMove(item, item.FullPageName().Replace("-skill-", "-skill style-"));
+				this.AddMove(item, item.FullPageName().Replace("-skill-", "-skill style-", System.StringComparison.Ordinal));
 			}
 		}
 	}
