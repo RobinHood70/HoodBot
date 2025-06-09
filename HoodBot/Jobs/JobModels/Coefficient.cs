@@ -3,9 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
 [Flags]
@@ -21,266 +19,415 @@ public enum MechanicTypes
 	Daedric = 1 << 6,
 }
 
-internal sealed class Coefficient
+internal sealed class Coefficient(IDataRecord row)
 {
-	#region Private Constants
-	// private const int Level = 50 + 16;
-	private const int Damage = 3000;
-	private const int Health = 16000;
-	private const int Resist = 10000;
-	private const int Stat = 30000;
-	#endregion
-
-	#region Constructors
-	public Coefficient(IDataRecord row, int index)
+	#region Static Fields
+	private static readonly Dictionary<short, string> DamageTypes = new()
 	{
-		if (index is < 0 or > 5)
-		{
-			throw new ArgumentOutOfRangeException(nameof(index));
-		}
-
-		var num = "123456"[index];
-		this.A = (float)row["a" + num];
-		this.B = (float)row["b" + num];
-		this.C = (float)row["c" + num];
-		//// this.R = (float)row["R" + num];
-		this.Mechanic = (sbyte)row["type" + num];
-
-		if (this.IsValid() && this.Mechanic == -1)
-		{
-			var mechanicType = row.GetDataTypeName(row.GetOrdinal("mechanic"));
-			var mechanicText = mechanicType.OrdinalEquals("INT")
-				? ((int)row["mechanic"]).ToStringInvariant()
-				: EsoLog.ConvertEncoding((string)row["mechanic"]);
-			if (mechanicText.Contains(',', StringComparison.Ordinal))
-			{
-				throw new InvalidOperationException("Type == -1 and Mechanic is split. It's unclear how this should be handled.");
-			}
-
-			this.Mechanic = int.Parse(mechanicText, CultureInfo.InvariantCulture);
-		}
-	}
-	#endregion
-
-	#region Public Properties
-	public float A { get; }
-
-	public float B { get; }
-
-	public float C { get; }
-
-	// Type, or mechanic if type not defined. Called Mechanic to make it obvious that they serve the same purpose.
-	public int Mechanic { get; }
-
-	//// public float R { get; }
-	#endregion
-
-	#region Public Static Methods
-	public static IReadOnlyList<Coefficient> GetCoefficientList(IDataRecord row)
-	{
-		var coefficients = new Coefficient[6];
-		for (var index = 0; index <= 5; index++)
-		{
-			coefficients[index] = new Coefficient(row, index);
-		}
-
-		return coefficients;
-	}
-
-	public static string GetCoefficientText(IReadOnlyList<Coefficient> coefs, string text, string skillName)
-	{
-		if (text.Length == 2 && text[0] == '$')
-		{
-			var index = text[1] - '1';
-			var coef = coefs[index];
-			if (!coef.IsValid())
-			{
-				Debug.WriteLine($"Coefficient error in {skillName}, coefficient {text[1]}.");
-				return text;
-			}
-
-			return coef.SkillDamageText();
-		}
-
-		return text;
-	}
-	#endregion
-
-	#region Public Methods
-
-	public bool IsValid() => this.A != -1 || this.B != -1 || this.C != -1;
-
-	// BitField Damage temporarily handles 0, 6, 10. After that's resolved, the check for BitFieldDamage should be altered to Mechanic > 0 rather than >=, or it might be possible to remove this check altogether and just move the BitField code up here.
-	public string SkillDamageText() => this.Mechanic switch
-	{
-		> -1 => this.BitFieldDamage(),
-		< -1 => this.IndexedDamage(),
-		_ => throw new InvalidOperationException("Mechanic is invalid."),
+		[0] = "None",
+		[1] = "Generic",
+		[2] = "Physical",
+		[3] = "Flame",
+		[4] = "Shock",
+		[5] = "Oblivion",
+		[6] = "Frost",
+		[7] = "Earth",
+		[8] = "Magic",
+		[9] = "Drown",
+		[10] = "Disease",
+		[11] = "Poison",
+		[12] = "Bleed",
+		[515] = "Flame",
 	};
 	#endregion
 
-	#region Private Methods
-	private static double ToPrecision(double num, int digits)
+	#region Fields
+	private int? newTicks;
+	#endregion
+
+	#region Public Static Properties
+	public static Regex RawCoefficient { get; } = new(@"<<(?<index>\d+)>>", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+	#endregion
+
+	#region Public Properties
+	public float A { get; } = (float)row["a"];
+
+	public float B { get; } = (float)row["b"];
+
+	public float C { get; } = (float)row["c"];
+
+	public sbyte CoefficientType { get; } = (sbyte)row["coefType"];
+
+	public int Cooldown { get; } = (int)row["cooldown"];
+
+	public short DamageType { get; } = (short)row["damageType"];
+
+	public int Duration { get; } = (int)row["duration"];
+
+	public bool HasRankMod { get; } = (bool)row["hasRankMod"];
+
+	public byte Index { get; } = (byte)row["idx"];
+
+	public bool IsADE { get; } = (bool)row["isAOE"];
+
+	public bool IsDDT { get; } = (bool)row["isDDT"];
+
+	public bool IsDamage { get; } = (bool)row["isDmg"];
+
+	public bool IsDmgShield { get; } = (bool)row["isDmgShield"];
+
+	public bool IsElfBane { get; } = (bool)row["isElfBane"];
+
+	public bool IsFlameAOE { get; } = (bool)row["isFlameAOE"];
+
+	public bool IsHeal { get; } = (bool)row["isHeal"];
+
+	public bool IsMelee { get; } = (bool)row["isMelee"];
+
+	public bool IsPlayer { get; } = (bool)row["isPlayer"];
+
+	public byte RawType { get; } = (byte)row["rawType"];
+
+	public int RawValue1 { get; } = (int)row["rawValue1"];
+
+	public int RawValue2 { get; } = (int)row["rawValue2"];
+
+	public int StartTime { get; } = (int)row["startTime"];
+
+	public int TickTime { get; } = (int)row["tickTime"];
+
+	public bool UsesManualCoefficient { get; } = (bool)row["usesManualCoefficient"];
+
+	public string Value { get; } = EsoLog.ConvertEncoding((string)row["value"]);
+
+	public float R { get; } = (float)row["r"];
+	#endregion
+
+	#region Public Methods
+	public bool IsValid() => this.A != -1 || this.B != -1 || this.C != -1;
+
+	public string SkillDamageText(double rankFactor)
 	{
-		if (num == 0)
+		var inputValues = new InputValues();
+		if (this.CoefficientType == -75)
 		{
-			return 0;
+			throw new NotSupportedException();
 		}
 
-		var unsig = Math.Floor(Math.Log10(Math.Abs(num))) + 1;
-		var scale = Math.Pow(10, unsig);
-		return scale * Math.Round(num / scale, digits);
+		double value;
+		switch (this.CoefficientType)
+		{
+			case -2: // Health
+			case 32: // Update 34
+				value = Math.Floor(this.A * inputValues.Health) + this.C;
+				break;
+			case 0: // Magicka
+			case 1: // Update 34
+				value = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.SpellDamage) + this.C;
+				break;
+			case 6: // Stamina
+			case 4: // Update 34
+				value = Math.Floor(this.A * inputValues.Stamina) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				break;
+			case 10: // Ultimate
+			case 8: // Update 34
+				value =
+					Math.Floor(this.A * Math.Max(inputValues.Magicka, inputValues.Stamina)) +
+					Math.Floor(this.B * Math.Max(inputValues.SpellDamage, inputValues.WeaponDamage)) +
+					this.C;
+				break;
+			case -50: // Ultimate Soul Tether
+				value =
+					Math.Floor(this.A * Math.Max(inputValues.Magicka, inputValues.Stamina)) +
+					Math.Floor(this.B * inputValues.SpellDamage) +
+					this.C;
+				break;
+			case -51: // Light Armor
+				if (inputValues.LightArmor is int lightArmor)
+				{
+					value = this.A * lightArmor + this.C;
+					break;
+				}
+
+				return this.C == 0
+					? $"({this.A:n5} * LightArmor)"
+					: $"({this.A:n5} * LightArmor + {this.C:n5})";
+			case -52: // Medium Armor
+				if (inputValues.MediumArmor is int mediumArmor)
+				{
+					value = this.A * mediumArmor + this.C;
+					break;
+				}
+
+				return this.C == 0
+					? $"({this.A:n5} * MediumArmor)"
+					: $"({this.A:n5} * MediumArmor + {this.C:n5})";
+			case -53: // Heavy Armor
+				if (inputValues.HeavyArmor is int heavyArmor)
+				{
+					value = this.A * heavyArmor + this.C;
+					break;
+				}
+
+				return this.C == 0
+					? $"({this.A:n5} * HeavyArmor)"
+					: $"({this.A:n5} * HeavyArmor + {this.C:n5})";
+			case -54: // Daggers
+				if (inputValues.DaggerWeapon is int daggerWeapon)
+				{
+					value = this.A * daggerWeapon;
+					break;
+				}
+
+				return $"({this.A:n5} * Dagger)";
+			case -55: // Armor Types
+				if (inputValues.ArmorTypes is int armorTypes)
+				{
+					value = this.A * armorTypes;
+					break;
+				}
+
+				return $"({this.A:n5} * ArmorTypes)";
+			case -56: // Spell + Weapon Damage
+				value = Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				break;
+			case -57:
+				value = this.A * inputValues.AssassinSkills;
+				break;
+			case -58:
+				value = this.A * inputValues.FightersGuildSkills;
+				break;
+			case -59:
+				value = this.A * inputValues.DraconicPowerSkills;
+				break;
+			case -60:
+				value = this.A * inputValues.ShadowSkills;
+				break;
+			case -61:
+				value = this.A * inputValues.SiphoningSkills;
+				break;
+			case -62:
+				value = this.A * inputValues.SorcererSkills;
+				break;
+			case -63:
+				value = this.A * inputValues.MagesGuildSkills;
+				break;
+			case -64:
+				value = this.A * inputValues.SupportSkills;
+				break;
+			case -65:
+				value = this.A * inputValues.AnimalCompanionSkills;
+				break;
+			case -66:
+				value = this.A * inputValues.GreenBalanceSkills;
+				break;
+			case -67:
+				value = this.A * inputValues.WintersEmbraceSkills;
+				break;
+			case -68: // Magicka with Capped Health
+				value = Math.Min(Math.Floor(this.A * inputValues.Magicka), Math.Floor(this.B * inputValues.Health));
+				break;
+			case -69:
+				value = this.A * inputValues.BoneTyrantSkills;
+				break;
+			case -70:
+				value = this.A * inputValues.GraveLordSkills;
+				break;
+			case -71: // Capped Spell Damage
+				value = Math.Min(Math.Floor(this.A * inputValues.SpellDamage) + this.B, this.C);
+				break;
+			case -72: // Magicka and Weapon Damage
+				value = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				break;
+			case -73: // Capped Magicka and Spell Damage
+				var halfMax = this.C / 2;
+				value = Math.Min(
+					Math.Min(Math.Floor(this.A * inputValues.Magicka), halfMax) +
+					Math.Min(Math.Floor(this.B * inputValues.SpellDamage), halfMax),
+					this.C);
+				break;
+			case -74: // Weapon Power
+				value = Math.Floor(this.A * inputValues.WeaponPower) + this.C;
+				break;
+			case -75: // Constant (should be handled before this point)
+				return this.Value;
+			case -76: // Health or Spell Damage
+				value = Math.Max(
+					Math.Floor(this.A * inputValues.SpellDamage),
+					Math.Floor(this.B * inputValues.Health)) +
+					this.C;
+				break;
+			case -79: // Health or Spell/Weapon Damage
+				value = Math.Max(
+					Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage),
+					Math.Floor(this.C * inputValues.Health));
+				break;
+			case -77: // Max Resistance
+				value = Math.Floor(this.A * Math.Max(inputValues.SpellResist, inputValues.PhysicalResist)) + this.C;
+				break;
+			case -78: // Magicka and Light Armor (Health Capped)
+				if (inputValues.LightArmor is null)
+				{
+					value = Math.Min(Math.Floor(this.A * inputValues.Magicka), this.C * inputValues.Health);
+				}
+				else
+				{
+					value = Math.Min(Math.Floor(this.A * inputValues.Magicka) * (1.0 + this.B * inputValues.LightArmor.Value), this.C * inputValues.Health);  // TODO: Check rounding order
+				}
+
+				break;
+			case -80: // Herald of the Tome skills slotted
+				value = this.A * inputValues.HeraldoftheTomeSkills;
+				break;
+			case -81: // Soldier of Apocrypha skills slotted
+				value = this.A * inputValues.SoldierofApocryphaSkills;
+				break;
+			case -82: // Health or Magicka with Health Cap
+				value = Math.Max(
+					Math.Floor(this.A * inputValues.Magicka),
+					Math.Floor(this.B * inputValues.Health));
+				var maxValue = Math.Floor(this.C * inputValues.Health);
+				if (maxValue > 0)
+				{
+					value = Math.Max(value, maxValue);
+				}
+
+				break;
+			default:
+				throw new InvalidOperationException($"Unrecognized coefficient type {this.CoefficientType}");
+		}
+
+		if (this.HasRankMod)
+		{
+			value = Math.Floor(value * rankFactor);
+		}
+
+		value = this.RawType == 92
+			? Math.Floor(value * 10) / 10
+			: Math.Floor(value);
+
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if ((this.RawType == 49 || this.RawType == 53) && this.Duration > 0)
+		{
+			var duration = +this.Duration;
+
+			double dotFactor;
+			if (this.newTicks is not null)
+			{
+				dotFactor = this.newTicks.Value;
+				this.newTicks = null;
+			}
+			else
+			{
+				dotFactor = this.TickTime > 0
+					? (duration + +this.TickTime) / +this.TickTime
+					: duration / 1000;
+			}
+
+			if (dotFactor != 1)
+			{
+				value = Math.Floor(Math.Floor(value) * dotFactor);
+			}
+		}
+
+		return $"{value:n5}";
 	}
 	#endregion
 
-	#region Private Methods
-	private string BitFieldDamage()
+	#region Private Classes
+	private sealed class InputValues
 	{
-		var a = this.A; // ToPrecision(this.A, 5);
-		var b = this.B; // ToPrecision(this.B, 5);
-		var c = this.C; // ToPrecision(this.C, 5);
+		#region Fields
+		private const int DefaultArmor = 11000;
+		private const int DefaultDamage = 3000;
+		private const int DefaultHealth = 16000;
+		private const int DefaultLevel = 66;
+		private const int DefaultMagStam = 30000;
+		#endregion
 
-		//// var r = this.R; // ToPrecision(this.R, 5);
+		#region Public Properties
+		public int AnimalCompanionSkills { get; } = 0;
 
-		double CappedStat()
-		{
-			var value = a * Stat;
-			var maxValue = b * Damage;
-			return value + maxValue + c;
-		}
+		public int? ArmorTypes { get; } = 0;
 
-		string ToText(double result) => ((int)Math.Round(result)).ToStringInvariant();
+		public int AssassinSkills { get; } = 0;
 
-		var resultList = new List<string>();
-		switch (this.Mechanic)
-		{
-			case 0: // Old Magicka
-			case 6: // Old Stamina
-			case 10: // Old Ultimate
-				var value = a * Stat;
-				var maxValue = b * Health;
-				//// Debug.WriteLine("Old stamina/ultimate (mechanic = 0/6/10) used!");
-				resultList.Add(ToText(value > maxValue ? maxValue : value));
-				break;
-			default:
-				var mechanicFlags = (MechanicTypes)this.Mechanic;
-				foreach (var mechanicType in mechanicFlags.GetUniqueFlags())
-				{
-					var result = mechanicType switch
-					{
-						MechanicTypes.None => throw new InvalidOperationException("No bits were set."),
-						MechanicTypes.Magicka => a * Stat,
-						MechanicTypes.Werewolf => a * Damage, // Werewolf
-						MechanicTypes.Stamina => a * Stat,
-						MechanicTypes.Ultimate => CappedStat(),
-						MechanicTypes.MountStamina => 0, // Mount Stamina
-						MechanicTypes.Health =>
-							a * Health + c,
-						MechanicTypes.Daedric => 0, // Daedric
-						_ => throw new InvalidOperationException("A bit was specified that has no current value."),
-					};
+		public int BoneTyrantSkills { get; } = 0;
 
-					resultList.Add(ToText(result));
-				}
+		public object[] ChannelDamageDone { get; } = [];
 
-				break;
-		}
+		public int? DaggerWeapon { get; } = 0;
 
-		return string.Join(", ", resultList);
-	}
+		public object[] Damage { get; } = [];
 
-	private string IndexedDamage()
-	{
-		/*
-		 * Dave's source code for this is found in ComputeEsoSkillValue() in the (already cloned) esolog repository at: https://github.com/uesp/uesp-esolog.
-		 * Note that Dave's calculations are significantly more complex, as they involve variable amounts. For the bot's purposes, constant amounts are used for key values, which simplifies many of the formulae.
-		 */
+		public int DamageShield { get; } = 0;
 
-		int value;
-		int maxValue;
-		var a = ToPrecision(this.A, 5);
-		var b = ToPrecision(this.B, 5);
-		var c = ToPrecision(this.C, 5);
-		//// var r = ToPrecision(this.R, 5);
+		public object[] DotDamageDone { get; } = [];
 
-		var sb = new StringBuilder();
-		switch (this.Mechanic)
-		{
-			case -2: // Health
-				sb.Append((int)Math.Round(a * Health + c));
-				break;
-			case -56: // Spell + Weapon Damage
-			case -50: // Ultimate (no weapon damage)
-			case -68: // Magicka with Health Cap
-				value = (int)Math.Round(a * Stat);
-				maxValue = (int)Math.Round(b * Health);
-				sb.Append(value > maxValue ? maxValue : value);
-				break;
-			case -71: // Spell Damage Capped
-				value = (int)Math.Round(a * Damage + b);
-				maxValue = (int)c;
-				sb.Append(value > maxValue ? maxValue : value);
-				break;
-			case -72: // Magicka and Weapon Damage
-				sb.Append((int)Math.Round(a * Stat + b * Damage + c));
-				break;
-			case -73: // Magicka and Spell Damage
-				var halfMax = c / 2;
-				var statDamage = a * Stat;
-				if (statDamage > halfMax)
-				{
-					statDamage = halfMax;
-				}
+		public int DraconicPowerSkills { get; } = 0;
 
-				var dmgDamage = b * Damage;
-				if (dmgDamage > halfMax)
-				{
-					dmgDamage = halfMax;
-				}
+		public int EffectiveLevel { get; } = DefaultLevel;
 
-				value = (int)Math.Round(statDamage + dmgDamage);
-				maxValue = (int)c;
-				sb.Append(value > maxValue ? maxValue : value);
-				break;
-			case -74: // Weapon Power
-			case -75: // Constant Value
-			case -76: // Health or Spell Damage
-			case -78: // Magicka and Light Armor(Health Capped)
-			case -79: // Health or Weapon/Spell Damage
-				throw new InvalidOperationException("Formula unknown");
-			case -77: // Max Resistance
-				sb.Append((int)Math.Round(a * Resist + c));
-				break;
-			case -51: // Light Armor #
-			case -52: // Medium Armor #
-			case -53: // Heavy Armor #
-			case -54: // Dagger #
-			case -55: // Armor Type #
-			case -57: // Assassination Skills Slotted
-			case -58: // Fighters Guild Skills Slotted
-			case -59: // Draconic Power Skills Slotted
-			case -60: // Shadow Skills Slotted
-			case -61: // Siphoning Skills Slotted
-			case -62: // Sorcerer Skills Slotted
-			case -63: // Mages Guild Skills Slotted
-			case -64: // Support Skills Slotted
-			case -65: // Animal Companion Skills Slotted
-			case -66: // Green Balance Skills Slotted
-			case -67: // Winter's Embrace Slotted
-			case -69: // Bone Tyrant Slotted
-			case -70: // Grave Lord Slotted
-				sb
-					.Append('(')
-					.Append(((double)this.A).RoundSignificant(3))
-					.Append(" × ")
-					.Append(EsoLog.MechanicNames[this.Mechanic])
-					.Append(')');
-				break;
-			default:
-				throw new InvalidOperationException($"Invalid {nameof(this.Mechanic)} {this.Mechanic.ToStringInvariant()}");
-		}
+		public int FightersGuildSkills { get; } = 0;
 
-		return sb.ToString();
+		public int GraveLordSkills { get; } = 0;
+
+		public int GreenBalanceSkills { get; } = 0;
+
+		public object[] Healing { get; } = [new object[] { "Done", 0 }];
+
+		public int Health { get; } = DefaultHealth;
+
+		public int? HeavyArmor { get; } = DefaultArmor;
+
+		public int HeraldoftheTomeSkills { get; } = 0;
+
+		public int? LightArmor { get; } = DefaultArmor;
+
+		public int MagesGuildSkills { get; } = 0;
+
+		public int Magicka { get; } = DefaultMagStam;
+
+		public int MaxDamage => Math.Max(this.SpellDamage, this.WeaponDamage);
+
+		public int MaxStat => Math.Max(this.Magicka, this.Stamina);
+
+		public int? MediumArmor { get; } = DefaultArmor;
+
+		public int PhysicalResist { get; } = DefaultArmor;
+
+		public int ShadowSkills { get; } = 0;
+
+		public int SiphoningSkills { get; } = 0;
+
+		public object[] SkillDamage { get; } = [];
+
+		public object[] SkillHealing { get; } = [];
+
+		public object[] SkillSpellDamage { get; } = [];
+
+		public int SoldierofApocryphaSkills { get; } = 0;
+
+		public int SorcererSkills { get; } = 0;
+
+		public int SpellDamage { get; } = DefaultDamage;
+
+		public int SpellResist { get; } = DefaultArmor;
+
+		public int Stamina { get; } = DefaultMagStam;
+
+		public int SupportSkills { get; } = 0;
+
+		public int WeaponDamage { get; } = DefaultDamage;
+
+		public int WeaponPower { get; } = 0;
+
+		public int WintersEmbraceSkills { get; } = 0;
+		#endregion
 	}
 	#endregion
 }

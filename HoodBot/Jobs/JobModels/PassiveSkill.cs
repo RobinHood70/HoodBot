@@ -4,32 +4,29 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class PassiveSkill : Skill
+internal sealed class PassiveSkill(IDataRecord row, List<Coefficient> coefficients) : Skill(row)
 {
 	#region Fields
 	private readonly List<Rank> ranks = [];
 	#endregion
 
-	#region Constructors
-	public PassiveSkill(IDataRecord row)
-		: base(row)
-	{
-		this.SkillLine = this.SkillLine.Replace(" Skills", string.Empty, StringComparison.Ordinal);
-	}
+	#region Public Properties
+	public IReadOnlyList<Coefficient> Coefficients => coefficients;
 	#endregion
 
 	#region Public Override Methods
-	public override void AddData(IDataRecord row)
+	public override void AddData(IDataRecord row, List<Coefficient> coefficients)
 	{
 		var rank = new PassiveRank(row);
 		this.ranks.Add(rank);
 	}
 
-	public override bool Check()
+	public override bool IsValid()
 	{
 		var retval = false;
 		if (this.ranks.Count is < 1 or > 10)
@@ -43,14 +40,14 @@ internal sealed class PassiveSkill : Skill
 			if (string.IsNullOrWhiteSpace(rank.Description))
 			{
 				retval = true;
-				Debug.WriteLine($"Warning: {this.Name} - Rank {rank.RankNum.ToStringInvariant()} has no description.");
+				Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Index.ToStringInvariant()} has no description.");
 			}
 		}
 
 		return retval;
 	}
 
-	public override void SetChangeType(Skill previous)
+	public override ChangeType GetChangeType(Skill previous)
 	{
 		if (previous is not PassiveSkill prevSkill)
 		{
@@ -60,8 +57,7 @@ internal sealed class PassiveSkill : Skill
 		if (this.ranks.Count != prevSkill.ranks.Count)
 		{
 			Debug.WriteLine($"[[{this.PageName}]] changed # of ranks between current and previous version. This is probably a sign of a bug somewhere.");
-			this.ChangeType = ChangeType.Major;
-			return;
+			return ChangeType.Major;
 		}
 
 		var retval = ChangeType.None;
@@ -72,17 +68,11 @@ internal sealed class PassiveSkill : Skill
 			var changeType = curRank.GetChangeType(prevRank);
 			if (changeType > retval)
 			{
-				if (changeType == ChangeType.Major)
-				{
-					this.ChangeType = ChangeType.Major;
-					return;
-				}
-
-				retval = changeType;
+				retval |= changeType;
 			}
 		}
 
-		this.ChangeType = retval;
+		return retval;
 	}
 	#endregion
 
@@ -96,8 +86,8 @@ internal sealed class PassiveSkill : Skill
 		TitleCollection usedList = new(site);
 		foreach (var rank in this.ranks)
 		{
-			var rankText = rank.RankNum.ToStringInvariant();
-			var paramName = "desc" + (rank.RankNum == 1 ? string.Empty : rankText);
+			var rankText = rank.Index.ToStringInvariant();
+			var paramName = "desc" + (rank.Index == 1 ? string.Empty : rankText);
 			var description = this.FormatRankDescription(rank);
 			UpdateParameter(template, paramName, description, usedList, this.Name);
 			if (rank is PassiveRank passiveRank)
@@ -109,23 +99,25 @@ internal sealed class PassiveSkill : Skill
 	#endregion
 
 	#region Private Methods
+
 	private string FormatRankDescription(Rank rank)
 	{
 		var retval = new List<string>();
-		var splitDescription = Highlight.Split(rank.Description);
+		var splitDescription = Coefficient.RawCoefficient.Split(rank.Description);
 		for (var i = 0; i < splitDescription.Length; i++)
 		{
-			var text = splitDescription[i];
-			if (i == 1 && splitDescription[0].Length == 0)
-			{
-				text = "<small>(" + text + ")</small>";
-			}
+			var coefNum = int.Parse(splitDescription[i], CultureInfo.InvariantCulture);
+			var coef = this.Coefficients[coefNum];
+			var text = coef.SkillDamageText(rank.Factor);
 
-			text = Coefficient.GetCoefficientText(rank.Coefficients, text, this.Name);
-
-			// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
 			if ((i & 1) == 1)
 			{
+				if (i == 1 && splitDescription[0].Length == 0)
+				{
+					text = "<small>(" + text + ")</small>";
+				}
+
+				// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
 				text = "'''" + text + "'''";
 			}
 

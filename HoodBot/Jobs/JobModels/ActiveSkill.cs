@@ -14,39 +14,61 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 {
 	#region Fields
 	private readonly int learnedLevel = (int)row["learnedLevel"];
-	private readonly List<Morph> morphs = new(3);
 	private readonly string skillType = ((string)row["icon"]).Contains("_artifact_", StringComparison.OrdinalIgnoreCase)
 		? "Artifact"
 		: EsoLog.ConvertEncoding((string)row["type"]);
+
+	private readonly Morph[] morphs = new Morph[2];
+	private Morph? baseSkill;
+	#endregion
+
+	#region Private Properties
+	private IEnumerable<Morph> AllMorphs
+	{
+		get
+		{
+			if (this.baseSkill is null)
+			{
+				yield break;
+			}
+
+			yield return this.baseSkill;
+			yield return this.morphs[0];
+			yield return this.morphs[1];
+		}
+	}
 	#endregion
 
 	#region Public Override Methods
-	public override void AddData(IDataRecord row)
+	public override void AddData(IDataRecord row, List<Coefficient> coefficients)
 	{
 		ArgumentNullException.ThrowIfNull(row);
-		var morphNum = (sbyte)row["morph"];
-		if (morphNum >= this.morphs.Count)
+		var morph = new Morph(row, coefficients);
+		if (morph.Index == 0)
 		{
-			this.morphs.Add(new Morph(row));
+			this.baseSkill ??= morph;
+		}
+		else
+		{
+			this.morphs[morph.Index - 1] ??= morph;
 		}
 
-		var morph = this.morphs[^1];
-		var rank = new ActiveRank(row);
-		morph.Ranks.Add(rank);
+		morph.Ranks.Add(new ActiveRank(row));
 	}
 
-	public override bool Check()
+	public override bool IsValid()
 	{
-		foreach (var morph in this.morphs)
+		var morphCount = 0;
+		foreach (var morph in this.AllMorphs)
 		{
 			if (morph.Description == null)
 			{
 				Debug.WriteLine($"Warning: {this.Name} - {morph.Name} has no description.");
-				return true;
+				return false;
 			}
 		}
 
-		return false;
+		return morphCount != 0;
 	}
 
 	public override void PostProcess()
@@ -57,32 +79,17 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 		}
 	}
 
-	public override void SetChangeType(Skill previous)
+	public override ChangeType GetChangeType(Skill oldVer)
 	{
-		if (previous is not ActiveSkill prevSkill)
+		if (oldVer is not ActiveSkill oldSkill || this.baseSkill is null || oldSkill.baseSkill is null)
 		{
 			throw new InvalidOperationException();
 		}
 
-		var retval = ChangeType.None;
-		for (var i = 0; i < this.morphs.Count; i++)
-		{
-			var curMorph = this.morphs[i];
-			var prevMorph = prevSkill.morphs[i];
-			var changeType = curMorph.GetChangeType(prevMorph);
-			if (changeType > retval)
-			{
-				if (changeType == ChangeType.Major)
-				{
-					this.ChangeType = ChangeType.Major;
-					return;
-				}
-
-				retval = changeType;
-			}
-		}
-
-		this.ChangeType = retval;
+		var retval = this.baseSkill.GetChangeType(oldSkill.baseSkill);
+		retval |= this.morphs[0].GetChangeType(oldSkill.morphs[0]);
+		retval |= this.morphs[1].GetChangeType(oldSkill.morphs[1]);
+		return retval;
 	}
 	#endregion
 
@@ -91,14 +98,18 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(template);
-		var baseMorph = this.morphs[0];
-		var baseRank = baseMorph.Ranks[^1];
+		if (this.baseSkill is null)
+		{
+			throw new InvalidOperationException();
+		}
+
+		var baseRank = this.baseSkill.Ranks[^1];
 		template.Update("id", baseRank.Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
-		var baseSkillCost = Cost.GetCostText(baseRank.Costs);
-		this.UpdateMorphs(site, template, baseMorph, baseSkillCost);
-		template.Update("casttime", FormatSeconds(baseMorph.CastingTime), ParameterFormat.OnePerLine, true);
+		var baseRankCost = Cost.GetCostText(baseRank.Costs);
+		this.UpdateMorphs(site, template, baseRankCost);
+		template.Update("casttime", FormatSeconds(EsoSpace.TimeToText(baseRank.CastingTime)), ParameterFormat.OnePerLine, true);
 		template.Update("linerank", this.learnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
-		template.Update("cost", baseSkillCost, ParameterFormat.OnePerLine, true);
+		template.Update("cost", baseRankCost, ParameterFormat.OnePerLine, true);
 		if (template.Find("cost")?.Value is WikiNodeCollection paramValue)
 		{
 			// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
@@ -130,28 +141,32 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 			}
 		}
 
-		template.UpdateOrRemove("duration", FormatSeconds(baseRank.Duration), ParameterFormat.OnePerLine, baseRank.Duration.OrdinalEquals("0"));
-		template.UpdateOrRemove("channeltime", FormatSeconds(baseRank.ChannelTime), ParameterFormat.OnePerLine, baseRank.ChannelTime.OrdinalEquals("0"));
-		template.Update("target", baseMorph.Target, ParameterFormat.OnePerLine, true);
+		template.UpdateOrRemove("duration", FormatSeconds(EsoSpace.TimeToText(baseRank.Duration)), ParameterFormat.OnePerLine, baseRank.Duration == 0);
+		template.UpdateOrRemove("channeltime", FormatSeconds(EsoSpace.TimeToText(baseRank.ChannelTime)), ParameterFormat.OnePerLine, baseRank.ChannelTime == 0);
+		template.Update("target", this.baseSkill.Target, ParameterFormat.OnePerLine, true);
 		template.UpdateOrRemove("type", this.skillType, ParameterFormat.OnePerLine, this.skillType.OrdinalEquals("Active"));
 	}
 
 	#endregion
 
 	#region Private Methods
-	private void UpdateMorph(ITemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter, CultureInfo culture)
+	private void UpdateMorph(ITemplateNode template, string baseSkillCost, TitleCollection usedList, Morph? morph, CultureInfo culture)
 	{
-		var baseRank = baseMorph.Ranks[^1];
-		List<string> descriptions = [];
-		var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
-		var morph = this.morphs[morphCounter];
-		if (!morph.CastingTime.OrdinalEquals(baseMorph.CastingTime))
+		ArgumentNullException.ThrowIfNull(morph);
+		if (this.baseSkill is null)
 		{
-			descriptions.Add("Casting Time: " + FormatSeconds(morph.CastingTime));
+			throw new InvalidOperationException();
 		}
 
-		var morphChannelTime = Morph.NowrapSameString(morph.Ranks.Select(r => r.ChannelTime));
-		if (!morphChannelTime.OrdinalEquals(baseRank.ChannelTime))
+		var baseRank = this.baseSkill.Ranks[^1];
+		List<string> descriptions = [];
+		if (morph.Ranks[^1].CastingTime != baseRank.CastingTime)
+		{
+			descriptions.Add("Casting Time: " + FormatSeconds(EsoSpace.TimeToText(baseRank.CastingTime)));
+		}
+
+		var morphChannelTime = Morph.NowrapSameString(morph.Ranks.Select(r => EsoSpace.TimeToText(r.ChannelTime)));
+		if (!morphChannelTime.OrdinalEquals(EsoSpace.TimeToText(baseRank.ChannelTime)))
 		{
 			descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 		}
@@ -163,8 +178,8 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 			descriptions.Add("Cost: " + morphSkillCost);
 		}
 
-		var morphDuration = Morph.NowrapSameString(morph.Ranks.Select(r => r.Duration));
-		if (!morphDuration.OrdinalEquals(baseRank.Duration) && !morphDuration.OrdinalEquals("0"))
+		var morphDuration = Morph.NowrapSameString(morph.Ranks.Select(r => EsoSpace.TimeToText(r.Duration)));
+		if (!morphDuration.OrdinalEquals(EsoSpace.TimeToText(baseRank.Duration)) && !morphDuration.OrdinalEquals("0"))
 		{
 			descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 		}
@@ -182,7 +197,7 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 			descriptions.Add("Range: " + FormatMeters(morphRange));
 		}
 
-		if (!morph.Target.OrdinalEquals(baseMorph.Target))
+		if (!morph.Target.OrdinalEquals(this.baseSkill.Target))
 		{
 			descriptions.Add("Target: " + morph.Target);
 		}
@@ -193,11 +208,11 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 			extras += ".<br>";
 		}
 
-		var paramName = "desc" + morphNum;
+		var paramName = "desc" + morph.ParamText;
 		UpdateParameter(template, paramName, extras + (morph.Description ?? string.Empty), usedList, this.Name);
-		if (morphCounter > 0)
+		if (morph != this.baseSkill)
 		{
-			var morphName = "morph" + morphNum;
+			var morphName = "morph" + morph.ParamText;
 			template.Update(morphName + "name", morph.Name, ParameterFormat.OnePerLine, true);
 			template.Update(morphName + "id", morph.Ranks[^1].Id.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 			var iconValue = MakeIcon(this.SkillLine, morph.Name);
@@ -206,13 +221,12 @@ internal sealed class ActiveSkill(IDataRecord row) : Skill(row)
 		}
 	}
 
-	private void UpdateMorphs(Site site, ITemplateNode template, Morph baseMorph, string baseSkillCost)
+	private void UpdateMorphs(Site site, ITemplateNode template, string baseSkillCost)
 	{
 		TitleCollection usedList = new(site);
-		for (var morphCounter = 0; morphCounter < this.morphs.Count; morphCounter++)
-		{
-			this.UpdateMorph(template, baseMorph, baseSkillCost, usedList, morphCounter, site.Culture);
-		}
+		this.UpdateMorph(template, baseSkillCost, usedList, this.baseSkill, site.Culture);
+		this.UpdateMorph(template, baseSkillCost, usedList, this.morphs[0], site.Culture);
+		this.UpdateMorph(template, baseSkillCost, usedList, this.morphs[1], site.Culture);
 	}
 	#endregion
 }
