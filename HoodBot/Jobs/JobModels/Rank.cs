@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
@@ -17,10 +16,9 @@ internal class Rank
 	#region Constructors
 	protected Rank(IDataRecord row)
 	{
-		this.Coefficients = Coefficient.GetCoefficientList(row);
 		this.Id = (int)row["id"];
-		this.RankNum = (sbyte)row["rank"];
-
+		this.Index = (sbyte)row["rank"];
+		this.CastingTime = (int)row["castTime"];
 		var description = (string)row["coefDescription"];
 		if (description.Length == 0)
 		{
@@ -48,19 +46,21 @@ internal class Rank
 	#endregion
 
 	#region Public Properties
-	public IReadOnlyList<Coefficient> Coefficients { get; }
+	public int CastingTime { get; }
 
 	public string Description { get; }
 
+	public double Factor { get; protected init; } = 1.0;
+
 	public int Id { get; }
 
-	public sbyte RankNum { get; }
+	public sbyte Index { get; }
 	#endregion
 
 	#region Public Methods
 	public virtual ChangeType GetChangeType(Rank previous)
 	{
-		if (this.RankNum != previous.RankNum)
+		if (this.Index != previous.Index)
 		{
 			throw new InvalidOperationException("I don't think this is possible.");
 		}
@@ -77,5 +77,4 @@ internal class Rank
 			: ChangeType.Major;
 	}
 	#endregion
-
 }

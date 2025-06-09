@@ -14,9 +14,8 @@ internal sealed class ActiveRank : Rank
 	{
 		static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
 
-		var channelTime = (int)row["channelTime"];
-		this.ChannelTime = EsoSpace.TimeToText(channelTime < 0 ? 0 : channelTime);
-		this.Duration = EsoSpace.TimeToText((int)row["duration"]);
+		this.ChannelTime = (int)row["channelTime"];
+		this.Duration = (int)row["duration"];
 		this.Radius = FormatRange((int)row["radius"]);
 		var maxRange = FormatRange((int)row["maxRange"]);
 		var minRange = FormatRange((int)row["minRange"]);
@@ -24,15 +23,23 @@ internal sealed class ActiveRank : Rank
 
 		this.Costs.AddRange(GetCostSplit(row, "cost", "mechanic", false));
 		this.Costs.AddRange(GetCostSplit(row, "costTime", "mechanicTime", true));
+		this.Factor = this.Index switch
+		{
+			1 => 1.0,
+			2 => 1.011,
+			3 => 1.022,
+			4 => 1.033,
+			_ => throw new InvalidOperationException($"Invalid RankNum: {this.Index}")
+		};
 	}
 	#endregion
 
 	#region Public Properties
-	public string ChannelTime { get; }
+	public int ChannelTime { get; }
 
 	public IList<Cost> Costs { get; } = [];
 
-	public string Duration { get; }
+	public int Duration { get; }
 
 	public string Radius { get; }
 

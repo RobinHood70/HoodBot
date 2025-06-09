@@ -10,11 +10,13 @@ using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
 #region Public Enumerations
+[Flags]
 internal enum ChangeType
 {
-	None,
-	Minor,
-	Major
+	// Implemented as flags for easier checking of Major changes
+	None = 0,
+	Minor = 1,
+	Major = 2
 }
 #endregion
 
@@ -39,7 +41,7 @@ internal abstract class Skill
 		this.Class = classValue.OrdinalEquals("Craft")
 			? classValue
 			: "Crafting";
-		this.SkillLine = classLine[1];
+		this.SkillLine = classLine[1].Replace(" Skills", string.Empty, StringComparison.Ordinal);
 		if (!ReplacementData.SkillNameFixes.TryGetValue(this.Name, out var newName))
 		{
 			ReplacementData.SkillNameFixes.TryGetValue($"{this.Name} - {this.SkillLine}", out newName);
@@ -50,25 +52,19 @@ internal abstract class Skill
 	#endregion
 
 	#region Public Static Properties
-	public static Regex Highlight => new(@"(?:\|c[0-9a-fA-F]{6})+|(?:\|r)+", RegexOptions.None, Globals.DefaultRegexTimeout);
-
 	public static Regex HighlightVar => new(@"\s*([\d]+(\.\d+)?|\|c[0-9A-Fa-f]{6}[^\|]+?\|r)\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
 	public static SortedList<string, string> IconNameCache { get; } = new(StringComparer.Ordinal);
 	#endregion
 
 	#region Public Properties
-	public ChangeType ChangeType { get; protected set; }
+	public string Class { get; }
+
+	public string Name { get; }
 
 	public string PageName { get; }
-	#endregion
 
-	#region Protected Properties
-	protected string Class { get; set; }
-
-	protected string Name { get; }
-
-	protected string SkillLine { get; set; }
+	public string SkillLine { get; set; }
 	#endregion
 
 	#region Public Methods
@@ -143,11 +139,11 @@ internal abstract class Skill
 	#endregion
 
 	#region Public Abstract Methods
-	public abstract void AddData(IDataRecord row);
+	public abstract void AddData(IDataRecord row, List<Coefficient> coefficients);
 
-	public abstract bool Check();
+	public abstract bool IsValid();
 
-	public abstract void SetChangeType(Skill previous);
+	public abstract ChangeType GetChangeType(Skill previous);
 	#endregion
 
 	#region Public Virtual Methods
