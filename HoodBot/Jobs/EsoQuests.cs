@@ -563,18 +563,29 @@ public class EsoQuests : EditJob
 	#endregion
 
 	#region Private Classes
-	private sealed class Condition(IDataRecord row) : IEquatable<Condition>
+	private sealed class Condition : IEquatable<Condition>
 	{
+		#region Constructors
+		public Condition(IDataRecord row)
+		{
+			this.IsComplete = (sbyte)row["isComplete"] == 1;
+			this.IsFail = (sbyte)row["isFail"] == 1;
+			this.QuestId = (long)row["questId"];
+			this.StepId = (long)row["questStepId"];
+			this.Text = EsoLog.ConvertEncoding((string)row["text"]);
+		}
+		#endregion
+
 		#region Public Properties
-		public bool IsComplete { get; } = (sbyte)row["isComplete"] == 1;
+		public bool IsComplete { get; }
 
-		public bool IsFail { get; } = (sbyte)row["isFail"] == 1;
+		public bool IsFail { get; }
 
-		public long QuestId { get; } = (long)row["questId"];
+		public long QuestId { get; }
 
-		public long StepId { get; } = (long)row["questStepId"];
+		public long StepId { get; }
 
-		public string Text { get; } = EsoLog.ConvertEncoding((string)row["text"]);
+		public string Text { get; }
 
 		public bool Equals(Condition? other) =>
 			other != null &&
@@ -735,27 +746,51 @@ public class EsoQuests : EditJob
 		#endregion
 	}
 
-	private sealed class Reward(IDataRecord row)
+	private sealed class Reward
 	{
+		#region Constructors
+		public Reward(IDataRecord row)
+		{
+			this.CollectId = (int)row["collectId"];
+			this.ItemId = (int)row["itemId"];
+			this.RewardType = (short)row["type"];
+			this.Name = EsoLog.ConvertEncoding((string)row["name"]);
+			this.Quality = (sbyte)row["quality"];
+			this.Quantity = (int)row["quantity"];
+			this.QuestId = (long)row["questId"];
+		}
+		#endregion
+
 		#region Public Properties
-		public int CollectId { get; } = (int)row["collectId"];
+		public int CollectId { get; }
 
-		public int ItemId { get; } = (int)row["itemId"];
+		public int ItemId { get; }
 
-		public int RewardType { get; } = (short)row["type"];
+		public int RewardType { get; }
 
-		public string Name { get; } = EsoLog.ConvertEncoding((string)row["name"]);
+		public string Name { get; }
 
-		public int Quality { get; } = (sbyte)row["quality"];
+		public int Quality { get; }
 
-		public int Quantity { get; } = (int)row["quantity"];
+		public int Quantity { get; }
 
-		public long QuestId { get; } = (long)row["questId"];
+		public long QuestId { get; }
 		#endregion
 	}
 
-	private sealed class Stage(IDataRecord row)
+	private sealed class Stage
 	{
+		#region Constructors
+		public Stage(IDataRecord row)
+		{
+			this.Id = (long)row["id"];
+			this.QuestId = (long)row["questId"];
+			this.Text = EsoLog.ConvertEncoding((string)row["text"]);
+			this.Visibility = (Visibility)(sbyte)row["visibility"];
+			this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
+		}
+		#endregion
+
 		#region Public Properties
 		public List<Condition> Conditions { get; } = [];
 
@@ -781,15 +816,15 @@ public class EsoQuests : EditJob
 			}
 		}
 
-		public long Id { get; } = (long)row["id"];
+		public long Id { get; }
 
-		public long QuestId { get; } = (long)row["questId"];
+		public long QuestId { get; }
 
-		public string Text { get; } = EsoLog.ConvertEncoding((string)row["text"]);
+		public string Text { get; }
 
-		public Visibility Visibility { get; } = (Visibility)(sbyte)row["visibility"];
+		public Visibility Visibility { get; }
 
-		public string Zone { get; } = EsoLog.ConvertEncoding((string)row["zone"]);
+		public string Zone { get; }
 		#endregion
 
 		#region Public Override Methods

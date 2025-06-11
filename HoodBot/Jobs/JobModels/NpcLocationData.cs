@@ -2,13 +2,22 @@
 
 using System.Data;
 
-public class NpcLocationData(IDataRecord row)
+public class NpcLocationData
 {
+	#region Constructors
+	public NpcLocationData(IDataRecord row)
+	{
+		this.Id = (long)row["npcId"];
+		this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
+		this.LocCount = (int)row["locCount"];
+	}
+	#endregion
+
 	#region Public Properties
-	public long Id { get; } = (long)row["npcId"];
+	public long Id { get; }
 
-	public string Zone { get; } = EsoLog.ConvertEncoding((string)row["zone"]);
+	public string Zone { get; }
 
-	public int LocCount { get; } = (int)row["locCount"];
+	public int LocCount { get; }
 	#endregion
 }
