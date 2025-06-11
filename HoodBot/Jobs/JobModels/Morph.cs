@@ -341,7 +341,7 @@ internal sealed class Morph
 						}
 						else if (!finalType.OrdinalEquals(split[2]))
 						{
-							Debug.WriteLine(coef.AbilityId + ", " + coef.Index);
+							Debug.WriteLine($"{coef.AbilityId}, {coef.Index}");
 							throw new InvalidOperationException("Multiple suffixes");
 						}
 					}
