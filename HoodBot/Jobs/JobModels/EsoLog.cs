@@ -20,7 +20,9 @@ internal static class EsoLog
 	#endregion
 
 	#region Public Properties
-	public static Regex ColourCode { get; } = new(@"\|c[0-9A-Fa-f]{6}(<content>[^\|]*?)\|r", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+	public static Regex ColourCode { get; } = new(@"\|c[0-9a-f]{6}\|?(?<content>[^\|]*?)\|r", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
+
+	public static Regex FloatFinder { get; } = new Regex(@"([\d\.]+)", RegexOptions.None, Globals.DefaultRegexTimeout);
 
 	public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
@@ -72,6 +74,7 @@ internal static class EsoLog
 		[-77] = "Max Resistance",
 		[-78] = "Magicka and Light Armor (Health Capped)",
 		[-79] = "Health or Weapon/Spell Damage",
+		[-82] = "Health or Magicka"
 	};
 
 	public static EsoVersion LatestDBUpdate(bool includePts)

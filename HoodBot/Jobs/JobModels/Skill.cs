@@ -73,14 +73,13 @@ internal abstract class Skill
 		var page = parser.Page;
 		if (page.IsMissing)
 		{
-			page.Text =
-				"{{Minimal|Skill}}";
+			var text = "{{Minimal|Skill}}";
 			if (GameInfo.Eso.ModTemplateName.Length > 0)
 			{
-				page.Text += GameInfo.Eso.ModHeader + '\n';
+				text += GameInfo.Eso.ModHeader + '\n';
 			}
 
-			page.Text +=
+			text +=
 				"{{" + SummaryTemplate + "}}\n" +
 				"\n" +
 				"<!--\n" +
@@ -88,6 +87,8 @@ internal abstract class Skill
 				"* -->\n" +
 				"{{Stub}}\n" +
 				"{{Online Skills " + this.Class + "}}";
+
+			parser.AddParsed(text);
 		}
 
 		var template = parser.FindTemplate(SummaryTemplate);
@@ -139,17 +140,13 @@ internal abstract class Skill
 	#endregion
 
 	#region Public Abstract Methods
-	public abstract void AddData(IDataRecord row, List<Coefficient> coefficients);
+	public abstract void AddData(IDataRecord row, Dictionary<long, List<Coefficient>> coefficients);
 
 	public abstract bool IsValid();
 
 	public abstract ChangeType GetChangeType(Skill previous);
-	#endregion
 
-	#region Public Virtual Methods
-	public virtual void PostProcess()
-	{
-	}
+	public abstract void PostProcess();
 	#endregion
 
 	#region Protected Static Methods

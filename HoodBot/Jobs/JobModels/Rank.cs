@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
@@ -10,16 +11,17 @@ internal class Rank
 	#region Static Fields
 	private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
-	private static readonly Regex LeadText = new(@"\A(\|c[0-9a-fA-F]{6})+.*?(\|r)+\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+	private static readonly Regex LeadText = new(@"\A<<.*?>>\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	#endregion
 
 	#region Constructors
-	protected Rank(IDataRecord row)
+	protected Rank(IDataRecord row, IReadOnlyList<Coefficient> coefficients)
 	{
-		this.Id = (int)row["id"];
+		this.Coefficients = coefficients;
+		this.Id = (long)row["abilityId"];
 		this.Index = (sbyte)row["rank"];
 		this.CastingTime = (int)row["castTime"];
-		var description = (string)row["coefDescription"];
+		var description = (string)row["rawDescription"];
 		if (description.Length == 0)
 		{
 			description = (string)row["description"];
@@ -31,14 +33,12 @@ internal class Rank
 			description = description.Replace(partial.From, partial.To, StringComparison.Ordinal);
 		}
 
+		description = EsoLog.ColourCode.Replace(description, "'''${content}'''");
 		description = BonusFinder.Replace(description, string.Empty);
-		if (!LeadText.Match(description).Success)
+		var descHeader = EsoLog.ColourCode.Replace(EsoLog.ConvertEncoding((string)row["descHeader"]), "${content}");
+		if (descHeader.Length > 0)
 		{
-			var descHeader = EsoLog.ConvertEncoding((string)row["descHeader"]);
-			if (descHeader.Length > 0)
-			{
-				description = $"|cffffff{descHeader}|r " + description;
-			}
+			description = $"'''{descHeader}''' " + description;
 		}
 
 		this.Description = RegexLibrary.PruneExcessWhitespace(description);
@@ -48,11 +48,13 @@ internal class Rank
 	#region Public Properties
 	public int CastingTime { get; }
 
+	public IReadOnlyList<Coefficient> Coefficients { get; }
+
 	public string Description { get; }
 
 	public double Factor { get; protected init; } = 1.0;
 
-	public int Id { get; }
+	public long Id { get; }
 
 	public sbyte Index { get; }
 	#endregion

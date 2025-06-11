@@ -7,3 +7,6 @@
 [*.{cs,vb}]
 
 dotnet_diagnostic.MA0076.severity = none
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none

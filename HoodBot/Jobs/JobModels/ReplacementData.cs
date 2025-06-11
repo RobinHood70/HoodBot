@@ -7,27 +7,20 @@ internal static class ReplacementData
 {
 	#region Public Static Properties
 	// Replacements that are specific to certain IDs but do not apply to the general case.
-	public static Dictionary<int, (string From, string To)> IdPartialReplacements { get; } = new Dictionary<int, (string, string)>
+	public static Dictionary<long, (string From, string To)> IdPartialReplacements { get; } = new Dictionary<long, (string, string)>
 	{
-		[23234] = ("|cffffff1|r second", "|cffffff1|r seconds"),
-		[24574] = ("|cffffff1|r minute", "|cffffff1|r minutes"),
-		[32166] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-		[33195] = ("second after leaving the path", "seconds after leaving the path"),
-		[37631] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-		[41567] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
-		[85982] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
-		[85983] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
-		[85984] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
-		[85985] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
-		[85986] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
-		[85987] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
-		[85988] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
-		[85989] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
-		[85990] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
-		[85991] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
-		[85992] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
-		[85993] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
-		[93914] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
+		[85982] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Feral Guardian|grizzly]]"),
+		[85983] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Feral Guardian|grizzly]]"),
+		[85984] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Feral Guardian|grizzly]]"),
+		[85985] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Feral Guardian|grizzly]]"),
+		[85986] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Eternal Guardian|grizzly]]"),
+		[85987] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Eternal Guardian|grizzly]]"),
+		[85988] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Eternal Guardian|grizzly]]"),
+		[85989] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Eternal Guardian|grizzly]]"),
+		[85990] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Wild Guardian|grizzly]]"),
+		[85991] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Wild Guardian|grizzly]]"),
+		[85992] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Wild Guardian|grizzly]]"),
+		[85993] = ("Rouse a grizzly", "Rouse a [[Online:Familiars#Wild Guardian|grizzly]]"),
 	};
 
 	public static Dictionary<string, string> NpcNameFixes { get; } = new Dictionary<string, string>(StringComparer.Ordinal)

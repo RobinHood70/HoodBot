@@ -5,20 +5,35 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using RobinHood70.CommonCode;
 
-internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
+internal sealed class Morph
 {
+	#region Constructors
+	public Morph(IDataRecord row)
+	{
+		this.AbilityId = (long)row["abilityId"];
+		this.EffectLine = EsoLog.ConvertEncoding((string)row["effectLines"]);
+		this.Index = (sbyte)row["morph"];
+		this.MaxRank = (sbyte)row["maxRank"];
+		this.Name = EsoLog.ConvertEncoding((string)row["name"]);
+		this.Target = EsoLog.ConvertEncoding((string)row["target"]);
+	}
+	#endregion
+
 	#region Public Properties
-	public IReadOnlyList<Coefficient> Coefficients => coefficients;
+	public long AbilityId { get; }
 
 	public string? Description { get; internal set; }
 
-	public string EffectLine { get; } = EsoLog.ConvertEncoding((string)row["effectLines"]);
+	public string EffectLine { get; }
 
-	public int Index { get; } = (sbyte)row["morph"];
+	public int Index { get; }
 
-	public string Name { get; } = EsoLog.ConvertEncoding((string)row["name"]);
+	public sbyte MaxRank { get; }
+
+	public string Name { get; }
 
 	public string ParamText => this.Index switch
 	{
@@ -30,14 +45,10 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 
 	public IList<ActiveRank> Ranks { get; } = new List<ActiveRank>(4);
 
-	public string Target { get; } = EsoLog.ConvertEncoding((string)row["target"]);
+	public string Target { get; }
 	#endregion
 
 	#region Public Static Methods
-	public static string NowrapSame<T>(IEnumerable<T> values)
-		where T : IEquatable<T>, IFormattable =>
-		NowrapList(Same(values));
-
 	public static string NowrapSameString(IEnumerable<string> values) =>
 		NowrapList(SameString(values));
 	#endregion
@@ -75,8 +86,13 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 		return newCosts;
 	}
 
-	public ChangeType GetChangeType(Morph previous)
+	public ChangeType GetChangeType(Morph? previous)
 	{
+		if (previous is null)
+		{
+			return ChangeType.Major;
+		}
+
 		// Descriptions are handled via the ranks, which allows it to compare original descriptions.
 		if (!this.EffectLine.OrdinalICEquals(previous.EffectLine) ||
 			!this.Target.OrdinalICEquals(previous.Target))
@@ -125,6 +141,23 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 
 		return retval;
 	}
+
+	public bool IsValid()
+	{
+		if (this.Description is null)
+		{
+			Debug.WriteLine($"{this.Name} has no description.");
+			return false;
+		}
+
+		if (this.Ranks[^1].Index != this.MaxRank)
+		{
+			Debug.WriteLine($"Warning: {this.Name} has the wrong maximum rank ({this.Ranks[^1].Index} vs. {this.MaxRank}).");
+			return false;
+		}
+
+		return true;
+	}
 	#endregion
 
 	#region Public Override Methods
@@ -138,11 +171,11 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 		var splitLength = splitDescriptions[0].Length;
 
 		var errors = false;
-		var text = new List<string>();
+		var sb = new StringBuilder();
 		for (var i = 0; i < splitLength; i++)
 		{
-			var data = this.ParseRankDescriptions(splitDescriptions, i);
-			var unique = SameString(data);
+			var (values, suffix) = this.ParseRankDescriptions(splitDescriptions, i);
+			var unique = SameString(values);
 			if ((i & 1) == 0)
 			{
 				if (unique.Count != 1)
@@ -153,7 +186,7 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 						Debug.WriteLine($"{rank.Id}: {rank.Description}");
 					}
 
-					foreach (var dataItem in data)
+					foreach (var dataItem in values)
 					{
 						Debug.WriteLine(dataItem);
 					}
@@ -162,32 +195,40 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 				}
 				else
 				{
-					text.Add(unique[0]);
+					sb.Append(unique[0]);
 				}
 			}
 			else
 			{
-				var addText = NowrapList(unique);
-				text.Add(addText);
+				var text = NowrapList(unique);
+				var allNumeric = true;
+				foreach (var value in unique)
+				{
+					if (!float.TryParse(value, CultureInfo.InvariantCulture, out var _))
+					{
+						allNumeric = false;
+						break;
+					}
+				}
+
+				if (allNumeric)
+				{
+					sb
+						.Append("'''")
+						.Append(text)
+						.Append("'''")
+						.Append(suffix);
+				}
+				else
+				{
+					sb.Append(text);
+				}
 			}
 		}
 
-		if (errors)
-		{
-			return string.Empty;
-		}
-
-		List<string> descriptions = [];
-		for (var i = 0; i < text.Count; i++)
-		{
-			// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every odd-numbered value with bold instead.
-			var fragment = text[i];
-			descriptions.Add((i & 1) == 1
-				? "'''" + fragment + "'''"
-				: fragment);
-		}
-
-		return string.Concat(descriptions);
+		return errors
+			? string.Empty
+			: sb.ToString();
 	}
 	#endregion
 
@@ -274,27 +315,55 @@ internal sealed class Morph(IDataRecord row, List<Coefficient> coefficients)
 		return splitDescriptions;
 	}
 
-	private List<string> ParseRankDescriptions(List<string[]> splitDescriptions, int i)
+	private (List<string> Values, string? DamageType) ParseRankDescriptions(List<string[]> splitDescriptions, int arrayIndex)
 	{
-		var descriptor = string.Empty;
 		List<string> retval = [];
-		for (var j = 0; j < this.Ranks.Count; j++)
+		string? finalType = null;
+		for (var rankNum = 0; rankNum < this.Ranks.Count; rankNum++)
 		{
-			var coefNum = int.Parse(splitDescriptions[j][i], CultureInfo.InvariantCulture);
-			var rank = this.Ranks[j];
-			var coef = this.Coefficients[coefNum];
-			var text = coef.SkillDamageText(rank.Factor);
+			var text = splitDescriptions[rankNum][arrayIndex];
+			if ((arrayIndex & 1) == 1)
+			{
+				var rank = this.Ranks[rankNum];
+				var coefNum = int.Parse(text, CultureInfo.InvariantCulture) - 1;
+				var coef = rank.Coefficients[coefNum];
+				text = coef.SkillDamageText(rank.Factor);
+				if (coef.CoefficientType == -75)
+				{
+					var split = EsoLog.FloatFinder.Split(text, 2);
+					if (split.Length == 3)
+					{
+						Debug.Assert(split[0].Length == 0, "Number isn't first - this will need both prefix and suffix handling!");
+						text = split[1];
+						if (finalType is null)
+						{
+							finalType = split[2];
+						}
+						else if (!finalType.OrdinalEquals(split[2]))
+						{
+							Debug.WriteLine(coef.AbilityId + ", " + coef.Index);
+							throw new InvalidOperationException("Multiple suffixes");
+						}
+					}
+				}
+				else if (coef.IsDamage)
+				{
+					var damageSuffix = " " + Coefficient.DamageTypes[coef.DamageType] + " Damage";
+					if (finalType is null)
+					{
+						finalType = damageSuffix;
+					}
+					else if (!finalType.OrdinalEquals(damageSuffix))
+					{
+						throw new InvalidOperationException("Multiple damage types");
+					}
+				}
+			}
 
 			retval.Add(text);
 		}
 
-		if (descriptor.Length > 0)
-		{
-			retval[0] = '(' + retval[0];
-			retval[^1] += $" × {descriptor})";
-		}
-
-		return retval;
+		return (retval, finalType);
 	}
 	#endregion
 }

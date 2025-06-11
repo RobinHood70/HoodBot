@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Jobs.Design;
@@ -19,9 +20,10 @@ internal sealed class EsoSkills : EditJob
 	private const string TooltipsTable = "skillTooltips";
 	private const string SkillQuery =
 		"SELECT\n" +
-			"st.abilityId\n" +
+			"st.abilityId,\n" +
 			"st.skillTypeName,\n" +
 			"st.learnedLevel,\n" +
+			"st.maxRank,\n" +
 			"st.baseName,\n" +
 			"st.type,\n" +
 			"st.icon,\n" +
@@ -43,7 +45,7 @@ internal sealed class EsoSkills : EditJob
 			"ms.mechanicTime,\n" +
 			"ms.rank,\n" +
 			"ms.morph,\n" +
-			"ms.rawDescription,\n" +
+			"ms.rawDescription\n" +
 		"FROM\n" +
 			"$st st\n" +
 		"INNER JOIN\n" +
@@ -53,12 +55,11 @@ internal sealed class EsoSkills : EditJob
 			"ms.isPlayer AND\n" +
 			"ms.morph >= 0 AND\n" +
 			"ms.skillLine != 'Emperor'\n" +
-		"ORDER BY st.baseName, st.skillTypeName, ms.morph, ms.rank;";
+		"ORDER BY st.baseName, ms.morph, ms.name, ms.rank;";
 
 	private const string CoefficientQuery =
 		"SELECT * " +
 		"FROM $tt " +
-		"WHERE isPlayer = 1" +
 		"ORDER BY abilityId, idx";
 	#endregion
 
@@ -142,17 +143,15 @@ internal sealed class EsoSkills : EditJob
 	#endregion
 
 	#region Private Static Methods
-	private static Dictionary<int, List<Coefficient>> GetCoefficients(EsoVersion version)
+	private static Dictionary<long, List<Coefficient>> GetCoefficients(EsoVersion version)
 	{
-		var retval = new Dictionary<int, List<Coefficient>>();
+		var retval = new Dictionary<long, List<Coefficient>>();
 		var versionText = version.ToString();
 		var query = CoefficientQuery
 			.Replace("$tt", TooltipsTable + versionText, StringComparison.Ordinal);
-
-		var errors = false;
 		foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 		{
-			var abilityId = (int)row["abilityId"];
+			var abilityId = (long)(int)row["abilityId"]; // Mismatch in sizes between tables, so convert to long here.
 			if (!retval.TryGetValue(abilityId, out var list))
 			{
 				list = [];
@@ -161,12 +160,13 @@ internal sealed class EsoSkills : EditJob
 
 			var coef = new Coefficient(row);
 			list.Add(coef);
-			errors |= coef.IsValid();
+			if (!coef.IsValid())
+			{
+				Debug.WriteLine($"Error in abilityId {abilityId}, coef {coef.Index}");
+			}
 		}
 
-		return errors
-			? throw new InvalidOperationException("Problems found in skill data.")
-			: retval;
+		return retval;
 	}
 
 	private static SortedList<string, string> GetIconChanges()
@@ -191,8 +191,7 @@ internal sealed class EsoSkills : EditJob
 			.Replace("$st", SkillTable + versionText, StringComparison.Ordinal)
 			.Replace("$ms", MinedTable + versionText, StringComparison.Ordinal);
 
-		var errors = false;
-		Dictionary<int, Skill> byId = new();
+		Dictionary<string, Skill> retval = new(StringComparer.Ordinal);
 		foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 		{
 			// As of Update 45, there are a bunch of skills being captured that shouldn't be. All have no prefix in skillTypeName, so check for that and skip the row if that's the case.
@@ -202,26 +201,27 @@ internal sealed class EsoSkills : EditJob
 				continue;
 			}
 
-			var abilityId = (int)row["abilityId"];
-			var coefs = coefficients[abilityId];
-			if (!byId.TryGetValue(abilityId, out var currentSkill))
+			var isPassive = (sbyte)row["isPassive"] == 1;
+			Skill newSkill = isPassive
+				? new PassiveSkill(row)
+				: new ActiveSkill(row);
+
+			// At this point, newSkill has only a few basics and is used primarily to figure out the correct PageName.
+			if (!retval.TryGetValue(newSkill.PageName, out var currentSkill))
 			{
-				var isPassive = (sbyte)row["isPassive"] == 1;
-				currentSkill = isPassive
-					? new PassiveSkill(row, coefs)
-					: new ActiveSkill(row);
-				byId.Add(abilityId, currentSkill);
+				retval.Add(newSkill.PageName, newSkill);
+				currentSkill = newSkill;
 			}
 
-			currentSkill.AddData(row, coefs);
+			// Once we've figured out which skill to use for currentSkill, AddData() does the heavy lifting, figuring out which morph and rank we're adding.
+			currentSkill.AddData(row, coefficients);
 		}
 
-		Dictionary<string, Skill> retval = new(StringComparer.Ordinal);
-		foreach (var skill in byId.Values)
+		var errors = false;
+		foreach (var skill in retval.Values)
 		{
 			skill.PostProcess();
 			errors |= !skill.IsValid();
-			retval.Add(skill.PageName, skill);
 		}
 
 		return errors

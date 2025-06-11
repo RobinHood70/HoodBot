@@ -9,8 +9,8 @@ using RobinHood70.CommonCode;
 internal sealed class ActiveRank : Rank
 {
 	#region Constructors
-	public ActiveRank(IDataRecord row)
-		: base(row)
+	public ActiveRank(IDataRecord row, List<Coefficient> coefficients)
+		: base(row, coefficients)
 	{
 		static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
 

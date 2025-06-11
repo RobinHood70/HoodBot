@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
@@ -19,13 +20,77 @@ public enum MechanicTypes
 	Daedric = 1 << 6,
 }
 
-internal sealed class Coefficient(IDataRecord row)
+internal sealed class Coefficient
 {
 	#region Static Fields
-	private static readonly Dictionary<short, string> DamageTypes = new()
+	private static readonly Dictionary<(int, sbyte), (string From, string To)> ValueReplacements = new()
 	{
-		[0] = "None",
-		[1] = "Generic",
+		[(23234, 1)] = ("1 second", "1 seconds"),
+		[(24574, 1)] = ("1 minute", "1 minutes"),
+		[(32166, 2)] = ("1 minute", "60 seconds"),
+		[(33195, 3)] = ("1 second", "1 seconds"),
+		[(37631, 2)] = ("1 minute", "60 seconds"),
+		[(41567, 2)] = ("1 minute", "60 seconds"),
+		[(93914, 3)] = ("1 minute", "60 seconds"),
+	};
+	#endregion
+
+	#region Fields
+	private int? newTicks;
+	#endregion
+
+	#region Constructors
+	public Coefficient(IDataRecord row)
+	{
+		this.A = (float)row["a"];
+		this.AbilityId = (int)row["abilityId"];
+		this.B = (float)row["b"];
+		this.C = (float)row["c"];
+		this.CoefficientType = (sbyte)row["coefType"];
+		this.Cooldown = (int)row["cooldown"];
+		this.DamageType = (int)row["dmgType"];
+		this.Duration = (int)row["duration"];
+		this.HasRankMod = (bool)row["hasRankMod"];
+		this.Index = (sbyte)row["idx"];
+		this.IsADE = (bool)row["isAOE"];
+		this.IsDamage = (bool)row["isDmg"] || ((int)row["origAbilityId"] == 185897 && this.Index == 3);
+		this.IsDamageShield = (bool)row["isDmgShield"];
+		this.IsElfBane = (bool)row["isElfBane"];
+		this.IsFlameAOE = (bool)row["isFlameAOE"];
+		this.IsHeal = (bool)row["isHeal"];
+		this.IsMelee = (bool)row["isMelee"];
+		this.IsPlayer = (bool)row["isPlayer"];
+		this.R = (float)row["r"];
+		this.RawType = (sbyte)row["rawType"];
+		this.RawValue1 = (int)row["rawValue1"];
+		this.RawValue2 = (int)row["rawValue2"];
+		this.StartTime = (int)row["startTime"];
+		this.TickTime = (int)row["tickTime"];
+		this.UsesManualCoefficient = (bool)row["usesManualCoef"];
+
+		var value = EsoLog.ConvertEncoding((string)row["value"]);
+		var key = (this.AbilityId, this.Index);
+		if (ValueReplacements.TryGetValue(key, out var replacement))
+		{
+			if (replacement.From.OrdinalEquals(value))
+			{
+				value = replacement.To;
+			}
+			else
+			{
+				Debug.WriteLine("Replacement " + key + " is out of date.");
+			}
+		}
+
+		this.Value = value;
+	}
+	#endregion
+
+	#region Public Static Properties
+	public static Dictionary<int, string> DamageTypes { get; } = new()
+	{
+		[0] = "<None>",
+		[1] = string.Empty,
 		[2] = "Physical",
 		[3] = "Flame",
 		[4] = "Shock",
@@ -39,81 +104,70 @@ internal sealed class Coefficient(IDataRecord row)
 		[12] = "Bleed",
 		[515] = "Flame",
 	};
-	#endregion
 
-	#region Fields
-	private int? newTicks;
-	#endregion
-
-	#region Public Static Properties
 	public static Regex RawCoefficient { get; } = new(@"<<(?<index>\d+)>>", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	#endregion
 
 	#region Public Properties
-	public float A { get; } = (float)row["a"];
+	public float A { get; }
 
-	public float B { get; } = (float)row["b"];
+	public int AbilityId { get; }
 
-	public float C { get; } = (float)row["c"];
+	public float B { get; }
 
-	public sbyte CoefficientType { get; } = (sbyte)row["coefType"];
+	public float C { get; }
 
-	public int Cooldown { get; } = (int)row["cooldown"];
+	public sbyte CoefficientType { get; }
 
-	public short DamageType { get; } = (short)row["damageType"];
+	public int Cooldown { get; }
 
-	public int Duration { get; } = (int)row["duration"];
+	public int DamageType { get; }
 
-	public bool HasRankMod { get; } = (bool)row["hasRankMod"];
+	public int Duration { get; }
 
-	public byte Index { get; } = (byte)row["idx"];
+	public bool HasRankMod { get; }
 
-	public bool IsADE { get; } = (bool)row["isAOE"];
+	public sbyte Index { get; }
 
-	public bool IsDDT { get; } = (bool)row["isDDT"];
+	public bool IsADE { get; }
 
-	public bool IsDamage { get; } = (bool)row["isDmg"];
+	public bool IsDamage { get; }
 
-	public bool IsDmgShield { get; } = (bool)row["isDmgShield"];
+	public bool IsDamageShield { get; }
 
-	public bool IsElfBane { get; } = (bool)row["isElfBane"];
+	public bool IsElfBane { get; }
 
-	public bool IsFlameAOE { get; } = (bool)row["isFlameAOE"];
+	public bool IsFlameAOE { get; }
 
-	public bool IsHeal { get; } = (bool)row["isHeal"];
+	public bool IsHeal { get; }
 
-	public bool IsMelee { get; } = (bool)row["isMelee"];
+	public bool IsMelee { get; }
 
-	public bool IsPlayer { get; } = (bool)row["isPlayer"];
+	public bool IsPlayer { get; }
 
-	public byte RawType { get; } = (byte)row["rawType"];
+	public float R { get; }
 
-	public int RawValue1 { get; } = (int)row["rawValue1"];
+	public sbyte RawType { get; }
 
-	public int RawValue2 { get; } = (int)row["rawValue2"];
+	public int RawValue1 { get; }
 
-	public int StartTime { get; } = (int)row["startTime"];
+	public int RawValue2 { get; }
 
-	public int TickTime { get; } = (int)row["tickTime"];
+	public int StartTime { get; }
 
-	public bool UsesManualCoefficient { get; } = (bool)row["usesManualCoefficient"];
+	public int TickTime { get; }
 
-	public string Value { get; } = EsoLog.ConvertEncoding((string)row["value"]);
+	public bool UsesManualCoefficient { get; }
 
-	public float R { get; } = (float)row["r"];
+	public string Value { get; }
 	#endregion
 
 	#region Public Methods
-	public bool IsValid() => this.A != -1 || this.B != -1 || this.C != -1;
+	public bool IsValid() => this.A != -1.0 || this.B != -1.0 || this.C != -1.0;
 
 	public string SkillDamageText(double rankFactor)
 	{
 		var inputValues = new InputValues();
-		if (this.CoefficientType == -75)
-		{
-			throw new NotSupportedException();
-		}
-
 		double value;
 		switch (this.CoefficientType)
 		{
@@ -150,8 +204,8 @@ internal sealed class Coefficient(IDataRecord row)
 				}
 
 				return this.C == 0
-					? $"({this.A:n5} * LightArmor)"
-					: $"({this.A:n5} * LightArmor + {this.C:n5})";
+					? $"({this.A:g5} * LightArmor)"
+					: $"({this.A:g5} * LightArmor + {this.C:g5})";
 			case -52: // Medium Armor
 				if (inputValues.MediumArmor is int mediumArmor)
 				{
@@ -160,8 +214,8 @@ internal sealed class Coefficient(IDataRecord row)
 				}
 
 				return this.C == 0
-					? $"({this.A:n5} * MediumArmor)"
-					: $"({this.A:n5} * MediumArmor + {this.C:n5})";
+					? $"({this.A:g5} * MediumArmor)"
+					: $"({this.A:g5} * MediumArmor + {this.C:g5})";
 			case -53: // Heavy Armor
 				if (inputValues.HeavyArmor is int heavyArmor)
 				{
@@ -170,8 +224,8 @@ internal sealed class Coefficient(IDataRecord row)
 				}
 
 				return this.C == 0
-					? $"({this.A:n5} * HeavyArmor)"
-					: $"({this.A:n5} * HeavyArmor + {this.C:n5})";
+					? $"({this.A:g5} * HeavyArmor)"
+					: $"({this.A:g5} * HeavyArmor + {this.C:g5})";
 			case -54: // Daggers
 				if (inputValues.DaggerWeapon is int daggerWeapon)
 				{
@@ -179,7 +233,7 @@ internal sealed class Coefficient(IDataRecord row)
 					break;
 				}
 
-				return $"({this.A:n5} * Dagger)";
+				return $"({this.A:g5} * Dagger)";
 			case -55: // Armor Types
 				if (inputValues.ArmorTypes is int armorTypes)
 				{
@@ -187,7 +241,7 @@ internal sealed class Coefficient(IDataRecord row)
 					break;
 				}
 
-				return $"({this.A:n5} * ArmorTypes)";
+				return $"({this.A:g5} * ArmorTypes)";
 			case -56: // Spell + Weapon Damage
 				value = Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
 				break;
@@ -249,7 +303,7 @@ internal sealed class Coefficient(IDataRecord row)
 			case -74: // Weapon Power
 				value = Math.Floor(this.A * inputValues.WeaponPower) + this.C;
 				break;
-			case -75: // Constant (should be handled before this point)
+			case -75: // Constant (Dave handles this at the top, but for my purposes, this seems sufficient)
 				return this.Value;
 			case -76: // Health or Spell Damage
 				value = Math.Max(
@@ -334,7 +388,7 @@ internal sealed class Coefficient(IDataRecord row)
 			}
 		}
 
-		return $"{value:n5}";
+		return $"{value:g5}";
 	}
 	#endregion
 
@@ -342,7 +396,7 @@ internal sealed class Coefficient(IDataRecord row)
 	private sealed class InputValues
 	{
 		#region Fields
-		private const int DefaultArmor = 11000;
+		private const int DefaultArmor = 10000;
 		private const int DefaultDamage = 3000;
 		private const int DefaultHealth = 16000;
 		private const int DefaultLevel = 66;
