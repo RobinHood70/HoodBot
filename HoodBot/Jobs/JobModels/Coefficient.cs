@@ -53,7 +53,7 @@ internal sealed class Coefficient
 		this.HasRankMod = (bool)row["hasRankMod"];
 		this.Index = (sbyte)row["idx"];
 		this.IsADE = (bool)row["isAOE"];
-		this.IsDamage = (bool)row["isDmg"] || ((int)row["origAbilityId"] == 185897 && this.Index == 3);
+		this.IsDamage = (bool)row["isDmg"];
 		this.IsDamageShield = (bool)row["isDmgShield"];
 		this.IsElfBane = (bool)row["isElfBane"];
 		this.IsFlameAOE = (bool)row["isFlameAOE"];
