@@ -74,6 +74,10 @@ public class Section
 	public string? GetTitle() => this.Header is null
 		? null
 		: WikiTextVisitor.Value(this.Header.Title).Trim();
+
+	/// <summary>Gets the raw text of the section.</summary>
+	/// <returns>The raw text of the section.</returns>
+	public string ToRaw() => this.Header?.ToRaw() + this.Content.ToRaw();
 	#endregion
 
 	#region Public Override Methods
