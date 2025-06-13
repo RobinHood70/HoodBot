@@ -23,7 +23,7 @@ public class SectionCollection : List<Section>
 
 	#region Public Properties
 
-	/// <summary>Gets or sets the string comparer for non-collection-based searches when none is specified. Colleection-based searches use the default search from the collection's Contains method.</summary>
+	/// <summary>Gets or sets the string comparer for non-collection-based searches when none is specified. Collection-based searches use the default search from the collection's Contains method.</summary>
 	public StringComparer Comparer { get; set; } = StringComparer.Ordinal;
 
 	/// <summary>Gets the factory to use for text manipulation.</summary>
