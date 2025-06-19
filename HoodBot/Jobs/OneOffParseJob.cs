@@ -126,26 +126,6 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 	#endregion
 
 	#region Private Static Methods
-	private void AddSection(SiteParser parser, string recipe)
-	{
-		var header = parser.Factory.HeaderNodeFromParts(3, HeaderText);
-		var content = new WikiNodeCollection(parser.Factory, parser.Parse('\n' + recipe));
-		var newSection = new Section(header, content);
-
-		var sections = parser.ToSections(3);
-		CreateFakeFooter(parser.Site, sections);
-		if (sections.Count > 1)
-		{
-			newSection.Content.AddText("\n\n");
-			this.InsertIntoSections(sections, newSection);
-			parser.FromSections(sections);
-		}
-		else
-		{
-			InsertIntoParser(parser, newSection);
-		}
-	}
-
 	private static void CreateFakeFooter(Site site, SectionCollection sections)
 	{
 		var lastSection = sections[^1];
@@ -189,6 +169,28 @@ public class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 		var insertText = newSection.ToRaw();
 		insertText = "<noinclude>\n{{NewLeft}}\n" + insertText + "</noinclude>";
 		parser.AddParsed(insertText);
+	}
+	#endregion
+
+	#region
+	private void AddSection(SiteParser parser, string recipe)
+	{
+		var header = parser.Factory.HeaderNodeFromParts(3, HeaderText);
+		var content = new WikiNodeCollection(parser.Factory, parser.Parse('\n' + recipe));
+		var newSection = new Section(header, content);
+
+		var sections = parser.ToSections(3);
+		CreateFakeFooter(parser.Site, sections);
+		if (sections.Count > 1)
+		{
+			newSection.Content.AddText("\n\n");
+			this.InsertIntoSections(sections, newSection);
+			parser.FromSections(sections);
+		}
+		else
+		{
+			InsertIntoParser(parser, newSection);
+		}
 	}
 
 	private void InsertIntoSections(SectionCollection sections, Section newSection)
