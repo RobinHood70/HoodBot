@@ -297,9 +297,10 @@ public abstract class MovePagesJob : EditJob
 
 	protected virtual void CheckRemaining()
 	{
-		// Since links to either moved pages or the source of updated links are probably undesirable, we add both to the list to check.
 		this.StatusWriteLine("Waiting for job queue to clear");
 		this.Site.WaitForJobQueue();
+
+		// Since links to either moved pages or the source of updated links are probably undesirable, we add both to the list to check.
 		this.StatusWriteLine("Checking remaining pages");
 		TitleCollection backlinkTitles = new(this.Site);
 		foreach (var replacement in this.linkUpdates)
@@ -342,7 +343,6 @@ public abstract class MovePagesJob : EditJob
 			Thread.Sleep(15); // Arbitrary wait to roughly ensure that job queue has started.
 			this.StatusWriteLine("Waiting for job queue to clear");
 			this.Site.WaitForJobQueue();
-
 			this.StatusWriteLine("Double-checking leftover remaining pages");
 			leftovers.Clear();
 			allBacklinks.Clear();
