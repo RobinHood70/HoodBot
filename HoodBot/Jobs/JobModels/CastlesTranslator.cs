@@ -357,7 +357,7 @@ internal sealed class CastlesTranslator
 			var varList = new List<string>(split.Length);
 			foreach (var id in split)
 			{
-				// Square breackets appear to indicate randomness weight.
+				// Square brackets appear to indicate randomness weight.
 				var stripped = id.Split('[', 2)[0];
 				varList.Add(stripped);
 			}
