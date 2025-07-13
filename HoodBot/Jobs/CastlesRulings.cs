@@ -57,7 +57,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		["BookTitles"] = "{{Hover|{0}|<random book title>}}",
 		["FirstEdition_Variations"] = "{{Hover|{0}|<first edition>}}",
 		["INN001_EstablishmentName"] = "<random inn name>",
-		["PR006_Joke_Variations"] = "<random joke>",
+		["PR006_Joke_Variations"] = "<[[Castles:Jokes#Ruling_Jokes|Random joke]]>",
 		["PR020_Dish_Variations"] = "{{Hover|{0}|<random dish>}}",
 		["RoyalAddress"] = "{{Hover|{0}|<Royal Address>}}",
 		["SR030_RulerFamilyMember"] = "{{Hover|{0}|<random family member>}}",
@@ -467,7 +467,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		{
 			this.Group = group;
 			this.Name = WikiTextUtilities.DecodeAndNormalize(rulingObject.MustHaveString("_debugRulingName") ?? string.Empty);
-
 			var descId = rulingObject.MustHaveString("_rulingDescription");
 			if (data.Translator.GetSentence(descId) is not string translated)
 			{
