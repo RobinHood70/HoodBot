@@ -149,7 +149,6 @@ public class EsoMatchIcons : EditJob
 
 	private static bool IsBook(PageParts parts)
 	{
-		var isBook = false;
 		foreach (var link in parts.Categories)
 		{
 			var title = link.Title;
@@ -158,12 +157,11 @@ public class EsoMatchIcons : EditJob
 				title.PageNameEquals("ON-icon-minor adornment-Necklace.png") ||
 				title.PageNameEquals("ON-icon-minor adornment-Ring.png"))
 			{
-				isBook = true;
-				break;
+				return true;
 			}
 		}
 
-		return isBook;
+		return false;
 	}
 
 	private static List<SiteLink> ParseCatgories(Site site, SiteParser parser)
