@@ -32,7 +32,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create NPC page";
 
-	protected override bool IsValid(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
+	protected override bool IsValidPage(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
 
 	protected override IDictionary<Title, Npcs> LoadItems()
 	{

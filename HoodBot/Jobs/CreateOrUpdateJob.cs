@@ -26,7 +26,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 	#endregion
 
 	#region Protected Abstract Methods
-	protected abstract bool IsValid(SiteParser parser, T item);
+	protected abstract bool IsValidPage(SiteParser parser, T item);
 
 	protected abstract IDictionary<Title, T> LoadItems();
 	#endregion
@@ -110,7 +110,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 			if (page.Exists)
 			{
 				var parser = new SiteParser(page);
-				if (this.IsValid(parser, items[title]))
+				if (this.IsValidPage(parser, items[title]))
 				{
 					parsedPages.Add(parser);
 					remaining.Remove(title);
@@ -142,7 +142,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 			if (page.Exists)
 			{
 				var parser = new SiteParser(page);
-				if (this.IsValid(parser, items[title]))
+				if (this.IsValidPage(parser, items[title]))
 				{
 					parsedPages.Add(parser);
 					remaining.Remove(title);
@@ -168,13 +168,13 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 			var text = this.NewPageText(title, item);
 			var page = this.Site.CreatePage(title, text);
 			var parser = new SiteParser(page);
-			if (this.IsValid(parser, item))
+			if (this.IsValidPage(parser, item))
 			{
 				yield return parser;
 			}
 			else
 			{
-				this.Warn($"New page [[{page.Title.FullPageName()}]] failed validity check.");
+				this.Warn($"New page [[{page.Title.FullPageName()}]] fails validity check.");
 			}
 		}
 	}

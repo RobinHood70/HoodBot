@@ -43,7 +43,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update faction page";
 
-	protected override bool IsValid(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
+	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
 
 	protected override IDictionary<Title, Redirect> LoadItems()
 	{

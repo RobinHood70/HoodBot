@@ -30,7 +30,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create weapon page";
 
-	protected override bool IsValid(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
+	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
 
 	protected override IDictionary<Title, List<CsvRow>> LoadItems()
 	{

@@ -32,7 +32,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create armor page";
 
-	protected override bool IsValid(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
+	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
 
 	protected override IDictionary<Title, List<SFItem>> LoadItems()
 	{

@@ -52,7 +52,7 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create book page";
 
-	protected override bool IsValid(SiteParser parser, Book item) => parser.FindTemplate("Game Book") is not null;
+	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate("Game Book") is not null;
 
 	protected override IDictionary<Title, Book> LoadItems()
 	{

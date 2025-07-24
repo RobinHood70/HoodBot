@@ -58,7 +58,7 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Update Aid Items";
 
-	protected override bool IsValid(SiteParser parser, SFItem item) =>
+	protected override bool IsValidPage(SiteParser parser, SFItem item) =>
 		parser.FindTemplate("Item Summary") is ITemplateNode template &&
 		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
 

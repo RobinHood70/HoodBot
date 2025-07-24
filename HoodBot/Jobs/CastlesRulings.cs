@@ -104,7 +104,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 	protected override string GetEditSummary(Page page) => "Update rulings";
 
-	protected override bool IsValid(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
+	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
 
 	protected override IDictionary<Title, Ruling> LoadItems()
 	{

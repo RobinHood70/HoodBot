@@ -29,7 +29,7 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Update effects";
 
-	protected override bool IsValid(SiteParser parser, Effect item) =>
+	protected override bool IsValidPage(SiteParser parser, Effect item) =>
 		parser.Page.IsRedirect &&
 		parser.LinkNodes.First() is ILinkNode linkNode &&
 		linkNode.GetTitle(parser.Site) == this.effectsTitle;

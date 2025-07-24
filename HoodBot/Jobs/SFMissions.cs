@@ -46,7 +46,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update mission";
 
-	protected override bool IsValid(SiteParser parser, Mission item) =>
+	protected override bool IsValidPage(SiteParser parser, Mission item) =>
 		FindTemplate(parser, item) is not null;
 
 	protected override IDictionary<Title, Mission> LoadItems()

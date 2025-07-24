@@ -30,7 +30,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create variant redirect"; // "Create/update creature page";
 
-	protected override bool IsValid(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
+	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
 
 	protected override IDictionary<Title, Creature> LoadItems()
 	{
