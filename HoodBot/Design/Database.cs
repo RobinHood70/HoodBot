@@ -28,6 +28,11 @@ public class Database
 	{
 		using MySqlConnection connection = new(connectionString);
 		connection.Open();
+		return RunQuery(connection, query, pageSize);
+	}
+
+	public static IEnumerable<IDataRecord> RunQuery(MySqlConnection connection, string query, long pageSize)
+	{
 		if (pageSize <= 0)
 		{
 			pageSize = long.MaxValue;
@@ -55,6 +60,20 @@ public class Database
 	}
 
 	public static IEnumerable<T> RunQuery<T>(string connectionString, string query, Func<IDataRecord, T> factory) => RunQuery(connectionString, query, -1, factory);
+
+	public static IEnumerable<T> RunQuery<T>(MySqlConnection connection, string query, long pageSize, Func<IDataRecord, T> factory)
+	{
+		ArgumentNullException.ThrowIfNull(factory);
+		return ReallyRunQuery(connection, query, pageSize, factory);
+
+		static IEnumerable<T> ReallyRunQuery(MySqlConnection connection, string query, long pageSize, Func<IDataRecord, T> factory)
+		{
+			foreach (var row in RunQuery(connection, query, pageSize))
+			{
+				yield return factory(row);
+			}
+		}
+	}
 
 	public static IEnumerable<T> RunQuery<T>(string connectionString, string query, long pageSize, Func<IDataRecord, T> factory)
 	{
