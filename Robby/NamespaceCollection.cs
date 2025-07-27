@@ -12,8 +12,10 @@ using RobinHood70.WikiCommon;
 /// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
 public sealed class NamespaceCollection : IReadOnlyCollection<Namespace>
 {
+	#region Fields
 	private readonly SortedList<int, Namespace> idsDictionary;
 	private readonly Dictionary<string, Namespace> namesDictionary;
+	#endregion
 
 	#region Constructors
 
