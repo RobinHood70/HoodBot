@@ -25,7 +25,7 @@ public sealed class NamespaceCollection : IReadOnlyCollection<Namespace>
 	/// <param name="namespaceAliases">All namespace aliases.</param>
 	internal NamespaceCollection(Site site, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases)
 	{
-		// From Language->getNsIndeix(), creates a case-insensitive comparer for the wiki's culture.
+		// From Language->getNsIndex(), creates a case-insensitive comparer for the wiki's culture.
 		var comparer = StringComparer.Create(site.Culture, true);
 
 		// NamespaceAliases
