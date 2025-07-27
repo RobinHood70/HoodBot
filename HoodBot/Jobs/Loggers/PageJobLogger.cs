@@ -13,24 +13,49 @@ using RobinHood70.WikiCommon.Parser;
 
 public class PageJobLogger : JobLogger
 {
+	#region Private Constants
+	private const string NewLogPageText =
+		"<cleanspace>\n" +
+		"{{#local:hidetime|{{#expr:({{#time:Y}}*12+{{#time:m}}-{{#arg:months|1}})-1}}}}\n" +
+		"{{#local:year|{{#expr:trunc(({{{hidetime}}})/12)}}}}\n" +
+		"{{#local:month|{{padleft:{{#expr:({{{hidetime}}} mod 12)+1}}|2}}}}\n" +
+		"{{#local:hidetime|{{{year}}}{{{month}}}}}\n" +
+		"</cleanspace>This is HoodBot's activity log. It allows users to know what the bot is currently up to, as well as keeping a list of what it has previously done should a specific job need to be reverted in its entirety.\n" +
+		"\n" +
+		"== Current Task ==\n" +
+		"None.\n" +
+		"\n" +
+		"== Task Log ==\n" +
+		"{| class=\"center\" style=\"white-space:nowrap; border-collapse:collapse;\"\n" +
+		"|}";
+	#endregion
+
 	#region Static Fields
 	private static readonly InvalidOperationException BadLogPage = new(Resources.BadLogPage);
 	#endregion
 
 	#region Fields
+	private readonly string clearStatus;
 	private readonly Title logTitle;
-	private Page? logPage;
 	private DateTime? end;
 	private LogInfo? logInfo;
+	private Page? logPage;
 	private DateTime? start;
-	private string status = "None";
+	private string status;
 	#endregion
 
 	#region Constructors
 	public PageJobLogger(Title logTitle)
 	{
 		ArgumentNullException.ThrowIfNull(logTitle);
+		this.clearStatus = logTitle.Site.Culture.TwoLetterISOLanguageName switch
+		{
+			"fr" => "Aucun",
+			_ => "None"
+		};
+
 		this.logTitle = logTitle;
+		this.status = this.clearStatus;
 	}
 	#endregion
 
@@ -46,14 +71,6 @@ public class PageJobLogger : JobLogger
 		this.SaveLogPage("Job Started", this.UpdateEntry);
 	}
 
-	public override void EndLogEntry()
-	{
-		Debug.Assert(this.logInfo is not null, "LogInfo is null.");
-		this.end = DateTime.UtcNow;
-		this.status = "None";
-		this.UpdateEntry();
-	}
-
 	public override void CloseLog()
 	{
 		if (this.logPage != null)
@@ -64,93 +81,84 @@ public class PageJobLogger : JobLogger
 		this.start = null;
 		this.end = null;
 	}
+
+	public override void EndLogEntry()
+	{
+		this.end = DateTime.UtcNow;
+		this.status = this.clearStatus;
+		this.UpdateEntry();
+	}
 	#endregion
 
 	#region Private Static Methods
-	private static void AddDateTime(List<(string? Name, string Value)> parms, DateTime? dateTime)
+	private static void AddDateTime(ITemplateNode template, DateTime? dateTime)
 	{
 		if (dateTime.HasValue)
 		{
-			parms.Add((null, FormatDateTime(dateTime.Value)));
+			template.Add(FormatDateTime(dateTime.Value));
 		}
 	}
 
-	private static string FormatDateTime(DateTime dt) => dt.ToString("u", CultureInfo.InvariantCulture).TrimEnd('Z');
-	#endregion
-
-	#region Private Methods
-	private static bool UpdateCurrentStatus(SiteParser parser, string status)
+	private static (Section CurrentTask, Section TaskLog) FindSections(IEnumerable<Section> sections)
 	{
-		var currentTask = parser.IndexOf<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals("Current Task"));
-		var taskLog = parser.IndexOf<IHeaderNode>(currentTask + 1);
-		if (currentTask == -1 || taskLog == -1)
+		Section? currentTask = null;
+		Section? taskLog = null;
+		foreach (var section in sections)
 		{
-			throw BadLogPage;
-		}
-
-		currentTask++;
-		var section = parser.GetRange(currentTask, taskLog - currentTask);
-		var previousTask = WikiTextVisitor.Raw(section).Trim().TrimEnd(TextArrays.Period);
-		parser.RemoveRange(currentTask, taskLog - currentTask);
-		parser.Insert(currentTask, parser.Factory.TextNode("\n" + status + ".\n\n"));
-
-		return previousTask.OrdinalEquals(status);
-	}
-
-	private void UpdateEntry()
-	{
-		Debug.Assert(this.logInfo != null, "LogInfo is null.");
-		this.logPage ??= this.logTitle.Load();
-		SiteParser parser = new(this.logPage);
-		var factory = parser.Factory;
-		var sameTaskText = UpdateCurrentStatus(parser, this.status);
-		var firstEntry = parser.IndexOf<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
-		if (firstEntry == -1)
-		{
-			// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.
-			throw BadLogPage;
-		}
-
-		var entry = (ITemplateNode)parser[firstEntry];
-		if (
-			this.end == null &&
-			sameTaskText &&
-			string.IsNullOrEmpty(entry.GetValue(3)) &&
-			this.logInfo.Title.OrdinalEquals(entry.GetValue(1)) &&
-			this.logInfo.Details.OrdinalEquals(entry.GetValue("info") ?? string.Empty))
-		{
-			return;
-		}
-
-		if (this.end != null)
-		{
-			// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-			var startParam = entry.FindNumberedIndex(2);
-			if (startParam >= 0)
+			// Section count should be very small, so little point to an early exit.
+			// Note that for non-English wikis, English text should be inserted in an HTML comment.
+			var textTitle = section.Header.GetTitle(true);
+			if (textTitle.Contains("Current Task", StringComparison.OrdinalIgnoreCase))
 			{
-				var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
-				entry.Parameters.Insert(startParam + 1, endParam);
-				parser.UpdatePage();
-				return;
+				currentTask = section;
+			}
+
+			if (textTitle.Contains("Task Log", StringComparison.OrdinalIgnoreCase))
+			{
+				taskLog = section;
 			}
 		}
 
-		List<(string?, string)> parms = [(null, this.logInfo.Title)];
+		return currentTask is null || taskLog is null
+			? throw BadLogPage
+			: (currentTask, taskLog);
+	}
+
+	private static string FormatDateTime(DateTime dt) => dt.ToString("u", CultureInfo.InvariantCulture).TrimEnd('Z');
+
+	private static bool UpdateCurrentStatus(Section currentTask, string status)
+	{
+		var previousTask = currentTask.Content.ToRaw().Trim().TrimEnd(TextArrays.Period);
+		currentTask.Content.Clear();
+		currentTask.Content.AddText("\n" + status + ".\n\n");
+
+		return previousTask.OrdinalEquals(status);
+	}
+	#endregion
+
+	#region Private Methods
+	private void AddParameters(ITemplateNode template, Section taskLog, int firstEntry)
+	{
+		template.Add(this.logInfo!.Title);
 		if (!string.IsNullOrEmpty(this.logInfo.Details))
 		{
-			parms.Add(("info", this.logInfo.Details));
+			template.Add("info", this.logInfo.Details);
 		}
 
-		AddDateTime(parms, this.start);
-		AddDateTime(parms, this.end);
+		AddDateTime(template, this.start);
+		AddDateTime(template, this.end);
 
-		var nodes = new IWikiNode[]
+		if (firstEntry == -1)
 		{
-			factory.TemplateNodeFromParts("/Entry", false, parms),
-			factory.TextNode("\n")
-		};
-		parser.InsertRange(firstEntry, nodes);
-		parser.UpdatePage();
+			var text = taskLog.Content.ToRaw();
+			text = text.Replace("|}", template.ToRaw() + "\n|}", StringComparison.Ordinal);
+			taskLog.Content.Clear();
+			taskLog.Content.AddText(text);
+		}
+		else
+		{
+			taskLog.Content.InsertRange(firstEntry, [template, template.Factory.TextNode("\n")]);
+		}
 	}
 
 	private void SaveLogPage(string editSummary, Action editConflictAction)
@@ -178,6 +186,54 @@ public class PageJobLogger : JobLogger
 			}
 		}
 		while (!saved);
+	}
+
+	private void UpdateEntry()
+	{
+		Debug.Assert(this.logInfo != null, "LogInfo is null.");
+		this.logPage ??= this.logTitle.Load();
+		if (this.logPage.Text.Length == 0)
+		{
+			this.logPage.Text = NewLogPageText;
+		}
+
+		SiteParser parser = new(this.logPage);
+		var factory = parser.Factory;
+		var sections = parser.ToSections(2);
+		var (currentTask, taskLog) = FindSections(sections);
+		var sameTaskText = UpdateCurrentStatus(currentTask, this.status);
+		var firstEntry = taskLog.Content.IndexOf<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
+		if (firstEntry != -1)
+		{
+			var entry = (ITemplateNode)taskLog.Content[firstEntry];
+			if (this.end == null &&
+				sameTaskText &&
+				string.IsNullOrEmpty(entry.GetValue(3)) &&
+				this.logInfo.Title.OrdinalEquals(entry.GetValue(1)) &&
+				this.logInfo.Details.OrdinalEquals(entry.GetValue("info") ?? string.Empty))
+			{
+				return;
+			}
+
+			if (this.end != null)
+			{
+				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
+				var startParam = entry.FindNumberedIndex(2);
+				if (startParam >= 0)
+				{
+					var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
+					entry.Parameters.Insert(startParam + 1, endParam);
+					parser.FromSections(sections);
+					parser.UpdatePage();
+					return;
+				}
+			}
+		}
+
+		var template = parser.Factory.TemplateNodeFromParts("/Entry");
+		this.AddParameters(template, taskLog, firstEntry);
+		parser.FromSections(sections);
+		parser.UpdatePage();
 	}
 	#endregion
 }
