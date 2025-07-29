@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -107,7 +108,7 @@ internal sealed class ActionQuery : ActionModule
 			}
 		}
 
-		// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
+		// Kludgy workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgy as this for a single faulty module.
 		if (parent[ListWatchlistRaw.ModuleName] != null)
 		{
 			foreach (var module in modules)
@@ -154,6 +155,7 @@ internal sealed class ActionQuery : ActionModule
 			}
 			catch (JsonReaderException)
 			{
+				Debug.WriteLine(response);
 				throw new InvalidDataException(response.Contains("Just a moment", StringComparison.Ordinal)
 					? EveMessages.CloudflareBlock
 					: null);
