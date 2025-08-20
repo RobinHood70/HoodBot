@@ -21,6 +21,14 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	private const string TemplateName = "Online Collectible Summary";
 	#endregion
 
+	#region Static Fields
+	private static readonly List<long> DeprecatedIds =
+	[
+		9369, // Prairie Dog
+		11242, // Almalexia deck
+	];
+	#endregion
+
 	#region Fields
 	private readonly Dictionary<Title, Collectible> collectibles = [];
 	private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
@@ -54,8 +62,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		var allTitles = new TitleCollection(this.Site);
 		allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 		var pages = this.GetBacklinks();
-		var knownIds = this.GetKnown(pages);
-		this.GetCollectibles(allTitles, pages, knownIds);
+		this.GetCollectibles(allTitles, pages);
 
 		this.StatusWriteLine("Getting crown crates");
 		this.GetCrownCrates();
@@ -205,8 +212,9 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		throw new InvalidOperationException("Blank Template not set.");
 	}
 
-	private void GetCollectibles(TitleCollection allTitles, PageCollection pages, HashSet<long> knownIds)
+	private void GetCollectibles(TitleCollection allTitles, PageCollection pages)
 	{
+		var knownIds = this.GetKnown(pages);
 		this.StatusWriteLine("Getting collectibles from database");
 		var (allCollectibles, dupeNames) = GetDBCollectibles();
 		foreach (var item in allCollectibles)
@@ -234,7 +242,12 @@ internal sealed class EsoCollectibles : ParsedPageJob
 
 	private HashSet<long> GetKnown(PageCollection pages)
 	{
-		var knownIds = new HashSet<long>();
+		var knownIds = new HashSet<long>(pages.Count + DeprecatedIds.Count);
+		foreach (var id in DeprecatedIds)
+		{
+			knownIds.Add(id);
+		}
+
 		foreach (var item in pages)
 		{
 			if (item is VariablesPage vPage)
