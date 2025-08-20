@@ -82,7 +82,9 @@ public class Database
 
 		static IEnumerable<T> ReallyRunQuery(string connectionString, string query, long pageSize, Func<IDataRecord, T> factory)
 		{
-			foreach (var row in RunQuery(connectionString, query, pageSize))
+			using var connection = new MySqlConnection(connectionString);
+			connection.Open();
+			foreach (var row in RunQuery(connection, query, pageSize))
 			{
 				yield return factory(row);
 			}
