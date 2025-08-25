@@ -26,9 +26,18 @@ public class Database
 
 	public static IEnumerable<IDataRecord> RunQuery(string connectionString, string query, long pageSize)
 	{
-		using MySqlConnection connection = new(connectionString);
-		connection.Open();
-		return RunQuery(connection, query, pageSize);
+		ArgumentNullException.ThrowIfNullOrEmpty(connectionString);
+		return ReallyRunQuery(connectionString, query, pageSize);
+
+		static IEnumerable<IDataRecord> ReallyRunQuery(string connectionString, string query, long pageSize)
+		{
+			using MySqlConnection connection = new(connectionString);
+			connection.Open();
+			foreach (var result in RunQuery(connection, query, pageSize))
+			{
+				yield return result;
+			}
+		}
 	}
 
 	public static IEnumerable<IDataRecord> RunQuery(MySqlConnection connection, string query, long pageSize)
