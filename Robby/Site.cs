@@ -338,7 +338,7 @@ public class Site : IMessageSource
 	}
 
 	/// <summary>Downloads a resource to a local file.</summary>
-	/// <param name="resource">The location of the resource (typically, the a Uri path). This does <em>not</em> have to be located on the wiki.</param>
+	/// <param name="resource">The location of the resource (typically, a Uri path). This does <em>not</em> have to be located on the wiki.</param>
 	/// <param name="fileName">Name of the file.</param>
 	/// <remarks><paramref name="resource"/> is not a <see cref="Uri"/> in order to satisfy <see cref="IWikiAbstractionLayer"/>'s agnosticism. In practice, however, it will almost certainly always be one.</remarks>
 	public bool Download(string resource, string? fileName) => this.Download(new DownloadInput(resource, fileName));
