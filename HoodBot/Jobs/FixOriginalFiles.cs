@@ -32,7 +32,7 @@ public class FixOriginalFiles(JobManager jobManager) : TemplateJob(jobManager)
 
 	protected override void LoadPages()
 	{
-		EsoFiles.GetIcons(this, EsoLog.LatestDBUpdate(false));
+		this.DownloadEsoFile(EsoFileTypes.Icons);
 		var dupes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		var folderLen = LocalConfig.EsoUIArtFolder.Length + 1;
 		foreach (var fullName in Directory.EnumerateFiles(LocalConfig.EsoUIArtFolder, "*.png", SearchOption.AllDirectories))

@@ -84,7 +84,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#region Protected Override Methods
 	protected override bool BeforeLogging()
 	{
-		this.GetIcons(EsoLog.LatestDBUpdate(false));
+		this.DownloadEsoFile(EsoFileTypes.Icons);
 		var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
 		HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 

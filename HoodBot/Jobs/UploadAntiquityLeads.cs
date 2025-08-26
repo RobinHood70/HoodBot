@@ -36,7 +36,7 @@ internal sealed class UploadAntiquityLeads(JobManager jobManager) : TemplateJob(
 
 	protected override void LoadPages()
 	{
-		this.GetIcons(EsoLog.LatestDBUpdate(false));
+		this.DownloadEsoFile(EsoFileTypes.Icons);
 		this.GetFilePages();
 		var leadFiles = this.GetLeadFiles();
 		this.GetLeadsFromDb();

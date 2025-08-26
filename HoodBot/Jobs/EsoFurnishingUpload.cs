@@ -23,7 +23,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 
 	protected override void Main()
 	{
-		this.GetIcons(EsoLog.LatestDBUpdate(false));
+		this.DownloadEsoFile(EsoFileTypes.Icons);
 		var pages = this.GetPages();
 		var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
 		this.ParsePageInfo(pages, items, false);

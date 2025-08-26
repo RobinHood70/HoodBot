@@ -11,31 +11,31 @@ using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
+#region Public Enumerations
+public enum EsoFileTypes
+{
+	Books,
+	Collectibles,
+	CrownCrates,
+	GameUIArt,
+	Icons,
+	Lang,
+	LoadScreens,
+	Maps,
+	Quests,
+	SplitIcons,
+	Store,
+	TreasureMaps,
+	TreeIcons,
+	Tribute,
+	Tutorial,
+}
+#endregion
+
 public static class EsoFiles
 {
 	#region Private Constants
 	private const string FileVersionsName = "FileVersions.csv";
-	#endregion
-
-	#region Public Enumerations
-	public enum EsoFileTypes
-	{
-		Books,
-		Collectibles,
-		CrownCrates,
-		GameUIArt,
-		Icons,
-		Lang,
-		LoadScreens,
-		Maps,
-		Quests,
-		SplitIcons,
-		Store,
-		TreasureMaps,
-		TreeIcons,
-		Tribute,
-		Tutorial,
-	}
 	#endregion
 
 	#region Public Properties
@@ -66,7 +66,30 @@ public static class EsoFiles
 		return Globals.GetHash(stream, HashType.Sha1);
 	}
 
-	public static IDictionary<string, EsoVersion> GetIconVersions()
+	public static void DownloadEsoFile(this WikiJob job, EsoFileTypes fileType) => DownloadEsoFile(job, fileType, EsoLog.LatestDBUpdate(false));
+
+	public static void DownloadEsoFile(this WikiJob job, EsoFileTypes fileType, EsoVersion desiredVersion)
+	{
+		var fileVersions = GetFileVersions();
+		var fileName = FileSystemNames[fileType];
+
+		if (fileVersions[fileName] == desiredVersion)
+		{
+			return;
+		}
+
+		var downloadPath = RemotePath(desiredVersion, EsoFileTypes.Icons);
+		var localFile = fileName + ".zip";
+
+		job.StatusWriteLine($"Updating local {fileName} file from {downloadPath}");
+		job.Site.Download(downloadPath, localFile);
+
+		job.StatusWriteLine($"Extracting {fileName}");
+		var extractPath = LocalPath(fileType);
+		ZipFile.ExtractToDirectory(localFile, extractPath, true);
+	}
+
+	public static IDictionary<string, EsoVersion> GetFileVersions()
 	{
 		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
 		var csv = new CsvFile(fullPath);
@@ -84,38 +107,6 @@ public static class EsoFiles
 		}
 
 		return retval;
-	}
-
-	public static void SaveIconVersions(IDictionary<string, EsoVersion> versions)
-	{
-		ArgumentNullException.ThrowIfNull(versions);
-		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
-		var csv = new CsvFile(fullPath);
-		foreach (var fileName in FileSystemNames)
-		{
-			versions.TryAdd(fileName.Value, EsoVersion.Empty);
-		}
-
-		foreach (var row in versions)
-		{
-			csv.Add(row.Key, row.Value.ToString());
-		}
-	}
-
-	public static void GetIcons(this WikiJob job, EsoVersion patchVersion)
-	{
-		var downloadPath = RemotePath(patchVersion, EsoFileTypes.Icons);
-		var localFile = FileSystemNames[EsoFileTypes.Icons] + ".zip";
-		var extractPath = LocalConfig.WikiIconsFolder;
-
-		if (File.GetLastWriteTime(localFile) < (DateTime.Now - TimeSpan.FromDays(1)))
-		{
-			job.StatusWriteLine("Updating local icons file from " + downloadPath);
-			job.Site.Download(downloadPath, localFile);
-
-			job.StatusWriteLine("Extracting icons");
-			ZipFile.ExtractToDirectory(localFile, extractPath, true);
-		}
 	}
 
 	public static IReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site) => GetOriginalFiles(site, PageModules.Default);
@@ -184,6 +175,22 @@ public static class EsoFiles
 		}
 
 		return paramValue;
+	}
+
+	public static void SaveFileVersions(IDictionary<string, EsoVersion> versions)
+	{
+		ArgumentNullException.ThrowIfNull(versions);
+		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
+		var csv = new CsvFile(fullPath);
+		foreach (var fileName in FileSystemNames)
+		{
+			versions.TryAdd(fileName.Value, EsoVersion.Empty);
+		}
+
+		foreach (var row in versions)
+		{
+			csv.Add(row.Key, row.Value.ToString());
+		}
 	}
 	#endregion
 }
