@@ -152,10 +152,21 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	private static string CategorySingular(string category) => category switch
 	{
 		"Allies" => "Ally",
+		"Deer" => category,
+		"Elk" => category,
+		"Guar" => category,
+		"Kagouti" => category,
+		"Multi-Rider" => category,
+		"Nix-Oxen" => "Nix-Ox",
 		"Non-Combat Pets" => "Pet",
+		"Pangrit" => category,
 		"Personalities" => "Personality",
+		"Senche" => category,
+		"Senche-Raht" => category,
+		"Special" => category,
 		"Stories" => "Story",
 		"Undaunted Trophies" => "Undaunted Trophy",
+		"Wolves" => "Wolf",
 		_ => category.TrimEnd('s'),
 	};
 	#endregion
