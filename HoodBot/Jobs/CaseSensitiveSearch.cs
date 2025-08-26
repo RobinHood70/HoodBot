@@ -6,7 +6,7 @@ using RobinHood70.Robby;
 using RobinHood70.WikiCommon;
 
 [method: JobInfo("Case-Sensitive Search")]
-internal class CaseSensitiveSearch(JobManager jobManager, string search) : WikiJob(jobManager, JobType.ReadOnly)
+internal sealed class CaseSensitiveSearch(JobManager jobManager, string search) : WikiJob(jobManager, JobType.ReadOnly)
 {
 	protected override void Main()
 	{
