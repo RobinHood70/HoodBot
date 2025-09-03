@@ -24,6 +24,13 @@ public readonly struct EsoVersion : IComparable<EsoVersion>, IEquatable<EsoVersi
 
 	public EsoVersion(string text)
 	{
+		if (text.Length == 0)
+		{
+			this.Version = EsoVersion.Empty.Version;
+			this.Pts |= EsoVersion.Empty.Pts;
+			return;
+		}
+
 		text = text?.Trim() ?? string.Empty;
 		var pts = text.EndsWith("pts", StringComparison.Ordinal);
 		if (pts)
