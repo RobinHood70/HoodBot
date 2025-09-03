@@ -37,12 +37,13 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 	#endregion
 
 	#region Fields
+	private readonly Context context;
 	private readonly Dictionary<long, Furnishing> collectibles = [];
 	private readonly Dictionary<long, Furnishing> furnishings = [];
+	private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
 	private readonly List<string> fileMessages = [];
 	private readonly List<string> pageMessages = [];
-	private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
-
+	private readonly TitleCollection missingIdExceptions;
 	//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new();
 	#endregion
 
@@ -58,6 +59,9 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Furnishings");
 			pageResults.SaveAsBot = false;
 		}
+
+		this.context = new Context(this.Site);
+		this.missingIdExceptions = new TitleCollection(this.Site, "Online:Orcish Shrine, Malacath", "Online:Goblin Totem");
 	}
 	#endregion
 
@@ -285,7 +289,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 				Debug.WriteLine($"Furnishing ID {id} not found on page {SiteLink.ToText(page)}.");
 			}
 		}
-		else
+		else if (!this.missingIdExceptions.Contains(page.Title))
 		{
 			Debug.WriteLine($"Furnishing ID on {SiteLink.ToText(page)} is missing or nonsensical.");
 		}
@@ -381,10 +385,18 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 			return;
 		}
 
-		var wikiTitle = page.Title.LabelName();
+		if (template.GetValue("name") is string wikiTitle)
+		{
+			wikiTitle = ParseToText.Build(wikiTitle, this.context);
+		}
+		else
+		{
+			wikiTitle = labelName;
+		}
+
 		if (!furnishing.Title.PageNameEquals(wikiTitle))
 		{
-			Debug.WriteLine($"Page title \"{wikiTitle}\" != furnishing title \"{furnishing.Title.PageName}\". Check for invalid ID and verify title case in game.");
+			Debug.WriteLine($"Page title != game title. Check for invalid ID or name change.\nPage: {page.Title}\nGame: {furnishing.Title.PageName}\n");
 		}
 
 		this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
