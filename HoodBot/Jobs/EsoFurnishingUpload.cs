@@ -32,14 +32,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 		var existingTitles = new TitleCollection(this.Site);
 		foreach (var item in items)
 		{
-			if (string.IsNullOrWhiteSpace(item.Value.IconName))
-			{
-				Debug.WriteLine("Empty: " + item.Key);
-			}
-			else
-			{
-				existingTitles.TryAdd(item.Value.IconName);
-			}
+			existingTitles.TryAdd(item.Value.IconName);
 		}
 
 		var existing = existingTitles.Load(PageModules.Info | PageModules.FileInfo);
@@ -57,9 +50,9 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 	{
 		if (iconInfo.LocalIcon != null)
 		{
-			var localFileName = Path.Combine(LocalConfig.WikiIconsFolder, iconInfo.LocalIcon);
-			var wikiIconName = iconInfo.IconName.Replace("\"", string.Empty, StringComparison.Ordinal);
-			var page = existing[wikiIconName];
+			var localFileName = Path.Combine(EsoFiles.LocalPath(EsoFileTypes.Icons), iconInfo.LocalIcon);
+			var wikiIconName = iconInfo.IconName.PageName.Replace("\"", string.Empty, StringComparison.Ordinal);
+			var page = existing["File:" + wikiIconName];
 
 			if (EsoSpace.ShouldUpload(localFileName, (FilePage)page))
 			{
@@ -106,7 +99,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 					icon = Furnishing.IconName(page.Title.PageName);
 				}
 
-				var iconInfo = new IconInfo(id, "File:" + icon);
+				var iconInfo = new IconInfo(id, TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.File], icon));
 				if (icon.Contains('"', StringComparison.Ordinal))
 				{
 					this.Warn("Quote in title: " + icon);
@@ -142,7 +135,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 	#endregion
 
 	#region Private Records
-	private sealed record IconInfo(long Id, string IconName)
+	private sealed record IconInfo(long Id, Title IconName)
 	{
 		public string? LocalIcon { get; set; }
 	}
