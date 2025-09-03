@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
+using RobinHood70.WikiCommon.Parser.Basic;
 
 /// <summary>Extends WikiNodeCollection to include <see cref="Title"/>-based methods, either directly or indirectly.</summary>
 public static class ParserHelpers
@@ -44,6 +45,11 @@ public static class ParserHelpers
 			if (nodes.Count > 0)
 			{
 				// makes sure two LFs are added no matter what, since newLineBefore adds a LF already
+				if (nodes[^1] is TextNode text)
+				{
+					text.Text = text.Text.TrimEnd();
+				}
+
 				nodes.AddText(newLineBefore ? "\n" : "\n\n");
 			}
 
