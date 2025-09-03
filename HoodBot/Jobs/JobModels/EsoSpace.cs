@@ -16,7 +16,7 @@ using RobinHood70.WikiCommon.Parser;
 internal static class EsoSpace
 {
 	#region Public Constants
-	public const string CurrentMod = "Season of the Worm Cult";
+	public const string CurrentMod = "Feast of Shadows";
 	#endregion
 
 	#region Static Fields
@@ -83,7 +83,6 @@ internal static class EsoSpace
 		{
 			template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
 			parser.Insert(0, template);
-			parser.InsertText(1, "\n\n");
 		}
 
 		if (!template.TitleNodes.ToRaw().EndsWith('\n'))
@@ -111,7 +110,7 @@ internal static class EsoSpace
 	public static PlaceCollection GetPlaces(Site site)
 	{
 		ArgumentNullException.ThrowIfNull(site);
-		var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
+		var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "modpage", "settlement", "titlename", "type", "zone");
 		places.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Online);
 		places.GetCategoryMembers("Online-Places");
 
@@ -152,7 +151,6 @@ internal static class EsoSpace
 
 	public static string GuessMod(string? zone, string? defaultMod) => zone switch
 	{
-		"Solstice" => "Season of the Worm Cult",
 		"Southern Elsweyr" => "Dragonhold",
 		"West Weald" => "Gold Road",
 		_ => defaultMod ?? CurrentMod,
@@ -186,28 +184,6 @@ internal static class EsoSpace
 	#endregion
 
 	#region Public WikiJob Extension Methods
-	public static Dictionary<string, HashSet<string>> GetIconChecksums()
-	{
-		var allIcons = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
-		if (Directory.Exists(LocalConfig.WikiIconsFolder))
-		{
-			foreach (var file in Directory.EnumerateFiles(LocalConfig.WikiIconsFolder, "*.*", SearchOption.AllDirectories))
-			{
-				var fileData = File.ReadAllBytes(file);
-				var checksum = Globals.GetHash(fileData, HashType.Sha1);
-				if (!allIcons.TryGetValue(checksum, out var list))
-				{
-					list = new HashSet<string>(1, StringComparer.Ordinal);
-					allIcons.Add(checksum, list);
-				}
-
-				list.Add(file[LocalConfig.WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
-			}
-		}
-
-		return allIcons;
-	}
-
 	public static EsoVersion GetPatchVersion(this WikiJob job, string paramName)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(paramName);
