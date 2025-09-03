@@ -28,7 +28,7 @@ public class EsoMatchIcons : EditJob
 	#region Fields
 	private readonly HashSet<Title> licenseTemplates = [];
 	private readonly Dictionary<string, List<ItemInfo>> allItems = new(StringComparer.Ordinal);
-	private Dictionary<string, HashSet<string>>? allIcons;
+	private IReadOnlyDictionary<string, HashSet<string>>? allIcons;
 	#endregion
 
 	#region Constructors
@@ -52,7 +52,7 @@ public class EsoMatchIcons : EditJob
 		this.GetItems();
 
 		this.StatusWriteLine("Calculating image checksums");
-		this.allIcons = EsoSpace.GetIconChecksums();
+		this.allIcons = EsoFiles.GetIconChecksums();
 
 		this.StatusWriteLine("Getting image info from wiki");
 		this.GetLicenseTemplates();
@@ -69,40 +69,42 @@ public class EsoMatchIcons : EditJob
 			throw new InvalidOperationException();
 		}
 
-		if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
+		if (page is not FilePage filePage || filePage.LatestFileRevision is not FileRevision latestRevision)
 		{
-			Globals.ThrowIfNull(latestRevision.Sha1, nameof(latestRevision), nameof(latestRevision.Sha1));
-			this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
-			SiteParser parser = new(page);
-			FindLicense(parser); // TODO: This is a dummy line put in here to shut up the nag until I can come back to this.
-			this.ReplaceLicense(parser);
-			PageParts parts = new(filePage);
-			if (foundIcons == null || foundIcons.Count == 0)
-			{
-				if (parts.OriginalFiles.Count > 0)
-				{
-					this.WriteLine($"* [[{page.Title.FullPageName()}]] used to be identified, but no longer is. It may have been removed from the game.");
-					return;
-				}
-
-				if (latestRevision.Timestamp > LastRun)
-				{
-					SiteLink link = TitleFactory.FromValidated(page.Site[MediaWikiNamespaces.Category], MissingFileCategory);
-					parts.Categories.Add(link);
-				}
-			}
-			else
-			{
-				foreach (var icon in foundIcons)
-				{
-					parts.OriginalFiles.Add(icon);
-				}
-
-				this.GetUsageList(parts);
-			}
-
-			page.Text = parts.ToText();
+			return;
 		}
+
+		Globals.ThrowIfNull(latestRevision.Sha1, nameof(latestRevision), nameof(latestRevision.Sha1));
+		this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
+		SiteParser parser = new(page);
+		FindLicense(parser); // TODO: This is a dummy line put in here to shut up the nag until I can come back to this.
+		this.ReplaceLicense(parser);
+		PageParts parts = new(filePage);
+		if (foundIcons == null || foundIcons.Count == 0)
+		{
+			if (parts.OriginalFiles.Count > 0)
+			{
+				this.WriteLine($"* [[{page.Title.FullPageName()}]] used to be identified, but no longer is. It may have been removed from the game.");
+				return;
+			}
+
+			if (latestRevision.Timestamp > LastRun)
+			{
+				SiteLink link = TitleFactory.FromValidated(page.Site[MediaWikiNamespaces.Category], MissingFileCategory);
+				parts.Categories.Add(link);
+			}
+		}
+		else
+		{
+			foreach (var icon in foundIcons)
+			{
+				parts.OriginalFiles.Add(icon);
+			}
+
+			this.GetUsageList(parts);
+		}
+
+		page.Text = parts.ToText();
 	}
 	#endregion
 

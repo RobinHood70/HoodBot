@@ -38,6 +38,10 @@ public static class EsoFiles
 	private const string FileVersionsName = "FileVersions.csv";
 	#endregion
 
+	#region Static Fields
+	private static readonly string EsoUIArtFolder = Path.Combine(LocalConfig.BotDataFolder, "esoui", "art");
+	#endregion
+
 	#region Public Properties
 	public static IReadOnlyDictionary<EsoFileTypes, string> FileSystemNames { get; } = new Dictionary<EsoFileTypes, string>
 	{
@@ -66,47 +70,80 @@ public static class EsoFiles
 		return Globals.GetHash(stream, HashType.Sha1);
 	}
 
-	public static void DownloadEsoFile(this WikiJob job, EsoFileTypes fileType) => DownloadEsoFile(job, fileType, EsoLog.LatestDBUpdate(false));
+	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType) => DownloadEsoFile(job, fileType, EsoLog.LatestDBUpdate(false));
 
-	public static void DownloadEsoFile(this WikiJob job, EsoFileTypes fileType, EsoVersion desiredVersion)
+	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType, EsoVersion desiredVersion)
 	{
+		ArgumentNullException.ThrowIfNull(job);
 		var fileVersions = GetFileVersions();
-		var fileName = FileSystemNames[fileType];
-
-		if (fileVersions[fileName] == desiredVersion)
+		var extractPath = LocalPath(fileType);
+		if (fileVersions[FileSystemNames[fileType]] == desiredVersion)
 		{
-			return;
+			return extractPath;
 		}
 
-		var downloadPath = RemotePath(desiredVersion, EsoFileTypes.Icons);
-		var localFile = fileName + ".zip";
+		var zipFile = LocalFileName(fileType);
+		var zipName = Path.GetFileName(zipFile);
+		var remotePath = RemotePath(desiredVersion, fileType);
+		job.StatusWriteLine($"Downloading {remotePath}");
+		if (!job.Site.Download(remotePath, zipFile))
+		{
+			return null;
+		}
 
-		job.StatusWriteLine($"Updating local {fileName} file from {downloadPath}");
-		job.Site.Download(downloadPath, localFile);
+		job.StatusWriteLine($"Extracting {zipName}");
+		Directory.Delete(extractPath, true);
+		ZipFile.ExtractToDirectory(zipFile, extractPath, false);
+		fileVersions[FileSystemNames[fileType]] = desiredVersion;
+		SaveFileVersions(fileVersions);
 
-		job.StatusWriteLine($"Extracting {fileName}");
-		var extractPath = LocalPath(fileType);
-		ZipFile.ExtractToDirectory(localFile, extractPath, true);
+		return extractPath;
 	}
 
 	public static IDictionary<string, EsoVersion> GetFileVersions()
 	{
-		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
-		var csv = new CsvFile(fullPath);
 		var retval = new SortedDictionary<string, EsoVersion>(StringComparer.Ordinal);
-		foreach (var fileName in FileSystemNames.Values)
+		var fullPath = Path.Combine(EsoUIArtFolder, FileVersionsName);
+		if (File.Exists(fullPath))
 		{
-			retval.Add(fileName, EsoVersion.Empty);
+			var csv = new CsvFile(fullPath);
+			foreach (var row in csv.ReadRows())
+			{
+				var name = row[0];
+				var version = row[1];
+				retval.Add(name, new EsoVersion(version));
+			}
 		}
 
-		foreach (var row in csv.ReadRows())
+		foreach (var fileName in FileSystemNames.Values)
 		{
-			var name = row[0];
-			var version = row[1];
-			retval[name] = new EsoVersion(version);
+			retval.TryAdd(fileName, EsoVersion.Empty);
 		}
 
 		return retval;
+	}
+
+	public static IReadOnlyDictionary<string, HashSet<string>> GetIconChecksums()
+	{
+		var allIcons = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+		var iconDirectory = EsoFiles.LocalPath(EsoFileTypes.Icons)[..^4];
+		if (Directory.Exists(iconDirectory))
+		{
+			foreach (var file in Directory.EnumerateFiles(iconDirectory, "*.*", SearchOption.AllDirectories))
+			{
+				var fileData = File.ReadAllBytes(file);
+				var checksum = Globals.GetHash(fileData, HashType.Sha1);
+				if (!allIcons.TryGetValue(checksum, out var list))
+				{
+					list = new HashSet<string>(1, StringComparer.Ordinal);
+					allIcons.Add(checksum, list);
+				}
+
+				list.Add(file[iconDirectory.Length..]);
+			}
+		}
+
+		return allIcons;
 	}
 
 	public static IReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site) => GetOriginalFiles(site, PageModules.Default);
@@ -145,12 +182,14 @@ public static class EsoFiles
 		return retval;
 	}
 
-	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(LocalConfig.EsoUIArtFolder, FileSystemNames[fileType]);
+	public static string LocalFileName(EsoFileTypes fileType) => LocalPath(fileType) + ".zip";
+
+	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(EsoUIArtFolder, FileSystemNames[fileType]);
 
 	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
 
 	public static string RemotePath(EsoVersion patchVersion, EsoFileTypes fileType) =>
-		RemotePath(patchVersion) + FileSystemNames[fileType] + ".zip";
+		$"{RemotePath(patchVersion)}{FileSystemNames[fileType]}.zip";
 
 	public static string SanitizeFileName(string paramValue)
 	{
@@ -180,7 +219,7 @@ public static class EsoFiles
 	public static void SaveFileVersions(IDictionary<string, EsoVersion> versions)
 	{
 		ArgumentNullException.ThrowIfNull(versions);
-		var fullPath = Path.Join(LocalConfig.WikiIconsFolder, FileVersionsName);
+		var fullPath = Path.Combine(EsoUIArtFolder, FileVersionsName);
 		var csv = new CsvFile(fullPath);
 		foreach (var fileName in FileSystemNames)
 		{
@@ -191,6 +230,8 @@ public static class EsoFiles
 		{
 			csv.Add(row.Key, row.Value.ToString());
 		}
+
+		csv.Save();
 	}
 	#endregion
 }

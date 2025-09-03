@@ -13,7 +13,7 @@ internal sealed class FindAllEsoIcons(JobManager jobManager) : EditJob(jobManage
 
 	protected override void LoadPages()
 	{
-		var checksums = EsoSpace.GetIconChecksums();
+		var checksums = EsoFiles.GetIconChecksums();
 		this.Pages.Modules = PageModules.Info | PageModules.FileInfo;
 		this.Pages.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Exclude, "ON-icon-achievement-R");
 		foreach (var page in this.Pages)

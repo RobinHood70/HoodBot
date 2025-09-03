@@ -85,7 +85,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	protected override bool BeforeLogging()
 	{
 		this.DownloadEsoFile(EsoFileTypes.Icons);
-		var allFiles = Directory.GetFiles(LocalConfig.WikiIconsFolder);
+		var allFiles = Directory.GetFiles(EsoFiles.LocalPath(EsoFileTypes.Icons));
 		HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
 		foreach (var file in allFiles)
@@ -111,7 +111,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 				"}}\n" +
 				$"[[Category:Online-Icons-{typeUcfirst}-{upload.Style}]]\n" +
 				$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n";
-			var fileName = Path.Combine(LocalConfig.WikiIconsFolder, upload.Icon + ".png");
+			var fileName = Path.Combine(EsoFiles.LocalPath(EsoFileTypes.Icons), upload.Icon + ".png");
 			this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText, true);
 			this.Progress++;
 		}
