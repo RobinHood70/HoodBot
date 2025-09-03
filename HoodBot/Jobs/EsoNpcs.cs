@@ -397,8 +397,15 @@ internal sealed class EsoNpcs : EditJob
 		if (npc.Places.Count > 0)
 		{
 			var mainPlace = npc.Places.MaxBy(kvp => kvp.Value).Key;
-			var mainZone = mainPlace?.Zone;
-			mod = EsoSpace.GuessMod(mainZone, null);
+			if (mainPlace.Mod is not null)
+			{
+				mod = mainPlace.Mod;
+			}
+			else
+			{
+				var mainZone = mainPlace?.Zone;
+				mod = EsoSpace.GuessMod(mainZone, null);
+			}
 		}
 
 		var sb = new StringBuilder().Append("{{Minimal|NPC}}");
