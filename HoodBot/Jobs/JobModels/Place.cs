@@ -27,6 +27,12 @@ internal sealed class Place : IEquatable<Place>
 		ArgumentNullException.ThrowIfNull(page);
 		this.Alliance = page.GetVariable("alliance");
 		this.Key = page.Title.PageName;
+		if (page.GetVariable("modpage") is string mod)
+		{
+			var split = mod.Split(TextArrays.Colon, 2);
+			this.Mod = split[^1];
+		}
+
 		this.Settlement = page.GetVariable("settlement");
 		this.Title = page.Title;
 		this.TitleName = page.GetVariable("titlename") ?? page.Title.PageName;
@@ -47,6 +53,8 @@ internal sealed class Place : IEquatable<Place>
 	public string? Alliance { get; private set; }
 
 	public string Key { get; }
+
+	public string? Mod { get; }
 
 	public PlaceType PlaceType { get; internal set; } // Should be redundant to TypeText, but this is taken from categories as opposed to the MT variables, so could differ.
 
