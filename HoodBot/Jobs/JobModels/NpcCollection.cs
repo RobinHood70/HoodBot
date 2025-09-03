@@ -31,7 +31,11 @@ internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 			foreach (var npc in EsoLog.GetNpcLocations(npcIds))
 			{
 				Place place = new(npc.Zone);
-				this[npc.Id].UnknownLocations.Add(place, npc.LocCount);
+				var unknown = this[npc.Id].UnknownLocations;
+				if (!unknown.TryAdd(place, npc.LocCount))
+				{
+					unknown[place] += npc.LocCount;
+				}
 			}
 		}
 	}

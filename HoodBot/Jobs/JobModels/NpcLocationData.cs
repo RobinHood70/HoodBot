@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
+using System;
 using System.Data;
 
 public class NpcLocationData
@@ -8,7 +9,9 @@ public class NpcLocationData
 	public NpcLocationData(IDataRecord row)
 	{
 		this.Id = (long)row["npcId"];
-		this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
+		this.Zone = EsoLog.ConvertEncoding((string)row["zone"])
+			.Replace(" (Normal)", string.Empty, StringComparison.Ordinal)
+			.Replace(" (Veteran)", string.Empty, StringComparison.Ordinal);
 		this.LocCount = (int)row["locCount"];
 	}
 	#endregion
