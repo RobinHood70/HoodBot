@@ -160,19 +160,22 @@ internal static class EsoLog
 		var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
 		foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))
 		{
-			if ((npcData.Id < 322827 || npcData.Id > 322924) && // Remove temporary(?) Polish names
-				!ColourCode.IsMatch(npcData.DataName) &&
-				!TrailingDigits.IsMatch(npcData.DataName) &&
-				!ReplacementData.NpcNameSkips.Contains(npcData.DataName))
+			if ((npcData.Id >= 322827 && npcData.Id <= 322924) || // Remove Polish names
+				ReplacementData.NpcIdSkips.Contains(npcData.Id) ||
+				ReplacementData.NpcNameSkips.Contains(npcData.DataName) ||
+				ColourCode.IsMatch(npcData.DataName) ||
+				TrailingDigits.IsMatch(npcData.DataName))
 			{
-				if (nameClash.Add(npcData.DataName))
-				{
-					retval.Add(npcData);
-				}
-				else
-				{
-					retval.Duplicates.Add(npcData);
-				}
+				continue;
+			}
+
+			if (nameClash.Add(npcData.DataName))
+			{
+				retval.Add(npcData);
+			}
+			else
+			{
+				retval.Duplicates.Add(npcData);
 			}
 		}
 
