@@ -49,6 +49,7 @@ internal sealed class ActionUpload(WikiAbstractionLayer wal) : ActionModule<Uplo
 		var resultText = result.MustHaveString("result");
 		IReadOnlyList<string> duplicates = [];
 		Dictionary<string, string> outputWarnings = new(StringComparer.Ordinal);
+		var duplicateVersions = new List<DateTime>();
 		if (result["warnings"] is JToken warnings)
 		{
 			foreach (var prop in warnings.Children<JProperty>())
@@ -61,6 +62,14 @@ internal sealed class ActionUpload(WikiAbstractionLayer wal) : ActionModule<Uplo
 					{
 						case "duplicate":
 							duplicates = value.GetList<string>();
+							break;
+						case "duplicateversions":
+							foreach (var dvts in value)
+							{
+								var dt = dvts["timestamp"].GetDate();
+								duplicateVersions.Add(dt);
+							}
+
 							break;
 						case "nochange":
 							if ((string?)value["timestamp"] is string ts)
@@ -88,6 +97,7 @@ internal sealed class ActionUpload(WikiAbstractionLayer wal) : ActionModule<Uplo
 		return new UploadResult(
 			result: resultText,
 			duplicates: duplicates,
+			duplicateVersions: duplicateVersions,
 			fileKey: (string?)result["filekey"],
 			fileName: (string?)result["filename"],
 			imageInfo: result["imageinfo"] is JToken imageInfoNode ? JTokenImageInfo.ParseImageInfo(imageInfoNode, new ImageInfoItem()) : null,
