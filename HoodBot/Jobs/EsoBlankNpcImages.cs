@@ -11,6 +11,7 @@ internal sealed class EsoBlankNpcImages(JobManager jobManager) : TemplateUsage(
 	["Online NPC Summary"],
 	true,
 	LocalConfig.BotDataSubPath("ESO NPCs No Images.txt"),
+	false,
 	false)
 {
 	#region Protected Override Methods

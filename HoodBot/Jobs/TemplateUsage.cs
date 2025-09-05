@@ -17,6 +17,7 @@ internal class TemplateUsage : WikiJob
 	private readonly List<string> headerOrder = [];
 	private readonly bool checkAllTemplates;
 	private readonly TitleCollection allTemplateNames;
+	private readonly bool treatBlanksAsNull;
 	#endregion
 
 	#region Constructors
@@ -26,7 +27,8 @@ internal class TemplateUsage : WikiJob
 		IEnumerable<string> templateNames,
 		[JobParameter(DefaultValue = true)] bool respectRedirects,
 		[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location,
-		bool checkAllTemplates)
+		bool checkAllTemplates,
+		bool treatBlanksAsNulls)
 		: base(jobManager, JobType.ReadOnly)
 	{
 		ArgumentNullException.ThrowIfNull(templateNames);
@@ -41,6 +43,7 @@ internal class TemplateUsage : WikiJob
 
 		this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allNames[0]), StringComparison.Ordinal);
 		this.allTemplateNames = new(this.Site, MediaWikiNamespaces.Template, allNames);
+		this.treatBlanksAsNull = treatBlanksAsNulls;
 	}
 	#endregion
 
@@ -156,7 +159,7 @@ internal class TemplateUsage : WikiJob
 	{
 		var csvFile = new CsvFile(location)
 		{
-			EmptyFieldText = " ",
+			EmptyFieldText = this.treatBlanksAsNull ? string.Empty : " ",
 			Header = ["Page", "Template Name", .. this.headerOrder]
 		};
 
