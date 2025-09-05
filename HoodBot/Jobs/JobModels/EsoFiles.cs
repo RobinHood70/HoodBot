@@ -84,7 +84,7 @@ public static class EsoFiles
 
 		var zipFile = LocalFileName(fileType);
 		var zipName = Path.GetFileName(zipFile);
-		var remotePath = RemotePath(desiredVersion, fileType);
+		var remotePath = RemoteFileName(desiredVersion, fileType);
 		job.StatusWriteLine($"Downloading {remotePath}");
 		if (!job.Site.Download(remotePath, zipFile))
 		{
@@ -186,10 +186,10 @@ public static class EsoFiles
 
 	public static string LocalPath(EsoFileTypes fileType) => Path.Combine(EsoUIArtFolder, FileSystemNames[fileType]);
 
-	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
-
-	public static string RemotePath(EsoVersion patchVersion, EsoFileTypes fileType) =>
+	public static string RemoteFileName(EsoVersion patchVersion, EsoFileTypes fileType) =>
 		$"{RemotePath(patchVersion)}{FileSystemNames[fileType]}.zip";
+
+	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
 
 	public static string SanitizeFileName(string paramValue)
 	{
