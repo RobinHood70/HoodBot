@@ -23,6 +23,8 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 
 	protected override void Main()
 	{
+		Debug.Assert(false, "TODO: Remove (and merge?) duplicate uploads before running this job again.");
+
 		this.DownloadEsoFile(EsoFileTypes.Icons);
 		var pages = this.GetPages();
 		var items = new SortedList<string, IconInfo>(StringComparer.Ordinal);
