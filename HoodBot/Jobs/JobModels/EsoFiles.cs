@@ -228,7 +228,11 @@ public static class EsoFiles
 
 		foreach (var row in versions)
 		{
-			csv.Add(row.Key, row.Value.ToString());
+			var value = row.Value.ToString();
+			if (value.Length > 0)
+			{
+				csv.Add(row.Key, row.Value.ToString());
+			}
 		}
 
 		csv.Save();
