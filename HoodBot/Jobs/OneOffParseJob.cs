@@ -14,7 +14,7 @@ internal sealed class OneOffParseJob : ParsedPageJob
 	#endregion
 
 	#region Static Fields
-	private TitleCollection TemplateNames;
+	private readonly TitleCollection templateNames;
 	#endregion
 
 	#region Constructors
@@ -22,7 +22,7 @@ internal sealed class OneOffParseJob : ParsedPageJob
 	public OneOffParseJob(JobManager jobManager)
 		: base(jobManager)
 	{
-		this.TemplateNames = new TitleCollection(this.Site, MediaWikiNamespaces.Template, TemplateName, "Cleanup-obhrp", "Cleanup-oprp", "Description", "Featured Article", "Incomplete", "Trail");
+		this.templateNames = new TitleCollection(this.Site, MediaWikiNamespaces.Template, TemplateName, "Cleanup-obhrp", "Cleanup-oprp", "Description", "Featured Article", "Incomplete", "Trail");
 	}
 	#endregion
 
@@ -62,14 +62,14 @@ internal sealed class OneOffParseJob : ParsedPageJob
 		var end = start + 1;
 
 		while (start > 0 && (
-			(parser[start - 1] is ITemplateNode prev && this.TemplateNames.Contains(TitleFactory.FromTemplate(this.Site, prev.TitleNodes.ToValue()))) ||
+			(parser[start - 1] is ITemplateNode prev && this.templateNames.Contains(TitleFactory.FromTemplate(this.Site, prev.TitleNodes.ToValue()))) ||
 			(parser[start - 1] is ITextNode text && string.IsNullOrWhiteSpace(text.Text))))
 		{
 			--start;
 		}
 
 		while (end < (parser.Count - 1) && (
-			(parser[end] is ITemplateNode next && this.TemplateNames.Contains(TitleFactory.FromTemplate(this.Site, next.TitleNodes.ToValue()))) ||
+			(parser[end] is ITemplateNode next && this.templateNames.Contains(TitleFactory.FromTemplate(this.Site, next.TitleNodes.ToValue()))) ||
 			(parser[end] is ITextNode text && string.IsNullOrWhiteSpace(text.Text))))
 		{
 			++end;
