@@ -40,7 +40,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 	/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 	/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 	/// <param name="modules">The module types indicating which data to retrieve from the site. Using this constructor, all modules will be loaded using default parameters.</param>
-	/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
+	/// <param name="followRedirects">Whether to follow redirects. Note that setting this option to true can be invalid in some cases, such as running an allpages generator query. This is left to the user to deal with due to the complexity of combined modules.</param>
 	public PageCollection(Site site, PageModules modules, bool followRedirects)
 		: this(site, new PageLoadOptions(modules, followRedirects))
 	{
@@ -227,7 +227,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 	/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 	/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 	/// <param name="modules">The module types indicating which data to retrieve from the site. Using this constructor, all modules will be loaded using default parameters.</param>
-	/// <param name="followRedirects">Whether to follow redirects.</param>
+	/// <param name="followRedirects">Whether to follow redirects. Note that setting this option to true can be invalid in some cases, such as running an allpages generator query. This is left to the user to deal with due to the complexity of combined modules.</param>
 	/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 	/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
 	public static PageCollection Unlimited(Site site, PageModules modules, bool followRedirects) => Unlimited(site, new PageLoadOptions(modules, followRedirects));
@@ -514,7 +514,15 @@ public class PageCollection : TitleData<Page, PageCollection>
 
 	/// <summary>Adds pages with the specified filters to the collection.</summary>
 	/// <param name="input">The input parameters.</param>
-	protected override PageCollection GetPages(AllPagesInput input) => this.GetCustomGenerator(input);
+	protected override PageCollection GetPages(AllPagesInput input)
+	{
+		if (this.LoadOptions.FollowRedirects)
+		{
+			throw new InvalidOperationException("MediaWiki doesn't support LoadOptions.FollowRedirects being true for GetPages and its derivatives. Instead, set followRedirects in the function call so the module handles it instead.");
+		}
+
+		return this.GetCustomGenerator(input);
+	}
 
 	/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 	/// <param name="input">The input parameters.</param>
