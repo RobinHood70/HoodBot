@@ -514,15 +514,9 @@ public class PageCollection : TitleData<Page, PageCollection>
 
 	/// <summary>Adds pages with the specified filters to the collection.</summary>
 	/// <param name="input">The input parameters.</param>
-	protected override PageCollection GetPages(AllPagesInput input)
-	{
-		if (this.LoadOptions.FollowRedirects)
-		{
-			throw new InvalidOperationException("MediaWiki doesn't support LoadOptions.FollowRedirects being true for GetPages and its derivatives. Instead, set followRedirects in the function call so the module handles it instead.");
-		}
-
-		return this.GetCustomGenerator(input);
-	}
+	protected override PageCollection GetPages(AllPagesInput input) => this.LoadOptions.FollowRedirects
+		? throw new InvalidOperationException("MediaWiki doesn't support LoadOptions.FollowRedirects being true for GetPages and its derivatives. Instead, set followRedirects in the function call so the module handles it instead.")
+		: this.GetCustomGenerator(input);
 
 	/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 	/// <param name="input">The input parameters.</param>
