@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base;
 
 using System.Collections.Generic;
 
-public class ImageInfoResult(string repo) : List<ImageInfoItem>
+public class ImageInfoResult(string? repo) : List<ImageInfoItem>
 {
-	public string Repository => repo;
+	public string? Repository => repo;
 }

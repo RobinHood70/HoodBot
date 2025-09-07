@@ -7,7 +7,6 @@ using RobinHood70.WallE.Base;
 using RobinHood70.WallE.Design;
 using RobinHood70.WallE.Eve;
 using RobinHood70.WikiCommon.RequestBuilder;
-using static RobinHood70.WallE.Eve.Exceptions;
 
 internal sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
 {
@@ -55,10 +54,9 @@ internal sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput inp
 
 	protected override ImageInfoResult GetNewList(JToken parent)
 	{
+		// Repo can be null if page has no images or it's a non-file page.
 		ArgumentNullException.ThrowIfNull(parent);
-		return (string?)parent["imagerepository"] is string repo
-			? new ImageInfoResult(repo)
-			: throw MalformedTypeException(this.ResultName, parent);
+		return new ImageInfoResult((string?)parent["imagerepository"]);
 	}
 	#endregion
 }
