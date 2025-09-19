@@ -1,59 +1,41 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using System.Collections.Generic;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Parser;
+using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
-internal sealed class OneOffJob : EditJob
+internal sealed class OneOffJob : WikiJob
 {
-	#region Fields
-	private readonly TitleCollection searchTitles;
-	#endregion
-
-	#region Constructors
 	[JobInfo("One-Off Job")]
 	public OneOffJob(JobManager jobManager)
-		: base(jobManager)
+		: base(jobManager, JobType.Write)
 	{
-		this.searchTitles = new TitleCollection(this.Site, "Tamriel Rebuilt:Firewatch Library", "Tamriel Rebuilt:Helnim Hall", "Tamriel Rebuilt:Telvanni Library");
 	}
-	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Remove references to deprecated locations";
-
-	protected override void LoadPages()
+	protected override void Main()
 	{
-		this.Pages.GetBacklinks("Tamriel Rebuilt:Firewatch Library", BacklinksTypes.Backlinks);
-		this.Pages.GetBacklinks("Tamriel Rebuilt:Helnim Hall", BacklinksTypes.Backlinks);
-		this.Pages.GetBacklinks("Tamriel Rebuilt:Telvanni Library", BacklinksTypes.Backlinks);
-	}
-
-	protected override void PageLoaded(Page page)
-	{
-		var lines = page.Text.Split(TextArrays.LineFeed);
-		var newLines = new List<string>(lines.Length);
-		foreach (var line in lines)
+		var rcOptions = new RecentChangesOptions()
 		{
-			var parser = new SiteParser(page, line);
-			var found = false;
-			foreach (var title in this.searchTitles)
+			Namespaces = [MediaWikiNamespaces.File],
+			Properties = RecentChangesProperties.Ids | RecentChangesProperties.LogInfo | RecentChangesProperties.Patrolled | RecentChangesProperties.Title | RecentChangesProperties.User,
+			Types = RecentChangesTypes.Log,
+		};
+
+		var changes = this.Site.LoadRecentChanges(rcOptions);
+		this.ResetProgress(changes.Count);
+		foreach (var change in changes)
+		{
+			if (change.PatrolFlags is PatrolFlags patrolFlags &&
+				patrolFlags.HasFlag(PatrolFlags.Unpatrolled) &&
+				(change.User?.Name.OrdinalEquals("Maintenance script") ?? false))
 			{
-				if (line.Length > 0 && line[0] == '*')
-				{
-					found |= parser.FindLink(title) is not null;
-				}
+				this.Site.Patrol(change.Id);
 			}
 
-			if (!found)
-			{
-				newLines.Add(line);
-			}
+			this.Progress++;
 		}
-
-		page.Text = string.Join('\n', newLines);
 	}
 	#endregion
 }
