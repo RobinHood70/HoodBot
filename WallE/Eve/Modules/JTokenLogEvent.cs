@@ -177,7 +177,7 @@ internal static class JTokenLogEvent
 			if (!this.logAction.OrdinalEquals("unblock") && this.parms["duration"] != null)
 			{
 				this.Result.Add("duration", (string?)this.parms["duration"]);
-				this.Result.Add("flags", (string?)this.parms["flags"]);
+				this.Result.Add("flags", this.parms.MustHave("flags").GetList<string>());
 				this.Result.Add("expiry", (DateTime?)this.parms["expiry"]);
 			}
 		}
