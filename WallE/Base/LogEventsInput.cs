@@ -28,17 +28,6 @@ public class LogEventsInput : ILimitableInput
 	public LogEventsInput()
 	{
 	}
-
-	public LogEventsInput(int ns)
-	{
-		this.Namespace = ns;
-	}
-
-	public LogEventsInput(string title)
-	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(title);
-		this.Title = title;
-	}
 	#endregion
 
 	#region Public Properties
@@ -50,7 +39,7 @@ public class LogEventsInput : ILimitableInput
 
 	public int MaxItems { get; set; }
 
-	public int? Namespace { get; }
+	public int? Namespace { get; set; }
 
 	public string? Prefix { get; private set; }
 
@@ -62,7 +51,7 @@ public class LogEventsInput : ILimitableInput
 
 	public string? Tag { get; set; }
 
-	public string? Title { get; }
+	public string? Title { get; set; }
 
 	public string? Type { get; set; }
 
