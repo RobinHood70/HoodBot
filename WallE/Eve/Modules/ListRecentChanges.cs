@@ -109,12 +109,15 @@ internal sealed class ListRecentChanges(WikiAbstractionLayer wal, RecentChangesI
 			newLength: (int?)result["newlen"] ?? 0,
 			oldLength: (int?)result["oldlen"] ?? 0,
 			oldRevisionId: (long?)result["old_revid"] ?? 0,
+			patrolFlags: result.GetFlags(
+				("autopatrolled", PatrolFlags.Autopatrolled),
+				("patrolled", PatrolFlags.Patrolled),
+				("unpatrolled", PatrolFlags.Unpatrolled)),
 			patrolToken: (string?)result["patroltoken"],
 			recentChangeType: (string?)result["type"],
 			revisionId: (long?)result["revid"] ?? 0,
 			tags: result["tags"].GetList<string>());
 		result.ParseLogEvent(item, "log", KnownProps, false);
-
 		return item;
 	}
 	#endregion

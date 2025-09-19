@@ -26,6 +26,7 @@ public class RecentChange : ITitle
 		this.NewSize = recentChange.NewLength;
 		this.OldSize = recentChange.OldLength;
 		this.OldRevisionId = recentChange.OldRevisionId;
+		this.PatrolFlags = recentChange.PatrolFlags;
 		this.RecentChangeType = recentChange.RecentChangeType;
 		this.RevisionId = recentChange.RevisionId;
 		this.Tags = recentChange.Tags;
@@ -71,6 +72,9 @@ public class RecentChange : ITitle
 	/// <summary>Gets the revision ID before the change.</summary>
 	/// <value>The revision ID before the change.</value>
 	public long OldRevisionId { get; }
+
+	/// <summary>Gets the flags that indicate whether an edit is autopatrolled, patrolled, and/or unpatrolled.</summary>
+	public PatrolFlags? PatrolFlags { get; }
 
 	/// <summary>Gets the type of the change.</summary>
 	/// <value>The type of the change.</value>

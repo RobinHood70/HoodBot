@@ -7,6 +7,15 @@ using RobinHood70.WikiCommon;
 
 #region Public Enumerations
 [Flags]
+public enum PatrolFlags
+{
+	None = 0,
+	Autopatrolled = 1,
+	Patrolled = 1 << 1,
+	Unpatrolled = 1 << 2
+}
+
+[Flags]
 public enum RecentChangesFlags
 {
 	None = 0,
@@ -21,7 +30,7 @@ public enum RecentChangesFlags
 public class RecentChangesItem : LogEvent, IApiTitle
 {
 	#region Constructors
-	internal RecentChangesItem(int ns, string title, RecentChangesFlags flags, long id, int newLength, int oldLength, long oldRevisionId, string? patrolToken, string? recentChangeType, long revisionId, IReadOnlyList<string> tags)
+	internal RecentChangesItem(int ns, string title, RecentChangesFlags flags, long id, int newLength, int oldLength, long oldRevisionId, PatrolFlags? patrolFlags, string? patrolToken, string? recentChangeType, long revisionId, IReadOnlyList<string> tags)
 	{
 		this.Namespace = ns;
 		this.Title = title;
@@ -30,6 +39,7 @@ public class RecentChangesItem : LogEvent, IApiTitle
 		this.NewLength = newLength;
 		this.OldLength = oldLength;
 		this.OldRevisionId = oldRevisionId;
+		this.PatrolFlags = patrolFlags;
 		this.PatrolToken = patrolToken;
 		this.RecentChangeType = recentChangeType;
 		this.RevisionId = revisionId;
@@ -49,6 +59,8 @@ public class RecentChangesItem : LogEvent, IApiTitle
 	public int OldLength { get; }
 
 	public long OldRevisionId { get; }
+
+	public PatrolFlags? PatrolFlags { get; }
 
 	public string? PatrolToken { get; }
 

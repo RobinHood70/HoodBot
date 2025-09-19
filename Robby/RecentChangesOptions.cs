@@ -48,6 +48,9 @@ public class RecentChangesOptions
 	/// <value><c>Any</c> to retrieve all changes; <c>Only</c> to retrieve only patrolled changes; <c>Exclude</c> to retrieve only unpatrolled changes.</value>
 	public Filter Patrolled { get; set; }
 
+	/// <summary>Gets or sets the information to retrieve.</summary>
+	public RecentChangesProperties Properties { get; set; }
+
 	/// <summary>Gets or sets a value indicating whether to filter edits based on whether they're redirects.</summary>
 	/// <value><c>Any</c> to retrieve all changes; <c>Only</c> to retrieve only changes to redirect pages; <c>Exclude</c> to retrieve changes made to all pages except redirects.</value>
 	public Filter Redirects { get; set; }
@@ -62,7 +65,7 @@ public class RecentChangesOptions
 
 	/// <summary>Gets or sets the Recent Change types to load.</summary>
 	/// <value>The Recent Change types to load.</value>
-	public RecentChangesTypes Types { get; set; }
+	public RecentChangesTypes Types { get; set; } = RecentChangesTypes.All;
 
 	/// <summary>Gets or sets the user whose changes should be retrieved (or ignored, if <see cref="ExcludeUser"/> is set).</summary>
 	/// <value>The user whose changes should be loaded or ignored.</value>
@@ -89,6 +92,7 @@ public class RecentChangesOptions
 		FilterPatrolled = this.Patrolled,
 		FilterRedirects = this.Redirects,
 		MaxItems = this.Count,
+		Properties = this.Properties,
 	};
 	#endregion
 }
