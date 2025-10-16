@@ -191,29 +191,29 @@ public static class EsoFiles
 
 	public static string RemotePath(EsoVersion patchVersion) => $"https://esofiles.uesp.net/update-{patchVersion}/";
 
-	public static string SanitizeFileName(string paramValue)
+	public static string SanitizeFileName(string fileName)
 	{
-		paramValue = paramValue.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
-		if (paramValue.Length > 0 && paramValue[0] == '/')
+		fileName = fileName.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
+		if (fileName.Length > 0 && fileName[0] == '/')
 		{
-			paramValue = paramValue[1..];
+			fileName = fileName[1..];
 		}
 
-		if (paramValue.StartsWith("esoui/art/", StringComparison.OrdinalIgnoreCase))
+		if (fileName.StartsWith("esoui/art/", StringComparison.OrdinalIgnoreCase))
 		{
-			paramValue = paramValue[10..];
+			fileName = fileName[10..];
 		}
 
-		var split = paramValue.Split('.', 2);
+		var split = fileName.Split('.', 2);
 		var ext = split.Length > 1 ? split[1] : string.Empty;
 		if (string.Equals(ext, "png", StringComparison.OrdinalIgnoreCase) ||
 			string.Equals(ext, "dds", StringComparison.OrdinalIgnoreCase) ||
 			string.Equals(ext, "jpg", StringComparison.OrdinalIgnoreCase))
 		{
-			paramValue = split[0];
+			fileName = split[0];
 		}
 
-		return paramValue;
+		return fileName;
 	}
 
 	public static void SaveFileVersions(IDictionary<string, EsoVersion> versions)
