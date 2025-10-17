@@ -130,22 +130,21 @@ public class SiteParser : WikiNodeCollection, ITitle
 
 	/// <summary>Reparses the current nodes.</summary>
 	/// <remarks>This can be used to reparse the existing nodes after making alterations to them that may need to be re-evaluated, such as replacing text with link text or template text.</remarks>
-	public void Reparse()
+	public void Reparse() => this.Reparse(this.ToRaw());
+
+	/// <summary>Clears the current nodes and reparses from the provided text.</summary>
+	/// <param name="text">The text to parse.</param>
+	public void Reparse(string text)
 	{
-		var oldText = this.ToRaw();
+		ArgumentNullException.ThrowIfNull(text);
 		this.Clear();
-		var newNodes = this.Factory.Parse(oldText, this.InclusionType, this.StrictInclusion);
+		var newNodes = this.Factory.Parse(text, this.InclusionType, this.StrictInclusion);
 		this.AddRange(newNodes);
 	}
 
 	/// <summary>Reparses the existing page text with the current inclusion parameters.</summary>
 	/// <remarks>This can be used to reparse the page text if it has been altered directly.</remarks>
-	public void ReparsePageText()
-	{
-		this.Clear();
-		var newNodes = this.Factory.Parse(this.Page.Text, this.InclusionType, this.StrictInclusion);
-		this.AddRange(newNodes);
-	}
+	public void ReparsePageText() => this.Reparse(this.Page.Text);
 
 	/// <summary>Reparses the existing page text with new inclusion parameters.</summary>
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
