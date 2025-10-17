@@ -117,7 +117,7 @@ public class Database
 		var query = "SHOW TABLES";
 		if (!string.IsNullOrEmpty(prefix))
 		{
-			query += $" LIKE {prefix}%";
+			query += $" LIKE '{prefix}%'";
 		}
 
 		foreach (var row in this.RunQuery(query))
