@@ -350,16 +350,27 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
 	public void InsertText(int index, [Localizable(false)] string text)
 	{
-		if (!string.IsNullOrEmpty(text))
+		if (index < 0 || index > this.Count)
 		{
-			if (index > 0 && this.Count >= index && this[index - 1] is ITextNode node)
-			{
-				node.Text += text;
-			}
-			else
-			{
-				this.Insert(index, this.Factory.TextNode(text));
-			}
+			throw new ArgumentOutOfRangeException(nameof(index));
+		}
+
+		if (string.IsNullOrEmpty(text))
+		{
+			return;
+		}
+
+		if (index < this.Count && this[index] is ITextNode currentNode)
+		{
+			currentNode.Text = text + currentNode.Text;
+		}
+		else if (index != 0 && this[index - 1] is ITextNode prevNode)
+		{
+			prevNode.Text += text;
+		}
+		else
+		{
+			this.Insert(index, this.Factory.TextNode(text));
 		}
 	}
 
