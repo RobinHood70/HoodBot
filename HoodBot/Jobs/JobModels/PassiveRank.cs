@@ -23,20 +23,9 @@ internal sealed class PassiveRank(IDataRecord row, List<Coefficient> coefficient
 				var coefNum = int.Parse(splitDescription[i], CultureInfo.InvariantCulture) - 1;
 				var coef = this.Coefficients[coefNum];
 				text = coef.SkillDamageText(this.Factor);
-				if (coef.CoefficientType == -75)
-				{
-					text = EsoLog.FloatFinder.Replace(text, "'''$&'''");
-				}
-				else
-				{
-					text = $"'''{text}'''";
-					if (coef.IsDamage &&
-						Coefficient.DamageTypes[coef.DamageType] is var damageType &&
-						damageType.Length > 0)
-					{
-						text += ' ' + damageType + " Damage";
-					}
-				}
+				text = coef.CoefficientType == -75
+					? EsoLog.FloatFinder.Replace(text, "'''$&'''")
+					: $"'''{text}'''{coef.DamageSuffix}";
 			}
 
 			retval.Add(text);

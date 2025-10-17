@@ -23,6 +23,24 @@ public enum MechanicTypes
 internal sealed class Coefficient
 {
 	#region Static Fields
+	private static readonly Dictionary<int, string> DamageTypes = new()
+	{
+		[0] = "<None>",
+		[1] = string.Empty,
+		[2] = "Physical",
+		[3] = "Flame",
+		[4] = "Shock",
+		[5] = "Oblivion",
+		[6] = "Frost",
+		[7] = "Earth",
+		[8] = "Magic",
+		[9] = "Drown",
+		[10] = "Disease",
+		[11] = "Poison",
+		[12] = "Bleed",
+		[515] = "Flame",
+	};
+
 	private static readonly Dictionary<(int, sbyte), (string From, string To)> ValueReplacements = new()
 	{
 		[(23234, 1)] = ("1 second", "1 seconds"),
@@ -87,24 +105,6 @@ internal sealed class Coefficient
 	#endregion
 
 	#region Public Static Properties
-	public static Dictionary<int, string> DamageTypes { get; } = new()
-	{
-		[0] = "<None>",
-		[1] = string.Empty,
-		[2] = "Physical",
-		[3] = "Flame",
-		[4] = "Shock",
-		[5] = "Oblivion",
-		[6] = "Frost",
-		[7] = "Earth",
-		[8] = "Magic",
-		[9] = "Drown",
-		[10] = "Disease",
-		[11] = "Poison",
-		[12] = "Bleed",
-		[515] = "Flame",
-	};
-
 	public static Regex RawCoefficient { get; } = new(@"<<(?<index>\d+)>>", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	#endregion
 
@@ -120,6 +120,13 @@ internal sealed class Coefficient
 	public sbyte CoefficientType { get; }
 
 	public int Cooldown { get; }
+
+	public string? DamageSuffix =>
+		this.IsDamage &&
+		Coefficient.DamageTypes[this.DamageType] is var damageType &&
+		damageType.Length > 0
+			? ' ' + damageType + " Damage"
+			: string.Empty;
 
 	public int DamageType { get; }
 

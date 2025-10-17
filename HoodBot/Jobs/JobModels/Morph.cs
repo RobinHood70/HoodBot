@@ -348,7 +348,7 @@ internal sealed class Morph
 				}
 				else if (coef.IsDamage)
 				{
-					var damageSuffix = " " + Coefficient.DamageTypes[coef.DamageType] + " Damage";
+					var damageSuffix = coef.DamageSuffix;
 					if (finalType is null)
 					{
 						finalType = damageSuffix;
