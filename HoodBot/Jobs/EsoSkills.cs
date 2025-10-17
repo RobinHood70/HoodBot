@@ -97,7 +97,12 @@ internal sealed class EsoSkills : EditJob
 	{
 		this.StatusWriteLine("Fetching data");
 		UespReplacer.Initialize(this);
-		this.version = EsoLog.LatestDBUpdate(false);
+		var dbVersion = EsoLog.LatestDBUpdate("skillTree", false);
+
+		// Version with no extension is one higher than last listed version, so add one if needed.
+		this.version = dbVersion.Pts
+			? dbVersion
+			: new EsoVersion(dbVersion.Version + 1, dbVersion.Pts);
 		this.skills = GetSkillList(EsoVersion.Empty);
 	}
 
@@ -234,7 +239,7 @@ internal sealed class EsoSkills : EditJob
 	private void GenerateReport()
 	{
 		var prevVersion = EsoSpace.GetPatchVersion(this, "botskills");
-		if (prevVersion >= this.version)
+		while (prevVersion >= this.version)
 		{
 			prevVersion = new EsoVersion(this.version.Version - 1, false);
 		}

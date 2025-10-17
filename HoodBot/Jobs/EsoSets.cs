@@ -118,7 +118,7 @@ internal sealed class EsoSets : EditJob
 	protected override void Main()
 	{
 		base.Main();
-		var version = EsoLog.LatestDBUpdate(false);
+		var version = EsoLog.LatestDBUpdate("setSummary", false);
 		EsoSpace.SetBotUpdateVersion(this, "botitemset", version);
 	}
 

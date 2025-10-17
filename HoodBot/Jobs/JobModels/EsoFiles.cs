@@ -70,7 +70,7 @@ public static class EsoFiles
 		return Globals.GetHash(stream, HashType.Sha1);
 	}
 
-	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType) => DownloadEsoFile(job, fileType, EsoLog.LatestDBUpdate(false));
+	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType) => DownloadEsoFile(job, fileType, EsoLog.LatestDBUpdate(string.Empty, false));
 
 	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType, EsoVersion desiredVersion)
 	{

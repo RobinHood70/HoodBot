@@ -14,7 +14,7 @@ internal static class EsoLog
 	#region Fields
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 	private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-	private static readonly EsoVersion[] LatestVersions = [EsoVersion.Empty, EsoVersion.Empty];
+	private static readonly Dictionary<string, EsoVersion[]> LatestVersions = new(StringComparer.Ordinal);
 
 	private static Database? database;
 	#endregion
@@ -77,30 +77,34 @@ internal static class EsoLog
 		[-82] = "Health or Magicka"
 	};
 
-	public static EsoVersion LatestDBUpdate(bool includePts)
+	public static EsoVersion LatestDBUpdate(string prefix, bool includePts)
 	{
-		if (LatestVersions[0] == EsoVersion.Empty)
+		if (!LatestVersions.TryGetValue(prefix, out var prefixedLatest))
 		{
-			foreach (var table in EsoDb.ShowTables())
+			prefixedLatest = [EsoVersion.Empty, EsoVersion.Empty];
+			foreach (var table in EsoDb.ShowTables(prefix))
 			{
 				var match = UpdateFinder.Match(table);
 				if (match.Success)
 				{
+					Debug.WriteLine(match.Value);
 					var version = new EsoVersion(match.Value);
 					var ptsNum = version.Pts ? 1 : 0;
 
 					// Invalid values return Empty, which is the default/minimum, so no need to check for it explicitly.
-					if (version.Version > LatestVersions[ptsNum].Version)
+					if (version.Version > prefixedLatest[ptsNum].Version)
 					{
-						LatestVersions[ptsNum] = version;
+						prefixedLatest[ptsNum] = version;
 					}
 				}
 			}
+
+			LatestVersions.Add(prefix, prefixedLatest);
 		}
 
-		return includePts && LatestVersions[1] > LatestVersions[0]
-			? LatestVersions[1]
-			: LatestVersions[0];
+		return includePts && prefixedLatest[1] > prefixedLatest[0]
+			? prefixedLatest[1]
+			: prefixedLatest[0];
 	}
 	#endregion
 
