@@ -314,7 +314,10 @@ public sealed class WikiStack
 				cmt = comments[j];
 				var start = j == 0 ? this.Index : cmt.Start;
 				piece.Nodes.Add(this.Factory.CommentNode(this.Text[start..cmt.End]));
-				piece.Nodes.Add(this.Factory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
+				if (cmt.WhiteSpaceLength > 0)
+				{
+					piece.Nodes.Add(this.Factory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
+				}
 			}
 
 			cmt = comments[lastComment];

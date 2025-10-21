@@ -97,6 +97,10 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <value>The header nodes.</value>
 	public IEnumerable<ILinkNode> LinkNodes => this.FindAll<ILinkNode>();
 
+	/// <summary>Gets the <see cref="ITextNode"/>s in the main body of the page without looking inside links, templates, etc.</summary>
+	/// <value>The header nodes.</value>
+	public IEnumerable<ITextNode> RootTextNodes => this.FindAll<ITextNode>(null, false, false, 0);
+
 	/// <summary>Gets the <see cref="ITemplateNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
 	public IEnumerable<ITemplateNode> TemplateNodes => this.FindAll<ITemplateNode>();
