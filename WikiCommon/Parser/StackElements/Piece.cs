@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.StackElements;
 
+using System;
 using System.Collections.Generic;
 using RobinHood70.WikiCommon.Parser;
 
@@ -12,6 +13,7 @@ internal class Piece
 	#region Public Methods
 	public void AddLiteral(IWikiNodeFactory factory, string literal)
 	{
+		ArgumentException.ThrowIfNullOrEmpty(literal);
 		if (this.Nodes.Count > 0 && this.Nodes[^1] is ITextNode node)
 		{
 			node.Text += literal;

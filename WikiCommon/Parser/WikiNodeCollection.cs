@@ -134,16 +134,14 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
 	public void AddText([Localizable(false)] string text)
 	{
-		if (!string.IsNullOrEmpty(text))
+		ArgumentException.ThrowIfNullOrEmpty(text);
+		if (this.Count > 0 && this[^1] is ITextNode node)
 		{
-			if (this.Count > 0 && this[^1] is ITextNode node)
-			{
-				node.Text += text;
-			}
-			else
-			{
-				this.Add(this.Factory.TextNode(text));
-			}
+			node.Text += text;
+		}
+		else
+		{
+			this.Add(this.Factory.TextNode(text));
 		}
 	}
 
