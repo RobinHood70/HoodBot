@@ -117,6 +117,15 @@ public static class Extensions
 
 	#region IParameterNode Extensions
 
+	/// <summary>Get the trimmed value of the parameter.</summary>
+	/// <param name="parameter">The parameter to work on.</param>
+	/// <returns>The trimmed text of the parameter value.</returns>
+	public static string? GetName(this IParameterNode parameter)
+	{
+		ArgumentNullException.ThrowIfNull(parameter);
+		return parameter.Name?.ToValue().Trim();
+	}
+
 	/// <summary>Gets the parameter number if it's numeric.</summary>
 	/// <param name="parameter">The parameter to check.</param>
 	/// <returns>The parameter number if it's an integer; otherwise 0.</returns>
@@ -740,41 +749,6 @@ public static class Extensions
 		return null;
 	}
 
-	/// <summary>Removes any parameters with the same name as a later parameter.</summary>
-	/// <param name="template">The template to work on.</param>
-	/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
-	public static void RemoveDuplicates(this ITemplateNode template)
-	{
-		ArgumentNullException.ThrowIfNull(template);
-		Dictionary<string, int> nameList = new(StringComparer.Ordinal);
-		var removals = new List<int>();
-		var anonIndex = 0;
-		for (var index = 0; index < template.Parameters.Count; index++)
-		{
-			var name = template.Parameters[index].Name?.ToValue()
-				?? (++anonIndex).ToStringInvariant();
-			if (nameList.TryGetValue(name, out var offset))
-			{
-				// MediaWiki uses is_int() to process what's an integer, and this does not seem to allow for variant numeral systems like Hebrew, only Arabic digits, so InvariantCulture is used here.
-				if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
-				{
-					template.Parameters[offset].Value.Clear();
-				}
-				else
-				{
-					removals.Add(offset);
-				}
-			}
-
-			nameList[name] = index;
-		}
-
-		for (var i = removals.Count - 1; i >= 0; i--)
-		{
-			template.Parameters.RemoveAt(removals[i]);
-		}
-	}
-
 	/// <summary>Finds the parameters with the given name and removes it.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="parameterName">The name of the parameter.</param>
@@ -823,6 +797,83 @@ public static class Extensions
 		}
 
 		return retval;
+	}
+
+	/// <summary>Removes any parameters with the same name as a later parameter.</summary>
+	/// <param name="template">The template to work on.</param>
+	/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
+	public static void RemoveDuplicates(this ITemplateNode template)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		Dictionary<string, int> nameList = new(StringComparer.Ordinal);
+		var removals = new List<int>();
+		var anonIndex = 0;
+		for (var index = 0; index < template.Parameters.Count; index++)
+		{
+			var name = template.Parameters[index].Name?.ToValue()
+				?? (++anonIndex).ToStringInvariant();
+			if (nameList.TryGetValue(name, out var offset))
+			{
+				// MediaWiki uses is_int() to process what's an integer, and this does not seem to allow for variant numeral systems like Hebrew, only Arabic digits, so InvariantCulture is used here.
+				if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+				{
+					template.Parameters[offset].Value.Clear();
+				}
+				else
+				{
+					removals.Add(offset);
+				}
+			}
+
+			nameList[name] = index;
+		}
+
+		for (var i = removals.Count - 1; i >= 0; i--)
+		{
+			template.Parameters.RemoveAt(removals[i]);
+		}
+	}
+
+	/// <summary>Removes any named parameters that only have whitespace values.</summary>
+	/// <param name="template">The template to work on.</param>
+	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(ITemplateNode)"/> first.</remarks>
+	public static void RemoveEmpties(this ITemplateNode template)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		for (var index = template.Parameters.Count - 1; index >= 0; index--)
+		{
+			var param = template.Parameters[index];
+			if (!param.Anonymous && param.GetValue().Length == 0)
+			{
+				template.Parameters.RemoveAt(index);
+			}
+		}
+	}
+
+	/// <summary>Removes any named parameters that only have whitespace values, excluding the parameter names specified.</summary>
+	/// <param name="template">The template to work on.</param>
+	/// <param name="exclusions">Parameter names not to remove, even if empty. To support case-insensitive parameters, pass an <see cref="IReadOnlySet{T}"/> with the appropriate comparer; otherwise, Ordinal comparison will be used.</param>
+	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(ITemplateNode)"/> first.</remarks>
+	public static void RemoveEmpties(this ITemplateNode template, IEnumerable<string> exclusions)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		var set = exclusions is IReadOnlySet<string> alreadySet
+			? alreadySet
+			: new HashSet<string>(exclusions, StringComparer.Ordinal);
+		if (set.Count == 0)
+		{
+			RemoveEmpties(template);
+			return;
+		}
+
+		for (var index = template.Parameters.Count - 1; index >= 0; index--)
+		{
+			var param = template.Parameters[index];
+			if (!param.Anonymous && param.GetValue().Length == 0 && !set.Contains(param.GetName()!))
+			{
+				template.Parameters.RemoveAt(index);
+			}
+		}
 	}
 
 	/// <summary>Finds the parameters with the given name and removes it.</summary>
