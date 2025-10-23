@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Jobs.Design;
@@ -25,15 +27,36 @@ internal enum ItemType
 }
 #endregion
 
-internal sealed class EsoFurnishingUpdater : TemplateJob
+internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 {
 	#region Private Constants
 	private const string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname, tags FROM collectibles WHERE furnCategory != ''";
 	#endregion
 
 	#region Static Fields
+	private static readonly Dictionary<string, int> CommentCounts = new(StringComparer.OrdinalIgnoreCase);
+	private static readonly HashSet<string> FurnishingKeep = new(StringComparer.Ordinal)
+	{
+		"cat", "subcat", "id"
+	};
+
 	private static readonly HashSet<long> IgnoreIds = [194537];
 	private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
+
+	private static readonly HashSet<string> NoHousingCats = new(StringComparer.OrdinalIgnoreCase)
+	{
+		"Miscellaneous", "Mounts", "Non-Combat Pets", "Services"
+	};
+
+	private static readonly Dictionary<string, HashSet<string>> Pruneables = new(StringComparer.Ordinal)
+	{
+		["Online Furnishing Antiquity/Start"] = new HashSet<string>(StringComparer.Ordinal) { "leads" },
+		["Online Furnishing Antiquity/Row"] = [],
+		["Online Furnishing Crafting"] = new HashSet<string>(StringComparer.Ordinal) { "craft" },
+		["Online Furnishing Purchase"] = []
+	};
+
+	private static readonly string TemplateName = "Online Furnishing Summary";
 	#endregion
 
 	#region Fields
@@ -44,6 +67,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 	private readonly List<string> fileMessages = [];
 	private readonly List<string> pageMessages = [];
 	private readonly TitleCollection missingIdExceptions;
+
 	//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new();
 	#endregion
 
@@ -52,6 +76,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 	public EsoFurnishingUpdater(JobManager jobManager)
 		: base(jobManager)
 	{
+		//// this.Shuffle = true;
 		//// jobManager.ShowDiffs = false;
 		if (this.Results is PageResultHandler pageResults)
 		{
@@ -67,10 +92,6 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 
 	#region Public Override Properties
 	public override string LogName { get; } = "ESO Furnishing Update";
-	#endregion
-
-	#region Protected Override Properties
-	protected override string TemplateName { get; } = "Online Furnishing Summary";
 	#endregion
 
 	#region Protected Override Methods
@@ -128,17 +149,74 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		this.FindDupes(this.furnishings, dupes);
 	}
 
-	protected override string GetEditSummary(Page page) => "Update info from ESO database";
+	protected override string GetEditSummary(Page page) => "Update info from ESO database; remove cruft";
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void LoadPages()
 	{
-		ArgumentNullException.ThrowIfNull(parser);
-		if (this.GenericTemplateFixes(template))
+		var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], TemplateName);
+		this.Pages.GetBacklinks(title.FullPageName(), BacklinksTypes.EmbeddedIn);
+		//// this.Pages.GetTitles("Online:10-Year Anniversary Banner, Medium");
+
+		var top10 = CommentCounts.OrderByDescending(entry => entry.Value).Take(10);
+		foreach (var comment in top10)
 		{
-			this.Warn("Template has anonymous parameter on " + parser.Title.FullPageName());
+			Debug.Write(comment.Value.ToStringInvariant() + ":  ");
+			Debug.WriteLine(comment.Key);
+			Debug.WriteLine(string.Empty);
+		}
+	}
+
+	protected override void ParseText(SiteParser parser)
+	{
+		var template = this.ProcessMainTemplate(parser);
+		var cat = template.GetValue("cat");
+		var doHousing = cat is not null && NoHousingCats.Contains(cat);
+		RemoveComments(parser, doHousing);
+		PruneSecondaryTemplates(parser);
+
+		foreach (var comment in parser.FindAll<ICommentNode>(null, false, false, 0))
+		{
+			CommentCounts[comment.Comment] = CommentCounts.TryGetValue(comment.Comment, out var value)
+				? ++value
+				: 1;
+		}
+	}
+
+	private static void RemoveComments(SiteParser parser, bool doHousing)
+	{
+		for (var i = parser.Count - 2; i >= 0; i--)
+		{
+			if (parser[i] is ICommentNode comment)
+			{
+				if (TemplateFinder().IsMatch(comment.Comment))
+				{
+					parser.RemoveAt(i);
+				}
+				else if (HeaderFinder().IsMatch(comment.Comment))
+				{
+					parser.RemoveAt(i);
+				}
+				else if (comment.Comment.StartsWith("<!--Instructions: ", StringComparison.Ordinal))
+				{
+					var remainder = comment.Comment[18..];
+					if (remainder.StartsWith("Fill in antiquity information", StringComparison.Ordinal) ||
+						remainder.StartsWith("Add book information here", StringComparison.Ordinal) ||
+						remainder.StartsWith("Use the template below to fill out the crafting details.", StringComparison.Ordinal) ||
+						remainder.StartsWith("Add vendor information here", StringComparison.Ordinal) ||
+						remainder.StartsWith("List the sources from", StringComparison.Ordinal) ||
+						(doHousing && remainder.StartsWith("Add this section to the page if the main category is NOT", StringComparison.Ordinal)))
+					{
+						parser.RemoveAt(i);
+					}
+				}
+			}
 		}
 
-		this.FurnishingFixes(template, parser.Page);
+		parser.MergeText(false);
+		foreach (var text in parser.RootTextNodes)
+		{
+			text.Text = VerticalSpaceFinder().Replace(text.Text, "\n\n");
+		}
 	}
 	#endregion
 
@@ -161,11 +239,18 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 
 	private static void CheckIcon(ITemplateNode template, string labelName)
 	{
-		var fileName = labelName.Replace(':', ',');
-		if (template.GetValue("icon").OrdinalEquals($"ON-icon-furnishing-{fileName}.png"))
+		labelName = labelName.Replace(':', ',');
+		var defaultName = $"ON-icon-furnishing-{labelName}.png";
+		// pageName = pageName.Replace(':', ',');
+		// var defaultPageName = $"ON-icon-furnishing-{pageName}.png";
+		if (template.GetValue("icon").OrdinalEquals(defaultName))
 		{
 			template.Remove("icon");
-		}
+		}/*
+		else if (!defaultName.OrdinalEquals(defaultPageName))
+		{
+			template.UpdateIfEmpty("icon", defaultPageName);
+		}*/
 	}
 
 	private static string CheckName(ITemplateNode template, string labelName)
@@ -204,6 +289,35 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 			behavior.SetValue(string.Join(", ", list), ParameterFormat.OnePerLine);
 		}
 	}
+
+	private static void PruneSecondaryTemplates(SiteParser parser)
+	{
+		foreach (var subTemplate in parser.FindTemplates(Pruneables.Keys))
+		{
+			var templateName = subTemplate.GetTitleText();
+			var exceptions = Pruneables[templateName];
+			subTemplate.RemoveEmpties(exceptions);
+		}
+	}
+
+	private static void RemoveInstructions(SiteParser parser, int i, ICommentNode comment, string commentStart)
+	{
+		if (comment.Comment.StartsWith("<!--Instructions: " + commentStart, StringComparison.Ordinal))
+		{
+			parser.RemoveAt(i);
+		}
+	}
+	#endregion
+
+	#region Private Static Partial Methods
+	[GeneratedRegex(@"^==\s*Available From\s*==", RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex HeaderFinder();
+
+	[GeneratedRegex(@"{{\s*Online Furnishing (Antiquity/(Row|Start)|Books|Crafting|Purchase)\b", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex TemplateFinder();
+
+	[GeneratedRegex("(\r?\n){3,}", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex VerticalSpaceFinder();
 	#endregion
 
 	#region Private Methods
@@ -379,7 +493,7 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		ArgumentNullException.ThrowIfNull(page);
 		var labelName = page.Title.LabelName();
 		var name = CheckName(template, labelName);
-		CheckIcon(template, labelName);
+		CheckIcon(template, name);
 		if (this.FindFurnishing(template, page, labelName) is not Furnishing furnishing)
 		{
 			return;
@@ -538,6 +652,19 @@ internal sealed class EsoFurnishingUpdater : TemplateJob
 		this.FixList(template, "skill");
 
 		return template.Find(1) is not null;
+	}
+
+	private ITemplateNode ProcessMainTemplate(SiteParser parser)
+	{
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		if (this.GenericTemplateFixes(template))
+		{
+			this.Warn("Template has anonymous parameter on " + parser.Title);
+		}
+
+		this.FurnishingFixes(template, parser.Page);
+		template.RemoveEmpties(FurnishingKeep);
+		return template;
 	}
 	#endregion
 }
