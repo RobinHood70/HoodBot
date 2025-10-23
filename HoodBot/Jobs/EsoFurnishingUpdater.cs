@@ -241,8 +241,8 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 	{
 		labelName = labelName.Replace(':', ',');
 		var defaultName = $"ON-icon-furnishing-{labelName}.png";
-		// pageName = pageName.Replace(':', ',');
-		// var defaultPageName = $"ON-icon-furnishing-{pageName}.png";
+		//// pageName = pageName.Replace(':', ',');
+		//// var defaultPageName = $"ON-icon-furnishing-{pageName}.png";
 		if (template.GetValue("icon").OrdinalEquals(defaultName))
 		{
 			template.Remove("icon");
