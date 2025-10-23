@@ -1010,7 +1010,7 @@ public static class Extensions
 	/// <param name="name">The name of the parameter to update.</param>
 	/// <param name="value">The value to update the parameter to.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.Verbatim);
+	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.Copy);
 
 	/// <summary>Updates a parameter with the specified value if it is blank or does not exist.</summary>
 	/// <param name="template">The template to update.</param>
