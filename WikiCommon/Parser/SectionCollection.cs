@@ -173,7 +173,7 @@ public class SectionCollection : List<Section>
 
 		for (var i = startIndex; i < this.Count; i++)
 		{
-			if (comparer.Equals(this[i], name))
+			if (comparer.Equals(this[i].GetTitle(), name))
 			{
 				return i;
 			}
