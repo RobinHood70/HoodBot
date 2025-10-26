@@ -135,11 +135,7 @@ internal sealed class SplitToAlphabetic : EditJob
 
 	private bool SplitMainPage()
 	{
-		if (this.Site.LoadPage(this.mainPage) is not Page page)
-		{
-			throw new InvalidOperationException();
-		}
-
+		var page = this.Site.LoadPage(this.mainPage);
 		var parser = new SiteParser(page);
 		var sections = parser.ToSections(2);
 		var newSections = this.GroupSections(sections);

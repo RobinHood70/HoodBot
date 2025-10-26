@@ -457,23 +457,41 @@ public class Site : IMessageSource
 	});
 
 	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
-	/// <param name="pageName">Name of the page.</param>
+	/// <param name="fullPageName">Name of the page.</param>
 	/// <returns>The page.</returns>
-	public Page? LoadPage(string pageName)
+	public Page LoadPage(string fullPageName)
 	{
-		ArgumentNullException.ThrowIfNull(pageName);
-		return this.LoadPage(TitleFactory.FromUnvalidated(this, pageName));
+		ArgumentNullException.ThrowIfNull(fullPageName);
+		return this.LoadPage(fullPageName, PageModules.Default);
 	}
 
 	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 	/// <param name="title">Name of the page.</param>
 	/// <returns>The page.</returns>
-	public Page? LoadPage(Title title)
+	public Page LoadPage(Title title) => this.LoadPage(title, PageModules.Default);
+
+	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+	/// <param name="fullPageName">Name of the page.</param>
+	/// <param name="pageModules">The page modules to load.</param>
+	/// <returns>The page.</returns>
+	public Page LoadPage(string fullPageName, PageModules pageModules)
+	{
+		ArgumentNullException.ThrowIfNull(fullPageName);
+		return this.LoadPage(TitleFactory.FromUnvalidated(this, fullPageName), pageModules);
+	}
+
+	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+	/// <param name="title">Name of the page.</param>
+	/// <param name="pageModules">The page modules to load.</param>
+	/// <returns>The page.</returns>
+	public Page LoadPage(Title title, PageModules pageModules)
 	{
 		ArgumentNullException.ThrowIfNull(title);
-		var pages = PageCollection.Unlimited(this);
+		var pages = PageCollection.Unlimited(this, pageModules, false);
 		pages.GetTitles(title);
-		return pages.Count == 1 ? pages[0] : null;
+		return pages.Count == 1
+			? pages[0]
+			: throw new WikiException("Unexpected number of pages returned from single page load: " + pages.Count.ToStringInvariant());
 	}
 
 	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
@@ -672,7 +690,7 @@ public class Site : IMessageSource
 	/// <summary>This is a convenience method to quickly get the text of a single subpage in the user's space.</summary>
 	/// <param name="subPageName">Name of the user subpage.</param>
 	/// <returns>The text of the page.</returns>
-	public Page? LoadUserSubPage(string subPageName)
+	public Page LoadUserSubPage(string subPageName)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(subPageName);
 		if (this.User is null)

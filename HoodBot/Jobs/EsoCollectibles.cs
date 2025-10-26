@@ -204,13 +204,19 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	private string GetBlankText()
 	{
 		this.StatusWriteLine("Getting wiki info");
-		if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
+		var page = this.Site.LoadPage($"Template:{TemplateName}/Blank");
+		if (page.IsMissing)
 		{
-			var extract = new SiteParser(page);
-			var pre = extract.FindTemplate("Pre");
-			if (pre?.Find(1)?.Value is IList<IWikiNode> nodes &&
-				nodes.Count > 0 &&
-				nodes[0] is ITagNode tag &&
+			throw new InvalidOperationException("Blank Template not found.");
+		}
+
+		var extract = new SiteParser(page);
+		var pre = extract.FindTemplate("Pre");
+		if (pre?.Find(1) is IParameterNode param)
+		{
+			var value = param.Value;
+			if (value.Count > 0 &&
+				value[0] is ITagNode tag &&
 				tag.Name.OrdinalEquals("nowiki") &&
 				tag.InnerText?.Trim() is string blankTemplate)
 			{
@@ -220,7 +226,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 			}
 		}
 
-		throw new InvalidOperationException("Blank Template not set.");
+		throw new InvalidOperationException("Blank template not in expected format.");
 	}
 
 	private void GetCollectibles(TitleCollection allTitles, PageCollection pages)
