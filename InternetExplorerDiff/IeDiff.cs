@@ -92,7 +92,8 @@ public class IeDiff : IDiffViewer
 			["wpAutoSummary"] = string.Empty.GetHash(HashType.Md5),
 			["wpEditToken"] = diff.EditToken,
 			["wpStarttime"] = IndexDateTime(diff.StartTimestamp),
-			["wpEdittime"] = IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now)
+			["wpEdittime"] = IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now),
+			["wpUltimateParam"] = "1"
 		};
 
 		var postData = new StringBuilder();
