@@ -194,7 +194,7 @@ internal abstract class Skill
 		ArgumentNullException.ThrowIfNull(value);
 		ArgumentNullException.ThrowIfNull(usedList);
 		ArgumentNullException.ThrowIfNull(skillName);
-		var collection = WikiNodeCollection.NewFrom(template, value.Trim());
+		var collection = new WikiNodeCollection(template.Factory, template.Factory.Parse(value));
 
 		UespReplacer.ReplaceGlobal(collection);
 		UespReplacer.ReplaceEsoLinks(usedList.Site, collection);

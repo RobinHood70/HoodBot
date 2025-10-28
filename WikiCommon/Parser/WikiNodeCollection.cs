@@ -110,19 +110,6 @@ public class WikiNodeCollection : List<IWikiNode>
 	public IEnumerable<ITextNode> TextNodes => this.FindAll<ITextNode>();
 	#endregion
 
-	#region Public Static Methods
-
-	/// <summary>Initializes a new instance of the <see cref="WikiNodeCollection"/> class from an existing <see cref="IParentNode"/>.</summary>
-	/// <param name="node">The node to copy from.</param>
-	/// <param name="value">The value to parse.</param>
-	/// <returns>A new <see cref="WikiNodeCollection"/> based on the node provided.</returns>
-	public static WikiNodeCollection NewFrom(IParentNode node, string? value)
-	{
-		ArgumentNullException.ThrowIfNull(node);
-		return new WikiNodeCollection(node.Factory, node.Factory.Parse(value));
-	}
-	#endregion
-
 	#region Public Methods
 
 	/// <summary>Accepts a visitor to process the node.</summary>
