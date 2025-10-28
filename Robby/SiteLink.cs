@@ -764,8 +764,7 @@ public class SiteLink : ILinkTitle
 			if (parameterType == ParameterType.Caption)
 			{
 				// Unlike other parameters, the last caption is always used in the event of a conflict, rather than the first, so compensate for that.
-				this.Parameters.Remove(parameterType);
-				this.Parameters.Add(parameterType, parameter);
+				this.Parameters[parameterType] = parameter;
 			}
 		}
 		else
