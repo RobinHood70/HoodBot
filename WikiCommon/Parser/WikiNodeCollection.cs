@@ -490,6 +490,99 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// </remarks>
 	public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType, ReplaceLocations replaceIn) => ReplaceTextPrivate(this, oldValue, newValue, comparisonType, replaceIn);
 
+	/// <summary>Splits the collection at the given text separator.</summary>
+	/// <param name="pattern">The <see cref="Regex"/> pattern to split on.</param>
+	/// <remarks>This only searches root-level text nodes for the text. Anything deeper than that could potentially split links or templates.</remarks>
+	/// <param name="includeSeparator">If true, includes the separator in the results as its own entry in the array.</param>
+	/// <remarks>In the current design, all nodes except split text nodes are references to their original nodes.</remarks>
+	/// <returns>An array of WikiNodeCollections split on the divider.</returns>
+	public IList<WikiNodeCollection> Split(Regex pattern, bool includeSeparator)
+	{
+		// TODO: Add Split(string separator) function
+		ArgumentNullException.ThrowIfNull(pattern);
+		var retval = new List<WikiNodeCollection>();
+		var i = 0;
+		var startNode = 0;
+		var textIndex = 0;
+		var startIndex = 0;
+		while (i < this.Count)
+		{
+			if (this[i] is ITextNode t && pattern.Match(t.Text, textIndex) is Match match && match.Success)
+			{
+				var before = new WikiNodeCollection(this.Factory);
+				if (this[startNode] is ITextNode lastText)
+				{
+					int textEnd;
+					if (i == startNode)
+					{
+						textEnd = match.Index;
+					}
+					else
+					{
+						textEnd = lastText.Text.Length;
+						startNode++;
+					}
+
+					if (textEnd > startIndex)
+					{
+						before.AddText(lastText.Text[startIndex..textEnd]);
+					}
+				}
+
+				if (i > startNode)
+				{
+					before.AddRange(this[startNode..i]);
+				}
+
+				if (startNode != i && match.Index > 0)
+				{
+					before.AddText(t.Text[0..match.Index]);
+				}
+
+				textIndex = match.Index + match.Length;
+				startNode = i;
+				startIndex = textIndex;
+
+				retval.Add(before);
+
+				if (includeSeparator)
+				{
+					before = new WikiNodeCollection(this.Factory);
+					before.AddText(match.Value);
+					retval.Add(before);
+				}
+			}
+			else
+			{
+				textIndex = 0;
+				i++;
+			}
+		}
+
+		var remainder = new WikiNodeCollection(this.Factory);
+		if (startNode < this.Count && this[startNode] is ITextNode text)
+		{
+			if (startIndex < text.Text.Length)
+			{
+				remainder.AddText(text.Text[startIndex..]);
+			}
+
+			startNode++;
+		}
+
+		if (startNode < this.Count)
+		{
+			remainder.AddRange(this[startNode..]);
+		}
+
+		if (remainder.Count > 0)
+		{
+			retval.Add(remainder);
+		}
+
+		return retval;
+	}
+
 	/// <summary>Splits a page into its individual sections. </summary>
 	/// <returns>An enumeration of the sections of the page.</returns>
 	/// <remarks>It is the caller's responsibility to set the collection's <see cref="SectionCollection.Comparer">Comparer property</see> if needed.</remarks>
