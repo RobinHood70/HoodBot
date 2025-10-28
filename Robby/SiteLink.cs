@@ -763,8 +763,16 @@ public class SiteLink : ILinkTitle
 			this.ParametersDropped = true;
 			if (parameterType == ParameterType.Caption)
 			{
-				// Unlike other parameters, the last caption is always used in the event of a conflict, rather than the first, so compensate for that.
-				this.Parameters[parameterType] = parameter;
+				if (this.ForcedNamespaceLink || this.Title.Namespace != MediaWikiNamespaces.File)
+				{
+					// TODO: Fudge the value for now. Looks like ILinkNodes should only ever have one parameter, then it gets split on | for images. Need to double-check this.
+					this.Parameters[parameterType] = new EmbeddedValue(this.Parameters[parameterType].ToString() + '|' + parameter.ToString());
+				}
+				else
+				{
+					// Unlike other parameters, the last caption is always used in the event of a conflict, rather than the first, so compensate for that.
+					this.Parameters[parameterType] = parameter;
+				}
 			}
 		}
 		else
