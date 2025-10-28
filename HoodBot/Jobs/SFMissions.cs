@@ -59,7 +59,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	#region Private Static Methods
 	private static string BuildStageSection(List<Stage> stages)
 	{
-		var factory = new WikiNodeFactory();
+		var factory = WikiNodeFactory.DefaultInstance;
 		var sb = new StringBuilder();
 		sb
 			.Append("== Mission Stages ==\n")
