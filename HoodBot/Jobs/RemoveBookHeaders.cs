@@ -30,10 +30,16 @@ internal sealed class RemoveBookHeaders : EditJob
 	protected override void PageLoaded(Page page)
 	{
 		// Crude unindent before parsing
-		page.Text = page.Text
-			.Replace("\r\n", "\n", StringComparison.Ordinal)
-			.Replace("\n\n:", "\n\n", StringComparison.Ordinal)
-			.Replace("\n:", "\n\n", StringComparison.Ordinal);
+		page.Text = page.Text.Replace("\r\n", "\n", StringComparison.Ordinal);
+		page.Text = page.Title.PageName.StartsWith("Crafting Motif 68", StringComparison.Ordinal)
+			? page.Text
+				.Replace("\n\n:", "\n\n", StringComparison.Ordinal)
+				.Replace("==\n:", "==\n", StringComparison.Ordinal)
+				.Replace("}}\n:", "}}\n", StringComparison.Ordinal)
+				.Replace("\n:", "<br>\n", StringComparison.Ordinal)
+			: page.Text
+				.Replace("\n\n:", "\n\n", StringComparison.Ordinal)
+				.Replace("\n:", "\n\n", StringComparison.Ordinal);
 		var parser = new SiteParser(page);
 
 		// Double-check that this is actually a book (not currently necessary, but left as a failsafe)
