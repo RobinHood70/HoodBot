@@ -84,11 +84,8 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	public void Visit(ILinkNode link)
 	{
 		var siteLink = SiteLink.FromLinkNode(this.Context.Site, link);
-		if (siteLink.Text is not null)
-		{
-			var text = Build(siteLink.Text, this.Context, this.Frame);
-			this.builder.Append(text);
-		}
+		var text = Build(siteLink.Text ?? siteLink.OriginalTitle?.Trim(), this.Context, this.Frame);
+		this.builder.Append(text);
 	}
 
 	/// <inheritdoc/>
