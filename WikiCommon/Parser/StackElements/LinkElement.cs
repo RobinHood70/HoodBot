@@ -2,8 +2,12 @@
 
 internal sealed class LinkElement(WikiStack stack, int length) : OpenCloseElement(stack, '[', length)
 {
+	#region Fields
+	private bool dividerFound;
+	#endregion
+
 	#region Internal Override Properties
-	internal override string SearchString { get; } = SearchBase + "|]";
+	internal override string SearchString => SearchBase + (this.dividerFound ? "]" : "|]");
 	#endregion
 
 	#region Public Override Methods
@@ -18,6 +22,7 @@ internal sealed class LinkElement(WikiStack stack, int length) : OpenCloseElemen
 			case '|':
 				this.DividerPieces.Add(new());
 				this.Stack.Index++;
+				this.dividerFound = true;
 				break;
 			case ']':
 				this.ParseClose(found);

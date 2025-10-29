@@ -414,10 +414,29 @@ public class SiteLink : ILinkTitle
 		retval.OriginalTitle = titleText;
 		retval.TitleWhitespaceBefore = valueSplit.Before;
 		retval.TitleWhitespaceAfter = valueSplit.After;
-		foreach (var parameter in link.Parameters)
+		switch (link.Parameters.Count)
 		{
-			var valueRaw = parameter.Value.ToRaw();
-			retval.InitValue(valueRaw);
+			case 0:
+				break;
+			case 1:
+				var caption = link.Parameters[0].Value;
+				if (retval.Title.Namespace == MediaWikiNamespaces.File && !retval.ForcedNamespaceLink)
+				{
+					var parameters = caption.Split("|");
+					foreach (var parameter in parameters)
+					{
+						var valueRaw = parameter.ToRaw();
+						retval.InitValue(valueRaw);
+					}
+				}
+				else
+				{
+					retval.Text = caption.ToRaw();
+				}
+
+				break;
+			default:
+				throw new InvalidOperationException("Link should never have more than 1 parameter.");
 		}
 
 		return retval;

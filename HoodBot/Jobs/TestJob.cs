@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using RobinHood70.Robby;
 using RobinHood70.WallE.Base;
 using RobinHood70.WallE.Clients;
 
@@ -11,6 +12,12 @@ internal sealed class TestJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	#region Protected Override Methods
 	protected override void Main()
 	{
+		var siteLink = SiteLink.FromText(this.Site, "[[Main Page|Test 1|Test 2]]");
+		this.StatusWriteLine(siteLink.Text ?? string.Empty);
+
+		siteLink = SiteLink.FromText(this.Site, "[[File:Example.jpg|Caption|link=Main Page]]");
+		this.StatusWriteLine(siteLink.Link ?? string.Empty);
+
 		const int maxTimes = 5;
 		this.ResetProgress(maxTimes);
 		for (var i = 1; i <= maxTimes; i++)
