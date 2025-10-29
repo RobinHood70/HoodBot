@@ -27,7 +27,7 @@ public static class ParserHelpers
 		for (var i = 0; i < nodes.Count; i++)
 		{
 			if (nodes[i] is ILinkNode link &&
-				TitleFactory.FromBacklinkNode(site, link).Title is var title &&
+				TitleFactory.FromTitleNode(site, link).Title is var title &&
 				title.Namespace == MediaWikiNamespaces.Category)
 			{
 				if (title.PageNameEquals(category))
@@ -109,7 +109,7 @@ public static class ParserHelpers
 		ArgumentNullException.ThrowIfNull(find);
 		return find is null
 			? null
-			: nodes.FindLink(link => TitleFactory.FromBacklinkNode(find.Title.Site, link).FullEquals(find));
+			: nodes.FindLink(link => TitleFactory.FromTitleNode(find.Title.Site, link).FullEquals(find));
 	}
 
 	/// <summary>Finds all links that match the provided title.</summary>
@@ -154,7 +154,7 @@ public static class ParserHelpers
 		ArgumentNullException.ThrowIfNull(find);
 		return find is null
 			? []
-			: nodes.FindLinks(link => TitleFactory.FromBacklinkNode(find.Title.Site, link).FullEquals(find));
+			: nodes.FindLinks(link => TitleFactory.FromTitleNode(find.Title.Site, link).FullEquals(find));
 	}
 
 	/// <summary>Finds the first template that matches the provided title.</summary>

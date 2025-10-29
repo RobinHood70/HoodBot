@@ -804,7 +804,7 @@ public abstract class MovePagesJob : EditJob
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(template);
-		var title = TitleFactory.FromBacklinkNode(this.Site, template).Title;
+		var title = TitleFactory.FromTitleNode(this.Site, template).Title;
 		if (this.linkUpdates.TryGetValue(title, out var to))
 		{
 			var nameText = to.Namespace == MediaWikiNamespaces.Template

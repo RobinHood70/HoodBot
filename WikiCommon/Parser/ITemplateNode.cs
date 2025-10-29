@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 
 /// <summary>Represents a link, including embedded images.</summary>
-public interface ITemplateNode : IBacklinkNode, IWikiNode
+public interface ITemplateNode : ITitleNode, IWikiNode
 {
 	/// <summary>Gets the parameters.</summary>
 	/// <value>The parameters.</value>

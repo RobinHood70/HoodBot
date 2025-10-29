@@ -254,17 +254,6 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 			: throw new InvalidOperationException("Namespace validation failed.");
 	}
 
-	/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-	/// <param name="site">The site the title is from.</param>
-	/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
-	/// <returns>A new FullTitle based on the provided values.</returns>
-	public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node)
-	{
-		ArgumentNullException.ThrowIfNull(site);
-		ArgumentNullException.ThrowIfNull(node);
-		return FromUnvalidated(site[MediaWikiNamespaces.Main], node.GetTitleText());
-	}
-
 	/// <summary>Shortcut method to create a <see cref="Title"/> from a template name.</summary>
 	/// <param name="site">The site the template is from.</param>
 	/// <param name="templateName">The template name.</param>
@@ -273,6 +262,17 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		return FromUnvalidated(site[MediaWikiNamespaces.Template], templateName);
+	}
+
+	/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+	/// <param name="site">The site the title is from.</param>
+	/// <param name="title">The <see cref="ITitleNode"/> to parse.</param>
+	/// <returns>A new FullTitle based on the provided values.</returns>
+	public static TitleFactory FromTitleNode(Site site, ITitleNode title)
+	{
+		ArgumentNullException.ThrowIfNull(site);
+		ArgumentNullException.ThrowIfNull(title);
+		return FromUnvalidated(site[MediaWikiNamespaces.Main], title.GetTitleText());
 	}
 
 	/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>

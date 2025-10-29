@@ -1063,7 +1063,7 @@ public class Site : IMessageSource
 	/// <param name="text">The text to parse.</param>
 	/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
 	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is ILinkNode linkNode
-		? TitleFactory.FromBacklinkNode(this, linkNode).ToFullTitle()
+		? TitleFactory.FromTitleNode(this, linkNode).ToFullTitle()
 		: null;
 
 	/// <summary>Gets all page property names in use on the wiki.</summary>

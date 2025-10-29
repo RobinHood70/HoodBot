@@ -39,12 +39,12 @@ public static class Extensions
 	#region IBacklink Methods
 
 	/// <summary>Parses the title and returns the trimmed value.</summary>
-	/// <param name="backlink">The backlink to get the title for.</param>
+	/// <param name="title">The node to get the title for.</param>
 	/// <returns>The title.</returns>
-	public static string GetTitleText(this IBacklinkNode backlink)
+	public static string GetTitleText(this ITitleNode title)
 	{
-		ArgumentNullException.ThrowIfNull(backlink);
-		var retval = backlink.TitleNodes.ToValue();
+		ArgumentNullException.ThrowIfNull(title);
+		var retval = title.TitleNodes.ToValue();
 		retval = WikiTextUtilities.DecodeAndNormalize(retval);
 		return retval.Trim();
 	}

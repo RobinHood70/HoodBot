@@ -52,7 +52,7 @@ internal sealed class SplitToAlphabetic : EditJob
 		var parser = new SiteParser(page);
 		foreach (var link in parser.LinkNodes)
 		{
-			var linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
+			var linkTitle = TitleFactory.FromTitleNode(this.Site, link);
 			if (linkTitle.Title == this.mainPage && linkTitle.Fragment?.Length > 0)
 			{
 				var fragment = linkTitle.Fragment.Trim();

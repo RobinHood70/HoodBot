@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents a link, including embedded images.</summary>
-public interface ILinkNode : IBacklinkNode, IWikiNode
+public interface ILinkNode : ITitleNode, IWikiNode
 {
 	/// <summary>Gets the parameter value.</summary>
 	/// <value>The value.</value>

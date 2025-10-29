@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.Parser;
 
 /// <summary>Interface for links and transclusions.</summary>
-public interface IBacklinkNode : IWikiNode, IParentNode
+public interface ITitleNode : IWikiNode, IParentNode
 {
 	#region Properties
 

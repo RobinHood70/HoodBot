@@ -305,12 +305,12 @@ internal sealed class UespReplacer
 		HashSet<Title> oldTemplates = [];
 		foreach (var node in this.oldNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
-			oldTemplates.Add(TitleFactory.FromBacklinkNode(this.Site, node));
+			oldTemplates.Add(TitleFactory.FromTitleNode(this.Site, node));
 		}
 
 		foreach (var node in this.newNodes.FindAll<ITemplateNode>(null, false, true, 0))
 		{
-			oldTemplates.Remove(TitleFactory.FromBacklinkNode(this.Site, node));
+			oldTemplates.Remove(TitleFactory.FromTitleNode(this.Site, node));
 		}
 
 		// Always ignore these
@@ -497,7 +497,7 @@ internal sealed class UespReplacer
 
 	private void RemoveTrivialTemplates(WikiNodeCollection nodes)
 	{
-		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.Site, node));
+		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromTitleNode(this.Site, node));
 
 		nodes.RemoveAll<ITemplateNode>(IsRemovable);
 	}
