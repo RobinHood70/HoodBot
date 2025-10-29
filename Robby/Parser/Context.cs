@@ -44,6 +44,7 @@ public sealed class Context
 		this.AddTemplateHandler("Huh", Ignore);
 		this.AddTemplateHandler("Pipe", Pipe);
 		this.AddTemplateHandler("Sic", ReturnFirstParameter);
+		this.AddTemplateHandler("TR3", ReturnSecondOrFirstParameter);
 
 		this.AddVariableHandler("!", Pipe);
 		this.AddVariableHandler("fullpagename", FullPageNameVar);
@@ -85,6 +86,19 @@ public sealed class Context
 		return frame.Parameters.TryGetValue("1", out var value)
 			? value
 			: string.Empty;
+	}
+
+	/// <summary>Generic method to return the value of the first parameter.</summary>
+	/// <param name="context">The context for the template call.</param>
+	/// <param name="frame">The template frame.</param>
+	/// <returns>The parameter value, if found; otherwise, an empty string.</returns>
+	public static string ReturnSecondOrFirstParameter(Context context, MagicWordFrame frame)
+	{
+		ArgumentNullException.ThrowIfNull(frame);
+		return
+			frame.Parameters.TryGetValue("2", out var value2) ? value2 :
+			frame.Parameters.TryGetValue("1", out var value1) ? value1 :
+			string.Empty;
 	}
 
 	/// <summary>Generic method to return the value of the second parameter.</summary>
