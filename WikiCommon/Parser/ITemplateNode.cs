@@ -1,7 +1,11 @@
 ﻿namespace RobinHood70.WikiCommon.Parser;
 
+using System.Collections.Generic;
+
 /// <summary>Represents a link, including embedded images.</summary>
 public interface ITemplateNode : IBacklinkNode, IWikiNode
 {
-	// Deliberately empty, as there's no new functionality to add, but ILinkNode, ITemplateNode, and IBacklinkNode logically represent different things.
+	/// <summary>Gets the parameters.</summary>
+	/// <value>The parameters.</value>
+	IList<IParameterNode> Parameters { get; }
 }

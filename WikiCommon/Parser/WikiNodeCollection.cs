@@ -794,10 +794,7 @@ public class WikiNodeCollection : List<IWikiNode>
 				case ILinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
-						foreach (var param in link.Parameters)
-						{
-							RegexReplacePrivate(param.Value, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
-						}
+						RegexReplacePrivate(link.Text, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
@@ -852,10 +849,7 @@ public class WikiNodeCollection : List<IWikiNode>
 				case ILinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
-						foreach (var param in link.Parameters)
-						{
-							RegexReplacePrivate(param.Value, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
-						}
+						RegexReplacePrivate(link.Text, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
@@ -910,10 +904,7 @@ public class WikiNodeCollection : List<IWikiNode>
 				case ILinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
-						foreach (var param in link.Parameters)
-						{
-							ReplaceTextPrivate(param.Value, from, to, comparison, replaceIn | ReplaceLocations.Text);
-						}
+						ReplaceTextPrivate(link.Text, from, to, comparison, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;

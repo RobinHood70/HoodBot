@@ -307,8 +307,8 @@ public class WikiNodeFactory : IWikiNodeFactory
 		new IgnoreNode(value);
 
 	/// <inheritdoc/>
-	public virtual ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
-		new LinkNode(this, title, parameters);
+	public virtual ILinkNode LinkNode(IEnumerable<IWikiNode> title, IEnumerable<IWikiNode> text) =>
+		new LinkNode(this, title, text);
 
 	/// <inheritdoc/>
 	public virtual IParameterNode ParameterNode(IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) =>

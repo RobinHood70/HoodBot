@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using RobinHood70.CommonCode;
 using RobinHood70.WikiCommon.Parser;
-using RobinHood70.WikiCommon.Properties;
 
 /// <summary>Represents a link, including embedded images.</summary>
 public class LinkNode : ILinkNode
@@ -13,34 +12,26 @@ public class LinkNode : ILinkNode
 	#region Constructors
 
 	/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
-	/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
+	/// <param name="factory">The factory to use when creating new nodes.</param>
 	/// <param name="title">The title.</param>
-	/// <param name="parameters">The parameters.</param>
+	/// <param name="text">The display text (with pipes included as text).</param>
 	public LinkNode(
 		[NotNull, ValidatedNotNull] IWikiNodeFactory factory,
 		[NotNull, ValidatedNotNull] IEnumerable<IWikiNode> title,
-		[NotNull, ValidatedNotNull] IList<IParameterNode> parameters)
+		[NotNull, ValidatedNotNull] IEnumerable<IWikiNode> text)
 	{
 		ArgumentNullException.ThrowIfNull(factory);
 		ArgumentNullException.ThrowIfNull(title);
-		ArgumentNullException.ThrowIfNull(parameters);
-		this.Factory = factory;
+		ArgumentNullException.ThrowIfNull(text);
 		this.TitleNodes = new WikiNodeCollection(factory, title);
-		this.Parameters = parameters;
-		foreach (var parameter in parameters)
-		{
-			if (parameter.Factory != factory)
-			{
-				throw new InvalidOperationException(Resources.FactoriesMustMatch);
-			}
-		}
+		this.Text = new WikiNodeCollection(factory, text);
 	}
 	#endregion
 
 	#region Public Properties
 
 	/// <inheritdoc/>
-	public IWikiNodeFactory Factory { get; }
+	public IWikiNodeFactory Factory => this.TitleNodes.Factory;
 
 	/// <inheritdoc/>
 	public IEnumerable<WikiNodeCollection> NodeCollections
@@ -48,18 +39,12 @@ public class LinkNode : ILinkNode
 		get
 		{
 			yield return this.TitleNodes;
-			foreach (var parameter in this.Parameters)
-			{
-				foreach (var nodeCollection in parameter.NodeCollections)
-				{
-					yield return nodeCollection;
-				}
-			}
+			yield return this.Text;
 		}
 	}
 
 	/// <inheritdoc/>
-	public IList<IParameterNode> Parameters { get; }
+	public WikiNodeCollection Text { get; }
 
 	/// <inheritdoc/>
 	public WikiNodeCollection TitleNodes { get; }
@@ -76,6 +61,6 @@ public class LinkNode : ILinkNode
 
 	/// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
 	/// <returns>A <see cref="string"/> that represents this instance.</returns>
-	public override string ToString() => this.Parameters.Count == 0 ? "[[Link]]" : $"[[Link|Count = {this.Parameters.Count}]]";
+	public override string ToString() => this.Text.Count == 0 ? "[[Link]]" : $"[[Link|Text]]";
 	#endregion
 }

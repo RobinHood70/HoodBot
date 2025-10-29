@@ -414,29 +414,22 @@ public class SiteLink : ILinkTitle
 		retval.OriginalTitle = titleText;
 		retval.TitleWhitespaceBefore = valueSplit.Before;
 		retval.TitleWhitespaceAfter = valueSplit.After;
-		switch (link.Parameters.Count)
+		if (link.Text.Count > 0)
 		{
-			case 0:
-				break;
-			case 1:
-				var caption = link.Parameters[0].Value;
-				if (retval.Title.Namespace == MediaWikiNamespaces.File && !retval.ForcedNamespaceLink)
+			var caption = link.Text;
+			if (retval.Title.Namespace == MediaWikiNamespaces.File && !retval.ForcedNamespaceLink)
+			{
+				var parameters = caption.Split("|");
+				foreach (var parameter in parameters)
 				{
-					var parameters = caption.Split("|");
-					foreach (var parameter in parameters)
-					{
-						var valueRaw = parameter.ToRaw();
-						retval.InitValue(valueRaw);
-					}
+					var valueRaw = parameter.ToRaw();
+					retval.InitValue(valueRaw);
 				}
-				else
-				{
-					retval.Text = caption.ToRaw();
-				}
-
-				break;
-			default:
-				throw new InvalidOperationException("Link should never have more than 1 parameter.");
+			}
+			else
+			{
+				retval.Text = caption.ToRaw();
+			}
 		}
 
 		return retval;
@@ -610,12 +603,12 @@ public class SiteLink : ILinkTitle
 	/// <param name="node">The node to update.</param>
 	public void UpdateLinkNode(ILinkNode node)
 	{
-		var thisNode = this.ToLinkNode();
 		ArgumentNullException.ThrowIfNull(node);
+		var thisNode = this.ToLinkNode();
 		node.TitleNodes.Clear();
 		node.TitleNodes.AddRange(thisNode.TitleNodes);
-		node.Parameters.Clear();
-		node.Parameters.AddRange(thisNode.Parameters);
+		node.Text.Clear();
+		node.Text.AddRange(thisNode.Text);
 	}
 
 	/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
@@ -737,9 +730,9 @@ public class SiteLink : ILinkTitle
 
 	private static void TrimTrailingSpace(ILinkNode linkNode)
 	{
-		var nodes = linkNode.Parameters.Count == 0
+		var nodes = linkNode.Text.Count == 0
 			? linkNode.TitleNodes
-			: linkNode.Parameters[^1].Value;
+			: linkNode.Text;
 		if (nodes[^1] is ITextNode last)
 		{
 			if (last.Text.Length == 1)

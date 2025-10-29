@@ -388,9 +388,9 @@ internal sealed class UespReplacer
 						if (newNode is ILinkNode link)
 						{
 							var siteLink = SiteLink.FromLinkNode(usedList.Site, link);
-							if (usedList.Contains(siteLink.Title) && link.Parameters.Count > 0 && link.Parameters[0].Value is WikiNodeCollection valueNode)
+							if (usedList.Contains(siteLink.Title) && link.Text.Count > 0)
 							{
-								retval.AddRange(valueNode);
+								retval.AddRange(link.Text);
 							}
 							else
 							{

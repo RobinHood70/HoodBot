@@ -82,9 +82,9 @@ public interface IWikiNodeFactory
 
 	/// <summary>Initializes a new instance of an <see cref="ILinkNode"/> class.</summary>
 	/// <param name="title">The title.</param>
-	/// <param name="parameters">The <see cref="IParameterNode"/>s representing the display text or, for image links, the full set of parameters.</param>
+	/// <param name="text">The display text. For image links, pipes should be included in the text.</param>
 	/// <returns>A new instance of an <see cref="ILinkNode"/> class.</returns>
-	ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters);
+	ILinkNode LinkNode(IEnumerable<IWikiNode> title, IEnumerable<IWikiNode> text);
 
 	/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
 	/// <param name="title">The link destination.</param>

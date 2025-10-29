@@ -90,9 +90,9 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 		this
 			.BuildTagOpen("link", null, false)
 			.BuildTag("title", null, link.TitleNodes); // Title is always emitted, even if empty.
-		foreach (var part in link.Parameters)
+		if (link.Text.Count > 0)
 		{
-			part.Accept(this);
+			this.BuildTag("value", null, link.Text);
 		}
 
 		this.BuildTagClose("link");
@@ -178,18 +178,15 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	#region Private Methods
 	private XmlVisitor BuildTag(string name, Dictionary<string, int>? attributes, WikiNodeCollection? inner)
 	{
-		var selfClosed = inner == null || inner.Count == 0;
-		this.BuildTagOpen(name, attributes, selfClosed);
-		if (!selfClosed)
+		if (inner is null)
 		{
-			foreach (var node in inner!)
-			{
-				node.Accept(this);
-			}
-
-			this.BuildTagClose(name);
+			this.BuildTagOpen(name, attributes, true);
+			return this;
 		}
 
+		this.BuildTagOpen(name, attributes, false);
+		inner.Accept(this);
+		this.BuildTagClose(name);
 		return this;
 	}
 

@@ -149,32 +149,18 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 		{
 			this.builder.Append("[[");
 			link.TitleNodes.Accept(this);
-			foreach (var param in link.Parameters)
+			if (link.Text.Count > 0)
 			{
-				param.Accept(this);
+				this.builder.Append('|');
+				link.Text.Accept(this);
 			}
 
 			this.builder.Append("]]");
 			return;
 		}
 
-		if (link.Parameters.Count > 0)
-		{
-			foreach (var parameter in link.Parameters)
-			{
-				if (parameter.Name is not null)
-				{
-					parameter.Name.Accept(this);
-					this.builder.Append('=');
-				}
-
-				parameter.Value.Accept(this);
-			}
-		}
-		else
-		{
-			link.TitleNodes.Accept(this);
-		}
+		var text = link.Text.Count > 0 ? link.Text : link.TitleNodes;
+		text.Accept(this);
 	}
 
 	/// <inheritdoc/>

@@ -47,7 +47,7 @@ internal sealed class RemoveSorting : EditJob
 			var linkTitle = TitleFactory.FromUnvalidated(this.Site, link.TitleNodes.ToValue());
 			if (this.categories.Contains(linkTitle.FullPageName()))
 			{
-				link.Parameters.Clear();
+				link.Text.Clear();
 			}
 		}
 
