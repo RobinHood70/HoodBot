@@ -10,10 +10,11 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed partial class NpcDataTables : ParsedPageJob
+internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 {
 	#region Private Constants
 	private const string CityName = "Narsis";
+	private const string CityType = "city";
 	#endregion
 
 	#region Fields
@@ -24,8 +25,8 @@ internal sealed partial class NpcDataTables : ParsedPageJob
 	#endregion
 
 	#region Constructors
-	[JobInfo("NPC Data Table Data")]
-	public NpcDataTables(JobManager jobManager)
+	[JobInfo("Update NPC from People page")]
+	public UpdateFromPeoplePage(JobManager jobManager)
 		: base(jobManager)
 	{
 		this.cityValues.Add(CityName);
@@ -39,7 +40,7 @@ internal sealed partial class NpcDataTables : ParsedPageJob
 	#region Protected Override Methods
 	protected override void AfterLoadPages()
 	{
-		if (this.warnings.Count > 0)
+		if (false && this.warnings.Count > 0)
 		{
 			this.warnings.Sort(StringComparer.Ordinal);
 			this.WriteLine("{| class=\"wikitable\"");
@@ -55,7 +56,7 @@ internal sealed partial class NpcDataTables : ParsedPageJob
 		}
 	}
 
-	protected override string GetEditSummary(Page page) => "Add NPCData info";
+	protected override string GetEditSummary(Page page) => "Update data from People page";
 
 	protected override void LoadPages()
 	{
@@ -98,7 +99,7 @@ internal sealed partial class NpcDataTables : ParsedPageJob
 		}
 
 		var city = isSummary ? $"[[TR3:{CityName}|{CityName}]]" : CityName;
-		var cityParam = template.UpdateIfEmpty("city", city);
+		var cityParam = template.UpdateIfEmpty(CityType, city);
 		var cityText = cityParam.GetValue();
 		if (!this.cityValues.Contains(cityText))
 		{
