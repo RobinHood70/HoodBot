@@ -146,7 +146,7 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 			List<string> variables = [];
 			this.Title = title;
 			var templateTitle = loadSave.TitleNodes.ToRaw();
-			var split = templateTitle.Split(TextArrays.Colon, 2);
+			var split = templateTitle.Split(TextArrays.Colon, 2, StringSplitOptions.TrimEntries);
 			var name = split[0];
 			var first = split[1];
 			if (name.OrdinalICEquals("#load"))
@@ -163,11 +163,12 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 				switch (param.Name?.ToValue())
 				{
 					case null:
-						variables.Add(param.GetRaw());
+						variables.Add(param.GetRaw().Trim());
 						break;
 					case "set":
 						this.Set = param.GetRaw();
 						break;
+					case "exists":
 					case "if":
 					case "ifnot":
 						break;
