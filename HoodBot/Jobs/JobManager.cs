@@ -24,19 +24,18 @@ using RobinHood70.WallE.Eve;
 public class JobManager : IDisposable
 {
 	#region Fields
-	private readonly WikiInfo wikiInfo;
 	private bool disposedValue;
 	#endregion
 
 	#region Constructors
 	public JobManager(WikiInfo wikiInfo, bool editingEnabled, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
 	{
-		this.wikiInfo = wikiInfo;
+		this.WikiInfo = wikiInfo;
 		this.CancelToken = cancelSource.Token;
 		this.PauseToken = pauseSource.Token;
 		this.Client = this.CreateClient();
 		this.AbstractionLayer = this.CreateAbstractionLayer();
-		this.Site = this.CreateSite(this.wikiInfo, this.AbstractionLayer, editingEnabled);
+		this.Site = this.CreateSite(this.WikiInfo, this.AbstractionLayer, editingEnabled);
 	}
 	#endregion
 
@@ -74,6 +73,8 @@ public class JobManager : IDisposable
 	public bool ShowDiffs { get; set; } = true;
 
 	public Site Site { get; }
+
+	public WikiInfo WikiInfo { get; }
 	#endregion
 
 	#region Public Static Methods
@@ -166,7 +167,7 @@ public class JobManager : IDisposable
 			: new PageJobLogger(TitleFactory.FromUnvalidated(this.Site, logPage));
 		this.ResultHandler = string.IsNullOrEmpty(resultsPage)
 			? null
-			: new PageResultHandler(TitleFactory.FromUnvalidated(this.Site, resultsPage));
+			: new PageResultHandler(TitleFactory.FromUnvalidated(this.Site, resultsPage), true);
 	}
 
 	public async Task Run(IEnumerable<JobInfo> jobList)
@@ -321,14 +322,14 @@ public class JobManager : IDisposable
 
 	private IWikiAbstractionLayer CreateAbstractionLayer()
 	{
-		Globals.ThrowIfNull(this.wikiInfo.Api, nameof(JobManager), nameof(this.wikiInfo), nameof(this.wikiInfo.Api));
-		var api = this.wikiInfo.Api;
+		Globals.ThrowIfNull(this.WikiInfo.Api, nameof(JobManager), nameof(this.WikiInfo), nameof(this.WikiInfo.Api));
+		var api = this.WikiInfo.Api;
 		IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
 			? new WallE.Test.WikiAbstractionLayer()
 			: new WikiAbstractionLayer(this.Client, api);
 		if (abstractionLayer is IMaxLaggable maxLagWal)
 		{
-			maxLagWal.MaxLag = this.wikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
+			maxLagWal.MaxLag = this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
 		}
 
 #if DEBUG
@@ -349,12 +350,12 @@ public class JobManager : IDisposable
 		// TODO: Below is a quick hack. Should probably be integrated into the UI at some point.
 		NetworkCredential? credentials = null; // new NetworkCredential("user", "password");
 		IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, this.CancelToken);
-		if (this.wikiInfo.ReadThrottling > 0 || this.wikiInfo.WriteThrottling > 0)
+		if (this.WikiInfo.ReadThrottling > 0 || this.WikiInfo.WriteThrottling > 0)
 		{
 			client = new ThrottledClient(
 				client,
-				TimeSpan.FromMilliseconds(this.wikiInfo.ReadThrottling ?? 0),
-				TimeSpan.FromMilliseconds(this.wikiInfo.WriteThrottling ?? 1000));
+				TimeSpan.FromMilliseconds(this.WikiInfo.ReadThrottling ?? 0),
+				TimeSpan.FromMilliseconds(this.WikiInfo.WriteThrottling ?? 1000));
 		}
 
 		client.RequestingDelay += this.Client_RequestingDelay;

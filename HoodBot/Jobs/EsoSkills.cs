@@ -74,11 +74,8 @@ internal sealed class EsoSkills : EditJob
 		: base(jobManager)
 	{
 		jobManager.ShowDiffs = !hideDiffs;
-		if (this.Results is PageResultHandler pageResults)
-		{
-			pageResults.SubPage = "ESO Skills";
-			pageResults.SaveAsBot = false;
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Skills");
+		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 
 		// TODO: Rewrite Mod Header handling to be more intelligent.
 		this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");

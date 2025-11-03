@@ -78,11 +78,8 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 	{
 		//// this.Shuffle = true;
 		//// jobManager.ShowDiffs = false;
-		if (this.Results is PageResultHandler pageResults)
-		{
-			pageResults.SubPage = "ESO Furnishings";
-			pageResults.SaveAsBot = false;
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Furnishings");
+		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 
 		this.context = new Context(this.Site);
 		this.missingIdExceptions = new TitleCollection(this.Site, "Online:Orcish Shrine, Malacath", "Online:Goblin Totem");

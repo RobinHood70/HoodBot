@@ -119,11 +119,8 @@ public class EsoQuests : EditJob
 	public EsoQuests(JobManager jobManager)
 		: base(jobManager)
 	{
-		if (this.Results is PageResultHandler pageResults)
-		{
-			pageResults.SubPage = "ESO Quests";
-			pageResults.SaveAsBot = false;
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Quests");
+		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 	}
 	#endregion
 

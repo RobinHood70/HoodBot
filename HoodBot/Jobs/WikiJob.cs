@@ -21,8 +21,10 @@ public abstract class WikiJob : IMessageSource
 {
 	#region Fields
 	private readonly string logName;
+	private bool hasSavedResultHandler; // Since real handler can be null, we have to track saved separately.
 	private int progress;
 	private int progressMaximum = 1;
+	private ResultHandler? savedResultHandler;
 	#endregion
 
 	#region Constructors
@@ -132,6 +134,17 @@ public abstract class WikiJob : IMessageSource
 			this.Results.Description = this.Results.Description == null ? title : this.Results.Description + "; " + title;
 		}
 	}
+
+	protected void SetTemporaryResultHandler(ResultHandler newHandler)
+	{
+		if (this.hasSavedResultHandler)
+		{
+			throw new InvalidOperationException("Temporary result handler already set.");
+		}
+
+		this.savedResultHandler = this.Results;
+		this.Results = newHandler;
+	}
 	#endregion
 
 	#region Protected Abstract Methods
@@ -186,6 +199,12 @@ public abstract class WikiJob : IMessageSource
 		}
 
 		this.Results?.Save();
+		if (this.hasSavedResultHandler)
+		{
+			this.hasSavedResultHandler = false;
+			this.Results = this.savedResultHandler;
+		}
+
 		this.Completed?.Invoke(this, EventArgs.Empty);
 	}
 

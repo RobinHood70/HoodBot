@@ -2,49 +2,26 @@
 
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Design;
 
 /// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
 /// <seealso cref="ResultHandler" />
 public class PageResultHandler : ResultHandler
 {
 	#region Fields
-	private string? subPage;
-	private Title title;
+	private readonly bool saveAsBot;
+	private readonly Title title;
 	#endregion
 
 	#region Constructors
 
 	/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
 	/// <param name="title">The title of the results page.</param>
-	public PageResultHandler(Title title)
+	/// <param name="saveAsBot">Whether the edit should be flagged as a bot edit when the results are saved.</param>
+	public PageResultHandler(Title title, bool saveAsBot)
 	{
 		this.title = title;
+		this.saveAsBot = saveAsBot;
 		this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);
-	}
-	#endregion
-
-	#region Public Properties
-	public bool SaveAsBot { get; set; } = true;
-
-	public string? SubPage
-	{
-		get => this.subPage;
-		set
-		{
-			this.Save();
-			this.subPage = value?.Trim().Trim('/');
-		}
-	}
-
-	public Title Title
-	{
-		get => this.title;
-		set
-		{
-			this.Save();
-			this.title = value;
-		}
 	}
 	#endregion
 
@@ -57,11 +34,8 @@ public class PageResultHandler : ResultHandler
 			this.StringBuilder.ToString().Trim() is var text &&
 			text.Length > 0)
 		{
-			var fullTitle = string.IsNullOrWhiteSpace(this.SubPage)
-				? this.Title
-				: TitleFactory.FromValidated(this.Title.Site, this.Title + "/" + this.SubPage);
-			var page = Page.FromTitle(fullTitle, text);
-			page.Save(this.Description, false, Tristate.Unknown, true, this.SaveAsBot);
+			var page = Page.FromTitle(this.title, text);
+			page.Save(this.Description, false, Tristate.Unknown, true, this.saveAsBot);
 		}
 	}
 	#endregion

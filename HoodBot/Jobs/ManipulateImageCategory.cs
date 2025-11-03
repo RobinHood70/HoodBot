@@ -13,8 +13,7 @@ internal sealed class ManipulateImageCategory : WikiJob
 		: base(jobManager, JobType.ReadOnly)
 	{
 		var title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
-		var results = new PageResultHandler(title) { SaveAsBot = false };
-		this.Results = results;
+		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 	}
 
 	protected override void Main()

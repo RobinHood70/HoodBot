@@ -40,11 +40,8 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		: base(jobManager)
 	{
 		this.CreateOnly = Tristate.True;
-		if (this.Results is PageResultHandler pageResults)
-		{
-			pageResults.SubPage = "ESO Collectibles";
-			pageResults.SaveAsBot = false;
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Collectibles");
+		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 
 		// TODO: Rewrite Mod Header handling to be more intelligent.
 		this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
