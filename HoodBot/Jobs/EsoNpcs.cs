@@ -33,8 +33,7 @@ internal sealed class EsoNpcs : EditJob
 		//// jobManager.ShowDiffs = false;
 		if (this.Results is PageResultHandler pageResults)
 		{
-			var title = pageResults.Title;
-			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO NPCs");
+			pageResults.SubPage = "ESO NPCs";
 			pageResults.SaveAsBot = false;
 		}
 

@@ -12,11 +12,9 @@ internal sealed class ManipulateImageCategory : WikiJob
 	public ManipulateImageCategory(JobManager jobManager)
 		: base(jobManager, JobType.ReadOnly)
 	{
-		if (this.Results is PageResultHandler pageResults)
-		{
-			pageResults.Title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
-			pageResults.SaveAsBot = false;
-		}
+		var title = TitleFactory.FromUnvalidated(this.Site, "User:Jeancey/Kah");
+		var results = new PageResultHandler(title) { SaveAsBot = false };
+		this.Results = results;
 	}
 
 	protected override void Main()

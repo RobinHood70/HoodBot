@@ -42,8 +42,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		this.CreateOnly = Tristate.True;
 		if (this.Results is PageResultHandler pageResults)
 		{
-			var title = pageResults.Title;
-			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Collectibles");
+			pageResults.SubPage = "ESO Collectibles";
 			pageResults.SaveAsBot = false;
 		}
 

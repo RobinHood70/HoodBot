@@ -76,8 +76,7 @@ internal sealed class EsoSkills : EditJob
 		jobManager.ShowDiffs = !hideDiffs;
 		if (this.Results is PageResultHandler pageResults)
 		{
-			var title = pageResults.Title;
-			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Skills");
+			pageResults.SubPage = "ESO Skills";
 			pageResults.SaveAsBot = false;
 		}
 

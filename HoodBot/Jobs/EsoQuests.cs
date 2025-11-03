@@ -121,8 +121,7 @@ public class EsoQuests : EditJob
 	{
 		if (this.Results is PageResultHandler pageResults)
 		{
-			var title = pageResults.Title;
-			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Quests");
+			pageResults.SubPage = "ESO Quests";
 			pageResults.SaveAsBot = false;
 		}
 	}

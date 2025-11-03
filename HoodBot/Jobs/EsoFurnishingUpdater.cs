@@ -80,8 +80,7 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		//// jobManager.ShowDiffs = false;
 		if (this.Results is PageResultHandler pageResults)
 		{
-			var title = pageResults.Title;
-			pageResults.Title = TitleFactory.FromValidated(title.Namespace, title.PageName + "/ESO Furnishings");
+			pageResults.SubPage = "ESO Furnishings";
 			pageResults.SaveAsBot = false;
 		}
 
