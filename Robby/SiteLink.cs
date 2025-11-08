@@ -585,7 +585,7 @@ public class SiteLink : ILinkTitle
 		}
 	}
 
-	/// <summary>Converts to the link to a <see cref="ILinkNode"/>.</summary>
+	/// <summary>Converts the link to a <see cref="ILinkNode"/>.</summary>
 	/// <returns>A <see cref="ILinkNode"/> containing the parsed link text.</returns>
 	public ILinkNode ToLinkNode()
 	{
