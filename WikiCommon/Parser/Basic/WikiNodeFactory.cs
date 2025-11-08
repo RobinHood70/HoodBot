@@ -98,25 +98,10 @@ public class WikiNodeFactory : IWikiNodeFactory
 	public ILinkNode LinkNodeFromParts(string title) => this.LinkNodeFromParts(title, null as IEnumerable<string>);
 
 	/// <inheritdoc/>
-	public ILinkNode LinkNodeFromParts(string title, string displayText) => this.LinkNodeFromParts(title, [displayText]);
+	public ILinkNode LinkNodeFromParts(string title, string displayText) => this.LinkNode(this.Parse(title), this.Parse(displayText));
 
 	/// <inheritdoc/>
-	public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
-	{
-		ArgumentNullException.ThrowIfNull(title);
-		var titleNodes = this.Parse(title);
-		List<IParameterNode> paramEntries = [];
-		if (parameters != null)
-		{
-			foreach (var parameter in parameters)
-			{
-				var paramNode = this.ParameterNodeFromParts(parameter);
-				paramEntries.Add(paramNode);
-			}
-		}
-
-		return this.LinkNode(titleNodes, paramEntries);
-	}
+	public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters) => this.LinkNodeFromParts(title, string.Join('|', parameters ?? []));
 
 	/// <inheritdoc/>
 	public ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<ILinkNode>(wikiText);
