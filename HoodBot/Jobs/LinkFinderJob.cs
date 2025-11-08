@@ -38,12 +38,6 @@ public abstract class LinkFinderJob : ParsedPageJob
 
 	protected override void Main()
 	{
-		base.Main();
-		if (this.results.Count == 0)
-		{
-			return;
-		}
-
 		foreach (var section in this.results)
 		{
 			var linkTitle = this.sectionLinksOnly ? "Section " : string.Empty;
@@ -147,6 +141,10 @@ public abstract class LinkFinderJob : ParsedPageJob
 
 	private sealed class PageLinkList : SortedDictionary<Title, LinkTargets>
 	{
+		public PageLinkList()
+			: base(TitleComparer.Instance)
+		{
+		}
+		#endregion
 	}
-	#endregion
 }
