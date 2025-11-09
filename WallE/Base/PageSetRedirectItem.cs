@@ -44,7 +44,7 @@ public class PageSetRedirectItem : IApiTitle
 		{
 			target
 				.Append('#')
-				.Append(this.Interwiki);
+				.Append(this.Fragment);
 		}
 
 		return target.ToString();
