@@ -7,9 +7,11 @@ using RobinHood70.Robby.Design;
 
 /// <summary>This is a wrapper around a Dictionary with the comparer always set to <see cref="TitleComparer"/>.</summary>
 /// <typeparam name="T">The value associated with the <see cref="Title"/>.</typeparam>
+/// <remarks>For simplicity, this only supports real <see cref="Title"/>s, not <see cref="ITitle"/>s.</remarks>
 public class TitleDictionary<T> : Dictionary<Title, T>
 {
 	#region Constructors
+
 	/// <summary>Initializes a new instance of the <see cref="TitleDictionary{T}"/> class.</summary>
 	public TitleDictionary()
 		: base(TitleComparer.Instance)
