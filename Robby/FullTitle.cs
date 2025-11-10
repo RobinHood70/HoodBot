@@ -59,4 +59,26 @@ public class FullTitle : IFullTitle
 		fragment = this.Fragment;
 	}
 	#endregion
+
+	#region Public Override Methods
+
+	/// <inheritdoc/>
+	public override string ToString()
+	{
+		var retval = string.Empty;
+		if (this.Interwiki is not null)
+		{
+			retval += this.Interwiki + ":";
+		}
+
+		retval += this.Title;
+
+		if (this.Fragment is not null)
+		{
+			retval += "#" + this.Fragment;
+		}
+
+		return retval;
+	}
+	#endregion
 }
