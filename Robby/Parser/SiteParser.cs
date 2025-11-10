@@ -63,9 +63,9 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <value>The magic word resolvers.</value>
 	public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
-	/// <summary>Gets or sets the title.</summary>
-	/// <value>The title.</value>
-	/// <remarks>This provides the context for resolving magic words.</remarks>
+	/// <summary>Gets or sets the page used as a basis for the parsing.</summary>
+	/// <value>The page.</value>
+	/// <remarks>This provides context for consumers.</remarks>
 	public Page Page { get; set; }
 
 	/// <summary>Gets a set parameter (e.g., <c>{{{1|}}}</c>) names and the values to be used when resolving them (NOT IMPLEMENTED).</summary>
