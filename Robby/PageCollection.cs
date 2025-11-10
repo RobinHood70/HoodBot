@@ -79,6 +79,9 @@ public class PageCollection : TitleData<Page, PageCollection>
 	/// <remarks>PageMissing always precedes <see cref="PageLoaded"/>, allowing the subscriber to initialize the page with standard text for PageLoaded to act on.</remarks>
 	public event StrongEventHandler<PageCollection, Page>? PageMissing;
 
+	/// <summary>This event occurs after the TitleMap is filled.</summary>
+	/// <remarks>The TitleMap is incremental, so TitleMapLoaded can be fired repeatedly for the same mappings.</remarks>
+	public event EventHandler? TitleMapLoaded;
 	#endregion
 
 	#region Public Properties
@@ -330,7 +333,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 
 	/// <summary>Loads pages into the collection from a series of titles.</summary>
 	/// <param name="titles">The titles.</param>
-	public PageCollection GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()), this.IsTitleInLimits);
+	public PageCollection GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
 
 	/// <summary>Merges the current PageCollection with another, including all <see cref="TitleMap"/> entries.</summary>
 	/// <param name="other">The PageCollection to merge with.</param>
@@ -380,13 +383,13 @@ public class PageCollection : TitleData<Page, PageCollection>
 	#region Public Override Methods
 
 	/// <inheritdoc/>
-	public override PageCollection GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput), this.IsTitleInLimits);
+	public override PageCollection GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
 
 	/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 	/// <param name="revisionIds">The IDs.</param>
 	/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 	// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-	public override PageCollection GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds), this.IsTitleInLimits);
+	public override PageCollection GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 	#endregion
 
 	#region Internal Methods
@@ -413,6 +416,14 @@ public class PageCollection : TitleData<Page, PageCollection>
 		foreach (var item in result.Redirects)
 		{
 			this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value.ToString()!);
+		}
+
+		if (result.Interwiki.Count > 0 ||
+			result.Converted.Count > 0 ||
+			result.Normalized.Count > 0 ||
+			result.Redirects.Count > 0)
+		{
+			this.TitleMapLoaded?.Invoke(this, EventArgs.Empty);
 		}
 	}
 	#endregion
@@ -646,9 +657,10 @@ public class PageCollection : TitleData<Page, PageCollection>
 	#endregion
 
 	#region Private Methods
+	private PageCollection LoadPages(QueryPageSetInput pageSetInput) => this.LoadPages(pageSetInput, this.IsTitleInLimits);
+
 	private PageCollection LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(
-		new QueryPageSetInput(generator, titles.ToFullPageNames()),
-		this.IsTitleInLimits);
+		new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
 	/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
 	/// <param name="item">The <see cref="IApiTitle"/> with all the information for the page.</param>
