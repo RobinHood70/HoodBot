@@ -96,6 +96,7 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	protected override bool BeforeLogging()
 	{
 		this.BeforeLoadPages();
+		this.Pages.TitleMapLoaded += this.Pages_TitleMapLoaded;
 		this.Pages.PageMissing += this.Pages_PageMissing;
 		this.Pages.PageLoaded += this.Pages_PageLoaded;
 		this.StatusWriteLine("Loading pages");
@@ -103,6 +104,7 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 		this.StatusWriteLine("Finished loading");
 		this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		this.Pages.PageMissing -= this.Pages_PageMissing;
+		this.Pages.TitleMapLoaded -= this.Pages_TitleMapLoaded;
 		if (this.IgnorePageCount || this.Pages.Count > 0)
 		{
 			this.AfterLoadPages();
@@ -148,11 +150,17 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	protected virtual void PageMissing(Page page)
 	{
 	}
+
+	protected virtual void TitleMapLoaded()
+	{
+	}
 	#endregion
 
 	#region Private Methods
 	private void Pages_PageLoaded(PageCollection sender, Page eventArgs) => this.PageLoaded(eventArgs);
 
 	private void Pages_PageMissing(PageCollection sender, Page eventArgs) => this.PageMissing(eventArgs);
+
+	private void Pages_TitleMapLoaded(object? sender, EventArgs e) => this.TitleMapLoaded();
 	#endregion
 }
