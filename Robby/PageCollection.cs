@@ -261,6 +261,20 @@ public class PageCollection : TitleData<Page, PageCollection>
 
 	#region Public Methods
 
+	/// <summary>Adds the page to the collection and triggers events as though it had been loaded.</summary>
+	/// <param name="page">The <see cref="Page"/> to add.</param>
+	public void AddAsLoaded(Page page)
+	{
+		ArgumentNullException.ThrowIfNull(page);
+		this.TryAdd(page);
+		if (page.IsMissing || (page.LoadOptions.Modules.HasAnyFlag(PageModules.Revisions) && string.IsNullOrWhiteSpace(page.Text)))
+		{
+			this.PageMissing?.Invoke(this, page);
+		}
+
+		this.PageLoaded?.Invoke(this, page);
+	}
+
 	/// <summary>Creates a new page and adds it to the collection.</summary>
 	/// <param name="title">The title to create the page with.</param>
 	public PageCollection Create(Title title) => this.Create(title, string.Empty);
@@ -642,13 +656,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 			var page = this.New(item);
 			if (pageValidator(page))
 			{
-				this.TryAdd(page);
-				if (page.IsMissing || (page.LoadOptions.Modules.HasAnyFlag(PageModules.Revisions) && string.IsNullOrWhiteSpace(page.Text)))
-				{
-					this.PageMissing?.Invoke(this, page);
-				}
-
-				this.PageLoaded?.Invoke(this, page);
+				this.AddAsLoaded(page);
 			}
 		}
 
