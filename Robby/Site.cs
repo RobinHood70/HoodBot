@@ -80,21 +80,8 @@ public class Site : IMessageSource
 	#region Fields
 	private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
 	private readonly PageNameComparer[] pageNameComparers = new PageNameComparer[2];
-
-	private string? baseArticlePath;
-	private CultureInfo culture = CultureInfo.CurrentCulture;
 	private TitleCollection? deletePreventionTemplates;
 	private TitleCollection? deletionCategories;
-	private IReadOnlySet<Title>? disambiguationTemplates;
-	private TitleCollection? discussionPages;
-	private string? generator;
-	private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
-	private FullTitle? mainPage;
-	private string? mainPageName;
-	private NamespaceCollection? namespaces;
-	private string? scriptPath;
-	private string? serverName;
-	private string? siteName;
 	#endregion
 
 	#region Constructors
@@ -111,7 +98,8 @@ public class Site : IMessageSource
 		this.FilterPages = new TitleCollection(this);
 		this.deletePreventionTemplates = new TitleCollection(this);
 		this.deletionCategories = new TitleCollection(this);
-		this.discussionPages = new TitleCollection(this);
+		this.DiscussionPages = new TitleCollection(this);
+		this.Culture = CultureInfo.CurrentCulture;
 	}
 	#endregion
 
@@ -136,10 +124,12 @@ public class Site : IMessageSource
 	/// <value>The wiki abstraction layer.</value>
 	public IWikiAbstractionLayer AbstractionLayer { get; } // TODO: Hide this and replace it with public or internal methods for all related calls (e.g., delete page, get watchlist, etc.)
 
+	private bool infoSet;
+
 	/// <summary>Gets the base article path.</summary>
 	/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string BaseArticlePath => this.baseArticlePath ?? throw NoSite();
+	public string BaseArticlePath { get; private set; }
 
 	/// <summary>Gets or sets a CultureInfo object base the wiki's language and variant.</summary>
 	/// <value>The culture of the wiki.</value>
@@ -147,10 +137,10 @@ public class Site : IMessageSource
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 	public CultureInfo Culture
 	{
-		get => this.culture ?? throw NoSite();
+		get;
 		set
 		{
-			this.culture = value;
+			field = value;
 			this.pageNameComparers[0] = new PageNameComparer(value, false);
 			this.pageNameComparers[1] = new PageNameComparer(value, true);
 		}
@@ -172,10 +162,10 @@ public class Site : IMessageSource
 	/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 	/// <value>The disambiguation templates.</value>
 	/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-	public IReadOnlySet<Title> DisambiguationTemplates => this.disambiguationTemplates ??= this.LoadDisambiguationTemplates();
+	public IReadOnlySet<Title> DisambiguationTemplates => field ??= this.LoadDisambiguationTemplates();
 
 	/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
-	public TitleCollection DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
+	public TitleCollection DiscussionPages { get => field ??= this.LoadDiscussionPages(); private set; }
 
 	/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 	/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -193,12 +183,12 @@ public class Site : IMessageSource
 	/// <summary>Gets the MediaWiki version of the wiki, including any text.</summary>
 	/// <value>The MediaWiki version of the wiki.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string Generator => this.generator ?? throw NoSite();
+	public string Generator { get; private set; }
 
 	/// <summary>Gets the interwiki map.</summary>
 	/// <value>The interwiki map.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap => this.interwikiMap ?? throw NoSite();
+	public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; }
 
 	/// <summary>Gets a list of current magic words on the wiki.</summary>
 	/// <value>The magic words.</value>
@@ -207,23 +197,23 @@ public class Site : IMessageSource
 	/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 	/// <value>The main page.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public FullTitle MainPage => this.mainPage ?? throw NoSite();
+	public FullTitle MainPage { get; private set; }
 
 	/// <summary>Gets the name of the main page, as returned by the site.</summary>
 	/// <value>The name of the main page.</value>
 	/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName()</c>, but is provided so that the original name is available, if needed.</remarks>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string MainPageName => this.mainPageName ?? throw NoSite();
+	public string MainPageName { get; private set; }
 
 	/// <summary>Gets the wiki name.</summary>
 	/// <value>The name of the wiki.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string Name => this.siteName ?? throw NoSite();
+	public string Name { get; private set; }
 
 	/// <summary>Gets the wiki namespaces.</summary>
 	/// <value>the wiki namespaces.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public NamespaceCollection Namespaces => this.namespaces ?? throw NoSite();
+	public NamespaceCollection Namespaces { get; private set; }
 
 	/// <summary>Gets or sets the page creator.</summary>
 	/// <value>The page creator.</value>
@@ -234,12 +224,12 @@ public class Site : IMessageSource
 	/// <value>The script path.</value>
 	/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string ScriptPath => this.scriptPath ?? throw NoSite();
+	public string ScriptPath { get; private set; }
 
 	/// <summary>Gets the name of the server—typically, the base URL.</summary>
 	/// <value>The name of the server.</value>
 	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string ServerName => this.serverName ?? throw NoSite();
+	public string ServerName { get; private set; }
 
 	/// <summary>Gets the bot's user name.</summary>
 	/// <value>The bot's user name.</value>
@@ -1276,14 +1266,6 @@ public class Site : IMessageSource
 	}
 	#endregion
 
-	#region Protected Static Methods
-
-	/// <summary>Throws an exception indicating that the site has not been initialized.</summary>
-	/// <param name="name">The name.</param>
-	/// <returns>System.InvalidOperationException.</returns>
-	protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => new(Globals.CurrentCulture(Resources.SiteNotInitialized, name));
-	#endregion
-
 	#region Protected Virtual Methods
 
 	/// <summary>Downloads a file.</summary>
@@ -1357,7 +1339,7 @@ public class Site : IMessageSource
 	/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 	/// <returns>A list of pages that function as talk pages.</returns>
 	/// <remarks>If not overridden, this will return an empty collection.</remarks>
-	protected virtual TitleCollection LoadDiscussionPages() => this.discussionPages = new TitleCollection(this);
+	protected virtual TitleCollection LoadDiscussionPages() => this.DiscussionPages = new TitleCollection(this);
 
 	/// <summary>Gets one or more messages from MediaWiki space.</summary>
 	/// <param name="input">The input parameters.</param>
@@ -1454,7 +1436,8 @@ public class Site : IMessageSource
 	{
 		var siteInfo = this.AbstractionLayer.AllSiteInfo;
 		if (siteInfo == null
-			|| siteInfo.General == null
+			|| siteInfo.General is not SiteInfoGeneral general
+			|| general.ServerName is null
 			|| siteInfo.Namespaces.Count == 0
 			|| siteInfo.MagicWords.Count == 0)
 		{
@@ -1462,27 +1445,26 @@ public class Site : IMessageSource
 		}
 
 		// General
-		var general = siteInfo.General;
 		var server = general.Server; // Used to help determine if interwiki is local
 		this.Culture = Globals.GetCulture(general.Language);
-		this.siteName = general.SiteName;
-		this.serverName = general.ServerName;
-		this.generator = general.Generator;
+		this.Name = general.SiteName;
+		this.ServerName = general.ServerName;
+		this.Generator = general.Generator;
 		var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, Globals.DefaultRegexTimeout);
 		versionFudged = Regex.Replace(versionFudged, @"\.{2,}", ".", RegexOptions.None, Globals.DefaultRegexTimeout);
 		versionFudged = versionFudged.Trim(TextArrays.Period);
 		this.Version = new Version(versionFudged);
 		var path = general.ArticlePath;
 		var basePath = general.BasePage[..(general.BasePage.IndexOf(server, StringComparison.Ordinal) + server.Length)]; // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
-		this.baseArticlePath = path.StartsWith('/') ? basePath + path : path;
-		this.mainPageName = general.MainPage;
-		this.scriptPath = basePath + general.Script;
-		this.namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
-		if (this.mainPageName != null)
+		this.BaseArticlePath = path.StartsWith('/') ? basePath + path : path;
+		this.MainPageName = general.MainPage;
+		if (this.MainPageName is not null)
 		{
-			this.mainPage = TitleFactory.FromUnvalidated(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+			this.MainPage = TitleFactory.FromUnvalidated(this, this.MainPageName); // Now that we understand namespaces, we can create a Title.
 		}
 
+		this.ScriptPath = basePath + general.Script;
+		this.Namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
 		// MagicWords
 		foreach (var word in siteInfo.MagicWords)
 		{
@@ -1514,7 +1496,7 @@ public class Site : IMessageSource
 			interwikiList.Add(entry);
 		}
 
-		this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(
+		this.InterwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(
 			item =>
 			{
 				ArgumentNullException.ThrowIfNull(item);
@@ -1584,15 +1566,15 @@ public class Site : IMessageSource
 
 	private void Clear()
 	{
-		this.baseArticlePath = null;
+		this.BaseArticlePath = null!;
 		this.Culture = CultureInfo.CurrentCulture;
 		this.DisambiguatorAvailable = false;
 		this.magicWords.Clear();
-		this.mainPage = null;
-		this.namespaces = null;
-		this.serverName = null;
-		this.siteName = null;
-		this.generator = null;
+		this.MainPage = null!;
+		this.Namespaces = null!;
+		this.ServerName = null!;
+		this.Name = null!;
+		this.Generator = null!;
 		this.Version = null;
 	}
 	#endregion
