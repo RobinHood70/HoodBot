@@ -27,7 +27,7 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "planet";
+	protected override string? GetDisambiguator(CsvRow item) => "planet";
 	#endregion
 
 	#region Protected Override Methods
@@ -35,9 +35,8 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 
 	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
 
-	protected override IDictionary<Title, CsvRow> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, CsvRow>();
 		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
 		if (File.Exists(csvName))
 		{
@@ -63,11 +62,9 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 			foreach (var item in csv.ReadRows())
 			{
 				var name = "Starfield:" + item["Name"];
-				items.Add(TitleFactory.FromUnvalidated(this.Site, name), item);
+				this.Items.Add(TitleFactory.FromUnvalidated(this.Site, name), item);
 			}
 		}
-
-		return items;
 	}
 	#endregion
 

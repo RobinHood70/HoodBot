@@ -37,7 +37,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "faction";
+	protected override string? GetDisambiguator(Redirect item) => "faction";
 	#endregion
 
 	#region Protected Override Methods
@@ -45,12 +45,12 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
 
-	protected override IDictionary<Title, Redirect> LoadItems()
+	protected override void LoadItems()
 	{
 		var newFactions = GetFactions(GameInfo.Starfield.ModFolder);
 		if (newFactions.Count == 0)
 		{
-			return new Dictionary<Title, Redirect>();
+			return;
 		}
 
 		var allMembers = this.GetFactionMembers();
@@ -66,8 +66,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 			.GetCategoryMembers("Starfield-Creatures-All");
 		this.AddMembersToExistingFactions(existing, allMembers);
 		this.AddFactionPages(existing);
-
-		return this.GetRedirects(newFactions);
+		this.Items.AddRange(this.GetRedirects(newFactions));
 	}
 	#endregion
 
@@ -346,8 +345,8 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	private string GetNewPageText(Title title, Redirect item)
 	{
 		var retval = $"#REDIRECT [[Starfield:Factions {item.Letter}#{item.Section}]] [[Category:Redirects to Broader Subjects]] [[Category:Starfield-Factions]]";
-		var origName = (this.Disambiguator is not null && title.PageName.EndsWith(" (" + this.Disambiguator + ")", StringComparison.Ordinal))
-			? title.PageName[..(this.Disambiguator.Length + 3)]
+		var origName = (this.GetDisambiguator(item) is string disambig && title.PageName.EndsWith(" (" + disambig + ")", StringComparison.Ordinal))
+			? title.PageName[..(disambig.Length + 3)]
 			: title.PageName;
 		var data = string.Empty;
 		if (item.AltName is not null)

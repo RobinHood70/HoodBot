@@ -40,7 +40,7 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "mission";
+	protected override string? GetDisambiguator(Mission item) => "mission";
 	#endregion
 
 	#region Protected Override Methods
@@ -49,10 +49,76 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	protected override bool IsValidPage(SiteParser parser, Mission item) =>
 		FindTemplate(parser, item) is not null;
 
-	protected override IDictionary<Title, Mission> LoadItems()
+	protected override void LoadItems()
 	{
 		var existing = this.LoadExisting();
-		return this.LoadQuests(existing);
+		var questsMissing = !File.Exists(QuestsFileName);
+		var stagesMissing = !File.Exists(StagesFileName);
+		if (questsMissing && stagesMissing)
+		{
+			return;
+		}
+
+		if (questsMissing || stagesMissing)
+		{
+			this.StatusWriteLine("Missing either " + QuestsFileName + " or " + StagesFileName + " but not both. WTF?");
+		}
+
+		var stages = LoadStages();
+		var disambigs = LoadDisambigs();
+		if (disambigs.Count == 0)
+		{
+			this.StatusWriteLine("No quest disambiguations found. If needed, add conflicting quests to " + DisambigsFileName);
+		}
+
+		var csv = new CsvFile(QuestsFileName)
+		{
+			Encoding = Encoding.GetEncoding(1252)
+		};
+
+		foreach (var row in csv.ReadRows())
+		{
+			var edid = row["EditorID"];
+			var name = row["Full"];
+			name = SanitizeName(name);
+			if (edid.Contains("dialog", StringComparison.OrdinalIgnoreCase) ||
+				name.Length == 0 ||
+				name.Contains('_', StringComparison.Ordinal) ||
+				name.Contains("convers", StringComparison.OrdinalIgnoreCase) ||
+				name.Contains("dialog", StringComparison.OrdinalIgnoreCase))
+			{
+				continue;
+			}
+
+			var summary = row["Summary"];
+			summary = summary
+				.Replace("!!----------------PLEASE WAIT TO DUPLICATE OR MODIFY-----------------!!", string.Empty, StringComparison.Ordinal)
+				.Trim();
+
+			var missionStages = stages.GetValueOrDefault(edid, []);
+
+			if (summary.Length > 0 || missionStages.Count > 0)
+			{
+				name = disambigs.GetValueOrDefault(edid, name);
+				if (name.Length > 0)
+				{
+					if (!existing.TryGetValue(edid, out var title))
+					{
+						title = TitleFactory.FromUnvalidated(this.Site.Namespaces["Starfield"], name);
+					}
+
+					if (this.Items.TryGetValue(title, out var mission))
+					{
+						Debug.WriteLine($"{title.FullPageName()} ({edid} / {mission.EditorId}) needs disambiguation.");
+					}
+					else
+					{
+						mission = new Mission(edid, name, summary, missionStages);
+						this.Items.Add(title, mission);
+					}
+				}
+			}
+		}
 	}
 	#endregion
 
@@ -287,80 +353,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		}
 
 		return existing;
-	}
-
-	private Dictionary<Title, Mission> LoadQuests(Dictionary<string, Title> existing)
-	{
-		var retval = new Dictionary<Title, Mission>();
-		var questsMissing = !File.Exists(QuestsFileName);
-		var stagesMissing = !File.Exists(StagesFileName);
-		if (questsMissing && stagesMissing)
-		{
-			return retval;
-		}
-
-		if (questsMissing || stagesMissing)
-		{
-			this.StatusWriteLine("Missing either " + QuestsFileName + " or " + StagesFileName + " but not both. WTF?");
-		}
-
-		var stages = LoadStages();
-		var disambigs = LoadDisambigs();
-		if (disambigs.Count == 0)
-		{
-			this.StatusWriteLine("No quest disambiguations found. If needed, add conflicting quests to " + DisambigsFileName);
-		}
-
-		var csv = new CsvFile(QuestsFileName)
-		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
-
-		foreach (var row in csv.ReadRows())
-		{
-			var edid = row["EditorID"];
-			var name = row["Full"];
-			name = SanitizeName(name);
-			if (edid.Contains("dialog", StringComparison.OrdinalIgnoreCase) ||
-				name.Length == 0 ||
-				name.Contains('_', StringComparison.Ordinal) ||
-				name.Contains("convers", StringComparison.OrdinalIgnoreCase) ||
-				name.Contains("dialog", StringComparison.OrdinalIgnoreCase))
-			{
-				continue;
-			}
-
-			var summary = row["Summary"];
-			summary = summary
-				.Replace("!!----------------PLEASE WAIT TO DUPLICATE OR MODIFY-----------------!!", string.Empty, StringComparison.Ordinal)
-				.Trim();
-
-			var missionStages = stages.GetValueOrDefault(edid, []);
-
-			if (summary.Length > 0 || missionStages.Count > 0)
-			{
-				name = disambigs.GetValueOrDefault(edid, name);
-				if (name.Length > 0)
-				{
-					if (!existing.TryGetValue(edid, out var title))
-					{
-						title = TitleFactory.FromUnvalidated(this.Site.Namespaces["Starfield"], name);
-					}
-
-					if (retval.TryGetValue(title, out var mission))
-					{
-						Debug.WriteLine($"{title.FullPageName()} ({edid} / {mission.EditorId}) needs disambiguation.");
-					}
-					else
-					{
-						mission = new Mission(edid, name, summary, missionStages);
-						retval.Add(title, mission);
-					}
-				}
-			}
-		}
-
-		return retval;
 	}
 
 	private void UpdateMission(SiteParser parser, Mission item)

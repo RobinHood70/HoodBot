@@ -52,7 +52,7 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "aid item";
+	protected override string? GetDisambiguator(SFItem item) => "aid item";
 	#endregion
 
 	#region Protected Override Methods
@@ -62,9 +62,8 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		parser.FindTemplate("Item Summary") is ITemplateNode template &&
 		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
 
-	protected override IDictionary<Title, SFItem> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, SFItem>();
 		foreach (var item in ReadItems())
 		{
 			var name = ReplacementNames.TryGetValue(item.EditorId, out var replacement)
@@ -73,15 +72,13 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 			if (name.Length != 0)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site[StarfieldNamespaces.Starfield], name);
-				if (!items.TryAdd(title, item))
+				if (!this.Items.TryAdd(title, item))
 				{
-					var existing = items[title];
+					var existing = this.Items[title];
 					Debug.WriteLine($"Dupe - {title.FullPageName()}: {existing.EditorId} / {item.EditorId}");
 				}
 			}
 		}
-
-		return items;
 	}
 	#endregion
 
@@ -100,13 +97,12 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
 		""";
 
-	private static List<SFItem> ReadItems()
+	private static IEnumerable<SFItem> ReadItems()
 	{
-		var retval = new List<SFItem>();
 		var csvName = GameInfo.Starfield.ModFolder + "Alchemy.csv";
 		if (!File.Exists(csvName))
 		{
-			return retval;
+			yield break;
 		}
 
 		var csvFile = new CsvFile(csvName)
@@ -117,11 +113,8 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		csvFile.HeaderFieldMap["Unkown1"] = "Value";
 		foreach (var row in csvFile.ReadRows())
 		{
-			var item = new SFItem(row, "Aid Item");
-			retval.Add(item);
+			yield return new SFItem(row, "Aid Item");
 		}
-
-		return retval;
 	}
 
 	private void UpdateAidItem(SiteParser parser, SFItem item)

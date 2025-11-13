@@ -41,7 +41,7 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "terminal";
+	protected override string? GetDisambiguator(Terminal item) => "terminal";
 	#endregion
 
 	#region Protected Override Methods
@@ -49,10 +49,44 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 
 	protected override bool IsValidPage(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
 
-	protected override IDictionary<Title, Terminal> LoadItems()
+	protected override void LoadItems()
 	{
 		this.LoadMenus();
-		return this.ReadTerm();
+		if (!File.Exists(TerminalsFileName))
+		{
+			return;
+		}
+
+		var disambigs = ReadDisambigs();
+		if (disambigs.Count == 0)
+		{
+			this.StatusWriteLine("No terminal disambiguations found. If needed, add conflicting terminals to " + DisambigsFileName);
+		}
+
+		var csv = new CsvFile(TerminalsFileName)
+		{
+			Encoding = Encoding.GetEncoding(1252)
+		};
+
+		foreach (var row in csv.ReadRows())
+		{
+			var edid = row["EditorID"];
+			var name = row["Full"];
+			if (disambigs.TryGetValue(edid, out var disambig))
+			{
+				disambig = " (" + disambig + ")";
+			}
+
+			var title = TitleFactory.FromUnvalidated(this.Site[StarfieldNamespaces.Starfield], name + disambig);
+			var image = row["Model"].Split(TextArrays.Backslash)[^1];
+			var menuId = row["TMLM"];
+			var terminal = new Terminal(name, edid, image, menuId);
+
+			if (!this.Items.TryAdd(title, terminal))
+			{
+				Debug.WriteLine(edid + '\t' + name);
+			}
+		}
 	}
 	#endregion
 
@@ -243,48 +277,6 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 					.Append('\n');
 			}
 		}
-	}
-
-	private Dictionary<Title, Terminal> ReadTerm()
-	{
-		var retval = new Dictionary<Title, Terminal>();
-		if (!File.Exists(TerminalsFileName))
-		{
-			return retval;
-		}
-
-		var disambigs = ReadDisambigs();
-		if (disambigs.Count == 0)
-		{
-			this.StatusWriteLine("No terminal disambiguations found. If needed, add conflicting terminals to " + DisambigsFileName);
-		}
-
-		var csv = new CsvFile(TerminalsFileName)
-		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
-
-		foreach (var row in csv.ReadRows())
-		{
-			var edid = row["EditorID"];
-			var name = row["Full"];
-			if (disambigs.TryGetValue(edid, out var disambig))
-			{
-				disambig = " (" + disambig + ")";
-			}
-
-			var title = TitleFactory.FromUnvalidated(this.Site[StarfieldNamespaces.Starfield], name + disambig);
-			var image = row["Model"].Split(TextArrays.Backslash)[^1];
-			var menuId = row["TMLM"];
-			var terminal = new Terminal(name, edid, image, menuId);
-
-			if (!retval.TryAdd(title, terminal))
-			{
-				Debug.WriteLine(edid + '\t' + name);
-			}
-		}
-
-		return retval;
 	}
 
 	/*

@@ -14,16 +14,24 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-// CONSIDER: Should redirects from EDID pages be to EDID targets with Anchor including both Name and EDID?
-[method: JobInfo("Effects", "Starfield")]
-internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJob<SFEffects.Effect>(jobManager)
+internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 {
 	#region Fields
-	private readonly Title effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
+	private readonly Title effectsTitle;
+	#endregion
+
+	#region Constructors
+	[JobInfo("Effects", "Starfield")]
+	public SFEffects(JobManager jobManager)
+	: base(jobManager)
+	{
+		this.effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
+		this.NewPageText = this.GetNewPageText;
+	}
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "effect";
+	protected override string? GetDisambiguator(Effect item) => "effect";
 	#endregion
 
 	#region Protected Override Methods
@@ -34,18 +42,16 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 		parser.LinkNodes.First() is ILinkNode linkNode &&
 		linkNode.GetTitle(parser.Site) == this.effectsTitle;
 
-	protected override IDictionary<Title, Effect> LoadItems()
+	protected override void LoadItems()
 	{
-		this.NewPageText = this.GetNewPageText;
 		var effects = new Effects();
 		var effectsPage = this.Site.LoadPage(this.effectsTitle) ?? throw new InvalidOperationException();
 		var rows = EffectsRowFinder().Matches(effectsPage.Text);
 		LoadExistingEffects(effects, rows);
-		var items = new Dictionary<Title, Effect>();
 		var newEffects = LoadNewEffects(effects);
 		if (newEffects.Count == 0)
 		{
-			return items;
+			return;
 		}
 
 		foreach (var effect in newEffects)
@@ -53,13 +59,13 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 			if (effect.Link.Length > 0)
 			{
 				var siteLink = SiteLink.FromText(this.Site, effect.Link);
-				items.TryAdd(siteLink.Title, effect);
+				this.Items.TryAdd(siteLink.Title, effect);
 			}
 
 			if (effect.EditorId.Length > 0)
 			{
 				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + effect.EditorId);
-				items.TryAdd(title, effect);
+				this.Items.TryAdd(title, effect);
 			}
 		}
 
@@ -98,8 +104,6 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 
 		effectsPage.Text = effectsPage.Text.Insert(startPos, sb.ToString());
 		this.Pages.Add(effectsPage);
-
-		return items;
 	}
 	#endregion
 

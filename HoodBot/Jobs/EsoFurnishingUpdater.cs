@@ -12,25 +12,18 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Jobs.Design;
 using RobinHood70.HoodBot.Jobs.JobModels;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
-#region Internal Enumerations
-internal enum ItemType
-{
-	Container = 18,
-	Recipes = 29,
-	Furnishing = 61,
-}
-#endregion
-
-internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
+internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishing>
 {
 	#region Private Constants
-	private const string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname, tags FROM collectibles WHERE furnCategory != ''";
+	private const string CollectiblesQuery = $"SELECT description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname, tags FROM collectibles WHERE furnCategory != ''";
+	private const string MinedItemsQuery = "SELECT abilityDesc, bindType, description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type = 61"; // 61 = Furnishings
 	#endregion
 
 	#region Static Fields
@@ -41,7 +34,6 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 	};
 
 	private static readonly HashSet<long> IgnoreIds = [194537];
-	private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
 
 	private static readonly HashSet<string> NoHousingCats = new(StringComparer.OrdinalIgnoreCase)
 	{
@@ -61,12 +53,13 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 
 	#region Fields
 	private readonly Context context;
-	private readonly Dictionary<long, Furnishing> collectibles = [];
 	private readonly Dictionary<long, Furnishing> furnishings = [];
-	private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
+
+	// nameLookup has a string key so that pagenames that only differ by case count as duplicates.
 	private readonly List<string> fileMessages = [];
-	private readonly List<string> pageMessages = [];
+	private readonly TitleDictionary<long> idLookup = [];
 	private readonly TitleCollection missingIdExceptions;
+	private readonly List<string> pageMessages = [];
 
 	//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new();
 	#endregion
@@ -80,14 +73,16 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		//// jobManager.ShowDiffs = false;
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Furnishings");
 		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
-
 		this.context = new Context(this.Site);
 		this.missingIdExceptions = new TitleCollection(this.Site, "Online:Orcish Shrine, Malacath", "Online:Goblin Totem");
+		this.NewPageText = this.CreatePage;
 	}
 	#endregion
 
 	#region Public Override Properties
 	public override string LogName { get; } = "ESO Furnishing Update";
+
+	protected override string? GetDisambiguator(Furnishing item) => item.Collectible ? "collectible" : "furnishing";
 	#endregion
 
 	#region Protected Override Methods
@@ -122,37 +117,130 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		}
 	}
 
-	protected override void BeforeLoadPages()
-	{
-		/*
-		TitleCollection furnishingFiles = new(this.Site);
-		furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-furnishing-");
-		furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
-		*/
+	protected override string GetEditSummary(Page page) => "Update info from ESO database; remove cruft";
 
-		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, record => new Furnishing(record, this.Site, true)))
+	protected override bool IsValidPage(SiteParser parser, Furnishing item) => parser.FindTemplate(TemplateName) is not null;
+
+	protected override void GetKnownPages()
+	{
+		var knownPages = this.Site.CreateMetaPageCollection(PageModules.Default, false, "id");
+		knownPages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
+		var removals = new TitleCollection(this.Site);
+		foreach (var page in knownPages)
 		{
-			this.collectibles.Add(furnishing.Id, furnishing);
+			var testTitle = TitleFactory.FromValidated(this.Site[UespNamespaces.Online], "Bushes, Withered Cluster");
+			if (this.Items.TryGetValue(testTitle, out var test))
+			{
+			}
+
+			if (page.Title.PageNameEquals("Bushes, Withered Cluster"))
+			{
+			}
+
+			if (page is not VariablesPage varPage)
+			{
+				continue;
+			}
+
+			if (varPage.GetVariable("id") is string idText &&
+				long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, this.Site.Culture, out var id) &&
+				this.furnishings.TryGetValue(id, out var item))
+			{
+				if (page.Title != item.Title)
+				{
+					this.Items.Remove(item.Title);
+					if (!this.Items.TryAdd(page.Title, item))
+					{
+						removals.Add(item.Title);
+					}
+				}
+
+				this.Pages.TryAddAsLoaded(page);
+			}
+			else
+			{
+				Debug.WriteLine($"{page.Title} has a missing or invalid id");
+			}
+		}
+
+		foreach (var title in removals)
+		{
+			this.Items.Remove(title);
+		}
+	}
+
+	protected override void LoadItems()
+	{
+		foreach (var collectible in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, record => new Furnishing(record, this.Site, true)))
+		{
+			this.furnishings.Add(Furnishing.GetKey(collectible.Id, true), collectible);
 		}
 
 		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, record => new Furnishing(record, this.Site, false)))
 		{
-			this.furnishings.Add(furnishing.Id, furnishing);
+			this.furnishings.Add(Furnishing.GetKey(furnishing.Id, false), furnishing);
 		}
 
-		var dupes = new HashSet<string>(StringComparer.Ordinal);
-		this.FindDupes(this.collectibles, dupes);
-		this.FindDupes(this.furnishings, dupes);
-	}
+		var exceptions = new (long Id, bool Collectible, string? Title)[]
+		{
+			// Collectibles
+			(1185, true, "Dwarven Spider (mount)"),
+			(1155, true, "Dwarven Spider (pet)"),
+			(4671, true, "Frostbane Bear (mount)"),
+			(4746, true, "Frostbane Bear (pet)"),
+			(1457, true, "Frostbane Wolf (mount)"),
+			(4747, true, "Frostbane Wolf (pet)"),
+			(1413, true, "Frostbane Sabre Cat (mount)"),
+			(4745, true, "Frostbane Sabre Cat (pet)"),
+			(1395, true, "Shadowghost Guar (mount)"),
+			(1396, true, "Shadowghost Guar (pet)"),
 
-	protected override string GetEditSummary(Page page) => "Update info from ESO database; remove cruft";
+			// Mined Items
+			(183198, false, null), // Identical: Bushes, Withered Cluster
+
+		};
+
+		foreach (var (id, collectible, titleText) in exceptions)
+		{
+			var key = Furnishing.GetKey(id, collectible);
+			if (titleText is not null)
+			{
+				var title = TitleFactory.FromValidated(this.Site[UespNamespaces.Online], titleText);
+				this.furnishings[key].Title = title;
+			}
+			else
+			{
+				this.furnishings.Remove(key);
+			}
+		}
+
+		var dupes = new Dictionary<long, Title>();
+		foreach (var (id, furnishing) in this.furnishings)
+		{
+			if (!this.Items.TryAdd(furnishing.Title, furnishing))
+			{
+				// Leave item in list after check so additional dupes can be detected. Remove all dupes later.
+				var dupe = this.Items[furnishing.Title];
+				var key = Furnishing.GetKey(furnishing.Id, furnishing.Collectible);
+				var key2 = Furnishing.GetKey(dupe.Id, dupe.Collectible);
+				Debug.WriteLine($"{key} / {key2}: {furnishing.Title}");
+				dupes.Add(key, furnishing.Title);
+			}
+		}
+
+		if (dupes.Count > 0)
+		{
+			this.StatusWriteLine("DUPES FOUND - see Debug output.");
+			foreach (var (id, title) in dupes)
+			{
+				this.Items.Remove(title);
+			}
+		}
+	}
 
 	protected override void LoadPages()
 	{
-		var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], TemplateName);
-		this.Pages.GetBacklinks(title.FullPageName(), BacklinksTypes.EmbeddedIn);
-		//// this.Pages.GetTitles("Online:10-Year Anniversary Banner, Medium");
-
+		base.LoadPages();
 		var top10 = CommentCounts.OrderByDescending(entry => entry.Value).Take(10);
 		foreach (var comment in top10)
 		{
@@ -162,57 +250,18 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		}
 	}
 
-	protected override void ParseText(SiteParser parser)
+	protected override void ValidPageLoaded(SiteParser parser, Furnishing item)
 	{
-		var template = this.ProcessMainTemplate(parser);
-		var cat = template.GetValue("cat");
-		var doHousing = cat is not null && NoHousingCats.Contains(cat);
-		RemoveComments(parser, doHousing);
-		PruneSecondaryTemplates(parser);
-
-		foreach (var comment in parser.FindAll<ICommentNode>(null, false, false, 0))
+		base.ValidPageLoaded(parser, item);
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		if (this.GenericTemplateFixes(template))
 		{
-			CommentCounts[comment.Comment] = CommentCounts.TryGetValue(comment.Comment, out var value)
-				? ++value
-				: 1;
-		}
-	}
-
-	private static void RemoveComments(SiteParser parser, bool doHousing)
-	{
-		for (var i = parser.Count - 2; i >= 0; i--)
-		{
-			if (parser[i] is ICommentNode comment)
-			{
-				if (TemplateFinder().IsMatch(comment.Comment))
-				{
-					parser.RemoveAt(i);
-				}
-				else if (HeaderFinder().IsMatch(comment.Comment))
-				{
-					parser.RemoveAt(i);
-				}
-				else if (comment.Comment.StartsWith("<!--Instructions: ", StringComparison.Ordinal))
-				{
-					var remainder = comment.Comment[18..];
-					if (remainder.StartsWith("Fill in antiquity information", StringComparison.Ordinal) ||
-						remainder.StartsWith("Add book information here", StringComparison.Ordinal) ||
-						remainder.StartsWith("Use the template below to fill out the crafting details.", StringComparison.Ordinal) ||
-						remainder.StartsWith("Add vendor information here", StringComparison.Ordinal) ||
-						remainder.StartsWith("List the sources from", StringComparison.Ordinal) ||
-						(doHousing && remainder.StartsWith("Add this section to the page if the main category is NOT", StringComparison.Ordinal)))
-					{
-						parser.RemoveAt(i);
-					}
-				}
-			}
+			this.Warn("Template has anonymous parameter on " + parser.Title);
 		}
 
-		parser.MergeText(false);
-		foreach (var text in parser.RootTextNodes)
-		{
-			text.Text = VerticalSpaceFinder().Replace(text.Text, "\n\n");
-		}
+		this.FurnishingFixes(template, parser.Page);
+		template.RemoveEmpties(FurnishingKeep);
+		CheckComments(parser, template);
 	}
 	#endregion
 
@@ -230,6 +279,21 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 			{
 				template.AddIfNotExists("behavior", furnishing.Behavior, ParameterFormat.OnePerLine);
 			}
+		}
+	}
+
+	private static void CheckComments(SiteParser parser, ITemplateNode template)
+	{
+		var cat = template.GetValue("cat");
+		var doHousing = cat is not null && NoHousingCats.Contains(cat);
+		RemoveComments(parser, doHousing);
+		PruneSecondaryTemplates(parser);
+
+		foreach (var comment in parser.FindAll<ICommentNode>(null, false, false, 0))
+		{
+			CommentCounts[comment.Comment] = CommentCounts.TryGetValue(comment.Comment, out var value)
+				? ++value
+				: 1;
 		}
 	}
 
@@ -293,6 +357,43 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 			var templateName = subTemplate.GetTitleText();
 			var exceptions = Pruneables[templateName];
 			subTemplate.RemoveEmpties(exceptions);
+		}
+	}
+
+	private static void RemoveComments(SiteParser parser, bool doHousing)
+	{
+		for (var i = parser.Count - 2; i >= 0; i--)
+		{
+			if (parser[i] is ICommentNode comment)
+			{
+				if (TemplateFinder().IsMatch(comment.Comment))
+				{
+					parser.RemoveAt(i);
+				}
+				else if (HeaderFinder().IsMatch(comment.Comment))
+				{
+					parser.RemoveAt(i);
+				}
+				else if (comment.Comment.StartsWith("<!--Instructions: ", StringComparison.Ordinal))
+				{
+					var remainder = comment.Comment[18..];
+					if (remainder.StartsWith("Fill in antiquity information", StringComparison.Ordinal) ||
+						remainder.StartsWith("Add book information here", StringComparison.Ordinal) ||
+						remainder.StartsWith("Use the template below to fill out the crafting details.", StringComparison.Ordinal) ||
+						remainder.StartsWith("Add vendor information here", StringComparison.Ordinal) ||
+						remainder.StartsWith("List the sources from", StringComparison.Ordinal) ||
+						(doHousing && remainder.StartsWith("Add this section to the page if the main category is NOT", StringComparison.Ordinal)))
+					{
+						parser.RemoveAt(i);
+					}
+				}
+			}
+		}
+
+		parser.MergeText(false);
+		foreach (var text in parser.RootTextNodes)
+		{
+			text.Text = VerticalSpaceFinder().Replace(text.Text, "\n\n");
 		}
 	}
 
@@ -370,31 +471,22 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		}
 	}
 
-	private void FindDupes(Dictionary<long, Furnishing> items, HashSet<string> dupes)
-	{
-		foreach (var item in items)
-		{
-			var furnishing = item.Value;
-			var labelName = furnishing.Title.LabelName();
-			if (!dupes.Contains(labelName) && !this.nameLookup.TryAdd(labelName, item.Key))
-			{
-				dupes.Add(labelName);
-				this.nameLookup.Remove(labelName);
-			}
-		}
-	}
+	private string CreatePage(Title title, Furnishing furnishing) => "{{Online Furnishing Summary}}";
 
-	private Furnishing? FindFurnishing(ITemplateNode template, Page page, string labelName)
+	private Furnishing? FindFurnishing(ITemplateNode template, Page page)
 	{
 		Furnishing? retval = null;
-		if (long.TryParse(template.GetValue("id"), NumberStyles.None, page.Site.Culture, out var id))
+		var idText = template.GetValue("id") ?? string.Empty;
+		var isCollectible = (template.GetValue("collectible") ?? string.Empty).Length > 0;
+		if (long.TryParse(idText, NumberStyles.None, page.Site.Culture, out var id))
 		{
-			if (IgnoreIds.Contains(id))
+			var key = Furnishing.GetKey(id, isCollectible);
+			if (IgnoreIds.Contains(key))
 			{
 				return null;
 			}
 
-			if (!this.furnishings.TryGetValue(id, out retval) && !this.collectibles.TryGetValue(id, out retval))
+			if (!this.furnishings.TryGetValue(key, out retval))
 			{
 				Debug.WriteLine($"Furnishing ID {id} not found on page {SiteLink.ToText(page)}.");
 			}
@@ -404,10 +496,10 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 			Debug.WriteLine($"Furnishing ID on {SiteLink.ToText(page)} is missing or nonsensical.");
 		}
 
-		if (retval is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
+		if (retval is null && this.idLookup.TryGetValue(page.Title, out var recoveredId))
 		{
-			Debug.WriteLine($"  Recovered ID {recoveredId} from {labelName}.");
-			if (this.collectibles.TryGetValue(recoveredId, out retval) || this.furnishings.TryGetValue(recoveredId, out retval))
+			Debug.WriteLine($"  Recovered ID {recoveredId} from {page.Title.PageName}.");
+			if (this.furnishings.TryGetValue(Furnishing.GetKey(recoveredId, isCollectible), out retval))
 			{
 				template.Update("id", recoveredId.ToStringInvariant());
 			}
@@ -490,7 +582,7 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		var labelName = page.Title.LabelName();
 		var name = CheckName(template, labelName);
 		CheckIcon(template, name);
-		if (this.FindFurnishing(template, page, labelName) is not Furnishing furnishing)
+		if (this.FindFurnishing(template, page) is not Furnishing furnishing)
 		{
 			return;
 		}
@@ -506,13 +598,17 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 
 		if (!furnishing.Title.PageNameEquals(wikiTitle))
 		{
-			Debug.WriteLine($"Page title != game title. Check for invalid ID or name change.\nPage: {page.Title}\nGame: {furnishing.Title.PageName}\n");
+			this.StatusWriteLine($"Page title != game title. Check for invalid ID or name change.\nPage: {page.Title.PageName}\nGame: {furnishing.Title.PageName}\n");
 		}
 
 		this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
 		this.CheckTitle(page.Title, labelName, furnishing);
 
-		template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);
+		if (!furnishing.Title.PageNameEquals(labelName))
+		{
+			template.Update("titlename", furnishing.Title.PageName, ParameterFormat.OnePerLine, true);
+		}
+
 		if (furnishing.Collectible)
 		{
 			template.Update("nickname", furnishing.NickName, ParameterFormat.OnePerLine, true);
@@ -648,19 +744,6 @@ internal sealed partial class EsoFurnishingUpdater : ParsedPageJob
 		this.FixList(template, "skill");
 
 		return template.Find(1) is not null;
-	}
-
-	private ITemplateNode ProcessMainTemplate(SiteParser parser)
-	{
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
-		if (this.GenericTemplateFixes(template))
-		{
-			this.Warn("Template has anonymous parameter on " + parser.Title);
-		}
-
-		this.FurnishingFixes(template, parser.Page);
-		template.RemoveEmpties(FurnishingKeep);
-		return template;
 	}
 	#endregion
 }

@@ -24,7 +24,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "weapon";
+	protected override string? GetDisambiguator(List<CsvRow> item) => "weapon";
 	#endregion
 
 	#region Protected Override Methods
@@ -32,9 +32,8 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 
 	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
 
-	protected override IDictionary<Title, List<CsvRow>> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, List<CsvRow>>();
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Weapons.csv")
 		{
 			Encoding = Encoding.GetEncoding(1252)
@@ -46,13 +45,11 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 			if (name.Length > 0)
 			{
-				var itemList = items.TryGetValue(title, out var list) ? list : [];
+				var itemList = this.Items.TryGetValue(title, out var list) ? list : [];
 				itemList.Add(row);
-				items[title] = itemList;
+				this.Items[title] = itemList;
 			}
 		}
-
-		return items;
 	}
 	#endregion
 

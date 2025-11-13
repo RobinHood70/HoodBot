@@ -82,10 +82,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	}
 	#endregion
 
-	#region Protected Override Properties
-	protected override string? Disambiguator => null;
-	#endregion
-
 	#region Public Static Methods
 	public static string WikiModeReplace(string text) => CastlesStyleReplacer()
 		.Replace(text, StyleReplacer)
@@ -102,21 +98,25 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		}
 	}
 
+	protected override string? GetDisambiguator(Ruling item) => null;
+
 	protected override string GetEditSummary(Page page) => "Update rulings";
 
 	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
 
-	protected override IDictionary<Title, Ruling> LoadItems()
+	protected override void LoadItems()
 	{
 		foreach (var (key, value) in TxInfoOverrides)
 		{
 			this.data.Translator.ParserOverrides[key] = value;
 		}
 
-		var rulings = this.GetRulingGroups();
-		this.UpdateRulingsPage(rulings);
+		this.GetItemsFromFile();
+		this.UpdateRulingsPage();
+	}
 
-		return rulings;
+	protected override void PageLoaded(Page page)
+	{
 	}
 	#endregion
 
@@ -201,22 +201,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		"|choices=\n" +
 		"}}";
 
-	private static List<Ruling> GetNewRulingsList(Dictionary<Title, Ruling> rulings, IReadOnlyList<Title> templates)
-	{
-		var retval = new List<Ruling>();
-		foreach (var ruling in rulings)
-		{
-			if (!templates.Contains(ruling.Key))
-			{
-				retval.Add(ruling.Value);
-			}
-		}
-
-		retval.Sort((r1, r2) => r1.Name.CompareTo(r2.Name));
-
-		return retval;
-	}
-
 	private static Section GetUnsortedSection(SectionCollection sections)
 	{
 		if (sections.FindFirst("Unsorted") is Section section)
@@ -288,9 +272,24 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		}
 	}
 
-	private Dictionary<Title, Ruling> GetRulingGroups()
+	private List<Ruling> GetNewRulingsList(IReadOnlyList<Title> templates)
 	{
-		var retval = new Dictionary<Title, Ruling>(TitleComparer.Instance);
+		var retval = new List<Ruling>();
+		foreach (var ruling in this.Items)
+		{
+			if (!templates.Contains(ruling.Key))
+			{
+				retval.Add(ruling.Value);
+			}
+		}
+
+		retval.Sort((r1, r2) => r1.Name.CompareTo(r2.Name));
+
+		return retval;
+	}
+
+	private void GetItemsFromFile()
+	{
 		var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
 		foreach (var rulingsGroupName in RulingsGroupNames)
 		{
@@ -300,18 +299,16 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 				{
 					var localRuling = new Ruling(rulingsGroupName, rulingObject, this.data);
 					var title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
-					while (retval.ContainsKey(title))
+					while (this.Items.ContainsKey(title))
 					{
 						localRuling.Copy++;
 						title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
 					}
 
-					retval.Add(title, localRuling);
+					this.Items.Add(title, localRuling);
 				}
 			}
 		}
-
-		return retval;
 	}
 
 	private Page GetRulingsPage()
@@ -319,6 +316,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		var pages = PageCollection.Unlimited(this.Site, PageModules.Default | PageModules.Templates, false);
 		pages.GetTitles("Castles:Rulings");
 		var rulingsPage = pages[0];
+
 		return rulingsPage;
 	}
 
@@ -382,7 +380,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		choiceParam.Value.AddRange(newNodes);
 	}
 
-	private void UpdateRulingsPage(Dictionary<Title, Ruling> rulings)
+	private void UpdateRulingsPage()
 	{
 		var rulingsPage = this.GetRulingsPage();
 		this.Pages.Add(rulingsPage);
@@ -392,7 +390,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		var sections = parser.ToSections(2);
 		var unsortedSection = GetUnsortedSection(sections);
 		var subSectionDict = this.GetSubSections(unsortedSection);
-		var newRulings = GetNewRulingsList(rulings, rulingsPage.Templates);
+		var newRulings = this.GetNewRulingsList(rulingsPage.Templates);
 		this.AddNewRulings(subSectionDict, newRulings);
 
 		var newSections = new SectionCollection(parser.Factory, 3);

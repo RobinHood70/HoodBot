@@ -46,7 +46,7 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "book";
+	protected override string? GetDisambiguator(Book item) => "book";
 	#endregion
 
 	#region Protected Override Methods
@@ -54,13 +54,12 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 
 	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate("Game Book") is not null;
 
-	protected override IDictionary<Title, Book> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, Book>();
 		var csvName = GameInfo.Starfield.ModFolder + "Books.csv";
 		if (!File.Exists(csvName))
 		{
-			return items;
+			return;
 		}
 
 		var csv = new CsvFile(csvName)
@@ -74,10 +73,8 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 			var book = new Book(row);
 			var titleText = TitleOverrides.GetValueOrDefault(book.EditorId, book.Title);
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + titleText);
-			items.Add(title, book);
+			this.Items.Add(title, book);
 		}
-
-		return items;
 	}
 	#endregion
 

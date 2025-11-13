@@ -62,13 +62,7 @@ internal sealed class Furnishing
 		titleName = titleName.TrimEnd(',');
 		titleName = TitleFactory.SanitizePageName(titleName, true);
 		this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
-		if (!this.Title.PageNameEquals(titleName))
-		{
-			this.TitleName = titleName;
-		}
-
-		// Encoding conversion does not seem to be necessary for desc.
-		var desc = ((string)row["description"])
+		var desc = EsoLog.ConvertEncoding((string)row["description"])
 			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
 			.Replace("|r", string.Empty, StringComparison.Ordinal)
 			.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
@@ -119,7 +113,6 @@ internal sealed class Furnishing
 			this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
 				? "nfsel".Substring(qualityNum - 1, 1)
 				: quality;
-			this.Type = (ItemType)row["type"];
 			var abilityDesc = EsoLog.ConvertEncoding((string)row["abilityDesc"]);
 			var ingrMatch = IngredientsFinder.Match(abilityDesc);
 			if (ingrMatch.Success)
@@ -219,20 +212,18 @@ internal sealed class Furnishing
 
 	public SortedSet<string> Skills { get; } = new(StringComparer.Ordinal);
 
-	public Title Title { get; }
-
-	public string? TitleName { get; }
-
-	public ItemType Type { get; }
+	public Title Title { get; set; } // Settable to deal with conflicts.
 	#endregion
 
 	#region Public Static Methods
+	public static long GetKey(long keyIn, bool collectible) => collectible ? keyIn << 32 : keyIn;
+
 	public static string IconName(string itemName) => $"ON-icon-furnishing-{itemName.Replace(':', ',')}.png";
 
 	public static string ImageName(string itemName) => $"ON-furnishing-{itemName.Replace(':', ',')}.jpg";
 	#endregion
 
 	#region Public Override Methods
-	public override string ToString() => $"({this.Id}) {this.TitleName}";
+	public override string ToString() => $"({this.Id}) {this.Title.PageName}";
 	#endregion
 }

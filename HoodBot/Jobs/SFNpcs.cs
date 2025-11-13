@@ -26,7 +26,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "NPC";
+	protected override string? GetDisambiguator(Npcs item) => "NPC";
 	#endregion
 
 	#region Protected Override Methods
@@ -34,18 +34,10 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 
 	protected override bool IsValidPage(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
 
-	protected override IDictionary<Title, Npcs> LoadItems()
+	protected override void LoadItems()
 	{
 		var fauna = GetFauna();
 		var races = GetRaces();
-		var items = GetNPCs(this.Site, races, fauna);
-
-		return items;
-	}
-
-	private static Dictionary<Title, Npcs> GetNPCs(Site site, Dictionary<string, string> races, HashSet<string> fauna)
-	{
-		var items = new Dictionary<Title, Npcs>();
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Npcs.csv")
 		{
 			Encoding = Encoding.GetEncoding(1252)
@@ -84,14 +76,12 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 					dead,
 					factions,
 					string.Empty);
-				var title = TitleFactory.FromUnvalidated(site, "Starfield:" + name);
-				var list = items.TryGetValue(title, out var npcs) ? npcs : [];
+				var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
+				var list = this.Items.TryGetValue(title, out var npcs) ? npcs : [];
 				list.Add(npc);
-				items[title] = list;
+				this.Items[title] = list;
 			}
 		}
-
-		return items;
 	}
 	#endregion
 

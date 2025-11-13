@@ -1,16 +1,33 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 
-public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobManager)
+public abstract class CreateOrUpdateJob<T> : EditJob
 	where T : notnull
 {
+	#region Fields
+	private readonly TitleCollection disambigTitles;
+	private readonly TitleDictionary<Title> reverseTitleMap = [];
+	private int phase;
+	#endregion
+
+	#region Constructors
+	protected CreateOrUpdateJob(JobManager jobManager)
+		: base(jobManager)
+	{
+		this.Pages = new PageCollection(this.Site, PageModules.Default, true);
+		this.disambigTitles = new TitleCollection(this.Site);
+	}
+	#endregion
+
 	#region Protected Properties
 	protected bool Clobber { get; set; }
+
+	protected TitleDictionary<T> Items { get; } = [];
 
 	protected Func<Title, T, string>? NewPageText { get; set; }
 
@@ -18,163 +35,185 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 
 	protected Action<SiteParser, T>? OnUpdate { get; set; }
 
-	protected PageLoadOptions? PageLoadOptions { get; set; }
-	#endregion
-
-	#region Protected Abstract Properties
-	protected abstract string? Disambiguator { get; }
+	protected bool ThrowInvalid { get; set; }
 	#endregion
 
 	#region Protected Abstract Methods
+
+	/// <summary>Gets the item data. The caller is responsible for storing it in whatever way makes sense, most likely a <c>Dictionary{key, T}</c>.</summary>
+	protected virtual void GetData() => throw new NotImplementedException();
+
+	protected abstract string? GetDisambiguator(T item);
+
+	/// <summary>Loads any known-good pages into this.Pages, such as via a .GetBacklinks query.</summary>
+	protected virtual void GetKnownPages() => throw new NotImplementedException();
+
 	protected abstract bool IsValidPage(SiteParser parser, T item);
 
-	protected abstract IDictionary<Title, T> LoadItems();
+	protected abstract void LoadItems();
+	#endregion
+
+	#region Protected Virtual Methods
+	protected virtual void DisambiguateWantedTitles(TitleCollection wantedTitles)
+	{
+#if DEBUG
+		wantedTitles.Sort();
+#endif
+		var exists = new PageCollection(this.Site, PageModules.None, false)
+			.GetTitles(wantedTitles);
+		var originalTitles = new TitleDictionary<Title>();
+		foreach (var page in exists)
+		{
+			if (page.Exists && this.Items.Remove(page.Title, out var item))
+			{
+				var disambigTitle = TitleFactory.FromUnvalidated(this.Site, $"{page.Title} ({this.GetDisambiguator(item)})");
+				originalTitles.Add(disambigTitle, page.Title);
+				this.Items.Add(disambigTitle, item); // Conflicts should be impossible here, I think. If there are, let it throw, then investigate.
+				wantedTitles.Remove(page.Title);
+				wantedTitles.Add(disambigTitle);
+			}
+		}
+	}
+
+	/// <summary>Figures out what new pages need to be created.</summary>
+	/// <returns>A TitleCollection containing the list of pages to create.</returns>
+	protected virtual TitleCollection GetWantedTitles()
+	{
+		var wantedTitles = new TitleCollection(this.Site);
+		foreach (var title in this.Items.Keys)
+		{
+			if (!this.Pages.Contains(title))
+			{
+				wantedTitles.Add(title);
+			}
+		}
+
+		return wantedTitles;
+	}
+
+	protected virtual void ValidPageLoaded(SiteParser parser, T item)
+	{
+		if (parser.Page.Exists && this.OnExists is not null)
+		{
+			this.OnExists(parser, item);
+		}
+
+		if (this.OnUpdate is not null)
+		{
+			this.OnUpdate(parser, item);
+		}
+	}
 	#endregion
 
 	#region Protected Override Methods
+	protected override void BeforeLoadPages() => this.LoadItems();
+
 	protected override void LoadPages()
 	{
-		var items = this.LoadItems();
-		if (items.Count == 0)
+		if (this.Items.Count == 0)
 		{
 			return;
 		}
 
-		var parsedPages = new List<SiteParser>();
-		var remaining = new TitleCollection(this.Site);
-		remaining.AddRange(items.Keys);
-
+		// Even if we're clobbering, we still check for valid pages that might exist, so we're clobbering the existing disambiguation in the rare instance where that might happen.
+		this.GetKnownPages();
+		var wantedTitles = this.GetWantedTitles();
 		if (!this.Clobber)
 		{
-			this.GetBasePages(items, parsedPages, remaining);
-			if (this.Disambiguator is not null && remaining.Count > 0)
-			{
-				this.GetDisambiguatedPages(items, parsedPages, remaining);
-			}
+			this.DisambiguateWantedTitles(wantedTitles);
 		}
 
-		parsedPages.AddRange(this.GetNewPages(items, remaining));
-		this.DoOnExists(items, parsedPages);
-		this.DoOnUpdate(items, parsedPages);
+		this.Pages.GetTitles(wantedTitles);
+	}
 
-		foreach (var parser in parsedPages)
+	protected override void PageLoaded(Page page)
+	{
+		if (!this.reverseTitleMap.TryGetValue(page.Title, out var title))
 		{
-			parser.UpdatePage();
-			if (parser.Page.TextModified)
+			title = page.Title;
+		}
+
+		if (!this.Items.TryGetValue(title, out var item))
+		{
+			// Item was removed due to a redirect conflict or by an external process - ignore it.
+			Debug.WriteLine($"Item not found for {title}");
+			this.Pages.Remove(page.Title); // THis is safe because we're looping over the API collection, not this.Pages.
+			return;
+		}
+
+		var parser = new SiteParser(page);
+		if (this.IsValidPage(parser, item))
+		{
+			this.ValidPageLoaded(parser, item);
+		}
+		else
+		{
+			if (page.Exists && this.ThrowInvalid)
 			{
-				this.Pages.Add(parser.Page);
+				throw new InvalidOperationException("Page found but failed validity check.");
+			}
+
+			if (this.phase == 1 && this.GetDisambiguator(item) is string disambigText)
+			{
+				var disambigTitle = TitleFactory.FromValidated(title.Namespace, $"{title.PageName} ({disambigText})");
+				this.disambigTitles.Add(disambigTitle);
+				this.Items.Remove(title);
+				this.Items.Add(disambigTitle, item);
 			}
 		}
 	}
 
-	protected override void PageLoaded(Page page) => throw new NotSupportedException();
+	protected override void TitleMapLoaded()
+	{
+		foreach (var (from, to) in this.Pages.TitleMap)
+		{
+			var fromTitle = TitleFactory.FromUnvalidated(this.Site, from);
+			this.reverseTitleMap[to.Title] = fromTitle;
+			if (this.Items.ContainsKey(to.Title))
+			{
+				// We found a belated dupe caused by a redirect, so remove it from everything.
+				Debug.WriteLine($"Item conflict: {fromTitle} => {to.Title}");
+				this.Items.Remove(to.Title);
+			}
+		}
+	}
 	#endregion
 
 	#region Private Methods
-	private void DoOnExists(IDictionary<Title, T> items, List<SiteParser> parsedPages)
+	private void LoadDisambiguatedPages()
 	{
-		if (this.OnExists is null)
-		{
-			return;
-		}
-
-		foreach (var parser in parsedPages)
-		{
-			if (parser.Page.Exists)
-			{
-				this.OnExists(parser, items[parser.Title]);
-			}
-		}
+		this.ThrowInvalid = true;
+		this.Pages.GetTitles(this.disambigTitles);
+		this.ThrowInvalid = false;
 	}
 
-	private void DoOnUpdate(IDictionary<Title, T> items, List<SiteParser> parsedPages)
-	{
-		if (this.OnUpdate is null)
-		{
-			return;
-		}
-
-		foreach (var parser in parsedPages)
-		{
-			this.OnUpdate(parser, items[parser.Page.Title]);
-		}
-	}
-
-	private void GetBasePages(IDictionary<Title, T> items, List<SiteParser> parsedPages, TitleCollection remaining)
-	{
-		var found = new PageCollection(this.Site, this.PageLoadOptions);
-		found.GetTitles(remaining);
-		foreach (var page in found)
-		{
-			var title = page.Title;
-			if (page.Exists)
-			{
-				var parser = new SiteParser(page);
-				if (this.IsValidPage(parser, items[title]))
-				{
-					parsedPages.Add(parser);
-					remaining.Remove(title);
-					if (this.OnUpdate is null)
-					{
-						this.Warn(title.ToString() + " - valid page already exists, possible conflict.");
-					}
-				}
-				else if (this.Disambiguator is not null)
-				{
-					var disambig = TitleFactory.FromValidated(title.Namespace, title.PageName + " (" + this.Disambiguator + ")");
-					remaining.Remove(title);
-					remaining.Add(disambig);
-					var item = items[title];
-					items.Remove(title);
-					items.Add(disambig, item);
-				}
-			}
-		}
-	}
-
-	private void GetDisambiguatedPages(IDictionary<Title, T> items, List<SiteParser> parsedPages, TitleCollection remaining)
-	{
-		var found = new PageCollection(this.Site);
-		found.GetTitles(remaining);
-		foreach (var page in found)
-		{
-			var title = page.Title;
-			if (page.Exists)
-			{
-				var parser = new SiteParser(page);
-				if (this.IsValidPage(parser, items[title]))
-				{
-					parsedPages.Add(parser);
-					remaining.Remove(title);
-				}
-				else
-				{
-					throw new InvalidOperationException("Disambiguated page found but it fails validity check.");
-				}
-			}
-		}
-	}
-
-	private IEnumerable<SiteParser> GetNewPages(IDictionary<Title, T> items, TitleCollection remaining)
+	private void GetNewPages()
 	{
 		if (this.NewPageText is null)
 		{
-			yield break;
+			return;
 		}
 
-		foreach (var title in remaining)
+		foreach (var (title, item) in this.Items)
 		{
-			var item = items[title];
-			var text = this.NewPageText(title, item);
-			var page = this.Site.CreatePage(title, text);
-			var parser = new SiteParser(page);
-			if (this.IsValidPage(parser, item))
+			if (!this.Pages.TryGetValue(title, out var page))
 			{
-				yield return parser;
+				page = this.Site.CreatePage(title);
 			}
-			else
+
+			if (page.IsMissing || this.Clobber)
 			{
-				this.Warn($"New page [[{page.Title.FullPageName()}]] fails validity check.");
+				page.Text = this.NewPageText(title, item);
+				var parser = new SiteParser(page);
+				if (this.IsValidPage(parser, item))
+				{
+					this.Pages.TryAdd(page);
+					this.ValidPageLoaded(parser, item);
+				}
+				else
+				{
+					this.Warn($"New page [[{page.Title}]] fails validity check.");
+				}
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using RobinHood70.CommonCode;
@@ -22,19 +21,18 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "star";
+	protected override string? GetDisambiguator(CsvRow item) => "star";
 	#endregion
 
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create star";
 
-	protected override IDictionary<Title, CsvRow> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, CsvRow>();
 		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
 		if (!File.Exists(csvName))
 		{
-			return items;
+			return;
 		}
 
 		var csv = new CsvFile(csvName)
@@ -46,10 +44,8 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 		foreach (var row in csv)
 		{
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + row["Name"] + " System");
-			items.Add(title, row);
+			this.Items.Add(title, row);
 		}
-
-		return items;
 	}
 
 	protected override bool IsValidPage(SiteParser parser, CsvRow item) => parser.FindTemplate("System Infobox") is not null;

@@ -34,10 +34,6 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	}
 	#endregion
 
-	#region Protected Override Properties
-	protected override string? Disambiguator => "planet";
-	#endregion
-
 	#region Internal Methods
 
 	// From Planets_infobox.csv per https://discord.com/channels/972159937310502923/1123008833963429940/1160714775215484951.
@@ -94,17 +90,17 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	#endregion
 
 	#region Protected Override Methods
+	protected override string? GetDisambiguator(Planet item) => "planet";
+
 	protected override string GetEditSummary(Page page) => "Create/update planet";
 
 	protected override bool IsValidPage(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
 
-	protected override IDictionary<Title, Planet> LoadItems()
+	protected override void LoadItems()
 	{
 		var biomes = GetBiomes();
-		var items = this.ReadEchelar(biomes);
-		this.ReadWip3(items);
-
-		return items;
+		this.Items.AddRange(this.ReadEchelar(biomes));
+		this.ReadWip3(this.Items);
 	}
 	#endregion
 

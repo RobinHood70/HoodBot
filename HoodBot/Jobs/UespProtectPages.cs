@@ -164,7 +164,7 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Constructors
-	[JobInfo("Protect UESP Pages")]
+	[JobInfo("Protect UESP Pages", "|Maintenance")]
 	public UespProtectPages(JobManager jobManager)
 		: base(jobManager)
 	{

@@ -26,7 +26,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "armor";
+	protected override string? GetDisambiguator(List<SFItem> item) => "armor";
 	#endregion
 
 	#region Protected Override Methods
@@ -34,13 +34,12 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 
 	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
 
-	protected override IDictionary<Title, List<SFItem>> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, List<SFItem>>();
 		var csvName = GameInfo.Starfield.ModFolder + "Armors.csv";
 		if (!File.Exists(csvName))
 		{
-			return items;
+			return;
 		}
 
 		var csv = new CsvFile(csvName)
@@ -54,15 +53,13 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 			var title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
 			if (name.Length > 0 && !name.Contains('_', StringComparison.Ordinal))
 			{
-				var itemList = items.TryGetValue(title, out var list) ? list : [];
+				var itemList = this.Items.TryGetValue(title, out var list) ? list : [];
 				var itemType = GetItemType(row);
 				var armor = new SFItem(row, itemType);
 				itemList.Add(armor);
-				items[title] = itemList;
+				this.Items[title] = itemList;
 			}
 		}
-
-		return items;
 	}
 	#endregion
 

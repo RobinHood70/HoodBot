@@ -24,7 +24,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	#endregion
 
 	#region Protected Override Properties
-	protected override string? Disambiguator => "creature";
+	protected override string? GetDisambiguator(Creature item) => "creature";
 	#endregion
 
 	#region Protected Override Methods
@@ -32,14 +32,32 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 
 	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
 
-	protected override IDictionary<Title, Creature> LoadItems()
+	protected override void LoadItems()
 	{
 		this.StatusWriteLine("NEEDS UPDATED TO USE Npcs.csv (or have more info in fauna.csv)");
-		var retval = new Dictionary<Title, Creature>();
 		var titleMap = this.GetTitleMap();
-		this.ReadFile(retval, titleMap);
+		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Fauna.csv")
+		{
+			Encoding = Encoding.GetEncoding(1252)
+		};
 
-		return retval;
+		Creature? creature = null;
+		foreach (var row in csv.ReadRows())
+		{
+			var name = row["Full"];
+			if (!(creature?.Variants[0]["Full"]).OrdinalEquals(name))
+			{
+				creature = new Creature([]);
+				if (!titleMap.TryGetValue(name, out var title))
+				{
+					title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
+				}
+
+				this.Items.Add(title, creature);
+			}
+
+			creature!.Variants.Add(row);
+		}
 	}
 	#endregion
 
@@ -152,32 +170,6 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 
 		return titleMap;
-	}
-
-	private void ReadFile(Dictionary<Title, Creature> retval, Dictionary<string, Title> titleMap)
-	{
-		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Fauna.csv")
-		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
-
-		Creature? creature = null;
-		foreach (var row in csv.ReadRows())
-		{
-			var name = row["Full"];
-			if (!(creature?.Variants[0]["Full"]).OrdinalEquals(name))
-			{
-				creature = new Creature([]);
-				if (!titleMap.TryGetValue(name, out var title))
-				{
-					title = TitleFactory.FromUnvalidated(this.Site, "Starfield:" + name);
-				}
-
-				retval.Add(title, creature);
-			}
-
-			creature!.Variants.Add(row);
-		}
 	}
 
 	private void UpdateCreature(SiteParser parser, Creature item)

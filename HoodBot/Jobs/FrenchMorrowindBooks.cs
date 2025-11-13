@@ -57,30 +57,27 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	}
 	#endregion
 
-	#region Protected Override Properties
-	protected override string? Disambiguator => "book";
-	#endregion
-
 	#region Protected Override Methods
+	protected override string? GetDisambiguator(Book item) => "book";
+
 	protected override string GetEditSummary(Page page) => EditSummary;
 
 	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate(TemplateName) is not null;
 
-	protected override IDictionary<Title, Book> LoadItems()
+	protected override void LoadItems()
 	{
-		var items = new Dictionary<Title, Book>();
 		using var connection = new MySqlConnection(App.GetConnectionString("CSData"));
 		connection.Open();
 		connection.ChangeDatabase(DbName);
 		foreach (var item in Database.RunQuery(connection, Query, -1, row => new Book(row)))
 		{
 			var title = TitleFactory.FromUnvalidated(this.Site, item.Namespace + ':' + item.Name);
-			if (items.TryAdd(title, item))
+			if (this.Items.TryAdd(title, item))
 			{
 				continue;
 			}
 
-			var existing = items[title];
+			var existing = this.Items[title];
 			if (item.MostlyEquals(existing))
 			{
 				foreach (var id in item.EditorIds)
@@ -94,15 +91,13 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 			/* var newTitle = item.FileId == 0
 				? null
 				: this.TryAddItem(items, title.FullPageName() + " (" + item.Namespace + ")", item); */
-			if (this.TryAddItem(items, title.FullPageName() + " (" + item.EditorIds.First() + ")", item) is not Title newTitle)
+			if (this.TryAddItem(this.Items, title.FullPageName() + " (" + item.EditorIds.First() + ")", item) is not Title newTitle)
 			{
 				throw new InvalidOperationException("No valid title was found for " + item.Name);
 			}
 
 			Debug.WriteLine("Disambiguated: " + newTitle.PageName);
 		}
-
-		return items;
 	}
 	#endregion
 
