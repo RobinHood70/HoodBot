@@ -162,6 +162,11 @@ public class TreeNode : ObservableObject
 	#region Private Methods
 	private bool? ChildrenCheckState()
 	{
+		if (this.Children.Count == 0)
+		{
+			return this.IsChecked;
+		}
+
 		bool? state = null;
 		foreach (var child in this.Children)
 		{
