@@ -21,12 +21,7 @@ public class Page : ITitle
 	private readonly Dictionary<string, string> properties = new(StringComparer.Ordinal);
 	private readonly List<Revision> revisions = [];
 	private readonly List<Title> templates = [];
-	private Uri? canonicalPath;
-	private CultureInfo? culture;
-	private Revision? currentRevision;
-	private Uri? editPath;
 	private bool? isRedirect;
-	private string text = string.Empty;
 	#endregion
 
 	#region Constructors
@@ -40,6 +35,7 @@ public class Page : ITitle
 		// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not quite sure how that would work and it's not the priority right now.
 		this.LoadOptions = options;
 		this.Title = title;
+		this.Text = string.Empty;
 		switch (apiItem)
 		{
 			case null:
@@ -110,10 +106,10 @@ public class Page : ITitle
 			var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
 			if (pageItem.Info is PageInfo info)
 			{
-				this.canonicalPath = info.CanonicalUrl;
-				this.culture = Globals.GetCulture(info.Language);
+				this.CanonicalPath = info.CanonicalUrl;
+				this.Culture = Globals.GetCulture(info.Language);
 				this.CurrentRevisionId = info.LastRevisionId;
-				this.editPath = info.EditUrl;
+				this.EditPath = info.EditUrl;
 				this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
 				this.isRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
 				this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
@@ -125,9 +121,9 @@ public class Page : ITitle
 			}
 			else
 			{
-				this.canonicalPath = null;
+				this.CanonicalPath = null;
 				this.CurrentRevisionId = 0;
-				this.editPath = null;
+				this.EditPath = null;
 				this.IsNew = false;
 				this.isRedirect = false;
 				protections.Clear();
@@ -157,7 +153,7 @@ public class Page : ITitle
 		void PopulateRevisions(PageItem pageItem)
 		{
 			this.revisions.Clear();
-			this.currentRevision = null;
+			this.CurrentRevision = null;
 			foreach (var rev in pageItem.Revisions)
 			{
 				this.revisions.Add(new Revision(rev));
@@ -184,10 +180,10 @@ public class Page : ITitle
 
 	/// <summary>Gets or sets the canonical article path.</summary>
 	/// <value>The canonical article path.</value>
-	public Uri CanonicalPath
+	public Uri? CanonicalPath
 	{
-		get => this.canonicalPath ?? this.Title.Site.GetArticlePath(this.Title.FullPageName());
-		set => this.canonicalPath = value;
+		get => field ?? this.Title.Site.GetArticlePath(this.Title.FullPageName());
+		set;
 	}
 
 	/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
@@ -199,16 +195,19 @@ public class Page : ITitle
 	/// <remarks>Setting this to <see langword="null"/> will force the Site value to be used.</remarks>
 	public CultureInfo Culture
 	{
-		get => this.culture ?? this.Site.Culture;
-		set => this.culture = value;
+		get => field ?? this.Site.Culture;
+		set;
 	}
 
 	/// <summary>Gets the current revision.</summary>
 	/// <value>The current revision.</value>
 	/// <remarks>If revisions are loaded which do not include the current revision, this will be null.</remarks>
-	public Revision? CurrentRevision => this.CurrentRevisionId == 0
-		? null
-		: this.currentRevision ??= ((List<Revision>)this.Revisions).Find(item => this.CurrentRevisionId > 0 && item.Id == this.CurrentRevisionId);
+	public Revision? CurrentRevision
+	{
+		get => this.CurrentRevisionId == 0
+			? null
+			: field ??= ((List<Revision>)this.Revisions).Find(item => this.CurrentRevisionId > 0 && item.Id == this.CurrentRevisionId); private set;
+	}
 
 	/// <summary>Gets or sets the ID of the current revision.</summary>
 	/// <value>The ID of the current revision.</value>
@@ -217,13 +216,13 @@ public class Page : ITitle
 
 	/// <summary>Gets or sets the URI to edit the article in a browser.</summary>
 	/// <value>The edit path.</value>
-	public Uri EditPath
+	public Uri? EditPath
 	{
-		get => this.editPath ?? new UriBuilder(this.Title.Site.ScriptPath)
+		get => field ?? (this.Title.Site.ScriptPath is null ? null : new UriBuilder(this.Title.Site.ScriptPath)
 		{
 			Query = "title=" + Uri.EscapeDataString(this.Title.FullPageName()) + "&action=edit"
-		}.Uri;
-		set => this.editPath = value;
+		}.Uri);
+		set;
 	}
 
 	/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
@@ -321,10 +320,10 @@ public class Page : ITitle
 	[AllowNull]
 	public string Text
 	{
-		get => this.text;
+		get;
 		set
 		{
-			this.text = value ?? string.Empty;
+			field = value ?? string.Empty;
 			this.isRedirect = null;
 		}
 	}

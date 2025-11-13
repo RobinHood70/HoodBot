@@ -8,19 +8,6 @@ using RobinHood70.HoodBot.Models;
 // TODO: Spit into separate model and viewmodel. Model should take care of saving/loading data (or use HostBuilder in App).
 public sealed class WikiInfoViewModel : ObservableObject, IEditableObject
 {
-	#region Fields
-	private Uri? api;
-	private string? displayName;
-	private string? logPage;
-	private int? maxLag;
-	private string? password;
-	private int? readThrottling;
-	private string? resultPage;
-	private string? siteClassIdentifier;
-	private string? userName;
-	private int? writeThrottling;
-	#endregion
-
 	#region Constructors
 	public WikiInfoViewModel()
 		: this(new WikiInfo())
@@ -38,66 +25,66 @@ public sealed class WikiInfoViewModel : ObservableObject, IEditableObject
 	#region Public Properties
 	public Uri? Api
 	{
-		get => this.api;
-		set => this.SetProperty(ref this.api, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public string? DisplayName
 	{
-		get => this.displayName;
-		set => this.SetProperty(ref this.displayName, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
 	public string? LogPage
 	{
-		get => this.logPage;
-		set => this.SetProperty(ref this.logPage, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public int? MaxLag
 	{
-		get => this.maxLag;
-		set => this.SetProperty(ref this.maxLag, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public string? Password
 	{
-		get => this.password;
-		set => this.SetProperty(ref this.password, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public int? ReadThrottling
 	{
-		get => this.readThrottling;
-		set => this.SetProperty(ref this.readThrottling, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public string? ResultsPage
 	{
-		get => this.resultPage;
-		set => this.SetProperty(ref this.resultPage, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public string? SiteClassIdentifier
 	{
-		get => this.siteClassIdentifier;
-		set => this.SetProperty(ref this.siteClassIdentifier, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public string? UserName
 	{
-		get => this.userName;
-		set => this.SetProperty(ref this.userName, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public WikiInfo WikiInfo { get; }
 
 	public int? WriteThrottling
 	{
-		get => this.writeThrottling;
-		set => this.SetProperty(ref this.writeThrottling, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 	#endregion
 

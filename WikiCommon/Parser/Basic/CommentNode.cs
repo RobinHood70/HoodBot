@@ -7,10 +7,6 @@ using RobinHood70.WikiCommon.Parser;
 /// <summary>Represents a wikitext (HTML) comment.</summary>
 public class CommentNode : ICommentNode
 {
-	#region Fields
-	private string comment = string.Empty;
-	#endregion
-
 	#region Constructors
 
 	/// <summary>Initializes a new instance of the <see cref="CommentNode"/> class.</summary>
@@ -27,8 +23,8 @@ public class CommentNode : ICommentNode
 	[AllowNull]
 	public string Comment
 	{
-		get => this.comment;
-		set => this.comment = value ?? string.Empty;
+		get;
+		set => field = value ?? string.Empty;
 	}
 	#endregion
 

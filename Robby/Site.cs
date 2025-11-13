@@ -100,6 +100,7 @@ public class Site : IMessageSource
 		this.deletionCategories = new TitleCollection(this);
 		this.DiscussionPages = new TitleCollection(this);
 		this.Culture = CultureInfo.CurrentCulture;
+		this.Namespaces = new NamespaceCollection(this, [], []);
 	}
 	#endregion
 
@@ -124,17 +125,13 @@ public class Site : IMessageSource
 	/// <value>The wiki abstraction layer.</value>
 	public IWikiAbstractionLayer AbstractionLayer { get; } // TODO: Hide this and replace it with public or internal methods for all related calls (e.g., delete page, get watchlist, etc.)
 
-	private bool infoSet;
-
 	/// <summary>Gets the base article path.</summary>
 	/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string BaseArticlePath { get; private set; }
+	public string? BaseArticlePath { get; private set; }
 
 	/// <summary>Gets or sets a CultureInfo object base the wiki's language and variant.</summary>
 	/// <value>The culture of the wiki.</value>
 	/// <remarks>Not all languages available in MediaWiki have direct equivalents in Windows. The bot will attempt to fall back to the more general language or variant when possible, but this property is left settable in the event that the choice made is unacceptable. If the culture cannot be determined, <see cref="CultureInfo.CurrentCulture"/> is used instead. Attempting to set the Culture to null will also result in CurrentCulture being used.</remarks>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 	public CultureInfo Culture
 	{
 		get;
@@ -182,13 +179,11 @@ public class Site : IMessageSource
 
 	/// <summary>Gets the MediaWiki version of the wiki, including any text.</summary>
 	/// <value>The MediaWiki version of the wiki.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string Generator { get; private set; }
+	public string? Generator { get; private set; }
 
 	/// <summary>Gets the interwiki map.</summary>
 	/// <value>The interwiki map.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; }
+	public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; } = ReadOnlyKeyedCollection<string, InterwikiEntry>.Empty;
 
 	/// <summary>Gets a list of current magic words on the wiki.</summary>
 	/// <value>The magic words.</value>
@@ -196,23 +191,19 @@ public class Site : IMessageSource
 
 	/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 	/// <value>The main page.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public FullTitle MainPage { get; private set; }
+	public FullTitle? MainPage { get; private set; }
 
 	/// <summary>Gets the name of the main page, as returned by the site.</summary>
 	/// <value>The name of the main page.</value>
 	/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName()</c>, but is provided so that the original name is available, if needed.</remarks>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string MainPageName { get; private set; }
+	public string? MainPageName { get; private set; }
 
 	/// <summary>Gets the wiki name.</summary>
 	/// <value>The name of the wiki.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string Name { get; private set; }
+	public string? Name { get; private set; }
 
 	/// <summary>Gets the wiki namespaces.</summary>
 	/// <value>the wiki namespaces.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 	public NamespaceCollection Namespaces { get; private set; }
 
 	/// <summary>Gets or sets the page creator.</summary>
@@ -223,13 +214,11 @@ public class Site : IMessageSource
 	/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
 	/// <value>The script path.</value>
 	/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string ScriptPath { get; private set; }
+	public string? ScriptPath { get; private set; }
 
 	/// <summary>Gets the name of the server—typically, the base URL.</summary>
 	/// <value>The name of the server.</value>
-	/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
-	public string ServerName { get; private set; }
+	public string? ServerName { get; private set; }
 
 	/// <summary>Gets the bot's user name.</summary>
 	/// <value>The bot's user name.</value>
@@ -355,7 +344,7 @@ public class Site : IMessageSource
 	/// <param name="articleName">Name of the article.</param>
 	/// <param name="fragment">The fragment to jump to. May be null.</param>
 	/// <returns>A full Uri to the article.</returns>
-	public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
+	public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(null, articleName, fragment);
 
 	/// <summary>Gets the page-name comparer with the specified sensitivity.</summary>
 	/// <param name="caseSensitive">Whether the comparer should have first-letter case sensitivity.</param>
@@ -1027,17 +1016,13 @@ public class Site : IMessageSource
 	/// <param name="fragment">The fragment to jump to. May be null.</param>
 	/// <returns>A full Uri to the article.</returns>
 	/// <exception cref="ArgumentException">Article name is invalid.</exception>
-	public virtual Uri GetArticlePath(string unparsedPath, string articleName, string? fragment)
+	public virtual Uri GetArticlePath(string? unparsedPath, string articleName, string? fragment)
 	{
 		// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
-		if (string.IsNullOrWhiteSpace(articleName))
-		{
-			throw new ArgumentException(paramName: nameof(articleName), message: Resources.TitleInvalid);
-		}
-
+		ArgumentException.ThrowIfNullOrEmpty(articleName);
 		if (string.IsNullOrEmpty(unparsedPath))
 		{
-			unparsedPath = this.BaseArticlePath;
+			unparsedPath = this.BaseArticlePath ?? throw new InvalidOperationException("Can't get article path unless logged in or a base path is provided.");
 		}
 
 		var fullPath = unparsedPath.Replace("$1", articleName.Replace(' ', '_'), StringComparison.Ordinal).TrimEnd('/');
@@ -1465,7 +1450,6 @@ public class Site : IMessageSource
 
 		this.ScriptPath = basePath + general.Script;
 		this.Namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
-		// MagicWords
 		foreach (var word in siteInfo.MagicWords)
 		{
 			this.magicWords.Add(word.Name, word);
@@ -1566,15 +1550,15 @@ public class Site : IMessageSource
 
 	private void Clear()
 	{
-		this.BaseArticlePath = null!;
+		this.BaseArticlePath = null;
 		this.Culture = CultureInfo.CurrentCulture;
 		this.DisambiguatorAvailable = false;
+		this.Generator = null;
 		this.magicWords.Clear();
-		this.MainPage = null!;
-		this.Namespaces = null!;
-		this.ServerName = null!;
-		this.Name = null!;
-		this.Generator = null!;
+		this.MainPage = null;
+		this.Name = null;
+		this.Namespaces = new NamespaceCollection(this, [], []);
+		this.ServerName = null;
 		this.Version = null;
 	}
 	#endregion

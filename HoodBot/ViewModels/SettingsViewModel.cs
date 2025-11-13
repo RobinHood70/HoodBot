@@ -17,7 +17,6 @@ public class SettingsViewModel : ObservableRecipient, IEditableObject
 {
 	#region Fields
 	private readonly IMediaWikiClient client = new SimpleClient(CancellationToken.None);
-	private WikiInfoViewModel? selectedItem;
 	#endregion
 
 	#region Constructors
@@ -42,13 +41,13 @@ public class SettingsViewModel : ObservableRecipient, IEditableObject
 	#region Public Properties
 	public WikiInfoViewModel? SelectedItem
 	{
-		get => this.selectedItem;
+		get;
 		set
 		{
-			if (value != this.selectedItem)
+			if (value != field)
 			{
 				this.CancelEdit();
-				this.SetProperty(ref this.selectedItem, value);
+				this.SetProperty(ref field, value);
 				this.BeginEdit();
 			}
 		}

@@ -13,10 +13,6 @@ using System.Reflection;
 /// <summary>A singleton class to handle all plugin functionality.</summary>
 public class Plugins : IDisposable
 {
-	#region Static Fields
-	private static Plugins? instance;
-	#endregion
-
 	#region Fields
 	private readonly ComposablePartCatalog? catalog;
 	private readonly CompositionContainer? container;
@@ -61,7 +57,7 @@ public class Plugins : IDisposable
 
 	/// <summary>Gets the single instance of the class.</summary>
 	/// <value>The instance.</value>
-	public static Plugins Instance => instance ??= new Plugins();
+	public static Plugins Instance => field ??= new Plugins();
 	#endregion
 
 	#region Public Properties

@@ -8,10 +8,6 @@ using RobinHood70.WallE.Properties;
 
 public class UploadInput(string remoteName, Stream fileData)
 {
-	#region Fields
-	private WatchlistOption watchlist = WatchlistOption.Preferences;
-	#endregion
-
 	#region Public Properties
 	public int ChunkSize { get; set; }
 
@@ -30,7 +26,7 @@ public class UploadInput(string remoteName, Stream fileData)
 
 	public WatchlistOption Watchlist
 	{
-		get => this.watchlist;
+		get;
 		set
 		{
 			if (value == WatchlistOption.Unwatch)
@@ -38,7 +34,7 @@ public class UploadInput(string remoteName, Stream fileData)
 				throw new ArgumentOutOfRangeException(paramName: nameof(value), message: Messages.UploadUnwatchInvalid);
 			}
 
-			this.watchlist = value;
+			field = value;
 		}
 	}
 	#endregion

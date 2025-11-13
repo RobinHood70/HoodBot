@@ -19,7 +19,6 @@ public class ParameterReplacers
 	private readonly List<ParameterReplacer> generalReplacers = [];
 	private readonly IReadOnlyDictionary<Title, Title> globalUpdates;
 	private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = [];
-	private UespNamespaceList? nsList;
 	#endregion
 
 	// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
@@ -63,7 +62,7 @@ public class ParameterReplacers
 	#endregion
 
 	#region Private Properties
-	private UespNamespaceList NamespaceList => this.nsList ??= new UespNamespaceList(this.site);
+	private UespNamespaceList NamespaceList => field ??= new UespNamespaceList(this.site);
 	#endregion
 
 	#region Public Methods

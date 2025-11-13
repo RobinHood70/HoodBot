@@ -57,10 +57,6 @@ internal sealed class NpcData
 	};
 	#endregion
 
-	#region Fields
-	private string? name;
-	#endregion
-
 	#region Constructors
 	public NpcData(IDataRecord row)
 	{
@@ -100,7 +96,7 @@ internal sealed class NpcData
 		this.DataName = nameField.Trim();
 		if (ReplacementData.NpcNameFixes.TryGetValue(nameField, out var newName))
 		{
-			this.name = newName;
+			this.Name = newName;
 		}
 	}
 	#endregion
@@ -120,8 +116,8 @@ internal sealed class NpcData
 
 	public string Name
 	{
-		get => this.name ?? this.DataName;
-		internal set => this.name = value;
+		get => field ?? this.DataName;
+		internal set;
 	}
 
 	public PickpocketDifficulty PickpocketDifficulty { get; }

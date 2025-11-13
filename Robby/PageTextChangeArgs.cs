@@ -10,10 +10,6 @@
 /// <param name="recreateIfJustDeleted">Whether the page should be recreated if it was deleted since the edit began.</param>
 public class PageTextChangeArgs(Page page, string methodName, string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
 {
-	#region Fields
-	private bool cancelChange;
-	#endregion
-
 	#region Public Properties
 
 	/// <summary>Gets or sets a value indicating whether the edit should be marked as a bot edit.</summary>
@@ -24,8 +20,8 @@ public class PageTextChangeArgs(Page page, string methodName, string editSummary
 	/// <remarks>Once this property is set to <see langword="true"/>, it cannot be changed.</remarks>
 	public bool CancelChange
 	{
-		get => this.cancelChange;
-		set => this.cancelChange |= value;
+		get;
+		set => field |= value;
 	}
 
 	/// <summary>Gets or sets the edit summary.</summary>

@@ -9,9 +9,6 @@ public class TreeNode : ObservableObject
 {
 	#region Fields
 	private readonly List<TreeNode> children = [];
-	private bool? isChecked = false;
-	private bool isSelected;
-	private TreeNode? selectedItem;
 	#endregion
 
 	#region Constructors
@@ -20,6 +17,7 @@ public class TreeNode : ObservableObject
 		ArgumentNullException.ThrowIfNull(displayText);
 		this.Parent = parent;
 		this.DisplayText = displayText;
+		this.IsChecked = false;
 	}
 	#endregion
 
@@ -34,17 +32,12 @@ public class TreeNode : ObservableObject
 
 	public bool? IsChecked
 	{
-		get => this.isChecked;
+		get;
 		set
 		{
-			if (this.SetProperty(ref this.isChecked, value))
+			if (this.SetProperty(ref field, value))
 			{
-				var selected = this.SelectedItem;
-				if (selected != null)
-				{
-					selected.IsSelected = false;
-				}
-
+				this.SelectedItem?.IsSelected = false;
 				if (value != null)
 				{
 					this.OnSelectionChange(new SelectedItemChangedEventArgs(this, value.Value));
@@ -63,19 +56,19 @@ public class TreeNode : ObservableObject
 
 	public bool IsSelected
 	{
-		get => this.isSelected;
+		get;
 		set
 		{
-			if (this.isSelected != value)
+			if (field != value)
 			{
-				this.SetProperty(ref this.isSelected, value);
-				this.Root.selectedItem = value ? this : null;
+				this.SetProperty(ref field, value);
+				this.Root.SelectedItem = value ? this : null;
 				this.OnSelectionChange(new SelectedItemChangedEventArgs(this, value));
 			}
 		}
 	}
 
-	public TreeNode? SelectedItem => this.Parent == null ? this.selectedItem : this.Root.SelectedItem;
+	public TreeNode? SelectedItem { get => this.Parent == null ? field : this.Root.SelectedItem; private set; }
 	#endregion
 
 	#region Protected Properties

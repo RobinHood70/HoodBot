@@ -70,7 +70,7 @@ internal sealed class Place : IEquatable<Place>
 	#endregion
 
 	#region Operators
-	public static bool operator ==(Place? left, Place? right) => left?.Equals(right) ?? right is null;
+	public static bool operator ==(Place? left, Place? right) => left?.Equals(right) ?? (right is null);
 
 	public static bool operator !=(Place? left, Place? right) => !(left == right);
 	#endregion

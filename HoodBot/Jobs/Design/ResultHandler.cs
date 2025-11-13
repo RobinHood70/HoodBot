@@ -8,15 +8,17 @@ using RobinHood70.HoodBot.Properties;
 
 /// <summary>Interface for objects which handle job results.</summary>
 /// <remarks>Initializes a new instance of the <see cref="ResultHandler"/> class.</remarks>
-public abstract class ResultHandler()
+public abstract class ResultHandler
 {
-	#region Constants
-	private const string BotResults = "Bot Results";
+	#region Fields
 	#endregion
 
-	#region Fields
-	private string defaultText = BotResults;
-	private string description = BotResults;
+	#region Constructors
+	protected ResultHandler()
+	{
+		this.DefaultText = this.ResourceManager.GetString("BotResults", this.Culture) ?? "Bot Results";
+		this.Description = this.DefaultText;
+	}
 	#endregion
 
 	#region Public Properties
@@ -29,21 +31,13 @@ public abstract class ResultHandler()
 	/// <value>The default text for the <see cref="Description"/>.</value>
 	/// <remarks>This property should be set in a derived class to set default text for the description if the caller doesn't customize it. If the derived class fails to set this, it will attempt to return the localized version of "Bot Results" or, failing all else, the English version of it.</remarks>
 	[AllowNull]
-	public string DefaultText
-	{
-		get => this.defaultText;
-		protected set => this.defaultText = value ?? this.ResourceManager.GetString("BotResults", this.Culture) ?? BotResults;
-	}
+	public string DefaultText { get; set; }
 
 	/// <summary>Gets or sets the description text.</summary>
 	/// <value>The description.</value>
 	/// <remarks>Use of this property is handler-specific, typically for edit summaries or e-mail subjects. Some handlers may ignore it altogether, so it should not be used to convey essential information. Setting this property to <see langword="null"/> will cause it to return <see cref="DefaultText"/>.</remarks>
 	[AllowNull]
-	public string Description
-	{
-		get => this.description;
-		set => this.description = value ?? this.DefaultText;
-	}
+	public string Description { get; set; }
 
 	/// <summary>Gets the <see cref="StringBuilder"/> that holds the result text.</summary>
 	/// <value>The string builder.</value>

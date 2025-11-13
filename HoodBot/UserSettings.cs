@@ -13,10 +13,6 @@ using RobinHood70.HoodBot.ViewModels;
 
 public class UserSettings : IJsonSettings<UserSettings>
 {
-	#region Fields
-	private string botDataFolder = DefaultBotDataFolder;
-	#endregion
-
 	#region Constructors
 	public UserSettings()
 	{
@@ -31,12 +27,12 @@ public class UserSettings : IJsonSettings<UserSettings>
 	#region Public Properties
 	public string BotDataFolder
 	{
-		get => this.botDataFolder;
+		get;
 		set
 		{
 			if (value != null)
 			{
-				this.botDataFolder = value;
+				field = value;
 				Environment.SetEnvironmentVariable("BotData", value);
 			}
 		}

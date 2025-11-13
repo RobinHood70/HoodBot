@@ -9,10 +9,6 @@ using System.Collections.Generic;
 /// <param name="parameters">Any parameters to the method. If null, Parameters will be set to an empty dictionary.</param>
 public class ChangeArgs(object realSender, string methodName, IReadOnlyDictionary<string, object?>? parameters)
 {
-	#region Fields
-	private bool cancelChange;
-	#endregion
-
 	#region Public Properties
 
 	/// <summary>Gets or sets a value indicating whether the desired edit should be cancelled.</summary>
@@ -20,8 +16,8 @@ public class ChangeArgs(object realSender, string methodName, IReadOnlyDictionar
 	/// <remarks>Once this property is set to <see langword="true"/>, it cannot be changed.</remarks>
 	public bool CancelChange
 	{
-		get => this.cancelChange;
-		set => this.cancelChange |= value;
+		get;
+		set => field |= value;
 	}
 
 	/// <summary>Gets the sender of the warning.</summary>

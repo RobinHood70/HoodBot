@@ -67,7 +67,7 @@ public sealed class EmbeddedValue : IEquatable<EmbeddedValue>
 	/// <param name="string1">The first string.</param>
 	/// <param name="string2">The second string.</param>
 	/// <returns>The result of the operator.</returns>
-	public static bool operator ==(EmbeddedValue? string1, EmbeddedValue? string2) => string1?.Equals(string2) ?? string2 is null;
+	public static bool operator ==(EmbeddedValue? string1, EmbeddedValue? string2) => string1?.Equals(string2) ?? (string2 is null);
 
 	/// <summary>Implements the operator !=.</summary>
 	/// <param name="string1">The first string.</param>

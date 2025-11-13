@@ -23,7 +23,6 @@ public sealed class Context
 	private readonly Dictionary<Title, MagicWordHandler> templateHandlers = new(TitleComparer.Instance);
 	private readonly HashSet<string> unhandledMagicWords = new(StringComparer.Ordinal);
 	private readonly MixedSensitivityDictionary<MagicWordHandler> variableHandlers = [];
-	private Title? title;
 	#endregion
 
 	#region Constructors
@@ -65,8 +64,8 @@ public sealed class Context
 	/// <remarks>Title does not need to be specified explicitly if <see cref="Page"/> is set.</remarks>
 	public Title? Title
 	{
-		get => this.title ?? this.Page?.Title;
-		set => this.title = value;
+		get => field ?? this.Page?.Title;
+		set;
 	}
 
 	/// <summary>Gets a list of all magic words that the parser found but was unable to handle.</summary>

@@ -32,20 +32,10 @@ public class MainViewModel : ObservableRecipient
 	private readonly PauseTokenSource pauser = new();
 
 	private CancellationTokenSource? canceller;
-	private bool editingEnabled;
 	private DateTime? eta;
 	private bool executing;
-	private bool jobParametersEnabled;
-	private Visibility jobParameterVisibility = Visibility.Hidden;
 	private DateTime timerStarted;
-	private double progress;
-	private double progressMax = 1;
 	private MainWindowParameterFetcher? parameterFetcher; // was IParameterFetcher?
-	private string? password;
-	private Brush progressBarColor = ProgressBarGreen;
-	private WikiInfoViewModel? selectedItem;
-	private string status = string.Empty;
-	private string? userName;
 	#endregion
 
 	#region Constructors
@@ -57,6 +47,10 @@ public class MainViewModel : ObservableRecipient
 		this.SelectedItem = App.UserSettings.GetCurrentItem();
 		var plugins = Plugins.Instance;
 		this.diffViewer = plugins.DiffViewers["Internet Explorer"];
+		this.JobParameterVisibility = Visibility.Hidden;
+		this.ProgressBarColor = ProgressBarGreen;
+		this.ProgressMax = 1;
+		this.Status = string.Empty;
 
 		this.JobTree.SelectionChanged += this.JobTree_OnSelectionChanged;
 	}
@@ -71,7 +65,7 @@ public class MainViewModel : ObservableRecipient
 		{
 			async void ExecuteJobsAsync()
 			{
-				if (!this.executing && this.selectedItem is WikiInfoViewModel wikiInfo)
+				if (!this.executing && this.SelectedItem is WikiInfoViewModel wikiInfo)
 				{
 					this.executing = true;
 					this.StatusWriteLine("Initializing");
@@ -94,53 +88,53 @@ public class MainViewModel : ObservableRecipient
 	#region Public Properties
 	public bool EditingEnabled
 	{
-		get => this.editingEnabled;
-		set => this.SetProperty(ref this.editingEnabled, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public DateTime? Eta => this.eta?.ToLocalTime();
 
 	public bool JobParametersEnabled
 	{
-		get => this.jobParametersEnabled;
-		private set => this.SetProperty(ref this.jobParametersEnabled, value);
+		get;
+		private set => this.SetProperty(ref field, value);
 	}
 
 	public Visibility JobParameterVisibility
 	{
-		get => this.jobParameterVisibility;
-		private set => this.SetProperty(ref this.jobParameterVisibility, value);
+		get;
+		private set => this.SetProperty(ref field, value);
 	}
 
 	public TreeNode JobTree { get; } = JobNode.Populate();
 
 	public double Progress
 	{
-		get => this.progress;
-		private set => this.SetProperty(ref this.progress, value);
+		get;
+		private set => this.SetProperty(ref field, value);
 	}
 
 	public double ProgressMax
 	{
-		get => this.progressMax;
-		private set => this.SetProperty(ref this.progressMax, value < 1 ? 1 : value);
+		get;
+		private set => this.SetProperty(ref field, value < 1 ? 1 : value);
 	}
 
 	public string? Password
 	{
-		get => this.password;
-		set => this.SetProperty(ref this.password, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public Brush ProgressBarColor
 	{
-		get => this.progressBarColor;
-		set => this.SetProperty(ref this.progressBarColor, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public WikiInfoViewModel? SelectedItem
 	{
-		get => this.selectedItem;
+		get;
 		set
 		{
 			if (value != null)
@@ -152,22 +146,22 @@ public class MainViewModel : ObservableRecipient
 				}
 			}
 
-			this.SetProperty(ref this.selectedItem, value);
+			this.SetProperty(ref field, value);
 		}
 	}
 
 	public string Status
 	{
-		get => this.status;
-		set => this.SetProperty(ref this.status, value ?? string.Empty);
+		get;
+		set => this.SetProperty(ref field, value ?? string.Empty);
 	}
 
 	public UserSettings UserSettings { get; } = App.UserSettings;
 
 	public string? UserName
 	{
-		get => this.userName;
-		set => this.SetProperty(ref this.userName, value);
+		get;
+		set => this.SetProperty(ref field, value);
 	}
 
 	public DateTime? UtcEta
@@ -251,7 +245,7 @@ public class MainViewModel : ObservableRecipient
 		// This is re-initialized every time so that one cancellation doesn't auto-cancel anything you start after it. I don't believe this is necessary for pausing, though.
 		this.canceller = new();
 
-		using var jobManager = new JobManager(wikiInfo.WikiInfo, this.editingEnabled, this.pauser, this.canceller);
+		using var jobManager = new JobManager(wikiInfo.WikiInfo, this.EditingEnabled, this.pauser, this.canceller);
 		try
 		{
 			jobManager.StartingJob += this.JobManager_StartingJob;
@@ -368,7 +362,7 @@ public class MainViewModel : ObservableRecipient
 	private void RunTest()
 	{
 		// Dummy code just so this doesn't get all kinds of unwanted code suggestions.
-		Debug.WriteLine(this.selectedItem?.DisplayName);
+		Debug.WriteLine(this.SelectedItem?.DisplayName);
 		Debug.WriteLine(this.UserName);
 	}
 

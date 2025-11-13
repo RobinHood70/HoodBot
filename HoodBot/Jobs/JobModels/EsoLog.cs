@@ -15,8 +15,6 @@ internal static class EsoLog
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 	private static readonly Regex UpdateFinder = new(@"\d+(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	private static readonly Dictionary<string, EsoVersion[]> LatestVersions = new(StringComparer.Ordinal);
-
-	private static Database? database;
 	#endregion
 
 	#region Public Properties
@@ -26,7 +24,7 @@ internal static class EsoLog
 
 	public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
-	public static Database EsoDb => database ??= new Database(Connection);
+	public static Database EsoDb => field ??= new Database(Connection);
 
 	public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 	{

@@ -22,8 +22,6 @@ public abstract class WikiJob : IMessageSource
 	#region Fields
 	private readonly string logName;
 	private bool hasSavedResultHandler; // Since real handler can be null, we have to track saved separately.
-	private int progress;
-	private int progressMaximum = 1;
 	private ResultHandler? savedResultHandler;
 	#endregion
 
@@ -37,6 +35,8 @@ public abstract class WikiJob : IMessageSource
 		this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.JobType = jobType;
+		this.Progress = 0;
+		this.ProgressMaximum = 1;
 	}
 	#endregion
 
@@ -53,25 +53,25 @@ public abstract class WikiJob : IMessageSource
 
 	public int Progress
 	{
-		get => this.progress;
+		get;
 		protected set
 		{
-			this.progress = value;
+			field = value;
 			this.UpdateProgress();
 		}
 	}
 
 	public int ProgressMaximum
 	{
-		get => this.progressMaximum;
+		get;
 		private set
 		{
-			this.progressMaximum = value <= 0 ? 1 : value;
+			field = value <= 0 ? 1 : value;
 			this.UpdateProgress();
 		}
 	}
 
-	public double ProgressPercent => (double)this.progress / this.progressMaximum;
+	public double ProgressPercent => (double)this.Progress / this.ProgressMaximum;
 
 	public Site Site { get; }
 	#endregion
@@ -127,13 +127,9 @@ public abstract class WikiJob : IMessageSource
 	#endregion
 
 	#region Protected Methods
-	protected void SetResultDescription(string title)
-	{
-		if (this.Results != null)
-		{
-			this.Results.Description = this.Results.Description == null ? title : this.Results.Description + "; " + title;
-		}
-	}
+	protected void SetResultDescription(string title) => this.Results?.Description = this.Results.Description == null
+		? title
+		: this.Results.Description + "; " + title;
 
 	protected void SetTemporaryResultHandler(ResultHandler newHandler)
 	{

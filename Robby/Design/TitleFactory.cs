@@ -38,7 +38,6 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 {
 	#region Private Fields
 	private readonly Dictionary<TitlePartType, string> originalParts = [];
-	private Title? title;
 	#endregion
 
 	#region Constructors
@@ -211,7 +210,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	public string PageName { get; }
 
 	/// <inheritdoc/>
-	public Title Title => this.title ??= new Title(this.Namespace, this.PageName);
+	public Title Title => field ??= new Title(this.Namespace, this.PageName);
 	#endregion
 
 	#region Public Implicit Operators
