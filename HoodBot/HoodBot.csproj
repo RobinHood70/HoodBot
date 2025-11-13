@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
@@ -45,7 +45,6 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="System.Text.Json" Version="9.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
