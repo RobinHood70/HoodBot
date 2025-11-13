@@ -11,70 +11,28 @@ using RobinHood70.WikiCommon.Parser;
 /// <param name="close">The close.</param>
 public class TagNode(string name, string? attributes, string? innerText, string? close) : ITagNode
 {
-	#region Fields
-	private string? attributes = attributes;
-	private string? close = close;
-	private string? innerText = innerText;
-	private string name = name;
-	#endregion
-
 	#region Public Properties
 
 	/// <summary>Gets or sets the tag's attributes.</summary>
 	/// <value>The attributes.</value>
-	public string? Attributes
-	{
-		get => this.attributes;
-		set
-		{
-			if (!value.OrdinalEquals(this.attributes))
-			{
-				this.attributes = value;
-			}
-		}
-	}
+	public string? Attributes { get; set; } = attributes;
 
 	/// <summary>Gets or sets the close tag.</summary>
 	/// <value>The close tag.</value>
-	public string? Close // Note that this is a full close tag, including the surrounding </...>.
-	{
-		get => this.close;
-		set
-		{
-			if (!value.OrdinalEquals(this.close))
-			{
-				this.close = value;
-			}
-		}
-	}
+	/// <remarks>
+	/// Note that this is a full close tag, including the surrounding &lt;/...&gt;
+	/// If this is <see langword="null"/>, the tag is self-closed.
+	/// </remarks>
+	public string? Close { get; set; } = close;
 
 	/// <summary>Gets or sets the inner text.</summary>
 	/// <value>The unparsed inner text.</value>
-	public string? InnerText
-	{
-		get => this.innerText;
-		set
-		{
-			if (!value.OrdinalEquals(this.innerText))
-			{
-				this.innerText = value;
-			}
-		}
-	}
+	public string? InnerText { get; set; } = innerText;
 
 	/// <summary>Gets or sets the tag name.</summary>
 	/// <value>The tag name.</value>
-	public string Name // Note that this is NOT a full open tag, it's just the name.
-	{
-		get => this.name;
-		set
-		{
-			if (!value.OrdinalEquals(this.name))
-			{
-				this.name = value;
-			}
-		}
-	}
+	/// <remarks>Note that this is NOT a full open tag, it's just the name.</remarks>
+	public string Name { get; set; } = name;
 
 	/// <summary>Gets a value indicating whether the tag is self-closed.</summary>
 	/// <value><see langword="true"/> if this is a self-closed tag; otherwise, <see langword="false"/>.</value>
