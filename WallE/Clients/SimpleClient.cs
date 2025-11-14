@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -278,14 +279,10 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 			return;
 		}
 
+		var cookieText = string.Empty;
 		try
 		{
-			var cookieText = File.ReadAllText(this.cookiesLocation);
-			if (JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
-			{
-				this.cookieContainer.Add(cookies);
-				this.previousHash = Globals.GetHash(cookieText, CookieHashType);
-			}
+			cookieText = File.ReadAllText(this.cookiesLocation);
 		}
 		catch (NullReferenceException)
 		{
@@ -295,6 +292,26 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		}
 		catch (FileNotFoundException)
 		{
+		}
+
+		if (cookieText.Length > 0 && JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
+		{
+			foreach (var cookie in cookies)
+			{
+				if (cookie is Cookie realCookie)
+				{
+					try
+					{
+						this.cookieContainer.Add(realCookie);
+					}
+					catch (CookieException)
+					{
+						Debug.WriteLine("Failed: " + realCookie.ToString());
+					}
+				}
+			}
+
+			this.previousHash = Globals.GetHash(cookieText, CookieHashType);
 		}
 	}
 
