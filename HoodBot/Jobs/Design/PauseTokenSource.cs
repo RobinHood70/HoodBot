@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ public class PauseTokenSource
 	internal static readonly Task CompletedTask = Task.FromResult(true);
 	private volatile TaskCompletionSource<bool>? paused;
 
+	[SuppressMessage("Design", "MA0173:Use LazyInitializer.EnsureInitialize", Justification = "Suggested fix raises another warning.")]
 	public bool IsPaused
 	{
 		get => this.paused != null;
@@ -17,25 +19,17 @@ public class PauseTokenSource
 			if (value)
 			{
 				Interlocked.CompareExchange(ref this.paused, new TaskCompletionSource<bool>(), null);
+				return;
 			}
-			else
-			{
-				// TODO: See if this can be re-written. This seems like it could be optimized to avoid the ugly "while (true)" construct, but since I'm not terribly familiar with multi-threading-specific code, I've left it untouched for now.
-				while (true)
-				{
-					var tcs = this.paused;
-					if (tcs == null)
-					{
-						return;
-					}
 
-					if (Interlocked.CompareExchange(ref this.paused, null, tcs) == tcs)
-					{
-						tcs.SetResult(true);
-						break;
-					}
-				}
+			// Wait for this.paused to toggle. Since this.paused is volatile, we need to assign it to a local variable to ensure we're working with the same value throughout the loop.
+			var tcs = this.paused;
+			while (tcs is not null && Interlocked.CompareExchange(ref this.paused, null, tcs) != tcs)
+			{
+				tcs = this.paused;
 			}
+
+			tcs?.SetResult(true);
 		}
 	}
 
