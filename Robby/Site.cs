@@ -1432,6 +1432,7 @@ public class Site : IMessageSource
 		// General
 		var server = general.Server; // Used to help determine if interwiki is local
 		this.Culture = Globals.GetCulture(general.Language);
+		this.Namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);  // Requires site.Culture
 		this.Name = general.SiteName;
 		this.ServerName = general.ServerName;
 		this.Generator = general.Generator;
@@ -1449,7 +1450,6 @@ public class Site : IMessageSource
 		}
 
 		this.ScriptPath = basePath + general.Script;
-		this.Namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
 		foreach (var word in siteInfo.MagicWords)
 		{
 			this.magicWords.Add(word.Name, word);
