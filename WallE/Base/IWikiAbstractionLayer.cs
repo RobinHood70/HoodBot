@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
 using RobinHood70.WallE.Design;
 using RobinHood70.WikiCommon;
@@ -76,9 +77,6 @@ public interface IWikiAbstractionLayer
 	/// <summary>Occurs when the wiki is about to load initialization data.</summary>
 	/// <remarks>Subscribers to this event have the opportunity to request additional SiteInfo data over what the base abstraction layer and any other layers require. It is the subscriber's responsibility to ensure that they're always requesting a superset of the information required and do not inadvertently prevent another subscriber from getting the information it requires. Most settings should be OR'd together with previous values and Filter settings should be set to Any in the event of a conflict. If there's a conflict in the interwiki language code, you will not be able to use co-initialization and should issue a separate SiteInfo request.</remarks>
 	event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
-
-	/// <summary>Occurs when a warning is issued by the wiki.</summary>
-	event StrongEventHandler<IWikiAbstractionLayer, WarningEventArgs>? WarningOccurred;
 	#endregion
 
 	#region Properties
@@ -102,6 +100,9 @@ public interface IWikiAbstractionLayer
 	/// <value>A function which returns true if the bot should stop what it's doing.</value>
 	Func<bool>? CustomStopCheck { get; set; }
 
+	/// <summary>Gets or sets the logger used to record diagnostic and operational messages for this component.</summary>
+	ILogger Logger { get; set; }
+
 	/// <summary>Gets the detected site version.</summary>
 	/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>
 	/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
@@ -118,21 +119,9 @@ public interface IWikiAbstractionLayer
 	/// <summary>Gets the stop check methods that are valid for current state.</summary>
 	/// <value>The stop methods.</value>
 	StopCheckMethods ValidStopCheckMethods { get; }
-
-	/// <summary>Gets a list of all warnings.</summary>
-	/// <value>The warnings.</value>
-	IReadOnlyList<ErrorItem> Warnings { get; }
 	#endregion
 
 	#region Support Methods
-
-	/// <summary>Adds a warning to the warning list.</summary>
-	/// <param name="code">The code returned by the wiki.</param>
-	/// <param name="info">The informative text returned by the wiki.</param>
-	void AddWarning(string code, string info);
-
-	/// <summary>Clears the warning list.</summary>
-	void ClearWarnings();
 
 	/// <summary>Initializes any needed information without trying to login.</summary>
 	void Initialize();

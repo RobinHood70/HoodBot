@@ -75,7 +75,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 				continue;
 			}
 
-			var api = new WikiAbstractionLayer(this.client, wiki.Api);
+			var api = new WikiAbstractionLayer(this.client, wiki.Api, this.Logger);
 			api.SendingRequest += JobManager.WalSendingRequest;
 
 			this.StatusWriteLine(string.Empty);
@@ -179,7 +179,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 	private void AddEnWikiBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://en.wikipedia.org/w/api.php");
-		var wmApi = new WikiAbstractionLayer(client, uri);
+		var wmApi = new WikiAbstractionLayer(client, uri, this.Logger);
 		wmApi.SendingRequest += JobManager.WalSendingRequest;
 		var wmSite = new Site(wmApi);
 		wmSite.Login(null, null);
@@ -213,7 +213,7 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 	private void AddGlobalBlocks(IMediaWikiClient client, List<CommonBlock> blocks, DateTime lastRun)
 	{
 		var uri = new Uri("https://meta.wikimedia.org/w/api.php");
-		var wmApi = new WikiAbstractionLayer(client, uri);
+		var wmApi = new WikiAbstractionLayer(client, uri, this.Logger);
 		wmApi.SendingRequest += JobManager.WalSendingRequest;
 		wmApi.Initialize();
 

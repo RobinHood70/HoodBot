@@ -24,7 +24,7 @@ public abstract class LinkFinderJob : ParsedPageJob
 	{
 		this.Pages.SetLimitations(LimitationType.None);
 		this.sectionLinksOnly = sectionLinksOnly;
-		this.Logger = null;
+		this.JobLogger = null;
 		this.Titles = new TitleCollection(this.Site);
 	}
 	#endregion

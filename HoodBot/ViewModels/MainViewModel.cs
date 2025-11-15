@@ -48,8 +48,8 @@ public class MainViewModel : ObservableRecipient
 		var plugins = Plugins.Instance;
 		this.diffViewer = plugins.DiffViewers["Internet Explorer"];
 		this.JobParameterVisibility = Visibility.Hidden;
+		this.ResetProgress();
 		this.ProgressBarColor = ProgressBarGreen;
-		this.ProgressMax = 1;
 		this.Status = string.Empty;
 
 		this.JobTree.SelectionChanged += this.JobTree_OnSelectionChanged;

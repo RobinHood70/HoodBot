@@ -19,7 +19,6 @@ public abstract class ActionModule<TInput, TOutput>(WikiAbstractionLayer wal) : 
 	#region Public Methods
 	public virtual TOutput Submit(TInput input)
 	{
-		this.Wal.ClearWarnings();
 		this.BeforeSubmit();
 		var request = this.CreateRequest(input);
 		var response = this.Wal.SendRequest(request);

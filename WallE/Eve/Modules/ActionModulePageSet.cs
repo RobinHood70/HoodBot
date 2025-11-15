@@ -58,7 +58,6 @@ public abstract class ActionModulePageSet<TInput, TOutput>(WikiAbstractionLayer 
 	#region Public Methods
 	public virtual PageSetResult<TOutput> Submit(TInput input)
 	{
-		this.Wal.ClearWarnings();
 		ArgumentNullException.ThrowIfNull(input);
 		if (input.GeneratorInput is IGeneratorInput genInput)
 		{

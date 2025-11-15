@@ -2,6 +2,7 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RobinHood70.HoodBot.Views;
 
 public class ViewModelLocator
@@ -15,6 +16,9 @@ public class ViewModelLocator
 	#endregion
 
 	#region Public Properties
+
+	public ILogger Logger => this.serviceProvider.GetRequiredService<ILogger<MainViewModel>>();
+
 	public MainViewModel MainViewModel => this.serviceProvider.GetRequiredService<MainViewModel>();
 
 	public MainWindow MainWindow => this.serviceProvider.GetRequiredService<MainWindow>();

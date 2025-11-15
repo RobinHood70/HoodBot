@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RobinHood70.CommonCode;
 using RobinHood70.WallE.Base;
 using RobinHood70.WallE.Design;
@@ -13,7 +15,7 @@ using RobinHood70.WikiCommon;
 
 /// <inheritdoc/>
 [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
-public class WikiAbstractionLayer : IWikiAbstractionLayer
+public class WikiAbstractionLayer(ILogger? logger = null) : IWikiAbstractionLayer
 {
 	// Only the basics are implemented for now; the rest can come later, as needed.
 	#region Fields
@@ -96,8 +98,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 		new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
 		new SiteInfoInterwikiMap("mediawikiwiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
 	];
-
-	private readonly List<ErrorItem> warnings = [];
 	#endregion
 
 	#region Public Events
@@ -110,9 +110,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 
 	/// <inheritdoc/>
 	public event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
-
-	/// <inheritdoc/>
-	public event StrongEventHandler<IWikiAbstractionLayer, WarningEventArgs>? WarningOccurred;
 	#endregion
 
 	#region Public Properties
@@ -133,6 +130,9 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 	public Func<bool>? CustomStopCheck { get; set; }
 
 	/// <inheritdoc/>
+	public ILogger Logger { get; set; } = logger ?? NullLogger.Instance;
+
+	/// <inheritdoc/>
 	public int SiteVersion { get; }
 
 	/// <inheritdoc/>
@@ -143,15 +143,9 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 
 	/// <inheritdoc/>
 	public StopCheckMethods ValidStopCheckMethods { get; }
-
-	/// <inheritdoc/>
-	public IReadOnlyList<ErrorItem> Warnings => this.warnings;
 	#endregion
 
 	#region Public Methods
-
-	/// <inheritdoc/>
-	public void AddWarning(string code, string info) => this.warnings.Add(new ErrorItem(code, info));
 
 	/// <inheritdoc/>
 	public IReadOnlyList<AllCategoriesItem> AllCategories(AllCategoriesInput input) => throw new NotImplementedException();
@@ -205,9 +199,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 	public bool ClearHasMessage() => true;
 
 	/// <inheritdoc/>
-	public void ClearWarnings() => this.warnings.Clear();
-
-	/// <inheritdoc/>
 	public CompareResult Compare(CompareInput input) => throw new NotImplementedException();
 
 	/// <inheritdoc/>
@@ -255,9 +246,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 
 	/// <inheritdoc/>
 	public FileRevertResult FileRevert(FileRevertInput input) => throw new NotImplementedException();
-
-	/// <inheritdoc/>
-	public SiteInfoResult SiteInfo(SiteInfoInput input) => throw new NotImplementedException();
 
 	/// <inheritdoc/>
 	public HelpResult Help(HelpInput input) => throw new NotImplementedException();
@@ -404,6 +392,9 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 	public PageSetResult<SetNotificationTimestampItem> SetNotificationTimestamp(SetNotificationTimestampInput input) => throw new NotImplementedException();
 
 	/// <inheritdoc/>
+	public SiteInfoResult SiteInfo(SiteInfoInput input) => throw new NotImplementedException();
+
+	/// <inheritdoc/>
 	public IReadOnlyList<ImageInfoItem> StashImageInfo(StashImageInfoInput input) => throw new NotImplementedException();
 
 	/// <inheritdoc/>
@@ -458,10 +449,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer
 	/// <summary>Raises the <see cref="Initializing" /> event.</summary>
 	/// <param name="e">The <see cref="InitializingEventArgs"/> instance containing the event data.</param>
 	protected virtual void OnInitializing(InitializingEventArgs e) => this.Initializing?.Invoke(this, e);
-
-	/// <summary>Raises the <see cref="WarningOccurred" /> event.</summary>
-	/// <param name="e">The <see cref="WarningEventArgs" /> instance containing the event data.</param>
-	protected virtual void OnWarningOccurred(WarningEventArgs e) => this.WarningOccurred?.Invoke(this, e);
 	#endregion
 
 	#region Private Methods

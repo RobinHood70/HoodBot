@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using RobinHood70.CommonCode;
 using RobinHood70.WallE.Base;
 using RobinHood70.WallE.Clients;
@@ -21,7 +23,7 @@ using RobinHood70.WikiCommon.RequestBuilder;
 /// <seealso cref="IWikiAbstractionLayer" />
 [SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
 [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
-public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, IMaxLaggable, ITokenGenerator
+public partial class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, IMaxLaggable, ITokenGenerator
 {
 	#region Internal Constants
 	internal const int LimitSmall1 = 50;
@@ -44,8 +46,8 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	#region Fields
 	private readonly HashSet<string> interwikiPrefixes = new(StringComparer.Create(CultureInfo.InvariantCulture, true));
 	private readonly Dictionary<int, SiteInfoNamespace> namespaces = [];
-	private readonly List<ErrorItem> warnings = [];
 	private readonly WikiException notInitialized = new(Globals.CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
+
 	private ITokenManager? tokenManager;
 	private int userTalkChecksIgnored;
 	#endregion
@@ -55,10 +57,12 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	/// <summary>Initializes a new instance of the <see cref="WikiAbstractionLayer" /> class.</summary>
 	/// <param name="client">The internet client.</param>
 	/// <param name="apiUri">The URI to api.php.</param>
-	public WikiAbstractionLayer(IMediaWikiClient client, Uri apiUri)
+	/// <param name="logger">The logger to use for warnings and errors.</param>
+	public WikiAbstractionLayer(IMediaWikiClient client, Uri apiUri, ILogger? logger = null)
 	{
 		ArgumentNullException.ThrowIfNull(client);
 		ArgumentNullException.ThrowIfNull(apiUri);
+		ArgumentNullException.ThrowIfNull(logger);
 		if (!apiUri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
 		{
 			throw new InvalidOperationException(EveMessages.InvalidApi);
@@ -66,6 +70,7 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 
 		this.Client = client;
 		this.EntryPoint = apiUri;
+		this.Logger = logger ?? NullLogger.Instance;
 		this.ModuleFactory = new ModuleFactory(this)
 			.RegisterGenerator<CategoriesInput>(PropCategories.CreateInstance)
 			.RegisterGenerator<DeletedRevisionsInput>(PropDeletedRevisions.CreateInstance)
@@ -139,9 +144,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 
 	/// <inheritdoc/>
 	public event StrongEventHandler<IWikiAbstractionLayer, RequestEventArgs>? SendingRequest;
-
-	/// <summary>Occurs when a warning is issued by the wiki.</summary>
-	public event StrongEventHandler<IWikiAbstractionLayer, WarningEventArgs>? WarningOccurred;
 	#endregion
 
 	#region Public Properties
@@ -193,13 +195,15 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
 	/// <value>The URI to use as a base.</value>
 	/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)" /> routine, but is left as settable by derived classes, should customization be needed.</remarks>
-	/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)" />
 	public Uri EntryPoint { get; protected set; }
 
 	/// <summary>Gets the interwiki prefixes.</summary>
 	/// <value>A hashset of all interwiki prefixes, to allow <see cref="PageSetRedirectItem.Interwiki"/> emulation for MW 1.24 and below.</value>
 	/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as an IReadOnlySet, since it's the fastest lookup.</remarks>
 	public IReadOnlySet<string> InterwikiPrefixes => this.interwikiPrefixes;
+
+	/// <inheritdoc/>
+	public ILogger Logger { get; set; }
 
 	/// <summary>Gets or sets the maximum length of get requests for a given site. Get requests that are longer than this will be sent as POST requests instead.</summary>
 	/// <value>The maximum length of get requests.</value>
@@ -272,10 +276,6 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo?.Flags.HasAnyFlag(UserInfoFlags.Anonymous) != false)
 		? this.StopCheckMethods & StopCheckMethods.LoggedOut
 		: this.StopCheckMethods;
-
-	/// <summary>Gets a list of all warnings.</summary>
-	/// <value>The warnings.</value>
-	public IReadOnlyList<ErrorItem> Warnings => this.warnings;
 	#endregion
 
 	#region Public Static Methods
@@ -415,13 +415,8 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	/// <param name="info">The informative text returned by the wiki.</param>
 	public void AddWarning(string code, string info)
 	{
-		ErrorItem warning = new(code, info);
-		this.warnings.Add(warning);
-		this.OnWarningOccurred(new WarningEventArgs(warning));
+		LogWarning(this.Logger, code, info);
 	}
-
-	/// <summary>Clears the warning list.</summary>
-	public void ClearWarnings() => this.warnings.Clear();
 
 	/// <summary>Initializes any needed information without trying to login.</summary>
 	/// <exception cref="WikiException">Thrown when the wiki did not return the required site and user information.</exception>
@@ -1445,10 +1440,11 @@ public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, 
 	/// <summary>Raises the <see cref="SendingRequest" /> event.</summary>
 	/// <param name="e">The <see cref="RequestEventArgs" /> instance containing the event data.</param>
 	protected virtual void OnSendingRequest(RequestEventArgs e) => this.SendingRequest?.Invoke(this, e);
+	#endregion
 
-	/// <summary>Raises the <see cref="WarningOccurred" /> event.</summary>
-	/// <param name="e">The <see cref="WarningEventArgs" /> instance containing the event data.</param>
-	protected virtual void OnWarningOccurred(WarningEventArgs e) => this.WarningOccurred?.Invoke(this, e);
+	#region Private Static Methods
+	[LoggerMessage(LogLevel.Warning, "({code}) {info}")]
+	private static partial void LogWarning(ILogger logger, string code, string info);
 	#endregion
 
 	#region Private Methods

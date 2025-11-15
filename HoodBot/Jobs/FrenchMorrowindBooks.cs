@@ -157,7 +157,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 			throw new InvalidOperationException();
 		}
 
-		var api = new WikiAbstractionLayer(client, uespWiki.Api);
+		var api = new WikiAbstractionLayer(client, uespWiki.Api, this.Logger);
 		api.SendingRequest += JobManager.WalSendingRequest;
 		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki.WikiInfo, api, this.Site.EditingEnabled);
 		enUesp.Login(uespWiki.UserName, uespWiki.Password);

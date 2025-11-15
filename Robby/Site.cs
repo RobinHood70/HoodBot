@@ -13,6 +13,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -61,7 +62,7 @@ public enum ChangeStatus
 /// <seealso cref="IMessageSource" />
 [SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Ironic suppression of buggy 'Remove unnecessary suppression'")]
 [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
-public class Site : IMessageSource
+public partial class Site : IMessageSource
 {
 	#region Private Constants
 	private const SiteInfoProperties NeededSiteInfo =
@@ -92,9 +93,9 @@ public class Site : IMessageSource
 	{
 		ArgumentNullException.ThrowIfNull(wiki);
 		this.AbstractionLayer = wiki;
+		this.Logger = wiki.Logger;
 		wiki.Initializing += AbstractionLayer_Initializing;
 		wiki.Initialized += this.AbstractionLayer_Initialized;
-		wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 		this.FilterPages = new TitleCollection(this);
 		this.deletePreventionTemplates = new TitleCollection(this);
 		this.deletionCategories = new TitleCollection(this);
@@ -114,9 +115,6 @@ public class Site : IMessageSource
 
 	/// <summary>Occurs when a page is about to be edited on the wiki. Subscribers may make additional changes to the page, or indicate if they need the change to be cancelled.</summary>
 	public event StrongEventHandler<Site, PageTextChangeArgs>? PageTextChanging;
-
-	/// <summary>Occurs when a warning should be sent to the user.</summary>
-	public event StrongEventHandler<Site, WarningEventArgs>? WarningOccurred;
 	#endregion
 
 	#region Public Properties
@@ -184,6 +182,9 @@ public class Site : IMessageSource
 	/// <summary>Gets the interwiki map.</summary>
 	/// <value>The interwiki map.</value>
 	public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; } = ReadOnlyKeyedCollection<string, InterwikiEntry>.Empty;
+
+	/// <summary>Gets or sets the logger used to record diagnostic and operational messages for this component.</summary>
+	public ILogger Logger { get; set; }
 
 	/// <summary>Gets a list of current magic words on the wiki.</summary>
 	/// <value>The magic words.</value>
@@ -1215,7 +1216,7 @@ public class Site : IMessageSource
 	/// <summary>Publishes a warning.</summary>
 	/// <param name="sender">The sending object.</param>
 	/// <param name="warning">The warning.</param>
-	public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
+	public virtual void PublishWarning(IMessageSource sender, string warning) => LogWarning(this.Logger, warning);
 	#endregion
 
 	#region Internal Methods
@@ -1532,21 +1533,15 @@ public class Site : IMessageSource
 		eventArgs.Properties = NeededSiteInfo;
 		eventArgs.FilterLocalInterwiki = Filter.Any;
 	}
+
+	[LoggerMessage(LogLevel.Warning, "{warning}")]
+	private static partial void LogWarning(ILogger logger, string warning);
 	#endregion
 
 	#region Private Methods
 
 	// Parse co-initialization results.
 	private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, EventArgs eventArgs) => this.ParseInternalSiteInfo();
-
-	/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>
-	/// <param name="sender">The sending abstraction layer.</param>
-	/// <param name="eventArgs">The event arguments.</param>
-	private void AbstractionLayer_WarningOccurred(IWikiAbstractionLayer sender, /* Overlapping type names, so must use full name here */ WallE.Design.WarningEventArgs eventArgs)
-	{
-		var warning = eventArgs.Warning;
-		this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
-	}
 
 	private void Clear()
 	{

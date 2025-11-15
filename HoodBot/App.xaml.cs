@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.ViewModels;
 using RobinHood70.HoodBot.Views;
@@ -70,6 +71,7 @@ public partial class App : Application
 	#region Private Methods
 	private static void ConfigureServices(IConfiguration configuration, IServiceCollection services) => services
 		.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)))
+		.AddLogging(configure => configure.AddConsole())
 		.AddSingleton<MainViewModel>()
 		.AddSingleton<MainWindow>()
 		.AddTransient<SettingsViewModel>()

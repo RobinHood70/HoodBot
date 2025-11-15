@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.Design;
 using RobinHood70.HoodBot.Jobs.Loggers;
@@ -32,7 +33,7 @@ public abstract class WikiJob : IMessageSource
 		this.JobManager = jobManager;
 		this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 		this.logName = this.GetType().Name.UnCamelCase();
-		this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
+		this.JobLogger = jobManager.JobLogger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.JobType = jobType;
 		this.ResetProgress(1);
@@ -46,9 +47,11 @@ public abstract class WikiJob : IMessageSource
 	#endregion
 
 	#region Public Properties
+	public JobLogger? JobLogger { get; protected set; }
+
 	public JobType JobType { get; }
 
-	public JobLogger? Logger { get; protected set; }
+	public ILogger Logger => this.Site.Logger;
 
 	public int Progress
 	{
@@ -176,10 +179,10 @@ public abstract class WikiJob : IMessageSource
 			return false;
 		}
 
-		if (this.Logger is not null && this.JobType == JobType.Write)
+		if (this.JobLogger is not null && this.JobType == JobType.Write)
 		{
 			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
-			this.Logger.AddLogEntry(logInfo);
+			this.JobLogger.AddLogEntry(logInfo);
 		}
 
 		return true;
@@ -201,9 +204,9 @@ public abstract class WikiJob : IMessageSource
 
 	protected virtual void JobCompleted()
 	{
-		if (this.Logger is not null && this.JobType == JobType.Write)
+		if (this.JobLogger is not null && this.JobType == JobType.Write)
 		{
-			this.Logger.EndLogEntry();
+			this.JobLogger.EndLogEntry();
 		}
 
 		this.Results?.Save();

@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.Design;
 using RobinHood70.HoodBot.Jobs.Loggers;
@@ -64,7 +65,7 @@ public class JobManager : IDisposable
 
 	public IMediaWikiClient Client { get; }
 
-	public JobLogger? Logger { get; set; }
+	public JobLogger? JobLogger { get; set; }
 
 	public PauseToken? PauseToken { get; }
 
@@ -122,13 +123,9 @@ public class JobManager : IDisposable
 #endif
 	}
 
-	public static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
-
 	public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs?.Response}");
 
 	public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs?.Request}");
-
-	public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 	#endregion
 
 	#region Public Methods
@@ -139,7 +136,6 @@ public class JobManager : IDisposable
 		retval.EditingEnabled = editingEnabled;
 		retval.Changing += SiteChanging;
 		retval.PagePreview += this.OnPagePreview;
-		retval.WarningOccurred += SiteWarningOccurred;
 		return retval;
 	}
 
@@ -151,7 +147,6 @@ public class JobManager : IDisposable
 
 	public void DisposeSite(Site site)
 	{
-		site.WarningOccurred -= SiteWarningOccurred;
 		site.PagePreview -= this.OnPagePreview;
 		site.Changing -= SiteChanging;
 	}
@@ -162,7 +157,7 @@ public class JobManager : IDisposable
 		this.Site.Login(userName, password);
 
 		// These must come after login since they require namespaces to be known.
-		this.Logger = string.IsNullOrEmpty(logPage)
+		this.JobLogger = string.IsNullOrEmpty(logPage)
 			? null
 			: new PageJobLogger(TitleFactory.FromUnvalidated(this.Site, logPage));
 		this.ResultHandler = string.IsNullOrEmpty(resultsPage)
@@ -250,7 +245,7 @@ public class JobManager : IDisposable
 
 	protected virtual void OnFinishedAllJobs(bool allSuccessful)
 	{
-		this.Logger?.CloseLog();
+		this.JobLogger?.CloseLog();
 
 		if (this.ResultHandler != null)
 		{
@@ -326,7 +321,7 @@ public class JobManager : IDisposable
 		var api = this.WikiInfo.Api;
 		IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
 			? new WallE.Test.WikiAbstractionLayer()
-			: new WikiAbstractionLayer(this.Client, api);
+			: new WikiAbstractionLayer(this.Client, api, App.Locator.Logger);
 		if (abstractionLayer is IMaxLaggable maxLagWal)
 		{
 			maxLagWal.MaxLag = this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
@@ -338,8 +333,6 @@ public class JobManager : IDisposable
 			internet.SendingRequest += WalSendingRequest;
 			//// internet.ResponseReceived += WalResponseReceived;
 		}
-
-		abstractionLayer.WarningOccurred += WalWarningOccurred;
 #endif
 
 		return abstractionLayer;
@@ -349,7 +342,7 @@ public class JobManager : IDisposable
 	{
 		// TODO: Below is a quick hack. Should probably be integrated into the UI at some point.
 		NetworkCredential? credentials = null; // new NetworkCredential("user", "password");
-		IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, this.CancelToken);
+		IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, App.Locator.Logger, this.CancelToken);
 		if (this.WikiInfo.ReadThrottling > 0 || this.WikiInfo.WriteThrottling > 0)
 		{
 			client = new ThrottledClient(
@@ -364,7 +357,6 @@ public class JobManager : IDisposable
 
 	private void DisposeAbstractionLayer()
 	{
-		this.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
 		if (this.AbstractionLayer is IInternetEntryPoint internet)
 		{
 			internet.SendingRequest -= WalSendingRequest;

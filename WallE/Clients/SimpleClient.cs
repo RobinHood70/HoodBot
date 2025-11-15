@@ -2,19 +2,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RobinHood70.CommonCode;
 
 /// <summary>Provides a simple client to work with WallE.</summary>
-public class SimpleClient : IMediaWikiClient, IDisposable
+public partial class SimpleClient : IMediaWikiClient, IDisposable
 {
 	#region Constants
 	private const HashType CookieHashType = HashType.Md5;
@@ -34,9 +35,9 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	private readonly CancellationToken cancellationToken;
 	private readonly CookieContainer cookieContainer = new();
 	private readonly string? cookiesLocation;
+	private readonly ILogger logger;
 	private readonly SimpleClientRetryHandler retryHandler;
 	private readonly HttpClient httpClient;
-	private readonly JsonSerializerSettings jsonSettings = new();
 	private readonly HttpClientHandler webHandler;
 	private bool disposed;
 	private string? previousHash;
@@ -47,7 +48,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class.</summary>
 	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
 	public SimpleClient(CancellationToken cancellationToken)
-		: this(null, null, null, cancellationToken)
+		: this(null, null, null, null, cancellationToken)
 	{
 	}
 
@@ -55,7 +56,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	/// <param name="cookiesLocation">The full file name of the file cookies should be stored in.</param>
 	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
 	public SimpleClient(string cookiesLocation, CancellationToken cancellationToken)
-		: this(null, cookiesLocation, null, cancellationToken)
+		: this(cookiesLocation, null, null, null, cancellationToken: cancellationToken)
 	{
 	}
 
@@ -63,19 +64,17 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 	/// <param name="contactInfo">Contact info to be sent in user agent.</param>
 	/// <param name="cookiesLocation">The full file name of the file cookies should be stored in. If <see langword="null"/>, cookies will not be persisted between sessions.</param>
 	/// <param name="credentials">Authentication for <see cref="HttpClientHandler"/> if site requires a password in order to reach the wiki.</param>
+	/// <param name="logger">The logger to use for warnings and error messages.</param>
 	/// <param name="cancellationToken">A standard cancellation token that cancels any long operation.</param>
-	public SimpleClient(string? contactInfo, string? cookiesLocation, ICredentials? credentials, CancellationToken cancellationToken)
+	public SimpleClient(string? contactInfo, string? cookiesLocation, ICredentials? credentials, ILogger? logger, CancellationToken cancellationToken)
 	{
 		this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
-		var resolver = new DefaultContractResolver
-		{
-			// Instructs Json to use fields instead of properties while (de-)serializing. This is necessary so that cookies retain their Timestamp property which is get-only, backed by a private field.
-			IgnoreSerializableAttribute = false
-		};
-		this.jsonSettings.ContractResolver = resolver;
 		this.cookiesLocation = cookiesLocation;
-		this.LoadCookies();
 		this.cancellationToken = cancellationToken;
+		this.logger = logger ?? NullLogger.Instance;
+
+		this.LoadCookies();
+
 		this.webHandler = new()
 		{
 			AllowAutoRedirect = true,
@@ -84,8 +83,8 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 			Credentials = credentials,
 			UseCookies = true,
 		};
-		this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
 
+		this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
 		HttpClient client = new(this.retryHandler)
 		{
 			Timeout = TimeSpan.FromSeconds(300) // TODO: Manually added timeout for now. Excessive to allow large downloads like ESO icons file. Better to see if we can chunk the download or something.
@@ -239,6 +238,9 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		using StreamReader reader = new(respStream);
 		return reader.ReadToEnd();
 	}
+
+	[LoggerMessage(LogLevel.Warning, "Could not load cookie: {cookie}")]
+	private static partial void LoadCookieFailed(ILogger logger, Cookie cookie, CookieException ce);
 	#endregion
 
 	#region Private Methods
@@ -274,7 +276,7 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 
 	private void LoadCookies()
 	{
-		if (this.cookiesLocation is null)
+		if (string.IsNullOrWhiteSpace(this.cookiesLocation))
 		{
 			return;
 		}
@@ -284,9 +286,6 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		{
 			cookieText = File.ReadAllText(this.cookiesLocation);
 		}
-		catch (NullReferenceException)
-		{
-		}
 		catch (DirectoryNotFoundException)
 		{
 		}
@@ -294,25 +293,27 @@ public class SimpleClient : IMediaWikiClient, IDisposable
 		{
 		}
 
-		if (cookieText.Length > 0 && JsonConvert.DeserializeObject<CookieCollection>(cookieText, this.jsonSettings) is CookieCollection cookies)
+		if (cookieText.Length == 0 || JsonConvert.DeserializeObject<CookieCollection>(cookieText, SerializerSettings) is not CookieCollection cookies)
 		{
-			foreach (var cookie in cookies)
+			return;
+		}
+
+		foreach (var cookie in cookies)
+		{
+			if (cookie is Cookie realCookie)
 			{
-				if (cookie is Cookie realCookie)
+				try
 				{
-					try
-					{
-						this.cookieContainer.Add(realCookie);
-					}
-					catch (CookieException)
-					{
-						Debug.WriteLine("Failed: " + realCookie.ToString());
-					}
+					this.cookieContainer.Add(realCookie);
+				}
+				catch (CookieException ce)
+				{
+					LoadCookieFailed(this.logger, realCookie, ce);
 				}
 			}
-
-			this.previousHash = Globals.GetHash(cookieText, CookieHashType);
 		}
+
+		this.previousHash = Globals.GetHash(cookieText, CookieHashType);
 	}
 
 	/// <summary>Saves all cookies to persistent storage.</summary>

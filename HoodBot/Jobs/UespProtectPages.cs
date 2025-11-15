@@ -268,7 +268,7 @@ internal sealed class UespProtectPages : EditJob
 
 		if (this.pageProtections.Count == 0)
 		{
-			this.Logger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
+			this.JobLogger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
 			this.StatusWriteLine("No pages needed to be changed.");
 		}
 	}

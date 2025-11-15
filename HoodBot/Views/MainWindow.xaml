@@ -223,7 +223,7 @@
 			Grid.Row="6"
 			Grid.Column="0"
 			Grid.ColumnSpan="3"
-			Foreground="{Binding ProgressBarColor}"
+			Foreground="{Binding ProgressBarColor, Mode=OneWay}"
 			Maximum="{Binding ProgressMax, Mode=OneWay}"
 			Value="{Binding Progress, Mode=OneWay}" />
 		<Grid

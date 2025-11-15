@@ -138,7 +138,6 @@ internal sealed class ActionQuery : ActionModule
 	#region Public Methods
 	public void Submit()
 	{
-		this.Wal.ClearWarnings();
 		this.BeforeSubmit();
 		do
 		{
