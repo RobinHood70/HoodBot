@@ -35,8 +35,7 @@ public abstract class WikiJob : IMessageSource
 		this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		this.JobType = jobType;
-		this.Progress = 0;
-		this.ProgressMaximum = 1;
+		this.ResetProgress(1);
 	}
 	#endregion
 
@@ -71,7 +70,20 @@ public abstract class WikiJob : IMessageSource
 		}
 	}
 
-	public double ProgressPercent => (double)this.Progress / this.ProgressMaximum;
+	public double ProgressPercent
+	{
+		get
+		{
+			var result = (double)this.Progress / this.ProgressMaximum;
+			return result switch
+			{
+				< 0 => 0,
+				> 1 => 1,
+				double.NaN => 0,
+				_ => result
+			};
+		}
+	}
 
 	public Site Site { get; }
 	#endregion
@@ -104,8 +116,8 @@ public abstract class WikiJob : IMessageSource
 
 	public void ResetProgress(int progressMax)
 	{
-		this.Progress = 0;
 		this.ProgressMaximum = progressMax;
+		this.Progress = 0;
 		this.JobManager.ResetProgress();
 	}
 
