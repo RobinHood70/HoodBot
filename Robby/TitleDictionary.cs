@@ -36,14 +36,6 @@ public class TitleDictionary<T> : Dictionary<Title, T>
 	#region Public Methods
 
 	/// <summary>Creates a <see cref="TitleCollection"/> from the keys of this dictionary.</summary>
-	/// <returns>A new <see cref="TitleCollection"/> comprised of the keys of this dictionary.</returns>
-	/// <exception cref="InvalidOperationException">Thrown if there are no elements in this dictionary.</exception>
-	/// <remarks>There must be at least one element in the dictionary for this to succeed.</remarks>
-	public TitleCollection ToTitleCollection() => this.First() is KeyValuePair<Title, T> item
-		? this.ToTitleCollection(item.Key.Site)
-		: throw new InvalidOperationException("Dictionary must have values to create a TitleCollection with no site.");
-
-	/// <summary>Creates a <see cref="TitleCollection"/> from the keys of this dictionary.</summary>
 	/// <param name="site">The <see cref="Site"/> the collection belongs to.</param>
 	/// <returns>A new <see cref="TitleCollection"/> comprised of the keys of this dictionary.</returns>
 	public TitleCollection ToTitleCollection(Site site)
