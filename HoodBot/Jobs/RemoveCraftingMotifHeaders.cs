@@ -8,11 +8,11 @@ using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class RemoveBookHeaders : EditJob
+internal sealed class RemoveCraftingMotifHeaders : EditJob
 {
 	#region Constructors
 	[JobInfo("Remove Book Headers")]
-	public RemoveBookHeaders(JobManager jobManager)
+	public RemoveCraftingMotifHeaders(JobManager jobManager)
 		: base(jobManager)
 	{
 	}
