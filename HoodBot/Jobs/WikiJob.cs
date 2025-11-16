@@ -114,6 +114,12 @@ public abstract class WikiJob : IMessageSource
 			return;
 		}
 
+		if (this.JobLogger is not null && this.JobType == JobType.Write)
+		{
+			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
+			this.JobLogger.AddLogEntry(logInfo);
+		}
+
 		this.FlowControl();
 		if (!this.BeforeMain())
 		{
@@ -123,6 +129,18 @@ public abstract class WikiJob : IMessageSource
 		this.FlowControl();
 		this.Main();
 		this.FlowControl();
+		if (this.JobLogger is not null && this.JobType == JobType.Write)
+		{
+			this.JobLogger.EndLogEntry();
+		}
+
+		this.Results?.Save();
+		if (this.hasSavedResultHandler)
+		{
+			this.hasSavedResultHandler = false;
+			this.Results = this.savedResultHandler;
+		}
+
 		this.JobCompleted();
 		this.Completed?.Invoke(this, EventArgs.Empty);
 	}
@@ -178,19 +196,9 @@ public abstract class WikiJob : IMessageSource
 	/// <returns><see langword="true"/> if the job should continue; otherwise, <see langword="false"/>.</returns>
 	protected virtual bool BeforeLogging() => true;
 
-	/// <summary>Executes any code that should happen before the main code body.</summary>
+	/// <summary>Executes any code that should happen after logging the job but before the main code body.</summary>
 	/// <returns><see langword="true"/> if the job should continue; otherwise, <see langword="false"/>.</returns>
-	/// <remarks>If this returns <see langword="false"/>, no logging or modifications should occur.</remarks>
-	protected virtual bool BeforeMain()
-	{
-		if (this.JobLogger is not null && this.JobType == JobType.Write)
-		{
-			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
-			this.JobLogger.AddLogEntry(logInfo);
-		}
-
-		return true;
-	}
+	protected virtual bool BeforeMain() => true;
 
 	protected virtual void FlowControl()
 	{
@@ -208,17 +216,6 @@ public abstract class WikiJob : IMessageSource
 
 	protected virtual void JobCompleted()
 	{
-		if (this.JobLogger is not null && this.JobType == JobType.Write)
-		{
-			this.JobLogger.EndLogEntry();
-		}
-
-		this.Results?.Save();
-		if (this.hasSavedResultHandler)
-		{
-			this.hasSavedResultHandler = false;
-			this.Results = this.savedResultHandler;
-		}
 	}
 
 	protected virtual void UpdateProgress()

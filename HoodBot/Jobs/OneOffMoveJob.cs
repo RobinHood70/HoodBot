@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
+
 using RobinHood70.Robby;
 
 [method: JobInfo("One-Off Move Job")]
@@ -8,7 +9,7 @@ public class OneOffMoveJob(JobManager jobManager, bool updateUserSpace) : MovePa
 	protected override bool BeforeMain()
 	{
 		this.MoveAction = MoveAction.MoveSafely;
-		return base.BeforeMain();
+		return true;
 	}
 
 	protected override string GetEditSummary(Page page) => "Move mod pages into Morrowind Mod";

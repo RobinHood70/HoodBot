@@ -37,11 +37,7 @@ internal sealed class SplitToAlphabetic : EditJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override bool BeforeMain()
-	{
-		base.BeforeMain();
-		return this.SplitMainPage();
-	}
+	protected override bool BeforeMain() => this.SplitMainPage();
 
 	protected override string GetEditSummary(Page page) => "Update links after page split";
 
