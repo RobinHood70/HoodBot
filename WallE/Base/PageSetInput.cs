@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Base;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using RobinHood70.CommonCode;
 
 public enum ListType
@@ -38,14 +39,8 @@ public abstract class PageSetInput
 	protected PageSetInput(IEnumerable<string> titles)
 	{
 		ArgumentNullException.ThrowIfNull(titles);
-		foreach (var title in titles)
-		{
-			ArgumentException.ThrowIfNullOrWhiteSpace(title);
-		}
-
 		this.ListType = ListType.Titles;
-		var values = titles.AsReadOnlyList();
-		this.Values = values;
+		this.Values = titles.Where(t => t is not null).AsReadOnlyList();
 	}
 
 	protected PageSetInput(IGeneratorInput generatorInput)

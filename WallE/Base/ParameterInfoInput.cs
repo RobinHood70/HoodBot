@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public enum HelpFormat
 {
@@ -18,12 +19,7 @@ public class ParameterInfoInput
 	public ParameterInfoInput(IEnumerable<string> modules)
 	{
 		ArgumentNullException.ThrowIfNull(modules);
-		foreach (var module in modules)
-		{
-			ArgumentException.ThrowIfNullOrWhiteSpace(module);
-		}
-
-		this.Modules = modules;
+		this.Modules = modules.Where(m => m is not null);
 	}
 
 	/// <summary>Gets or sets the modules to retrieve parameter information for.</summary>
