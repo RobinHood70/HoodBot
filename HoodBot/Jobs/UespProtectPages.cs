@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
+
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -40,7 +41,7 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Fields
-	private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>(TitleComparer.Instance);
+	private readonly TitleDictionary<PageProtection> pageProtections = [];
 	private readonly List<ProtectionInfo> searchList =
 	[
 		new ProtectionInfo([MediaWikiNamespaces.Project], @"\AJavascript/.*?\.js", new PageProtection(
@@ -209,73 +210,20 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void AfterLoadPages()
-	{
-		this.WriteLine("== Page Protection Mismatches ==");
-		this.WriteLine("{| class=\"wikitable sortable\"");
-		this.WriteLine("! Group");
-		this.WriteLine("! Page");
-		this.WriteLine("! Original Protection");
-		this.WriteLine("! New Protection");
-		this.WriteLine("! Reason");
-
-		foreach (var page in this.Pages)
-		{
-			var protection = this.pageProtections[page.Title];
-			if (page.Exists &&
-				(!protection.FriendlyName.OrdinalEquals("Deletion Review") ||
-				page.StartTimestamp?.AddDays(30) < DateTime.Now))
-			{
-				this.WriteLine("|-");
-				this.WriteLine("| " + protection.FriendlyName);
-				this.WriteLine("| " + SiteLink.ToText(page));
-				this.WriteLine("| " + CombinedProtectionString(
-					this.ProtectionFromPage(page, "edit"),
-					this.ProtectionFromPage(page, "move")));
-				this.WriteLine("| " + CombinedProtectionString(
-					protection.EditProtection,
-					protection.MoveProtection));
-				this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
-			}
-		}
-
-		this.WriteLine("|}");
-	}
-
-	protected override void BeforeLoadPages()
-	{
-		this.StatusWriteLine("Loading Page Names");
-		var namespacesToLoad = this.NamespacesInSearchList();
-		var titlesToProtect = this.LoadPageNames(namespacesToLoad);
-		this.StatusWriteLine("Loading Current Protection Levels");
-		var pageLoadOptions = new PageLoadOptions(PageModules.Info, true) { InfoGetProtection = true };
-		var currentProtectionPages = PageCollection.Unlimited(this.Site, pageLoadOptions);
-		currentProtectionPages.GetTitles(titlesToProtect.ToTitles());
-		currentProtectionPages.RemoveExists(false);
-		foreach (var protectedTitle in titlesToProtect)
-		{
-			var protection = protectedTitle.Protection;
-			if (currentProtectionPages.TryGetValue(protectedTitle.Title, out var page))
-			{
-				var editProtection = this.ProtectionFromPage(page, "edit");
-				var moveProtection = this.ProtectionFromPage(page, "move");
-				if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
-				{
-					this.pageProtections.TryAdd(page.Title, protection);
-				}
-			}
-		}
-
-		if (this.pageProtections.Count == 0)
-		{
-			this.JobLogger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
-			this.StatusWriteLine("No pages needed to be changed.");
-		}
-	}
+	protected override void AfterLoadPages() => this.GenerateReport();
 
 	protected override string GetEditSummary(Page page) => "Add/update templates";
 
-	protected override void PageLoaded(Page page) => this.UpdatePage(page);
+	protected override void LoadPages()
+	{
+		var titlesToProtect = this.LoadProtectionTitles();
+		this.LoadCurrentLevels(titlesToProtect);
+		if (this.pageProtections.Count != 0)
+		{
+			var titles = this.pageProtections.ToTitleCollection(this.Site);
+			this.Pages.GetTitles(titles);
+		}
+	}
 
 	protected override void Main()
 	{
@@ -286,14 +234,12 @@ internal sealed class UespProtectPages : EditJob
 		}
 
 		this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
-		this.Pages.Sort();
+		this.Pages.Sort(); // Should already be sorted at this point, but just in case
 		this.ResetProgress(this.Pages.Count);
-		this.Progress = 0;
 		foreach (var page in this.Pages)
 		{
 			var protection = this.pageProtections[page.Title];
 			page.Title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
-
 			if (page.TextModified)
 			{
 				this.SavePage(page);
@@ -303,10 +249,78 @@ internal sealed class UespProtectPages : EditJob
 		}
 	}
 
-	protected override void LoadPages()
+	protected override void PageLoaded(Page page)
 	{
-		var titles = new TitleCollection(this.Site, this.pageProtections.Keys);
-		this.Pages.GetTitles(titles);
+		var protection = this.pageProtections[page.Title];
+		var insertPos = 0;
+		SiteParser parser = new(page);
+		var nodes = parser;
+
+		// Figure out where to put a new Protection template: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
+		if (page.IsRedirect)
+		{
+			insertPos = nodes.IndexOf<ILinkNode>(0) + 1;
+			nodes.InsertRange(insertPos, [nodes.Factory.TextNode("\n")]);
+			insertPos++;
+		}
+		else if (protection.NoInclude && (
+			(protection.AddProtectionTemplate != null && (protection.EditProtection != ProtectionLevel.None || protection.MoveProtection != ProtectionLevel.None))
+			|| !string.IsNullOrEmpty(protection.Header)
+			|| !string.IsNullOrEmpty(protection.Footer)))
+		{
+			while (insertPos < nodes.Count && !(nodes[insertPos] is IIgnoreNode ignoreNode && ignoreNode.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase)))
+			{
+				var nextNode = nodes[insertPos];
+				if (nextNode is ITextNode)
+				{
+					break;
+				}
+
+				insertPos++;
+			}
+
+			// If we didn't bail out because it's an ITextNode, increment position to be after the IIgnoreNode.
+			if (insertPos == nodes.Count || nodes[insertPos] is ITextNode)
+			{
+				insertPos = 1;
+				var newNodes = new IWikiNode[]
+				{
+					nodes.Factory.IgnoreNode("<noinclude>"),
+					nodes.Factory.TextNode("\n"),
+					nodes.Factory.IgnoreNode("</noinclude>"),
+				};
+				nodes.InsertRange(0, newNodes);
+			}
+			else
+			{
+				insertPos++;
+			}
+		}
+
+		if (protection.AddProtectionTemplate != null)
+		{
+			insertPos = protection.AddProtectionTemplate(parser, protection, insertPos);
+		}
+
+		if (!string.IsNullOrEmpty(protection.Header))
+		{
+			insertPos = AddHeader(parser, protection, insertPos);
+		}
+
+		if (!string.IsNullOrEmpty(protection.Footer))
+		{
+			AddFooter(parser, protection);
+		}
+
+		// Check if we've pulled stuff out of an unwanted noinclude block.
+		if (parser.Count > insertPos &&
+			parser[insertPos] is IIgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
+			parser[insertPos + 1] is IIgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
+		{
+			parser.RemoveRange(insertPos, 2);
+		}
+
+		parser.UpdatePage();
 	}
 	#endregion
 
@@ -488,95 +502,83 @@ internal sealed class UespProtectPages : EditJob
 
 		return insertPos;
 	}
-
-	private void UpdatePage(Page page)
-	{
-		var protection = this.pageProtections[page.Title];
-		var insertPos = 0;
-		SiteParser parser = new(page);
-		var nodes = parser;
-
-		// Figure out where to put a new Protection template: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
-		if (page.IsRedirect)
-		{
-			insertPos = nodes.IndexOf<ILinkNode>(0) + 1;
-			nodes.InsertRange(insertPos, [nodes.Factory.TextNode("\n")]);
-			insertPos++;
-		}
-		else if (protection.NoInclude && (
-			(protection.AddProtectionTemplate != null && (protection.EditProtection != ProtectionLevel.None || protection.MoveProtection != ProtectionLevel.None))
-			|| !string.IsNullOrEmpty(protection.Header)
-			|| !string.IsNullOrEmpty(protection.Footer)))
-		{
-			while (insertPos < nodes.Count && !(nodes[insertPos] is IIgnoreNode ignoreNode && ignoreNode.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase)))
-			{
-				var nextNode = nodes[insertPos];
-				if (nextNode is ITextNode)
-				{
-					break;
-				}
-
-				insertPos++;
-			}
-
-			// If we didn't bail out because it's an ITextNode, increment position to be after the IIgnoreNode.
-			if (insertPos == nodes.Count || nodes[insertPos] is ITextNode)
-			{
-				insertPos = 1;
-				var newNodes = new IWikiNode[]
-				{
-					nodes.Factory.IgnoreNode("<noinclude>"),
-					nodes.Factory.TextNode("\n"),
-					nodes.Factory.IgnoreNode("</noinclude>"),
-				};
-				nodes.InsertRange(0, newNodes);
-			}
-			else
-			{
-				insertPos++;
-			}
-		}
-
-		if (protection.AddProtectionTemplate != null)
-		{
-			insertPos = protection.AddProtectionTemplate(parser, protection, insertPos);
-		}
-
-		if (!string.IsNullOrEmpty(protection.Header))
-		{
-			insertPos = AddHeader(parser, protection, insertPos);
-		}
-
-		if (!string.IsNullOrEmpty(protection.Footer))
-		{
-			AddFooter(parser, protection);
-		}
-
-		// Check if we've pulled stuff out of an unwanted noinclude block.
-		if (parser.Count > insertPos &&
-			parser[insertPos] is IIgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
-			parser[insertPos + 1] is IIgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
-		{
-			parser.RemoveRange(insertPos, 2);
-		}
-
-		parser.UpdatePage();
-	}
 	#endregion
 
 	#region Private Methods
-	private List<ProtectedTitle> LoadPageNames(HashSet<int> spacesToLoad)
+	private void GenerateReport()
 	{
-		List<ProtectedTitle> titlesToProtect = [];
+		if (this.Pages.Count == 0)
+		{
+			return;
+		}
+
+		this.WriteLine("== Page Protection Mismatches ==");
+		this.WriteLine("{| class=\"wikitable sortable\"");
+		this.WriteLine("! Group");
+		this.WriteLine("! Page");
+		this.WriteLine("! Original Protection");
+		this.WriteLine("! New Protection");
+		this.WriteLine("! Reason");
+
+		this.Pages.Sort();
+		foreach (var page in this.Pages)
+		{
+			var protection = this.pageProtections[page.Title];
+			if (page.Exists &&
+				(!protection.FriendlyName.OrdinalEquals("Deletion Review") ||
+				page.StartTimestamp?.AddDays(30) < DateTime.Now))
+			{
+				this.WriteLine("|-");
+				this.WriteLine("| " + protection.FriendlyName);
+				this.WriteLine("| " + SiteLink.ToText(page));
+				this.WriteLine("| " + CombinedProtectionString(
+					this.ProtectionFromPage(page, "edit"),
+					this.ProtectionFromPage(page, "move")));
+				this.WriteLine("| " + CombinedProtectionString(
+					protection.EditProtection,
+					protection.MoveProtection));
+				this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
+			}
+		}
+
+		this.WriteLine("|}");
+	}
+
+	private void LoadCurrentLevels(TitleDictionary<PageProtection> titlesToProtect)
+	{
+		this.StatusWriteLine("Loading Current Protection Levels");
+		var pageLoadOptions = new PageLoadOptions(PageModules.Info, true) { InfoGetProtection = true };
+		var currentProtectionPages = PageCollection.Unlimited(this.Site, pageLoadOptions);
+		currentProtectionPages.GetTitles(titlesToProtect.ToTitleCollection(this.Site));
+		currentProtectionPages.RemoveExists(false);
+		foreach (var (title, protection) in titlesToProtect)
+		{
+			if (currentProtectionPages.TryGetValue(title, out var page))
+			{
+				var editProtection = this.ProtectionFromPage(page, "edit");
+				var moveProtection = this.ProtectionFromPage(page, "move");
+				if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
+				{
+					this.pageProtections.TryAdd(title, protection);
+				}
+			}
+		}
+	}
+
+	private TitleDictionary<PageProtection> LoadProtectionTitles()
+	{
+		this.StatusWriteLine("Loading Page Names");
+		var retval = new TitleDictionary<PageProtection>();
 		UespNamespaceList nsList = new(this.Site);
 		foreach (var ns in nsList.Values)
 		{
 			if (ns.IsGamespace)
 			{
-				titlesToProtect.Add(new ProtectedTitle(ns.MainPage, GamespaceProtection));
+				retval.Add(ns.MainPage, GamespaceProtection);
 			}
 		}
 
+		var spacesToLoad = this.NamespacesInSearchList();
 		this.ResetProgress(spacesToLoad.Count);
 		foreach (var ns in spacesToLoad)
 		{
@@ -589,7 +591,7 @@ internal sealed class UespProtectPages : EditJob
 				{
 					if (si.Namespaces.Contains(title.Namespace.Id) && si.SearchPattern.IsMatch(title.PageName))
 					{
-						titlesToProtect.Add(new ProtectedTitle(title, si.PageProtection));
+						retval.Add(title, si.PageProtection);
 						break;
 					}
 				}
@@ -599,7 +601,7 @@ internal sealed class UespProtectPages : EditJob
 		}
 
 		this.Progress = 0;
-		return titlesToProtect;
+		return retval;
 	}
 
 	private HashSet<int> NamespacesInSearchList()
@@ -659,15 +661,6 @@ internal sealed class UespProtectPages : EditJob
 
 		#region Public Override Methods
 		public override string ToString() => this.FriendlyName;
-		#endregion
-	}
-
-	private sealed class ProtectedTitle(Title title, PageProtection protection) : ITitle
-	{
-		#region Public Properties
-		public PageProtection Protection { get; } = protection;
-
-		public Title Title { get; } = title;
 		#endregion
 	}
 

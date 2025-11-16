@@ -4,25 +4,8 @@ using System.Collections.Generic;
 using RobinHood70.CommonCode;
 
 /// <summary>A generic set of extensions useful in the program's design.</summary>
-public static class Extensions
+public static class RobbyExtensions
 {
-	#region IEnumerable<ITitle> Extensions
-
-	/// <summary>Convert a collection of <see cref="ITitle"/>s to <see cref="Title"/>s.</summary>
-	/// <param name="titles">The titles to convert.</param>
-	/// <returns>An enumeration of the titles converted to their full page names.</returns>
-	public static IEnumerable<Title> ToTitles(this IEnumerable<ITitle> titles)
-	{
-		if (titles != null)
-		{
-			foreach (var title in titles)
-			{
-				yield return title.Title;
-			}
-		}
-	}
-	#endregion
-
 	#region IEnumerable<Title> Extensions
 
 	/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
@@ -30,7 +13,7 @@ public static class Extensions
 	/// <returns>An enumeration of the titles converted to their full page names.</returns>
 	public static IEnumerable<string> ToFullPageNames(this IEnumerable<Title> titles)
 	{
-		if (titles != null)
+		if (titles is not null)
 		{
 			foreach (var title in titles)
 			{
