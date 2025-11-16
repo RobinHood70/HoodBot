@@ -11,7 +11,7 @@ using RobinHood70.WikiCommon.Parser;
 internal sealed class RemoveCraftingMotifHeaders : EditJob
 {
 	#region Constructors
-	[JobInfo("Remove Book Headers")]
+	[JobInfo("Remove Crafting Motif Headers")]
 	public RemoveCraftingMotifHeaders(JobManager jobManager)
 		: base(jobManager)
 	{
