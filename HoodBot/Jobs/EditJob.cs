@@ -105,13 +105,13 @@ public abstract class EditJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 		this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		this.Pages.PageMissing -= this.Pages_PageMissing;
 		this.Pages.TitleMapLoaded -= this.Pages_TitleMapLoaded;
-		if (this.IgnorePageCount || this.Pages.Count > 0)
+		if (this.Pages.Count == 0 && !this.IgnorePageCount)
 		{
-			this.AfterLoadPages();
-			return true;
+			return false;
 		}
 
-		return false;
+		this.AfterLoadPages();
+		return true;
 	}
 
 	protected override void Main() => this.SavePages();

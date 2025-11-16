@@ -108,13 +108,23 @@ public abstract class WikiJob : IMessageSource
 
 	public void Execute()
 	{
-		if (this.BeforeMain())
+		this.Started?.Invoke(this, EventArgs.Empty);
+		if (!this.BeforeLogging())
 		{
-			this.FlowControl();
-			this.Main();
-			this.FlowControl();
-			this.JobCompleted();
+			return;
 		}
+
+		this.FlowControl();
+		if (!this.BeforeMain())
+		{
+			return;
+		}
+
+		this.FlowControl();
+		this.Main();
+		this.FlowControl();
+		this.JobCompleted();
+		this.Completed?.Invoke(this, EventArgs.Empty);
 	}
 
 	public void ResetProgress(int progressMax)
@@ -173,12 +183,6 @@ public abstract class WikiJob : IMessageSource
 	/// <remarks>If this returns <see langword="false"/>, no logging or modifications should occur.</remarks>
 	protected virtual bool BeforeMain()
 	{
-		this.Started?.Invoke(this, EventArgs.Empty);
-		if (!this.BeforeLogging())
-		{
-			return false;
-		}
-
 		if (this.JobLogger is not null && this.JobType == JobType.Write)
 		{
 			LogInfo logInfo = new(this.LogName ?? "Unknown Job Type", this.LogDetails);
@@ -215,8 +219,6 @@ public abstract class WikiJob : IMessageSource
 			this.hasSavedResultHandler = false;
 			this.Results = this.savedResultHandler;
 		}
-
-		this.Completed?.Invoke(this, EventArgs.Empty);
 	}
 
 	protected virtual void UpdateProgress()
