@@ -106,7 +106,7 @@ public static class EsoFiles
 		var fullPath = Path.Combine(EsoUIArtFolder, FileVersionsName);
 		if (File.Exists(fullPath))
 		{
-			var csv = new CsvFile(fullPath);
+			var csv = new CsvFile(fullPath) { HasHeader = false };
 			foreach (var row in csv.ReadRows())
 			{
 				var name = row[0];
