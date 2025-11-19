@@ -830,7 +830,7 @@ public partial class Site : IMessageSource
 	/// <remarks>The destination filename will be the same as the local filename.</remarks>
 	/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 	/// <returns>A value indicating the change status of the upload.</returns>
-	public ChangeStatus Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null, false);
+	public ChangeValue<UploadOutput> Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null, false);
 
 	/// <summary>Upload a file to the wiki.</summary>
 	/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -839,7 +839,7 @@ public partial class Site : IMessageSource
 	/// <remarks>The destination filename will be the same as the local filename.</remarks>
 	/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 	/// <returns>A value indicating the change status of the upload.</returns>
-	public ChangeStatus Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null, false);
+	public ChangeValue<UploadOutput> Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null, false);
 
 	/// <summary>Upload a file to the wiki.</summary>
 	/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -848,7 +848,7 @@ public partial class Site : IMessageSource
 	/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null  if this is a new version of an existing file or to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 	/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 	/// <returns>A value indicating the change status of the upload.</returns>
-	public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.Upload(fileName, destinationName, editSummary, pageText, false);
+	public ChangeValue<UploadOutput> Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.Upload(fileName, destinationName, editSummary, pageText, false);
 
 	/// <summary>Upload a file to the wiki.</summary>
 	/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -858,16 +858,13 @@ public partial class Site : IMessageSource
 	/// <param name="ignoreWarnings">Whether to ignore upload warnings.</param>
 	/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 	/// <returns>A value indicating the change status of the upload.</returns>
-	public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText, bool ignoreWarnings)
+	public ChangeValue<UploadOutput> Upload(string fileName, string? destinationName, string editSummary, string? pageText, bool ignoreWarnings)
 	{
-		ArgumentNullException.ThrowIfNull(fileName);
-		ArgumentNullException.ThrowIfNull(editSummary);
-
-		// Always access this, even if we don't need it, as a means of checking validity.
-		var checkedName = Path.GetFileName(fileName);
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(fileName);
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(editSummary);
 		if (string.IsNullOrWhiteSpace(destinationName))
 		{
-			destinationName = checkedName;
+			destinationName = Path.GetFileName(fileName);
 		}
 
 		Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
@@ -879,23 +876,35 @@ public partial class Site : IMessageSource
 			[nameof(ignoreWarnings)] = ignoreWarnings,
 		};
 
-		return !this.EditingEnabled && !File.Exists(fileName)
-			? ChangeStatus.Failure
-			: this.PublishChange(this, parameters, ChangeFunc);
+		var disabledResult = new UploadOutput(UploadStatus.Aborted, fileName);
+		return this.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
-		ChangeStatus ChangeFunc()
+		ChangeValue<UploadOutput> ChangeFunc()
 		{
+			if (!File.Exists(fileName))
+			{
+				return new ChangeValue<UploadOutput>(ChangeStatus.Failure, new UploadOutput(UploadStatus.Aborted, fileName));
+			}
+
 			using FileStream upload = new(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-			UploadInput uploadInput = new(destinationName!, upload)
+			UploadInput uploadInput = new(destinationName, upload)
 			{
 				Comment = editSummary,
 				IgnoreWarnings = ignoreWarnings,
 				Text = pageText,
 			};
 
-			return this.Upload(uploadInput)
-				? ChangeStatus.Success
-				: ChangeStatus.Failure;
+			var result = this.Upload(uploadInput);
+			var retval = new UploadOutput(result);
+			var changeStatus = retval.Status switch
+			{
+				UploadStatus.Success => ChangeStatus.Success,
+				UploadStatus.Aborted => ChangeStatus.Cancelled,
+				UploadStatus.Failure => ChangeStatus.Failure,
+				_ => ChangeStatus.Unknown
+			};
+
+			return new ChangeValue<UploadOutput>(changeStatus, new UploadOutput(result));
 		}
 	}
 
@@ -1179,8 +1188,7 @@ public partial class Site : IMessageSource
 	/// <param name="caller">The calling method (populated automatically with caller name).</param>
 	/// <returns>A value indicating the actions that should take place.</returns>
 	/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
-	public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
-		where T : class
+	public virtual ChangeValue<T> PublishChange<T>([AllowNull] T disabledResult, object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
 	{
 		// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
 		ArgumentNullException.ThrowIfNull(changeFunction);
@@ -1508,21 +1516,7 @@ public partial class Site : IMessageSource
 	/// <summary>Uploads a file.</summary>
 	/// <param name="input">The input parameters.</param>
 	/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
-	protected virtual bool Upload(UploadInput input)
-	{
-		var result = this.AbstractionLayer.Upload(input);
-		foreach (var warning in result.Warnings)
-		{
-			this.PublishWarning(this, $"{warning.Key}: {warning.Value}");
-		}
-
-		foreach (var duplicate in result.Duplicates)
-		{
-			this.PublishWarning(this, "Duplicate: " + duplicate);
-		}
-
-		return result.Result.OrdinalICEquals("Success");
-	}
+	protected virtual UploadResult Upload(UploadInput input) => this.AbstractionLayer.Upload(input);
 	#endregion
 
 	#region Private Static Methods
