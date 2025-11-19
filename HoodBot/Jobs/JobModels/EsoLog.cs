@@ -85,7 +85,6 @@ internal static class EsoLog
 				var match = UpdateFinder.Match(table);
 				if (match.Success)
 				{
-					Debug.WriteLine(match.Value);
 					var version = new EsoVersion(match.Value);
 					var ptsNum = version.Pts ? 1 : 0;
 
