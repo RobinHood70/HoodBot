@@ -38,15 +38,15 @@ public sealed class ListGlobalBlocks(WikiAbstractionLayer wal, GlobalBlocksInput
 	protected override GlobalBlocksResult? GetItem(JToken result) => result == null
 		? null
 		: new GlobalBlocksResult(
-			address: (string?)result["address"],
-			anononly: result["anononly"].GetBCBool(),
-			by: (string?)result["by"],
-			byWiki: (string?)result["byid"],
-			expiry: result["expiry"].GetNullableDate(),
-			id: (long?)result["id"] ?? 0,
-			rangeStart: (string?)result["rangestart"],
-			rangeEnd: (string?)result["rangeend"],
-			reason: (string?)result["reason"],
-			timestamp: result["timestamp"].GetNullableDate());
+			Address: (string?)result["address"],
+			AnonymousOnly: result["anononly"].GetBCBool(),
+			By: (string?)result["by"],
+			ByWiki: (string?)result["byid"],
+			Expiry: result["expiry"].GetNullableDate(),
+			Id: (long?)result["id"] ?? 0,
+			RangeStart: (string?)result["rangestart"],
+			RangeEnd: (string?)result["rangeend"],
+			Reason: (string?)result["reason"],
+			Timestamp: result["timestamp"].GetNullableDate());
 	#endregion
 }

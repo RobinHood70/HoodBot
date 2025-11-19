@@ -21,41 +21,28 @@ public enum GlobalBlocksProperties
 }
 #endregion
 
-public class GlobalBlocksInput : ILimitableInput
+public sealed record GlobalBlocksInput(IEnumerable<string>? Addresses, DateTime? End, IEnumerable<long>? Ids, IPAddress? IP, GlobalBlocksProperties Properties, bool SortAscending, DateTime? Start) : ILimitableInput
 {
 	#region Constructors
 	public GlobalBlocksInput()
+		: this(null, null, null, null, default, default, null)
 	{
 	}
 
 	public GlobalBlocksInput(IPAddress ip)
+		: this(null, null, null, ip, default, default, null)
 	{
-		this.IP = ip;
 	}
 
 	public GlobalBlocksInput(IEnumerable<string> addresses)
+		: this(addresses, null, null, null, default, default, null)
 	{
-		this.Addresses = addresses;
 	}
 	#endregion
 
 	#region Public Properties
-	public IEnumerable<string>? Addresses { get; set; }
-
-	public DateTime? End { get; set; }
-
-	public IEnumerable<long>? Ids { get; set; }
-
-	public IPAddress? IP { get; }
-
 	public int Limit { get; set; }
 
 	public int MaxItems { get; set; }
-
-	public GlobalBlocksProperties Properties { get; set; }
-
-	public bool SortAscending { get; set; }
-
-	public DateTime? Start { get; set; }
 	#endregion
 }
