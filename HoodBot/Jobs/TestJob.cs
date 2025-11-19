@@ -12,11 +12,10 @@ internal sealed class TestJob(JobManager jobManager) : WikiJob(jobManager, JobTy
 	#region Protected Override Methods
 	protected override void Main()
 	{
-		var siteLink = SiteLink.FromText(this.Site, "[[Main Page|Test 1|Test 2]]");
-		this.StatusWriteLine(siteLink.Text ?? string.Empty);
-
-		siteLink = SiteLink.FromText(this.Site, "[[File:Example.jpg|Caption|link=Main Page]]");
-		this.StatusWriteLine(siteLink.Link ?? string.Empty);
+		var result = this.Site.Upload(@"D:\Data\HoodBot\esoui\art\icons\ability_1handed_001.png", "Test Image.png", "Test upload", "This is a test upload.");
+		var warnings = string.Join(" / ", result.Value.Warnings);
+		var duplicates = string.Join(" / ", result.Value.Duplicates);
+		this.StatusWriteLine($"Upload aborted.\r\nWarnings: {warnings}\r\nDuplicate versions: {duplicates}");
 
 		const int maxTimes = 5;
 		this.ResetProgress(maxTimes);
