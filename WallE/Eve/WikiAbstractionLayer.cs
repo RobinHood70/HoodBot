@@ -413,10 +413,7 @@ public partial class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntr
 	/// <summary>Adds a warning to the warning list.</summary>
 	/// <param name="code">The code returned by the wiki.</param>
 	/// <param name="info">The informative text returned by the wiki.</param>
-	public void AddWarning(string code, string info)
-	{
-		LogWarning(this.Logger, code, info);
-	}
+	public void AddWarning(string code, string info) => LogWarning(this.Logger, code, info);
 
 	/// <summary>Initializes any needed information without trying to login.</summary>
 	/// <exception cref="WikiException">Thrown when the wiki did not return the required site and user information.</exception>
