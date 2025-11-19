@@ -1,7 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
+using System;
+using System.Diagnostics;
+using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
+using RobinHood70.Robby.Design;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
@@ -16,25 +20,18 @@ internal sealed class OneOffJob : WikiJob
 	#region Protected Override Methods
 	protected override void Main()
 	{
-		var rcOptions = new RecentChangesOptions()
+		var contributions = this.Site.User!.GetContributions(DateTime.Today.AddDays(-2), DateTime.MaxValue);
+		var pages = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.FileInfo, false);
+		var titles = contributions
+			.Select(contribution => contribution.Title)
+			.Where(title => title.Namespace == MediaWikiNamespaces.File);
+		pages.GetTitles(titles);
+		foreach (var page in pages)
 		{
-			Namespaces = [MediaWikiNamespaces.File],
-			Properties = RecentChangesProperties.Ids | RecentChangesProperties.LogInfo | RecentChangesProperties.Patrolled | RecentChangesProperties.Title | RecentChangesProperties.User,
-			Types = RecentChangesTypes.Log,
-		};
-
-		var changes = this.Site.LoadRecentChanges(rcOptions);
-		this.ResetProgress(changes.Count);
-		foreach (var change in changes)
-		{
-			if (change.PatrolFlags is PatrolFlags patrolFlags &&
-				patrolFlags.HasFlag(PatrolFlags.Unpatrolled) &&
-				(change.User?.Name.OrdinalEquals("Maintenance script") ?? false))
+			if (page is FilePage filePage && filePage.FileRevisions.Count == 0)
 			{
-				this.Site.Patrol(change.Id);
+				page.Title.Delete("Page created in error");
 			}
-
-			this.Progress++;
 		}
 	}
 	#endregion
