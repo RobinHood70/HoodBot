@@ -31,8 +31,8 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-	  <PackageReference Include="IPAddressRange" Version="6.2.0" />
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.253">
+	  <PackageReference Include="IPAddressRange" Version="6.3.0" />
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.254">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
