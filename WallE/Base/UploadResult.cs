@@ -3,13 +3,12 @@ namespace RobinHood70.WallE.Base;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using RobinHood70.CommonCode;
 
 public class UploadResult
 {
 	#region Constructors
-	internal UploadResult(string result, IReadOnlyList<string> duplicates, IReadOnlyList<DateTime> duplicateVersions, string? fileKey, string? fileName, ImageInfoItem? imageInfo, ReadOnlyDictionary<string, string> warnings)
+	internal UploadResult(string result, IReadOnlyList<string> duplicates, IReadOnlyList<DateTime> duplicateVersions, string? fileKey, string? fileName, ImageInfoItem? imageInfo, IReadOnlyDictionary<string, string> warnings)
 	{
 		this.Result = result;
 		this.Duplicates = duplicates;
