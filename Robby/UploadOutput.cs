@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using RobinHood70.WallE.Base;
 
+/// <summary>Specifies the status of an upload operation to MediaWiki.</summary>
 public enum UploadStatus
 {
 	/// <summary>The upload status is unknown. Most likely, this is the result of a stashed upload gone wrong or a new status having been added in a later version of MediaWiki. See ResultText for the original value.</summary>
