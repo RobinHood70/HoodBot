@@ -171,8 +171,11 @@ internal sealed class EsoSets : EditJob
 			this.Warn(warning);
 		}
 
-		setData.IsNonTrivial = replacer.IsNonTrivialChange();
 		newPage.UpdatePage();
+		setData.ChangeType =
+			replacer.IsNonTrivialChange() ? ChangeType.Major :
+			newPage.Page.TextModified ? ChangeType.Minor :
+			ChangeType.None;
 	}
 	#endregion
 
@@ -198,7 +201,7 @@ internal sealed class EsoSets : EditJob
 		foreach (var (title, set) in this.sets)
 		{
 			sb.Clear();
-			if (set.IsNonTrivial)
+			if (set.ChangeType == ChangeType.Major)
 			{
 				sb
 					.Append("* {{Pl|")
@@ -208,7 +211,7 @@ internal sealed class EsoSets : EditJob
 					.Append("|diff=cur}}");
 				nonTrivial.Add(title, sb.ToString());
 			}
-			else
+			else if (set.ChangeType == ChangeType.Minor)
 			{
 				trivial.Add(title, SiteLink.ToText(title, LinkFormat.LabelName));
 			}
@@ -364,7 +367,7 @@ internal sealed class EsoSets : EditJob
 
 		public List<(string ItemCount, string Text)> BonusDescriptions { get; } = [];
 
-		public bool IsNonTrivial { get; set; }
+		public ChangeType ChangeType { get; set; }
 
 		public string Name { get; }
 		#endregion
