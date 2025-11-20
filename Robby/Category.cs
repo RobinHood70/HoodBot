@@ -2,7 +2,7 @@
 
 /// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
 /// <seealso cref="ITitle" />
-public class Category : ITitle
+public sealed class Category : ITitle
 {
 	#region Constructors
 

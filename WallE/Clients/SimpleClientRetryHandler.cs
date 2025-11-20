@@ -10,7 +10,7 @@ using System.Threading;
 
 // This class adds retry functionality to the standard HttpClient.
 // It could also have derived from WebRequestHandler directly, but it's hinted by MS and others that this is the better way to do things in case people want to add further handlers to the chain.
-public class SimpleClientRetryHandler : DelegatingHandler
+public sealed class SimpleClientRetryHandler : DelegatingHandler
 {
 	#region Fields
 	private readonly SimpleClient parent;

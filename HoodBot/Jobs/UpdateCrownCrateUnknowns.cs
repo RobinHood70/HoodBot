@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -182,7 +183,7 @@ internal sealed class UpdateCrownCrateUnknowns(JobManager jobManager) : ParsedPa
 	#endregion
 
 	#region Private Records
-	private record CardInfo(string CardName, string Type, string SubType);
+	private sealed record CardInfo(string CardName, string Type, string SubType);
 	#endregion
 
 	#region Private Classes

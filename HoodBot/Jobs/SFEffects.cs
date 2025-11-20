@@ -170,7 +170,7 @@ internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 
 	#region Internal Records
 
-	internal record Effect(string FormId, string EditorId, string Link, string ModTemplate, string Description);
+	internal sealed record Effect(string FormId, string EditorId, string Link, string ModTemplate, string Description);
 	#endregion
 
 	#region Private Classes

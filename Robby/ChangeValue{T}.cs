@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Stores the result of a change to the wiki, along with any data associated with the change.</summary>
 /// <typeparam name="T">The type of data being returned from the function.</typeparam>
-public class ChangeValue<T>
+public sealed class ChangeValue<T>
 {
 	#region Constructors
 

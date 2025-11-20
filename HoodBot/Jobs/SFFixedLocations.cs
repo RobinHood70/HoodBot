@@ -169,6 +169,6 @@ internal sealed class SFFixedLocations : EditJob
 	#endregion
 
 	#region Private Records
-	private record RefUse(string FullName, int Count);
+	private sealed record RefUse(string FullName, int Count);
 	#endregion
 }

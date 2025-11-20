@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby;
 
 /// <summary>Event data for any events where page text is changing.</summary>
-public class PagePreviewArgs
+public sealed class PagePreviewArgs
 {
 	#region Constructors
 

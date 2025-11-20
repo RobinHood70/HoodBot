@@ -1,0 +1,5 @@
+# C# files
+[*.cs]
+
+# Seal class - classes here are public and meant to be extensible, but not overridable
+dotnet_diagnostic.MA0053.severity = none
