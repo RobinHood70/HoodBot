@@ -1,7 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
@@ -13,26 +15,29 @@ internal sealed class OneOffJob : WikiJob
 {
 	[JobInfo("One-Off Job")]
 	public OneOffJob(JobManager jobManager)
-		: base(jobManager, JobType.Write)
+		: base(jobManager, JobType.ReadOnly)
 	{
 	}
 
 	#region Protected Override Methods
 	protected override void Main()
 	{
-		var contributions = this.Site.User!.GetContributions(DateTime.Today.AddDays(-2), DateTime.MaxValue);
-		var pages = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.FileInfo, false);
-		var titles = contributions
-			.Select(contribution => contribution.Title)
-			.Where(title => title.Namespace == MediaWikiNamespaces.File);
-		pages.GetTitles(titles);
-		foreach (var page in pages)
+		var lines = new List<string>();
+		for (var letter = 'A'; letter <= 'Z'; letter++)
 		{
-			if (page is FilePage filePage && filePage.FileRevisions.Count == 0)
+			var title = TitleFactory.FromUnvalidated(this.Site, "Lore:Bestiary " + letter);
+			var input = new BacklinksInput(title.FullPageName(), BacklinksTypes.Backlinks) { FilterRedirects = Filter.Any, Redirect = true };
+			var result = this.Site.AbstractionLayer.Backlinks(input);
+			var items = result
+				.Where(bl => bl.Namespace != MediaWikiNamespaces.User)
+				.OrderByDescending(bl => bl.Redirects.Count);
+			foreach (var item in items)
 			{
-				page.Title.Delete("Page created in error");
+				lines.Add($"{title} => {item.Title}: {item.Redirects.Count}");
 			}
 		}
+
+		File.WriteAllLines(@"D:\Bestiary Most Incoming Redirects.txt", lines);
 	}
 	#endregion
 }
