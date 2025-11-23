@@ -16,7 +16,7 @@ using RobinHood70.WikiCommon.Parser;
 internal static class EsoSpace
 {
 	#region Public Constants
-	public const string CurrentMod = "Feast of Shadows";
+	public const string CurrentMod = "2025 Content Pass";
 	#endregion
 
 	#region Static Fields
