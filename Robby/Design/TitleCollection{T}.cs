@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
@@ -14,6 +15,8 @@ using RobinHood70.WikiCommon;
 /// <seealso cref="IList{TTitle}" />
 /// <seealso cref="IReadOnlyCollection{TTitle}" />
 /// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
+[DebuggerTypeProxy(typeof(TitleCollectionDebugView<>))]
+[DebuggerDisplay("Count = {Count}")]
 public class TitleCollection<T> : KeyedCollection<Title, T>, IEnumerable<T>
 	where T : ITitle
 {
