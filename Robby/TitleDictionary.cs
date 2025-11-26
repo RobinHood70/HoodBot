@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using RobinHood70.Robby.Design;
 
 /// <summary>This is a wrapper around a Dictionary with the comparer always set to <see cref="TitleComparer"/>.</summary>
