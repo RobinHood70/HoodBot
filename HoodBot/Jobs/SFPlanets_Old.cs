@@ -231,7 +231,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 		return biomes;
 	}
 
-	private void ReadWip3(Dictionary<Title, Planet> items)
+	private void ReadWip3(IDictionary<Title, Planet> items)
 	{
 		var faunaCounts = new Dictionary<string, int>(StringComparer.Ordinal);
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "sfcreatures_-_wip3.csv")
