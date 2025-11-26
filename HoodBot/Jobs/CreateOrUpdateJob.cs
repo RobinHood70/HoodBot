@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
@@ -10,6 +11,10 @@ using RobinHood70.Robby.Parser;
 public abstract class CreateOrUpdateJob<T> : EditJob
 	where T : notnull
 {
+	#region Fields
+	private readonly TitleDictionary<T> dictionary = [];
+	#endregion
+
 	#region Constructors
 	protected CreateOrUpdateJob(JobManager jobManager)
 		: base(jobManager)
@@ -20,7 +25,8 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 	#region Protected Properties
 	protected bool Clobber { get; set; }
 
-	protected TitleDictionary<T> Items { get; } = [];
+	// TODO: Should be made into a read-only dictionary so processes can only add to Items via the designated methods.
+	protected IDictionary<Title, T> Items => this.dictionary;
 
 	protected Func<Title, T, string>? NewPageText { get; set; }
 
@@ -39,7 +45,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 	{
 		this.GetExternalData();
 		var existing = this.GetExistingItems();
-		this.Items.AddRange(existing);
+		this.dictionary.AddRange(existing);
 
 		var newItems = this.GetNewItems();
 		if (!this.Clobber)
@@ -47,7 +53,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 			this.DisambiguateNewItems(newItems);
 		}
 
-		this.Items.AddRange(newItems);
+		this.dictionary.AddRange(newItems);
 	}
 	#endregion
 
@@ -67,7 +73,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 		}
 	}
 
-	/// <summary>Loads any known-good pages into <see cref="Pages"/>, such as via a .GetBacklinks query.</summary>
+	/// <summary>Gets the list of existing titles. Do *NOT* load these via <see cref="Pages"/> or add them to <see cref="Items"/> - that will be done after pages are disambiguated, if appropriate.</summary>
 	/// <remarks>This is called even when <see cref="Clobber"/> is true so that if valid pages exist, they're the ones that get clobbered. If the job is create-only, there's no need to override it.</remarks>
 	protected virtual TitleDictionary<T> GetExistingItems() => [];
 
@@ -128,7 +134,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 			{
 				// We found a belated dupe caused by a redirect, so remove it from everything.
 				Debug.WriteLine($"Item conflict: {fromTitle} => {to.Title}");
-				this.Items.Remove(to.Title);
+				this.dictionary.Remove(to.Title);
 			}
 		}
 	}
