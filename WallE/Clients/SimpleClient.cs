@@ -78,7 +78,7 @@ public partial class SimpleClient : IMediaWikiClient, IDisposable
 		this.webHandler = new()
 		{
 			AllowAutoRedirect = true,
-			AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+			AutomaticDecompression = DecompressionMethods.All,
 			CookieContainer = this.cookieContainer,
 			Credentials = credentials,
 			UseCookies = true,
