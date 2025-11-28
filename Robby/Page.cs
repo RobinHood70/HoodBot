@@ -10,6 +10,10 @@ using RobinHood70.Robby.Design;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
+// CONSIDER: Possibly extend to include a collection of results, indexed by a text key, so each module can be tracked separately and extending the entire Page object isn't required for new modules. This would allow extensions to co-exist (e.g., variables on a file page). The two potential issues I see are:
+// * Boxing, which could be mitigated by having only extra data follow this scheme, while the basic page data uses the existing structure.
+// * Key conflicts, which could be mitigated by namespacing (e.g., "WallE:File", "HoodBot:Variables").
+
 /// <summary>Represents a wiki page.</summary>
 /// <seealso cref="Title" />
 public class Page : ITitle
