@@ -53,7 +53,6 @@ internal sealed class Furnishing
 	private static readonly HashSet<long> DeprecatedFurnishings =
 	[
 		115083,
-		116426,
 		119706,
 		120853,
 		152141,
@@ -96,6 +95,7 @@ internal sealed class Furnishing
 		[126658] = "Dwarven Pipeline Cap, Sealed (standard)",
 		[198055] = "Necrom Funerary Offering, Mushrooms (Bundle)",
 		[218012] = "Necrom Funerary Offering, Mushrooms (Planter)",
+		[116427] = "Orcish Bookshelf, Peaked",
 		[116419] = "Orcish Chair, Peaked (epic)",
 		[116392] = "Orcish Chair, Peaked (superior)",
 		[197713] = "Tribunal Rug (Necrom)",
@@ -130,7 +130,7 @@ internal sealed class Furnishing
 		}
 		else
 		{
-			this.BindType = GetBindTypeText((int)row["bindType"]);
+			this.BindType = GetBindTypeName((int)row["bindType"]);
 
 			if (!string.IsNullOrEmpty(furnCategory))
 			{
@@ -145,14 +145,13 @@ internal sealed class Furnishing
 			}
 
 			var quality = EsoLog.ConvertEncoding((string)row["quality"]);
-			this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
-				? "nfsel".Substring(qualityNum - 1, 1)
-				: quality;
+			this.Quality = GetQualityName(quality);
+
 			var abilityDesc = EsoLog.ConvertEncoding((string)row["abilityDesc"]);
 			this.AddSkillsAndMats(abilityDesc);
 		}
 
-		this.FurnishingLimitType = this.GetFurnishingLimitType(row);
+		this.FurnishingLimitType = this.GetFurnishingTypeFromRow(row);
 		var itemLink = EsoLog.ConvertEncoding((string)row["resultitemLink"]);
 		this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
 		this.Name = EsoLog.ConvertEncoding((string)row["name"]);
@@ -172,15 +171,6 @@ internal sealed class Furnishing
 	#endregion
 
 	#region Public Static Properties
-	public static Dictionary<FurnishingType, string> FurnishingLimitTypes { get; } = new()
-	{
-		[FurnishingType.None] = string.Empty,
-		[FurnishingType.TraditionalFurnishings] = "Traditional Furnishings",
-		[FurnishingType.SpecialFurnishings] = "Special Furnishings",
-		[FurnishingType.CollectibleFurnishings] = "Collectible Furnishings",
-		[FurnishingType.SpecialCollectibles] = "Special Collectibles",
-	};
-
 	public static Dictionary<string, string> PageNameExceptions { get; } = new(StringComparer.Ordinal)
 	{
 		["Dwarven Spider Pet"] = "Dwarven Spider Pet (furnishing)",
@@ -235,6 +225,16 @@ internal sealed class Furnishing
 	#endregion
 
 	#region Public Static Methods
+	public static string? GetFurnishingLimitType(FurnishingType furnishingLimitType) => furnishingLimitType switch
+	{
+		FurnishingType.None => string.Empty,
+		FurnishingType.TraditionalFurnishings => "Traditional Furnishings",
+		FurnishingType.SpecialFurnishings => "Special Furnishings",
+		FurnishingType.CollectibleFurnishings => "Collectible Furnishings",
+		FurnishingType.SpecialCollectibles => "Special Collectibles",
+		_ => null
+	};
+
 	public static long GetKey(long keyIn, bool collectible) => collectible ? keyIn << 32 : keyIn;
 
 	public static string IconName(string itemName) => $"ON-icon-furnishing-{itemName.Replace(':', ',')}.png";
@@ -247,14 +247,25 @@ internal sealed class Furnishing
 	#endregion
 
 	#region Private Static Methods
-	private static string? GetBindTypeText(int bindType) => bindType switch
+	private static string? GetBindTypeName(int bindType) => bindType switch
 	{
-		-1 => null,
 		0 => string.Empty,
 		1 => "Bind on Pickup",
 		2 => "Bind on Equip",
 		3 => "Backpack Bind on Pickup",
-		_ => throw new InvalidOperationException()
+		_ => null,
+	};
+
+	private static string? GetQualityName(string quality) => quality switch
+	{
+		"1-5" => "Any",
+		"1" => "Normal",
+		"2" => "Fine",
+		"3" => "Superior",
+		"4" => "Epic",
+		"5" => "Legendary",
+		"6" => "Mythic",
+		_ => null,
 	};
 	#endregion
 
@@ -286,7 +297,7 @@ internal sealed class Furnishing
 		}
 	}
 
-	private FurnishingType GetFurnishingLimitType(IDataRecord row)
+	private FurnishingType GetFurnishingTypeFromRow(IDataRecord row)
 	{
 		var furnishingLimitType = this.Collectible
 			? (FurnishingType)(sbyte)row["furnLimitType"]

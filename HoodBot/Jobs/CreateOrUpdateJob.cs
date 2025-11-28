@@ -95,7 +95,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 	protected override void LoadPages()
 	{
 		this.LoadItems();
-		var titles = new TitleCollection(this.Site, this.Items.Keys);
+		var titles = new TitleCollection(this.Site, this.dictionary.Keys);
 		this.Pages.GetTitles(titles);
 	}
 
