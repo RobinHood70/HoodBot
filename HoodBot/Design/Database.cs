@@ -26,7 +26,7 @@ public class Database
 
 	public static IEnumerable<IDataRecord> RunQuery(string connectionString, string query, long pageSize)
 	{
-		ArgumentNullException.ThrowIfNullOrEmpty(connectionString);
+		ArgumentException.ThrowIfNullOrEmpty(connectionString);
 		return ReallyRunQuery(connectionString, query, pageSize);
 
 		static IEnumerable<IDataRecord> ReallyRunQuery(string connectionString, string query, long pageSize)

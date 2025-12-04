@@ -230,6 +230,9 @@ internal sealed class NpcData
 				}
 
 				break;
+			case PlaceType.Unknown:
+			case PlaceType.House:
+			case PlaceType.Ship:
 			default:
 				foreach (var item in subset)
 				{

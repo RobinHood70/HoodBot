@@ -4,6 +4,6 @@ internal interface IJsonSettings<T> : IJsonSubSetting<T>
 	where T : new()
 {
 	#region Properties
-	public string FileName { get; }
+	string FileName { get; }
 	#endregion
 }

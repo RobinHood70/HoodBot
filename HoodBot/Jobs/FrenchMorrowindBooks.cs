@@ -41,7 +41,6 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	private readonly Regex fontFinder = new(@"<FONT( COLOR=""(?<color>[0-9A-F]+)"")?( SIZE=""(?<size>\d+)"")?( FACE=""(?<face>[^""]+)"")>(?<text>.*?)((?=<FONT )|</FONT>|$)", RegexOptions.Singleline | RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 	private readonly Regex imgFinder = new(@"<IMG SRC(=|{{=}})""(?<filename>[^""]+?)"" WIDTH(=|{{=}})""(?<width>\d+)"" HEIGHT(=|{{=}})""(?<height>\d+)"">", RegexOptions.Singleline | RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 	private readonly Regex tagFinder = new(@"<[^>]+>", RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
-	private readonly UespNamespaceList nsInfo;
 	private readonly Dictionary<string, string> icons = new(StringComparer.Ordinal);
 	#endregion
 
@@ -50,7 +49,6 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	public FrenchMorrowindBooks(JobManager jobManager)
 		: base(jobManager)
 	{
-		this.nsInfo = new UespNamespaceList(this.Site);
 		this.NewPageText = this.GetNewPageText;
 		this.OnUpdate = this.UpdatePage;
 		this.GetEnglishIcons(jobManager.Client);

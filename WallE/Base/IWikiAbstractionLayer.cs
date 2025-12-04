@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
-using RobinHood70.WallE.Design;
 using RobinHood70.WikiCommon;
 
 #region Public Delegates
@@ -82,7 +81,7 @@ public interface IWikiAbstractionLayer
 	#region Properties
 
 	/// <summary>Gets the site information after either <see cref="Initialize"/> or <see cref="Login(LoginInput)"/> has been called.</summary>
-	public SiteInfoResult? AllSiteInfo { get; }
+	SiteInfoResult? AllSiteInfo { get; }
 
 	/// <summary>Gets or sets the assert string.</summary>
 	/// <value>The assert string to be used, such as "bot" or "user" for <c>assert=bot</c> or <c>assert=user</c>.</value>
@@ -94,7 +93,7 @@ public interface IWikiAbstractionLayer
 
 	/// <summary>Gets the current user information.</summary>
 	/// <value>The user information.</value>
-	public UserInfoResult? CurrentUserInfo { get; }
+	UserInfoResult? CurrentUserInfo { get; }
 
 	/// <summary>Gets or sets the custom stop check function.</summary>
 	/// <value>A function which returns true if the bot should stop what it's doing.</value>

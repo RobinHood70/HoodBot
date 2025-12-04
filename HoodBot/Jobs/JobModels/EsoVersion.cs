@@ -26,8 +26,8 @@ public readonly struct EsoVersion : IComparable<EsoVersion>, IEquatable<EsoVersi
 	{
 		if (text.Length == 0)
 		{
-			this.Version = EsoVersion.Empty.Version;
-			this.Pts |= EsoVersion.Empty.Pts;
+			this.Version = Empty.Version;
+			this.Pts |= Empty.Pts;
 			return;
 		}
 

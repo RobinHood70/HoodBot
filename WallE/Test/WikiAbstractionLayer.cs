@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using RobinHood70.CommonCode;
 using RobinHood70.WallE.Base;
-using RobinHood70.WallE.Design;
 using RobinHood70.WikiCommon;
 
 /// <inheritdoc/>

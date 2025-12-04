@@ -11,7 +11,6 @@ internal class Rank
 	#region Static Fields
 	private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 
-	private static readonly Regex LeadText = new(@"\A<<.*?>>\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	#endregion
 
 	#region Constructors

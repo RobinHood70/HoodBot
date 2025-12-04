@@ -9,7 +9,6 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.Design;
 using RobinHood70.HoodBot.Jobs.Loggers;

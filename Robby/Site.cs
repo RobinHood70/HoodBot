@@ -860,8 +860,8 @@ public partial class Site : IMessageSource
 	/// <returns>A value indicating the change status of the upload.</returns>
 	public ChangeValue<UploadOutput> Upload(string fileName, string? destinationName, string editSummary, string? pageText, bool ignoreWarnings)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(fileName);
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(editSummary);
+		ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+		ArgumentException.ThrowIfNullOrWhiteSpace(editSummary);
 		if (string.IsNullOrWhiteSpace(destinationName))
 		{
 			destinationName = Path.GetFileName(fileName);
@@ -901,6 +901,8 @@ public partial class Site : IMessageSource
 				UploadStatus.Success => ChangeStatus.Success,
 				UploadStatus.Aborted => ChangeStatus.Cancelled,
 				UploadStatus.Failure => ChangeStatus.Failure,
+				UploadStatus.Unknown => ChangeStatus.Unknown,
+				UploadStatus.Warning => ChangeStatus.Failure,
 				_ => ChangeStatus.Unknown
 			};
 

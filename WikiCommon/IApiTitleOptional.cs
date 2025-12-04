@@ -3,5 +3,5 @@ namespace RobinHood70.WikiCommon;
 
 public interface IApiTitleOptional
 {
-	public string? Title { get; }
+	string? Title { get; }
 }

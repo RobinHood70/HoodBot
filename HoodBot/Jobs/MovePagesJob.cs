@@ -656,6 +656,14 @@ public abstract class MovePagesJob : EditJob
 			case ITemplateNode template:
 				this.UpdateTemplateNode(page, template);
 				break;
+			case IArgumentNode:
+			case ICommentNode:
+			case IHeaderNode:
+			case IIgnoreNode:
+			case IParameterNode:
+				break;
+			default:
+				throw new InvalidOperationException("Unknown node type encountered.");
 		}
 	}
 

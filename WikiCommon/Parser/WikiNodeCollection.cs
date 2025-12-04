@@ -267,7 +267,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
 	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ILinkNode> FindLinks(Predicate<ILinkNode> condition) => this.FindAll<ILinkNode>(condition);
+	public IEnumerable<ILinkNode> FindLinks(Predicate<ILinkNode> condition) => this.FindAll(condition);
 
 	/// <summary>Finds a single link node, non-recursively, that satisfies the condition.</summary>
 	/// <param name="condition">The condition the link node must satisfy.</param>
@@ -278,7 +278,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
 	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ITemplateNode> FindTemplates(Predicate<ITemplateNode> condition) => this.FindAll<ITemplateNode>(condition);
+	public IEnumerable<ITemplateNode> FindTemplates(Predicate<ITemplateNode> condition) => this.FindAll(condition);
 
 	/// <summary>Replaces all current content with the content of the sections provided.</summary>
 	/// <param name="sections">The new sections for the page.</param>
@@ -498,7 +498,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	public IList<WikiNodeCollection> Split(string separator)
 	{
 		// TODO: Add Split(string separator) function
-		ArgumentNullException.ThrowIfNullOrEmpty(separator);
+		ArgumentException.ThrowIfNullOrEmpty(separator);
 		var retval = new List<WikiNodeCollection>();
 		var i = 0;
 		var startNode = 0;
@@ -822,6 +822,12 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
+				case IArgumentNode:
+				case IIgnoreNode:
+				case ITagNode:
+					break;
+				default:
+					throw new InvalidOperationException("Unknown node type encountered.");
 			}
 		}
 	}
@@ -877,6 +883,8 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
+				default:
+					throw new InvalidOperationException("Unknown node type encountered.");
 			}
 		}
 	}
@@ -932,6 +940,12 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
+				case IArgumentNode:
+				case IIgnoreNode:
+				case ITagNode:
+					break;
+				default:
+					throw new InvalidOperationException("Unknown node type encountered.");
 			}
 		}
 	}

@@ -126,7 +126,7 @@ public static class EsoFiles
 	public static IReadOnlyDictionary<string, HashSet<string>> GetIconChecksums()
 	{
 		var allIcons = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
-		var iconDirectory = EsoFiles.LocalPath(EsoFileTypes.Icons);
+		var iconDirectory = LocalPath(EsoFileTypes.Icons);
 		if (Directory.Exists(iconDirectory))
 		{
 			foreach (var file in Directory.EnumerateFiles(iconDirectory, "*.*", SearchOption.AllDirectories))

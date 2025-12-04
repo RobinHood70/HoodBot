@@ -18,7 +18,6 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 	#endregion
 
 	#region Static Fields
-	private static readonly Regex NotesCheck = new(@"^==\s*Notes\s*==", RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 	private static readonly HashSet<string> AfterNotes = new(StringComparer.Ordinal) { "References", "Bugs", "Gallery" };
 	#endregion
 

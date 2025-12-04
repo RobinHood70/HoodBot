@@ -1447,21 +1447,6 @@ public partial class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntr
 	#region Private Methods
 	private static string CheckToken(string? token, string type) => token ?? throw new WikiException(Globals.CurrentCulture(EveMessages.InvalidToken, type));
 
-	private void Clear()
-	{
-		// This should be kept in sync with the Initialize() method to clear anything it sets.
-		this.AllSiteInfo = null;
-		this.ArticlePath = null;
-		this.ContinueVersion = 0;
-		this.CustomStopCheck = null;
-		this.SiteVersion = 0;
-		this.SupportsMaxLag = false;
-		this.UseLanguage = null;
-		this.interwikiPrefixes.Clear();
-		this.namespaces.Clear();
-		this.tokenManager?.Clear(); // Deliberately clearing underlying property so we're not initializing it only to clear it.
-	}
-
 	private string GetSessionToken(string type) => CheckToken(this.TokenManager.SessionToken(type), type);
 
 	private PageSetResult<TOutput> SubmitPageSet<TInput, TOutput>(ActionModulePageSet<TInput, TOutput> action, TInput input)

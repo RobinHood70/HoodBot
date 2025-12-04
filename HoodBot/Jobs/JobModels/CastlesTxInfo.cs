@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
+using System;
 using RobinHood70.CommonCode;
 
 internal sealed class CastlesTxInfo
@@ -61,6 +62,8 @@ internal sealed class CastlesTxInfo
 				this.Singular = true;
 				this.Term = true;
 				break;
+			default:
+				throw new InvalidOperationException($"Unknown keyword: '{keyword}'");
 		}
 
 		if (keyword.Length > 1)
@@ -120,6 +123,8 @@ internal sealed class CastlesTxInfo
 				case 'v':
 					this.Variation = true;
 					break;
+				default:
+					throw new InvalidOperationException($"Unknown tag type encountered: '{tag[0]}'.");
 			}
 		}
 	}

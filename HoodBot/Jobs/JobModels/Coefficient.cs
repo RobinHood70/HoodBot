@@ -123,7 +123,7 @@ internal sealed class Coefficient
 
 	public string? DamageSuffix =>
 		this.IsDamage &&
-		Coefficient.DamageTypes[this.DamageType] is var damageType &&
+		DamageTypes[this.DamageType] is var damageType &&
 		damageType.Length > 0
 			? ' ' + damageType + " Damage"
 			: string.Empty;

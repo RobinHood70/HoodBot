@@ -82,7 +82,7 @@ public interface IWikiData<TThis>
 	/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
 	/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
 	/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
-	public TThis GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse);
+	TThis GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse);
 
 	/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 	/// <param name="titles">The titles to find duplicates of.</param>

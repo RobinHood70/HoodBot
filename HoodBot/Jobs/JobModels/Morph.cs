@@ -262,19 +262,6 @@ internal sealed class Morph
 			return allEqual;
 		}
 	}
-
-	private static List<string> Same<T>(IEnumerable<T> values)
-		where T : IEquatable<T>, IFormattable
-	{
-		var valueList = SameString(values);
-		var retval = new List<string>(valueList.Count);
-		foreach (var value in valueList)
-		{
-			retval.Add(value.ToString() ?? string.Empty);
-		}
-
-		return retval;
-	}
 	#endregion
 
 	#region Private Methods

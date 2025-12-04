@@ -3,5 +3,5 @@ namespace RobinHood70.WallE.Eve.Modules;
 
 public interface IPropertyModule : IContinuableQueryModule
 {
-	public object? OutputObject { get; }
+	object? OutputObject { get; }
 }

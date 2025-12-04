@@ -315,6 +315,15 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 				}
 
 				break;
+			case IArgumentNode:
+			case ICommentNode:
+			case IIgnoreNode:
+			case ILinkNode:
+			case IParameterNode:
+			case ITagNode:
+				break;
+			default:
+				throw new InvalidOperationException("Unknown node type encountered.");
 		}
 
 		return null;

@@ -6,8 +6,8 @@ internal interface IJsonSubSetting<T>
 	where T : new()
 {
 	#region Methods
-	public void FromJson(JToken json);
+	void FromJson(JToken json);
 
-	public JToken ToJson();
+	JToken ToJson();
 	#endregion
 }

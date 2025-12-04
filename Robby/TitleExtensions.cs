@@ -317,6 +317,7 @@ public static class TitleExtensions
 		ProtectionLevel.Semi => "autoconfirmed",
 		ProtectionLevel.Full => "sysop",
 		ProtectionLevel.NoChange => null,
+		ProtectionLevel.Unknown => throw new InvalidOperationException("Protection level should not be unknown."),
 		_ => throw new ArgumentOutOfRangeException(paramName: nameof(level), message: GlobalMessages.InvalidSwitchValue)
 	};
 	#endregion
