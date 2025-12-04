@@ -333,11 +333,11 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 	public static string SanitizePageName(string pageName, bool extended)
 	{
 		pageName = Regex.Replace(pageName, @"[<>\[\]\|{}]", string.Empty, RegexOptions.None, Globals.DefaultRegexTimeout);
+		pageName = RegexLibrary.PruneExcessSpaces(pageName).Trim();
 		if (extended)
 		{
 			pageName = Regex.Replace(pageName, "[`´’ʻʾʿ᾿῾‘’]", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
 			pageName = Regex.Replace(pageName, "[“”„“«»]", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
-			pageName = RegexLibrary.PruneExcessSpaces(pageName);
 		}
 
 		return pageName;
