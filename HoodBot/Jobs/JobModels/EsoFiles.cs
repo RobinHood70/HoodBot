@@ -92,7 +92,11 @@ public static class EsoFiles
 		}
 
 		job.StatusWriteLine($"Extracting {zipName}");
-		Directory.Delete(extractPath, true);
+		if (Directory.Exists(extractPath))
+		{
+			Directory.Delete(extractPath, true);
+		}
+
 		ZipFile.ExtractToDirectory(zipFile, extractPath, false);
 		fileVersions[FileSystemNames[fileType]] = desiredVersion;
 		SaveFileVersions(fileVersions);
