@@ -7,14 +7,10 @@ using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 
-internal sealed class OneOffParseJob : ParsedPageJob
+[method: JobInfo("One-Off Parse Job")]
+internal sealed class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 {
-	[JobInfo("One-Off Parse Job")]
-	public OneOffParseJob(JobManager jobManager)
-		: base(jobManager)
-	{
-	}
-
+	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Update ID to xx";
 
 	protected override void LoadPages()
@@ -37,4 +33,5 @@ internal sealed class OneOffParseJob : ParsedPageJob
 			textNode.Text = Regex.Replace(textNode.Text, @"([|(\n]\s*)01([0-9A-Fa-f]{6})", "$1xx$2", RegexOptions.None, Globals.DefaultRegexTimeout);
 		}
 	}
+	#endregion
 }

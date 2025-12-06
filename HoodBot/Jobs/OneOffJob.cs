@@ -8,14 +8,9 @@ using RobinHood70.Robby.Design;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
-internal sealed class OneOffJob : WikiJob
+[method: JobInfo("One-Off Job")]
+internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.ReadOnly)
 {
-	[JobInfo("One-Off Job")]
-	public OneOffJob(JobManager jobManager)
-		: base(jobManager, JobType.ReadOnly)
-	{
-	}
-
 	#region Protected Override Methods
 	protected override void Main()
 	{

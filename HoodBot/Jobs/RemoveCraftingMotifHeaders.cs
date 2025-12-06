@@ -8,16 +8,9 @@ using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class RemoveCraftingMotifHeaders : EditJob
+[method: JobInfo("Remove Crafting Motif Headers")]
+internal sealed class RemoveCraftingMotifHeaders(JobManager jobManager) : EditJob(jobManager)
 {
-	#region Constructors
-	[JobInfo("Remove Crafting Motif Headers")]
-	public RemoveCraftingMotifHeaders(JobManager jobManager)
-		: base(jobManager)
-	{
-	}
-	#endregion
-
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Remove Headers/Indentation";
 
