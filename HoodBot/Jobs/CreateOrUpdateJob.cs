@@ -109,6 +109,11 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 			return;
 		}
 
+		if (this.NewPageText is not null && (page.IsMissing || page.Text.Length == 0))
+		{
+			page.Text = this.NewPageText(page.Title, item);
+		}
+
 		var parser = new SiteParser(page);
 		if (this.IsValidPage(parser, item))
 		{
@@ -121,7 +126,7 @@ public abstract class CreateOrUpdateJob<T> : EditJob
 		}
 		else if (page.Exists && this.ThrowInvalid)
 		{
-			throw new InvalidOperationException("Page found but failed validity check.");
+			throw new InvalidOperationException($"Page failed validity check: {page.Title}");
 		}
 	}
 
