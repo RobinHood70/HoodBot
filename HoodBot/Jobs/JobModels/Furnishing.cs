@@ -3,11 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
-using RobinHood70.HoodBot.Uesp;
-using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 
 #region Internal Enumerations
@@ -86,7 +85,13 @@ internal sealed class Furnishing
 
 	private static readonly Regex IngredientsFinder = new(@"\|cffffffINGREDIENTS\|r\n(?<ingredients>.+)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 	private static readonly Regex SizeFinder = new(@"This is a (?<size>\w+) house item.", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-	private static readonly Dictionary<long, string> TitleExceptions = new()
+	private static readonly Dictionary<long, string> NameExceptions = new()
+	{
+		// Capitalization is still mostly algorithmic. This list contains exceptions to the rules Dave implemented in ESOLog.
+		[208358111] = "Handbook for New Homeowners",
+	};
+
+	private static readonly Dictionary<long, string> PageNameExceptions = new()
 	{
 		[203278] = "Apocrypha Tree, Spore (Legendary)",
 		[118162] = "Carpet of the Desert Flame, Faded (design 1)",
@@ -103,47 +108,56 @@ internal sealed class Furnishing
 	#endregion
 
 	#region Constructors
-	public Furnishing(IDataRecord row, Site site, bool collectible)
+	public Furnishing(IDataRecord row, HashSet<string>? names)
 	{
-		this.Collectible = collectible;
-		this.Id = collectible ? (long)row["itemId"] : (int)row["itemId"];
+		var furnField = row["furnLimitType"];
+
+		// Clunky workaround for furnishing having different type than collectible.
+		this.FurnishingLimitType = furnField is sbyte tinyVal
+			? (FurnishingType)(int)tinyVal
+			: (FurnishingType)furnField;
+		var furnSplit = EsoLog.ConvertEncoding((string)row["furnCategory"])
+			.Split(TextArrays.Colon, 2);
+		this.FurnishingCategory = furnSplit[0];
+		if (furnSplit.Length == 2)
+		{
+			this.FurnishingSubcategory = furnSplit[1].Split(TextArrays.Parentheses, StringSplitOptions.TrimEntries)[0];
+			if (this.FurnishingLimitType == FurnishingType.None)
+			{
+				this.FurnishingLimitType = (
+					AliveCats.Contains(this.FurnishingCategory) ||
+					AliveCats.Contains(this.FurnishingSubcategory))
+						? FurnishingType.SpecialFurnishings
+						: FurnishingType.TraditionalFurnishings;
+			}
+		}
+		else
+		{
+			// If you get an error here, it may be because the furnishing furnCategory isn't in the expected format, so it's processing it as a collection item.
+			this.FurnishingSubcategory = EsoLog.ConvertEncoding((string)row["furnSubCategory"]);
+		}
+
+		this.Id = row["itemId"] is long longVal ? (int)longVal : (int)row["itemId"];
 		var desc = EsoLog.ConvertEncoding((string)row["description"])
 			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
 			.Replace("|r", string.Empty, StringComparison.Ordinal);
-		desc = desc.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal); // Doing this one separately since it should probably be separated out at some point.
 		var sizeMatch = SizeFinder.Match(desc);
 		this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value.UpperFirst(CultureInfo.CurrentCulture) : null;
 		this.Description = sizeMatch.Success && sizeMatch.Index == 0 && sizeMatch.Length == desc.Length
 			? null
 			: desc;
-		var furnCategory = EsoLog.ConvertEncoding((string)row["furnCategory"]);
 		if ((string?)row["tags"] is string tags)
 		{
 			this.Behavior = EsoSpace.TrimBehavior(EsoLog.ConvertEncoding(tags));
 		}
 
-		if (collectible)
+		if (this.Collectible)
 		{
-			this.FurnishingCategory = furnCategory;
-			this.FurnishingSubcategory = EsoLog.ConvertEncoding((string)row["furnSubCategory"]);
 			this.NickName = EsoLog.ConvertEncoding((string)row["nickname"]);
 		}
 		else
 		{
 			this.BindType = GetBindTypeName((int)row["bindType"]);
-
-			if (!string.IsNullOrEmpty(furnCategory))
-			{
-				var furnSplit = furnCategory.Split(TextArrays.Colon, 2);
-				if (furnSplit.Length > 0)
-				{
-					this.FurnishingCategory = furnSplit[0];
-					this.FurnishingSubcategory = furnSplit[1]
-						.Split(TextArrays.Parentheses)[0]
-						.TrimEnd();
-				}
-			}
-
 			var quality = EsoLog.ConvertEncoding((string)row["quality"]);
 			this.Quality = GetQualityName(quality);
 
@@ -151,36 +165,30 @@ internal sealed class Furnishing
 			this.AddSkillsAndMats(abilityDesc);
 		}
 
-		this.FurnishingLimitType = this.GetFurnishingTypeFromRow(row);
 		var itemLink = EsoLog.ConvertEncoding((string)row["resultitemLink"]);
 		this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
-		this.Name = EsoLog.ConvertEncoding((string)row["name"]);
-		if (this.Collectible || !TitleExceptions.TryGetValue(this.Id, out var titleName))
+		this.Name = NameExceptions.TryGetValue(this.Id, out var correctedName)
+			? correctedName
+			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
+		if (names?.TryGetValue(this.Name, out var correctedCase) == true)
 		{
-			titleName = TitleFactory.SanitizePageName(this.Name, true);
+			if (!this.Name.OrdinalEquals(correctedCase))
+			{
+				Debug.WriteLine($"Corrected casing for furnishing ID {this.Id} from '{this.Name}' to '{correctedCase}'");
+			}
+
+			this.Name = correctedCase;
 		}
 
-		this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
+		this.PageName = !this.Collectible && PageNameExceptions.TryGetValue(this.Id, out var correctedPageName)
+			? correctedPageName
+			: TitleFactory.SanitizePageName(this.Name, true);
 		this.Disambiguator =
 			this.FurnishingCategory.OrdinalICEquals("Mounts") ? "mount" :
 			this.FurnishingCategory.OrdinalICEquals("Vanity Pets") ? "pet" :
 			this.Collectible ? "collectible" :
-			" furnishing";
-		this.DisambiguationTitle = TitleFactory.FromUnvalidated(this.Title.Namespace, $"{this.Title.PageName} ({this.Disambiguator})");
+			"furnishing";
 	}
-	#endregion
-
-	#region Public Static Properties
-	public static Dictionary<string, string> PageNameExceptions { get; } = new(StringComparer.Ordinal)
-	{
-		["Dwarven Spider Pet"] = "Dwarven Spider Pet (furnishing)",
-		["Frostbane Bear Mount"] = "Frostbane Bear (mount)",
-		["Frostbane Bear Pet"] = "Frostbane Bear (pet)",
-		["Frostbane Sabre Cat Pet"] = "Frostbane Sabre Cat (pet)",
-		["Frostbane Sabre Cat Mount"] = "Frostbane Sabre Cat (mount)",
-		["Frostbane Wolf Mount"] = "Frostbane Wolf (mount)",
-		["Frostbane Wolf Pet"] = "Frostbane Wolf (pet)",
-	};
 	#endregion
 
 	#region Public Properties
@@ -188,16 +196,13 @@ internal sealed class Furnishing
 
 	public string? BindType { get; }
 
-	public bool Collectible { get; }
-
-	// Likely to only be accessed once per item, so mapping it to Contains rather than storing a value.
-	public bool Deprecated => DeprecatedFurnishings.Contains(this.Id);
+	public bool Collectible => this.FurnishingLimitType is
+		FurnishingType.CollectibleFurnishings or
+		FurnishingType.SpecialCollectibles;
 
 	public string? Description { get; }
 
 	public string Disambiguator { get; }
-
-	public Title DisambiguationTitle { get; }
 
 	public string? FurnishingCategory { get; }
 
@@ -213,6 +218,8 @@ internal sealed class Furnishing
 
 	public string? NickName { get; }
 
+	public string PageName { get; set; } // Settable to deal with conflicts.
+
 	public string? Quality { get; }
 
 	public string? ResultItemLink { get; }
@@ -220,8 +227,6 @@ internal sealed class Furnishing
 	public string? Size { get; }
 
 	public SortedSet<string> Skills { get; } = new(StringComparer.Ordinal);
-
-	public Title Title { get; set; } // Settable to deal with conflicts.
 	#endregion
 
 	#region Public Static Methods
@@ -242,8 +247,16 @@ internal sealed class Furnishing
 	public static string ImageName(string itemName) => $"ON-furnishing-{itemName.Replace(':', ',')}.jpg";
 	#endregion
 
+	#region Public Methods
+	public bool IsValid() =>
+		!DeprecatedFurnishings.Contains(this.Id) &&
+		!this.Name.Contains(" Station (", StringComparison.Ordinal);
+	#endregion
+
 	#region Public Override Methods
-	public override string ToString() => $"({this.Id}) {this.Title.PageName}";
+	public override string ToString() => this.Name.OrdinalEquals(this.PageName)
+		? $"({this.Id}) {this.Name}"
+		: $"({this.Id}) {this.Name} => Online:{this.PageName}";
 	#endregion
 
 	#region Private Static Methods
@@ -295,27 +308,6 @@ internal sealed class Furnishing
 				}
 			}
 		}
-	}
-
-	private FurnishingType GetFurnishingTypeFromRow(IDataRecord row)
-	{
-		var furnishingLimitType = this.Collectible
-			? (FurnishingType)(sbyte)row["furnLimitType"]
-			: (FurnishingType)row["furnLimitType"];
-		if (furnishingLimitType == FurnishingType.None)
-		{
-			furnishingLimitType = (
-				AliveCats.Contains(this.FurnishingCategory!) ||
-				AliveCats.Contains(this.FurnishingSubcategory!))
-					? this.Collectible
-						? FurnishingType.SpecialCollectibles
-						: FurnishingType.SpecialFurnishings
-					: this.Collectible
-						? FurnishingType.CollectibleFurnishings
-						: FurnishingType.TraditionalFurnishings;
-		}
-
-		return furnishingLimitType;
 	}
 	#endregion
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -50,33 +51,35 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Fields
-	private readonly Context context;
 	private readonly TitleCollection deprecatedTitles;
 	private readonly Dictionary<long, Furnishing> furnishings = [];
 	private readonly List<string> fileMessages = [];
-	private readonly TitleDictionary<long> idLookup = [];
+	private readonly HashSet<string> itemNames = new(StringComparer.OrdinalIgnoreCase);
 	private readonly List<string> pageMessages = [];
+	private readonly bool removeUnneededStuff;
 	private string? blank;
-	private HashSet<long> wantedIds = [];
 	#endregion
 
 	#region Constructors
 	[JobInfo("Furnishings", "ESO Update")]
-	public EsoFurnishingUpdater(JobManager jobManager)
+	public EsoFurnishingUpdater(JobManager jobManager, bool removeUnneededStuff)
 		: base(jobManager)
 	{
+		var test = new StringBuilder();
+
 		//// this.Shuffle = true;
 		//// jobManager.ShowDiffs = false;
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Furnishings");
 		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
-		this.context = new Context(this.Site);
 		this.deprecatedTitles = new(this.Site)
 		{
 			"Online:Dock Pulleys, Mounted",
 			"Online:Goblin Totem",
 			"Online:Orcish Shrine, Malacath",
 		};
+		this.removeUnneededStuff = removeUnneededStuff;
 
+		this.NewPageText = this.GetBlankFurnishingPageText;
 		this.OnUpdate = this.UpdateFurnishing;
 	}
 	#endregion
@@ -146,8 +149,9 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 						this.Warn($"Same id found on multiple pages: {id} on {varPage.Title} and {knownIds[id]}");
 					}
 
-					item.Title = varPage.Title; // Make sure the item knows what page it belongs to.
-					retval.Add(item.Title, item);
+					item.PageName = varPage.Title.PageName; // Make sure the item knows what page it belongs to.
+					var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], item.PageName);
+					retval.Add(title, item);
 				}
 				else
 				{
@@ -160,89 +164,40 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			}
 		}
 
-		this.wantedIds = [.. this.furnishings.Keys];
-		this.wantedIds.ExceptWith(knownIds.Keys);
-
 		return retval;
 	}
 
 	protected override void GetExternalData()
 	{
-		var blankPage = this.Site.LoadPage($"Template:{TemplateName}/Blank");
-		var parser = new SiteParser(blankPage);
-		if (parser.FindTemplate("Pre") is not ITemplateNode template ||
-			template.Find(1)?.Value is not WikiNodeCollection paramValue ||
-			paramValue.Count != 1 ||
-			paramValue[0] is not ITagNode nowiki)
-		{
-			throw new InvalidOperationException("Template blank not in expected format.");
-		}
-
-		this.blank = nowiki.InnerText?.Trim();
-
-		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, record => new Furnishing(record, this.Site, false)))
-		{
-			if (!furnishing.Deprecated)
-			{
-				this.furnishings.Add(Furnishing.GetKey(furnishing.Id, false), furnishing);
-			}
-		}
-
-		foreach (var collectible in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, record => new Furnishing(record, this.Site, true)))
-		{
-			if (!collectible.Deprecated)
-			{
-				this.furnishings.Add(Furnishing.GetKey(collectible.Id, true), collectible);
-			}
-		}
-
-		var test = new TitleDictionary<Furnishing>();
-		var dupes = new Dictionary<long, Title>();
-		foreach (var (id, furnishing) in this.furnishings)
-		{
-			if (!test.TryAdd(furnishing.Title, furnishing))
-			{
-				// Leave item in list after check so additional dupes can be detected. Remove all dupes later.
-				var dupe = test[furnishing.Title];
-				if (furnishing.DisambiguationTitle == dupe.DisambiguationTitle)
-				{
-					var key = Furnishing.GetKey(furnishing.Id, furnishing.Collectible);
-					var key2 = Furnishing.GetKey(dupe.Id, dupe.Collectible);
-					Debug.WriteLine($"{key} / {key2}: {furnishing.Title}");
-					dupes.Add(key, furnishing.Title);
-				}
-			}
-		}
-
-		if (dupes.Count > 0)
-		{
-			this.StatusWriteLine("DUPES FOUND - see Debug output.");
-		}
+		this.blank = this.LoadBlankFurnishingPage();
+		this.GetFurnishingsFromDb();
+		this.GetCollectiblesFromDb();
+		this.CheckForDupes();
 	}
 
 	protected override TitleDictionary<Furnishing> GetNewItems()
 	{
-		var newItems = new TitleDictionary<Furnishing>();
-		foreach (var id in this.wantedIds)
+		var fileName = LocalConfig.BotDataSubPath("NewFurnishings.txt");
+		if (!File.Exists(fileName))
 		{
-			var item = this.furnishings[id];
-			var title = item.Title;
-			if (!newItems.TryAdd(title, item))
-			{
-				var oldItem = newItems[title];
-				if (oldItem.DisambiguationTitle != item.DisambiguationTitle)
-				{
-					// If adding two new items with the same name, disambiguate both if possible.
-					oldItem.Title = oldItem.DisambiguationTitle;
-					item.Title = item.DisambiguationTitle;
-					title = item.DisambiguationTitle;
-				}
+			return [];
+		}
 
-				if (!newItems.TryAdd(title, item))
-				{
-					throw new InvalidOperationException($"Unable to find unique disambiguation for {item.Name}.");
-				}
+		var newItems = new TitleDictionary<Furnishing>();
+		var file = new CsvFile(fileName);
+		foreach (var row in file.ReadRows())
+		{
+			var id = long.Parse(row["id"], CultureInfo.InvariantCulture);
+			var name = row["name"];
+
+			var furnishing = this.furnishings[id];
+			if (name.OrdinalEquals(furnishing.Name))
+			{
+				throw new InvalidOperationException("Furnishing name mismatch.");
 			}
+
+			var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], furnishing.PageName);
+			newItems.Add(title, furnishing);
 		}
 
 		return newItems;
@@ -276,8 +231,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			Debug.WriteLine(string.Empty);
 		}
 	}
-
-	protected override void PageMissing(Page page) => page.Text = this.blank ?? throw new InvalidOperationException("Blank page text is null.");
 	#endregion
 
 	#region Private Static Methods
@@ -326,6 +279,32 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		{
 			template.UpdateIfEmpty("icon", defaultPageName);
 		}*/
+	}
+
+	private static string CheckName(Page page, ITemplateNode template, Furnishing item)
+	{
+		var labelName = page.Title.LabelName();
+
+		// Prioritize existing name in template.
+		if (template.GetValue("name") is string nameValue)
+		{
+			if (nameValue.OrdinalEquals(labelName))
+			{
+				template.Remove("name");
+			}
+
+			return nameValue;
+		}
+
+		// Otherwise, make sure the name is correct.
+		if (!item.Name.OrdinalEquals(labelName))
+		{
+			template.Update("name", item.Name, ParameterFormat.OnePerLine, true);
+			return item.Name;
+		}
+
+		// Failing that, just return the label name.
+		return labelName;
 	}
 
 	private static void FixBehavior(ITemplateNode template)
@@ -410,6 +389,34 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Private Methods
+	private void CheckForDupes()
+	{
+		var test = new TitleDictionary<Furnishing>();
+		var dupes = new Dictionary<long, Title>();
+		foreach (var furnishing in this.furnishings.Values)
+		{
+			var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], furnishing.PageName);
+			if (!test.TryAdd(title, furnishing))
+			{
+				// Leave item in list after check so additional dupes can be detected. Remove all dupes later.
+				var dupe = test[title];
+				if (furnishing.PageName.OrdinalEquals(dupe.PageName) &&
+					furnishing.Disambiguator.OrdinalEquals(dupe.Disambiguator))
+				{
+					var key = Furnishing.GetKey(furnishing.Id, furnishing.Collectible);
+					var key2 = Furnishing.GetKey(dupe.Id, dupe.Collectible);
+					Debug.WriteLine($"{key} / {key2}: {title}");
+					dupes.Add(key, title);
+				}
+			}
+		}
+
+		if (dupes.Count > 0)
+		{
+			this.StatusWriteLine("DUPES FOUND - see Debug output.");
+		}
+	}
+
 	private void CheckImage(ITemplateNode template, string name, string link)
 	{
 		var fileSpace = this.Site[MediaWikiNamespaces.File];
@@ -447,38 +454,17 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private string CheckName(Page page, ITemplateNode template, Furnishing item)
-	{
-		var retval = page.Title.LabelName();
-		if (template.GetValue("name") is string nameValue)
-		{
-			if (nameValue.OrdinalEquals(retval))
-			{
-				template.Remove("name");
-			}
-
-			retval = ParseToText.Build(nameValue, this.context);
-		}
-		else if (!item.Name.OrdinalEquals(retval))
-		{
-			template.Update("name", item.Title.PageName, ParameterFormat.OnePerLine, true);
-		}
-
-		return retval;
-	}
-
 	private void CheckTitle(Title title, string labelName, Furnishing furnishing)
 	{
-		var compareName = Furnishing.PageNameExceptions.GetValueOrDefault(labelName, furnishing.Title.LabelName());
-		if (!labelName.OrdinalEquals(compareName))
+		if (!labelName.OrdinalEquals(furnishing.PageName))
 		{
 			this.pageMessages.Add($"[[{title.FullPageName()}|{labelName}]] ''should be''<br>\n" +
-			  $"{compareName}");
+			  $"{furnishing.PageName}");
 			if (!title.PageName.Contains(':', StringComparison.Ordinal) &&
-				compareName.Contains(':', StringComparison.Ordinal) &&
-				title.PageName.Replace(',', ':').OrdinalEquals(furnishing.Title.PageName))
+				furnishing.PageName.Contains(':', StringComparison.Ordinal) &&
+				title.PageName.Replace(',', ':').OrdinalEquals(furnishing.PageName))
 			{
-				Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\t{furnishing.Title}");
+				Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\tOnline:{furnishing.PageName}");
 			}
 		}
 	}
@@ -562,7 +548,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	private void FurnishingFixes(ITemplateNode template, Page page, Furnishing item)
 	{
 		ArgumentNullException.ThrowIfNull(page);
-		var name = this.CheckName(page, template, item);
+		var rawTemplate = template.ToRaw();
+		var name = CheckName(page, template, item);
 		CheckIcon(template, name);
 		this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
 		this.CheckTitle(page.Title, name, item);
@@ -572,14 +559,13 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			template.Update("nickname", item.NickName, ParameterFormat.OnePerLine, true);
 		}
 
-		template.Update("quality", item.Quality, ParameterFormat.OnePerLine, true);
-
 		if (item.Size is not null)
 		{
 			template.Update("size", item.Size, ParameterFormat.OnePerLine, false);
 		}
 
-		template.Update("desc", item.Description, ParameterFormat.OnePerLine, false);
+		var desc = item.Description?.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
+		template.Update("desc", desc, ParameterFormat.OnePerLine, false);
 		template.Update("cat", item.FurnishingCategory, ParameterFormat.OnePerLine, false);
 		template.Update("subcat", item.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
 
@@ -633,14 +619,17 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
 		}
 
-		if (item.FurnishingLimitType == FurnishingType.None && string.IsNullOrEmpty(item.Behavior))
+		if (item.FurnishingLimitType is not FurnishingType.SpecialCollectibles and not FurnishingType.CollectibleFurnishings)
 		{
 			template.Remove("collectible");
 		}
-		else
+
+		if (!rawTemplate.OrdinalEquals(template.ToRaw()))
 		{
+			// Only update these if something else changed.
 			var wantsToBe = Furnishing.GetFurnishingLimitType(item.FurnishingLimitType);
 			template.Update("furnLimitType", wantsToBe);
+			template.Update("quality", item.Quality, ParameterFormat.OnePerLine, true);
 		}
 	}
 
@@ -677,6 +666,34 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		this.FixList(template, "skill");
 	}
 
+	private string GetBlankFurnishingPageText(Title title, Furnishing furnishing) => this.blank ?? throw new InvalidOperationException("Blank page text is null.");
+
+	private void GetCollectiblesFromDb()
+	{
+		foreach (var collectible in Database.RunQuery(EsoLog.Connection, CollectiblesQuery, record => new Furnishing(record, this.itemNames)).Where(collectible => collectible.IsValid()))
+		{
+			this.furnishings.Add(Furnishing.GetKey(collectible.Id, true), collectible);
+		}
+	}
+
+	private void GetFurnishingsFromDb()
+	{
+		foreach (var furnishing in Database.RunQuery(EsoLog.Connection, MinedItemsQuery, record => new Furnishing(record, this.itemNames)).Where(furnishing => furnishing.IsValid()))
+		{
+			this.furnishings.Add(Furnishing.GetKey(furnishing.Id, false), furnishing);
+		}
+	}
+
+	private string LoadBlankFurnishingPage()
+	{
+		var blankPage = this.Site.LoadPage($"Template:{TemplateName}/Blank");
+		var parser = new SiteParser(blankPage);
+		var paramValue = parser.FindTemplate("Pre")?.Find(1)?.Value;
+		return paramValue?.Count == 1 && paramValue[0] is ITagNode nowiki && nowiki.InnerText is string text
+			? text.Trim()
+			: throw new InvalidOperationException("Template blank not in expected format.");
+	}
+
 	private void UpdateFurnishing(SiteParser parser, Furnishing item)
 	{
 		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
@@ -688,8 +705,11 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 
 		this.FurnishingFixes(template, parser.Page, item);
-		template.RemoveEmpties(FurnishingKeep);
-		CheckComments(parser, template);
+		if (this.removeUnneededStuff)
+		{
+			template.RemoveEmpties(FurnishingKeep);
+			CheckComments(parser, template);
+		}
 	}
 	#endregion
 }
