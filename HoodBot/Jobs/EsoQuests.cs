@@ -325,6 +325,65 @@ public class EsoQuests : EditJob
 	#endregion
 
 	#region Private Static Methods
+	private static void AppendRewardInfo(StringBuilder sb, Reward reward)
+	{
+		sb.Append("<br>");
+		if (reward.RewardType == 1)
+		{
+			sb
+				.Append("{{ESO Gold|<!--")
+				.Append(reward.Quantity)
+				.Append("-->}} Gold");
+			return;
+		}
+
+		if (reward.Quantity > 1)
+		{
+			sb
+				.Append(reward.Quantity)
+				.Append(' ');
+		}
+
+		if (reward.ItemId == 0 && reward.CollectId == 0)
+		{
+			sb.Append(reward.Name);
+			return;
+		}
+
+		sb
+			.Append("{{Item Link|")
+			.Append(reward.Name);
+		if (reward.ItemId != 0)
+		{
+			sb
+				.Append("|id=")
+				.Append(reward.ItemId);
+		}
+
+		if (reward.CollectId != 0)
+		{
+			sb
+				.Append("|collectid=")
+				.Append(reward.CollectId);
+		}
+
+		if (reward.Quality > -1)
+		{
+			sb
+				.Append("|quality=")
+				.Append(reward.Quality);
+		}
+
+		sb.Append("|summary=1}}");
+	}
+
+	private static Condition ConditionFromRow(IDataRecord row) => new(
+		isComplete: (sbyte)row["isComplete"] == 1,
+		isFail: (sbyte)row["isFail"] == 1,
+		questId: (long)row["questId"],
+		stepId: (long)row["questStepId"],
+		text: EsoLog.ConvertEncoding((string)row["text"]));
+
 	private static List<string> GetJournalEntries(Dictionary<string, List<Condition>> mergedStages)
 	{
 		List<string> journalEntries = [];
@@ -365,7 +424,7 @@ public class EsoQuests : EditJob
 
 		// Retrieve quest data from database
 		var retval = new List<QuestData>();
-		foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
+		foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, QuestDataFromRow))
 		{
 			var fullPageName = "Online:" + quest.Name;
 			if (!ignore.Contains(quest.InternalId) &&
@@ -377,6 +436,49 @@ public class EsoQuests : EditJob
 		}
 
 		return retval;
+	}
+
+	private static QuestData QuestDataFromRow(IDataRecord row)
+	{
+		var name = EsoLog.ConvertEncoding((string)row["name"]);
+		var offset = name.IndexOf('\n', StringComparison.Ordinal);
+		if (offset != -1)
+		{
+			name = name[..offset];
+		}
+
+		offset = name.LastIndexOf(" (", StringComparison.Ordinal);
+		if (offset != -1)
+		{
+			name = name[..offset];
+		}
+
+		var zone = EsoLog.ConvertEncoding((string)row["zone"]);
+		if (zone.Length == 0 || zone.OrdinalEquals("Tamriel"))
+		{
+			zone = EsoLog.ConvertEncoding((string)row["locationZone"]);
+			if (zone.OrdinalEquals("Tamriel"))
+			{
+				zone = string.Empty;
+			}
+		}
+
+		return new QuestData(
+			id: (long)row["id"],
+			backgroundText: EsoLog.ConvertEncoding((string)row["backgroundText"]),
+			confirmText: EsoLog.ConvertEncoding((string)row["confirmText"]),
+			declineText: EsoLog.ConvertEncoding((string)row["declineText"]),
+			endBackgroundText: EsoLog.ConvertEncoding((string)row["endBackgroundText"]),
+			endDialogueText: EsoLog.ConvertEncoding((string)row["endDialogText"]),
+			endJournalText: EsoLog.ConvertEncoding((string)row["endJournalText"]),
+			goalText: EsoLog.ConvertEncoding((string)row["goalText"]),
+			internalId: (int)row["internalId"],
+			level: (sbyte)row["level"],
+			name: name,
+			objective: EsoLog.ConvertEncoding((string)row["objective"]),
+			repeatType: (short)row["repeatType"],
+			type: (short)row["type"],
+			zone: zone);
 	}
 
 	private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
@@ -397,6 +499,22 @@ public class EsoQuests : EditJob
 
 		return retval;
 	}
+
+	private static Reward RewardFromRow(IDataRecord row) => new(
+		(int)row["collectId"],
+		(int)row["itemId"],
+		(short)row["type"],
+		EsoLog.ConvertEncoding((string)row["name"]),
+		(sbyte)row["quality"],
+		(int)row["quantity"],
+		(long)row["questId"]);
+
+	private static Stage StageFromRow(IDataRecord record) => new(
+		(long)record["id"],
+		(long)record["questId"],
+		EsoLog.ConvertEncoding((string)record["text"]),
+		(Visibility)(sbyte)record["visibility"],
+		EsoLog.ConvertEncoding((string)record["zone"]));
 	#endregion
 
 	#region Private Methods
@@ -445,7 +563,7 @@ public class EsoQuests : EditJob
 	private void GetConditions(Dictionary<long, QuestData> idToQuest, string whereText)
 	{
 		this.StatusWriteLine("Getting condition data");
-		var conditions = Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Condition(row));
+		var conditions = Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), ConditionFromRow);
 		foreach (var condition in conditions)
 		{
 			var quest = idToQuest[condition.QuestId];
@@ -490,7 +608,7 @@ public class EsoQuests : EditJob
 	private void GetRewards(Dictionary<long, QuestData> idToQuest, string whereText)
 	{
 		this.StatusWriteLine("Getting rewards data");
-		var rewardData = Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Reward(row));
+		var rewardData = Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), RewardFromRow);
 		var rewards = new List<Reward>();
 		var previousRewards = new HashSet<long>();
 		foreach (var reward in rewardData)
@@ -506,7 +624,7 @@ public class EsoQuests : EditJob
 	private void GetStages(Dictionary<long, QuestData> idToQuest, string whereText)
 	{
 		this.StatusWriteLine("Getting stage data");
-		var stages = Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Stage(row));
+		var stages = Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), StageFromRow);
 		foreach (var stage in stages)
 		{
 			var quest = idToQuest[stage.QuestId];
@@ -559,29 +677,18 @@ public class EsoQuests : EditJob
 	#endregion
 
 	#region Private Classes
-	private sealed class Condition : IEquatable<Condition>
+	private sealed class Condition(bool isComplete, bool isFail, long questId, long stepId, string text) : IEquatable<Condition>
 	{
-		#region Constructors
-		public Condition(IDataRecord row)
-		{
-			this.IsComplete = (sbyte)row["isComplete"] == 1;
-			this.IsFail = (sbyte)row["isFail"] == 1;
-			this.QuestId = (long)row["questId"];
-			this.StepId = (long)row["questStepId"];
-			this.Text = EsoLog.ConvertEncoding((string)row["text"]);
-		}
-		#endregion
-
 		#region Public Properties
-		public bool IsComplete { get; }
+		public bool IsComplete { get; } = isComplete;
 
-		public bool IsFail { get; }
+		public bool IsFail { get; } = isFail;
 
-		public long QuestId { get; }
+		public long QuestId { get; } = questId;
 
-		public long StepId { get; }
+		public long StepId { get; } = stepId;
 
-		public string Text { get; }
+		public string Text { get; } = text;
 
 		public bool Equals(Condition? other) =>
 			other != null &&
@@ -597,144 +704,71 @@ public class EsoQuests : EditJob
 		#endregion
 	}
 
-	private sealed class QuestData
+	private sealed class QuestData(long id, string backgroundText, string confirmText, string declineText, string endBackgroundText, string endDialogueText, string endJournalText, string goalText, int internalId, sbyte level, string name, string objective, short repeatType, short type, string zone)
 	{
 		#region Fields
 		private readonly List<Reward> rewards = [];
 		#endregion
 
-		#region Constructors
-		public QuestData(IDataRecord row)
-		{
-			this.BackgroundText = EsoLog.ConvertEncoding((string)row["backgroundText"]);
-			this.Id = (long)row["id"];
-			this.InternalId = (int)row["internalId"];
-			var name = EsoLog.ConvertEncoding((string)row["name"]);
-			var offset = name.IndexOf('\n', StringComparison.Ordinal);
-			if (offset != -1)
-			{
-				name = name[..offset];
-			}
-
-			offset = name.LastIndexOf(" (", StringComparison.Ordinal);
-			if (offset != -1)
-			{
-				name = name[..offset];
-			}
-
-			this.Name = name;
-			this.Objective = EsoLog.ConvertEncoding((string)row["objective"]);
-			this.RepeatType = (short)row["repeatType"];
-			this.Type = (short)row["type"];
-			this.Level = (sbyte)row["level"];
-			this.ConfirmText = EsoLog.ConvertEncoding((string)row["confirmtext"]);
-			this.DeclineText = EsoLog.ConvertEncoding((string)row["declinetext"]);
-			this.EndBackgroundText = EsoLog.ConvertEncoding((string)row["endbackgroundtext"]);
-			this.EndDialogueText = EsoLog.ConvertEncoding((string)row["enddialogtext"]);
-			this.EndJournalText = EsoLog.ConvertEncoding((string)row["endjournaltext"]);
-			this.GoalText = EsoLog.ConvertEncoding((string)row["goaltext"]);
-
-			var zone = EsoLog.ConvertEncoding((string)row["zone"]);
-			if (zone.Length == 0 || zone.OrdinalEquals("Tamriel"))
-			{
-				zone = EsoLog.ConvertEncoding((string)row["locationZone"]);
-				if (zone.OrdinalEquals("Tamriel"))
-				{
-					zone = string.Empty;
-				}
-			}
-
-			this.Zone = zone;
-		}
-		#endregion
-
 		#region Public Properties
-		public string BackgroundText { get; }
+		public string BackgroundText { get; } = backgroundText;
 
-		public string ConfirmText { get; }
+		public string ConfirmText { get; } = confirmText;
 
-		public string DeclineText { get; }
+		public string DeclineText { get; } = declineText;
 
-		public string EndBackgroundText { get; }
+		public string EndBackgroundText { get; } = endBackgroundText;
 
-		public string EndDialogueText { get; }
+		public string EndDialogueText { get; } = endDialogueText;
 
-		public string EndJournalText { get; }
+		public string EndJournalText { get; } = endJournalText;
 
-		public string GoalText { get; }
+		public string GoalText { get; } = goalText;
 
-		public long Id { get; }
+		public long Id { get; } = id;
 
-		public int InternalId { get; internal set; }
+		public int InternalId { get; internal set; } = internalId;
 
-		public sbyte Level { get; }
+		public sbyte Level { get; } = level;
 
-		public string Name { get; }
+		public string Name { get; } = name;
 
-		public string Objective { get; }
+		public string Objective { get; } = objective;
 
-		public int RepeatType { get; }
+		public int RepeatType { get; } = repeatType;
 
 		public List<Stage> Stages { get; } = [];
 
-		public int Type { get; }
+		public int Type { get; } = type;
 
 		public string? XP { get; private set; }
 
-		public string Zone { get; set; }
+		public string Zone { get; set; } = zone;
 		#endregion
 
 		#region Public Methods
-		public void AddReward(Reward reward) => this.rewards.Add(reward);
+		public void AddReward(Reward reward)
+		{
+			if (reward.RewardType == -1)
+			{
+				this.XP = $"{{{{ESO XP|<!--{reward.Quantity}-->}}}} XP";
+			}
+			else
+			{
+				this.rewards.Add(reward);
+			}
+		}
 
 		public string GetRewardText()
 		{
-			List<string> rewardList = [];
+			var sb = new StringBuilder(1000);
 			foreach (var reward in this.rewards)
 			{
-				switch (reward.RewardType)
-				{
-					case -1:
-						this.XP = $"{{{{ESO XP|<!--{reward.Quantity}-->}}}} XP";
-						break;
-					case 1:
-						rewardList.Add($"{{{{ESO Gold|<!--{reward.Quantity}-->}}}} Gold");
-						break;
-					default:
-						var rewardText = reward.Quantity > 1 ? reward.Quantity.ToStringInvariant() + ' ' : string.Empty;
-						if (reward.ItemId == 0 && reward.CollectId == 0)
-						{
-							rewardText += reward.Name;
-						}
-						else
-						{
-							rewardText += "{{Item Link|" + reward.Name;
-							if (reward.ItemId != 0)
-							{
-								rewardText += "|id=" + reward.ItemId.ToStringInvariant();
-							}
-
-							if (reward.CollectId != 0)
-							{
-								rewardText += "|collectid=" + reward.CollectId.ToStringInvariant();
-							}
-
-							if (reward.Quality > -1)
-							{
-								rewardText += "|quality=" + reward.Quality.ToStringInvariant();
-							}
-
-							rewardText += "|summary=1}}";
-						}
-
-						rewardList.Add(rewardText);
-						break;
-				}
+				AppendRewardInfo(sb, reward);
 			}
 
-			return string.Join("<br>", rewardList);
+			return sb.ToString()[4..];
 		}
-
 		#endregion
 
 		#region Public Override Methods
@@ -742,51 +776,27 @@ public class EsoQuests : EditJob
 		#endregion
 	}
 
-	private sealed class Reward
+	private sealed class Reward(int collectId, int itemId, int rewardType, string name, int quality, int quantity, long questId)
 	{
-		#region Constructors
-		public Reward(IDataRecord row)
-		{
-			this.CollectId = (int)row["collectId"];
-			this.ItemId = (int)row["itemId"];
-			this.RewardType = (short)row["type"];
-			this.Name = EsoLog.ConvertEncoding((string)row["name"]);
-			this.Quality = (sbyte)row["quality"];
-			this.Quantity = (int)row["quantity"];
-			this.QuestId = (long)row["questId"];
-		}
-		#endregion
-
 		#region Public Properties
-		public int CollectId { get; }
+		public int CollectId { get; } = collectId;
 
-		public int ItemId { get; }
+		public int ItemId { get; } = itemId;
 
-		public int RewardType { get; }
+		public int RewardType { get; } = rewardType;
 
-		public string Name { get; }
+		public string Name { get; } = name;
 
-		public int Quality { get; }
+		public int Quality { get; } = quality;
 
-		public int Quantity { get; }
+		public int Quantity { get; } = quantity;
 
-		public long QuestId { get; }
+		public long QuestId { get; } = questId;
 		#endregion
 	}
 
-	private sealed class Stage
+	private sealed class Stage(long id, long questId, string text, Visibility visibility, string zone)
 	{
-		#region Constructors
-		public Stage(IDataRecord row)
-		{
-			this.Id = (long)row["id"];
-			this.QuestId = (long)row["questId"];
-			this.Text = EsoLog.ConvertEncoding((string)row["text"]);
-			this.Visibility = (Visibility)(sbyte)row["visibility"];
-			this.Zone = EsoLog.ConvertEncoding((string)row["zone"]);
-		}
-		#endregion
-
 		#region Public Properties
 		public List<Condition> Conditions { get; } = [];
 
@@ -812,15 +822,15 @@ public class EsoQuests : EditJob
 			}
 		}
 
-		public long Id { get; }
+		public long Id { get; } = id;
 
-		public long QuestId { get; }
+		public long QuestId { get; } = questId;
 
-		public string Text { get; }
+		public string Text { get; } = text;
 
-		public Visibility Visibility { get; }
+		public Visibility Visibility { get; } = visibility;
 
-		public string Zone { get; }
+		public string Zone { get; } = zone;
 		#endregion
 
 		#region Public Override Methods
