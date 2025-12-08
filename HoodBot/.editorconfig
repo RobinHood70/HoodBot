@@ -1,12 +1,7 @@
-# NOTE: Requires **VS2019 16.3** or later
-
-# HoodBot Custom Rules
-# Description: Code analysis rules for projects which have been released or are about to be.
+# Description: Code analysis rule overrides for informal code.
 
 # Code files
 [*.{cs,vb}]
 
+# MA0076: Do not use implicit culture-sensitive ToString in interpolated strings
 dotnet_diagnostic.MA0076.severity = none
-
-# IDE0290: Use primary constructor
-dotnet_diagnostic.IDE0290.severity = none
