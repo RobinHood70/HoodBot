@@ -44,9 +44,6 @@ internal sealed class NpcData(string dataName, sbyte difficulty, Gender gender, 
 		[PickpocketDifficulty.Medium] = "Medium",
 		[PickpocketDifficulty.Hard] = "Hard",
 	};
-
-	#endregion
-	#region Constructors
 	#endregion
 
 	#region Public Static Properties
@@ -59,6 +56,7 @@ internal sealed class NpcData(string dataName, sbyte difficulty, Gender gender, 
 		[5] = "NPC Ally",
 		[6] = "Companion",
 	};
+	#endregion
 
 	#region Public Properties
 	public string DataName { get; } = dataName;
@@ -73,7 +71,7 @@ internal sealed class NpcData(string dataName, sbyte difficulty, Gender gender, 
 
 	public string LootType { get; } = lootType;
 
-	public string Name { get; } = name;
+	public string Name { get; set; } = name;
 
 	public PickpocketDifficulty PickpocketDifficulty { get; } = pickpocketDifficulty;
 
