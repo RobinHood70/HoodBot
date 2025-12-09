@@ -183,12 +183,45 @@ internal sealed class EsoSets : EditJob
 	private static List<SetData> GetSetData()
 	{
 		var retval = new List<SetData>();
-		foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new SetData(row)))
+		foreach (var item in Database.RunQuery(EsoLog.Connection, Query, SetDataFromRow))
 		{
 			retval.Add(item);
 		}
 
 		return retval;
+	}
+
+	private static SetData SetDataFromRow(IDataRecord row)
+	{
+		const int numEntries = 12;
+		var bonusDescriptions = new List<(string ItemCount, string Text)>(numEntries);
+		var name = EsoLog.ConvertEncoding((string)row["setName"]);
+		for (var i = 1; i <= numEntries; i++)
+		{
+			var bonusDesc = (string)row[$"setBonusDesc{i}"];
+			if (string.IsNullOrWhiteSpace(bonusDesc))
+			{
+				continue;
+			}
+
+			bonusDesc = EsoLog.ConvertEncoding(bonusDesc);
+			var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.TrimEntries);
+			if (bonusSplit.Length != 2 || bonusSplit[0][0] != '(')
+			{
+				throw new InvalidOperationException($"Set bonus for {name} is improperly formatted: {bonusDesc}");
+			}
+
+			var items = bonusSplit[0][1..];
+			var text = RegexLibrary.PruneExcessWhitespace(bonusSplit[1]);
+			if (text.StartsWith(name, StringComparison.Ordinal))
+			{
+				text = text[name.Length..].TrimStart();
+			}
+
+			bonusDescriptions.Add((items, text));
+		}
+
+		return new SetData(name, bonusDescriptions);
 	}
 	#endregion
 
@@ -333,39 +366,18 @@ internal sealed class EsoSets : EditJob
 	private sealed class SetData
 	{
 		#region Constructors
-		public SetData(IDataRecord row)
+		public SetData(string name, List<(string ItemCount, string Text)> bonusDescriptions)
 		{
-			ArgumentNullException.ThrowIfNull(row);
-			this.Name = EsoLog.ConvertEncoding((string)row["setName"]);
-			for (var i = 1; i <= 12; i++)
-			{
-				var bonusDesc = EsoLog.ConvertEncoding((string)row[$"setBonusDesc{i}"]);
-				if (!string.IsNullOrEmpty(bonusDesc))
-				{
-					var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.None);
-					var items = bonusSplit[0];
-					if (bonusSplit.Length != 2 || items[0] != '(')
-					{
-						throw new InvalidOperationException($"Set bonus for {this.Name} is improperly formatted: {bonusDesc}");
-					}
-
-					items = items[1..];
-					var text = bonusSplit[1].Trim();
-					text = RegexLibrary.PruneExcessWhitespace(text);
-					if (text.StartsWith(this.Name, StringComparison.Ordinal))
-					{
-						text = text[this.Name.Length..].TrimStart();
-					}
-
-					this.BonusDescriptions.Add((items, text));
-				}
-			}
+			ArgumentNullException.ThrowIfNull(name);
+			ArgumentNullException.ThrowIfNull(bonusDescriptions);
+			this.Name = name;
+			this.BonusDescriptions = bonusDescriptions;
 		}
 		#endregion
 
 		#region Public Properties
 
-		public List<(string ItemCount, string Text)> BonusDescriptions { get; } = [];
+		public List<(string ItemCount, string Text)> BonusDescriptions { get; }
 
 		public ChangeType ChangeType { get; set; }
 

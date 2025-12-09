@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
@@ -26,7 +25,7 @@ public enum PickpocketDifficulty
 }
 #endregion
 
-internal sealed class NpcData
+internal sealed class NpcData(string dataName, sbyte difficulty, Gender gender, long id, string lootType, string name, PickpocketDifficulty pickpocketDifficulty, string reaction)
 {
 	#region Static Fields
 	private static readonly Dictionary<Gender, string> Genders = new()
@@ -37,7 +36,7 @@ internal sealed class NpcData
 		[Gender.Male] = "Male",
 	};
 
-	private static readonly Dictionary<PickpocketDifficulty, string> PIckpocketDifficulties = new()
+	private static readonly Dictionary<PickpocketDifficulty, string> PickpocketDifficulties = new()
 	{
 		[PickpocketDifficulty.NotApplicable] = "N/A",
 		[PickpocketDifficulty.Unknown] = "?",
@@ -46,7 +45,12 @@ internal sealed class NpcData
 		[PickpocketDifficulty.Hard] = "Hard",
 	};
 
-	private static readonly Dictionary<sbyte, string> Reactions = new()
+	#endregion
+	#region Constructors
+	#endregion
+
+	#region Public Static Properties
+	public static Dictionary<int, string> Reactions { get; } = new()
 	{
 		[1] = "Hostile",
 		[2] = "Neutral",
@@ -55,78 +59,29 @@ internal sealed class NpcData
 		[5] = "NPC Ally",
 		[6] = "Companion",
 	};
-	#endregion
-
-	#region Constructors
-	public NpcData(IDataRecord row)
-	{
-		this.Id = (long)row["id"];
-		var nameField = EsoLog.ConvertEncoding((string)row["name"]);
-		var gender = (sbyte)row["gender"];
-		this.Difficulty = (sbyte)row["difficulty"];
-		this.Difficulty--;
-		this.PickpocketDifficulty = (PickpocketDifficulty)(sbyte)row["ppDifficulty"];
-		this.LootType = EsoLog.ConvertEncoding((string)row["ppClass"]);
-		var reaction = (sbyte)row["reaction"];
-		this.Reaction = reaction == -1
-			? this.LootType switch
-			{
-				"Bard" => "Friendly",
-				"" => string.Empty,
-				_ => "Justice Neutral"
-			}
-			: Reactions[reaction];
-
-		if (nameField.Length > 2 && nameField[^2] == '^' && gender == -1)
-		{
-			var genderChar = char.ToUpperInvariant(nameField[^1]);
-			nameField = nameField[0..^2];
-			this.Gender = genderChar switch
-			{
-				'M' => Gender.Male,
-				'F' => Gender.Female,
-				_ => Gender.None
-			};
-		}
-		else
-		{
-			this.Gender = (Gender)gender;
-		}
-
-		this.DataName = nameField.Trim();
-		if (ReplacementData.NpcNameFixes.TryGetValue(nameField, out var newName))
-		{
-			this.Name = newName;
-		}
-	}
-	#endregion
 
 	#region Public Properties
-	public string DataName { get; }
+	public string DataName { get; } = dataName;
 
-	public sbyte Difficulty { get; }
+	public sbyte Difficulty { get; } = difficulty;
 
-	public Gender Gender { get; }
+	public Gender Gender { get; } = gender;
 
 	public string GenderText => Genders[this.Gender];
 
-	public long Id { get; }
+	public long Id { get; } = id;
 
-	public string LootType { get; }
+	public string LootType { get; } = lootType;
 
-	public string Name
-	{
-		get => field ?? this.DataName;
-		internal set;
-	}
+	public string Name { get; } = name;
 
-	public PickpocketDifficulty PickpocketDifficulty { get; }
+	public PickpocketDifficulty PickpocketDifficulty { get; } = pickpocketDifficulty;
 
-	public string PickpocketDifficultyText => PIckpocketDifficulties[this.PickpocketDifficulty];
+	public string PickpocketDifficultyText => PickpocketDifficulties[this.PickpocketDifficulty];
 
 	public Dictionary<Place, int> Places { get; } = [];
 
-	public string Reaction { get; }
+	public string Reaction { get; } = reaction;
 
 	public Title? Title { get; set; }
 

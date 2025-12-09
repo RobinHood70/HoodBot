@@ -18,6 +18,15 @@ using RobinHood70.WikiCommon.Parser;
 internal sealed class EsoCollectibles : ParsedPageJob
 {
 	#region Private Constants
+	private const string CollectibleQuery =
+		"SELECT id, name, nickname, description, categoryName, subCategoryName " +
+		"FROM collectibles " +
+		"WHERE " +
+			"categoryName NOT IN ('Armor Styles' , 'Emotes', 'Fragments', 'Furnishings', 'Housing', 'Stories', 'Weapon Styles') AND " +
+			"subCategoryName != 'Companions' AND " +
+			"referenceId != 0 AND " +
+			"id NOT IN (248, 271, 272, 273, 274, 275, 276, 370, 371, 372, 1156, 1306, 1480, 8202, 10387, 10388)";
+
 	private const string TemplateName = "Online Collectible Summary";
 	#endregion
 
@@ -27,6 +36,11 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		9369, // Prairie Dog
 		11242, // Almalexia deck
 	];
+
+	private static readonly Dictionary<long, string> NameOverrides = new()
+	{
+		[6117] = "Honor Guard Jack"
+	};
 	#endregion
 
 	#region Fields
@@ -93,7 +107,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		if (parser.FindTemplate(TemplateName) is ITemplateNode template)
 		{
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
-			template.Update("type", CategorySingular(collectible.Type));
+			template.Update("type", CategorySingular(collectible.SubCategory));
 			template.UpdateIfEmpty("image", $"<!--{collectible.ImageName}-->");
 			template.UpdateIfEmpty("icon", $"{collectible.IconName}");
 			template.Update("id", collectible.Id.ToStringInvariant());
@@ -128,41 +142,58 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		HashSet<string> dupeNames = new(StringComparer.Ordinal);
 		HashSet<string> singleNames = new(StringComparer.Ordinal);
 		var retval = new List<Collectible>();
-		foreach (var item in Database.RunQuery(EsoLog.Connection, Collectible.Query, row => new Collectible(row)))
+		foreach (var item in Database.RunQuery(EsoLog.Connection, CollectibleQuery, CollectibleFromRow))
 		{
-			// These IDs correspond to Mount and Pet. It's unknown what purpose these serve, but one way or another, they should not be created.
-			if (item.Id is not 10387 and not 10388)
+			retval.Add(item);
+			if (!singleNames.Add(item.Name))
 			{
-				retval.Add(item);
-				if (!singleNames.Add(item.Name))
-				{
-					dupeNames.Add(item.Name);
-				}
+				dupeNames.Add(item.Name);
 			}
 		}
 
 		return (retval, dupeNames);
 	}
 
+	private static Collectible CollectibleFromRow(IDataRecord row)
+	{
+		var id = (long)row["id"];
+		var name = NameOverrides.GetValueOrDefault(id, EsoLog.ConvertEncoding((string)row["name"]));
+		var collectibleType = EsoLog.ConvertEncoding((string)row["categoryName"]);
+		var subCategory = EsoLog.ConvertEncoding((string)row["subCategoryName"]);
+		var colTypeSingular = CategorySingular(collectibleType);
+		var subCatSingular = CategorySingular(subCategory);
+		var fileCategory = colTypeSingular switch
+		{
+			"Appearance" => subCatSingular.OrdinalEquals("Hair Style")
+				? "hairstyle"
+				: subCatSingular.ToLowerInvariant(),
+			"Customized Action" => "action",
+			"Memento" or "Tool" => "memento",
+			"Ally" or "Mount" or "Pet" => colTypeSingular.ToLowerInvariant(),
+			_ => subCatSingular
+		};
+
+		return new Collectible(
+			id: id,
+			name: name,
+			nickName: EsoLog.ConvertEncoding((string)row["nickname"]),
+			description: EsoLog.ConvertEncoding((string)row["description"]),
+			collectibleType: collectibleType,
+			subCategory: subCategory,
+			imageName: $"ON-{fileCategory}-{name}",
+			iconName: $"ON-icon-{fileCategory}-{name}");
+	}
+
 	private static string CategorySingular(string category) => category switch
 	{
 		"Allies" => "Ally",
-		"Deer" => category,
-		"Elk" => category,
-		"Guar" => category,
-		"Kagouti" => category,
-		"Multi-Rider" => category,
 		"Nix-Oxen" => "Nix-Ox",
 		"Non-Combat Pets" => "Pet",
-		"Pangrit" => category,
 		"Personalities" => "Personality",
-		"Senche" => category,
-		"Senche-Raht" => category,
-		"Special" => category,
 		"Stories" => "Story",
 		"Undaunted Trophies" => "Undaunted Trophy",
 		"Wolves" => "Wolf",
-		_ => category.TrimEnd('s'),
+		_ => category[^1] == 's' ? category[0..^1] : category
 	};
 	#endregion
 
@@ -234,7 +265,7 @@ internal sealed class EsoCollectibles : ParsedPageJob
 			var titleText = item.Name;
 			if (dupeNames.Contains(item.Name))
 			{
-				var cat = item.Type.Length == 0 ? item.CollectibleType : item.Type;
+				var cat = item.SubCategory.Length == 0 ? item.CollectibleType : item.SubCategory;
 				titleText += $" ({cat})";
 			}
 
@@ -306,74 +337,28 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	#endregion
 
 	#region Private Classes
-	private sealed class Collectible
+	private sealed class Collectible(long id, string name, string nickName, string description, string collectibleType, string subCategory, string imageName, string iconName)
 	{
-		#region Constructors
-		internal Collectible(IDataRecord row)
-		{
-			this.Id = (long)row["id"];
-			this.Name = this.Id == 6117
-				? "Honor Guard Jack"
-				: EsoLog.ConvertEncoding((string)row["name"]);
-			this.NickName = EsoLog.ConvertEncoding((string)row["nickname"]);
-			this.Description = EsoLog.ConvertEncoding((string)row["description"]);
-			this.CollectibleType = EsoLog.ConvertEncoding((string)row["categoryName"]);
-			this.Type = EsoLog.ConvertEncoding((string)row["subCategoryName"]);
-			var colTypeSingular = CategorySingular(this.CollectibleType);
-			var typeSingular = CategorySingular(this.Type);
-			var fileCategory = colTypeSingular switch
-			{
-				"Appearance" => typeSingular.OrdinalEquals("Hair Style")
-					? "hairstyle"
-					: typeSingular,
-				"Customized Action" => "Action",
-				"Tool" => "Memento",
-				"Ally" or "Memento" or "Mount" or "Pet" => colTypeSingular,
-				_ => typeSingular
-			};
-
-			fileCategory = fileCategory.ToLowerInvariant();
-			this.ImageName = $"ON-{fileCategory}-{this.Name}";
-			this.IconName = $"ON-icon-{fileCategory}-{this.Name}";
-		}
-		#endregion
-
-		#region Public Static Properties
-		public static string Query { get; } = "SELECT " +
-				"id, " +
-				"name, " +
-				"nickname, " +
-				"description, " +
-				"categoryName, " +
-				"subCategoryName " +
-			"FROM collectibles " +
-			"WHERE " +
-				"categoryName NOT IN ('Armor Styles' , 'Emotes', 'Fragments', 'Furnishings', 'Housing', 'Stories', 'Weapon Styles') AND " +
-				"subCategoryName != 'Companions' AND " +
-				"referenceId != 0 AND " +
-				"id NOT IN (248, 271, 272, 273, 274, 275, 276, 370, 371, 372, 1156, 1306, 1480, 8202)";
-		#endregion
-
 		#region Public Properties
-		public string CollectibleType { get; }
+		public string CollectibleType { get; } = collectibleType;
 
 		public List<string> Crates { get; } = [];
 
-		public string Description { get; }
+		public string Description { get; } = description;
 
-		public string IconName { get; }
+		public string IconName { get; } = iconName;
 
-		public long Id { get; }
+		public long Id { get; } = id;
 
-		public string ImageName { get; }
+		public string ImageName { get; } = imageName;
 
-		public string Name { get; }
+		public string Name { get; } = name;
 
 		public IList<IWikiNode>? NewContent { get; private set; }
 
-		public string NickName { get; }
+		public string NickName { get; } = nickName;
 
-		public string Type { get; }
+		public string SubCategory { get; } = subCategory;
 
 		public string? Tier { get; }
 		#endregion

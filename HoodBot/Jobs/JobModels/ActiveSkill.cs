@@ -10,27 +10,13 @@ using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class ActiveSkill : Skill
+internal sealed class ActiveSkill(string name, string pageName, string skillClass, string skillLine, int learnedLevel, string skillType) : Skill(name, pageName, skillClass, skillLine)
 {
 	#region Fields
-	private readonly int learnedLevel;
-	private readonly string skillType;
-
 	private Morph? baseSkill = null;
 	#endregion
 
-	#region Constructors
-	public ActiveSkill(IDataRecord row)
-		: base(row)
-	{
-		this.learnedLevel = (int)row["learnedLevel"];
-		this.skillType = ((string)row["icon"]).Contains("_artifact_", StringComparison.OrdinalIgnoreCase)
-		? "Artifact"
-		: EsoLog.ConvertEncoding((string)row["type"]);
-	}
-	#endregion
-
-	#region Private Properties
+	#region Public Properties
 	public Morph BaseSkill => this.baseSkill ?? throw new InvalidOperationException();
 
 	public Dictionary<string, Morph> Morphs { get; } = new(StringComparer.Ordinal);
@@ -40,7 +26,7 @@ internal sealed class ActiveSkill : Skill
 	public override void AddData(IDataRecord row, Dictionary<long, List<Coefficient>> coefficients)
 	{
 		ArgumentNullException.ThrowIfNull(row);
-		var newMorph = new Morph(row);
+		var newMorph = MorphFromRow(row);
 		if (!this.Morphs.TryGetValue(newMorph.Name, out var morph))
 		{
 			morph = newMorph;
@@ -57,7 +43,7 @@ internal sealed class ActiveSkill : Skill
 			coefs = [];
 		}
 
-		morph.Ranks.Add(new ActiveRank(row, coefs));
+		morph.Ranks.Add(RankFromRow(row, coefs));
 	}
 
 	public override bool IsValid()
@@ -133,7 +119,7 @@ internal sealed class ActiveSkill : Skill
 		var baseRankCost = Cost.GetCostText(baseRank.Costs);
 		this.UpdateMorphs(site, template, baseRankCost);
 		template.Update("casttime", FormatSeconds(EsoSpace.TimeToText(baseRank.CastingTime)), ParameterFormat.OnePerLine, true);
-		template.Update("linerank", this.learnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
+		template.Update("linerank", learnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 		template.Update("cost", baseRankCost, ParameterFormat.OnePerLine, true);
 		if (template.Find("cost")?.Value is WikiNodeCollection paramValue)
 		{
@@ -169,12 +155,78 @@ internal sealed class ActiveSkill : Skill
 		template.UpdateOrRemove("duration", FormatSeconds(EsoSpace.TimeToText(baseRank.Duration)), ParameterFormat.OnePerLine, baseRank.Duration == 0);
 		template.UpdateOrRemove("channeltime", FormatSeconds(EsoSpace.TimeToText(baseRank.ChannelTime)), ParameterFormat.OnePerLine, baseRank.ChannelTime == -1);
 		template.Update("target", this.baseSkill.Target, ParameterFormat.OnePerLine, true);
-		template.UpdateOrRemove("type", this.skillType, ParameterFormat.OnePerLine, this.skillType.OrdinalEquals("Active"));
+		template.UpdateOrRemove("type", skillType, ParameterFormat.OnePerLine, skillType.OrdinalEquals("Active"));
 	}
 
 	#endregion
 
+	#region Private Static Methods
+	private static Morph MorphFromRow(IDataRecord row) => new(
+		abilityId: (long)row["abilityId"],
+		effectLine: EsoLog.ConvertEncoding((string)row["effectLines"]),
+		index: (sbyte)row["morph"],
+		maxRank: (sbyte)row["maxRank"],
+		name: EsoLog.ConvertEncoding((string)row["name"]),
+		target: EsoLog.ConvertEncoding((string)row["target"]));
+	#endregion
+
 	#region Private Methods
+
+	private static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
+
+	private static void GetCostSplit(IDataRecord row, List<Cost> costs, string costsName, string mechanicsName, bool perTime)
+	{
+		var costsText = (string)row[costsName];
+		if (string.IsNullOrEmpty(costsText) || costsText.OrdinalEquals("0") || costsText.OrdinalICEquals("None"))
+		{
+			return;
+		}
+
+		var mechanicsText = (string)row[mechanicsName];
+		var costSplit = costsText.Split(TextArrays.Comma);
+		var mechanics = mechanicsText.Split(TextArrays.Comma);
+		if (costSplit.Length != mechanics.Length)
+		{
+			throw new InvalidOperationException("Costs and mechanics have different lengths.");
+		}
+
+		costs.EnsureCapacity(costs.Count + costSplit.Length);
+		for (var i = 0; i < costSplit.Length; i++)
+		{
+			if (int.Parse(costSplit[i], CultureInfo.InvariantCulture) != 0)
+			{
+				var mechanicNum = int.Parse(mechanics[i], CultureInfo.InvariantCulture);
+				var mechanic = EsoLog.MechanicNames[mechanicNum] + (perTime ? " / 1s" : string.Empty);
+				costs.Add(new Cost(costSplit[i], mechanic));
+			}
+		}
+	}
+
+	private static ActiveRank RankFromRow(IDataRecord row, List<Coefficient> coefs)
+	{
+		var id = (long)row["abilityId"];
+		var minRange = FormatRange((int)row["minRange"]);
+		var maxRange = FormatRange((int)row["maxRange"]);
+		var range = minRange.OrdinalEquals("0")
+			? maxRange
+			: string.Concat(minRange, "-", maxRange);
+		var costs = new List<Cost>();
+		GetCostSplit(row, costs, "cost", "mechanic", false);
+		GetCostSplit(row, costs, "costTime", "mechanicTime", true);
+
+		return new ActiveRank(
+			id: id,
+			castingTime: (int)row["castTime"],
+			channelTime: (int)row["channelTime"],
+			coefficients: coefs,
+			costs: costs,
+			description: EsoLog.GetRankDescription(id, row),
+			duration: (int)row["duration"],
+			radius: FormatRange((int)row["radius"]),
+			range: range,
+			rank: (sbyte)row["rank"]);
+	}
+
 	private void UpdateMorph(ITemplateNode template, string baseSkillCost, TitleCollection usedList, Morph? morph, CultureInfo culture)
 	{
 		ArgumentNullException.ThrowIfNull(morph);

@@ -8,34 +8,16 @@ using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class PassiveSkill : Skill
+internal sealed class PassiveSkill(string name, string pageName, string skillClass, string skillLine, sbyte maxRank) : Skill(name, pageName, skillClass, skillLine)
 {
-	#region Constructors
-	public PassiveSkill(IDataRecord row)
-	: base(row)
-	{
-		this.MaxRank = (sbyte)row["maxRank"];
-	}
-	#endregion
-
 	#region Public Properties
-	public sbyte MaxRank { get; }
+	public sbyte MaxRank { get; } = maxRank;
 
 	internal List<PassiveRank> Ranks { get; } = [];
 	#endregion
 
 	#region Public Override Methods
-	public override void AddData(IDataRecord row, Dictionary<long, List<Coefficient>> coefficients)
-	{
-		var abilityId = (long)row["abilityId"];
-		if (!coefficients.TryGetValue(abilityId, out var coefs))
-		{
-			coefs = [];
-		}
-
-		var rank = new PassiveRank(row, coefs);
-		this.Ranks.Add(rank);
-	}
+	public override void AddData(IDataRecord row, Dictionary<long, List<Coefficient>> coefficients) => this.Ranks.Add(RankFromRow(row, coefficients));
 
 	public override ChangeType GetChangeType(Skill previous)
 	{
@@ -68,9 +50,9 @@ internal sealed class PassiveSkill : Skill
 	public override bool IsValid()
 	{
 		var retval = true;
-		if (this.Ranks[^1].Index != this.MaxRank)
+		if (this.Ranks[^1].Rank != this.MaxRank)
 		{
-			Debug.WriteLine($"Warning: {this.Name} has the wrong maximum rank ({this.Ranks[^1].Index} vs. {this.MaxRank}).");
+			Debug.WriteLine($"Warning: {this.Name} has the wrong maximum rank ({this.Ranks[^1].Rank} vs. {this.MaxRank}).");
 			retval = false;
 		}
 
@@ -78,7 +60,7 @@ internal sealed class PassiveSkill : Skill
 		{
 			if (string.IsNullOrWhiteSpace(rank.Description))
 			{
-				Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Index.ToStringInvariant()} has no description.");
+				Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Rank.ToStringInvariant()} has no description.");
 				retval = false;
 			}
 		}
@@ -101,15 +83,25 @@ internal sealed class PassiveSkill : Skill
 		TitleCollection usedList = new(site);
 		foreach (var rank in this.Ranks)
 		{
-			var rankText = rank.Index.ToStringInvariant();
-			var paramName = "desc" + (rank.Index == 1 ? string.Empty : rankText);
+			var rankText = rank.Rank.ToStringInvariant();
+			var paramName = "desc" + (rank.Rank == 1 ? string.Empty : rankText);
 			var description = rank.FormatDescription();
 			UpdateParameter(template, paramName, description, usedList, this.Name);
-			if (rank is PassiveRank passiveRank)
-			{
-				template.Update("linerank" + rankText, passiveRank.LearnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
-			}
+			template.Update("linerank" + rankText, rank.LearnedLevel.ToStringInvariant(), ParameterFormat.OnePerLine, true);
 		}
+	}
+	#endregion
+
+	#region Private Static Methods
+	private static PassiveRank RankFromRow(IDataRecord row, Dictionary<long, List<Coefficient>> coefficients)
+	{
+		var id = (long)row["abilityId"];
+		return new PassiveRank(
+			coefficients: coefficients.GetValueOrDefault(id, []),
+			description: EsoLog.GetRankDescription(id, row),
+			id: id,
+			rank: (sbyte)row["rank"],
+			learnedLevel: (int)row["learnedLevel"]);
 	}
 	#endregion
 }

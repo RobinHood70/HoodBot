@@ -2,38 +2,25 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using RobinHood70.CommonCode;
 
-internal sealed class Morph
+internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyte maxRank, string name, string target)
 {
-	#region Constructors
-	public Morph(IDataRecord row)
-	{
-		this.AbilityId = (long)row["abilityId"];
-		this.EffectLine = EsoLog.ConvertEncoding((string)row["effectLines"]);
-		this.Index = (sbyte)row["morph"];
-		this.MaxRank = (sbyte)row["maxRank"];
-		this.Name = EsoLog.ConvertEncoding((string)row["name"]);
-		this.Target = EsoLog.ConvertEncoding((string)row["target"]);
-	}
-	#endregion
-
 	#region Public Properties
-	public long AbilityId { get; }
+	public long AbilityId { get; } = abilityId;
 
 	public string? Description { get; internal set; }
 
-	public string EffectLine { get; }
+	public string EffectLine { get; } = effectLine;
 
-	public int Index { get; }
+	public int Index { get; } = index;
 
-	public sbyte MaxRank { get; }
+	public sbyte MaxRank { get; } = maxRank;
 
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	public string ParamText => this.Index switch
 	{
@@ -45,7 +32,7 @@ internal sealed class Morph
 
 	public IList<ActiveRank> Ranks { get; } = new List<ActiveRank>(4);
 
-	public string Target { get; }
+	public string Target { get; } = target;
 	#endregion
 
 	#region Public Static Methods
@@ -150,9 +137,9 @@ internal sealed class Morph
 			return false;
 		}
 
-		if (this.Ranks[^1].Index != this.MaxRank)
+		if (this.Ranks[^1].Rank != this.MaxRank)
 		{
-			Debug.WriteLine($"Warning: {this.Name} has the wrong maximum rank ({this.Ranks[^1].Index} vs. {this.MaxRank}).");
+			Debug.WriteLine($"Warning: {this.Name} has the wrong maximum rank ({this.Ranks[^1].Rank} vs. {this.MaxRank}).");
 			return false;
 		}
 

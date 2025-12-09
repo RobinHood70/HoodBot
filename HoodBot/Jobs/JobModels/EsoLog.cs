@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,6 +19,8 @@ internal static class EsoLog
 	#endregion
 
 	#region Public Properties
+	public static Regex BonusFinder { get; } = new(@"\s*Current [Bb]onus:.*?(\.|$)", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
 	public static Regex ColourCode { get; } = new(@"\|c[0-9a-f]{6}\|?(?<content>[^\|]*?)\|r", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 
 	public static Regex FloatFinder { get; } = new Regex(@"([\d\.]+)", RegexOptions.None, Globals.DefaultRegexTimeout);
@@ -106,7 +109,6 @@ internal static class EsoLog
 	#endregion
 
 	#region Public Methods
-
 	public static string ConvertEncoding(string text)
 	{
 		var fromEncoding = Encoding.GetEncoding(1252) ?? throw new InvalidOperationException();
@@ -133,7 +135,7 @@ internal static class EsoLog
 		{
 			try
 			{
-				foreach (var location in Database.RunQuery(Connection, query, row => new NpcLocationData(row)))
+				foreach (var location in Database.RunQuery(Connection, query, NpcLocationDataFromRow))
 				{
 					retval.Add(location);
 				}
@@ -159,7 +161,7 @@ internal static class EsoLog
 		NpcCollection retval = [];
 		HashSet<string> nameClash = new(StringComparer.Ordinal);
 		var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
-		foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))
+		foreach (var npcData in Database.RunQuery(Connection, query, NpcDataFromRow))
 		{
 			if ((npcData.Id >= 322827 && npcData.Id <= 322924) || // Remove Polish names
 				ReplacementData.NpcIdSkips.Contains(npcData.Id) ||
@@ -176,11 +178,35 @@ internal static class EsoLog
 			}
 			else
 			{
-				retval.Duplicates.Add(npcData);
+				Debug.WriteLine($"Warning: an NPC with the name \"{npcData.DataName}\" exists more than once in the database!");
 			}
 		}
 
 		return retval;
+	}
+
+	public static string GetRankDescription(long id, IDataRecord row)
+	{
+		if ((string)row["rawDescription"] is var description && description.Length == 0)
+		{
+			description = (string)row["description"];
+		}
+
+		var descHeader = ColourCode.Replace(ConvertEncoding((string)row["descHeader"]), "${content}");
+		description = ConvertEncoding(description).Trim();
+		if (ReplacementData.IdPartialReplacements.TryGetValue(id, out var partial))
+		{
+			description = description.Replace(partial.From, partial.To, StringComparison.Ordinal);
+		}
+
+		description = ColourCode.Replace(description, "'''${content}'''");
+		description = BonusFinder.Replace(description, string.Empty);
+		if (descHeader.Length > 0)
+		{
+			description = $"'''{descHeader}''' " + description;
+		}
+
+		return RegexLibrary.PruneExcessWhitespace(description).Trim();
 	}
 
 	public static IEnumerable<(string Name, int Data)> GetZones()
@@ -198,5 +224,58 @@ internal static class EsoLog
 			yield return (name, (int)row["mapType"]);
 		}
 	}
+	#endregion
+
+	#region Private Methods
+	private static NpcData NpcDataFromRow(IDataRecord row)
+	{
+		var dataName = ConvertEncoding((string)row["name"]).Trim();
+		var gender = (Gender)(sbyte)row["gender"];
+		if (gender == Gender.None && dataName.Length > 2 && dataName[^2] == '^')
+		{
+			var genderChar = char.ToUpperInvariant(dataName[^1]);
+			dataName = dataName[0..^2];
+			gender = genderChar switch
+			{
+				'M' => Gender.Male,
+				'F' => Gender.Female,
+				'N' => Gender.NotApplicable,
+				_ => Gender.None
+			};
+		}
+
+		if (!ReplacementData.NpcNameFixes.TryGetValue(dataName, out var name))
+		{
+			name = dataName;
+		}
+
+		var lootType = ConvertEncoding((string)row["ppClass"]);
+		var dataReaction = (sbyte)row["reaction"];
+		var reaction = dataReaction == -1
+			? lootType switch
+			{
+				"Bard" => "Friendly",
+				"" => string.Empty,
+				_ => "Justice Neutral"
+			}
+			: NpcData.Reactions[dataReaction];
+
+		return new NpcData(
+			dataName: dataName,
+			difficulty: (sbyte)((sbyte)row["difficulty"] - 1),
+			gender: gender,
+			id: (long)row["id"],
+			lootType: lootType,
+			name: name,
+			pickpocketDifficulty: (PickpocketDifficulty)(sbyte)row["ppDifficulty"],
+			reaction: reaction);
+	}
+
+	private static NpcLocationData NpcLocationDataFromRow(IDataRecord row) => new(
+		id: (long)row["npcId"],
+		zone: ConvertEncoding((string)row["zone"])
+			.Replace(" (Normal)", string.Empty, StringComparison.Ordinal)
+			.Replace(" (Veteran)", string.Empty, StringComparison.Ordinal),
+		locCount: (int)row["locCount"]);
 	#endregion
 }

@@ -234,11 +234,6 @@ internal sealed class EsoNpcs : EditJob
 	private void GetNpcPages()
 	{
 		var npcs = EsoLog.GetNpcs();
-		foreach (var dupe in npcs.Duplicates)
-		{
-			this.Warn($"Warning: an NPC with the name \"{dupe.DataName}\" exists more than once in the database!");
-		}
-
 		var loadNpcs = this.GetNpcsToLoad(npcs);
 		var loadPages = this.GetPages(loadNpcs);
 

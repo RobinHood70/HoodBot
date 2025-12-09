@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,7 +21,7 @@ internal enum ChangeType
 }
 #endregion
 
-internal abstract class Skill
+internal abstract class Skill(string name, string pageName, string skillClass, string skillLine)
 {
 	#region Public Constants
 	public const string SummaryTemplate = "Online Skill Summary";
@@ -29,26 +30,6 @@ internal abstract class Skill
 	#region Static Fields
 	private static readonly HashSet<string> DestructionExceptions = new(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
 	private static readonly string[] DestructionTypes = ["Frost", "Shock", "Fire"];
-	private static readonly string[] DoubleColonSplit = ["::"];
-	#endregion
-
-	#region Constructors
-	protected Skill(IDataRecord row)
-	{
-		this.Name = EsoLog.ConvertEncoding((string)row["baseName"]);
-		var classLine = EsoLog.ConvertEncoding((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
-		var classValue = classLine[0];
-		this.Class = classValue.OrdinalEquals("Craft")
-			? classValue
-			: "Crafting";
-		this.SkillLine = classLine[1].Replace(" Skills", string.Empty, StringComparison.Ordinal);
-		if (!ReplacementData.SkillNameFixes.TryGetValue(this.Name, out var newName))
-		{
-			ReplacementData.SkillNameFixes.TryGetValue($"{this.Name} - {this.SkillLine}", out newName);
-		}
-
-		this.PageName = "Online:" + (newName ?? this.Name);
-	}
 	#endregion
 
 	#region Public Static Properties
@@ -58,13 +39,13 @@ internal abstract class Skill
 	#endregion
 
 	#region Public Properties
-	public string Class { get; }
+	public string Class { get; } = skillClass;
 
-	public string Name { get; }
+	public string Name { get; } = name;
 
-	public string PageName { get; }
+	public string PageName { get; } = pageName;
 
-	public string SkillLine { get; set; }
+	public string SkillLine { get; set; } = skillLine;
 	#endregion
 
 	#region Public Methods

@@ -2,25 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
-[Flags]
-public enum MechanicTypes
-{
-	None = 0,
-	Magicka = 1,
-	Werewolf = 1 << 1,
-	Stamina = 1 << 2,
-	Ultimate = 1 << 3,
-	MountStamina = 1 << 4,
-	Health = 1 << 5,
-	Daedric = 1 << 6,
-}
-
-internal sealed class Coefficient
+internal sealed class Coefficient(float a, int abilityId, float b, float c, sbyte coefficientType, int cooldown, int damageType, int duration, bool hasRankMod, sbyte index, bool isADE, bool isDamage, bool isDamageShield, bool isElfBane, bool isFlameAOE, bool isHeal, bool isMelee, bool isPlayer, float r, sbyte rawType, int rawValue1, int rawValue2, int startTime, int tickTime, bool usesManualCoefficient, string value)
 {
 	#region Static Fields
 	private static readonly Dictionary<int, string> DamageTypes = new()
@@ -40,68 +25,10 @@ internal sealed class Coefficient
 		[12] = "Bleed",
 		[515] = "Flame",
 	};
-
-	private static readonly Dictionary<(int, sbyte), (string From, string To)> ValueReplacements = new()
-	{
-		[(23234, 1)] = ("1 second", "1 seconds"),
-		[(24574, 1)] = ("1 minute", "1 minutes"),
-		[(32166, 2)] = ("1 minute", "60 seconds"),
-		[(33195, 3)] = ("1 second", "1 seconds"),
-		[(37631, 2)] = ("1 minute", "60 seconds"),
-		[(41567, 2)] = ("1 minute", "60 seconds"),
-		[(93914, 3)] = ("1 minute", "60 seconds"),
-	};
 	#endregion
 
 	#region Fields
 	private int? newTicks;
-	#endregion
-
-	#region Constructors
-	public Coefficient(IDataRecord row)
-	{
-		this.A = (float)row["a"];
-		this.AbilityId = (int)row["abilityId"];
-		this.B = (float)row["b"];
-		this.C = (float)row["c"];
-		this.CoefficientType = (sbyte)row["coefType"];
-		this.Cooldown = (int)row["cooldown"];
-		this.DamageType = (int)row["dmgType"];
-		this.Duration = (int)row["duration"];
-		this.HasRankMod = (bool)row["hasRankMod"];
-		this.Index = (sbyte)row["idx"];
-		this.IsADE = (bool)row["isAOE"];
-		this.IsDamage = (bool)row["isDmg"];
-		this.IsDamageShield = (bool)row["isDmgShield"];
-		this.IsElfBane = (bool)row["isElfBane"];
-		this.IsFlameAOE = (bool)row["isFlameAOE"];
-		this.IsHeal = (bool)row["isHeal"];
-		this.IsMelee = (bool)row["isMelee"];
-		this.IsPlayer = (bool)row["isPlayer"];
-		this.R = (float)row["r"];
-		this.RawType = (sbyte)row["rawType"];
-		this.RawValue1 = (int)row["rawValue1"];
-		this.RawValue2 = (int)row["rawValue2"];
-		this.StartTime = (int)row["startTime"];
-		this.TickTime = (int)row["tickTime"];
-		this.UsesManualCoefficient = (bool)row["usesManualCoef"];
-
-		var value = EsoLog.ConvertEncoding((string)row["value"]);
-		var key = (this.AbilityId, this.Index);
-		if (ValueReplacements.TryGetValue(key, out var replacement))
-		{
-			if (replacement.From.OrdinalEquals(value))
-			{
-				value = replacement.To;
-			}
-			else
-			{
-				Debug.WriteLine("Replacement " + key + " is out of date.");
-			}
-		}
-
-		this.Value = value;
-	}
 	#endregion
 
 	#region Public Static Properties
@@ -109,17 +36,17 @@ internal sealed class Coefficient
 	#endregion
 
 	#region Public Properties
-	public float A { get; }
+	public float A { get; } = a;
 
-	public int AbilityId { get; }
+	public int AbilityId { get; } = abilityId;
 
-	public float B { get; }
+	public float B { get; } = b;
 
-	public float C { get; }
+	public float C { get; } = c;
 
-	public sbyte CoefficientType { get; }
+	public sbyte CoefficientType { get; } = coefficientType;
 
-	public int Cooldown { get; }
+	public int Cooldown { get; } = cooldown;
 
 	public string? DamageSuffix =>
 		this.IsDamage &&
@@ -128,45 +55,45 @@ internal sealed class Coefficient
 			? ' ' + damageType + " Damage"
 			: string.Empty;
 
-	public int DamageType { get; }
+	public int DamageType { get; } = damageType;
 
-	public int Duration { get; }
+	public int Duration { get; } = duration;
 
-	public bool HasRankMod { get; }
+	public bool HasRankMod { get; } = hasRankMod;
 
-	public sbyte Index { get; }
+	public sbyte Index { get; } = index;
 
-	public bool IsADE { get; }
+	public bool IsADE { get; } = isADE;
 
-	public bool IsDamage { get; }
+	public bool IsDamage { get; } = isDamage;
 
-	public bool IsDamageShield { get; }
+	public bool IsDamageShield { get; } = isDamageShield;
 
-	public bool IsElfBane { get; }
+	public bool IsElfBane { get; } = isElfBane;
 
-	public bool IsFlameAOE { get; }
+	public bool IsFlameAOE { get; } = isFlameAOE;
 
-	public bool IsHeal { get; }
+	public bool IsHeal { get; } = isHeal;
 
-	public bool IsMelee { get; }
+	public bool IsMelee { get; } = isMelee;
 
-	public bool IsPlayer { get; }
+	public bool IsPlayer { get; } = isPlayer;
 
-	public float R { get; }
+	public float R { get; } = r;
 
-	public sbyte RawType { get; }
+	public sbyte RawType { get; } = rawType;
 
-	public int RawValue1 { get; }
+	public int RawValue1 { get; } = rawValue1;
 
-	public int RawValue2 { get; }
+	public int RawValue2 { get; } = rawValue2;
 
-	public int StartTime { get; }
+	public int StartTime { get; } = startTime;
 
-	public int TickTime { get; }
+	public int TickTime { get; } = tickTime;
 
-	public bool UsesManualCoefficient { get; }
+	public bool UsesManualCoefficient { get; } = usesManualCoefficient;
 
-	public string Value { get; }
+	public string Value { get; } = value;
 	#endregion
 
 	#region Public Methods
@@ -174,31 +101,32 @@ internal sealed class Coefficient
 
 	public string SkillDamageText(double rankFactor)
 	{
+		// Original code: EsoLog => esoSkillToolTips.js => window.ComputeEsoSkillTooltipCoefDescription2
 		var inputValues = new InputValues();
-		double value;
+		double retval;
 		switch (this.CoefficientType)
 		{
 			case -2: // Health
 			case 32: // Update 34
-				value = Math.Floor(this.A * inputValues.Health) + this.C;
+				retval = Math.Floor(this.A * inputValues.Health) + this.C;
 				break;
 			case 0: // Magicka
 			case 1: // Update 34
-				value = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.SpellDamage) + this.C;
+				retval = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.SpellDamage) + this.C;
 				break;
 			case 6: // Stamina
 			case 4: // Update 34
-				value = Math.Floor(this.A * inputValues.Stamina) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				retval = Math.Floor(this.A * inputValues.Stamina) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
 				break;
 			case 10: // Ultimate
 			case 8: // Update 34
-				value =
+				retval =
 					Math.Floor(this.A * Math.Max(inputValues.Magicka, inputValues.Stamina)) +
 					Math.Floor(this.B * Math.Max(inputValues.SpellDamage, inputValues.WeaponDamage)) +
 					this.C;
 				break;
 			case -50: // Ultimate Soul Tether
-				value =
+				retval =
 					Math.Floor(this.A * Math.Max(inputValues.Magicka, inputValues.Stamina)) +
 					Math.Floor(this.B * inputValues.SpellDamage) +
 					this.C;
@@ -206,7 +134,7 @@ internal sealed class Coefficient
 			case -51: // Light Armor
 				if (inputValues.LightArmor is int lightArmor)
 				{
-					value = this.A * lightArmor + this.C;
+					retval = this.A * lightArmor + this.C;
 					break;
 				}
 
@@ -216,7 +144,7 @@ internal sealed class Coefficient
 			case -52: // Medium Armor
 				if (inputValues.MediumArmor is int mediumArmor)
 				{
-					value = this.A * mediumArmor + this.C;
+					retval = this.A * mediumArmor + this.C;
 					break;
 				}
 
@@ -226,7 +154,7 @@ internal sealed class Coefficient
 			case -53: // Heavy Armor
 				if (inputValues.HeavyArmor is int heavyArmor)
 				{
-					value = this.A * heavyArmor + this.C;
+					retval = this.A * heavyArmor + this.C;
 					break;
 				}
 
@@ -236,7 +164,7 @@ internal sealed class Coefficient
 			case -54: // Daggers
 				if (inputValues.DaggerWeapon is int daggerWeapon)
 				{
-					value = this.A * daggerWeapon;
+					retval = this.A * daggerWeapon;
 					break;
 				}
 
@@ -244,113 +172,113 @@ internal sealed class Coefficient
 			case -55: // Armor Types
 				if (inputValues.ArmorTypes is int armorTypes)
 				{
-					value = this.A * armorTypes;
+					retval = this.A * armorTypes;
 					break;
 				}
 
 				return $"({this.A:g5} * ArmorTypes)";
 			case -56: // Spell + Weapon Damage
-				value = Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				retval = Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
 				break;
 			case -57:
-				value = this.A * inputValues.AssassinSkills;
+				retval = this.A * inputValues.AssassinSkills;
 				break;
 			case -58:
-				value = this.A * inputValues.FightersGuildSkills;
+				retval = this.A * inputValues.FightersGuildSkills;
 				break;
 			case -59:
-				value = this.A * inputValues.DraconicPowerSkills;
+				retval = this.A * inputValues.DraconicPowerSkills;
 				break;
 			case -60:
-				value = this.A * inputValues.ShadowSkills;
+				retval = this.A * inputValues.ShadowSkills;
 				break;
 			case -61:
-				value = this.A * inputValues.SiphoningSkills;
+				retval = this.A * inputValues.SiphoningSkills;
 				break;
 			case -62:
-				value = this.A * inputValues.SorcererSkills;
+				retval = this.A * inputValues.SorcererSkills;
 				break;
 			case -63:
-				value = this.A * inputValues.MagesGuildSkills;
+				retval = this.A * inputValues.MagesGuildSkills;
 				break;
 			case -64:
-				value = this.A * inputValues.SupportSkills;
+				retval = this.A * inputValues.SupportSkills;
 				break;
 			case -65:
-				value = this.A * inputValues.AnimalCompanionSkills;
+				retval = this.A * inputValues.AnimalCompanionSkills;
 				break;
 			case -66:
-				value = this.A * inputValues.GreenBalanceSkills;
+				retval = this.A * inputValues.GreenBalanceSkills;
 				break;
 			case -67:
-				value = this.A * inputValues.WintersEmbraceSkills;
+				retval = this.A * inputValues.WintersEmbraceSkills;
 				break;
 			case -68: // Magicka with Capped Health
-				value = Math.Min(Math.Floor(this.A * inputValues.Magicka), Math.Floor(this.B * inputValues.Health));
+				retval = Math.Min(Math.Floor(this.A * inputValues.Magicka), Math.Floor(this.B * inputValues.Health));
 				break;
 			case -69:
-				value = this.A * inputValues.BoneTyrantSkills;
+				retval = this.A * inputValues.BoneTyrantSkills;
 				break;
 			case -70:
-				value = this.A * inputValues.GraveLordSkills;
+				retval = this.A * inputValues.GraveLordSkills;
 				break;
 			case -71: // Capped Spell Damage
-				value = Math.Min(Math.Floor(this.A * inputValues.SpellDamage) + this.B, this.C);
+				retval = Math.Min(Math.Floor(this.A * inputValues.SpellDamage) + this.B, this.C);
 				break;
 			case -72: // Magicka and Weapon Damage
-				value = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
+				retval = Math.Floor(this.A * inputValues.Magicka) + Math.Floor(this.B * inputValues.WeaponDamage) + this.C;
 				break;
 			case -73: // Capped Magicka and Spell Damage
 				var halfMax = this.C / 2;
-				value = Math.Min(
+				retval = Math.Min(
 					Math.Min(Math.Floor(this.A * inputValues.Magicka), halfMax) +
 					Math.Min(Math.Floor(this.B * inputValues.SpellDamage), halfMax),
 					this.C);
 				break;
 			case -74: // Weapon Power
-				value = Math.Floor(this.A * inputValues.WeaponPower) + this.C;
+				retval = Math.Floor(this.A * inputValues.WeaponPower) + this.C;
 				break;
 			case -75: // Constant (Dave handles this at the top, but for my purposes, this seems sufficient)
 				return this.Value;
 			case -76: // Health or Spell Damage
-				value = Math.Max(
+				retval = Math.Max(
 					Math.Floor(this.A * inputValues.SpellDamage),
 					Math.Floor(this.B * inputValues.Health)) +
 					this.C;
 				break;
 			case -79: // Health or Spell/Weapon Damage
-				value = Math.Max(
+				retval = Math.Max(
 					Math.Floor(this.A * inputValues.SpellDamage) + Math.Floor(this.B * inputValues.WeaponDamage),
 					Math.Floor(this.C * inputValues.Health));
 				break;
 			case -77: // Max Resistance
-				value = Math.Floor(this.A * Math.Max(inputValues.SpellResist, inputValues.PhysicalResist)) + this.C;
+				retval = Math.Floor(this.A * Math.Max(inputValues.SpellResist, inputValues.PhysicalResist)) + this.C;
 				break;
 			case -78: // Magicka and Light Armor (Health Capped)
 				if (inputValues.LightArmor is null)
 				{
-					value = Math.Min(Math.Floor(this.A * inputValues.Magicka), this.C * inputValues.Health);
+					retval = Math.Min(Math.Floor(this.A * inputValues.Magicka), this.C * inputValues.Health);
 				}
 				else
 				{
-					value = Math.Min(Math.Floor(this.A * inputValues.Magicka) * (1.0 + this.B * inputValues.LightArmor.Value), this.C * inputValues.Health);  // TODO: Check rounding order
+					retval = Math.Min(Math.Floor(this.A * inputValues.Magicka) * (1.0 + this.B * inputValues.LightArmor.Value), this.C * inputValues.Health);  // TODO: Check rounding order
 				}
 
 				break;
 			case -80: // Herald of the Tome skills slotted
-				value = this.A * inputValues.HeraldoftheTomeSkills;
+				retval = this.A * inputValues.HeraldoftheTomeSkills;
 				break;
 			case -81: // Soldier of Apocrypha skills slotted
-				value = this.A * inputValues.SoldierofApocryphaSkills;
+				retval = this.A * inputValues.SoldierofApocryphaSkills;
 				break;
 			case -82: // Health or Magicka with Health Cap
-				value = Math.Max(
+				retval = Math.Max(
 					Math.Floor(this.A * inputValues.Magicka),
 					Math.Floor(this.B * inputValues.Health));
 				var maxValue = Math.Floor(this.C * inputValues.Health);
 				if (maxValue > 0)
 				{
-					value = Math.Max(value, maxValue);
+					retval = Math.Max(retval, maxValue);
 				}
 
 				break;
@@ -360,42 +288,43 @@ internal sealed class Coefficient
 
 		if (this.HasRankMod)
 		{
-			value = Math.Floor(value * rankFactor);
+			retval = Math.Floor(retval * rankFactor);
 		}
 
-		value = this.RawType == 92
-			? Math.Floor(value * 10) / 10
-			: Math.Floor(value);
+		retval = this.RawType == 92
+			? Math.Floor(retval * 10) / 10
+			: Math.Floor(retval);
 
-		if (value < 0)
+		if (retval < 0)
 		{
-			value = 0;
+			retval = 0;
 		}
 
 		if ((this.RawType == 49 || this.RawType == 53) && this.Duration > 0)
 		{
-			var duration = +this.Duration;
+			var dur = this.Duration;
 
 			double dotFactor;
 			if (this.newTicks is not null)
 			{
+				// TODO: Figure out what this was supposed to do. Right now, newTicks is never set. Looks like this code is incomplete.
 				dotFactor = this.newTicks.Value;
 				this.newTicks = null;
 			}
 			else
 			{
 				dotFactor = this.TickTime > 0
-					? (duration + +this.TickTime) / +this.TickTime
-					: duration / 1000;
+					? (dur + this.TickTime) / this.TickTime
+					: dur / 1000;
 			}
 
 			if (dotFactor != 1)
 			{
-				value = Math.Floor(Math.Floor(value) * dotFactor);
+				retval = Math.Floor(Math.Floor(retval) * dotFactor);
 			}
 		}
 
-		return $"{value:g5}";
+		return $"{retval:g5}";
 	}
 	#endregion
 

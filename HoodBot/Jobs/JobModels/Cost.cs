@@ -13,7 +13,7 @@ internal sealed class Cost(string value, string mechanicText)
 	#endregion
 
 	#region Public Static Methods
-	public static string GetCostText(IList<Cost> costs) => costs.Count switch
+	public static string GetCostText(IReadOnlyList<Cost> costs) => costs.Count switch
 	{
 		0 => "Free",
 		1 => costs[0].ToString(),

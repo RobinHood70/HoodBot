@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Jobs.JobModels;
@@ -16,13 +17,13 @@ using RobinHood70.WikiCommon.Parser.Basic;
 
 public class EsoMatchIcons : EditJob
 {
-	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
 	#region Constants
 	private const string MissingFileCategory = "Online-Icons-Missing Original File";
 	#endregion
 
 	#region Static Fields
 	private static readonly DateTime LastRun = new(2020, 9, 25);
+	private static readonly Regex IconTrimmer = new(@"^/esoui/art/icons/(?<icon>.+)\.dds$", RegexOptions.IgnoreCase, Globals.DefaultRegexTimeout);
 	#endregion
 
 	#region Fields
@@ -48,6 +49,7 @@ public class EsoMatchIcons : EditJob
 	#region Protected Override Methods
 	protected override void BeforeLoadPages()
 	{
+		// TODO: Download icons file.
 		this.StatusWriteLine("Getting database info");
 		this.GetItems();
 
@@ -166,6 +168,22 @@ public class EsoMatchIcons : EditJob
 		return false;
 	}
 
+	private static ItemInfo ItemInfoFromRow(IDataRecord record, string key)
+	{
+		var iconName = EsoLog.ConvertEncoding((string)record["icon"]);
+		var match = IconTrimmer.Match(iconName);
+		if (match.Success)
+		{
+			iconName = match.Groups["icon"].Value;
+		}
+
+		return new(
+			id: record["id"] is long longId ? longId : (int)record["id"],
+			iconName: iconName,
+			itemName: EsoLog.ConvertEncoding((string)record["name"]),
+			type: key);
+	}
+
 	private static List<SiteLink> ParseCatgories(Site site, SiteParser parser)
 	{
 		List<SiteLink> retval = [];
@@ -253,7 +271,7 @@ public class EsoMatchIcons : EditJob
 
 	private void LoadQueryData(KeyValuePair<string, string> query)
 	{
-		foreach (var item in Database.RunQuery(EsoLog.Connection, query.Value, row => new ItemInfo(row, query.Key)))
+		foreach (var item in Database.RunQuery(EsoLog.Connection, query.Value, row => ItemInfoFromRow(row, query.Key)))
 		{
 			if (!this.allItems.TryGetValue(item.IconName, out var list))
 			{
@@ -294,33 +312,17 @@ public class EsoMatchIcons : EditJob
 	#endregion
 
 	#region Private Classes
-	private sealed class ItemInfo
+	private sealed class ItemInfo(long id, string iconName, string itemName, string type)
 	{
-		public ItemInfo(IDataRecord row, string type)
-		{
-			var idType = row.GetDataTypeName(0);
-			var id = idType switch
-			{
-				"BIGINT" => (long)row["id"],
-				"INT" => (int)row["id"],
-				_ => throw new InvalidCastException(),
-			};
-			var iconName = EsoLog.ConvertEncoding((string)row["icon"]);
-			this.IconName = iconName
-				.Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase)
-				.Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
-			this.Id = id;
-			this.ItemName = EsoLog.ConvertEncoding((string)row["name"]);
-			this.Type = type;
-		}
+		#region Public Properties
+		public string IconName { get; } = iconName;
 
-		public string IconName { get; }
+		public long Id { get; } = id;
 
-		public long Id { get; }
+		public string ItemName { get; } = itemName;
 
-		public string ItemName { get; }
-
-		public string Type { get; }
+		public string Type { get; } = type;
+		#endregion
 	}
 
 	private sealed class PageParts

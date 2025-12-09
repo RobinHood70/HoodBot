@@ -67,7 +67,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 		using var connection = new MySqlConnection(App.GetConnectionString("CSData"));
 		connection.Open();
 		connection.ChangeDatabase(DbName);
-		foreach (var item in Database.RunQuery(connection, Query, -1, row => new Book(row)))
+		foreach (var item in Database.RunQuery(connection, Query, -1, BookFromRow))
 		{
 			var title = TitleFactory.FromUnvalidated(this.Site, item.Namespace + ':' + item.Name);
 			if (this.Items.TryAdd(title, item))
@@ -96,6 +96,29 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 
 			Debug.WriteLine("Disambiguated: " + newTitle.PageName);
 		}
+	}
+
+	private static Book BookFromRow(IDataRecord row)
+	{
+		var skill = (row["skill_lu"] is ushort skillLu)
+			? skillLu
+			: (ushort)0;
+		var text = (row["text"] is byte[] textBytes)
+			? Encoding.UTF8.GetString(textBytes).Trim()
+			: string.Empty;
+
+		return new(
+			edid: Encoding.ASCII.GetString((byte[])row["edid"]).Trim(),
+			fileId: (byte)row["fileid"],
+			icon: ((string)row["icon"])[2..],
+			isScroll: (int)row["scroll"] == 1,
+			model: ((string)row["model"])[2..],
+			name: (string)row["name"],
+			ns: (string)row["filenamespace"],
+			skill: skill,
+			text: text,
+			value: (int)row["value"],
+			weight: (float)row["weight"]);
 	}
 	#endregion
 
@@ -319,26 +342,19 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	internal sealed class Book
 	{
 		#region Constructors
-		public Book(IDataRecord row)
+		public Book(string edid, byte fileId, string icon, bool isScroll, string model, string name, string ns, ushort skill, string text, int value, float weight)
 		{
-			var edid = (byte[])row["edid"];
-			this.EditorIds.Add(Encoding.ASCII.GetString(edid).Trim());
-			this.FileId = (byte)row["fileid"];
-			this.Icon = ((string)row["icon"])[2..];
-			this.IsScroll = (int)row["scroll"] == 1;
-			this.Namespace = (string)row["filenamespace"];
-			this.Model = ((string)row["model"])[2..];
-			this.Name = (string)row["name"];
-			if (row["skill_lu"] is ushort skill)
-			{
-				this.Skill = skill;
-			}
-
-			this.Text = row["text"] is byte[] textBytes
-				? Encoding.UTF8.GetString(textBytes).Trim()
-				: string.Empty;
-			this.Value = (int)row["value"];
-			this.Weight = (float)row["weight"];
+			this.EditorIds.Add(edid);
+			this.FileId = fileId;
+			this.Icon = icon;
+			this.IsScroll = isScroll;
+			this.Model = model;
+			this.Name = name;
+			this.Namespace = ns;
+			this.Skill = skill;
+			this.Text = text;
+			this.Value = value;
+			this.Weight = weight;
 		}
 		#endregion
 
@@ -370,11 +386,11 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 		public bool MostlyEquals(Book other) =>
 			this.FileId == other.FileId &&
 			this.Icon.OrdinalEquals(other.Icon) &&
-			this.IsScroll == other.IsScroll &&
 			this.Name.OrdinalEquals(other.Name) &&
-			this.Text.OrdinalEquals(other.Text) &&
+			this.IsScroll == other.IsScroll &&
 			this.Value == other.Value &&
-			this.Weight == other.Weight;
+			this.Weight == other.Weight &&
+			this.Text.OrdinalEquals(other.Text);
 		#endregion
 	}
 	#endregion

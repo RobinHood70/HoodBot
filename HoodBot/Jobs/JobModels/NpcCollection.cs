@@ -8,12 +8,7 @@ using RobinHood70.Robby;
 
 internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 {
-	#region Public Properties
-	public IList<NpcData> Duplicates { get; } = [];
-	#endregion
-
 	#region Public Methods
-
 	public void GetLocations(Site site)
 	{
 		ArgumentNullException.ThrowIfNull(site);

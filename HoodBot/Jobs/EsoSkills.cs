@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
@@ -21,31 +22,32 @@ internal sealed class EsoSkills : EditJob
 	private const string SkillQuery =
 		"SELECT\n" +
 			"st.abilityId,\n" +
-			"st.skillTypeName,\n" +
+			"st.baseName,\n" +
+			"st.icon,\n" +
 			"st.learnedLevel,\n" +
 			"st.maxRank,\n" +
-			"st.baseName,\n" +
-			"st.type,\n" +
-			"st.icon,\n" +
 			"ms.name,\n" +
-			"ms.description,\n" +
-			"ms.descHeader,\n" +
-			"ms.target,\n" +
-			"ms.effectLines,\n" +
-			"ms.duration,\n" +
-			"ms.cost,\n" +
-			"ms.costTime,\n" +
-			"ms.maxRange,\n" +
-			"ms.minRange,\n" +
-			"ms.radius,\n" +
-			"ms.isPassive,\n" +
+			"st.skillTypeName,\n" +
+			"st.type,\n" +
 			"ms.castTime,\n" +
 			"ms.channelTime,\n" +
+			"ms.cost,\n" +
+			"ms.costTime,\n" +
+			"ms.descHeader,\n" +
+			"ms.description,\n" +
+			"ms.duration,\n" +
+			"ms.effectLines,\n" +
+			"ms.isPassive,\n" +
+			"ms.maxRange,\n" +
 			"ms.mechanic,\n" +
 			"ms.mechanicTime,\n" +
-			"ms.rank,\n" +
 			"ms.morph,\n" +
-			"ms.rawDescription\n" +
+			"ms.minRange,\n" +
+			"ms.radius,\n" +
+			"ms.rank,\n" +
+			"ms.rawDescription,\n" +
+			"ms.target,\n" +
+			"ms.tickTime\n" +
 		"FROM\n" +
 			"$st st\n" +
 		"INNER JOIN\n" +
@@ -61,6 +63,19 @@ internal sealed class EsoSkills : EditJob
 		"SELECT * " +
 		"FROM $tt " +
 		"ORDER BY abilityId, idx";
+	#endregion
+
+	#region Static Fields
+	private static readonly Dictionary<(int, sbyte), (string From, string To)> ValueReplacements = new()
+	{
+		[(23234, 1)] = ("1 second", "1 seconds"),
+		[(24574, 1)] = ("1 minute", "1 minutes"),
+		[(32166, 2)] = ("1 minute", "60 seconds"),
+		[(33195, 3)] = ("1 second", "1 seconds"),
+		[(37631, 2)] = ("1 minute", "60 seconds"),
+		[(41567, 2)] = ("1 minute", "60 seconds"),
+		[(93914, 3)] = ("1 minute", "60 seconds"),
+	};
 	#endregion
 
 	#region Fields
@@ -159,7 +174,7 @@ internal sealed class EsoSkills : EditJob
 				retval.Add(abilityId, list);
 			}
 
-			var coef = new Coefficient(row);
+			var coef = CoefficientFromRow(row);
 			list.Add(coef);
 			if (!coef.IsValid())
 			{
@@ -168,6 +183,53 @@ internal sealed class EsoSkills : EditJob
 		}
 
 		return retval;
+	}
+
+	private static Coefficient CoefficientFromRow(IDataRecord row)
+	{
+		var abilityId = (int)row["abilityId"];
+		var index = (sbyte)row["idx"];
+		var value = EsoLog.ConvertEncoding((string)row["value"]);
+		var key = (abilityId, index);
+		if (ValueReplacements.TryGetValue(key, out var replacement))
+		{
+			if (replacement.From.OrdinalEquals(value))
+			{
+				value = replacement.To;
+			}
+			else
+			{
+				Debug.WriteLine($"Replacement {key} is out of date.");
+			}
+		}
+
+		return new Coefficient(
+			a: (float)row["a"],
+			abilityId: abilityId,
+			b: (float)row["b"],
+			c: (float)row["c"],
+			coefficientType: (sbyte)row["coefType"],
+			cooldown: (int)row["cooldown"],
+			damageType: (int)row["dmgType"],
+			duration: (int)row["duration"],
+			hasRankMod: (bool)row["hasRankMod"],
+			index: index,
+			isADE: (bool)row["isAOE"],
+			isDamage: (bool)row["isDmg"],
+			isDamageShield: (bool)row["isDmgShield"],
+			isElfBane: (bool)row["isElfBane"],
+			isFlameAOE: (bool)row["isFlameAOE"],
+			isHeal: (bool)row["isHeal"],
+			isMelee: (bool)row["isMelee"],
+			isPlayer: (bool)row["isPlayer"],
+			r: (float)row["r"],
+			rawType: (sbyte)row["rawType"],
+			rawValue1: (int)row["rawValue1"],
+			rawValue2: (int)row["rawValue2"],
+			startTime: (int)row["startTime"],
+			tickTime: (int)row["tickTime"],
+			usesManualCoefficient: (bool)row["usesManualCoef"],
+			value: value);
 	}
 
 	private static SortedList<string, string> GetIconChanges()
@@ -203,9 +265,37 @@ internal sealed class EsoSkills : EditJob
 			}
 
 			var isPassive = (sbyte)row["isPassive"] == 1;
-			Skill newSkill = isPassive
-				? new PassiveSkill(row)
-				: new ActiveSkill(row);
+			var name = EsoLog.ConvertEncoding((string)row["baseName"]);
+			var classLine = EsoLog.ConvertEncoding((string)row["skillTypeName"]).Split("::", StringSplitOptions.None);
+			var skillClass = classLine[0];
+			if (skillClass.OrdinalEquals("Craft"))
+			{
+				// Fix for different name in DB.
+				skillClass = "Crafting";
+			}
+
+			var skillLine = classLine[1].Replace(" Skills", string.Empty, StringComparison.Ordinal);
+			if (!ReplacementData.SkillNameFixes.TryGetValue(name, out var newName))
+			{
+				ReplacementData.SkillNameFixes.TryGetValue($"{name} - {skillLine}", out newName);
+			}
+
+			var pageName = "Online:" + (newName ?? name);
+
+			Skill newSkill;
+			if (isPassive)
+			{
+				var maxRank = (sbyte)row["maxRank"];
+				newSkill = new PassiveSkill(name, pageName, skillClass, skillLine, maxRank);
+			}
+			else
+			{
+				var learnedLevel = (int)row["learnedLevel"];
+				var skillType = ((string)row["icon"]).Contains("_artifact_", StringComparison.OrdinalIgnoreCase)
+					? "Artifact"
+					: EsoLog.ConvertEncoding((string)row["type"]);
+				newSkill = new ActiveSkill(name, pageName, skillClass, skillLine, learnedLevel, skillType);
+			}
 
 			// At this point, newSkill has only a few basics and is used primarily to figure out the correct PageName.
 			if (!retval.TryGetValue(newSkill.PageName, out var currentSkill))

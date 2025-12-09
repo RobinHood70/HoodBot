@@ -2,76 +2,59 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using RobinHood70.CommonCode;
 
-internal sealed class ActiveRank : Rank
+internal sealed class ActiveRank(int castingTime, int channelTime, IReadOnlyList<Coefficient> coefficients, IReadOnlyList<Cost> costs, string description, int duration, long id, string radius, string range, sbyte rank)
 {
-	#region Constructors
-	public ActiveRank(IDataRecord row, List<Coefficient> coefficients)
-		: base(row, coefficients)
-	{
-		static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
-
-		this.ChannelTime = (int)row["channelTime"];
-		this.Duration = (int)row["duration"];
-		this.Radius = FormatRange((int)row["radius"]);
-		var maxRange = FormatRange((int)row["maxRange"]);
-		var minRange = FormatRange((int)row["minRange"]);
-		this.Range = minRange.OrdinalEquals("0") ? maxRange : string.Concat(minRange, "-", maxRange);
-
-		this.Costs.AddRange(GetCostSplit(row, "cost", "mechanic", false));
-		this.Costs.AddRange(GetCostSplit(row, "costTime", "mechanicTime", true));
-		this.Factor = this.Index switch
-		{
-			1 => 1.0,
-			2 => 1.011,
-			3 => 1.022,
-			4 => 1.033,
-			_ => throw new InvalidOperationException($"Invalid RankNum: {this.Index}")
-		};
-	}
-	#endregion
-
 	#region Public Properties
-	public int ChannelTime { get; }
+	public int CastingTime { get; } = castingTime;
 
-	public IList<Cost> Costs { get; } = [];
+	public int ChannelTime { get; } = channelTime;
 
-	public int Duration { get; }
+	public IReadOnlyList<Coefficient> Coefficients { get; } = coefficients;
 
-	public string Radius { get; }
+	public IReadOnlyList<Cost> Costs { get; } = costs;
 
-	public string Range { get; }
+	public string Description { get; } = description;
+
+	public int Duration { get; } = duration;
+
+	public double Factor { get; } = rank switch
+	{
+		1 => 1.0,
+		2 => 1.011,
+		3 => 1.022,
+		4 => 1.033,
+		_ => throw new InvalidOperationException($"Invalid RankNum: {rank}")
+	};
+
+	public long Id { get; } = id;
+
+	public sbyte Rank { get; } = rank;
+
+	public string Radius { get; } = radius;
+
+	public string Range { get; } = range;
 	#endregion
 
-	#region Private Static Methods
-	private static IEnumerable<Cost> GetCostSplit(IDataRecord row, string costsName, string mechanicsName, bool perTime)
+	#region Public Methods
+	public ChangeType GetChangeType(ActiveRank previous)
 	{
-		var costsText = (string)row[costsName];
-		if (string.IsNullOrEmpty(costsText))
+		if (this.Rank != previous.Rank)
 		{
-			yield break;
+			throw new InvalidOperationException("I don't think this is possible.");
 		}
 
-		var mechanicsText = (string)row[mechanicsName];
-		var costs = costsText.Split(TextArrays.Comma);
-		var mechanics = mechanicsText.Split(TextArrays.Comma);
-		if (costs.Length != mechanics.Length)
+		if (this.Description.OrdinalEquals(previous.Description))
 		{
-			throw new InvalidOperationException("Costs and mechanics have different lengths.");
+			return ChangeType.None;
 		}
 
-		for (var i = 0; i < costs.Length; i++)
-		{
-			if (int.Parse(costs[i], CultureInfo.InvariantCulture) != 0)
-			{
-				var mechanicNum = int.Parse(mechanics[i], CultureInfo.InvariantCulture);
-				var mechanic = EsoLog.MechanicNames[mechanicNum] + (perTime ? " / 1s" : string.Empty);
-				yield return new Cost(costs[i], mechanic);
-			}
-		}
+		var curSkill = Skill.HighlightVar.Replace(this.Description, " ");
+		var oldSkill = Skill.HighlightVar.Replace(previous.Description, " ");
+		return curSkill.OrdinalICEquals(oldSkill)
+			? ChangeType.Minor
+			: ChangeType.Major;
 	}
 	#endregion
 }
