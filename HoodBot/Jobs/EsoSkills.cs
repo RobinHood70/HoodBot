@@ -19,50 +19,22 @@ internal sealed class EsoSkills : EditJob
 	private const string MinedTable = "minedSkills";
 	private const string SkillTable = "skillTree";
 	private const string TooltipsTable = "skillTooltips";
-	private const string SkillQuery =
-		"SELECT\n" +
-			"st.abilityId,\n" +
-			"st.baseName,\n" +
-			"st.icon,\n" +
-			"st.learnedLevel,\n" +
-			"st.maxRank,\n" +
-			"ms.name,\n" +
-			"st.skillTypeName,\n" +
-			"st.type,\n" +
-			"ms.castTime,\n" +
-			"ms.channelTime,\n" +
-			"ms.cost,\n" +
-			"ms.costTime,\n" +
-			"ms.descHeader,\n" +
-			"ms.description,\n" +
-			"ms.duration,\n" +
-			"ms.effectLines,\n" +
-			"ms.isPassive,\n" +
-			"ms.maxRange,\n" +
-			"ms.mechanic,\n" +
-			"ms.mechanicTime,\n" +
-			"ms.morph,\n" +
-			"ms.minRange,\n" +
-			"ms.radius,\n" +
-			"ms.rank,\n" +
-			"ms.rawDescription,\n" +
-			"ms.target,\n" +
-			"ms.tickTime\n" +
-		"FROM\n" +
-			"$st st\n" +
-		"INNER JOIN\n" +
-			"$ms ms ON st.abilityId = ms.id\n" +
-		"WHERE\n" +
-			/* "st.baseName = 'Reanimate' AND\n" + */
-			"ms.isPlayer AND\n" +
-			"ms.morph >= 0 AND\n" +
-			"ms.skillLine != 'Emperor'\n" +
-		"ORDER BY st.baseName, ms.morph, ms.name, ms.rank;";
+	private const string SkillQuery = @"
+		SELECT
+			st.abilityId, st.baseName, st.icon, st.learnedLevel, st.maxRank, st.skillTypeName, st.type,
+			ms.castTime, ms.channelTime, ms.cost, ms.costTime, ms.descHeader, ms.description, ms.duration, ms.effectLines, ms.isPassive, ms.maxRange, ms.mechanic, ms.mechanicTime, ms.morph, ms.minRange, ms.name, ms.radius, ms.rank, ms.rawDescription, ms.target, ms.tickTime
+		FROM
+			$st st
+		INNER JOIN
+			$ms ms ON st.abilityId = ms.id
+		WHERE
+			st.baseName = 'Vigor' AND
+			ms.isPlayer AND
+			ms.morph >= 0 AND
+			ms.skillLine != 'Emperor'
+		ORDER BY st.baseName, ms.morph, ms.name, ms.rank;";
 
-	private const string CoefficientQuery =
-		"SELECT * " +
-		"FROM $tt " +
-		"ORDER BY abilityId, idx";
+	private const string CoefficientQuery = "SELECT * FROM $tt ORDER BY abilityId, idx";
 	#endregion
 
 	#region Static Fields
