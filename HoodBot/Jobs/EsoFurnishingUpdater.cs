@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -25,54 +24,19 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 {
 	#region Private Constants
 	private const string CollectiblesQuery = "SELECT description, furnCategory, furnSubCategory, id, name, nickname, tags FROM collectibles WHERE furnLimitType = 2";
-	private const string MinedItemsQuery = "SELECT abilityDesc, bindType, description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type = 61"; // 61 = Furnishings
+	private const string MinedItemsQuery = "SELECT abilityDesc, bindType, description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags FROM uesp_esolog.minedItemSummary WHERE type = 61 AND itemId NOT IN(115083, 119706, 120853, 152141, 152142, 152143, 152144, 152145, 152146, 152147, 152148, 152149, 153552, 153553, 153554, 153555, 153556, 153557, 153558, 153559, 153560, 153561, 153562, 183198, 220297, 220318, 220288, 220300, 220320, 220323) AND name NOT LIKE '% Station (%'"; // 61 = Furnishings
 	#endregion
 
 	#region Static Fields
-	private static readonly HashSet<string> AliveCats = new(StringComparer.Ordinal)
-	{
-		"Amory Assitants",
-		"Banking Assistants",
-		"Companions",
-		"Creatures",
-		"Deconstruction Assistants",
-		"Houseguests",
-		"Merchant Assistants",
-		"Mounts",
-		"Non-Combat Pets",
-		"Statues",
-	};
-
 	private static readonly Dictionary<string, int> CommentCounts = new(StringComparer.OrdinalIgnoreCase);
 	private static readonly HashSet<string> FurnishingKeep = new(StringComparer.Ordinal)
 	{
 		"cat", "subcat", "id"
 	};
 
-	private static readonly Dictionary<long, string> NameExceptions = new()
-	{
-		// Capitalization is still mostly algorithmic. This list contains exceptions to the rules Dave implemented in ESOLog.
-		[208358] = "Handbook for New Homeowners",
-	};
-
 	private static readonly HashSet<string> NoHousingCats = new(StringComparer.OrdinalIgnoreCase)
 	{
 		"Miscellaneous", "Mounts", "Non-Combat Pets", "Services"
-	};
-
-	private static readonly Dictionary<long, string> PageNameExceptions = new()
-	{
-		[203278] = "Apocrypha Tree, Spore (Legendary)",
-		[118162] = "Carpet of the Desert Flame, Faded (design 1)",
-		[118167] = "Carpet of the Desert Flame, Faded (design 2)",
-		[125530] = "Dwarven Pipeline Cap, Sealed (small)",
-		[126658] = "Dwarven Pipeline Cap, Sealed (standard)",
-		[198055] = "Necrom Funerary Offering, Mushrooms (Bundle)",
-		[218012] = "Necrom Funerary Offering, Mushrooms (Planter)",
-		[116427] = "Orcish Bookshelf, Peaked",
-		[116419] = "Orcish Chair, Peaked (epic)",
-		[116392] = "Orcish Chair, Peaked (superior)",
-		[197713] = "Tribunal Rug (Necrom)",
 	};
 
 	private static readonly Dictionary<string, HashSet<string>> Pruneables = new(StringComparer.Ordinal)
@@ -83,7 +47,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		["Online Furnishing Purchase"] = []
 	};
 
-	private static readonly Regex SizeFinder = new(@"This is a (?<size>\w+) house item.", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	private static readonly string TemplateName = "Online Furnishing Summary";
 	#endregion
 
@@ -365,102 +328,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private static Furnishing FurnishingFromCollectibleRow(IDataRecord row)
-	{
-		var id = (long)row["id"];
-		var name = NameExceptions.TryGetValue(id, out var correctedName)
-			? correctedName
-			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
-		var desc = EsoLog.ConvertEncoding((string)row["description"]);
-		var size = SizeFromDesc(ref desc);
-
-		return new Furnishing(
-			id: id,
-			abilityDesc: null,
-			behavior: EsoLog.ConvertEncoding((string)row["tags"]),
-			bindType: null,
-			description: desc,
-			furnishingLimitType: FurnishingType.CollectibleFurnishings,
-			furnishingCategory: EsoLog.ConvertEncoding((string)row["furnCategory"]),
-			furnishingSubcategory: EsoLog.ConvertEncoding((string)row["furnSubCategory"]),
-			name: name,
-			nickName: EsoLog.ConvertEncoding((string)row["nickname"]),
-			pageName: TitleFactory.SanitizePageName(name, true),
-			quality: null,
-			resultItemLink: null,
-			size: size);
-	}
-
-	private static Furnishing FurnishingFromRow(IDataRecord row)
-	{
-		var furnSplit = EsoLog.ConvertEncoding((string)row["furnCategory"]).Split(TextArrays.Colon, 2);
-		var furnishingCategory = furnSplit[0];
-		if (furnSplit.Length != 2)
-		{
-			throw new InvalidOperationException("Furnishing category missing subcategory.");
-		}
-
-		var furnishingSubcategory = furnSplit[1].Split(TextArrays.Parentheses, StringSplitOptions.TrimEntries)[0];
-		var furnishingLimitType = (FurnishingType)(int)row["furnLimitType"];
-		if (furnishingLimitType == FurnishingType.None)
-		{
-			furnishingLimitType = AliveCats.Overlaps([furnishingCategory, furnishingSubcategory])
-				? FurnishingType.SpecialFurnishings
-				: FurnishingType.TraditionalFurnishings;
-		}
-
-		var id = (int)row["itemId"];
-		var desc = EsoLog.ConvertEncoding((string)row["description"])
-			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
-			.Replace("|r", string.Empty, StringComparison.Ordinal);
-		var size = SizeFromDesc(ref desc);
-		if ((string?)row["tags"] is null)
-		{
-			Debug.WriteLine("tags was null");
-		}
-
-		var name = NameExceptions.TryGetValue(id, out var correctedName)
-			? correctedName
-			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
-
-		return new Furnishing(
-			id: id,
-			abilityDesc: EsoLog.ConvertEncoding((string)row["abilityDesc"]),
-			behavior: EsoLog.ConvertEncoding((string)row["tags"]),
-			bindType: GetBindTypeName((int)row["bindType"]),
-			description: desc,
-			furnishingLimitType: furnishingLimitType,
-			furnishingCategory: furnishingCategory,
-			furnishingSubcategory: furnishingSubcategory,
-			name: name,
-			nickName: null,
-			pageName: PageNameExceptions.GetValueOrDefault(id, TitleFactory.SanitizePageName(name, true)),
-			quality: GetQualityName(EsoLog.ConvertEncoding((string)row["quality"])),
-			resultItemLink: EsoLog.ExtractItemId(EsoLog.ConvertEncoding((string)row["resultitemLink"])),
-			size: size);
-	}
-
-	private static string? GetBindTypeName(int bindType) => bindType switch
-	{
-		0 => string.Empty,
-		1 => "Bind on Pickup",
-		2 => "Bind on Equip",
-		3 => "Backpack Bind on Pickup",
-		_ => null,
-	};
-
-	private static string? GetQualityName(string quality) => quality switch
-	{
-		"1-5" => "Any",
-		"1" => "Normal",
-		"2" => "Fine",
-		"3" => "Superior",
-		"4" => "Epic",
-		"5" => "Legendary",
-		"6" => "Mythic",
-		_ => null,
-	};
-
 	private static void PruneSecondaryTemplates(SiteParser parser)
 	{
 		foreach (var subTemplate in parser.FindTemplates(Pruneables.Keys))
@@ -506,23 +373,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		{
 			text.Text = VerticalSpaceFinder().Replace(text.Text, "\n\n");
 		}
-	}
-
-	// Note: nullifies desc if it's only the standard size phrasing.
-	private static string? SizeFromDesc([DisallowNull] ref string? desc)
-	{
-		var sizeMatch = SizeFinder.Match(desc);
-		string? size = null;
-		if (sizeMatch.Success)
-		{
-			size = sizeMatch.Groups["size"].Value.UpperFirst(CultureInfo.CurrentCulture);
-			if (sizeMatch.Index == 0 && sizeMatch.Length == desc.Length)
-			{
-				desc = null;
-			}
-		}
-
-		return size;
 	}
 	#endregion
 
@@ -605,16 +455,19 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 	private void CheckTitle(Title title, string labelName, Furnishing furnishing)
 	{
-		if (!labelName.OrdinalEquals(furnishing.PageName))
+		if (labelName.OrdinalEquals(furnishing.PageName) ||
+			labelName.OrdinalEquals(Title.ToLabelName(furnishing.PageName)))
 		{
-			this.pageMessages.Add($"[[{title.FullPageName()}|{labelName}]] ''should be''<br>\n" +
-			  $"{furnishing.PageName}");
-			if (!title.PageName.Contains(':', StringComparison.Ordinal) &&
-				furnishing.PageName.Contains(':', StringComparison.Ordinal) &&
-				title.PageName.Replace(',', ':').OrdinalEquals(furnishing.PageName))
-			{
-				Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\tOnline:{furnishing.PageName}");
-			}
+			return;
+		}
+
+		this.pageMessages.Add($"[[{title.FullPageName()}|{labelName}]] ''should be''<br>\n" +
+		  $"{furnishing.PageName}");
+		if (!title.PageName.Contains(':', StringComparison.Ordinal) &&
+			furnishing.PageName.Contains(':', StringComparison.Ordinal) &&
+			title.PageName.Replace(',', ':').OrdinalEquals(furnishing.PageName))
+		{
+			Debug.WriteLine($"Page Replace Needed: {title.FullPageName()}\tOnline:{furnishing.PageName}");
 		}
 	}
 
@@ -819,8 +672,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 	private void GetCollectiblesFromDb()
 	{
-		var rows = Database.RunQuery(EsoLog.Connection, CollectiblesQuery, FurnishingFromCollectibleRow);
-		foreach (var collectible in rows.Where(collectible => collectible.IsValid()))
+		var rows = Database.RunQuery(EsoLog.Connection, CollectiblesQuery, FurnishingFactory.FromCollectibleRow);
+		foreach (var collectible in rows)
 		{
 			this.furnishings.Add(Furnishing.GetKey(collectible.Id, true), collectible);
 		}
@@ -828,8 +681,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 	private void GetFurnishingsFromDb()
 	{
-		var rows = Database.RunQuery(EsoLog.Connection, MinedItemsQuery, FurnishingFromRow);
-		foreach (var furnishing in rows.Where(static furnishing => furnishing.IsValid()))
+		var rows = Database.RunQuery(EsoLog.Connection, MinedItemsQuery, FurnishingFactory.FromRow);
+		foreach (var furnishing in rows)
 		{
 			this.furnishings.Add(Furnishing.GetKey(furnishing.Id, false), furnishing);
 		}
