@@ -28,7 +28,7 @@ internal sealed class EsoSkills : EditJob
 		INNER JOIN
 			$ms ms ON st.abilityId = ms.id
 		WHERE
-			st.baseName = 'Vigor' AND
+			st.baseName = 'Betty Netch' AND
 			ms.isPlayer AND
 			ms.morph >= 0 AND
 			ms.skillLine != 'Emperor'
@@ -180,7 +180,7 @@ internal sealed class EsoSkills : EditJob
 			abilityId: abilityId,
 			b: (float)row["b"],
 			c: (float)row["c"],
-			coefficientType: (sbyte)row["coefType"],
+			coefficientType: (CoefficientTypes)row["coefType"],
 			cooldown: (int)row["cooldown"],
 			damageType: (int)row["dmgType"],
 			duration: (int)row["duration"],
@@ -195,7 +195,7 @@ internal sealed class EsoSkills : EditJob
 			isMelee: (bool)row["isMelee"],
 			isPlayer: (bool)row["isPlayer"],
 			r: (float)row["r"],
-			rawType: (sbyte)row["rawType"],
+			rawType: (RawTypes)row["rawType"],
 			rawValue1: (int)row["rawValue1"],
 			rawValue2: (int)row["rawValue2"],
 			startTime: (int)row["startTime"],

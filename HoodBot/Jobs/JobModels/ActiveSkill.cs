@@ -73,7 +73,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 	{
 		foreach (var morph in this.Morphs.Values)
 		{
-			morph.Description = morph.GetParsedDescription();
+			morph.PostProcess();
 		}
 	}
 
@@ -195,7 +195,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 		{
 			if (int.Parse(costSplit[i], CultureInfo.InvariantCulture) != 0)
 			{
-				var mechanicNum = int.Parse(mechanics[i], CultureInfo.InvariantCulture);
+				var mechanicNum = (CoefficientTypes)sbyte.Parse(mechanics[i], CultureInfo.InvariantCulture);
 				var mechanic = EsoLog.MechanicNames[mechanicNum] + (perTime ? " / 1s" : string.Empty);
 				costs.Add(new Cost(costSplit[i], mechanic));
 			}

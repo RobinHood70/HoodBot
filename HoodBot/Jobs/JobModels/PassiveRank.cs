@@ -52,8 +52,10 @@ internal sealed class PassiveRank(IReadOnlyList<Coefficient> coefficients, strin
 			{
 				var coefNum = int.Parse(splitDescription[i], CultureInfo.InvariantCulture) - 1;
 				var coef = this.Coefficients[coefNum];
-				text = coef.SkillDamageText(1.0);
-				text = coef.CoefficientType == -75
+				text = EsoSkillTooltips.ComputeEsoSkillTooltipCoefDescription2(
+					coef,
+					EsoSkillInputValues.WikiDefault);
+				text = coef.CoefficientType == CoefficientTypes.ConstantValue
 					? EsoLog.FloatFinder.Replace(text, "'''$&'''")
 					: $"'''{text}'''{coef.DamageSuffix}";
 			}

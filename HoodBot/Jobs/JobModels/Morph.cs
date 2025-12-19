@@ -7,12 +7,13 @@ using System.Globalization;
 using System.Text;
 using RobinHood70.CommonCode;
 
+// CONSIDER: Merge with Skill class?
 internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyte maxRank, string name, string target)
 {
 	#region Public Properties
 	public long AbilityId { get; } = abilityId;
 
-	public string? Description { get; internal set; }
+	public string? Description { get; private set; }
 
 	public string EffectLine { get; } = effectLine;
 
@@ -97,8 +98,8 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 
 		// TODO: Re-examine this to see if it captures all cases. Also, it's comparing based on both text and post-parsed values whereas it should probably be done by comparing values directly.
 		var retval = ChangeType.None;
-		var curDesc = this.GetParsedDescription();
-		var prevDesc = previous.GetParsedDescription();
+		var curDesc = this.Description;
+		var prevDesc = previous.Description;
 		if (!curDesc.OrdinalEquals(prevDesc))
 		{
 			retval = ChangeType.Minor;
@@ -145,6 +146,13 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 
 		return true;
 	}
+
+	public void PostProcess()
+	{
+		this.SetDefaultCoefficients();
+		this.SetOverTimeCoefficients();
+		this.Description = this.GetParsedDescription();
+	}
 	#endregion
 
 	#region Public Override Methods
@@ -154,7 +162,7 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 	#region Public Internal Methods
 	internal string GetParsedDescription()
 	{
-		var splitDescriptions = this.GetDescriptions();
+		var splitDescriptions = this.SplitDescriptions();
 		var splitLength = splitDescriptions[0].Length;
 
 		var errors = false;
@@ -220,6 +228,32 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 	#endregion
 
 	#region Private Static Methods
+	private static int FindOverTimeIndex(ActiveRank baseRank)
+	{
+		for (var coefIndex = 0; coefIndex < baseRank.Coefficients.Count; coefIndex++)
+		{
+			if (baseRank.Coefficients[coefIndex].RawType == RawTypes.HealOverTime)
+			{
+				return coefIndex;
+			}
+		}
+
+		return -1;
+	}
+
+	private static int FindTimeIndex(ActiveRank baseRank, int overTimeIndex)
+	{
+		for (var coefIndex = overTimeIndex + 1; coefIndex < baseRank.Coefficients.Count; coefIndex++)
+		{
+			if (baseRank.Coefficients[coefIndex].RawType is RawTypes.OverTimeDuration or RawTypes.EveryTickTime or RawTypes.TotalDuration)
+			{
+				return coefIndex;
+			}
+		}
+
+		return -1;
+	}
+
 	private static string NowrapList(IReadOnlyList<string> list) => list.Count switch
 	{
 		0 => string.Empty,
@@ -252,7 +286,103 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 	#endregion
 
 	#region Private Methods
-	private List<string[]> GetDescriptions()
+	private (List<string> Values, string? DamageType) ParseRankDescriptions(List<string[]> splitDescriptions, int arrayIndex)
+	{
+		List<string> retval = [];
+		string? finalType = null;
+		for (var rankNum = 0; rankNum < this.Ranks.Count; rankNum++)
+		{
+			var text = splitDescriptions[rankNum][arrayIndex];
+			if ((arrayIndex & 1) == 1)
+			{
+				var rank = this.Ranks[rankNum];
+				var coefNum = int.Parse(text, CultureInfo.InvariantCulture) - 1;
+				var coef = rank.Coefficients[coefNum];
+				text = EsoSkillTooltips.ComputeEsoSkillTooltipCoefDescription2(
+					coef,
+					EsoSkillInputValues.WikiDefault);
+				if (coef.CoefficientType == CoefficientTypes.ConstantValue)
+				{
+					var split = EsoLog.FloatFinder.Split(text, 2);
+					if (split.Length == 3)
+					{
+						Debug.Assert(split[0].Length == 0, "Number isn't first - this will need both prefix and suffix handling!");
+						text = split[1];
+						if (finalType is null)
+						{
+							finalType = split[2];
+						}
+						else if (!finalType.OrdinalEquals(split[2]))
+						{
+							Debug.WriteLine($"{coef.AbilityId}, {coef.Index}");
+							throw new InvalidOperationException("Multiple suffixes");
+						}
+					}
+				}
+				else if (coef.IsDamage)
+				{
+					var damageSuffix = coef.DamageSuffix;
+					if (finalType is null)
+					{
+						finalType = damageSuffix;
+					}
+					else if (!finalType.OrdinalEquals(damageSuffix))
+					{
+						throw new InvalidOperationException("Multiple damage types");
+					}
+				}
+			}
+
+			retval.Add(text);
+		}
+
+		return (retval, finalType);
+	}
+
+	private void SetOverTimeCoefficients()
+	{
+		var baseRank = this.Ranks[0]; // Assumes the over-time structure is the same for all ranks.
+		var overTimeIndex = FindOverTimeIndex(baseRank);
+		if (overTimeIndex == -1)
+		{
+			return;
+		}
+
+		var timeIndex = FindTimeIndex(baseRank, overTimeIndex);
+		if (timeIndex == -1)
+		{
+			throw new InvalidOperationException("Heal over time found with no time coefficient.");
+		}
+
+		if (!this.ValueVariesOverRanks(baseRank.Coefficients[timeIndex].Value, timeIndex))
+		{
+			return;
+		}
+
+		for (var rankIndex = 1; rankIndex < this.Ranks.Count; rankIndex++)
+		{
+			var rank = this.Ranks[rankIndex];
+			var tickTime = baseRank.Coefficients[timeIndex].TickTime;
+			var factor = (double)(rank.Duration + tickTime) / (baseRank.Duration + tickTime);
+			rank.Coefficients[overTimeIndex].Factor = factor;
+		}
+	}
+
+	private void SetDefaultCoefficients()
+	{
+		for (var rankIndex = 1; rankIndex < this.Ranks.Count; rankIndex++)
+		{
+			foreach (var coef in this.Ranks[rankIndex].Coefficients)
+			{
+				if (coef.HasRankMod)
+				{
+					coef.Factor = 1 + rankIndex * 0.011;
+				}
+			}
+		}
+	}
+
+	private List<string[]> SplitDescriptions()
 	{
 		List<string[]> splitDescriptions = new(this.Ranks.Count);
 		var splitLength = 0;
@@ -289,55 +419,18 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 		return splitDescriptions;
 	}
 
-	private (List<string> Values, string? DamageType) ParseRankDescriptions(List<string[]> splitDescriptions, int arrayIndex)
+	private bool ValueVariesOverRanks(string baseValue, int timeIndex)
 	{
-		List<string> retval = [];
-		string? finalType = null;
-		for (var rankNum = 0; rankNum < this.Ranks.Count; rankNum++)
+		// rankIndex = 1 because we don't want to compare the baseValue against itself.
+		for (var rankIndex = 1; rankIndex < this.Ranks.Count; rankIndex++)
 		{
-			var text = splitDescriptions[rankNum][arrayIndex];
-			if ((arrayIndex & 1) == 1)
+			if (!this.Ranks[rankIndex].Coefficients[timeIndex].Value.OrdinalEquals(baseValue))
 			{
-				var rank = this.Ranks[rankNum];
-				var coefNum = int.Parse(text, CultureInfo.InvariantCulture) - 1;
-				var coef = rank.Coefficients[coefNum];
-				text = coef.SkillDamageText(rank.Factor);
-				if (coef.CoefficientType == -75)
-				{
-					var split = EsoLog.FloatFinder.Split(text, 2);
-					if (split.Length == 3)
-					{
-						Debug.Assert(split[0].Length == 0, "Number isn't first - this will need both prefix and suffix handling!");
-						text = split[1];
-						if (finalType is null)
-						{
-							finalType = split[2];
-						}
-						else if (!finalType.OrdinalEquals(split[2]))
-						{
-							Debug.WriteLine($"{coef.AbilityId}, {coef.Index}");
-							throw new InvalidOperationException("Multiple suffixes");
-						}
-					}
-				}
-				else if (coef.IsDamage)
-				{
-					var damageSuffix = coef.DamageSuffix;
-					if (finalType is null)
-					{
-						finalType = damageSuffix;
-					}
-					else if (!finalType.OrdinalEquals(damageSuffix))
-					{
-						throw new InvalidOperationException("Multiple damage types");
-					}
-				}
+				return true;
 			}
-
-			retval.Add(text);
 		}
 
-		return (retval, finalType);
+		return false;
 	}
 	#endregion
 }

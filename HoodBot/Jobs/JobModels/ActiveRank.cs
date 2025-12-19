@@ -19,15 +19,6 @@ internal sealed class ActiveRank(int castingTime, int channelTime, IReadOnlyList
 
 	public int Duration { get; } = duration;
 
-	public double Factor { get; } = rank switch
-	{
-		1 => 1.0,
-		2 => 1.011,
-		3 => 1.022,
-		4 => 1.033,
-		_ => throw new InvalidOperationException($"Invalid RankNum: {rank}")
-	};
-
 	public long Id { get; } = id;
 
 	public sbyte Rank { get; } = rank;
