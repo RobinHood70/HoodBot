@@ -359,12 +359,23 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 			return;
 		}
 
+		var coef = baseRank.Coefficients[overTimeIndex];
+		if (coef.RawType == RawTypes.HealOverTime && coef.CoefficientType == CoefficientTypes.ConstantValue)
+		{
+			baseRank.Coefficients[overTimeIndex].ValueVariesOverride = true;
+		}
+
+		var tickTime = baseRank.Coefficients[timeIndex].TickTime;
 		for (var rankIndex = 1; rankIndex < this.Ranks.Count; rankIndex++)
 		{
 			var rank = this.Ranks[rankIndex];
-			var tickTime = baseRank.Coefficients[timeIndex].TickTime;
 			var factor = (double)(rank.Duration + tickTime) / (baseRank.Duration + tickTime);
-			rank.Coefficients[overTimeIndex].Factor = factor;
+			coef = rank.Coefficients[overTimeIndex];
+			coef.Factor = factor;
+			if (coef.RawType == RawTypes.HealOverTime && coef.CoefficientType == CoefficientTypes.ConstantValue)
+			{
+				coef.ValueVariesOverride = true; // Tag not to do ticktime calculations.
+			}
 		}
 	}
 

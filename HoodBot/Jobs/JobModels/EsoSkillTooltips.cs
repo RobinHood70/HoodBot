@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 
 /// <summary>This class is a modified version of the EsoSkillTooltips class from the ESO Log project (esoSkillTooltips.js), adapted for use in HoodBot.</summary>
@@ -13,7 +12,8 @@ internal static partial class EsoSkillTooltips
 	public static string ComputeEsoSkillTooltipCoefDescription2(Coefficient coef, EsoSkillInputValues inputValues)
 	{
 		// All initialization code in the original function is either not necessary or has been moved closer to where it's actually used.
-		double retval;
+		double retval = -1;
+		string? textReturn = null;
 		switch (coef.CoefficientType)
 		{
 			case CoefficientTypes.HealthOld:
@@ -45,48 +45,63 @@ internal static partial class EsoSkillTooltips
 				if (inputValues.LightArmor is int lightArmor)
 				{
 					retval = coef.A * lightArmor + coef.C;
-					break;
+				}
+				else
+				{
+					textReturn = coef.C == 0
+						? $"({coef.A:g5} * LightArmor)"
+						: $"({coef.A:g5} * LightArmor + {coef.C:g5})";
 				}
 
-				return coef.C == 0
-					? $"({coef.A:g5} * LightArmor)"
-					: $"({coef.A:g5} * LightArmor + {coef.C:g5})";
+				break;
 			case CoefficientTypes.MediumArmor:
 				if (inputValues.MediumArmor is int mediumArmor)
 				{
 					retval = coef.A * mediumArmor + coef.C;
-					break;
+				}
+				else
+				{
+					textReturn = coef.C == 0
+						? $"({coef.A:g5} * MediumArmor)"
+						: $"({coef.A:g5} * MediumArmor + {coef.C:g5})";
 				}
 
-				return coef.C == 0
-					? $"({coef.A:g5} * MediumArmor)"
-					: $"({coef.A:g5} * MediumArmor + {coef.C:g5})";
+				break;
 			case CoefficientTypes.HeavyArmor: // Heavy Armor
 				if (inputValues.HeavyArmor is int heavyArmor)
 				{
 					retval = coef.A * heavyArmor + coef.C;
-					break;
+				}
+				else
+				{
+					textReturn = coef.C == 0
+						? $"({coef.A:g5} * HeavyArmor)"
+						: $"({coef.A:g5} * HeavyArmor + {coef.C:g5})";
 				}
 
-				return coef.C == 0
-					? $"({coef.A:g5} * HeavyArmor)"
-					: $"({coef.A:g5} * HeavyArmor + {coef.C:g5})";
+				break;
 			case CoefficientTypes.WeaponDagger:
 				if (inputValues.DaggerWeapon is int daggerWeapon)
 				{
 					retval = coef.A * daggerWeapon;
-					break;
+				}
+				else
+				{
+					textReturn = $"({coef.A:g5} * Dagger)";
 				}
 
-				return $"({coef.A:g5} * Dagger)";
+				break;
 			case CoefficientTypes.ArmorType:
 				if (inputValues.ArmorTypes is int armorTypes)
 				{
 					retval = coef.A * armorTypes;
-					break;
+				}
+				else
+				{
+					textReturn = $"({coef.A:g5} * ArmorTypes)";
 				}
 
-				return $"({coef.A:g5} * ArmorTypes)";
+				break;
 			case CoefficientTypes.Damage:
 				retval = Math.Floor(coef.A * inputValues.SpellDamage) + Math.Floor(coef.B * inputValues.WeaponDamage) + coef.C;
 				break;
@@ -149,14 +164,16 @@ internal static partial class EsoSkillTooltips
 				retval = Math.Floor(coef.A * inputValues.WeaponPower) + coef.C;
 				break;
 			case CoefficientTypes.ConstantValue:
-				if (coef.RawType == RawTypes.HealOverTime)
+				if (coef.ValueVariesOverride)
 				{
-					Debug.WriteLine(coef.Value);
 					retval = double.Parse(coef.Value, CultureInfo.InvariantCulture);
-					break;
+				}
+				else
+				{
+					textReturn = coef.Value;
 				}
 
-				return coef.Value;
+				break;
 			case CoefficientTypes.HealthOrSpellDamage:
 				retval = Math.Max(
 					Math.Floor(coef.A * inputValues.SpellDamage),
@@ -208,21 +225,25 @@ internal static partial class EsoSkillTooltips
 				throw new InvalidOperationException($"Unrecognized coefficient type {coef.CoefficientType}");
 		}
 
+		if (textReturn is not null)
+		{
+			return textReturn;
+		}
+
 		// Debug.WriteLine($"{coef.AbilityId} / {coef.Index} (rank {rank}) / {coef.RawType}: {retval} * {coef.Factor} = {Math.Floor(retval * coef.Factor)}");
 		retval = Math.Floor(retval * coef.Factor);
-		retval = (true || coef.RawType == RawTypes.DerivedOneDec)
-			? Math.Floor(retval * 10) / 10
-			: Math.Floor(retval);
+		if (coef.RawType == RawTypes.DerivedOneDec)
+		{
+			retval = Math.Floor(retval * 10) / 10;
+		}
 
 		if (retval < 0)
 		{
 			throw new InvalidOperationException("Return value less than zero.");
 		}
 
-		if ((coef.RawType == RawTypes.DamageOverTime || coef.RawType == RawTypes.HealOverTime) && coef.Duration > 0)
+		if (!coef.ValueVariesOverride && (coef.RawType is RawTypes.DamageOverTime or RawTypes.HealOverTime) && coef.Duration > 0)
 		{
-			var dur = coef.Duration;
-
 			double dotFactor;
 			if (coef.NewTicks != -1)
 			{
@@ -233,8 +254,8 @@ internal static partial class EsoSkillTooltips
 			else
 			{
 				dotFactor = coef.TickTime > 0
-					? (dur + coef.TickTime) / coef.TickTime
-					: dur / 1000;
+					? (coef.Duration + coef.TickTime) / coef.TickTime
+					: coef.Duration / 1000;
 			}
 
 			if (dotFactor != 1)

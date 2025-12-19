@@ -28,7 +28,7 @@ internal sealed class EsoSkills : EditJob
 		INNER JOIN
 			$ms ms ON st.abilityId = ms.id
 		WHERE
-			st.baseName = 'Betty Netch' AND
+			/* st.baseName = 'Betty Netch' AND */
 			ms.isPlayer AND
 			ms.morph >= 0 AND
 			ms.skillLine != 'Emperor'

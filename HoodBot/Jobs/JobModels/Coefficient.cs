@@ -173,6 +173,8 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 
 	public int RawValue2 { get; } = rawValue2;
 
+	public bool ValueVariesOverride { get; set; }
+
 	public int StartTime { get; } = startTime;
 
 	public int TickTime { get; } = tickTime;
