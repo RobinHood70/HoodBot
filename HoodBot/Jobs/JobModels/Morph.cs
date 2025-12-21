@@ -359,19 +359,13 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 			return;
 		}
 
-		var coef = baseRank.Coefficients[overTimeIndex];
-		if (coef.RawType == RawTypes.HealOverTime && coef.CoefficientType == CoefficientTypes.ConstantValue)
+		var baseTickTime = baseRank.Coefficients[overTimeIndex].TickTime;
+		foreach (var rank in this.Ranks)
 		{
-			baseRank.Coefficients[overTimeIndex].ValueVariesOverride = true;
-		}
-
-		var tickTime = baseRank.Coefficients[timeIndex].TickTime;
-		for (var rankIndex = 1; rankIndex < this.Ranks.Count; rankIndex++)
-		{
-			var rank = this.Ranks[rankIndex];
-			var factor = (double)(rank.Duration + tickTime) / (baseRank.Duration + tickTime);
-			coef = rank.Coefficients[overTimeIndex];
-			coef.Factor = factor;
+			var coef = rank.Coefficients[overTimeIndex];
+			coef.Factor = rank.Duration == baseRank.Duration
+				? 1.0 // Don't go through potential innacuracy of FP math when answer guaranteed to be 1.
+				: (double)(rank.Duration + baseTickTime) / (baseRank.Duration + baseTickTime);
 			if (coef.RawType == RawTypes.HealOverTime && coef.CoefficientType == CoefficientTypes.ConstantValue)
 			{
 				coef.ValueVariesOverride = true; // Tag not to do ticktime calculations.
