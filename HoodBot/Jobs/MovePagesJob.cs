@@ -260,21 +260,15 @@ public abstract class MovePagesJob : EditJob
 
 		this.StatusWriteLine("Getting linked pages");
 		this.Pages.GetTitles(loadTitles);
-		var removeTitles = new TitleCollection(this.Site);
 
 		// We're loading the page text before any pages have moved, so if a page that needs edited is also one that's being moved, make sure the saved page has the new title.
-		foreach (var fromPage in this.Pages)
+		for (var i = 0; i < this.Pages.Count; i++)
 		{
+			var fromPage = this.Pages[i];
 			if (this.moves.TryGetValue(fromPage.Title, out var to))
 			{
-				removeTitles.Add(fromPage.Title);
-				this.Pages.Add(this.Site.CreatePage(to, fromPage.Text));
+				this.Pages[i] = this.Site.CreatePage(to, fromPage.Text);
 			}
-		}
-
-		foreach (var title in removeTitles)
-		{
-			this.Pages.Remove(title);
 		}
 	}
 
@@ -661,9 +655,10 @@ public abstract class MovePagesJob : EditJob
 			case IHeaderNode:
 			case IIgnoreNode:
 			case IParameterNode:
+			case ITextNode:
 				break;
 			default:
-				throw new InvalidOperationException("Unknown node type encountered.");
+				throw new InvalidOperationException("Unknown node type encountered: " + node.GetType().Name);
 		}
 	}
 
