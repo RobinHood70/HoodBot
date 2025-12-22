@@ -66,7 +66,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 	#region Fields
 	private readonly Context context;
-	private readonly CastlesData data = new(GameCulture);
 	private readonly StringComparer subComparer;
 	#endregion
 
@@ -91,6 +90,35 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	#region Protected Override Methods
 	protected override void AfterLoadPages()
 	{
+		var rulingsPage = this.GetRulingsPage();
+		this.Pages.Add(rulingsPage);
+
+		var oldPage = new SiteParser(rulingsPage);
+		var parser = new SiteParser(rulingsPage);
+		var sections = parser.ToSections(2);
+		var unsortedSection = GetUnsortedSection(sections);
+		var subSectionDict = this.GetSubSections(unsortedSection);
+		var newRulings = this.GetNewRulingsList(rulingsPage.Templates);
+		this.AddNewRulings(subSectionDict, newRulings);
+
+		var newSections = new SectionCollection(parser.Factory, 3);
+		foreach (var (sectionName, titles) in subSectionDict)
+		{
+			var sectionText = CreateSectionText(titles);
+			var nullName = sectionName.Length == 0 ? null : sectionName;
+			var newSection = Section.FromText(parser.Factory, 3, nullName, sectionText);
+			newSections.Add(newSection);
+		}
+
+		unsortedSection.Content.FromSections(newSections);
+		parser.FromSections(sections);
+		parser.UpdatePage();
+		var replacer = new UespReplacer(this.Site, oldPage, parser);
+		foreach (var warning in replacer.Compare(parser.Title.FullPageName()))
+		{
+			this.Warn(warning);
+		}
+
 		var sorted = new SortedSet<string>(this.context.UnhandledMagicWords, StringComparer.Ordinal);
 		foreach (var item in sorted)
 		{
@@ -102,18 +130,37 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 	protected override string GetEditSummary(Page page) => "Update rulings";
 
-	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
+	protected override TitleDictionary<Ruling> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
-		foreach (var (key, value) in TxInfoOverrides)
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
+		var translator = new CastlesTranslator(GameCulture, TxInfoOverrides);
+		var data = new CastlesData(translator);
+		var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
+		foreach (var rulingsGroupName in RulingsGroupNames)
 		{
-			this.data.Translator.ParserOverrides[key] = value;
-		}
+			if (obj[rulingsGroupName] is JToken group)
+			{
+				foreach (var rulingObject in group)
+				{
+					var localRuling = new Ruling(rulingsGroupName, rulingObject, data);
+					var title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
+					while (this.Items.ContainsKey(title))
+					{
+						localRuling.Copy++;
+						title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
+					}
 
-		this.GetItemsFromFile();
-		this.UpdateRulingsPage();
+					this.Items.Add(title, localRuling);
+				}
+			}
+		}
 	}
+
+	protected override TitleDictionary<Ruling> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
 
 	protected override void PageLoaded(Page page)
 	{
@@ -288,29 +335,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		return retval;
 	}
 
-	private void GetItemsFromFile()
-	{
-		var obj = JsonShortcuts.Load(GameInfo.Castles.ModFolder + "RulingsDefault2.json");
-		foreach (var rulingsGroupName in RulingsGroupNames)
-		{
-			if (obj[rulingsGroupName] is JToken group)
-			{
-				foreach (var rulingObject in group)
-				{
-					var localRuling = new Ruling(rulingsGroupName, rulingObject, this.data);
-					var title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
-					while (this.Items.ContainsKey(title))
-					{
-						localRuling.Copy++;
-						title = TitleFactory.FromUnvalidated(this.Site, localRuling.PageName);
-					}
-
-					this.Items.Add(title, localRuling);
-				}
-			}
-		}
-	}
-
 	private Page GetRulingsPage()
 	{
 		var pages = PageCollection.Unlimited(this.Site, PageModules.Default | PageModules.Templates, false);
@@ -378,38 +402,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 		choiceParam.Value.Clear();
 		choiceParam.Value.AddRange(newNodes);
-	}
-
-	private void UpdateRulingsPage()
-	{
-		var rulingsPage = this.GetRulingsPage();
-		this.Pages.Add(rulingsPage);
-
-		var oldPage = new SiteParser(rulingsPage);
-		var parser = new SiteParser(rulingsPage);
-		var sections = parser.ToSections(2);
-		var unsortedSection = GetUnsortedSection(sections);
-		var subSectionDict = this.GetSubSections(unsortedSection);
-		var newRulings = this.GetNewRulingsList(rulingsPage.Templates);
-		this.AddNewRulings(subSectionDict, newRulings);
-
-		var newSections = new SectionCollection(parser.Factory, 3);
-		foreach (var (sectionName, titles) in subSectionDict)
-		{
-			var sectionText = CreateSectionText(titles);
-			var nullName = sectionName.Length == 0 ? null : sectionName;
-			var newSection = Section.FromText(parser.Factory, 3, nullName, sectionText);
-			newSections.Add(newSection);
-		}
-
-		unsortedSection.Content.FromSections(newSections);
-		parser.FromSections(sections);
-		parser.UpdatePage();
-		var replacer = new UespReplacer(this.Site, oldPage, parser);
-		foreach (var warning in replacer.Compare(parser.Title.FullPageName()))
-		{
-			this.Warn(warning);
-		}
 	}
 	#endregion
 

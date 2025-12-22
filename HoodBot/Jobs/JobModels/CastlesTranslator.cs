@@ -35,10 +35,11 @@ internal sealed class CastlesTranslator
 	#endregion
 
 	#region Constructors
-	public CastlesTranslator(CultureInfo culture)
+	public CastlesTranslator(CultureInfo culture, Dictionary<string, string> overrides)
 	{
 		ArgumentNullException.ThrowIfNull(culture);
 		this.culture = culture;
+		this.ParserOverrides = overrides;
 		this.LoadLanguageDatabase();
 		this.LoadRules();
 		this.LoadSentences();
@@ -48,7 +49,7 @@ internal sealed class CastlesTranslator
 	#endregion
 
 	#region Public Properties
-	public IDictionary<string, string> ParserOverrides { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+	public IDictionary<string, string> ParserOverrides { get; }
 	#endregion
 
 	#region Private Properties

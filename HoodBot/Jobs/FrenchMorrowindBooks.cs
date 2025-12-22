@@ -60,10 +60,11 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 
 	protected override string GetEditSummary(Page page) => EditSummary;
 
-	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate(TemplateName) is not null;
+	protected override TitleDictionary<Book> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		using var connection = new MySqlConnection(App.GetConnectionString("CSData"));
 		connection.Open();
 		connection.ChangeDatabase(DbName);
@@ -97,6 +98,10 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 			Debug.WriteLine("Disambiguated: " + newTitle.PageName);
 		}
 	}
+
+	protected override TitleDictionary<Book> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate(TemplateName) is not null;
 
 	private static Book BookFromRow(IDataRecord row)
 	{

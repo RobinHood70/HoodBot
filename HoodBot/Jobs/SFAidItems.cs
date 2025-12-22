@@ -58,12 +58,11 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Update Aid Items";
 
-	protected override bool IsValidPage(SiteParser parser, SFItem item) =>
-		parser.FindTemplate("Item Summary") is ITemplateNode template &&
-		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
+	protected override TitleDictionary<SFItem> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		foreach (var item in ReadItems())
 		{
 			var name = ReplacementNames.TryGetValue(item.EditorId, out var replacement)
@@ -80,6 +79,12 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 			}
 		}
 	}
+
+	protected override TitleDictionary<SFItem> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, SFItem item) =>
+		parser.FindTemplate("Item Summary") is ITemplateNode template &&
+		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
 	#endregion
 
 	#region Private Static Methods

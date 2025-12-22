@@ -32,10 +32,11 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create armor page";
 
-	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
+	protected override TitleDictionary<List<SFItem>> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var csvName = GameInfo.Starfield.ModFolder + "Armors.csv";
 		if (!File.Exists(csvName))
 		{
@@ -61,6 +62,10 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 			}
 		}
 	}
+
+	protected override TitleDictionary<List<SFItem>> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
 	#endregion
 
 	#region Private Static Methods

@@ -94,14 +94,19 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 
 	protected override string GetEditSummary(Page page) => "Create/update planet";
 
-	protected override bool IsValidPage(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
+	protected override TitleDictionary<Planet> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var biomes = GetBiomes();
 		this.Items.AddRange(this.ReadEchelar(biomes));
 		this.ReadWip3(this.Items);
 	}
+
+	protected override TitleDictionary<Planet> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
 	#endregion
 
 	#region Private Static Methods

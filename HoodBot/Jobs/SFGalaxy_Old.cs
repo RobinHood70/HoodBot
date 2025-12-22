@@ -33,10 +33,11 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create planet page";
 
-	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
+	protected override TitleDictionary<CsvRow> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
 		if (File.Exists(csvName))
 		{
@@ -66,6 +67,10 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 			}
 		}
 	}
+
+	protected override TitleDictionary<CsvRow> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
 	#endregion
 
 	#region Private Methods

@@ -46,11 +46,11 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update mission";
 
-	protected override bool IsValidPage(SiteParser parser, Mission item) =>
-		FindTemplate(parser, item) is not null;
+	protected override TitleDictionary<Mission> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var existing = this.LoadExisting();
 		var questsMissing = !File.Exists(QuestsFileName);
 		var stagesMissing = !File.Exists(StagesFileName);
@@ -120,6 +120,11 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			}
 		}
 	}
+
+	protected override TitleDictionary<Mission> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Mission item) =>
+		FindTemplate(parser, item) is not null;
 	#endregion
 
 	#region Private Static Methods

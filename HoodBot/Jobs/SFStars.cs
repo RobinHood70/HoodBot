@@ -27,8 +27,11 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create star";
 
-	protected override void LoadItems()
+	protected override TitleDictionary<CsvRow> GetExistingItems() => [];
+
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var csvName = GameInfo.Starfield.ModFolder + "stars.csv";
 		if (!File.Exists(csvName))
 		{
@@ -47,6 +50,8 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 			this.Items.Add(title, row);
 		}
 	}
+
+	protected override TitleDictionary<CsvRow> GetNewItems() => [];
 
 	protected override bool IsValidPage(SiteParser parser, CsvRow item) => parser.FindTemplate("System Infobox") is not null;
 	#endregion

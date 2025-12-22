@@ -30,10 +30,11 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create weapon page";
 
-	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
+	protected override TitleDictionary<List<CsvRow>> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Weapons.csv")
 		{
 			Encoding = Encoding.GetEncoding(1252)
@@ -51,6 +52,10 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 			}
 		}
 	}
+
+	protected override TitleDictionary<List<CsvRow>> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
 	#endregion
 
 	#region Private Static Methods

@@ -47,10 +47,11 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create terminal page";
 
-	protected override bool IsValidPage(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
+	protected override TitleDictionary<Terminal> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		this.LoadMenus();
 		if (!File.Exists(TerminalsFileName))
 		{
@@ -88,6 +89,10 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 			}
 		}
 	}
+
+	protected override TitleDictionary<Terminal> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
 	#endregion
 
 	#region Private Static Methods

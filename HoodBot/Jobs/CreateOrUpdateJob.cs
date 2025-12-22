@@ -68,16 +68,14 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 
 	/// <summary>Gets the list of existing titles. Do *NOT* load these via <see cref="Pages"/> or add them to <see cref="Items"/> - that will be done after pages are disambiguated, if appropriate.</summary>
 	/// <remarks>This is called even when <see cref="Clobber"/> is true so that if valid pages exist, they're the ones that get clobbered. If the job is create-only, there's no need to override it.</remarks>
-	protected virtual TitleDictionary<T> GetExistingItems() => [];
+	protected abstract TitleDictionary<T> GetExistingItems();
 
-	protected virtual void GetExternalData()
-	{
-	}
+	protected abstract void GetExternalData();
 
 	/// <summary>Figures out what new pages need to be created.</summary>
 	/// <param name="existing">Existing items on the wiki.</param>
 	/// <returns>A <see cref="TitleDictionary{T}"/> containing the list of pages to create.</returns>
-	protected virtual TitleDictionary<T> GetNewItems() => [];
+	protected abstract TitleDictionary<T> GetNewItems();
 
 	protected virtual void ValidPageLoaded(SiteParser parser, T item)
 	{

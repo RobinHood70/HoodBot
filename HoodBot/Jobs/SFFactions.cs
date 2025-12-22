@@ -43,10 +43,11 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create/update faction page";
 
-	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
+	protected override TitleDictionary<Redirect> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var newFactions = GetFactions(GameInfo.Starfield.ModFolder);
 		if (newFactions.Count == 0)
 		{
@@ -68,6 +69,10 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		this.AddFactionPages(existing);
 		this.Items.AddRange(this.GetRedirects(newFactions));
 	}
+
+	protected override TitleDictionary<Redirect> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
 	#endregion
 
 	#region Private Static Methods

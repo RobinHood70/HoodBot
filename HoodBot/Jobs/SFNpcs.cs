@@ -32,10 +32,11 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create NPC page";
 
-	protected override bool IsValidPage(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
+	protected override TitleDictionary<Npcs> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var fauna = GetFauna();
 		var races = GetRaces();
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Npcs.csv")
@@ -83,6 +84,10 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 			}
 		}
 	}
+
+	protected override TitleDictionary<Npcs> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
 	#endregion
 
 	#region Private Static Methods

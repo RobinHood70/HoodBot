@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Newtonsoft.Json.Linq;
 using RobinHood70.WikiCommon;
 
@@ -29,9 +28,10 @@ internal sealed class CastlesData
 	#endregion
 
 	#region Constructors
-	public CastlesData(CultureInfo culture)
+	public CastlesData(CastlesTranslator translator)
 	{
-		this.Translator = new CastlesTranslator(culture);
+		ArgumentNullException.ThrowIfNull(translator);
+		this.Translator = translator;
 		this.LoadGroups();
 		this.LoadPropData();
 		this.LoadQuests();

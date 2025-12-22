@@ -30,10 +30,11 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Create variant redirect"; // "Create/update creature page";
 
-	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
+	protected override TitleDictionary<Creature> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		this.StatusWriteLine("NEEDS UPDATED TO USE Npcs.csv (or have more info in fauna.csv)");
 		var titleMap = this.GetTitleMap();
 		var csv = new CsvFile(GameInfo.Starfield.ModFolder + "Fauna.csv")
@@ -59,6 +60,10 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 			creature!.Variants.Add(row);
 		}
 	}
+
+	protected override TitleDictionary<Creature> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
 	#endregion
 
 	#region Private Static Methods

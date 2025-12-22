@@ -37,13 +37,11 @@ internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Update effects";
 
-	protected override bool IsValidPage(SiteParser parser, Effect item) =>
-		parser.Page.IsRedirect &&
-		parser.LinkNodes.First() is ILinkNode linkNode &&
-		linkNode.GetTitle(parser.Site) == this.effectsTitle;
+	protected override TitleDictionary<Effect> GetExistingItems() => [];
 
-	protected override void LoadItems()
+	protected override void GetExternalData()
 	{
+		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var effects = new Effects();
 		var effectsPage = this.Site.LoadPage(this.effectsTitle) ?? throw new InvalidOperationException();
 		var rows = EffectsRowFinder().Matches(effectsPage.Text);
@@ -105,6 +103,13 @@ internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 		effectsPage.Text = effectsPage.Text.Insert(startPos, sb.ToString());
 		this.Pages.Add(effectsPage);
 	}
+
+	protected override TitleDictionary<Effect> GetNewItems() => [];
+
+	protected override bool IsValidPage(SiteParser parser, Effect item) =>
+		parser.Page.IsRedirect &&
+		parser.LinkNodes.First() is ILinkNode linkNode &&
+		linkNode.GetTitle(parser.Site) == this.effectsTitle;
 	#endregion
 
 	#region Private Static Methods
