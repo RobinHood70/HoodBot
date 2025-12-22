@@ -87,7 +87,7 @@ public class UespNamespaceList : IReadOnlyDictionary<string, UespNamespace>
 			var modName = uespNs.ModName;
 			if (pageName.Length > modName.Length && pageName[modName.Length] == '/')
 			{
-				pageName = pageName[..(modName.Length - 1)];
+				pageName = pageName[..modName.Length];
 			}
 
 			if (ns.PageNameEquals(modName, pageName))
