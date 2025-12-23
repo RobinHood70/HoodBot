@@ -3,7 +3,6 @@
 using System.Diagnostics;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 
@@ -15,13 +14,20 @@ internal sealed class CheckFileLicensing(JobManager jobManager) : WikiJob(jobMan
 	{
 		var licenseTemplates = this.GetImageLicenses();
 		var filePages = this.GetFilePages();
+		var none = true;
 		foreach (var filePage in filePages)
 		{
 			var parser = new SiteParser(filePage);
 			if (!this.HasLicense(licenseTemplates, parser))
 			{
+				none = false;
 				Debug.WriteLine($"No license: {filePage.Title}");
 			}
+		}
+
+		if (none)
+		{
+			Debug.WriteLine("All files have license info.");
 		}
 	}
 	#endregion
@@ -31,8 +37,7 @@ internal sealed class CheckFileLicensing(JobManager jobManager) : WikiJob(jobMan
 
 	private PageCollection GetFilePages()
 	{
-		var retval = new PageCollection(this.Site, PageModules.Default, false);
-		retval.SetLimitations(LimitationType.OnlyAllow, MediaWikiNamespaces.File);
+		var retval = PageCollection.Unlimited(this.Site);
 		retval.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "OB-");
 		retval.Sort();
 
