@@ -30,6 +30,9 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 
 	#region Protected Abstract Methods
 
+	/// <summary>Gets the disambiguator in the event of a conflict between existing pages and new ones.</summary>
+	/// <param name="item">The item to find the disambiguator for.</param>
+	/// <returns>The disambiguator. If the return value is <see langword="null"/> and disambiguation is requested, an error will be thrown.</returns>
 	protected abstract string? GetDisambiguator(T item);
 
 	protected abstract bool IsValidPage(SiteParser parser, T item);
@@ -59,8 +62,13 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 		{
 			if (page.Exists && newItems.Remove(page.Title, out var item))
 			{
-				var disambigTitle = TitleFactory.FromUnvalidated(this.Site, $"{page.Title} ({this.GetDisambiguator(item)})");
-				newItems.Remove(page.Title);
+				var disambiguator = this.GetDisambiguator(item)?.ToLower(this.Site.Culture);
+				if (string.IsNullOrEmpty(disambiguator))
+				{
+					throw new InvalidOperationException($"Cannot disambiguate page because disambiguator is empty: {page.Title}");
+				}
+
+				var disambigTitle = TitleFactory.FromUnvalidated(this.Site, $"{page.Title} ({disambiguator})");
 				newItems.Add(disambigTitle, item);
 			}
 		}
