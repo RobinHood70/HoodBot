@@ -138,17 +138,15 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		.Append("{{Stub|Mission}}")
 		.ToString();
 
-	protected override bool IsValidPage(SiteParser parser, Mission item) =>
-		FindTemplate(parser, item) is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, Mission item)
+	protected override void ItemPageLoaded(SiteParser parser, Mission item)
 	{
-		if (FindTemplate(parser, item) is not ITemplateNode template)
+		var template = parser.FindTemplate("Mission Header") ?? throw new InvalidOperationException("Mission Header template not found.");
+		var idParam = template.UpdateIfEmpty("ID", item.EditorId);
+		if (!idParam.GetValue().OrdinalEquals(item.EditorId))
 		{
-			return;
+			throw new InvalidOperationException("Mission EditorID does not match template ID.");
 		}
 
-		template.Update("ID", item.EditorId);
 		var labelName = parser.Title.LabelName();
 		if (!labelName.OrdinalEquals(item.Name))
 		{
@@ -221,14 +219,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 		sb.Append("}}\n\n");
 		return sb.ToString();
-	}
-
-	private static ITemplateNode? FindTemplate(SiteParser parser, Mission item)
-	{
-		var template = parser.FindTemplate("Mission Header");
-		return (template?.GetValue("ID")?.Trim()).OrdinalEquals(item.EditorId)
-			? template
-			: null;
 	}
 
 	private static Dictionary<string, string> LoadDisambigs()

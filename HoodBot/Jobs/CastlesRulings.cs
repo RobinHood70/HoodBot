@@ -165,13 +165,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		"|choices=\n" +
 		"}}";
 
-	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
-
-	protected override void PageLoaded(Page page)
-	{
-	}
-
-	protected override void ValidPageLoaded(SiteParser parser, Ruling ruling)
+	protected override void ItemPageLoaded(SiteParser parser, Ruling ruling)
 	{
 		this.context.Page = parser.Page;
 		var comparer = new FlatteningComparer(this.context, this.subComparer)
@@ -179,7 +173,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 			ParseBeforeStringCompare = RemoveCruftBeforeCompare
 		};
 
-		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
+		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException(RulingTemplate + " template not found.");
 
 		template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
 

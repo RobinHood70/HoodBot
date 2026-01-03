@@ -61,28 +61,25 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 
 	protected override TitleDictionary<Creature> GetNewItems() => [];
 
-	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, Creature item)
+	protected override void ItemPageLoaded(SiteParser parser, Creature item)
 	{
-		var cs = parser.FindTemplate("Creature Summary");
-		if (cs is not null)
+		if (parser.FindTemplate("Creature Summary") is ITemplateNode template)
 		{
-			cs.Remove("resp");
-			cs.Remove("typenamesp");
-			cs.RenameParameter("level", "difficulty");
-			cs.RenameParameter("levels", "difficulty");
+			template.Remove("resp");
+			template.Remove("typenamesp");
+			template.RenameParameter("level", "difficulty");
+			template.RenameParameter("levels", "difficulty");
 
-			var typeValue = cs.GetValue("type");
+			var typeValue = template.GetValue("type");
 			if (typeValue != null && (typeValue.Length == 0 || typeValue.OrdinalEquals("Fauna")))
 			{
-				cs.Remove("type");
+				template.Remove("type");
 			}
 
 			if (item.Variants.Count < 2)
 			{
-				this.UpdateLoc(cs, item);
-				UpdateTemplate(cs, item.Variants[0]);
+				this.UpdateLoc(template, item);
+				UpdateTemplate(template, item.Variants[0]);
 			}
 			else
 			{
@@ -92,7 +89,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 					planets.Add(variant["Planet"]);
 				}
 
-				cs.Update("planet", string.Join(", ", planets));
+				template.Update("planet", string.Join(", ", planets));
 			}
 		}
 

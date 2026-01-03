@@ -6,7 +6,6 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Parser;
 
 internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 {
@@ -51,8 +50,6 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	}
 
 	protected override TitleDictionary<CsvRow> GetNewItems() => [];
-
-	protected override bool IsValidPage(SiteParser parser, CsvRow item) => parser.FindTemplate("System Infobox") is not null;
 	#endregion
 
 	#region Private Static Methods

@@ -104,9 +104,7 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 
 	protected override TitleDictionary<Planet> GetNewItems() => [];
 
-	protected override bool IsValidPage(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, Planet item)
+	protected override void ItemPageLoaded(SiteParser parser, Planet item)
 	{
 		var template = parser.FindTemplate("Planet Infobox") ?? throw new InvalidOperationException();
 		var biomes = item.Biomes.Count == 0

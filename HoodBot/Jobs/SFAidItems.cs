@@ -79,17 +79,15 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 	protected override TitleDictionary<SFItem> GetNewItems() => [];
 
-	protected override bool IsValidPage(SiteParser parser, SFItem item) =>
-		parser.FindTemplate("Item Summary") is ITemplateNode template &&
-		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
-
-	protected override void ValidPageLoaded(SiteParser parser, SFItem item)
+	protected override void ItemPageLoaded(SiteParser parser, SFItem item)
 	{
-		if (parser.Page.Exists)
+		var template = parser.FindTemplate("Item Summary") ?? throw new InvalidOperationException("Item Summary template not found.");
+		var idParam = template.UpdateIfEmpty("editorid", item.EditorId);
+		if (!string.Equals(idParam.GetValue(), item.EditorId, StringComparison.Ordinal))
 		{
+			throw new InvalidOperationException("Editor ID does not match.");
 		}
 
-		var template = parser.FindTemplate("Item Summary") ?? throw new InvalidOperationException();
 		var pagenameParam = template.Find("pagename");
 		var pagename = pagenameParam?.GetValue();
 		if (parser.Title.PageNameEquals(pagename))

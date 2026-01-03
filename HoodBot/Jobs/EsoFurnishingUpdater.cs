@@ -199,8 +199,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 	protected override string GetNewPageText(Title title, Furnishing item) => this.blank ?? throw new InvalidOperationException("Blank page text is null.");
 
-	protected override bool IsValidPage(SiteParser parser, Furnishing item) => parser.FindTemplate(TemplateName) is not null;
-
 	protected override void LoadPages()
 	{
 		base.LoadPages();
@@ -228,9 +226,9 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	protected override void ValidPageLoaded(SiteParser parser, Furnishing item)
+	protected override void ItemPageLoaded(SiteParser parser, Furnishing item)
 	{
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException(TemplateName + " template not found.");
 		template.UpdateIfEmpty("id", item.Id.ToStringInvariant(), ParameterFormat.OnePerLine);
 		this.GenericTemplateFixes(template);
 		if (template.Parameters.Any(p => p.Anonymous))

@@ -10,7 +10,6 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Parser;
 
 internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 {
@@ -78,8 +77,6 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	}
 
 	protected override TitleDictionary<Book> GetNewItems() => [];
-
-	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate("Game Book") is not null;
 	#endregion
 
 	#region Private Static Methods

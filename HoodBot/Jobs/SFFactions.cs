@@ -96,7 +96,13 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		return retval;
 	}
 
-	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
+	protected override void ItemPageLoaded(SiteParser parser, Redirect item)
+	{
+		if (!parser.Page.IsRedirect)
+		{
+			throw new InvalidOperationException("Page is not a redirect!");
+		}
+	}
 	#endregion
 
 	#region Private Static Methods

@@ -24,16 +24,8 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 	protected bool ThrowInvalid { get; set; }
 	#endregion
 
-	#region Protected Abstract Methods
-
-	/// <summary>Gets the disambiguator in the event of a conflict between existing pages and new ones.</summary>
-	/// <param name="item">The item to find the disambiguator for.</param>
-	/// <returns>The disambiguator. If the return value is <see langword="null"/> and disambiguation is requested, an error will be thrown.</returns>
-	protected abstract string? GetDisambiguator(T item);
-
-	protected abstract bool IsValidPage(SiteParser parser, T item);
-
-	protected virtual void LoadItems()
+	#region Protected Methods
+	protected void LoadItems()
 	{
 		this.GetExternalData();
 		var existing = this.GetExistingItems();
@@ -47,6 +39,14 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 
 		this.items.AddRange(newItems);
 	}
+	#endregion
+
+	#region Protected Abstract Methods
+
+	/// <summary>Gets the disambiguator in the event of a conflict between existing pages and new ones.</summary>
+	/// <param name="item">The item to find the disambiguator for.</param>
+	/// <returns>The disambiguator. If the return value is <see langword="null"/> and disambiguation is requested, an error will be thrown.</returns>
+	protected abstract string? GetDisambiguator(T item);
 	#endregion
 
 	#region Protected Abstract Methods
@@ -86,7 +86,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 
 	protected virtual string GetNewPageText(Title title, T item) => string.Empty;
 
-	protected virtual void ValidPageLoaded(SiteParser parser, T item)
+	protected virtual void ItemPageLoaded(SiteParser parser, T item)
 	{
 	}
 	#endregion
@@ -115,15 +115,8 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 		}
 
 		var parser = new SiteParser(page);
-		if (this.IsValidPage(parser, item))
-		{
-			this.ValidPageLoaded(parser, item);
-			parser.UpdatePage();
-		}
-		else if (page.Exists && this.ThrowInvalid)
-		{
-			throw new InvalidOperationException($"Page failed validity check: {page.Title}");
-		}
+		this.ItemPageLoaded(parser, item);
+		parser.UpdatePage();
 	}
 
 	protected override void TitleMapLoaded()

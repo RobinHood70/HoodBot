@@ -141,7 +141,13 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 		return sb.ToString();
 	}
 
-	protected override bool IsValidPage(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
+	protected override void ItemPageLoaded(SiteParser parser, Terminal item)
+	{
+		if (parser.FindTemplate("Terminal Summary") is null)
+		{
+			throw new InvalidOperationException("Terminal Summary template not found.");
+		}
+	}
 	#endregion
 
 	#region Private Static Methods

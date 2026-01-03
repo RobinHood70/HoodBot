@@ -105,11 +105,9 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 		this.Wikify(book.Text, title) +
 		"\n{{Fin de livre}}";
 
-	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate(TemplateName) is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, Book book)
+	protected override void ItemPageLoaded(SiteParser parser, Book book)
 	{
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException(TemplateName + " template not found.");
 		var index = 1;
 		foreach (var id in book.EditorIds)
 		{

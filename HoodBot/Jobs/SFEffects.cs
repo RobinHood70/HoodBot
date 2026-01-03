@@ -103,10 +103,19 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 		return "#REDIRECT [[Starfield:Effects#" + siteLink.Text + "]]\n[[Category:Redirects to Broader Subjects]]\n[[Category:Starfield-Effects]]";
 	}
 
-	protected override bool IsValidPage(SiteParser parser, Effect item) =>
-		parser.Page.IsRedirect &&
-		parser.LinkNodes.First() is ILinkNode linkNode &&
-		linkNode.GetTitle(parser.Site) == this.effectsTitle;
+	protected override void ItemPageLoaded(SiteParser parser, Effect item)
+	{
+		if (!parser.Page.IsRedirect)
+		{
+			throw new InvalidOperationException("Page is not a redirect!");
+		}
+
+		if (parser.LinkNodes.First() is not ILinkNode linkNode ||
+			linkNode.GetTitle(parser.Site) != this.effectsTitle)
+		{
+			throw new InvalidOperationException("Redirect does not point to Effects page!");
+		}
+	}
 	#endregion
 
 	#region Private Static Methods

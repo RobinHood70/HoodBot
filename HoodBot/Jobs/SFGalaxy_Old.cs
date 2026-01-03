@@ -97,6 +97,7 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 		"}}\n\n{{Stub|Planet}}";
 	}
 
-	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
+	protected override void ItemPageLoaded(SiteParser parser, CsvRow data) =>
+		_ = parser.FindTemplate("Planet Infobox") ?? throw new InvalidOperationException("Planet Infobox template not found");
 	#endregion
 }

@@ -90,12 +90,15 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 			""";
 	}
 
-	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, List<SFItem> list)
+	protected override void ItemPageLoaded(SiteParser parser, List<SFItem> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
 		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
+		if (insertPos == -1)
+		{
+			throw new InvalidOperationException("Item Summary template not found on page.");
+		}
+
 		foreach (var item in list)
 		{
 			if (FindMatchingTemplate(parser, item) is ITemplateNode template)

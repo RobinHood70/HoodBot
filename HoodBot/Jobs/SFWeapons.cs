@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using RobinHood70.CommonCode;
@@ -76,12 +77,16 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 			""";
 	}
 
-	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
-
-	protected override void ValidPageLoaded(SiteParser parser, List<CsvRow> list)
+	protected override void ItemPageLoaded(SiteParser parser, List<CsvRow> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary") + 1;
+		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
+		if (insertPos == -1)
+		{
+			throw new InvalidOperationException("Item Summary template not found.");
+		}
+
+		insertPos++;
 		foreach (var row in list)
 		{
 			if (FindMatchingTemplate(parser, row) is null)
