@@ -6,6 +6,12 @@ using System.Collections.Generic;
 internal static class ReplacementData
 {
 	#region Public Static Properties
+	public static Dictionary<long, string> CollectibleNameOverrides { get; } = new()
+	{
+		[4528] = "Ashlander Helm",
+		[6117] = "Honor Guard Jack",
+	};
+
 	// Replacements that are specific to certain IDs but do not apply to the general case.
 	public static Dictionary<long, (string From, string To)> IdPartialReplacements { get; } = new Dictionary<long, (string, string)>
 	{
@@ -32,7 +38,14 @@ internal static class ReplacementData
 		["Sayya-Daro"] = "Sayya-daro",
 	};
 
-	public static HashSet<long> NpcIdSkips { get; } = [26213, 26214, 63050];
+	public static HashSet<long> NpcIdSkips { get; } =
+	[
+		26213,  // Strangler
+		26214,  // Dremora Kynlurker
+		63050,  // Endryn Ertis
+		324090, // The Elder One
+		324203, // Celia Tyde
+	];
 
 	public static HashSet<string> NpcNameSkips { get; } = new HashSet<string>(StringComparer.Ordinal)
 	{

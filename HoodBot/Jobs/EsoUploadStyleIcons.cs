@@ -15,12 +15,6 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 	#endregion
 
 	#region Static Fields
-	private static readonly Dictionary<long, string> NameFixes = new()
-	{
-		[4528] = "Ashlander Helm",
-		[6117] = "Honor Guard Jack",
-	};
-
 	private static readonly List<Part> Parts =
 	[
 		new("Hat", "armor", "Head"),
@@ -125,7 +119,7 @@ internal sealed class EsoUploadStyleIcons : WikiJob
 		foreach (var row in Database.RunQuery(EsoLog.Connection, Query))
 		{
 			var id = (long)row["id"];
-			if (!NameFixes.TryGetValue(id, out var name))
+			if (!ReplacementData.CollectibleNameOverrides.TryGetValue(id, out var name))
 			{
 				name = EsoLog.ConvertEncoding((string)row["name"]);
 			}
