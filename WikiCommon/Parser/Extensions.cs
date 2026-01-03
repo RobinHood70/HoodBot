@@ -1021,8 +1021,7 @@ public static class Extensions
 	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
 	{
 		ArgumentNullException.ThrowIfNull(template);
-		var param = template.Find(name);
-		if (param is IParameterNode parameter)
+		if (template.Find(name) is IParameterNode parameter)
 		{
 			if (parameter.GetValue().Length == 0)
 			{
