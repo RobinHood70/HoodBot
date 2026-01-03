@@ -16,7 +16,6 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
 	}
 	#endregion
 
@@ -57,7 +56,7 @@ internal sealed class SFStars : CreateOrUpdateJob<CsvRow>
 	#endregion
 
 	#region Private Static Methods
-	private static string GetNewPageText(Title title, CsvRow item) =>
+	protected override string GetNewPageText(Title title, CsvRow item) =>
 		"{{Trail|Places}}\n" +
 		"{{System Infobox\n" +
 		$"|eid={item["FormID"]}\n" +

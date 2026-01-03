@@ -75,8 +75,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		: base(jobManager)
 	{
 		this.context = new Context(this.Site);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = this.UpdateRuling;
 		this.subComparer = this.Site.GetStringComparer(false);
 	}
 	#endregion
@@ -160,10 +158,58 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 	protected override TitleDictionary<Ruling> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, Ruling ruling) =>
+		"{{Castles Ruling\n" +
+		"|text=\n" +
+		"|conditions=\n" +
+		"|choices=\n" +
+		"}}";
+
 	protected override bool IsValidPage(SiteParser parser, Ruling item) => parser.FindTemplate(RulingTemplate) is not null;
 
 	protected override void PageLoaded(Page page)
 	{
+	}
+
+	protected override void ValidPageLoaded(SiteParser parser, Ruling ruling)
+	{
+		this.context.Page = parser.Page;
+		var comparer = new FlatteningComparer(this.context, this.subComparer)
+		{
+			ParseBeforeStringCompare = RemoveCruftBeforeCompare
+		};
+
+		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
+
+		template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
+
+		if (ruling.Conditions.Count > 0)
+		{
+			var newConditions = string.Join("<br>\n", ruling.Conditions);
+			template.LooseUpdate("conditions", newConditions, ParameterFormat.OnePerLine, comparer);
+		}
+
+		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
+		var choiceDictionary = new Dictionary<int, ITemplateNode>();
+		var searchTemplate = TitleFactory.FromTemplate(this.Site, "Castles Ruling/Choice");
+		foreach (var choiceTemplate in choiceParam.Value.FindTemplates(searchTemplate))
+		{
+			if (choiceTemplate.GetValue("id") is string choiceId)
+			{
+				choiceDictionary.Add(int.Parse(choiceId, this.Site.Culture), choiceTemplate);
+			}
+		}
+
+		var newNodes = new WikiNodeCollection(parser.Factory);
+		foreach (var choice in ruling.Choices)
+		{
+			var choiceTemplate = UpdateChoiceTemplate(choice, parser, choiceDictionary, comparer);
+			newNodes.Add(choiceTemplate);
+			newNodes.AddText("\n");
+		}
+
+		choiceParam.Value.Clear();
+		choiceParam.Value.AddRange(newNodes);
 	}
 	#endregion
 
@@ -240,13 +286,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 		return template;
 	}
-
-	private static string GetNewPageText(Title title, Ruling ruling) =>
-		"{{Castles Ruling\n" +
-		"|text=\n" +
-		"|conditions=\n" +
-		"|choices=\n" +
-		"}}";
 
 	private static Section GetUnsortedSection(SectionCollection sections)
 	{
@@ -361,47 +400,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		}
 
 		return retval;
-	}
-
-	private void UpdateRuling(SiteParser parser, Ruling ruling)
-	{
-		this.context.Page = parser.Page;
-		var comparer = new FlatteningComparer(this.context, this.subComparer)
-		{
-			ParseBeforeStringCompare = RemoveCruftBeforeCompare
-		};
-
-		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException("Template not found.");
-
-		template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
-
-		if (ruling.Conditions.Count > 0)
-		{
-			var newConditions = string.Join("<br>\n", ruling.Conditions);
-			template.LooseUpdate("conditions", newConditions, ParameterFormat.OnePerLine, comparer);
-		}
-
-		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
-		var choiceDictionary = new Dictionary<int, ITemplateNode>();
-		var searchTemplate = TitleFactory.FromTemplate(this.Site, "Castles Ruling/Choice");
-		foreach (var choiceTemplate in choiceParam.Value.FindTemplates(searchTemplate))
-		{
-			if (choiceTemplate.GetValue("id") is string choiceId)
-			{
-				choiceDictionary.Add(int.Parse(choiceId, this.Site.Culture), choiceTemplate);
-			}
-		}
-
-		var newNodes = new WikiNodeCollection(parser.Factory);
-		foreach (var choice in ruling.Choices)
-		{
-			var choiceTemplate = UpdateChoiceTemplate(choice, parser, choiceDictionary, comparer);
-			newNodes.Add(choiceTemplate);
-			newNodes.AddText("\n");
-		}
-
-		choiceParam.Value.Clear();
-		choiceParam.Value.AddRange(newNodes);
 	}
 	#endregion
 

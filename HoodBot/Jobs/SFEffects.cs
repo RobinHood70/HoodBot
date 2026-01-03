@@ -14,20 +14,11 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
+[method: JobInfo("Effects", "Starfield")]
+internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJob<SFEffects.Effect>(jobManager)
 {
 	#region Fields
-	private readonly Title effectsTitle;
-	#endregion
-
-	#region Constructors
-	[JobInfo("Effects", "Starfield")]
-	public SFEffects(JobManager jobManager)
-	: base(jobManager)
-	{
-		this.effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
-		this.NewPageText = this.GetNewPageText;
-	}
+	private readonly Title effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
 	#endregion
 
 	#region Protected Override Properties
@@ -106,6 +97,12 @@ internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 
 	protected override TitleDictionary<Effect> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, Effect effect)
+	{
+		var siteLink = SiteLink.FromText(this.Site, effect.Link);
+		return "#REDIRECT [[Starfield:Effects#" + siteLink.Text + "]]\n[[Category:Redirects to Broader Subjects]]\n[[Category:Starfield-Effects]]";
+	}
+
 	protected override bool IsValidPage(SiteParser parser, Effect item) =>
 		parser.Page.IsRedirect &&
 		parser.LinkNodes.First() is ILinkNode linkNode &&
@@ -162,14 +159,6 @@ internal sealed partial class SFEffects : CreateOrUpdateJob<SFEffects.Effect>
 		}
 
 		return retval;
-	}
-	#endregion
-
-	#region Private Methods
-	private string GetNewPageText(Title title, Effect effect)
-	{
-		var siteLink = SiteLink.FromText(this.Site, effect.Link);
-		return "#REDIRECT [[Starfield:Effects#" + siteLink.Text + "]]\n[[Category:Redirects to Broader Subjects]]\n[[Category:Starfield-Effects]]";
 	}
 	#endregion
 

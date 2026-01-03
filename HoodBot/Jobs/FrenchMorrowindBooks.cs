@@ -49,8 +49,6 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	public FrenchMorrowindBooks(JobManager jobManager)
 		: base(jobManager)
 	{
-		this.NewPageText = this.GetNewPageText;
-		this.OnUpdate = this.UpdatePage;
 		this.GetEnglishIcons(jobManager.Client);
 	}
 	#endregion
@@ -101,8 +99,56 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 
 	protected override TitleDictionary<Book> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, Book book) =>
+		"{{" + TemplateName + '\n' +
+		"}}\n" +
+		this.Wikify(book.Text, title) +
+		"\n{{Fin de livre}}";
+
 	protected override bool IsValidPage(SiteParser parser, Book item) => parser.FindTemplate(TemplateName) is not null;
 
+	protected override void ValidPageLoaded(SiteParser parser, Book book)
+	{
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		var index = 1;
+		foreach (var id in book.EditorIds)
+		{
+			var name = index == 1
+				? "id"
+				: "id" + index.ToStringInvariant();
+			template.AddIfNotExists(name, id, ParameterFormat.OnePerLine);
+			if (this.icons.TryGetValue(id, out var icon))
+			{
+				template.Update("icon", icon);
+			}
+			else
+			{
+				Debug.WriteLine(id + " - " + parser.Page);
+			}
+
+			index++;
+		}
+
+		// var ns = this.nsInfo[book.Namespace];
+		// template.AddIfNotExists(ns.Id, "1", ParameterFormat.OnePerLine);
+		template.AddIfNotExists("value", book.Value.ToStringInvariant(), ParameterFormat.OnePerLine);
+		template.AddIfNotExists("weight", book.Weight.ToStringInvariant(), ParameterFormat.OnePerLine);
+		template.AddIfNotExists("lorename", "none", ParameterFormat.OnePerLine);
+		if (book.Skill is ushort skill)
+		{
+			template.AddIfNotExists("skill", Skills[skill], ParameterFormat.OnePerLine);
+		}
+
+		if (book.IsScroll)
+		{
+			template.AddIfNotExists("scroll", "1", ParameterFormat.OnePerLine);
+		}
+
+		template.AddIfNotExists("description", string.Empty, ParameterFormat.OnePerLine);
+	}
+	#endregion
+
+	#region Private Static Methods
 	private static Book BookFromRow(IDataRecord row)
 	{
 		var skill = (row["skill_lu"] is ushort skillLu)
@@ -125,9 +171,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 			value: (int)row["value"],
 			weight: (float)row["weight"]);
 	}
-	#endregion
 
-	#region Private Static Methods
 	private static string CenterDivReplacer(Match match) =>
 		match.Groups["pre"].Value +
 		"{{Centre|" + WikifyParameter(match.Groups["text"].Value) + "}}" +
@@ -220,58 +264,12 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 		api.SendingRequest -= JobManager.WalSendingRequest;
 	}
 
-	private string GetNewPageText(Title title, Book book) =>
-		"{{" + TemplateName + '\n' +
-		"}}\n" +
-		this.Wikify(book.Text, title) +
-		"\n{{Fin de livre}}";
-
 	private Title? TryAddItem(IDictionary<Title, Book> items, string titleText, Book item)
 	{
 		var title = TitleFactory.FromUnvalidated(this.Site, titleText).ToTitle();
 		return items.TryAdd(title, item)
 			? title
 			: null;
-	}
-
-	private void UpdatePage(SiteParser parser, Book book)
-	{
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
-		var index = 1;
-		foreach (var id in book.EditorIds)
-		{
-			var name = index == 1
-				? "id"
-				: "id" + index.ToStringInvariant();
-			template.AddIfNotExists(name, id, ParameterFormat.OnePerLine);
-			if (this.icons.TryGetValue(id, out var icon))
-			{
-				template.Update("icon", icon);
-			}
-			else
-			{
-				Debug.WriteLine(id + " - " + parser.Page);
-			}
-
-			index++;
-		}
-
-		// var ns = this.nsInfo[book.Namespace];
-		// template.AddIfNotExists(ns.Id, "1", ParameterFormat.OnePerLine);
-		template.AddIfNotExists("value", book.Value.ToStringInvariant(), ParameterFormat.OnePerLine);
-		template.AddIfNotExists("weight", book.Weight.ToStringInvariant(), ParameterFormat.OnePerLine);
-		template.AddIfNotExists("lorename", "none", ParameterFormat.OnePerLine);
-		if (book.Skill is ushort skill)
-		{
-			template.AddIfNotExists("skill", Skills[skill], ParameterFormat.OnePerLine);
-		}
-
-		if (book.IsScroll)
-		{
-			template.AddIfNotExists("scroll", "1", ParameterFormat.OnePerLine);
-		}
-
-		template.AddIfNotExists("description", string.Empty, ParameterFormat.OnePerLine);
 	}
 
 	private string Wikify(string text, Title title)

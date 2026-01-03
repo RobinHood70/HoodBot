@@ -30,8 +30,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = this.UpdateMission;
 		this.searchTitles = new TitleCollection(
 			this.Site,
 			"Template:Stub",
@@ -123,8 +121,50 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 
 	protected override TitleDictionary<Mission> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, Mission item) => new StringBuilder()
+		.Append("{{Mission Header\n")
+		.Append("|type=\n")
+		.Append("|Giver=\n")
+		.Append("|Icon=\n")
+		.Append("|Reward={{Huh}}\n")
+		.Append($"|ID={item.EditorId}\n")
+		.Append("|Prev=\n")
+		.Append("|Next=\n")
+		.Append("|Loc=\n")
+		.Append("|image=\n")
+		.Append("|imgdesc=\n")
+		.Append("|description=\n")
+		.Append("}}\n\n")
+		.Append("{{Stub|Mission}}")
+		.ToString();
+
 	protected override bool IsValidPage(SiteParser parser, Mission item) =>
 		FindTemplate(parser, item) is not null;
+
+	protected override void ValidPageLoaded(SiteParser parser, Mission item)
+	{
+		if (FindTemplate(parser, item) is not ITemplateNode template)
+		{
+			return;
+		}
+
+		template.Update("ID", item.EditorId);
+		var labelName = parser.Title.LabelName();
+		if (!labelName.OrdinalEquals(item.Name))
+		{
+			template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
+		}
+
+		if (item.Summary.Length > 0)
+		{
+			this.DoSummary(parser, item.Summary);
+		}
+
+		if (item.Stages.Count > 0)
+		{
+			this.DoStages(parser, item.Stages);
+		}
+	}
 	#endregion
 
 	#region Private Static Methods
@@ -190,23 +230,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 			? template
 			: null;
 	}
-
-	private static string GetNewPageText(Title title, Mission item) => new StringBuilder()
-		.Append("{{Mission Header\n")
-		.Append("|type=\n")
-		.Append("|Giver=\n")
-		.Append("|Icon=\n")
-		.Append("|Reward={{Huh}}\n")
-		.Append($"|ID={item.EditorId}\n")
-		.Append("|Prev=\n")
-		.Append("|Next=\n")
-		.Append("|Loc=\n")
-		.Append("|image=\n")
-		.Append("|imgdesc=\n")
-		.Append("|description=\n")
-		.Append("}}\n\n")
-		.Append("{{Stub|Mission}}")
-		.ToString();
 
 	private static Dictionary<string, string> LoadDisambigs()
 	{
@@ -358,31 +381,6 @@ internal sealed class SFMissions : CreateOrUpdateJob<SFMissions.Mission>
 		}
 
 		return existing;
-	}
-
-	private void UpdateMission(SiteParser parser, Mission item)
-	{
-		if (FindTemplate(parser, item) is not ITemplateNode template)
-		{
-			return;
-		}
-
-		template.Update("ID", item.EditorId);
-		var labelName = parser.Title.LabelName();
-		if (!labelName.OrdinalEquals(item.Name))
-		{
-			template.UpdateIfEmpty("title", labelName, ParameterFormat.OnePerLine);
-		}
-
-		if (item.Summary.Length > 0)
-		{
-			this.DoSummary(parser, item.Summary);
-		}
-
-		if (item.Stages.Count > 0)
-		{
-			this.DoStages(parser, item.Stages);
-		}
 	}
 	#endregion
 

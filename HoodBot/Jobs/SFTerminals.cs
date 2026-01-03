@@ -35,7 +35,6 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		this.CreateOnly = Tristate.True;
-		this.NewPageText = this.GetNewPageText;
 		this.Clobber = true;
 	}
 	#endregion
@@ -91,6 +90,56 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	}
 
 	protected override TitleDictionary<Terminal> GetNewItems() => [];
+
+	protected override string GetNewPageText(Title title, Terminal item)
+	{
+		Menu menu;
+		if (item.MenuId.Length == 0)
+		{
+			menu = new Menu(item.EditorId, "NO MENUS", string.Empty, ImmutableDictionary<int, Entry>.Empty);
+		}
+		else
+		{
+			menu = this.menus.TryGetValue(item.MenuId, out var tryMenu)
+				? tryMenu
+				: new Menu(item.EditorId, "MENU NOT FOUND", item.MenuId, ImmutableDictionary<int, Entry>.Empty);
+			if (menu.Entries.Count == 0)
+			{
+				this.Warn("MainMenu " + item.MenuId + " not found!");
+			}
+		}
+
+		var menuList = new MenuList(menu);
+		var menuOffset = 0;
+		var sb = new StringBuilder();
+		sb.Append("{{Terminal Summary\n");
+		if (!title.LabelName().OrdinalEquals(item.Name))
+		{
+			sb
+				.Append($"|name={item.Name}\n");
+		}
+
+		sb
+			.Append($"|edid={item.EditorId}\n")
+			.Append($"|icon=<!--{item.ImageName}-->\n")
+			.Append("|image=\n")
+			.Append("|description=\n")
+			.Append("|quest=\n")
+			.Append("|location=\n")
+			.Append("}}\n")
+			.Append("{{NewLine}}\n")
+			.Append("== Menus ==\n")
+			.Append("{| class=\"wikitable sortable\"\n");
+
+		while (menuOffset < menuList.Count)
+		{
+			this.OutputMenu(sb, menuList, menuOffset);
+			menuOffset++;
+		}
+
+		sb.Append("|}");
+		return sb.ToString();
+	}
 
 	protected override bool IsValidPage(SiteParser parser, Terminal item) => parser.FindTemplate("Terminal Summary") is not null;
 	#endregion
@@ -149,56 +198,6 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	#endregion
 
 	#region Private Methods
-	private string GetNewPageText(Title title, Terminal item)
-	{
-		Menu menu;
-		if (item.MenuId.Length == 0)
-		{
-			menu = new Menu(item.EditorId, "NO MENUS", string.Empty, ImmutableDictionary<int, Entry>.Empty);
-		}
-		else
-		{
-			menu = this.menus.TryGetValue(item.MenuId, out var tryMenu)
-				? tryMenu
-				: new Menu(item.EditorId, "MENU NOT FOUND", item.MenuId, ImmutableDictionary<int, Entry>.Empty);
-			if (menu.Entries.Count == 0)
-			{
-				this.Warn("MainMenu " + item.MenuId + " not found!");
-			}
-		}
-
-		var menuList = new MenuList(menu);
-		var menuOffset = 0;
-		var sb = new StringBuilder();
-		sb.Append("{{Terminal Summary\n");
-		if (!title.LabelName().OrdinalEquals(item.Name))
-		{
-			sb
-				.Append($"|name={item.Name}\n");
-		}
-
-		sb
-			.Append($"|edid={item.EditorId}\n")
-			.Append($"|icon=<!--{item.ImageName}-->\n")
-			.Append("|image=\n")
-			.Append("|description=\n")
-			.Append("|quest=\n")
-			.Append("|location=\n")
-			.Append("}}\n")
-			.Append("{{NewLine}}\n")
-			.Append("== Menus ==\n")
-			.Append("{| class=\"wikitable sortable\"\n");
-
-		while (menuOffset < menuList.Count)
-		{
-			this.OutputMenu(sb, menuList, menuOffset);
-			menuOffset++;
-		}
-
-		sb.Append("|}");
-		return sb.ToString();
-	}
-
 	private void LoadMenus()
 	{
 		if (!File.Exists(MenusFileName))

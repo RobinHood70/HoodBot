@@ -41,7 +41,6 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
 	}
 	#endregion
 
@@ -84,7 +83,7 @@ internal sealed class SFBooks : CreateOrUpdateJob<SFBooks.Book>
 	#endregion
 
 	#region Private Static Methods
-	private static string GetNewPageText(Title title, Book book)
+	protected override string GetNewPageText(Title title, Book book)
 	{
 		var text =
 			"{{Trail|Items|Books}}\n" +

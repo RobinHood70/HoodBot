@@ -45,9 +45,6 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = this.UpdateAidItem;
-		this.Shuffle = true;
 	}
 	#endregion
 
@@ -85,44 +82,8 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 	protected override bool IsValidPage(SiteParser parser, SFItem item) =>
 		parser.FindTemplate("Item Summary") is ITemplateNode template &&
 		string.Equals(template.Find("editorid")?.GetValue() ?? throw new InvalidOperationException(), item.EditorId, StringComparison.Ordinal);
-	#endregion
 
-	#region Private Static Methods
-	private static string GetNewPageText(Title title, SFItem item) => $$$"""
-		{{Trail|Items|Aid Items}}{{Item Summary
-		|objectid={{{item.FormId}}}
-		|editorid={{{item.EditorId}}}
-		|type=Aid Item
-		|image=<!--SF-item-{{{item.Name}}}.png-->
-		|weight={{{item.Weight}}}
-		|value={{{item.Value}}}
-		|effect=
-		|description={{{item.Description}}}
-		}}
-		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
-		""";
-
-	private static IEnumerable<SFItem> ReadItems()
-	{
-		var csvName = GameInfo.Starfield.ModFolder + "Alchemy.csv";
-		if (!File.Exists(csvName))
-		{
-			yield break;
-		}
-
-		var csvFile = new CsvFile(csvName)
-		{
-			Encoding = Encoding.GetEncoding(1252)
-		};
-
-		csvFile.HeaderFieldMap["Unkown1"] = "Value";
-		foreach (var row in csvFile.ReadRows())
-		{
-			yield return new SFItem(row, "Aid Item");
-		}
-	}
-
-	private void UpdateAidItem(SiteParser parser, SFItem item)
+	protected override void ValidPageLoaded(SiteParser parser, SFItem item)
 	{
 		if (parser.Page.Exists)
 		{
@@ -171,6 +132,42 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 
 		template.Update("description", item.Description, ParameterFormat.OnePerLine, false);
 		template.Sort("objectid", "editorid", "type", "weight", "value", "image", "imgdesc", "effect", "description");
+	}
+	#endregion
+
+	#region Private Static Methods
+	protected override string GetNewPageText(Title title, SFItem item) => $$$"""
+		{{Trail|Items|Aid Items}}{{Item Summary
+		|objectid={{{item.FormId}}}
+		|editorid={{{item.EditorId}}}
+		|type=Aid Item
+		|image=<!--SF-item-{{{item.Name}}}.png-->
+		|weight={{{item.Weight}}}
+		|value={{{item.Value}}}
+		|effect=
+		|description={{{item.Description}}}
+		}}
+		[[{{{title.FullPageName()}}}|{{{item.Name}}}]] is an [[Starfield:Aid Items|aid]] [[Starfield:Items|item]].
+		""";
+
+	private static IEnumerable<SFItem> ReadItems()
+	{
+		var csvName = GameInfo.Starfield.ModFolder + "Alchemy.csv";
+		if (!File.Exists(csvName))
+		{
+			yield break;
+		}
+
+		var csvFile = new CsvFile(csvName)
+		{
+			Encoding = Encoding.GetEncoding(1252)
+		};
+
+		csvFile.HeaderFieldMap["Unkown1"] = "Value";
+		foreach (var row in csvFile.ReadRows())
+		{
+			yield return new SFItem(row, "Aid Item");
+		}
 	}
 	#endregion
 }

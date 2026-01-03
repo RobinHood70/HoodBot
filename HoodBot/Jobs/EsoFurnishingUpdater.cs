@@ -64,8 +64,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	public EsoFurnishingUpdater(JobManager jobManager, bool removeUnneededStuff)
 		: base(jobManager)
 	{
-		var test = new StringBuilder();
-
 		//// this.Shuffle = true;
 		//// jobManager.ShowDiffs = false;
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Furnishings");
@@ -77,9 +75,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			"Online:Orcish Shrine, Malacath",
 		};
 		this.removeUnneededStuff = removeUnneededStuff;
-
-		this.NewPageText = this.GetBlankFurnishingPageText;
-		this.OnUpdate = this.UpdateFurnishing;
 	}
 	#endregion
 
@@ -202,6 +197,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		return newItems;
 	}
 
+	protected override string GetNewPageText(Title title, Furnishing item) => this.blank ?? throw new InvalidOperationException("Blank page text is null.");
+
 	protected override bool IsValidPage(SiteParser parser, Furnishing item) => parser.FindTemplate(TemplateName) is not null;
 
 	protected override void LoadPages()
@@ -228,6 +225,24 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			Debug.Write(comment.Value.ToStringInvariant() + ":  ");
 			Debug.WriteLine(comment.Key);
 			Debug.WriteLine(string.Empty);
+		}
+	}
+
+	protected override void ValidPageLoaded(SiteParser parser, Furnishing item)
+	{
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
+		template.UpdateIfEmpty("id", item.Id.ToStringInvariant(), ParameterFormat.OnePerLine);
+		this.GenericTemplateFixes(template);
+		if (template.Parameters.Any(p => p.Anonymous))
+		{
+			this.Warn("Template has anonymous parameter on " + parser.Title);
+		}
+
+		this.FurnishingFixes(template, parser.Page, item);
+		if (this.removeUnneededStuff)
+		{
+			template.RemoveEmpties(FurnishingKeep);
+			CheckComments(parser, template);
 		}
 	}
 	#endregion
@@ -668,8 +683,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		this.FixList(template, "skill");
 	}
 
-	private string GetBlankFurnishingPageText(Title title, Furnishing furnishing) => this.blank ?? throw new InvalidOperationException("Blank page text is null.");
-
 	private void GetCollectiblesFromDb()
 	{
 		var rows = Database.RunQuery(EsoLog.Connection, CollectiblesQuery, FurnishingFactory.FromCollectibleRow);
@@ -696,24 +709,6 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		return paramValue?.Count == 1 && paramValue[0] is ITagNode nowiki && nowiki.InnerText is string text
 			? text.Trim()
 			: throw new InvalidOperationException("Template blank not in expected format.");
-	}
-
-	private void UpdateFurnishing(SiteParser parser, Furnishing item)
-	{
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException();
-		template.UpdateIfEmpty("id", item.Id.ToStringInvariant(), ParameterFormat.OnePerLine);
-		this.GenericTemplateFixes(template);
-		if (template.Parameters.Any(p => p.Anonymous))
-		{
-			this.Warn("Template has anonymous parameter on " + parser.Title);
-		}
-
-		this.FurnishingFixes(template, parser.Page, item);
-		if (this.removeUnneededStuff)
-		{
-			template.RemoveEmpties(FurnishingKeep);
-			CheckComments(parser, template);
-		}
 	}
 	#endregion
 }

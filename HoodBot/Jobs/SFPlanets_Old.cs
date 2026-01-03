@@ -29,8 +29,6 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = UpdatePlanet;
 	}
 	#endregion
 
@@ -107,28 +105,8 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 	protected override TitleDictionary<Planet> GetNewItems() => [];
 
 	protected override bool IsValidPage(SiteParser parser, Planet data) => parser.FindTemplate("Planet Infobox") is not null;
-	#endregion
 
-	#region Private Static Methods
-	private static string GetNewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
-		"|image=\n" +
-		"|system=\n" +
-		"|type=\n" +
-		"|gravity=\n" +
-		"|temp=\n" +
-		"|atmosphere=\n" +
-		"|magnetosphere=\n" +
-		"|fauna=\n" +
-		"|flora=\n" +
-		"|water=\n" +
-		"|resource=\n" +
-		"|trait=\n" +
-		"|biome=\n" +
-		"|orbits=\n" +
-		"|orbital_position=\n" +
-		"}}\n\n{{Stub|Planet}}";
-
-	private static void UpdatePlanet(SiteParser parser, Planet item)
+	protected override void ValidPageLoaded(SiteParser parser, Planet item)
 	{
 		var template = parser.FindTemplate("Planet Infobox") ?? throw new InvalidOperationException();
 		var biomes = item.Biomes.Count == 0
@@ -164,6 +142,26 @@ internal sealed class SFPlanets_Old : CreateOrUpdateJob<SFPlanets_Old.Planet>
 			template.Update("biomes", biomes, ParameterFormat.OnePerLine, false);
 		}
 	}
+	#endregion
+
+	#region Private Static Methods
+	protected override string GetNewPageText(Title title, Planet item) => "{{Planet Infobox\n" +
+		"|image=\n" +
+		"|system=\n" +
+		"|type=\n" +
+		"|gravity=\n" +
+		"|temp=\n" +
+		"|atmosphere=\n" +
+		"|magnetosphere=\n" +
+		"|fauna=\n" +
+		"|flora=\n" +
+		"|water=\n" +
+		"|resource=\n" +
+		"|trait=\n" +
+		"|biome=\n" +
+		"|orbits=\n" +
+		"|orbital_position=\n" +
+		"}}\n\n{{Stub|Planet}}";
 	#endregion
 
 	#region Private Methods

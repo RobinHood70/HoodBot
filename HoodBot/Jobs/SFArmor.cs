@@ -20,8 +20,6 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = UpdateArmor;
 	}
 	#endregion
 
@@ -65,7 +63,57 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 
 	protected override TitleDictionary<List<SFItem>> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, List<SFItem> item)
+	{
+		var sb = new StringBuilder();
+		foreach (var armor in item)
+		{
+			BuildTemplate(sb, armor);
+		}
+
+		var firstType = item[0].Type;
+		var link = firstType switch
+		{
+			"Apparel" => "piece of [[Starfield:Apparel|apparel]]",
+			"Helmet" => "[[Starfield:Helmet|helmet]]",
+			"Pack" => "[[Starfield:Pack|pack]]",
+			"Skin" => "[[Starfield:Skin|skin]]",
+			"Spacesuit" => "[[Starfield:Spacesuit|spacesuit]]",
+			_ => null,
+		};
+
+		return $$$"""
+			{{Trail|Items|{{{firstType}}}}}{{{sb}}}
+			The [[{{{title.FullPageName()}}}|]] is a {{{link}}}.
+
+			{{Stub|{{{firstType}}}}}
+			""";
+	}
+
 	protected override bool IsValidPage(SiteParser parser, List<SFItem> item) => parser.FindTemplate("Item Summary") is not null;
+
+	protected override void ValidPageLoaded(SiteParser parser, List<SFItem> list)
+	{
+		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
+		foreach (var item in list)
+		{
+			if (FindMatchingTemplate(parser, item) is ITemplateNode template)
+			{
+				template.Update("objectid", item.FormId);
+				template.Update("weight", item.Weight.ToStringInvariant());
+				template.Update("value", item.Value.ToStringInvariant());
+			}
+			else
+			{
+				var sb = new StringBuilder();
+				BuildTemplate(sb, item);
+				var newNodes = parser.Parse(sb.ToString());
+				parser.InsertRange(insertPos, newNodes);
+				insertPos += newNodes.Count;
+			}
+		}
+	}
 	#endregion
 
 	#region Private Static Methods
@@ -120,56 +168,6 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 		}
 
 		return itemType;
-	}
-
-	private static string GetNewPageText(Title title, List<SFItem> item)
-	{
-		var sb = new StringBuilder();
-		foreach (var armor in item)
-		{
-			BuildTemplate(sb, armor);
-		}
-
-		var firstType = item[0].Type;
-		var link = firstType switch
-		{
-			"Apparel" => "piece of [[Starfield:Apparel|apparel]]",
-			"Helmet" => "[[Starfield:Helmet|helmet]]",
-			"Pack" => "[[Starfield:Pack|pack]]",
-			"Skin" => "[[Starfield:Skin|skin]]",
-			"Spacesuit" => "[[Starfield:Spacesuit|spacesuit]]",
-			_ => null,
-		};
-
-		return $$$"""
-			{{Trail|Items|{{{firstType}}}}}{{{sb}}}
-			The [[{{{title.FullPageName()}}}|]] is a {{{link}}}.
-
-			{{Stub|{{{firstType}}}}}
-			""";
-	}
-
-	private static void UpdateArmor(SiteParser parser, List<SFItem> list)
-	{
-		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
-		foreach (var item in list)
-		{
-			if (FindMatchingTemplate(parser, item) is ITemplateNode template)
-			{
-				template.Update("objectid", item.FormId);
-				template.Update("weight", item.Weight.ToStringInvariant());
-				template.Update("value", item.Value.ToStringInvariant());
-			}
-			else
-			{
-				var sb = new StringBuilder();
-				BuildTemplate(sb, item);
-				var newNodes = parser.Parse(sb.ToString());
-				parser.InsertRange(insertPos, newNodes);
-				insertPos += newNodes.Count;
-			}
-		}
 	}
 	#endregion
 }

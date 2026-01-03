@@ -18,8 +18,6 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = UpdateWeapon;
 	}
 	#endregion
 
@@ -55,7 +53,48 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 
 	protected override TitleDictionary<List<CsvRow>> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, List<CsvRow> itemList)
+	{
+		var sb = new StringBuilder();
+		foreach (var item in itemList)
+		{
+			BuildTemplate(sb, item);
+		}
+
+		if (sb.Length > 0)
+		{
+			sb.Remove(0, 14);
+		}
+
+		return $$$"""
+			{{Trail|Items|Weapons}}{{{sb}}}
+
+			The [[{{{title.FullPageName()}}}|]] is a [[Starfield:Weapons|weapon]].
+
+			{{Starfield Weapons}}
+			{{Stub|Weapon}}
+			""";
+	}
+
 	protected override bool IsValidPage(SiteParser parser, List<CsvRow> item) => parser.FindTemplate("Item Summary") is not null;
+
+	protected override void ValidPageLoaded(SiteParser parser, List<CsvRow> list)
+	{
+		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary") + 1;
+		foreach (var row in list)
+		{
+			if (FindMatchingTemplate(parser, row) is null)
+			{
+				var sb = new StringBuilder();
+				BuildTemplate(sb, row);
+				var text = sb.ToString();
+				var newNodes = parser.Parse(text);
+				parser.InsertRange(insertPos, newNodes);
+				insertPos += newNodes.Count;
+			}
+		}
+	}
 	#endregion
 
 	#region Private Static Methods
@@ -91,47 +130,6 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 		}
 
 		return null;
-	}
-
-	private static string GetNewPageText(Title title, List<CsvRow> itemList)
-	{
-		var sb = new StringBuilder();
-		foreach (var item in itemList)
-		{
-			BuildTemplate(sb, item);
-		}
-
-		if (sb.Length > 0)
-		{
-			sb.Remove(0, 14);
-		}
-
-		return $$$"""
-			{{Trail|Items|Weapons}}{{{sb}}}
-
-			The [[{{{title.FullPageName()}}}|]] is a [[Starfield:Weapons|weapon]].
-
-			{{Starfield Weapons}}
-			{{Stub|Weapon}}
-			""";
-	}
-
-	private static void UpdateWeapon(SiteParser parser, List<CsvRow> list)
-	{
-		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary") + 1;
-		foreach (var row in list)
-		{
-			if (FindMatchingTemplate(parser, row) is null)
-			{
-				var sb = new StringBuilder();
-				BuildTemplate(sb, row);
-				var text = sb.ToString();
-				var newNodes = parser.Parse(text);
-				parser.InsertRange(insertPos, newNodes);
-				insertPos += newNodes.Count;
-			}
-		}
 	}
 	#endregion
 }

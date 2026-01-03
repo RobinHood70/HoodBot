@@ -18,8 +18,6 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = this.UpdateCreature;
 	}
 	#endregion
 
@@ -64,10 +62,62 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	protected override TitleDictionary<Creature> GetNewItems() => [];
 
 	protected override bool IsValidPage(SiteParser parser, Creature item) => parser.FindTemplate("Creature Summary") is not null;
+
+	protected override void ValidPageLoaded(SiteParser parser, Creature item)
+	{
+		var cs = parser.FindTemplate("Creature Summary");
+		if (cs is not null)
+		{
+			cs.Remove("resp");
+			cs.Remove("typenamesp");
+			cs.RenameParameter("level", "difficulty");
+			cs.RenameParameter("levels", "difficulty");
+
+			var typeValue = cs.GetValue("type");
+			if (typeValue != null && (typeValue.Length == 0 || typeValue.OrdinalEquals("Fauna")))
+			{
+				cs.Remove("type");
+			}
+
+			if (item.Variants.Count < 2)
+			{
+				this.UpdateLoc(cs, item);
+				UpdateTemplate(cs, item.Variants[0]);
+			}
+			else
+			{
+				var planets = new SortedSet<string>(StringComparer.Ordinal);
+				foreach (var variant in item.Variants)
+				{
+					planets.Add(variant["Planet"]);
+				}
+
+				cs.Update("planet", string.Join(", ", planets));
+			}
+		}
+
+		if (parser.FindTemplate("Creature Variant") is null && item.Variants.Count > 1)
+		{
+			AddVariants(parser, item);
+		}
+
+		foreach (var variant in item.Variants)
+		{
+			var resource = variant["Resource"].Split(" (", 2, StringSplitOptions.None)[0];
+			var redirectText =
+				$"#REDIRECT [[Starfield:{variant["Name"]}#{variant["Planet"]}]]\n" +
+				$"[[Category:Starfield-Creatures-{resource}]]\n" +
+				"[[Category:Redirects to Broader Subjects]]";
+			var redirect = this.Site.CreatePage($"Starfield:{variant["Name"]} ({variant["Planet"]})", redirectText);
+			this.Pages.Add(redirect);
+		}
+
+		parser.UpdatePage();
+	}
 	#endregion
 
 	#region Private Static Methods
-	private static string GetNewPageText(Title title, Creature item)
+	protected override string GetNewPageText(Title title, Creature item)
 	{
 		var sb = new StringBuilder();
 		sb
@@ -175,58 +225,6 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 
 		return titleMap;
-	}
-
-	private void UpdateCreature(SiteParser parser, Creature item)
-	{
-		var cs = parser.FindTemplate("Creature Summary");
-		if (cs is not null)
-		{
-			cs.Remove("resp");
-			cs.Remove("typenamesp");
-			cs.RenameParameter("level", "difficulty");
-			cs.RenameParameter("levels", "difficulty");
-
-			var typeValue = cs.GetValue("type");
-			if (typeValue != null && (typeValue.Length == 0 || typeValue.OrdinalEquals("Fauna")))
-			{
-				cs.Remove("type");
-			}
-
-			if (item.Variants.Count < 2)
-			{
-				this.UpdateLoc(cs, item);
-				UpdateTemplate(cs, item.Variants[0]);
-			}
-			else
-			{
-				var planets = new SortedSet<string>(StringComparer.Ordinal);
-				foreach (var variant in item.Variants)
-				{
-					planets.Add(variant["Planet"]);
-				}
-
-				cs.Update("planet", string.Join(", ", planets));
-			}
-		}
-
-		if (parser.FindTemplate("Creature Variant") is null && item.Variants.Count > 1)
-		{
-			AddVariants(parser, item);
-		}
-
-		foreach (var variant in item.Variants)
-		{
-			var resource = variant["Resource"].Split(" (", 2, StringSplitOptions.None)[0];
-			var redirectText =
-				$"#REDIRECT [[Starfield:{variant["Name"]}#{variant["Planet"]}]]\n" +
-				$"[[Category:Starfield-Creatures-{resource}]]\n" +
-				"[[Category:Redirects to Broader Subjects]]";
-			var redirect = this.Site.CreatePage($"Starfield:{variant["Name"]} ({variant["Planet"]})", redirectText);
-			this.Pages.Add(redirect);
-		}
-
-		parser.UpdatePage();
 	}
 
 	private void UpdateLoc(ITemplateNode template, Creature item)

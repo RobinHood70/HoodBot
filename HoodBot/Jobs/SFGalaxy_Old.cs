@@ -22,7 +22,6 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = this.GetNewPageText;
 	}
 	#endregion
 
@@ -70,11 +69,7 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 
 	protected override TitleDictionary<CsvRow> GetNewItems() => [];
 
-	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
-	#endregion
-
-	#region Private Methods
-	private string GetNewPageText(Title title, CsvRow item)
+	protected override string GetNewPageText(Title title, CsvRow item)
 	{
 		var starName = this.stars[item["Star ID"]];
 		var starType = item["Type"]
@@ -101,5 +96,7 @@ internal sealed class SFGalaxy_Old : CreateOrUpdateJob<CsvRow>
 		"|trait=\n" +
 		"}}\n\n{{Stub|Planet}}";
 	}
+
+	protected override bool IsValidPage(SiteParser parser, CsvRow data) => parser.FindTemplate("Planet Infobox") is not null;
 	#endregion
 }

@@ -30,7 +30,6 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = this.GetNewPageText;
 		this.StatusWriteLine("This job must be run AFTER the creature and NPC updates.");
 		this.npcs = new TitleCollection(this.Site);
 	}
@@ -71,6 +70,31 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 	}
 
 	protected override TitleDictionary<Redirect> GetNewItems() => [];
+
+	protected override string GetNewPageText(Title title, Redirect item)
+	{
+		var retval = $"#REDIRECT [[Starfield:Factions {item.Letter}#{item.Section}]] [[Category:Redirects to Broader Subjects]] [[Category:Starfield-Factions]]";
+		var origName = (this.GetDisambiguator(item) is string disambig && title.PageName.EndsWith(" (" + disambig + ")", StringComparison.Ordinal))
+			? title.PageName[..(disambig.Length + 3)]
+			: title.PageName;
+		var data = string.Empty;
+		if (item.AltName is not null)
+		{
+			data += "|altname=" + item.AltName;
+		}
+
+		if (origName.Contains('(', StringComparison.Ordinal))
+		{
+			data += "|catname=" + origName;
+		}
+
+		if (data.Length > 0)
+		{
+			retval += "\n{{Faction Data" + data + "}}";
+		}
+
+		return retval;
+	}
 
 	protected override bool IsValidPage(SiteParser parser, Redirect item) => parser.Page.IsRedirect;
 	#endregion
@@ -342,31 +366,6 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 			var sortedSections = new SectionDictionary(page);
 			retval.Add(page.Title, sortedSections);
-		}
-
-		return retval;
-	}
-
-	private string GetNewPageText(Title title, Redirect item)
-	{
-		var retval = $"#REDIRECT [[Starfield:Factions {item.Letter}#{item.Section}]] [[Category:Redirects to Broader Subjects]] [[Category:Starfield-Factions]]";
-		var origName = (this.GetDisambiguator(item) is string disambig && title.PageName.EndsWith(" (" + disambig + ")", StringComparison.Ordinal))
-			? title.PageName[..(disambig.Length + 3)]
-			: title.PageName;
-		var data = string.Empty;
-		if (item.AltName is not null)
-		{
-			data += "|altname=" + item.AltName;
-		}
-
-		if (origName.Contains('(', StringComparison.Ordinal))
-		{
-			data += "|catname=" + origName;
-		}
-
-		if (data.Length > 0)
-		{
-			retval += "\n{{Faction Data" + data + "}}";
 		}
 
 		return retval;

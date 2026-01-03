@@ -20,8 +20,6 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 		: base(jobManager)
 	{
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-		this.NewPageText = GetNewPageText;
-		this.OnUpdate = UpdateNpcs;
 	}
 	#endregion
 
@@ -87,7 +85,42 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 
 	protected override TitleDictionary<Npcs> GetNewItems() => [];
 
+	protected override string GetNewPageText(Title title, Npcs item)
+	{
+		var sb = new StringBuilder();
+		foreach (var npc in item)
+		{
+			BuildTemplate(sb, npc);
+		}
+
+		if (sb.Length > 0)
+		{
+			sb.Remove(0, 14);
+		}
+
+		sb.Append("\n\n{{Npc Navbox}}\n\n{{Stub|NPC}}");
+		return sb.ToString();
+	}
+
 	protected override bool IsValidPage(SiteParser parser, Npcs item) => parser.FindTemplate("NPC Summary") is not null;
+
+	protected override void ValidPageLoaded(SiteParser parser, Npcs item)
+	{
+		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
+		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:NPC Summary") + 1;
+		foreach (var npc in item)
+		{
+			if (FindMatchingTemplate(parser, npc) is null)
+			{
+				var sb = new StringBuilder();
+				BuildTemplate(sb, npc);
+				var text = sb.ToString();
+				var newNodes = parser.Parse(text);
+				parser.InsertRange(insertPos, newNodes);
+				insertPos += newNodes.Count;
+			}
+		}
+	}
 	#endregion
 
 	#region Private Static Methods
@@ -149,23 +182,6 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 		return fauna;
 	}
 
-	private static string GetNewPageText(Title title, Npcs item)
-	{
-		var sb = new StringBuilder();
-		foreach (var npc in item)
-		{
-			BuildTemplate(sb, npc);
-		}
-
-		if (sb.Length > 0)
-		{
-			sb.Remove(0, 14);
-		}
-
-		sb.Append("\n\n{{Npc Navbox}}\n\n{{Stub|NPC}}");
-		return sb.ToString();
-	}
-
 	private static Dictionary<string, string> GetRaces()
 	{
 		var dict = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -202,24 +218,6 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 			}
 
 			dict[formId] = name;
-		}
-	}
-
-	private static void UpdateNpcs(SiteParser parser, Npcs item)
-	{
-		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:NPC Summary") + 1;
-		foreach (var npc in item)
-		{
-			if (FindMatchingTemplate(parser, npc) is null)
-			{
-				var sb = new StringBuilder();
-				BuildTemplate(sb, npc);
-				var text = sb.ToString();
-				var newNodes = parser.Parse(text);
-				parser.InsertRange(insertPos, newNodes);
-				insertPos += newNodes.Count;
-			}
 		}
 	}
 	#endregion
