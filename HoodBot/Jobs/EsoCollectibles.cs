@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Jobs.Design;
@@ -15,48 +17,56 @@ using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class EsoCollectibles : ParsedPageJob
+internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 {
 	#region Private Constants
-	private const string CollectibleQuery =
-		"SELECT id, name, nickname, description, categoryName, subCategoryName " +
-		"FROM collectibles " +
-		"WHERE " +
-			"categoryName NOT IN ('Armor Styles' , 'Emotes', 'Fragments', 'Furnishings', 'Housing', 'Stories', 'Weapon Styles') AND " +
-			"subCategoryName != 'Companions' AND " +
-			"referenceId != 0 AND " +
-			"id NOT IN (248, 271, 272, 273, 274, 275, 276, 370, 371, 372, 1156, 1306, 1480, 8202, 10387, 10388)";
+
+	// Includes only collectibles that have a referenceId (i.e., are obtainable) or are Upgrades.
+	private const string CollectibleQuery = """
+		SELECT id, name, nickname, description, categoryName, subCategoryName
+		FROM collectibles
+		WHERE
+			((categoryName IN ('Appearance', 'Customized Actions', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Patrons', 'Tools') AND referenceId != 0) OR
+			(categoryName = 'Allies' AND subCategoryName != 'Companions') OR
+			(categoryName = 'Furnishings' AND subCategoryName = 'Houseguests') OR
+			(categoryName = 'Upgrade'))
+		""";
 
 	private const string TemplateName = "Online Collectible Summary";
 	#endregion
 
 	#region Static Fields
-	private static readonly List<long> DeprecatedIds =
+	private static readonly HashSet<long> ExcludedIds =
 	[
-		9369, // Prairie Dog
-		11242, // Almalexia deck
+		271, // Gold Coast 1
+		272, // Gold Coast 2
+		273, // Gold Coast 3
+		274, // Red Sail 1
+		275, // Red Sail 2
+		276, // Red Sail 3
+		370, // Test 05 Default Idle
+		371, // Test 06 Injured
+		372, // Test 07 Goblin
+		1156, // NOT IN USE
+		1306, // NAME ME Summer Robe
+		6017, // Summerset (inactive duplicate, give or take a few words)
+		9369, // Prairie Dog (clearly a test/deprecated item, real is at 10626)
 	];
-
-	private static readonly Dictionary<long, string> NameOverrides = new()
-	{
-		[6117] = "Honor Guard Jack"
-	};
 	#endregion
 
 	#region Fields
-	private readonly Dictionary<Title, Collectible> collectibles = [];
+	private readonly Dictionary<long, Collectible> allCollectibles = [];
 	private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
+	private string? blankPage;
 	#endregion
 
 	#region Constructors
-	[JobInfo("Create Collectibles", "ESO Update")]
+	[JobInfo("Collectibles", "ESO Update")]
 	public EsoCollectibles(JobManager jobManager)
 		: base(jobManager)
 	{
-		this.CreateOnly = Tristate.True;
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Collectibles");
 		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
-
 		this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
 	}
 	#endregion
@@ -66,113 +76,190 @@ internal sealed class EsoCollectibles : ParsedPageJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void BeforeLoadPages()
+	protected override string? GetDisambiguator(Collectible item) => item.SubCategory.Length == 0
+		? item.CollectibleType
+		: item.SubCategory;
+
+	protected override string GetEditSummary(Page page) => (page.Exists ? "Update" : "Create") + " collectible";
+
+	protected override TitleDictionary<Collectible> GetExistingItems()
 	{
-		var allTitles = new TitleCollection(this.Site);
-		allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
-		var pages = this.GetBacklinks();
-		this.GetCollectibles(allTitles, pages);
-
-		this.StatusWriteLine("Getting crown crates");
-		this.GetCrownCrates();
-	}
-
-	protected override string GetEditSummary(Page page) => "Create collectible page";
-
-	protected override void LoadPages()
-	{
-		var blankText = this.GetBlankText();
-		foreach (var collectible in this.collectibles)
+		var retval = new TitleDictionary<Collectible>();
+		var site = (UespSite)this.Site;
+		var pages = site.CreateMetaPageCollection(PageModules.None, false, "id");
+		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
+		var untracked = new TitleCollection(this.Site);
+		foreach (var page in pages)
 		{
-			var page = this.Site.CreatePage(collectible.Key, blankText!);
-			this.Pages.Add(page);
-			this.PageLoaded(page);
-		}
-	}
-
-	protected override void ParseText(SiteParser parser)
-	{
-		var page = parser.Page;
-		parser.ReplaceText(
-			"<gallery>\n</gallery>",
-			$"<gallery>\nON-crown store-{page.Title.PageName}.jpg\n</gallery>",
-			StringComparison.Ordinal,
-			ReplaceLocations.Comments | ReplaceLocations.Text);
-		var collectible = this.collectibles[page.Title] ?? throw new InvalidOperationException();
-		if (this.crateTiers.TryGetValue(collectible.Name, out var crateInfo))
-		{
-			collectible.Crates.AddRange(crateInfo);
-		}
-
-		if (parser.FindTemplate(TemplateName) is ITemplateNode template)
-		{
-			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
-			template.Update("type", CategorySingular(collectible.SubCategory));
-			template.UpdateIfEmpty("image", $"<!--{collectible.ImageName}-->");
-			template.UpdateIfEmpty("icon", $"{collectible.IconName}");
-			template.Update("id", collectible.Id.ToStringInvariant());
-			template.UpdateIfEmpty("description", collectible.Description);
-			template.RenameParameter("name", "nickname");
-			if (string.IsNullOrEmpty(collectible.NickName))
+			if (page is not VariablesPage variablesPage)
 			{
-				template.Remove("nickname");
+				continue;
+			}
+
+			var idText = variablesPage.GetVariable("id");
+			if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id) &&
+				this.allCollectibles.Remove(id, out var item))
+			{
+				retval.Add(page.Title, item);
 			}
 			else
 			{
-				template.Update("nickname", collectible.NickName);
+				untracked.Add(page.Title);
+			}
+		}
+
+		var untrackedPages = untracked.Load();
+		foreach (var page in untrackedPages)
+		{
+			var parser = new SiteParser(page);
+			var text = $"Page found on wiki but not in collectibles: {page.Title}";
+			if (parser.FindTemplate(TemplateName) is ITemplateNode template)
+			{
+				text += " -> " + template.GetValue("collectibletype") + ", " + template.GetValue("type");
 			}
 
-			if (collectible.Crates is not null)
+			Debug.WriteLine(text);
+		}
+
+		return retval;
+	}
+
+	protected override void GetExternalData()
+	{
+		this.StatusWriteLine("Getting collectibles from database");
+		foreach (var item in Database.RunQuery(EsoLog.Connection, CollectibleQuery, CollectibleFromRow))
+		{
+			this.allCollectibles.Add(item.Id, item);
+		}
+
+		foreach (var id in ExcludedIds)
+		{
+			this.allCollectibles.Remove(id);
+		}
+
+		this.GetCrownCrates();
+	}
+
+	protected override TitleDictionary<Collectible> GetNewItems()
+	{
+		var retval = new TitleDictionary<Collectible>();
+		var comparer = StringComparer.Ordinal;
+		var dupes = this.allCollectibles.Values
+			.GroupBy(c => c.Name, comparer)
+			.Where(g => g.Skip(1).Any()) // => Count() > 1
+			.Select(g => g.Key)
+			.ToList();
+		foreach (var item in this.allCollectibles.Values)
+		{
+			var titleText = item.Name;
+			if (dupes.Contains(item.Name, comparer))
 			{
-				var crates = string.Join(", ", collectible.Crates);
-				template.Update("crate", crates);
+				titleText += $" ({this.GetDisambiguator(item)})";
 			}
 
-			if (collectible.Tier is not null)
-			{
-				template.Update("tier", collectible.Tier);
-			}
+			var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], titleText);
+			retval.Add(title, item);
+		}
+
+		return retval;
+	}
+
+	protected override string GetNewPageText(Title title, Collectible item) => this.blankPage ??= this.LoadBlankPage();
+
+	protected override void ItemPageLoaded(SiteParser parser, Collectible item)
+	{
+		if (parser.Page.IsMissing)
+		{
+			parser.ReplaceText(
+				"<gallery>\n</gallery>",
+				$"<gallery>\nON-crown store-{parser.Title.PageName}.jpg\n</gallery>",
+				StringComparison.Ordinal,
+				ReplaceLocations.Comments | ReplaceLocations.Text);
+		}
+
+		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException(TemplateName + " template not found.");
+		template.Update("collectibletype", CatToTemplateType(item.CollectibleType));
+		if (parser.Page.IsMissing)
+		{
+			template.Update("description", item.Description);
+			template.Update("id", item.Id.ToStringInvariant());
+			template.Update("icon", $"<!--{item.IconName}-->");
+			template.Update("image", $"<!--{item.ImageName}-->");
+		}
+
+		if (!parser.Page.Title.LabelName().OrdinalEquals(item.Name))
+		{
+			template.UpdateIfEmpty("titlename", item.Name);
+		}
+
+		if (template.Find("name") is IParameterNode nameParam &&
+			nameParam.GetValue().Length != 0)
+		{
+			template.RenameParameter("name", "nickname");
+		}
+
+		template.Update("nickname", item.NickName, ParameterFormat.OnePerLine, true);
+
+		var typeVal = SubcatToSingular(item.SubCategory);
+		if (typeVal.Length > 0)
+		{
+			template.Update("type", typeVal, ParameterFormat.OnePerLine, true);
+		}
+
+		if (this.crateTiers.TryGetValue(item.Name, out var crateInfo))
+		{
+			var crates = string.Join(", ", crateInfo);
+			template.Update("crate", crates);
+		}
+
+		if (item.Tier is not null)
+		{
+			template.Update("tier", item.Tier);
 		}
 	}
 	#endregion
 
 	#region Private Static Methods
-	private static (List<Collectible> Collectibles, HashSet<string> Duplicates) GetDBCollectibles()
+	private static string CatToTemplateType(string category) => category switch
 	{
-		HashSet<string> dupeNames = new(StringComparer.Ordinal);
-		HashSet<string> singleNames = new(StringComparer.Ordinal);
-		var retval = new List<Collectible>();
-		foreach (var item in Database.RunQuery(EsoLog.Connection, CollectibleQuery, CollectibleFromRow))
-		{
-			retval.Add(item);
-			if (!singleNames.Add(item.Name))
-			{
-				dupeNames.Add(item.Name);
-			}
-		}
+		"Allies" => "Ally",
+		"Non-Combat Pets" => "Pet",
+		_ => category.TrimEnd('s')
+	};
 
-		return (retval, dupeNames);
-	}
+	private static string? CatToFileSubcat(string collectibleType) => collectibleType switch
+	{
+		"Allies" => "ally",
+		"Customized Action" => "action",
+		"Memento" => "memento",
+		"Mount" => "mount",
+		"Non-Combat Pets" => "pet",
+		"Patrons" => "patron",
+		"Tools" => "tool",
+		_ => null
+	};
+
+	private static string SubcatToSingular(string subCategory) => subCategory switch
+	{
+		"" => string.Empty,
+		"Nix-Oxen" => "Nix-Ox",
+		"Personalities" => "Personality",
+		"Stories" => "Story",
+		"Undaunted Trophies" => "Undaunted Trophy",
+		"Wolves" => "Wolf",
+		_ => subCategory[^1] == 's' ? subCategory[0..^1] : subCategory
+	};
 
 	private static Collectible CollectibleFromRow(IDataRecord row)
 	{
 		var id = (long)row["id"];
-		var name = NameOverrides.GetValueOrDefault(id, EsoLog.ConvertEncoding((string)row["name"]));
+		var name = ReplacementData.CollectibleNameOverrides.GetValueOrDefault(id, EsoLog.ConvertEncoding((string)row["name"]));
 		var collectibleType = EsoLog.ConvertEncoding((string)row["categoryName"]);
 		var subCategory = EsoLog.ConvertEncoding((string)row["subCategoryName"]);
-		var colTypeSingular = CategorySingular(collectibleType);
-		var subCatSingular = CategorySingular(subCategory);
-		var fileCategory = colTypeSingular switch
-		{
-			"Appearance" => subCatSingular.OrdinalEquals("Hair Style")
-				? "hairstyle"
-				: subCatSingular.ToLowerInvariant(),
-			"Customized Action" => "action",
-			"Memento" or "Tool" => "memento",
-			"Ally" or "Mount" or "Pet" => colTypeSingular.ToLowerInvariant(),
-			_ => subCatSingular
-		};
-
+		var fileCategory = CatToFileSubcat(collectibleType) ?? SubcatToSingular(subCategory);
+		fileCategory = fileCategory.OrdinalEquals("Hair Style")
+			? "hairstyle"
+			: fileCategory.ToLowerInvariant();
 		return new Collectible(
 			id: id,
 			name: name,
@@ -183,53 +270,21 @@ internal sealed class EsoCollectibles : ParsedPageJob
 			imageName: $"ON-{fileCategory}-{name}",
 			iconName: $"ON-icon-{fileCategory}-{name}");
 	}
-
-	private static string CategorySingular(string category) => category switch
-	{
-		"Allies" => "Ally",
-		"Nix-Oxen" => "Nix-Ox",
-		"Non-Combat Pets" => "Pet",
-		"Personalities" => "Personality",
-		"Stories" => "Story",
-		"Undaunted Trophies" => "Undaunted Trophy",
-		"Wolves" => "Wolf",
-		_ => category[^1] == 's' ? category[0..^1] : category
-	};
 	#endregion
 
 	#region Private Methods
-	private void AddItem(Collectible item, Title title, TitleCollection allTitles, HashSet<long> knownIds, PageCollection pages)
+	private void GetCrownCrates()
 	{
-		Title titleDisambig = TitleFactory.FromValidated(title.Namespace, title.PageName + " (collectible)");
-		if (!knownIds.Contains(item.Id) && !pages.Contains(title) && !pages.Contains(titleDisambig))
+		PageCollection crownCrates = new(this.Site);
+		crownCrates.GetCategoryMembers("Online-Crown Crates");
+		foreach (var crate in crownCrates)
 		{
-			if (allTitles.Contains(title))
-			{
-				if (allTitles.Contains(titleDisambig))
-				{
-					this.StatusWriteLine($"Couldn't find a usable page for {item.Name}.");
-					return;
-				}
-
-				title = titleDisambig;
-			}
-
-			this.collectibles.Add(title, item);
+			this.ParseCrate(crate);
 		}
 	}
 
-	private PageCollection GetBacklinks()
+	private string LoadBlankPage()
 	{
-		var site = (UespSite)this.Site;
-		var pages = site.CreateMetaPageCollection(PageModules.None, false, "id");
-		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
-
-		return pages;
-	}
-
-	private string GetBlankText()
-	{
-		this.StatusWriteLine("Getting wiki info");
 		var page = this.Site.LoadPage($"Template:{TemplateName}/Blank");
 		if (page.IsMissing)
 		{
@@ -255,82 +310,21 @@ internal sealed class EsoCollectibles : ParsedPageJob
 		throw new InvalidOperationException("Blank template not in expected format.");
 	}
 
-	private void GetCollectibles(TitleCollection allTitles, PageCollection pages)
-	{
-		var knownIds = this.GetKnown(pages);
-		this.StatusWriteLine("Getting collectibles from database");
-		var (allCollectibles, dupeNames) = GetDBCollectibles();
-		foreach (var item in allCollectibles)
-		{
-			var titleText = item.Name;
-			if (dupeNames.Contains(item.Name))
-			{
-				var cat = item.SubCategory.Length == 0 ? item.CollectibleType : item.SubCategory;
-				titleText += $" ({cat})";
-			}
-
-			this.AddItem(item, TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], titleText), allTitles, knownIds, pages);
-		}
-	}
-
-	private void GetCrownCrates()
-	{
-		PageCollection crownCrates = new(this.Site);
-		crownCrates.GetCategoryMembers("Online-Crown Crates");
-		foreach (var crate in crownCrates)
-		{
-			this.ParseCrate(crate);
-		}
-	}
-
-	private HashSet<long> GetKnown(PageCollection pages)
-	{
-		var knownIds = new HashSet<long>(pages.Count + DeprecatedIds.Count);
-		foreach (var id in DeprecatedIds)
-		{
-			knownIds.Add(id);
-		}
-
-		foreach (var item in pages)
-		{
-			if (item is VariablesPage vPage)
-			{
-				var idText = vPage.GetVariable("id");
-				if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
-				{
-					knownIds.Add(id);
-				}
-			}
-		}
-
-		return knownIds;
-	}
-
 	private void ParseCrate(Page crate)
 	{
 		SiteParser parser = new(crate);
-		//// var tier = string.Empty;
-		var cardListTemplate = TitleFactory.FromTemplate(this.Site, "ESO Crate Card List");
-		foreach (var node in parser)
+		foreach (var template in parser.FindTemplates(this.Site, "ESO Crate Card List"))
 		{
-			if (node is IHeaderNode)
+			foreach (var parameter in template.ParameterCluster(2))
 			{
-				//// tier = GetSectionTitle(header);
-			}
-			else if (node is ITemplateNode template && template.GetTitle(this.Site) == cardListTemplate)
-			{
-				foreach (var parameter in template.ParameterCluster(2))
+				var title = parameter[0].GetValue();
+				if (!this.crateTiers.TryGetValue(title, out var allTiers))
 				{
-					var title = parameter[0].GetValue();
-					if (!this.crateTiers.TryGetValue(title, out var allTiers))
-					{
-						allTiers = [];
-						this.crateTiers.Add(title, allTiers);
-					}
-
-					// allTiers.Add($"[[Online:{crate.PageName}#{tier}|{crate.PageName}]]");
-					allTiers.Add(crate.Title.PageName);
+					allTiers = [];
+					this.crateTiers.Add(title, allTiers);
 				}
+
+				allTiers.Add(crate.Title.PageName.Replace("Crown Crates/", string.Empty, StringComparison.Ordinal));
 			}
 		}
 	}
