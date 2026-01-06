@@ -109,7 +109,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 			return;
 		}
 
-		if (page.IsMissing || page.Text.Length == 0)
+		if (page.IsMissing)
 		{
 			page.Text = this.GetNewPageText(page.Title, item);
 		}
