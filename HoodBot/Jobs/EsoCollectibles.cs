@@ -77,8 +77,8 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 	#region Protected Override Methods
 	protected override string? GetDisambiguator(Collectible item) => item.SubCategory.Length == 0
-		? item.CollectibleType
-		: item.SubCategory;
+		? CatToFileSubcat(item.CollectibleType) ?? item.CollectibleType
+		: SubcatToSingular(item.SubCategory);
 
 	protected override string GetEditSummary(Page page) => (page.Exists ? "Update" : "Create") + " collectible";
 
@@ -206,6 +206,11 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 			template.Update("type", typeVal, ParameterFormat.OnePerLine, true);
 		}
 
+		if (template.GetValue("crate").OrdinalEquals("Unknown"))
+		{
+			template.Update("crate", string.Empty);
+		}
+
 		if (this.crateTiers.TryGetValue(item.Name, out var crateInfo))
 		{
 			var crates = string.Join(", ", crateInfo);
@@ -239,17 +244,6 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		_ => null
 	};
 
-	private static string SubcatToSingular(string subCategory) => subCategory switch
-	{
-		"" => string.Empty,
-		"Nix-Oxen" => "Nix-Ox",
-		"Personalities" => "Personality",
-		"Stories" => "Story",
-		"Undaunted Trophies" => "Undaunted Trophy",
-		"Wolves" => "Wolf",
-		_ => subCategory[^1] == 's' ? subCategory[0..^1] : subCategory
-	};
-
 	private static Collectible CollectibleFromRow(IDataRecord row)
 	{
 		var id = (long)row["id"];
@@ -270,6 +264,17 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 			imageName: $"ON-{fileCategory}-{name}",
 			iconName: $"ON-icon-{fileCategory}-{name}");
 	}
+
+	private static string SubcatToSingular(string subCategory) => subCategory switch
+	{
+		"" => string.Empty,
+		"Nix-Oxen" => "Nix-Ox",
+		"Personalities" => "Personality",
+		"Stories" => "Story",
+		"Undaunted Trophies" => "Undaunted Trophy",
+		"Wolves" => "Wolf",
+		_ => subCategory[^1] == 's' ? subCategory[0..^1] : subCategory
+	};
 	#endregion
 
 	#region Private Methods
@@ -277,6 +282,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 	{
 		PageCollection crownCrates = new(this.Site);
 		crownCrates.GetCategoryMembers("Online-Crown Crates");
+		crownCrates.Remove("Online:Crown Crates/Unknown");
 		foreach (var crate in crownCrates)
 		{
 			this.ParseCrate(crate);
