@@ -14,7 +14,7 @@ internal enum FurnishingType
 }
 #endregion
 
-internal sealed class Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string? furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
+internal sealed class Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
 {
 	#region Public Properties
 	public string? Behavior { get; } = behavior;
@@ -31,11 +31,11 @@ internal sealed class Furnishing(long id, string? behavior, string? bindType, st
 		furnishingLimitType == FurnishingType.CollectibleFurnishings ? "collectible" :
 		"furnishing";
 
-	public string? FurnishingCategory { get; } = furnishingCategory;
+	public string FurnishingCategory { get; } = furnishingCategory;
 
 	public FurnishingType FurnishingLimitType { get; } = furnishingLimitType;
 
-	public string? FurnishingSubcategory { get; } = furnishingSubcategory;
+	public string FurnishingSubcategory { get; } = furnishingSubcategory;
 
 	public long Id { get; } = id;
 
