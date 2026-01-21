@@ -24,7 +24,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 {
 	#region Private Constants
 	private const string CollectiblesQuery = "SELECT description, furnCategory, furnSubCategory, id, name, nickname, tags FROM collectibles WHERE furnLimitType = 2";
-	private const string MinedItemsQuery = "SELECT abilityDesc, bindType, description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags FROM uesp_esolog.minedItemSummary WHERE type = 61 AND itemId NOT IN(115083, 119706, 120853, 152141, 152142, 152143, 152144, 152145, 152146, 152147, 152148, 152149, 153552, 153553, 153554, 153555, 153556, 153557, 153558, 153559, 153560, 153561, 153562, 183198, 220297, 220318, 220288, 220300, 220320, 220323) AND name NOT LIKE '% Station (%'"; // 61 = Furnishings
+	private const string MinedItemsQuery = "SELECT abilityDesc, bindType, description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags FROM minedItemSummary WHERE type = 61 AND itemId NOT IN(115083, 119706, 120853, 152141, 152142, 152143, 152144, 152145, 152146, 152147, 152148, 152149, 153552, 153553, 153554, 153555, 153556, 153557, 153558, 153559, 153560, 153561, 153562, 183198, 220297, 220318, 220288, 220300, 220320, 220323) AND name NOT LIKE '% Station (%'"; // 61 = Furnishings
 	#endregion
 
 	#region Static Fields
@@ -581,8 +581,15 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 		var desc = item.Description?.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
 		template.Update("desc", desc, ParameterFormat.OnePerLine, false);
-		template.Update("cat", item.FurnishingCategory, ParameterFormat.OnePerLine, false);
-		template.Update("subcat", item.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
+		if (item.FurnishingCategory.Length != 0)
+		{
+			template.Update("cat", item.FurnishingCategory, ParameterFormat.OnePerLine, false);
+		}
+
+		if (item.FurnishingSubcategory.Length != 0)
+		{
+			template.Update("subcat", item.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
+		}
 
 		CheckBehavior(template, item);
 
