@@ -38,6 +38,14 @@ public class UespNamespaceList : IReadOnlyDictionary<string, UespNamespace>
 				this.byId.Add(ns.Id, uespNs);
 			}
 
+			if (!ns.IsPseudospace)
+			{
+				foreach (var alias in site[ns.Base].AllNames)
+				{
+					this.byBase.TryAdd(alias, uespNs);
+				}
+			}
+
 			if (!this.byNs.TryGetValue(uespNs.BaseNamespace.Id, out var list))
 			{
 				list = [];
