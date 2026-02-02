@@ -81,11 +81,6 @@ internal sealed class EsoSkills : EditJob
 		this.StatusWriteLine("Fetching data");
 		UespReplacer.Initialize(this);
 		var dbVersion = EsoLog.LatestDBUpdate("skillTree", false);
-
-		// Version with no extension is one higher than last listed version, so add one if needed.
-		this.version = dbVersion.Pts
-			? dbVersion
-			: new EsoVersion(dbVersion.Version + 1, dbVersion.Pts);
 		this.skills = GetSkillList(EsoVersion.Empty);
 	}
 
