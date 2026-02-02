@@ -10,11 +10,11 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Replace links per Discord request";
 
-	protected override void LoadPages() => this.Pages.GetBacklinks("Daggerfall:Daggerfall Preview", BacklinksTypes.Backlinks, false);
+	protected override void LoadPages() => this.Pages.GetBacklinks("Lore:Herne", BacklinksTypes.Backlinks, false);
 
 	protected override void PageLoaded(Page page) => page.Text = page.Text.Replace(
-		"[[Daggerfall:Daggerfall Preview|Daggerfall Preview]] - [[Daggerfall:Daggerfall Preview/REDGUARD.TXT|REDGUARD.TXT]]}}",
-		"[[Daggerfall:Daggerfall Preview/REDGUARD.TXT|REDGUARD.TXT]] - [[Daggerfall:Daggerfall Preview|Daggerfall Preview]]}}",
+		"[[Lore:Herne|Herne]]",
+		"[[Lore:Herne (island)|Herne]]",
 		StringComparison.OrdinalIgnoreCase);
 	#endregion
 }
