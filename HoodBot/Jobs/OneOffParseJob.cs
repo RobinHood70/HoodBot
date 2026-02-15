@@ -1,116 +1,50 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using RobinHood70.CommonCode;
-using RobinHood70.HoodBot.Jobs.JobModels;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
+using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
 [method: JobInfo("One-Off Parse Job")]
 internal sealed class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
 {
-	#region Fields
-	private readonly TitleDictionary<IDictionary<string, string>> data = [];
+	#region Private Constants
+	private const string EndText = "[[Online:Furnishings/Luxury Furnisher|Luxury Furnishings]]";
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Update Item";
+	protected override string GetEditSummary(Page page) => "Update section text";
 
-	protected override void LoadPages()
-	{
-		var fileName = LocalConfig.BotDataSubPath("Blades - Item Stats.csv");
-		var csv = new CsvFile(fileName);
-		foreach (var row in csv.ReadRows())
-		{
-			var page = row["page"];
-			if (page.StartsWith("Divine ", StringComparison.Ordinal))
-			{
-				page = page[7..] + " (divine)";
-			}
-
-			var fields = row.ToDictionary();
-			var newDict = TrimDictionary(fields);
-			var title = TitleFactory.FromUnvalidated(this.Site, "Blades:" + page);
-			this.data.Add(title, newDict);
-		}
-
-		this.Pages.GetTitles(this.data.ToTitleCollection(this.Site));
-	}
+	protected override void LoadPages() => this.Pages.GetBacklinks("Online:Zanil Theran", BacklinksTypes.Backlinks);
 
 	protected override void ParseText(SiteParser parser)
 	{
-		if (parser.Page.IsMissing)
+		var sections = parser.ToSections();
+		var section = sections.FindFirst("Available From");
+		if (section is null)
 		{
-			Debug.WriteLine("Page does not exist: " + parser.Title);
 			return;
 		}
 
-		parser.RemoveTemplates("Stub");
-		parser.RemoveTemplates("Minimal");
-		this.InsertItemStats(parser);
-		TrimBeforeNoinclude(parser);
-	}
-	#endregion
-
-	#region Private Static Methods
-	private static Section CreateItemStatsSection(SiteParser parser, IDictionary<string, string> fields)
-	{
-		var template = parser.Factory.TemplateNodeFromParts("Blades Item Stats Table");
-		foreach (var (key, value) in fields)
+		var text = section.Content.ToRaw();
+		var offset = text.IndexOf(EndText, StringComparison.Ordinal);
+		if (offset == -1)
 		{
-			template.Add(key, value, ParameterFormat.OnePerLine);
+			Debug.WriteLine("Couldn't find end text on " + parser.Title);
+			return;
 		}
 
-		var itemStats = Section.FromText(parser.Factory, 3, "Item Stats", "\n");
-		itemStats.Content.Add(template);
-		itemStats.Content.AddText("\n\n");
-
-		return itemStats;
-	}
-
-	private static void TrimBeforeNoinclude(SiteParser parser)
-	{
-		if (parser.Count >= 2 &&
-			parser[^1] is IIgnoreNode &&
-			parser[^2] is ITextNode text)
+		if (text[offset + EndText.Length] == '.')
 		{
-			text.Text = text.Text.TrimEnd();
-		}
-	}
-
-	private static Dictionary<string, string> TrimDictionary(IDictionary<string, string> fields)
-	{
-		fields.Remove("page");
-		var newDict = new Dictionary<string, string>(fields.Count, StringComparer.Ordinal);
-		foreach (var (key, value) in fields)
-		{
-			if (value.Trim().Length != 0)
-			{
-				newDict.Add(key, value);
-			}
+			offset++;
 		}
 
-		return newDict;
-	}
-	#endregion
-
-	#region Private Methods
-	private void InsertItemStats(SiteParser parser)
-	{
-		var sections = parser.ToSections();
-		var index = sections.IndexOf("Tempering Recipe");
-		if (index == -1)
-		{
-			index = 1;
-		}
-
-		var fields = this.data[parser.Title];
-		var itemStats = CreateItemStatsSection(parser, fields);
-		sections.Insert(index, itemStats);
+		text = text[(offset + EndText.Length)..];
+		text = "\n* This furnishing is a '''Luxury''' item. Luxury items are on a 'week/year' rotation. Once a week, the [[Online:Luxury Furnisher|Luxury Furnisher]] appears with a set of wares which rotate each week, and ultimately, may not be seen again for one year.<br>There are a few exceptions to the rotation, given that there may be events and new releases that disrupt the usual ware list for a week.\n* Visit [[Online:Zanil Theran|Zanil Theran]] in [[Online:Coldharbour|Coldharbour]]'s [[Online:The Hollow City|The Hollow City]] or in [[Online:Craglorn|Craglorn]] at the [[Online:Belkarth Festival Grounds|Belkarth Festival Grounds]] every Friday night after 8:00 PM ET to view the weekly [[Online:Furnishings/Luxury Furnisher|Luxury Furnishings]]." + text;
+		section.Content.Clear();
+		section.Content.AddText(text);
 		parser.FromSections(sections);
 	}
 	#endregion
