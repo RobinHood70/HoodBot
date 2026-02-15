@@ -72,7 +72,7 @@ public abstract class CreateOrUpdateJob<T>(JobManager jobManager) : EditJob(jobM
 		{
 			if (page.Exists && newItems.Remove(page.Title, out var item))
 			{
-				var disambiguator = this.GetDisambiguator(item)?.ToLower(this.Site.Culture);
+				var disambiguator = this.GetDisambiguator(item);
 				if (string.IsNullOrEmpty(disambiguator))
 				{
 					throw new InvalidOperationException($"Cannot disambiguate page because disambiguator is empty: {page.Title}");
