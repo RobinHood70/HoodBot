@@ -393,8 +393,8 @@ internal sealed class CastlesTranslator
 
 			// Checks must be in this exact order - do not optimize.
 			var retval =
-				this.ExceptionStarts.Match(input).Success ? this.Exceptions[declension] :
-				this.ArticleStarts.Match(input).Success ? this.Articles[declension] :
+				this.ExceptionStarts.IsMatch(input) ? this.Exceptions[declension] :
+				this.ArticleStarts.IsMatch(input) ? this.Articles[declension] :
 				this.Exceptions[declension];
 			return retval.Replace("{0}", input, StringComparison.Ordinal);
 		}

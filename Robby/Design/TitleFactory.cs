@@ -414,7 +414,7 @@ public sealed class TitleFactory : ILinkTitle, IFullTitle, ITitle
 		}
 
 		var illegalRegex = new Regex('[' + illegalChars + ']', RegexOptions.None, Globals.DefaultRegexTimeout);
-		return !illegalRegex.Match(pageName).Success;
+		return !illegalRegex.IsMatch(pageName);
 	}
 	#endregion
 
