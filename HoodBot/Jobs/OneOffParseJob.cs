@@ -2,50 +2,152 @@
 
 using System;
 using System.Diagnostics;
+using RobinHood70.CommonCode;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
-[method: JobInfo("One-Off Parse Job")]
-internal sealed class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobManager)
+internal sealed class OneOffParseJob : ParsedPageJob
 {
-	#region Private Constants
-	private const string EndText = "[[Online:Furnishings/Luxury Furnisher|Luxury Furnishings]]";
+	#region Fields
+	private readonly PageCollection npcs;
+	private readonly TitleCollection delete;
+	#endregion
+
+	#region Constructors
+	[JobInfo("One-Off Parse Job")]
+	public OneOffParseJob(JobManager jobManager)
+		: base(jobManager)
+	{
+		this.delete = new TitleCollection(this.Site);
+		this.npcs = new PageCollection(this.Site);
+	}
 	#endregion
 
 	#region Protected Override Methods
-	protected override string GetEditSummary(Page page) => "Update section text";
+	protected override string GetEditSummary(Page page) => "Add NPC Summary";
 
-	protected override void LoadPages() => this.Pages.GetBacklinks("Online:Zanil Theran", BacklinksTypes.Backlinks);
+	protected override void LoadPages()
+	{
+		this.npcs.GetBacklinks("Template:NPC Summary", BacklinksTypes.EmbeddedIn, false, Filter.Exclude, UespNamespaces.Daggerfall);
+		this.Pages.GetCategoryMembers("Daggerfall-People");
+	}
+
+	protected override void Main()
+	{
+		base.Main();
+		foreach (var title in this.delete)
+		{
+			title.Delete("Information copied to main NPC page");
+		}
+	}
 
 	protected override void ParseText(SiteParser parser)
 	{
+		foreach (var template in parser.TemplateNodes)
+		{
+			if (template.GetTitleText().Contains("Summary", StringComparison.Ordinal))
+			{
+				Debug.WriteLine($"{parser.Title} already has a summary, skipping.");
+				return;
+			}
+		}
+
 		var sections = parser.ToSections();
-		var section = sections.FindFirst("Available From");
-		if (section is null)
+		var lead = sections[0].Content;
+		if (this.FindMainImage(lead) is not SiteLink mainImage)
 		{
+			Debug.WriteLine($"Could not find main image for {parser.Title}");
 			return;
 		}
 
-		var text = section.Content.ToRaw();
-		var offset = text.IndexOf(EndText, StringComparison.Ordinal);
-		if (offset == -1)
-		{
-			Debug.WriteLine("Couldn't find end text on " + parser.Title);
-			return;
-		}
+		this.RemovePeopleTrail(lead);
+		lead.TrimStart();
 
-		if (text[offset + EndText.Length] == '.')
-		{
-			offset++;
-		}
+		var npcSummaryText = this.GetNpcSummary(parser);
+		lead.InsertParsed(0, npcSummaryText);
+		this.UpdateNpcSummary(lead, mainImage);
 
-		text = text[(offset + EndText.Length)..];
-		text = "\n* This furnishing is a '''Luxury''' item. Luxury items are on a 'week/year' rotation. Once a week, the [[Online:Luxury Furnisher|Luxury Furnisher]] appears with a set of wares which rotate each week, and ultimately, may not be seen again for one year.<br>There are a few exceptions to the rotation, given that there may be events and new releases that disrupt the usual ware list for a week.\n* Visit [[Online:Zanil Theran|Zanil Theran]] in [[Online:Coldharbour|Coldharbour]]'s [[Online:The Hollow City|The Hollow City]] or in [[Online:Craglorn|Craglorn]] at the [[Online:Belkarth Festival Grounds|Belkarth Festival Grounds]] every Friday night after 8:00 PM ET to view the weekly [[Online:Furnishings/Luxury Furnisher|Luxury Furnishings]]." + text;
-		section.Content.Clear();
-		section.Content.AddText(text);
 		parser.FromSections(sections);
+	}
+	#endregion
+
+	#region Private Methods
+	private void UpdateNpcSummary(WikiNodeCollection lead, SiteLink mainImage)
+	{
+		if (lead.FindTemplate(this.Site, "NPC Summary") is not ITemplateNode npcSummary)
+		{
+			throw new InvalidOperationException("Could not find NPC Summary. WTF?");
+		}
+
+		npcSummary.Update("image", mainImage.Title.PageName, ParameterFormat.OnePerLine, false);
+		npcSummary.Update("imgdesc", mainImage.Text, ParameterFormat.OnePerLine, false);
+	}
+
+	private string GetNpcSummary(SiteParser parser)
+	{
+		if (this.npcs.TryGetValue(parser.Title + " (NPC)", out var npcPage))
+		{
+			// Note: this was bugged in the original version but fixed before committed to GitHub. The original version was adding the main page title to the delete list instead of the NPC page title.
+			this.delete.Add(npcPage.Title);
+			return npcPage.Text.Trim() + '\n';
+		}
+
+		return """
+		{{NPC Summary
+		|id=
+		|lorelink=
+		|city=
+		|loc=
+		|race=
+		|region=
+		|gender=
+		|type=
+		|faction=
+		|sgroup=
+		|ggroup=
+		|parentfaction=
+		|ally1=
+		|ally2=
+		|enemy1=
+		|enemy2=
+		|enemy3=
+		|power=
+		|minf=
+		|maxf=
+		|summon=
+		|image=
+		|imgdesc=
+		}}
+
+		""";
+	}
+
+	private void RemovePeopleTrail(WikiNodeCollection lead)
+	{
+		if (lead.FindTemplate(this.Site, "Trail") is ITemplateNode trail &&
+			trail.Find(1) is IParameterNode parameter &&
+			parameter.GetValue().OrdinalEquals("People"))
+		{
+			lead.Remove(trail);
+		}
+	}
+
+	private SiteLink? FindMainImage(WikiNodeCollection lead)
+	{
+		foreach (var link in lead.LinkNodes)
+		{
+			var siteLink = SiteLink.FromLinkNode(this.Site, link);
+			if (siteLink.HorizontalAlignment.OrdinalEquals("left"))
+			{
+				lead.Remove(link);
+				return siteLink;
+			}
+		}
+
+		return null;
 	}
 	#endregion
 }
