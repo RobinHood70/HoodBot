@@ -12,7 +12,6 @@ using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Design;
 using RobinHood70.HoodBot.Models;
 using RobinHood70.HoodBot.Uesp;
-using RobinHood70.HoodBot.ViewModels;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
@@ -210,16 +209,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 	private void GetEnglishIcons(IMediaWikiClient client)
 	{
 		var wikis = App.UserSettings.Wikis;
-		WikiInfoViewModel? uespWiki = null;
-		foreach (var wiki in wikis)
-		{
-			if (wiki.DisplayName.OrdinalEquals("UESPWiki"))
-			{
-				uespWiki = wiki;
-				break;
-			}
-		}
-
+		var uespWiki = JobManager.FindWikiInfo(wiki => wiki.DisplayName.OrdinalEquals("UESPWiki"));
 		if (uespWiki is null || uespWiki.Api is null)
 		{
 			throw new InvalidOperationException();
@@ -227,7 +217,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 
 		var api = new WikiAbstractionLayer(client, uespWiki.Api, this.Logger);
 		api.SendingRequest += JobManager.WalSendingRequest;
-		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki.WikiInfo, api, this.Site.EditingEnabled);
+		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki, api, this.Site.EditingEnabled);
 		enUesp.Login(uespWiki.UserName, uespWiki.Password);
 
 		var pages = enUesp.CreateMetaPageCollection(PageModules.Info, false, "icon", "id", "id2", "id3", "id4", "id5");

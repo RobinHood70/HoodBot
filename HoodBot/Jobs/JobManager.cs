@@ -34,7 +34,7 @@ public class JobManager : IDisposable
 		this.CancelToken = cancelSource.Token;
 		this.PauseToken = pauseSource.Token;
 		this.Client = this.CreateClient();
-		this.AbstractionLayer = this.CreateAbstractionLayer();
+		this.AbstractionLayer = this.CreateAbstractionLayer(this.WikiInfo);
 		this.Site = this.CreateSite(this.WikiInfo, this.AbstractionLayer, editingEnabled);
 	}
 	#endregion
@@ -78,6 +78,20 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Static Methods
+
+	public static WikiInfo? FindWikiInfo(Predicate<WikiInfo> predicate)
+	{
+		var allWikis = App.UserSettings.Wikis;
+		foreach (var wiki in allWikis)
+		{
+			if (predicate(wiki.WikiInfo))
+			{
+				return wiki.WikiInfo;
+			}
+		}
+
+		return null;
+	}
 
 	public static void SiteChanging(Site sender, ChangeArgs eventArgs)
 	{
@@ -128,6 +142,30 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Methods
+	public IWikiAbstractionLayer CreateAbstractionLayer(WikiInfo wikiInfo)
+	{
+		ArgumentNullException.ThrowIfNull(wikiInfo);
+		Globals.ThrowIfNull(wikiInfo.Api, nameof(JobManager), nameof(wikiInfo), nameof(wikiInfo.Api));
+		var api = wikiInfo.Api;
+		IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
+			? new WallE.Test.WikiAbstractionLayer()
+			: new WikiAbstractionLayer(this.Client, api, App.Locator.Logger);
+		if (abstractionLayer is IMaxLaggable maxLagWal)
+		{
+			maxLagWal.MaxLag = this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
+		}
+
+#if DEBUG
+		if (abstractionLayer is IInternetEntryPoint internet)
+		{
+			internet.SendingRequest += WalSendingRequest;
+			//// internet.ResponseReceived += WalResponseReceived;
+		}
+#endif
+
+		return abstractionLayer;
+	}
+
 	public Site CreateSite(WikiInfo wikiInfo, IWikiAbstractionLayer abstractionLayer, bool editingEnabled)
 	{
 		// TODO: Refactor OnPagePreview (and possibly others) so that CreateSite is no longer tied into JobManager and can be safely used from within a job like ImportBlocks. Should probably work as is for now, but is definitely sketchy.
@@ -312,29 +350,6 @@ public class JobManager : IDisposable
 				eventArgs.Description);
 			this.OnUpdateStatus(text + '\n');
 		}
-	}
-
-	private IWikiAbstractionLayer CreateAbstractionLayer()
-	{
-		Globals.ThrowIfNull(this.WikiInfo.Api, nameof(JobManager), nameof(this.WikiInfo), nameof(this.WikiInfo.Api));
-		var api = this.WikiInfo.Api;
-		IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
-			? new WallE.Test.WikiAbstractionLayer()
-			: new WikiAbstractionLayer(this.Client, api, App.Locator.Logger);
-		if (abstractionLayer is IMaxLaggable maxLagWal)
-		{
-			maxLagWal.MaxLag = this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
-		}
-
-#if DEBUG
-		if (abstractionLayer is IInternetEntryPoint internet)
-		{
-			internet.SendingRequest += WalSendingRequest;
-			//// internet.ResponseReceived += WalResponseReceived;
-		}
-#endif
-
-		return abstractionLayer;
 	}
 
 	private IMediaWikiClient CreateClient()
