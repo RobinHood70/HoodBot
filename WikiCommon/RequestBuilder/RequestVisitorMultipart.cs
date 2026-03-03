@@ -116,7 +116,7 @@ public sealed class RequestVisitorMultipart : IParameterVisitor
 		var data = string.Create(
 			CultureInfo.InvariantCulture,
 			$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
-		this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
+		this.stream.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
 		this.stream.Write(fileData, 0, fileData.Length);
 	}
 
@@ -178,7 +178,7 @@ public sealed class RequestVisitorMultipart : IParameterVisitor
 		var postData = string.Create(
 			CultureInfo.InvariantCulture,
 			$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
-		this.stream!.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
+		this.stream.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
 	}
 	#endregion
 }

@@ -148,7 +148,7 @@ public sealed class NamespaceCollection : IReadOnlyCollection<Namespace>
 	/// <param name="id">The namespace ID to search for.</param>
 	/// <param name="value">The namespace object, if found; otherwise, null.</param>
 	/// <returns>True if the collection contains the desired namespace.</returns>
-	public bool TryGetValue(int id, [MaybeNullWhen(false)] out Namespace value) => this.idsDictionary.TryGetValue(id, out value!);
+	public bool TryGetValue(int id, [MaybeNullWhen(false)] out Namespace value) => this.idsDictionary.TryGetValue(id, out value);
 
 	/// <summary>Returns the namespace associated with the specified name.</summary>
 	/// <param name="name">Any of the names or aliases of the namespace to search for.</param>

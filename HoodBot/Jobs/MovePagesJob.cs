@@ -762,7 +762,7 @@ public abstract class MovePagesJob : EditJob
 			if (this.linkUpdates.TryGetValue(key, out var toMedia))
 			{
 				this
-					.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia!.PageName))
+					.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.PageName))
 					.UpdateLinkNode(node);
 			}
 		}

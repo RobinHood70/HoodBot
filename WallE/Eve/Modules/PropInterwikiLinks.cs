@@ -39,7 +39,7 @@ internal sealed class PropInterwikiLinks(WikiAbstractionLayer wal, InterwikiLink
 
 	protected override InterwikiTitleItem? GetItem(JToken result) => result == null
 		? null
-		: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title")!, (Uri?)result["url"]);
+		: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title"), (Uri?)result["url"]);
 
 	protected override InterwikiLinksResult GetNewList(JToken parent) => [];
 	#endregion

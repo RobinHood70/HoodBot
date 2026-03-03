@@ -36,7 +36,7 @@ internal sealed class ContinueModule1 : ContinueModule
 			Globals.ThrowIfNull(this.GeneratorContinue, nameof(ContinueModule1), nameof(this.GeneratorContinue));
 
 			// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
-			request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);
+			request.AddOrChangeIfNotNull(this.GeneratorContinue, this.currentGeneratorValue);
 			foreach (var entry in this.ContinueEntries)
 			{
 				request.AddOrChangeIfNotNull(entry.Key, entry.Value);

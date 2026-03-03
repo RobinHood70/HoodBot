@@ -52,7 +52,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 			}
 
 			this.WriteLine("|}");
-			this.Results!.Save();
+			this.Results.Save();
 			this.Results.Clear();
 		}
 	}

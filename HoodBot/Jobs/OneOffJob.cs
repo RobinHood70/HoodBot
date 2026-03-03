@@ -7,7 +7,7 @@ using RobinHood70.Robby;
 internal sealed class OneOffJob(JobManager jobManager) : WikiJob(jobManager, JobType.Write)
 {
 	#region Fields
-	private TitleCollection deletions = new(
+	private readonly TitleCollection deletions = new(
 		jobManager.Site,
 		"Daggerfall:The Fey (NPC)",
 		"Daggerfall:Whitka (NPC)",

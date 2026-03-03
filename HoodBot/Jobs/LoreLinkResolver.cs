@@ -124,7 +124,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 	{
 		foreach (var title in titles)
 		{
-			if (this.targetPages!.Contains(title))
+			if (this.targetPages.Contains(title))
 			{
 				return title;
 			}

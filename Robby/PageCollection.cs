@@ -444,7 +444,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 
 		foreach (var item in result.Redirects)
 		{
-			this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value.ToString()!);
+			this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value.ToString());
 		}
 
 		if (result.Interwiki.Count > 0 ||

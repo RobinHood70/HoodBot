@@ -1386,12 +1386,7 @@ public partial class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntr
 				{
 					var input = DefaultUserInformation;
 					input.Properties |= UserInfoProperties.HasMsg; // Default should cover this, but if that's ever changed, this still *must* have a HasMsg check.
-					userInfoResult = this.UserInfo(input);
-					if (userInfoResult == null)
-					{
-						throw WikiException.General("userinfo-failed", EveMessages.UserInfoCheckFailed);
-					}
-
+					userInfoResult = this.UserInfo(input) ?? throw WikiException.General("userinfo-failed", EveMessages.UserInfoCheckFailed);
 					this.userTalkChecksIgnored = 0;
 				}
 				else
