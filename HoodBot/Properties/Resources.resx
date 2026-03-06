@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Add" xml:space="preserve">
+	<data name="Add" xml:space="preserve">
     <value>Add</value>
   </data>
-  <data name="AnyWikiPage" xml:space="preserve">
+	<data name="AnyWikiPage" xml:space="preserve">
     <value>Enter URL to any page on the wiki:</value>
   </data>
   <data name="ApiPath" xml:space="preserve">
@@ -224,5 +224,17 @@
   </data>
   <data name="WriteThrottle" xml:space="preserve">
     <value>Write Throttle:</value>
+  </data>
+  <data name="CurrentTask" xml:space="preserve">
+    <value>Current Task</value>
+  </data>
+  <data name="TaskLog" xml:space="preserve">
+    <value>Task Log</value>
+  </data>
+  <data name="TaskNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="LogPageLead" xml:space="preserve">
+    <value>This is HoodBot's activity log. It allows users to know what the bot is currently up to, as well as keeping a list of what it has previously done should a specific job need to be reverted in its entirety.</value>
   </data>
 </root>

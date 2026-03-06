@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobinHood70.HoodBot.Properties; 
+namespace RobinHood70.HoodBot.Properties {
     using System;
     
     
@@ -19,7 +19,7 @@ namespace RobinHood70.HoodBot.Properties;
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -111,6 +111,15 @@ namespace RobinHood70.HoodBot.Properties;
         public static string BotDataFolder {
             get {
                 return ResourceManager.GetString("BotDataFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Task.
+        /// </summary>
+        public static string CurrentTask {
+            get {
+                return ResourceManager.GetString("CurrentTask", resourceCulture);
             }
         }
         
@@ -214,6 +223,15 @@ namespace RobinHood70.HoodBot.Properties;
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This is HoodBot&apos;s activity log. It allows users to know what the bot is currently up to, as well as keeping a list of what it has previously done should a specific job need to be reverted in its entirety..
+        /// </summary>
+        public static string LogPageLead {
+            get {
+                return ResourceManager.GetString("LogPageLead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to MaxLag:.
         /// </summary>
         public static string MaxLag {
@@ -313,6 +331,24 @@ namespace RobinHood70.HoodBot.Properties;
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Task Log.
+        /// </summary>
+        public static string TaskLog {
+            get {
+                return ResourceManager.GetString("TaskLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string TaskNone {
+            get {
+                return ResourceManager.GetString("TaskNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Undo.
         /// </summary>
         public static string Undo {
@@ -384,3 +420,4 @@ namespace RobinHood70.HoodBot.Properties;
             }
         }
     }
+}

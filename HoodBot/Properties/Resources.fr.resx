@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Add" xml:space="preserve">
+	<data name="Add" xml:space="preserve">
     <value>Ajouter</value>
   </data>
-  <data name="AnyWikiPage" xml:space="preserve">
+	<data name="AnyWikiPage" xml:space="preserve">
     <value>Entrez l'URL de n'importe quelle page sur le wiki :</value>
   </data>
   <data name="ApiPath" xml:space="preserve">
@@ -221,5 +221,17 @@
   </data>
   <data name="WriteThrottle" xml:space="preserve">
     <value>Limitation à mettre-à-jour :</value>
+  </data>
+  <data name="CurrentTask" xml:space="preserve">
+    <value>Tâche en cours</value>
+  </data>
+  <data name="TaskLog" xml:space="preserve">
+    <value>Journal des tâches</value>
+  </data>
+  <data name="TaskNone" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="LogPageLead" xml:space="preserve">
+    <value>Il s'agit du journal d'activité de HoodBot. Il permet aux utilisateurs de savoir ce que le bot est en train de faire, ainsi que de conserver une liste de ce qu'il a fait précédemment au cas où une tâche spécifique devrait être entièrement annulée.</value>
   </data>
 </root>

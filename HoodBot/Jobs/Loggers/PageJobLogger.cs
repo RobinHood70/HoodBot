@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Loggers;
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Resources;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Properties;
 using RobinHood70.Robby;
@@ -13,30 +13,16 @@ using RobinHood70.WikiCommon.Parser;
 
 public class PageJobLogger : JobLogger
 {
-	#region Private Constants
-	private const string NewLogPageText =
-		"<cleanspace>\n" +
-		"{{#local:hidetime|{{#expr:({{#time:Y}}*12+{{#time:m}}-{{#arg:months|1}})-1}}}}\n" +
-		"{{#local:year|{{#expr:trunc(({{{hidetime}}})/12)}}}}\n" +
-		"{{#local:month|{{padleft:{{#expr:({{{hidetime}}} mod 12)+1}}|2}}}}\n" +
-		"{{#local:hidetime|{{{year}}}{{{month}}}}}\n" +
-		"</cleanspace>This is HoodBot's activity log. It allows users to know what the bot is currently up to, as well as keeping a list of what it has previously done should a specific job need to be reverted in its entirety.\n" +
-		"\n" +
-		"== Current Task ==\n" +
-		"None.\n" +
-		"\n" +
-		"== Task Log ==\n" +
-		"{| class=\"center\" style=\"white-space:nowrap; border-collapse:collapse;\"\n" +
-		"|}";
-	#endregion
-
 	#region Static Fields
 	private static readonly InvalidOperationException BadLogPage = new(Resources.BadLogPage);
 	#endregion
 
 	#region Fields
 	private readonly string clearStatus;
+	private readonly string currentTaskTitle;
+	private readonly string logPageLead;
 	private readonly Title logTitle;
+	private readonly string taskLogTitle;
 	private DateTime? end;
 	private LogInfo? logInfo;
 	private Page? logPage;
@@ -47,13 +33,14 @@ public class PageJobLogger : JobLogger
 	#region Constructors
 	public PageJobLogger(Title logTitle)
 	{
+		// For now, log page translations are stored in HoodBot's resource files. If this becomes more complex in the future, or uses more languages than HoodBot itself supports (currently English and French), translations should be moved to their own resx files. All translations are here in the constructor.
 		ArgumentNullException.ThrowIfNull(logTitle);
-		this.clearStatus = logTitle.Site.Culture.TwoLetterISOLanguageName switch
-		{
-			"fr" => "Aucun",
-			_ => "None"
-		};
-
+		var rm = new ResourceManager(typeof(Resources));
+		var culture = logTitle.Site.Culture;
+		this.clearStatus = rm.GetString("TaskNone", culture) ?? "None";
+		this.currentTaskTitle = rm.GetString("CurrentTask", culture) ?? "Current Task";
+		this.logPageLead = rm.GetString("LogPageLead", culture) ?? string.Empty;
+		this.taskLogTitle = rm.GetString("TaskLog", culture) ?? "Task Log";
 		this.logTitle = logTitle;
 		this.status = this.clearStatus;
 	}
@@ -97,31 +84,6 @@ public class PageJobLogger : JobLogger
 		{
 			template.Add(FormatDateTime(dateTime.Value));
 		}
-	}
-
-	private static (Section CurrentTask, Section TaskLog) FindSections(IEnumerable<Section> sections)
-	{
-		Section? currentTask = null;
-		Section? taskLog = null;
-		foreach (var section in sections)
-		{
-			// Section count should be very small, so little point to an early exit.
-			// Note that for non-English wikis, English text should be inserted in an HTML comment.
-			var textTitle = section.Header.GetTitle(true);
-			if (textTitle.Contains("Current Task", StringComparison.OrdinalIgnoreCase))
-			{
-				currentTask = section;
-			}
-
-			if (textTitle.Contains("Task Log", StringComparison.OrdinalIgnoreCase))
-			{
-				taskLog = section;
-			}
-		}
-
-		return currentTask is null || taskLog is null
-			? throw BadLogPage
-			: (currentTask, taskLog);
 	}
 
 	private static string FormatDateTime(DateTime dt) => dt.ToString("u", CultureInfo.InvariantCulture).TrimEnd('Z');
@@ -194,13 +156,27 @@ public class PageJobLogger : JobLogger
 		this.logPage ??= this.logTitle.Load();
 		if (this.logPage.Text.Length == 0)
 		{
-			this.logPage.Text = NewLogPageText;
+			this.logPage.Text =
+				"<cleanspace>\n" +
+				"{{#local:hidetime|{{#expr:({{#time:Y}}*12+{{#time:m}}-{{#arg:months|1}})-1}}}}\n" +
+				"{{#local:year|{{#expr:trunc(({{{hidetime}}})/12)}}}}\n" +
+				"{{#local:month|{{padleft:{{#expr:({{{hidetime}}} mod 12)+1}}|2}}}}\n" +
+				"{{#local:hidetime|{{{year}}}{{{month}}}}}\n" +
+				"</cleanspace>" + this.logPageLead + '\n' +
+				"\n" +
+				"== " + this.currentTaskTitle + " ==\n" +
+				this.status + ".\n" +
+				"\n" +
+				"== " + this.taskLogTitle + " ==\n" +
+				"{| class=\"center\" style=\"white-space:nowrap; border-collapse:collapse;\"\n" +
+				"|}";
 		}
 
 		SiteParser parser = new(this.logPage);
 		var factory = parser.Factory;
 		var sections = parser.ToSections(2);
-		var (currentTask, taskLog) = FindSections(sections);
+		var currentTask = sections.FindFirst(this.currentTaskTitle) ?? throw BadLogPage;
+		var taskLog = sections.FindFirst(this.taskLogTitle) ?? throw BadLogPage;
 		var sameTaskText = UpdateCurrentStatus(currentTask, this.status);
 		var firstEntry = taskLog.Content.IndexOf<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
 		if (firstEntry != -1)
