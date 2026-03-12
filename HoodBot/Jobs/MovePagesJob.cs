@@ -994,11 +994,7 @@ public abstract class MovePagesJob : EditJob
 		var link = SiteLink.FromGalleryText(this.Site, line);
 		if (this.linkUpdates.TryGetValue(link.Title, out var toTitle))
 		{
-			if (toTitle.Namespace != MediaWikiNamespaces.File)
-			{
-				this.Warn($"{link.Title.PageName} to non-File {toTitle.FullPageName()} move skipped in gallery on page: {page.Title.FullPageName()}.");
-			}
-			else
+			if (toTitle.Namespace == MediaWikiNamespaces.File)
 			{
 				var newNamespace = (link.Title.Namespace == MediaWikiNamespaces.File && link.Coerced)
 					? this.Site[MediaWikiNamespaces.Main]
@@ -1007,8 +1003,10 @@ public abstract class MovePagesJob : EditJob
 				var newLink = link.WithTitle(newTitle);
 				this.UpdateLinkText(page, link, newLink, false);
 
-				return newLink.LinkTarget(false);
+				return newLink.AsLink()[2..^2];
 			}
+
+			this.Warn($"{link.Title.PageName} to non-File {toTitle.FullPageName()} move skipped in gallery on page: {page.Title.FullPageName()}.");
 		}
 
 		return line;
