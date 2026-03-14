@@ -29,7 +29,8 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 			((categoryName IN ('Appearance', 'Customized Actions', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Patrons', 'Tools') AND referenceId != 0) OR
 			(categoryName = 'Allies' AND subCategoryName != 'Companions') OR
 			(categoryName = 'Furnishings' AND subCategoryName = 'Houseguests') OR
-			(categoryName = 'Upgrade'))
+			(categoryName = 'Upgrade')) OR
+			id = 12990 -- Corrupted Indrik, doesn't fit above criteria but is collectible and has a page on the wiki
 		""";
 
 	private const string TemplateName = "Online Collectible Summary";
@@ -57,6 +58,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 	#region Fields
 	private readonly Dictionary<long, Collectible> allCollectibles = [];
 	private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
+	private readonly TitleCollection knownUntracked;
 	private string? blankPage;
 	#endregion
 
@@ -68,6 +70,12 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Collectibles");
 		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 		this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
+
+		this.knownUntracked = new TitleCollection(this.Site)
+		{
+			"Online:Corrupted Indrik",
+			"Online:Prong-Eared Forge Mouser",
+		};
 	}
 	#endregion
 
@@ -97,12 +105,15 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 			}
 
 			var idText = variablesPage.GetVariable("id");
-			if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id) &&
-				this.allCollectibles.Remove(id, out var item))
+			if (!long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
+			{
+				Debug.WriteLine($"Invalid id on page {page.Title}");
+			}
+			else if (this.allCollectibles.Remove(id, out var item))
 			{
 				retval.Add(page.Title, item);
 			}
-			else
+			else if (!this.knownUntracked.Contains(page.Title))
 			{
 				untracked.Add(page.Title);
 			}
