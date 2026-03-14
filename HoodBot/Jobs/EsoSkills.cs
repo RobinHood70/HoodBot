@@ -54,6 +54,8 @@ internal sealed class EsoSkills : EditJob
 		[("49", 41567, 2)] = ("1 minute", "60 seconds"),
 		[("49", 93914, 3)] = ("1 minute", "60 seconds"),
 	};
+
+	private static readonly HashSet<int> ConsumingTrapIds = [40317, 43071, 43077, 43083];
 	#endregion
 
 	#region Fields
@@ -151,22 +153,6 @@ internal sealed class EsoSkills : EditJob
 			}
 
 			var coef = CoefficientFromRow(row, version);
-			if (!coef.IsValid())
-			{
-				if (coef.AbilityId == 55584 && coef.Index == 2)
-				{
-					coef = new Coefficient(0.02F, 55584, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, 2, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 2, 2, -1, -1, true, "240");
-				}
-				else if (coef.AbilityId == 55676 && coef.Index == 2)
-				{
-					coef = new Coefficient(0.04F, 55584, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, 2, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 4, 4, -1, -1, true, "480");
-				}
-				else
-				{
-					Debug.WriteLine($"IsValid() failed in CoefficientQuery: {abilityId}, coef {coef.Index}.");
-				}
-			}
-
 			list.Add(coef);
 		}
 
@@ -191,7 +177,7 @@ internal sealed class EsoSkills : EditJob
 			}
 		}
 
-		return new Coefficient(
+		var retval = new Coefficient(
 			a: (float)row["a"],
 			abilityId: abilityId,
 			b: (float)row["b"],
@@ -202,7 +188,7 @@ internal sealed class EsoSkills : EditJob
 			duration: (int)row["duration"],
 			hasRankMod: (bool)row["hasRankMod"],
 			index: index,
-			isADE: (bool)row["isAOE"],
+			isAOE: (bool)row["isAOE"],
 			isDamage: (bool)row["isDmg"],
 			isDamageShield: (bool)row["isDmgShield"],
 			isElfBane: (bool)row["isElfBane"],
@@ -218,6 +204,47 @@ internal sealed class EsoSkills : EditJob
 			tickTime: (int)row["tickTime"],
 			usesManualCoefficient: (bool)row["usesManualCoef"],
 			value: value);
+
+		// Consuming Trap fixes
+		if (retval.CoefficientType == CoefficientTypes.MediumArmor && ConsumingTrapIds.Contains(retval.AbilityId))
+		{
+			var a = retval.AbilityId switch
+			{
+				40317 => 0.17F,
+				43071 => 0.18F,
+				43077 => 0.19F,
+				43083 => 0.20F,
+				_ => retval.A,
+			};
+
+			value = retval.AbilityId switch
+			{
+				40317 => "2040",
+				43071 => "2160",
+				43077 => "2280",
+				43083 => "2400",
+				_ => retval.Value,
+			};
+
+			return new Coefficient(a, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, false, false, false, false, false, false, true, 1, RawTypes.Resource16, 17, 17, -1, -1, true, value);
+		}
+
+		if (!retval.IsValid())
+		{
+			if (retval.AbilityId == 55584 && retval.Index == 2)
+			{
+				return new Coefficient(0.02F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 2, 2, -1, -1, true, "240");
+			}
+
+			if (retval.AbilityId == 55676 && retval.Index == 2)
+			{
+				return new Coefficient(0.04F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 4, 4, -1, -1, true, "480");
+			}
+
+			Debug.WriteLine($"IsValid() failed in CoefficientQuery: {abilityId}, index {retval.Index}.");
+		}
+
+		return retval;
 	}
 
 	private static SortedList<string, string> GetIconChanges()
