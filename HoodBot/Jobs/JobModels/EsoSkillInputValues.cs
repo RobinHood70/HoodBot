@@ -13,7 +13,10 @@ public sealed class EsoSkillInputValues(int defaultArmor, int defaultDamage, int
 	#region Public Properties
 	public int AnimalCompanionSkills { get; } = 0;
 
-	public int? ArmorTypes { get; } = 0;
+	public int ArmorTypes =>
+		(this.HeavyArmorPieces.HasValue ? 1 : 0) +
+		(this.MediumArmorPieces.HasValue ? 1 : 0) +
+		(this.LightArmorPieces.HasValue ? 1 : 0);
 
 	public int AssassinSkills { get; } = 0;
 
@@ -43,11 +46,11 @@ public sealed class EsoSkillInputValues(int defaultArmor, int defaultDamage, int
 
 	public int Health { get; } = defaultHealth;
 
-	public int? HeavyArmor { get; } = defaultArmor;
+	public int? HeavyArmorPieces { get; } = null;
 
 	public int HeraldoftheTomeSkills { get; } = 0;
 
-	public int? LightArmor { get; } = defaultArmor;
+	public int? LightArmorPieces { get; } = null;
 
 	public int MagesGuildSkills { get; } = 0;
 
@@ -57,7 +60,7 @@ public sealed class EsoSkillInputValues(int defaultArmor, int defaultDamage, int
 
 	public int MaxStat => Math.Max(this.Magicka, this.Stamina);
 
-	public int? MediumArmor { get; } = defaultArmor;
+	public int? MediumArmorPieces { get; } = null;
 
 	public int PhysicalResist { get; } = defaultArmor;
 

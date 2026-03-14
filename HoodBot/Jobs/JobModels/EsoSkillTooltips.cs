@@ -7,6 +7,7 @@ using System.Globalization;
 /// <remarks>While not all functions are replicated, and those that are aren't necessarily completely identical (even allowing for language differences), any function that's essentially the same uses the same name as the original for easy comparison.</remarks>
 internal static partial class EsoSkillTooltips
 {
+	#region Public Methods
 	/* Static class for now, may be better as instantiable with parameters moved out of individual functions. */
 
 	public static string ComputeEsoSkillTooltipCoefDescription2(Coefficient coef, EsoSkillInputValues inputValues)
@@ -42,41 +43,35 @@ internal static partial class EsoSkillTooltips
 					coef.C;
 				break;
 			case CoefficientTypes.LightArmor:
-				if (inputValues.LightArmor is int lightArmor)
+				if (inputValues.LightArmorPieces is int lightArmor)
 				{
 					retval = coef.A * lightArmor + coef.C;
 				}
 				else
 				{
-					textReturn = coef.C == 0
-						? $"({coef.A:g5} * LightArmor)"
-						: $"({coef.A:g5} * LightArmor + {coef.C:g5})";
+					textReturn = FormatPieceCount("Light Armor", coef.A, coef.C);
 				}
 
 				break;
 			case CoefficientTypes.MediumArmor:
-				if (inputValues.MediumArmor is int mediumArmor)
+				if (inputValues.MediumArmorPieces is int mediumArmor)
 				{
 					retval = coef.A * mediumArmor + coef.C;
 				}
 				else
 				{
-					textReturn = coef.C == 0
-						? $"({coef.A:g5} * MediumArmor)"
-						: $"({coef.A:g5} * MediumArmor + {coef.C:g5})";
+					textReturn = FormatPieceCount("Medium Armor", coef.A, coef.C);
 				}
 
 				break;
 			case CoefficientTypes.HeavyArmor: // Heavy Armor
-				if (inputValues.HeavyArmor is int heavyArmor)
+				if (inputValues.HeavyArmorPieces is int heavyArmor)
 				{
 					retval = coef.A * heavyArmor + coef.C;
 				}
 				else
 				{
-					textReturn = coef.C == 0
-						? $"({coef.A:g5} * HeavyArmor)"
-						: $"({coef.A:g5} * HeavyArmor + {coef.C:g5})";
+					textReturn = FormatPieceCount("Heavy Armor", coef.A, coef.C);
 				}
 
 				break;
@@ -184,13 +179,13 @@ internal static partial class EsoSkillTooltips
 				retval = Math.Floor(coef.A * Math.Max(inputValues.SpellResist, inputValues.PhysicalResist)) + coef.C;
 				break;
 			case CoefficientTypes.MagickaLightArmor:
-				if (inputValues.LightArmor is null)
+				if (inputValues.LightArmorPieces is null)
 				{
 					retval = Math.Min(Math.Floor(coef.A * inputValues.Magicka), coef.C * inputValues.Health);
 				}
 				else
 				{
-					retval = Math.Min(Math.Floor(coef.A * inputValues.Magicka) * (1.0 + coef.B * inputValues.LightArmor.Value), coef.C * inputValues.Health);  // TODO: Check rounding order
+					retval = Math.Min(Math.Floor(coef.A * inputValues.Magicka) * (1.0 + coef.B * inputValues.LightArmorPieces.Value), coef.C * inputValues.Health);  // TODO: Check rounding order
 				}
 
 				break;
@@ -266,6 +261,32 @@ internal static partial class EsoSkillTooltips
 
 		return $"{retval:g5}";
 	}
+	#endregion
+
+	#region Private Methods
+	private static string FormatPieceCount(string armor, float a, float c)
+	{
+		if (a == 0.0)
+		{
+			return $"{c:g5}";
+		}
+
+		var retval = "(";
+		if (a != 1.0)
+		{
+			retval += $"{a:g5} * ";
+		}
+
+		retval += $"''# {armor}''";
+
+		if (c != 0)
+		{
+			retval += $" + {c:g5}";
+		}
+
+		return retval + ")";
+	}
+	#endregion
 
 	/*
 		// Intended for Skill Browser's raw output, which we don't use.
