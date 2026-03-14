@@ -98,8 +98,9 @@ internal sealed class UespReplacer
 				throw new InvalidOperationException("Tables are missing on the replacements page!");
 			}
 
-			GetMatches(replaceFirst.Value, ReplaceFirstList);
+			// Replace All is done first so that Replace First can take effect on any plain text leftover. Note that this could conceivably be problematic either way, but if there are cases where we don't want plain text replaced after a Replace All, we can probably just embed a <noinclude/> in the replace to avoid the Replace First list from finding it.
 			GetMatches(replaceAll.Value, ReplaceAllList);
+			GetMatches(replaceFirst.Value, ReplaceFirstList);
 			initialized = true;
 		}
 	}
