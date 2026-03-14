@@ -72,7 +72,7 @@ public static class EsoFiles
 
 	public static string? DownloadEsoFile(this WikiJob job, EsoFileTypes fileType)
 	{
-		var version = EsoLog.LatestDBUpdate(string.Empty, false);
+		var version = EsoLog.LatestDBUpdate(string.Empty);
 		return DownloadEsoFile(job, fileType, version);
 	}
 

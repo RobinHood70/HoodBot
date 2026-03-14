@@ -38,15 +38,21 @@ internal sealed class EsoSkills : EditJob
 	#endregion
 
 	#region Static Fields
-	private static readonly Dictionary<(int, sbyte), (string From, string To)> ValueReplacements = new()
+	private static readonly Dictionary<(string, int, sbyte), (string From, string To)> ValueReplacements = new()
 	{
-		[(23234, 1)] = ("1 second", "1 seconds"),
-		[(24574, 1)] = ("1 minute", "1 minutes"),
-		[(32166, 2)] = ("1 minute", "60 seconds"),
-		[(33195, 3)] = ("1 second", "1 seconds"),
-		[(37631, 2)] = ("1 minute", "60 seconds"),
-		[(41567, 2)] = ("1 minute", "60 seconds"),
-		[(93914, 3)] = ("1 minute", "60 seconds"),
+		[("48", 23234, 1)] = ("1 second", "1 seconds"),
+		[("48", 24574, 1)] = ("1 minute", "1 minutes"),
+		[("48", 32166, 2)] = ("1 minute", "60 seconds"),
+		[("48", 33195, 3)] = ("1 second", "1 seconds"),
+		[("48", 37631, 2)] = ("1 minute", "60 seconds"),
+		[("48", 41567, 2)] = ("1 minute", "60 seconds"),
+		[("48", 93914, 3)] = ("1 minute", "60 seconds"),
+		[("49", 23234, 1)] = ("1 second", "1 seconds"),
+		[("49", 24574, 1)] = ("1 minute", "1 minutes"),
+		[("49", 32166, 3)] = ("1 minute", "60 seconds"),
+		[("49", 33195, 3)] = ("1 second", "1 seconds"),
+		[("49", 41567, 2)] = ("1 minute", "60 seconds"),
+		[("49", 93914, 3)] = ("1 minute", "60 seconds"),
 	};
 	#endregion
 
@@ -80,8 +86,8 @@ internal sealed class EsoSkills : EditJob
 	{
 		this.StatusWriteLine("Fetching data");
 		UespReplacer.Initialize(this);
-		this.version = EsoLog.LatestDBUpdate("skillTree", false);
-		this.skills = GetSkillList(EsoVersion.Empty);
+		this.version = EsoLog.LatestDBUpdate("skillTree");
+		this.skills = GetSkillList(this.version);
 	}
 
 	protected override string GetEditSummary(Page page) => (page.IsNew ? "Create" : "Update") + " skill";
@@ -129,7 +135,10 @@ internal sealed class EsoSkills : EditJob
 	private static Dictionary<long, List<Coefficient>> GetCoefficients(EsoVersion version)
 	{
 		var retval = new Dictionary<long, List<Coefficient>>();
-		var versionText = version.ToString();
+
+		// skillTooltips is weird in that the table with the latest version number exists, at least as of 49, but is unused in favour of the unversioned table name. Thus, we don't increment the version when checking the LatestDBUpdate, but we still blank the versionText if working with the current version.
+		var currentVersion = EsoLog.LatestDBUpdate("skillTooltips", false, false);
+		var versionText = version == currentVersion ? string.Empty : version.ToString();
 		var query = CoefficientQuery
 			.Replace("$tt", TooltipsTable + versionText, StringComparison.Ordinal);
 		foreach (var row in Database.RunQuery(EsoLog.Connection, query))
@@ -141,23 +150,35 @@ internal sealed class EsoSkills : EditJob
 				retval.Add(abilityId, list);
 			}
 
-			var coef = CoefficientFromRow(row);
-			list.Add(coef);
+			var coef = CoefficientFromRow(row, version);
 			if (!coef.IsValid())
 			{
-				Debug.WriteLine($"Error in abilityId {abilityId}, coef {coef.Index}");
+				if (coef.AbilityId == 55584 && coef.Index == 2)
+				{
+					coef = new Coefficient(0.02F, 55584, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, 2, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 2, 2, -1, -1, true, "240");
+				}
+				else if (coef.AbilityId == 55676 && coef.Index == 2)
+				{
+					coef = new Coefficient(0.04F, 55584, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, 2, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 4, 4, -1, -1, true, "480");
+				}
+				else
+				{
+					Debug.WriteLine($"IsValid() failed in CoefficientQuery: {abilityId}, coef {coef.Index}.");
+				}
 			}
+
+			list.Add(coef);
 		}
 
 		return retval;
 	}
 
-	private static Coefficient CoefficientFromRow(IDataRecord row)
+	private static Coefficient CoefficientFromRow(IDataRecord row, EsoVersion version)
 	{
 		var abilityId = (int)row["abilityId"];
 		var index = (sbyte)row["idx"];
 		var value = EsoLog.ConvertEncoding((string)row["value"]);
-		var key = (abilityId, index);
+		var key = (version.ToString(), abilityId, index);
 		if (ValueReplacements.TryGetValue(key, out var replacement))
 		{
 			if (replacement.From.OrdinalEquals(value))
@@ -166,7 +187,7 @@ internal sealed class EsoSkills : EditJob
 			}
 			else
 			{
-				Debug.WriteLine($"Replacement {key} is out of date.");
+				Debug.WriteLine($"CoefficientQuery replacement {key} is out of date. Wanted '{replacement.From}' but found '{value}'.");
 			}
 		}
 
@@ -215,8 +236,10 @@ internal sealed class EsoSkills : EditJob
 
 	private static Dictionary<string, Skill> GetSkillList(EsoVersion version)
 	{
+		Debug.WriteLine($"Getting skill list for version {version}.");
 		var coefficients = GetCoefficients(version);
-		var versionText = version.ToString();
+		var currentVersion = EsoLog.LatestDBUpdate("skillTree");
+		var versionText = version == currentVersion ? string.Empty : version.ToString();
 		var query = SkillQuery
 			.Replace("$st", SkillTable + versionText, StringComparison.Ordinal)
 			.Replace("$ms", MinedTable + versionText, StringComparison.Ordinal);

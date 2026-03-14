@@ -77,12 +77,14 @@ internal static class EsoLog
 		[CoefficientTypes.HealthOrMagickaCapped] = "Health or Magicka"
 	};
 
-	public static EsoVersion LatestDBUpdate(string prefix, bool includePts)
+	public static EsoVersion LatestDBUpdate(string prefix) => LatestDBUpdate(prefix, false, true);
+
+	public static EsoVersion LatestDBUpdate(string prefix, bool includePts, bool blankIsLatest)
 	{
 		if (!LatestVersions.TryGetValue(prefix, out var prefixedLatest))
 		{
 			prefixedLatest = [EsoVersion.Empty, EsoVersion.Empty];
-			var noVersion = false;
+			var versionIsBlank = false;
 			foreach (var table in EsoDb.ShowTables(prefix))
 			{
 				var match = UpdateFinder.Match(table);
@@ -90,7 +92,7 @@ internal static class EsoLog
 				{
 					if (match.Value.Length == 0)
 					{
-						noVersion = true;
+						versionIsBlank = true;
 						continue;
 					}
 
@@ -105,7 +107,7 @@ internal static class EsoLog
 				}
 			}
 
-			if (noVersion && prefixedLatest[0].Version > 0)
+			if (versionIsBlank && blankIsLatest && prefixedLatest[0].Version > 0)
 			{
 				var latestVersion = new EsoVersion(prefixedLatest[0].Version + 1, false);
 				prefixedLatest[0] = latestVersion;
