@@ -91,7 +91,7 @@ public enum RawTypes : sbyte
 	Unknown123 = 123,
 }
 
-internal sealed class Coefficient(float a, int abilityId, float b, float c, CoefficientTypes coefficientType, int cooldown, int damageType, int duration, bool hasRankMod, sbyte index, bool isADE, bool isDamage, bool isDamageShield, bool isElfBane, bool isFlameAOE, bool isHeal, bool isMelee, bool isPlayer, float r, RawTypes rawType, int rawValue1, int rawValue2, int startTime, int tickTime, bool usesManualCoefficient, string value)
+internal sealed class Coefficient(float a, int abilityId, float b, float c, CoefficientTypes coefficientType, int cooldown, int damageType, int duration, bool hasRankMod, sbyte index, bool isAOE, bool isDamage, bool isDamageShield, bool isElfBane, bool isFlameAOE, bool isHeal, bool isMelee, bool isPlayer, float r, RawTypes rawType, int rawValue1, int rawValue2, int startTime, int tickTime, bool usesManualCoefficient, string value)
 {
 	#region Static Fields
 	private static readonly Dictionary<int, string> DamageTypes = new()
@@ -147,7 +147,7 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 
 	public sbyte Index { get; } = index;
 
-	public bool IsADE { get; } = isADE;
+	public bool IsAOE { get; } = isAOE;
 
 	public bool IsDamage { get; } = isDamage;
 
