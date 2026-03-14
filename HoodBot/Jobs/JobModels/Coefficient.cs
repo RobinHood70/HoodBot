@@ -187,4 +187,8 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 	#region Public Methods
 	public bool IsValid() => this.A != -1.0 || this.B != -1.0 || this.C != -1.0;
 	#endregion
+
+	#region Public Override Methods
+	public override string ToString() => $"({this.AbilityId}, {this.Index}) {this.Value} {this.DamageSuffix}";
+	#endregion
 }
