@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
@@ -58,7 +59,7 @@ public enum RawTypes : sbyte
 	None = 0,
 	Name = 3,
 	AbilityName = 8,
-	Resource16 = 16,
+	Integer16 = 16,
 	Damage17 = 17,
 	Damage18 = 18,
 	EveryTickTime = 19, // Substitute with index+2
@@ -130,13 +131,6 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 
 	public int Cooldown { get; } = cooldown;
 
-	public string? DamageSuffix =>
-		this.IsDamage &&
-		DamageTypes[this.DamageType] is var damageType &&
-		damageType.Length > 0
-			? ' ' + damageType + " Damage"
-			: string.Empty;
-
 	public int DamageType { get; } = damageType;
 
 	public int Duration { get; } = duration;
@@ -177,6 +171,17 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 
 	public int StartTime { get; } = startTime;
 
+	public string Suffix => this.RawType switch
+	{
+		RawTypes.Integer16 or RawTypes.DamageShort52 or RawTypes.HealOverTime or RawTypes.Derived => string.Empty,
+		RawTypes.Damage17 or RawTypes.Damage18 or RawTypes.DamageOverTime => DamageTypes[this.DamageType] is var damageType && damageType.Length > 0
+			? ' ' + damageType + " Damage"
+			: string.Empty,
+		RawTypes.OverTimeDuration => " seconds",
+		RawTypes.StatPercent => "%",
+		_ => throw new NotSupportedException(),
+	};
+
 	public int TickTime { get; } = tickTime;
 
 	public bool UsesManualCoefficient { get; } = usesManualCoefficient;
@@ -189,6 +194,6 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 	#endregion
 
 	#region Public Override Methods
-	public override string ToString() => $"({this.AbilityId}, {this.Index}) {this.Value} {this.DamageSuffix}";
+	public override string ToString() => $"({this.AbilityId}, {this.Index}) {this.Value}";
 	#endregion
 }

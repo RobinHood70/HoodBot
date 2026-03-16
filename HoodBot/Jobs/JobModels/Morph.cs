@@ -303,6 +303,7 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 					EsoSkillInputValues.WikiDefault);
 				if (coef.CoefficientType == CoefficientTypes.ConstantValue)
 				{
+					// TODO: This if statement might be excessively convoluted. See if it can be simplified.
 					var split = EsoLog.FloatFinder.Split(text, 2);
 					if (split.Length == 3)
 					{
@@ -314,22 +315,17 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 						}
 						else if (!finalType.OrdinalEquals(split[2]))
 						{
-							Debug.WriteLine($"{coef.AbilityId}, {coef.Index}");
-							throw new InvalidOperationException("Multiple suffixes");
+							throw new InvalidOperationException($"Multiple suffixes in {coef.AbilityId}, index {coef.Index}: {finalType}, {split[2]}");
 						}
 					}
 				}
-				else if (coef.IsDamage)
+				else if (finalType is null)
 				{
-					var damageSuffix = coef.DamageSuffix;
-					if (finalType is null)
-					{
-						finalType = damageSuffix;
-					}
-					else if (!finalType.OrdinalEquals(damageSuffix))
-					{
-						throw new InvalidOperationException("Multiple damage types");
-					}
+					finalType = coef.Suffix;
+				}
+				else if (!finalType.OrdinalEquals(coef.Suffix))
+				{
+					throw new InvalidOperationException("Multiple damage types");
 				}
 			}
 

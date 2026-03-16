@@ -226,19 +226,20 @@ internal sealed class EsoSkills : EditJob
 				_ => retval.Value,
 			};
 
-			return new Coefficient(a, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, false, false, false, false, false, false, true, 1, RawTypes.Resource16, 17, 17, -1, -1, true, value);
+			return new Coefficient(a, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, false, false, false, false, false, false, true, 1, RawTypes.Integer16, 17, 17, -1, -1, true, value);
 		}
 
 		if (!retval.IsValid())
 		{
+			// Undaunted Command backup fixes
 			if (retval.AbilityId == 55584 && retval.Index == 2)
 			{
-				return new Coefficient(0.02F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 2, 2, -1, -1, true, "240");
+				return new Coefficient(0.02F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Integer16, 2, 2, -1, -1, true, "240");
 			}
 
 			if (retval.AbilityId == 55676 && retval.Index == 2)
 			{
-				return new Coefficient(0.04F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Resource16, 4, 4, -1, -1, true, "480");
+				return new Coefficient(0.04F, retval.AbilityId, 0, 0, CoefficientTypes.Stamina, -1, 1, -1, false, retval.Index, false, true, false, false, false, false, false, true, 1, RawTypes.Integer16, 4, 4, -1, -1, true, "480");
 			}
 
 			Debug.WriteLine($"IsValid() failed in CoefficientQuery: {abilityId}, index {retval.Index}.");

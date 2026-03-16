@@ -57,7 +57,7 @@ internal sealed class PassiveRank(IReadOnlyList<Coefficient> coefficients, strin
 					EsoSkillInputValues.WikiDefault);
 				text = coef.CoefficientType == CoefficientTypes.ConstantValue
 					? EsoLog.FloatFinder.Replace(text, "'''$&'''")
-					: $"'''{text}'''{coef.DamageSuffix}";
+					: $"'''{text}'''{coef.Suffix}";
 			}
 
 			retval.Add(text);
