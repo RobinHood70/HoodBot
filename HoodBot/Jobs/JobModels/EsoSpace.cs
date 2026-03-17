@@ -149,11 +149,11 @@ internal static class EsoSpace
 		return retval;
 	}
 
-	public static string GuessMod(string? zone, string? defaultMod) => zone switch
+	public static string? GuessMod(string? zone, string? defaultMod) => zone switch
 	{
 		"Southern Elsweyr" => "Dragonhold",
 		"West Weald" => "Gold Road",
-		_ => defaultMod ?? CurrentMod,
+		_ => defaultMod,
 	};
 
 	public static bool ShouldUpload(string localFileName, FilePage filePage)
