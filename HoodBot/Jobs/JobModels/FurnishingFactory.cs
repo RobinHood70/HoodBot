@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
@@ -63,7 +62,7 @@ internal static class FurnishingFactory
 			? correctedName
 			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
 		var desc = EsoLog.ConvertEncoding((string)row["description"]);
-		var size = SizeFromDesc(ref desc);
+		var size = SizeFromDesc(desc);
 
 		return new Furnishing(
 			id: id,
@@ -85,7 +84,7 @@ internal static class FurnishingFactory
 
 	public static Furnishing FromRow(IDataRecord row)
 	{
-		var furnSplit = EsoLog.ConvertEncoding((string)row["furnCategory"]).Split(TextArrays.Colon, 2);
+		var furnSplit = ((string)row["furnCategory"]).Split(TextArrays.Colon, 2);
 		var furnishingCategory = furnSplit[0];
 		if (furnSplit.Length != 2)
 		{
@@ -102,22 +101,23 @@ internal static class FurnishingFactory
 		}
 
 		var id = (int)row["itemId"];
-		var desc = EsoLog.ConvertEncoding((string)row["description"])
+		var desc = (string)row["description"];
+		desc = desc
 			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
 			.Replace("|r", string.Empty, StringComparison.Ordinal);
-		var size = SizeFromDesc(ref desc);
+		var size = SizeFromDesc(desc);
 		var name = NameExceptions.TryGetValue(id, out var correctedName)
 			? correctedName
-			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
+			: RegexLibrary.PruneExcessSpaces((string)row["name"]).Trim();
 
 		// Strictly for recipes.
-		var abilityDesc = EsoLog.ConvertEncoding((string)row["abilityDesc"]);
+		var abilityDesc = (string)row["abilityDesc"];
 		var materials = GetMaterials(abilityDesc);
 		var skills = GetSkills(abilityDesc);
 
 		return new Furnishing(
 			id: id,
-			behavior: EsoLog.ConvertEncoding((string)row["tags"]),
+			behavior: (string)row["tags"],
 			bindType: GetBindTypeName((int)row["bindType"]),
 			description: desc,
 			furnishingLimitType: furnishingLimitType,
@@ -127,8 +127,8 @@ internal static class FurnishingFactory
 			name: name,
 			nickName: null,
 			pageName: PageNameExceptions.GetValueOrDefault(id, TitleFactory.SanitizePageName(name, true)),
-			quality: GetQualityName(EsoLog.ConvertEncoding((string)row["quality"])),
-			resultItemLink: EsoLog.ExtractItemId(EsoLog.ConvertEncoding((string)row["resultitemLink"])),
+			quality: GetQualityName((string)row["quality"]),
+			resultItemLink: EsoLog.ExtractItemId((string)row["resultitemLink"]),
 			size: size,
 			skills: skills);
 	}
@@ -158,21 +158,10 @@ internal static class FurnishingFactory
 	};
 
 	// Note: nullifies desc if it's only the standard size phrasing.
-	private static string? SizeFromDesc([DisallowNull] ref string? desc)
+	private static string? SizeFromDesc(string desc)
 	{
 		var sizeMatch = SizeFinder.Match(desc);
-		if (!sizeMatch.Success)
-		{
-			return null;
-		}
-
-		var size = sizeMatch.Groups["size"].Value.UpperFirst(CultureInfo.CurrentCulture);
-		if (sizeMatch.Index == 0 && sizeMatch.Length == desc.Length)
-		{
-			desc = null;
-		}
-
-		return size;
+		return sizeMatch.Success ? sizeMatch.Groups["size"].Value.UpperFirst(CultureInfo.CurrentCulture) : null;
 	}
 
 	private static List<string> GetMaterials(string? abilityDesc)

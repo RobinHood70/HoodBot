@@ -138,9 +138,10 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 				var furnId = Furnishing.GetKey(id, collectible);
 				if (this.furnishings.TryGetValue(furnId, out var item))
 				{
-					if (!knownIds.TryAdd(Furnishing.GetKey(id, collectible), varPage.Title))
+					var realKey = Furnishing.GetKey(id, collectible);
+					if (!knownIds.TryAdd(realKey, varPage.Title))
 					{
-						this.Warn($"Same id found on multiple pages: {id} on {varPage.Title} and {knownIds[id]}");
+						this.Warn($"Same id found on multiple pages: {id} on {varPage.Title} and {knownIds[realKey]}");
 					}
 
 					item.PageName = varPage.Title.PageName; // Make sure the item knows what page it belongs to.
@@ -311,6 +312,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		// Otherwise, make sure the name is correct.
 		if (!item.Name.OrdinalEquals(labelName))
 		{
+			Debug.WriteLine($"Warning: Name mismatch on {page.Title}: {item.Name} vs {labelName}. Could be an incorrect ID.");
 			template.Update("name", item.Name, ParameterFormat.OnePerLine, true);
 			return item.Name;
 		}
@@ -580,7 +582,21 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 
 		var desc = item.Description?.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
-		template.Update("desc", desc, ParameterFormat.OnePerLine, false);
+		var doUpdate = true;
+		if (desc.OrdinalEquals($"This is a {item.Size?.ToLower(this.Site.Culture)} house item."))
+		{
+			var descParam = template.Find("desc");
+			if (descParam is null || (descParam.ToValue().Trim() is var descValue && (descValue.Length == 0 || descValue.OrdinalEquals(desc))))
+			{
+				doUpdate = false;
+			}
+		}
+
+		if (doUpdate)
+		{
+			template.Update("desc", desc, ParameterFormat.OnePerLine, false);
+		}
+
 		if (item.FurnishingCategory.Length != 0)
 		{
 			template.Update("cat", item.FurnishingCategory, ParameterFormat.OnePerLine, false);
