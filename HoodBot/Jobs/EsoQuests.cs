@@ -325,31 +325,25 @@ public class EsoQuests : EditJob
 	#endregion
 
 	#region Private Static Methods
-	private static void AppendRewardInfo(StringBuilder sb, Reward reward)
+	private static string GetRewardInfo(Reward reward)
 	{
-		sb.Append("<br>");
 		if (reward.RewardType == 1)
 		{
-			sb
-				.Append("{{ESO Gold|<!--")
-				.Append(reward.Quantity)
-				.Append("-->}} Gold");
-			return;
+			return $"{{{{ESO Gold|<!--{reward.Quantity}-->}}}} Gold";
 		}
 
+		var rewardInfo = string.Empty;
 		if (reward.Quantity > 1)
 		{
-			sb
-				.Append(reward.Quantity)
-				.Append(' ');
+			rewardInfo += $"{reward.Quantity} ";
 		}
 
 		if (reward.ItemId == 0 && reward.CollectId == 0)
 		{
-			sb.Append(reward.Name);
-			return;
+			return rewardInfo + reward.Name;
 		}
 
+		var sb = new StringBuilder();
 		sb
 			.Append("{{Item Link|")
 			.Append(reward.Name);
@@ -375,6 +369,7 @@ public class EsoQuests : EditJob
 		}
 
 		sb.Append("|summary=1}}");
+		return sb.ToString();
 	}
 
 	private static Condition ConditionFromRow(IDataRecord row) => new(
@@ -761,13 +756,13 @@ public class EsoQuests : EditJob
 
 		public string GetRewardText()
 		{
-			var sb = new StringBuilder(1000);
+			var rewardInfos = new List<string>();
 			foreach (var reward in this.rewards)
 			{
-				AppendRewardInfo(sb, reward);
+				rewardInfos.Add(GetRewardInfo(reward));
 			}
 
-			return sb.ToString()[4..];
+			return string.Join("<br>", rewardInfos);
 		}
 		#endregion
 
