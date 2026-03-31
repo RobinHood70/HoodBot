@@ -101,7 +101,7 @@ internal static class FurnishingFactory
 		}
 
 		var id = (int)row["itemId"];
-		var desc = (string)row["description"];
+		var desc = EsoLog.ConvertEncoding((string)row["description"]);
 		desc = desc
 			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
 			.Replace("|r", string.Empty, StringComparison.Ordinal);
