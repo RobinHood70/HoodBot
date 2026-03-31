@@ -42,7 +42,8 @@ public class UespNamespaceList : IReadOnlyDictionary<string, UespNamespace>
 			{
 				foreach (var alias in site[ns.Base].AllNames)
 				{
-					this.byBase.TryAdd(alias, uespNs);
+					// Changed from byBase to byId. I think this is what was intended, not sure why it was byBase before.
+					this.byId.TryAdd(alias, uespNs);
 				}
 			}
 
