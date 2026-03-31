@@ -210,8 +210,6 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Protected Override Methods
-	protected override void AfterLoadPages() => this.GenerateReport();
-
 	protected override string GetEditSummary(Page page) => "Add/update templates";
 
 	protected override void LoadPages()
@@ -236,9 +234,12 @@ internal sealed class UespProtectPages : EditJob
 		this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
 		this.Pages.Sort(); // Should already be sorted at this point, but just in case
 		this.ResetProgress(this.Pages.Count);
+
+		this.StartLog();
 		foreach (var page in this.Pages)
 		{
 			var protection = this.pageProtections[page.Title];
+			this.AddLogEntry(page, protection);
 			page.Title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 			if (page.TextModified)
 			{
@@ -247,6 +248,8 @@ internal sealed class UespProtectPages : EditJob
 
 			this.Progress++;
 		}
+
+		this.EndLog();
 	}
 
 	protected override void PageLoaded(Page page)
@@ -505,44 +508,22 @@ internal sealed class UespProtectPages : EditJob
 	#endregion
 
 	#region Private Methods
-	private void GenerateReport()
+
+	private void AddLogEntry(Page page, PageProtection protection)
 	{
-		if (this.Pages.Count == 0)
-		{
-			return;
-		}
-
-		this.WriteLine("== Page Protection Mismatches ==");
-		this.WriteLine("{| class=\"wikitable sortable\"");
-		this.WriteLine("! Group");
-		this.WriteLine("! Page");
-		this.WriteLine("! Original Protection");
-		this.WriteLine("! New Protection");
-		this.WriteLine("! Reason");
-
-		this.Pages.Sort();
-		foreach (var page in this.Pages)
-		{
-			var protection = this.pageProtections[page.Title];
-			if (page.Exists &&
-				(!protection.FriendlyName.OrdinalEquals("Deletion Review") ||
-				page.StartTimestamp?.AddDays(30) < DateTime.Now))
-			{
-				this.WriteLine("|-");
-				this.WriteLine("| " + protection.FriendlyName);
-				this.WriteLine("| " + SiteLink.ToText(page));
-				this.WriteLine("| " + CombinedProtectionString(
-					this.ProtectionFromPage(page, "edit"),
-					this.ProtectionFromPage(page, "move")));
-				this.WriteLine("| " + CombinedProtectionString(
-					protection.EditProtection,
-					protection.MoveProtection));
-				this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
-			}
-		}
-
-		this.WriteLine("|}");
+		this.WriteLine("|-");
+		this.WriteLine("| " + protection.FriendlyName);
+		this.WriteLine("| " + SiteLink.ToText(page));
+		this.WriteLine("| " + CombinedProtectionString(
+			this.ProtectionFromPage(page, "edit"),
+			this.ProtectionFromPage(page, "move")));
+		this.WriteLine("| " + CombinedProtectionString(
+			protection.EditProtection,
+			protection.MoveProtection));
+		this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
 	}
+
+	private void EndLog() => this.WriteLine("|}");
 
 	private void LoadCurrentLevels(TitleDictionary<PageProtection> titlesToProtect)
 	{
@@ -635,6 +616,17 @@ internal sealed class UespProtectPages : EditJob
 				this.StatusWriteLine("Unknown protection level: " + protection.Level);
 				return ProtectionLevel.Unknown;
 		}
+	}
+
+	private void StartLog()
+	{
+		this.WriteLine("== Page Protection Mismatches ==");
+		this.WriteLine("{| class=\"wikitable sortable\"");
+		this.WriteLine("! Group");
+		this.WriteLine("! Page");
+		this.WriteLine("! Original Protection");
+		this.WriteLine("! New Protection");
+		this.WriteLine("! Reason");
 	}
 	#endregion
 
