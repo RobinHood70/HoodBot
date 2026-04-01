@@ -23,7 +23,12 @@ public enum FollowUpActions
 	CheckLinksRemaining = 1,
 	EmitReport = 1 << 1,
 	FixLinks = 1 << 2,
+
+	/// <summary>For [[Direct links]], retain the original link text as a caption when updating links, if the original link had no caption.</summary>
+	/// <remarks>Does not apply to redirects.</remarks>
 	RetainDirectLinkText = 1 << 3,
+
+	/// <summary>If a link caption looks like the to PageName or FullPageName, update it to the to link.</summary>
 	UpdateSameNamedText = 1 << 4,
 	ProposeUnused = 1 << 5,
 	UpdateCategoryMembers = 1 << 6,
@@ -278,7 +283,6 @@ public abstract class MovePagesJob : EditJob
 		{
 			this.MovePages();
 		}
-
 		base.Main();
 		if (this.FollowUpActions.HasAnyFlag(FollowUpActions.CheckLinksRemaining))
 		{
