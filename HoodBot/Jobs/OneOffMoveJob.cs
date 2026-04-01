@@ -1,8 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using RobinHood70.HoodBot.Jobs.JobModels;
+using System;
 using RobinHood70.Robby;
-using RobinHood70.Robby.Parser;
 
 public class OneOffMoveJob : MovePagesJob
 {
@@ -11,29 +10,33 @@ public class OneOffMoveJob : MovePagesJob
 	public OneOffMoveJob(JobManager jobManager, bool updateUserSpace)
 		: base(jobManager, updateUserSpace)
 	{
-		this.MoveAction = MoveAction.MoveSafely;
-		this.FollowUpActions = FollowUpActions.CheckLinksRemaining | FollowUpActions.EmitReport | FollowUpActions.FixLinks;
+		this.MoveAction = MoveAction.MoveOverExisting;
+		this.FollowUpActions = FollowUpActions.Default; // FollowUpActions.CheckLinksRemaining | FollowUpActions.EmitReport | FollowUpActions.FixLinks;
+		this.SuppressRedirects = false;
 	}
 	#endregion
 
+	#region Protected Override Properties
+	public override string LogDetails => "Fix incorrect Battleground'''s''' merchants";
+	#endregion
+
 	#region Protected Override Methods
-	protected override void CustomEdit(SiteParser parser, Title from) => parser.AddCategory("Daggerfall-NPC Face Flats", true);
-
-	protected override string GetEditSummary(Page page) => "Fix name";
-
 	protected override void PopulateMoves()
 	{
-		for (var i = 163; i <= 212; i++)
-		{
-			this.AddReplacement($"File:DF-Face-Flat-{i}.png", $"File:DF-Face-Flat {i}.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		}
+		this.AddMove($"Online:Battlegrounds Merchants", $"Online:Battleground Merchants");
+		this.AddMove($"Online:Battlegrounds Supplies Merchants", $"Online:Battleground Supplies Merchants");
+	}
 
-		this.AddReplacement($"File:DF-Face-Flat-360.png", $"File:DF-Face-Flat 360.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		this.AddReplacement($"File:DF-Face-Flat-396-0.png", $"File:DF-Face-Flat 396-0.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		this.AddReplacement($"File:DF-Face-Flat-415.png", $"File:DF-Face-Flat 415.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		this.AddReplacement($"File:DF-Face-Flat-444.png", $"File:DF-Face-Flat 444.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		this.AddReplacement($"File:DF-Face-Flat-445.png", $"File:DF-Face-Flat 445.png", ReplacementActions.Move | ReplacementActions.Edit, null);
-		this.AddReplacement($"File:DF-Face-Flat-492.png", $"File:DF-Face-Flat 492.png", ReplacementActions.Move | ReplacementActions.Edit, null);
+	protected override void UpdateLinkText(ITitle page, SiteLink from, SiteLink toLink, bool addCaption)
+	{
+		base.UpdateLinkText(page, from, toLink, addCaption);
+		toLink.Text = toLink.Text?
+			.Replace("Battlegrounds Supplies", "Battleground Supplies", StringComparison.Ordinal)
+			.Replace("Battlegrounds supplies", "Battleground supplies", StringComparison.Ordinal)
+			.Replace("battlegrounds supplies", "battleground supplies", StringComparison.Ordinal)
+			.Replace("Battlegrounds Merch", "Battleground Merch", StringComparison.Ordinal)
+			.Replace("Battlegrounds merch", "Battleground merch", StringComparison.Ordinal)
+			.Replace("battlegrounds merch", "battleground merch", StringComparison.Ordinal);
 	}
 	#endregion
 }
