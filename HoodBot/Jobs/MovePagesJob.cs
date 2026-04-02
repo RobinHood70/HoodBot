@@ -61,8 +61,8 @@ public abstract class MovePagesJob : EditJob
 {
 	#region Fields
 	private readonly SortedDictionary<Title, DetailedActions> actions = new(TitleComparer.Instance);
-	private readonly Dictionary<Title, Title> linkUpdates = [];
-	private readonly Dictionary<Title, Title> moves = [];
+	private readonly TitleDictionary<Title> linkUpdates = [];
+	private readonly TitleDictionary<Title> moves = [];
 	private bool isRedirectLink;
 	private string? logDetails;
 	#endregion
@@ -149,7 +149,7 @@ public abstract class MovePagesJob : EditJob
 
 	protected FollowUpActions FollowUpActions { get; set; } = FollowUpActions.Default;
 
-	protected IReadOnlyDictionary<Title, Title> LinkUpdates => this.linkUpdates;
+	protected TitleDictionary<Title> LinkUpdates => this.linkUpdates;
 
 	protected MoveAction MoveAction { get; set; } = MoveAction.MoveSafely;
 
@@ -283,6 +283,7 @@ public abstract class MovePagesJob : EditJob
 		{
 			this.MovePages();
 		}
+
 		base.Main();
 		if (this.FollowUpActions.HasAnyFlag(FollowUpActions.CheckLinksRemaining))
 		{

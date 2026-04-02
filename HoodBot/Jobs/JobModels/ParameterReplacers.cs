@@ -17,13 +17,13 @@ public sealed class ParameterReplacers
 	#region Fields
 	private readonly Site site;
 	private readonly List<ParameterReplacer> generalReplacers = [];
-	private readonly IReadOnlyDictionary<Title, Title> globalUpdates;
+	private readonly TitleDictionary<Title> globalUpdates;
 	private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = [];
 	#endregion
 
 	// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 	#region Constructors
-	internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, Title> linkUpdates)
+	internal ParameterReplacers(Site site, TitleDictionary<Title> linkUpdates)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(linkUpdates);
@@ -89,20 +89,35 @@ public sealed class ParameterReplacers
 		}
 	}
 
+	public string? GetPageNameReplaceValue(Namespace ns, string? paramValue)
+	{
+		/* var title2 = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
+		var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
+		var ns2 = rep2 ? replacement2.To.Namespace : null; */
+		if (paramValue is not null)
+		{
+			var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
+			if (this.globalUpdates.TryGetValue(findTitle, out var target))
+			{
+				if (target.Namespace == ns)
+				{
+					return target.PageName;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public void PageNameReplace(Namespace ns, IParameterNode? param)
 	{
 		/* var title2 = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
 		var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
 		var ns2 = rep2 ? replacement2.To.Namespace : null; */
-		if (param != null)
+		if (param is not null &&
+			this.GetPageNameReplaceValue(ns, param.GetValue()) is string newValue)
 		{
-			var paramValue = param.GetValue();
-			var findTitle = TitleFactory.FromUnvalidated(ns, paramValue);
-			if (this.globalUpdates.TryGetValue(findTitle, out var target) &&
-				target.Namespace == ns)
-			{
-				param.SetValue(target.PageName, ParameterFormat.Copy);
-			}
+			param.SetValue(newValue, ParameterFormat.Copy);
 		}
 	}
 
@@ -202,8 +217,34 @@ public sealed class ParameterReplacers
 
 	private void EsoNpc(Page page, ITemplateNode template)
 	{
-		this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("condition"));
-		this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("race"));
+		var nsOnline = page.Site[UespNamespaces.Online];
+		this.PageNameReplace(nsOnline, template.Find("condition"));
+		this.PageNameReplace(nsOnline, template.Find("race"));
+		if (template.Find("sells") is IParameterNode sellsParam)
+		{
+			// Note that anything that translates to "Misc Vendors" in the template can't be handled here, as the parameter values overlap.
+			var sellsPlural = sellsParam.GetValue();
+			sellsPlural = sellsPlural switch
+			{
+				"Armsman" => "Armsmen",
+				"Chef & Brewer" => "Chefs & Brewers",
+				"Magus" => "Magi",
+				_ => sellsPlural + 's',
+			};
+
+			if (this.GetPageNameReplaceValue(nsOnline, sellsPlural) is string newValue)
+			{
+				newValue = newValue switch
+				{
+					"Armsmen" => "Armsman",
+					"Chefs & Brewers" => "Chef & Brewer",
+					"Magi" => "Magus",
+					_ => newValue[^1] == 's' ? newValue[..^1] : newValue,
+				};
+
+				sellsParam.SetValue(newValue, ParameterFormat.Copy);
+			}
+		}
 	}
 
 	private void EsoSetsWith(Page page, ITemplateNode template)
