@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.Robby.Parser;
+
 using System;
 using System.Collections.Generic;
 using RobinHood70.Robby.Design;
@@ -23,24 +24,9 @@ public static class ParserHelpers
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(category);
-		var lastCategoryIndex = -1;
-		for (var i = 0; i < nodes.Count; i++)
-		{
-			if (nodes[i] is ILinkNode link &&
-				TitleFactory.FromTitleNode(site, link).Title is var title &&
-				title.Namespace == MediaWikiNamespaces.Category)
-			{
-				if (title.PageNameEquals(category))
-				{
-					return false;
-				}
-
-				lastCategoryIndex = i;
-			}
-		}
-
-		lastCategoryIndex++;
-		if (lastCategoryIndex == 0)
+		var lastCategoryIndex = nodes.LastIndexOf<ILinkNode>(link =>
+			TitleFactory.FromTitleNode(site, link).Title.Namespace == MediaWikiNamespaces.Category);
+		if (lastCategoryIndex == -1)
 		{
 			if (nodes.Count > 0)
 			{
@@ -54,17 +40,36 @@ public static class ParserHelpers
 			}
 
 			lastCategoryIndex = nodes.Count;
-			//// nodes.Nodes.Add(newCat);
 		}
 
-		if (newLineBefore && lastCategoryIndex > 0)
+		var categoryTitle = TitleFactory.FromUnvalidated(site[MediaWikiNamespaces.Category], category).Title;
+		return AddCategoryInternal(nodes, lastCategoryIndex + 1, categoryTitle, newLineBefore);
+	}
+
+	/// <summary>Adds a category to the page.</summary>
+	/// <param name="nodes">The node collection to work on.</param>
+	/// <param name="site">The site being worked with.</param>
+	/// <param name="category">The category to add.</param>
+	/// <param name="afterCategory">The category the new one must appear after.</param>
+	/// <param name="newLineBefore">Whether to add a new line before the category.</param>
+	/// <returns><see langword="true"/> if the category was added to the page; <see langword="false"/> if was already on the page.</returns>
+	/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
+	public static bool AddCategoryAfter(this WikiNodeCollection nodes, Site site, string category, string afterCategory, bool newLineBefore)
+	{
+		ArgumentNullException.ThrowIfNull(nodes);
+		ArgumentNullException.ThrowIfNull(site);
+		ArgumentNullException.ThrowIfNull(category);
+		var afterCategoryIndex = nodes.LastIndexOf<ILinkNode>(link =>
+			TitleFactory.FromTitleNode(site, link).Title is var title &&
+			title.Namespace == MediaWikiNamespaces.Category &&
+			title.PageNameEquals(afterCategory));
+		if (afterCategoryIndex == -1)
 		{
-			nodes.Insert(lastCategoryIndex, nodes.Factory.TextNode("\n"));
-			lastCategoryIndex++;
+			return AddCategory(nodes, site, category, newLineBefore);
 		}
 
-		nodes.Insert(lastCategoryIndex, nodes.Factory.LinkNodeFromParts(site[MediaWikiNamespaces.Category].Name + ':' + category));
-		return true;
+		var categoryTitle = TitleFactory.FromUnvalidated(site[MediaWikiNamespaces.Category], category).Title;
+		return AddCategoryInternal(nodes, afterCategoryIndex + 1, categoryTitle, newLineBefore);
 	}
 
 	/// <summary>Finds the first link that matches the provided title.</summary>
@@ -282,6 +287,26 @@ public static class ParserHelpers
 				}
 			}
 		}
+	}
+	#endregion
+
+	#region Private Methods
+	private static bool AddCategoryInternal(WikiNodeCollection nodes, int index, Title category, bool newLineBefore)
+	{
+		if (nodes.FindLink(category) is not null)
+		{
+			return false;
+		}
+
+		if (newLineBefore && index > 0)
+		{
+			nodes.Insert(index, nodes.Factory.TextNode("\n"));
+			index++;
+		}
+
+		nodes.Insert(index, nodes.Factory.LinkNodeFromParts(category.FullPageName()));
+
+		return true;
 	}
 	#endregion
 }
