@@ -317,6 +317,8 @@ public class JobManager : IDisposable
 			LastRevisionText = page.CurrentRevision?.Text,
 			LastRevisionTimestamp = page.CurrentRevision?.Timestamp,
 			StartTimestamp = page.StartTimestamp,
+			UserAgent = this.Client.UserAgent,
+			UserFolder = App.UserFolder
 		};
 
 		this.PagePreview?.Invoke(this, diffContent);
