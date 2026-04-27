@@ -46,6 +46,12 @@ public class ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval,
 	}
 	#endregion
 
+	#region Public Properties
+
+	/// <inheritdoc/>
+	public string UserAgent => baseClient.UserAgent;
+	#endregion
+
 	#region Public Methods
 
 	/// <inheritdoc/>

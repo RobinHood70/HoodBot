@@ -115,7 +115,8 @@ public partial class SimpleClient : IMediaWikiClient, IDisposable
 	/// <summary>Gets or sets the amount of time between retries if a request fails.</summary>
 	public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
-	private string UserAgent { get; }
+	/// <inheritdoc/>
+	public string UserAgent { get; }
 	#endregion
 
 	#region Public Methods

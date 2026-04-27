@@ -32,6 +32,12 @@ public interface IMediaWikiClient
 	event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay;
 	#endregion
 
+	#region Properties
+
+	/// <summary>Gets the user agent.</summary>
+	string UserAgent { get; }
+	#endregion
+
 	#region Methods
 
 	/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
