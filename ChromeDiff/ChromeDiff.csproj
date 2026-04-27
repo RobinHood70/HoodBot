@@ -1,32 +1,55 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Description>Automates Chrome for on-site diffs.</Description>
+		<RootNamespace>RobinHood70.ChromeDiff</RootNamespace>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<BaseOutputPath>C:\Users\rmorl\Source\Repos\HoodBot\HoodBot</BaseOutputPath>
+		<CsWinRTAotOptimizerEnabled>false</CsWinRTAotOptimizerEnabled>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="Selenium.Support" Version="4.43.0" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.43.0" />
+		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="147.0.7727.11700" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Selenium.WebDriver" Version="4.43.0" />
-  </ItemGroup>
+	<Import Project="..\GlobalInfo.csproj" />
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<OutputPath>..\HoodBot\bin\Debug\Plugins\</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<OutputPath>..\HoodBot\bin\Release\Plugins\</OutputPath>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+	  <Reference Include="CommonCode">
+	    <HintPath>..\CommonCode.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DependentUpon>Resources.resx</DependentUpon>
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>
