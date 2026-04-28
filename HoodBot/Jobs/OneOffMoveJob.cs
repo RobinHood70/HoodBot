@@ -12,15 +12,7 @@ public class OneOffMoveJob : MovePagesJob
 	}
 	#endregion
 
-	#region Protected Override Properties
-	public override string LogDetails => "Fix incorrect Battleground'''s''' merchants";
-	#endregion
-
 	#region Protected Override Methods
-	protected override void PopulateMoves()
-	{
-		this.AddLinkUpdate($"Online:Battlegrounds Merchants", $"Online:Battleground Merchants");
-		this.AddLinkUpdate($"Online:Battlegrounds Supplies Merchants", $"Online:Battleground Supplies Merchants");
-	}
+	protected override void PopulateMoves() => this.AddLinkUpdate($"Lore:Shade", $"Lore:Void-Shade");
 	#endregion
 }

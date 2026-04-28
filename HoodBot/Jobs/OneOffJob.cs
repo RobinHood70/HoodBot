@@ -11,10 +11,7 @@ internal sealed class OneOffJob(JobManager jobManager) : EditJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Add category";
 
-	protected override void LoadPages()
-	{
-		this.Pages.GetRedirectsToNamespace(UespNamespaces.Lore);
-	}
+	protected override void LoadPages() => this.Pages.GetRedirectsToNamespace(UespNamespaces.Lore);
 
 	protected override void PageLoaded(Page page)
 	{
