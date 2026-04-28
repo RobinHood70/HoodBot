@@ -37,7 +37,7 @@ public class Diff : IDiffViewer, IDisposable
 
 		// Launch Chrome maximized.
 		var options = new ChromeOptions();
-		options.AddArgument(Path.Combine($"--user-data-dir={diff.UserFolder}", "Chrome"));
+		options.AddArgument(Path.Combine($"--user-data-dir={diff.UserFolder}", this.Name));
 		options.AddArgument("--start-maximized");
 		if (diff.UserAgent is not null)
 		{
@@ -70,7 +70,7 @@ public class Diff : IDiffViewer, IDisposable
 			}
 		}
 
-		text = driver.FindElement(By.Id("wpDiff"));
+		text = this.driver.FindElement(By.Id("wpDiff"));
 		text.Submit();
 	}
 
