@@ -61,7 +61,6 @@ public abstract class MovePagesJob : EditJob
 {
 	#region Fields
 	private readonly SortedDictionary<Title, DetailedActions> actions = new(TitleComparer.Instance);
-	private readonly TitleDictionary<Title> linkUpdates = [];
 	private readonly TitleDictionary<Title> moves = [];
 	private bool isRedirectLink;
 	private string? logDetails;
@@ -149,7 +148,7 @@ public abstract class MovePagesJob : EditJob
 
 	protected FollowUpActions FollowUpActions { get; set; } = FollowUpActions.Default;
 
-	protected TitleDictionary<Title> LinkUpdates => this.linkUpdates;
+	protected TitleDictionary<Title> LinkUpdates { get; } = [];
 
 	protected MoveAction MoveAction { get; set; } = MoveAction.MoveSafely;
 
@@ -206,7 +205,7 @@ public abstract class MovePagesJob : EditJob
 			initialActions == ReplacementActions.None ||
 			this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 		{
-			this.linkUpdates.Add(from, to);
+			this.LinkUpdates.Add(from, to);
 		}
 
 		this.actions.Add(from, new DetailedActions(initialActions, reason));
@@ -318,7 +317,7 @@ public abstract class MovePagesJob : EditJob
 		// Since links to either moved pages or the source of updated links are probably undesirable, we add both to the list to check.
 		this.StatusWriteLine("Checking remaining pages");
 		TitleCollection backlinkTitles = new(this.Site);
-		foreach (var replacement in this.linkUpdates)
+		foreach (var replacement in this.LinkUpdates)
 		{
 			backlinkTitles.Add(replacement.Key);
 		}
@@ -418,7 +417,7 @@ public abstract class MovePagesJob : EditJob
 			}
 			else if (this.FollowUpActions.HasAnyFlag(FollowUpActions.FixLinks))
 			{
-				actionsList.Add("update links to " + SiteLink.ToText(this.linkUpdates[from], LinkFormat.ForcedLink));
+				actionsList.Add("update links to " + SiteLink.ToText(this.LinkUpdates[from], LinkFormat.ForcedLink));
 			}
 
 			if (action.HasAction(ReplacementActions.Edit) && !action.HasAction(ReplacementActions.Skip))
@@ -475,7 +474,7 @@ public abstract class MovePagesJob : EditJob
 		if (this.FollowUpActions.HasAnyFlag(FollowUpActions.NeedsCategoryMembers))
 		{
 			var categoryReplacements = new Dictionary<Title, ITitle>();
-			foreach (var replacement in this.linkUpdates)
+			foreach (var replacement in this.LinkUpdates)
 			{
 				if (replacement.Key.Namespace == MediaWikiNamespaces.Category &&
 					replacement.Value.Namespace == MediaWikiNamespaces.Category)
@@ -494,7 +493,7 @@ public abstract class MovePagesJob : EditJob
 			{
 				var from = category.Key;
 				if (this.FollowUpActions.HasAnyFlag(FollowUpActions.ProposeUnused) ||
-					this.linkUpdates.ContainsKey(from))
+					this.LinkUpdates.ContainsKey(from))
 				{
 					TitleCollection catMembers = new(this.Site);
 					catMembers.GetCategoryMembers(from.PageName, CategoryMemberTypes.All, this.RecursiveCategoryMembers);
@@ -520,7 +519,7 @@ public abstract class MovePagesJob : EditJob
 	protected virtual Title? LinkUpdateMatch(SiteLink from)
 	{
 		// This whole function could be reduced to a one-liner but is separated out for easier reading/debugging.
-		_ = this.linkUpdates.TryGetValue(from.Title, out var to);
+		_ = this.LinkUpdates.TryGetValue(from.Title, out var to);
 		if (to is not null)
 		{
 			// If this is a category tag, make the change conditional on UpdateCategoryMembers flag.
@@ -676,7 +675,7 @@ public abstract class MovePagesJob : EditJob
 			doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
 		}
 
-		foreach (var title in this.linkUpdates.Keys)
+		foreach (var title in this.LinkUpdates.Keys)
 		{
 			if (fromPages.GetMapped(title) is not Page fromPage ||
 				!fromPage.Exists ||
@@ -764,7 +763,7 @@ public abstract class MovePagesJob : EditJob
 		if (from.Title.Namespace == MediaWikiNamespaces.Media)
 		{
 			Title key = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.File], from.Title.PageName);
-			if (this.linkUpdates.TryGetValue(key, out var toMedia))
+			if (this.LinkUpdates.TryGetValue(key, out var toMedia))
 			{
 				this
 					.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.PageName))
@@ -813,7 +812,7 @@ public abstract class MovePagesJob : EditJob
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(template);
 		var title = TitleFactory.FromTitleNode(this.Site, template).Title;
-		if (this.linkUpdates.TryGetValue(title, out var to))
+		if (this.LinkUpdates.TryGetValue(title, out var to))
 		{
 			var nameText = to.Namespace == MediaWikiNamespaces.Template
 				? to.PageName
@@ -928,7 +927,7 @@ public abstract class MovePagesJob : EditJob
 
 		// Do not filter the From lists to only-existent pages, or backlinks and category members for non-existent pages will be missed.
 		TitleCollection fromTitles = new(this.Site);
-		foreach (var replacement in this.linkUpdates)
+		foreach (var replacement in this.LinkUpdates)
 		{
 			fromTitles.Add(replacement.Key);
 		}
@@ -997,7 +996,7 @@ public abstract class MovePagesJob : EditJob
 	private string UpdateGalleryLink(Page page, string line)
 	{
 		var link = SiteLink.FromGalleryText(this.Site, line);
-		if (this.linkUpdates.TryGetValue(link.Title, out var toTitle))
+		if (this.LinkUpdates.TryGetValue(link.Title, out var toTitle))
 		{
 			if (toTitle.Namespace == MediaWikiNamespaces.File)
 			{
