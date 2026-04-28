@@ -14,68 +14,46 @@ internal enum FurnishingType
 }
 #endregion
 
-internal sealed class Furnishing
+internal sealed class Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
 {
-	#region Constructors
-	public Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
-	{
-		this.Behavior = behavior;
-		this.BindType = bindType;
-		this.Description = description;
-		this.Disambiguator =
+	#region Public Properties
+	public string? Behavior { get; } = behavior;
+
+	public string? BindType { get; } = bindType;
+
+	public bool Collectible => this.FurnishingLimitType == FurnishingType.CollectibleFurnishings;
+
+	public string? Description { get; } = description;
+
+	public string Disambiguator { get; } =
 		furnishingCategory.OrdinalICEquals("Mounts") ? "mount" :
 		furnishingCategory.OrdinalICEquals("Vanity Pets") ? "pet" :
 		furnishingLimitType == FurnishingType.CollectibleFurnishings ? "collectible" :
 		"furnishing";
-		this.FurnishingCategory = furnishingCategory;
-		this.FurnishingLimitType = furnishingLimitType;
-		this.FurnishingSubcategory = furnishingSubcategory;
-		this.Id = id;
-		this.Materials = materials;
-		this.Name = name;
-		this.NickName = nickName;
-		this.PageName = pageName;
-		this.Quality = quality;
-		this.ResultItemLink = resultItemLink;
-		this.Size = size;
-		this.Skills = skills;
-	}
-	#endregion
 
-	#region Public Properties
-	public string? Behavior { get; }
+	public string FurnishingCategory { get; } = furnishingCategory;
 
-	public string? BindType { get; }
+	public FurnishingType FurnishingLimitType { get; } = furnishingLimitType;
 
-	public bool Collectible => this.FurnishingLimitType == FurnishingType.CollectibleFurnishings;
+	public string FurnishingSubcategory { get; } = furnishingSubcategory;
 
-	public string? Description { get; }
+	public long Id { get; } = id;
 
-	public string Disambiguator { get; }
+	public IReadOnlyList<string> Materials { get; } = materials;
 
-	public string FurnishingCategory { get; }
+	public string Name { get; } = name;
 
-	public FurnishingType FurnishingLimitType { get; }
+	public string? NickName { get; } = nickName;
 
-	public string FurnishingSubcategory { get; }
+	public string PageName { get; set; } = pageName;
 
-	public long Id { get; }
+	public string? Quality { get; } = quality;
 
-	public IReadOnlyList<string> Materials { get; }
+	public string? ResultItemLink { get; } = resultItemLink;
 
-	public string Name { get; }
+	public string? Size { get; } = size;
 
-	public string? NickName { get; }
-
-	public string PageName { get; set; }
-
-	public string? Quality { get; }
-
-	public string? ResultItemLink { get; }
-
-	public string? Size { get; }
-
-	public IReadOnlyList<string> Skills { get; }
+	public IReadOnlyList<string> Skills { get; } = skills;
 	#endregion
 
 	#region Public Static Methods
