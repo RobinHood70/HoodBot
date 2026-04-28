@@ -46,7 +46,7 @@ public class MainViewModel : ObservableRecipient
 
 		this.SelectedItem = App.UserSettings.GetCurrentItem();
 		var plugins = Plugins.Instance;
-		this.diffViewer = plugins.DiffViewers["Internet Explorer"];
+		this.diffViewer = plugins.DiffViewers["Chrome"];
 		this.JobParameterVisibility = Visibility.Hidden;
 		this.ResetProgress();
 		this.ProgressBarColor = ProgressBarGreen;
