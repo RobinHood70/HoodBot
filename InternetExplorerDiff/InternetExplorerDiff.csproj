@@ -30,7 +30,7 @@
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.254">
+	  <PackageReference Include="Meziantou.Analyzer" Version="3.0.56">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
