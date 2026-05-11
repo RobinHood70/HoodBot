@@ -19,7 +19,7 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="3.0.56">
+	  <PackageReference Include="Meziantou.Analyzer" Version="3.0.78">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
