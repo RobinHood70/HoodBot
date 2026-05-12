@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
@@ -171,6 +172,7 @@ internal sealed class Coefficient(float a, int abilityId, float b, float c, Coef
 
 	public int StartTime { get; } = startTime;
 
+	[SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "Cases are numerous and would all throw NotSupportedException anyway")]
 	public string Suffix => this.RawType switch
 	{
 		RawTypes.Integer16 or RawTypes.DamageShort52 or RawTypes.HealOverTime or RawTypes.Derived => string.Empty,

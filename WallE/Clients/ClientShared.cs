@@ -39,8 +39,6 @@ public static class ClientShared
 			? string.Empty
 			: $" ({contactInfo.Trim()})";
 
-		return string.Create(
-			CultureInfo.InvariantCulture,
-			$"{botInfo}{contactInfo} {libraryName.Name}/{libraryName.Version}");
+		return 			$"{botInfo}{contactInfo} {libraryName.Name}/{libraryName.Version}";
 	}
 }

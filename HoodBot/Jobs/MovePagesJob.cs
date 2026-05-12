@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -401,7 +400,7 @@ public abstract class MovePagesJob : EditJob
 		foreach (var (from, action) in this.actions)
 		{
 			this.WriteLine("|-");
-			this.Write(string.Create(CultureInfo.InvariantCulture, $"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
+			this.Write($"| {from} ([[Special:WhatLinksHere/{from}|links]]) || ");
 			List<string> actionsList = [];
 			if (action.HasAction(ReplacementActions.Skip))
 			{

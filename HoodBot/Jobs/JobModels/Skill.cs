@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
@@ -102,9 +101,7 @@ internal abstract class Skill(string name, string pageName, string skillClass, s
 		{
 			var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
 			var destType = loopCount > 0
-				? string.Create(
-					CultureInfo.InvariantCulture,
-					$" ({DestructionTypes[i]})")
+				? $" ({DestructionTypes[i]})"
 				: string.Empty;
 			var newValue = IconValueFixup(template.Find(iconName), iconValue + destType);
 			template.Update(iconName, newValue, ParameterFormat.OnePerLine, true);

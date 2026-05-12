@@ -41,9 +41,7 @@ internal sealed class RequestVisitorDisplay : IParameterVisitor
 			_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 		};
 
-		return string.Create(
-			CultureInfo.InvariantCulture,
-			$"{methodText}: {request.Uri}?{sb}");
+		return 			$"{methodText}: {request.Uri}?{sb}";
 	}
 
 	public void Visit(FileParameter parameter)
