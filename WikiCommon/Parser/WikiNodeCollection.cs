@@ -394,7 +394,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		// Count - 1 because we can't merge the last node with anything.
 		for (var i = 0; i < this.Count - 1; i++)
 		{
-			if (this[i] is ITextNode currentText && this[i + 1] is ITextNode nextText)
+			if (this[i..(i + 1)] is [ITextNode currentText, ITextNode nextText])
 			{
 				nextText.Text = currentText.Text + nextText.Text;
 				this.RemoveAt(i);

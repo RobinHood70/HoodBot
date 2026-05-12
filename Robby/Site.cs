@@ -1240,9 +1240,7 @@ public partial class Site : IMessageSource
 		var nodes = WikiNodeFactory.DefaultInstance.Parse(text);
 
 		// Is the text of the format TextNode, LinkNode?
-		if (nodes.Count > 1 &&
-			nodes[0] is ITextNode textNode &&
-			nodes[1] is ILinkNode linkNode)
+		if (nodes is [ITextNode textNode, ILinkNode linkNode, ..])
 		{
 			var searchText = textNode.Text.TrimEnd();
 

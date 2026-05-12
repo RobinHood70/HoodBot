@@ -44,7 +44,7 @@ internal sealed class ActionOpenSearch(WikiAbstractionLayer wal) : ActionModule<
 				return [];
 			}
 
-			if (array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)
+			if (array is [_, JArray titles, JArray descriptions, JArray urls])
 			{
 				List<OpenSearchItem> output = new(titles.Count);
 				for (var i = 0; i < titles.Count; i++)
