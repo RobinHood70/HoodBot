@@ -20,7 +20,7 @@ using RobinHood70.HoodBot.Views;
 using RobinHood70.HoodBotPlugins;
 using RobinHood70.Robby;
 
-public class MainViewModel : ObservableRecipient
+public partial class MainViewModel : ObservableRecipient
 {
 	#region Static Fields
 	private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
@@ -86,50 +86,14 @@ public class MainViewModel : ObservableRecipient
 	#endregion
 
 	#region Public Properties
-	public bool EditingEnabled
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
 	public DateTime? Eta => this.eta?.ToLocalTime();
 
-	public bool JobParametersEnabled
-	{
-		get;
-		private set => this.SetProperty(ref field, value);
-	}
-
-	public Visibility JobParameterVisibility
-	{
-		get;
-		private set => this.SetProperty(ref field, value);
-	}
-
 	public TreeNode JobTree { get; } = JobNode.Populate();
-
-	public double Progress
-	{
-		get;
-		private set => this.SetProperty(ref field, value);
-	}
 
 	public double ProgressMax
 	{
 		get;
 		private set => this.SetProperty(ref field, value < 1 ? 1 : value);
-	}
-
-	public string? Password
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public Brush ProgressBarColor
-	{
-		get;
-		set => this.SetProperty(ref field, value);
 	}
 
 	public WikiInfoViewModel? SelectedItem
@@ -158,12 +122,6 @@ public class MainViewModel : ObservableRecipient
 
 	public UserSettings UserSettings { get; } = App.UserSettings;
 
-	public string? UserName
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
 	public DateTime? UtcEta
 	{
 		get => this.eta;
@@ -176,6 +134,29 @@ public class MainViewModel : ObservableRecipient
 			}
 		}
 	}
+	#endregion
+
+	#region Public Observable Properties
+	[ObservableProperty]
+	public partial bool EditingEnabled { get; set; }
+
+	[ObservableProperty]
+	public partial bool JobParametersEnabled { get; private set; }
+
+	[ObservableProperty]
+	public partial Visibility JobParameterVisibility { get; private set; }
+
+	[ObservableProperty]
+	public partial double Progress { get; private set; }
+
+	[ObservableProperty]
+	public partial string? Password { get; set; }
+
+	[ObservableProperty]
+	public partial Brush ProgressBarColor { get; set; }
+
+	[ObservableProperty]
+	public partial string? UserName { get; set; }
 	#endregion
 
 	#region Private Static Methods

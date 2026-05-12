@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using RobinHood70.HoodBot.Models;
 
 // TODO: Spit into separate model and viewmodel. Model should take care of saving/loading data (or use HostBuilder in App).
-public sealed class WikiInfoViewModel : ObservableObject, IEditableObject
+public sealed partial class WikiInfoViewModel : ObservableObject, IEditableObject
 {
 	#region Constructors
 	public WikiInfoViewModel()
@@ -23,69 +23,41 @@ public sealed class WikiInfoViewModel : ObservableObject, IEditableObject
 	#endregion
 
 	#region Public Properties
-	public Uri? Api
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public string? DisplayName
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
 	public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
-	public string? LogPage
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public int? MaxLag
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public string? Password
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public int? ReadThrottling
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public string? ResultsPage
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public string? SiteClassIdentifier
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
-	public string? UserName
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
-
 	public WikiInfo WikiInfo { get; }
+	#endregion
 
-	public int? WriteThrottling
-	{
-		get;
-		set => this.SetProperty(ref field, value);
-	}
+	#region Public Observable Properties
+	[ObservableProperty]
+	public partial Uri? Api { get; set; }
+
+	[ObservableProperty]
+	public partial string? DisplayName { get; set; }
+
+	[ObservableProperty]
+	public partial string? LogPage { get; set; }
+
+	[ObservableProperty]
+	public partial int? MaxLag { get; set; }
+
+	[ObservableProperty]
+	public partial string? Password { get; set; }
+
+	[ObservableProperty]
+	public partial int? ReadThrottling { get; set; }
+
+	[ObservableProperty]
+	public partial string? ResultsPage { get; set; }
+
+	[ObservableProperty]
+	public partial string? SiteClassIdentifier { get; set; }
+
+	[ObservableProperty]
+	public partial string? UserName { get; set; }
+
+	[ObservableProperty]
+	public partial int? WriteThrottling { get; set; }
 	#endregion
 
 	#region Public Methods
