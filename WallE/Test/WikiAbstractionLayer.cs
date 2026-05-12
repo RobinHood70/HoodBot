@@ -12,7 +12,7 @@ using RobinHood70.CommonCode;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
-/// <inheritdoc/>
+/// <summary>WallE abstraction layer.</summary>
 [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
 public class WikiAbstractionLayer(ILogger? logger = null) : IWikiAbstractionLayer
 {
