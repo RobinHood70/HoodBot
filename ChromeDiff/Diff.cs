@@ -117,31 +117,29 @@ public class Diff : IDiffViewer, IDisposable
 	#endregion
 
 	#region Private Methods
-	private IWebElement FillForm(ChromeDriver js, DiffContent diff)
+	private void FillForm(ChromeDriver js, DiffContent diff)
 	{
-		var text = this.WaitForElement(By.Id("wpTextbox1"));
-		text.Clear();
+		var textBox = this.WaitForElement(By.Id("wpTextbox1"));
+		textBox.Clear();
 		var encodedText = JavaScriptEncoder.Default.Encode(diff.Text);
-		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", text);
+		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", textBox);
 
-		text = this.WaitForElement(By.Id("wpSummary"));
-		text.Clear();
+		textBox = this.WaitForElement(By.Id("wpSummary"));
+		textBox.Clear();
 		encodedText = JavaScriptEncoder.Default.Encode(diff.EditSummary);
-		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", text);
+		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", textBox);
 		if (diff.IsMinor)
 		{
 			try
 			{
-				text = this.WaitForElement(By.Id("wpMinoredit"));
-				text.Click();
+				textBox = js.FindElement(By.Id("wpDiff"));
+				textBox.Click();
 			}
 			catch (NoSuchElementException)
 			{
 				// This is possible if the bot is logged out currently, in which case the minor edit checkbox is not available. Ignore it and continue.
 			}
 		}
-
-		return text;
 	}
 
 	private IWebElement WaitForElement(By condition)
