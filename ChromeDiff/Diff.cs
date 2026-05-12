@@ -3,6 +3,8 @@
 using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
+using System.Text.Encodings.Web;
 using ChromeDiff.Properties;
 using Microsoft.Win32;
 using OpenQA.Selenium;
@@ -49,29 +51,9 @@ public class Diff : IDiffViewer, IDisposable
 		// Navigate to the edit page.
 		this.driver.Navigate().GoToUrl(diff.EditPath);
 		this.windowCount = this.driver.WindowHandles.Count;
-
-		// Fill in the form.
-		var text = this.WaitForElement(By.Id("wpTextbox1"));
-		text.Clear();
-		text.SendKeys(diff.Text);
-		text = this.WaitForElement(By.Id("wpSummary"));
-		text.Clear();
-		text.SendKeys(diff.EditSummary);
-		if (diff.IsMinor)
-		{
-			try
-			{
-				text = this.driver.FindElement(By.Id("wpMinoredit"));
-				text.Click();
-			}
-			catch (NoSuchElementException)
-			{
-				// This is possible if the bot is logged out currently, in which case the minor edit checkbox is not available. Ignore it and continue.
-			}
-		}
-
-		text = this.driver.FindElement(By.Id("wpDiff"));
-		text.Submit();
+		this.FillForm(this.driver, diff);
+		var diffButton = this.driver.FindElement(By.Id("wpDiff"));
+		diffButton.Submit();
 	}
 
 	public bool Validate()
@@ -135,6 +117,33 @@ public class Diff : IDiffViewer, IDisposable
 	#endregion
 
 	#region Private Methods
+	private IWebElement FillForm(ChromeDriver js, DiffContent diff)
+	{
+		var text = this.WaitForElement(By.Id("wpTextbox1"));
+		text.Clear();
+		var encodedText = JavaScriptEncoder.Default.Encode(diff.Text);
+		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", text);
+
+		text = this.WaitForElement(By.Id("wpSummary"));
+		text.Clear();
+		encodedText = JavaScriptEncoder.Default.Encode(diff.EditSummary);
+		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", text);
+		if (diff.IsMinor)
+		{
+			try
+			{
+				text = this.WaitForElement(By.Id("wpMinoredit"));
+				text.Click();
+			}
+			catch (NoSuchElementException)
+			{
+				// This is possible if the bot is logged out currently, in which case the minor edit checkbox is not available. Ignore it and continue.
+			}
+		}
+
+		return text;
+	}
+
 	private IWebElement WaitForElement(By condition)
 	{
 		Debug.Assert(condition is not null);
