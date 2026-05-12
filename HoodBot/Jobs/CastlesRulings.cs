@@ -79,8 +79,14 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	}
 	#endregion
 
+	#region Private Static Partial Properties
+	[GeneratedRegex(@"<style=(?<style>\w+)>(?<content>.*?)</style>", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex CastlesStyleReplacer { get; }
+
+	#endregion
+
 	#region Public Static Methods
-	public static string WikiModeReplace(string text) => CastlesStyleReplacer()
+	public static string WikiModeReplace(string text) => CastlesStyleReplacer
 		.Replace(text, StyleReplacer)
 		.Replace('’', '\'');
 	#endregion
@@ -208,9 +214,6 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 	#endregion
 
 	#region Private Static Methods
-	[GeneratedRegex(@"<style=(?<style>\w+)>(?<content>.*?)</style>", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex CastlesStyleReplacer();
-
 	private static string CreateSectionText(TitleCollection titles)
 	{
 		if (titles.Count == 0)

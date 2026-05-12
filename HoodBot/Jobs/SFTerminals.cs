@@ -39,11 +39,20 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	}
 	#endregion
 
-	#region Protected Override Properties
-	protected override string? GetDisambiguator(Terminal item) => "terminal";
+	#region Private Static Partial Properties
+	[GeneratedRegex("(-{4,})", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex ConsecutiveDashes { get; }
+
+	[GeneratedRegex(@"^[\*:;=]", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex Dewikify { get; }
+
+	[GeneratedRegex(@"[ \t]+\n", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex SpaceBeforeNewLine { get; }
 	#endregion
 
 	#region Protected Override Methods
+	protected override string? GetDisambiguator(Terminal item) => "terminal";
+
 	protected override string GetEditSummary(Page page) => "Create terminal page";
 
 	protected override TitleDictionary<Terminal> GetExistingItems() => [];
@@ -151,13 +160,6 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 	#endregion
 
 	#region Private Static Methods
-
-	[GeneratedRegex("(-{4,})", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex ConsecutiveDashes();
-
-	[GeneratedRegex(@"^[\*:;=]", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex Dewikify();
-
 	private static string GlobalReplace(string text)
 	{
 		if (text is null || text.Length == 0)
@@ -169,15 +171,15 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 			.Replace("\\n", "\n", StringComparison.Ordinal)
 			.TrimStart('\n')
 			.TrimEnd();
-		text = SpaceBeforeNewLine().Replace(text, "\n");
+		text = SpaceBeforeNewLine.Replace(text, "\n");
 		if (text[0] == ' ' || text.Contains("\n ", StringComparison.Ordinal))
 		{
 			text = "<div style=\"white-space:pre\">" + text + "</div>";
 		}
 
 		text = Regex.Replace(text, @"(?<!\n)\n(?!\n)", "<br>", RegexOptions.None, Globals.DefaultRegexTimeout);
-		text = ConsecutiveDashes().Replace(text, "<nowiki>$1</nowiki>");
-		text = Dewikify().Replace(text, "<nowiki/>$&");
+		text = ConsecutiveDashes.Replace(text, "<nowiki>$1</nowiki>");
+		text = Dewikify.Replace(text, "<nowiki/>$&");
 		return text;
 	}
 
@@ -198,9 +200,6 @@ internal sealed partial class SFTerminals : CreateOrUpdateJob<SFTerminals.Termin
 
 		return disambigs;
 	}
-
-	[GeneratedRegex(@"[ \t]+\n", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex SpaceBeforeNewLine();
 	#endregion
 
 	#region Private Methods

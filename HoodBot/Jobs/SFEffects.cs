@@ -21,11 +21,14 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 	private readonly Title effectsTitle = TitleFactory.FromUnvalidated(jobManager.Site, "Starfield:Effects");
 	#endregion
 
-	#region Protected Override Properties
-	protected override string? GetDisambiguator(Effect item) => "effect";
+	#region Private Static Partial Properties
+	[GeneratedRegex(@"\|-\s+\|\s*(NO NAME|{{Anchor\|(?<Link>\[\[.*?\]\])}})(?<Mod>{{.*?}})?\s*\|\|\s*({{ID\|(?<FormId>[x0-9A-F]{8}.*?)}}|(0x)?(?<FormId>[x0-9A-F]{8}.*?))\s*\|\|\s*(?<EditorId>.*?)\s*\|\|(?<Comment>.*?)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
+	private static partial Regex EffectsRowFinder { get; }
 	#endregion
 
 	#region Protected Override Methods
+	protected override string? GetDisambiguator(Effect item) => "effect";
+
 	protected override string GetEditSummary(Page page) => "Update effects";
 
 	protected override TitleDictionary<Effect> GetExistingItems() => [];
@@ -35,7 +38,7 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 		// NOTE: This was a hasty conversion to the new format that just stuffs everything in GetExternalData(). If used again in the future, it should probably be separated into its proper GetExternal/GetExisting/GetNew components.
 		var effects = new Effects();
 		var effectsPage = this.Site.LoadPage(this.effectsTitle) ?? throw new InvalidOperationException();
-		var rows = EffectsRowFinder().Matches(effectsPage.Text);
+		var rows = EffectsRowFinder.Matches(effectsPage.Text);
 		LoadExistingEffects(effects, rows);
 		var newEffects = LoadNewEffects(effects);
 		if (newEffects.Count == 0)
@@ -119,9 +122,6 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 	#endregion
 
 	#region Private Static Methods
-	[GeneratedRegex(@"\|-\s+\|\s*(NO NAME|{{Anchor\|(?<Link>\[\[.*?\]\])}})(?<Mod>{{.*?}})?\s*\|\|\s*({{ID\|(?<FormId>[x0-9A-F]{8}.*?)}}|(0x)?(?<FormId>[x0-9A-F]{8}.*?))\s*\|\|\s*(?<EditorId>.*?)\s*\|\|(?<Comment>.*?)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, 10000)]
-	private static partial Regex EffectsRowFinder();
-
 	private static void LoadExistingEffects(Effects effects, IReadOnlyList<Match> rows)
 	{
 		foreach (var row in rows)

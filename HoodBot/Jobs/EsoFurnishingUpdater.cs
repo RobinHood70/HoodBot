@@ -82,6 +82,17 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	public override string LogName { get; } = "ESO Furnishing Update";
 	#endregion
 
+	#region Private Static Partial Properties
+	[GeneratedRegex(@"^==\s*Available From\s*==", RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex HeaderFinder { get; }
+
+	[GeneratedRegex(@"{{\s*Online Furnishing (Antiquity/(Row|Start)|Books|Crafting|Purchase)\b", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex TemplateFinder { get; }
+
+	[GeneratedRegex("(\r?\n){3,}", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex VerticalSpaceFinder { get; }
+	#endregion
+
 	#region Protected Override Methods
 	protected override void AfterLoadPages()
 	{
@@ -359,11 +370,11 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		{
 			if (parser[i] is ICommentNode comment)
 			{
-				if (TemplateFinder().IsMatch(comment.Comment))
+				if (TemplateFinder.IsMatch(comment.Comment))
 				{
 					parser.RemoveAt(i);
 				}
-				else if (HeaderFinder().IsMatch(comment.Comment))
+				else if (HeaderFinder.IsMatch(comment.Comment))
 				{
 					parser.RemoveAt(i);
 				}
@@ -386,20 +397,9 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		parser.MergeText(false);
 		foreach (var text in parser.RootTextNodes)
 		{
-			text.Text = VerticalSpaceFinder().Replace(text.Text, "\n\n");
+			text.Text = VerticalSpaceFinder.Replace(text.Text, "\n\n");
 		}
 	}
-	#endregion
-
-	#region Private Static Partial Methods
-	[GeneratedRegex(@"^==\s*Available From\s*==", RegexOptions.Multiline, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex HeaderFinder();
-
-	[GeneratedRegex(@"{{\s*Online Furnishing (Antiquity/(Row|Start)|Books|Crafting|Purchase)\b", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex TemplateFinder();
-
-	[GeneratedRegex("(\r?\n){3,}", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex VerticalSpaceFinder();
 	#endregion
 
 	#region Private Methods

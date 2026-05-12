@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +36,11 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 		this.cityValues.Add("{{TR3|" + CityName + "}}");
 		this.context = new Context(this.Site);
 	}
+	#endregion
+
+	#region Private Static Partial Properties
+	[GeneratedRegex(@"(\|\||\n\|)", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
+	private static partial Regex CellMarkers { get; }
 	#endregion
 
 	#region Protected Override Methods
@@ -143,7 +149,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 	#region Private Methods
 	private static List<string> GetCellsFromNodes(WikiNodeCollection nodes)
 	{
-		var split = nodes.Split(CellMarkers(), false);
+		var split = nodes.Split(CellMarkers, false);
 		if (split.Count > 0)
 		{
 			var text = split[0].ToRaw().Trim();
@@ -181,8 +187,5 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 		return [.. split[1..]];
 		*/
 	}
-
-	[GeneratedRegex(@"(\|\||\n\|)", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
-	private static partial Regex CellMarkers();
 	#endregion
 }

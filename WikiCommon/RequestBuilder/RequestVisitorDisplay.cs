@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder;
 
 using System;
-using System.Globalization;
 using System.Text;
 using RobinHood70.CommonCode;
 using RobinHood70.WikiCommon.Properties;
@@ -41,7 +40,7 @@ internal sealed class RequestVisitorDisplay : IParameterVisitor
 			_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 		};
 
-		return 			$"{methodText}: {request.Uri}?{sb}";
+		return $"{methodText}: {request.Uri}?{sb}";
 	}
 
 	public void Visit(FileParameter parameter)

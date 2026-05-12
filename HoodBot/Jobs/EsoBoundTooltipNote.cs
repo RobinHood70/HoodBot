@@ -85,7 +85,7 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 
 					break;
 				case ICommentNode commentNode:
-					var matches = WikiRegexes.HeaderFinder().Matches(commentNode.Comment);
+					var matches = WikiRegexes.HeaderFinder.Matches(commentNode.Comment);
 					foreach (Match match in matches)
 					{
 						if (match.Groups["title"].Value.OrdinalEquals("Notes"))
@@ -152,7 +152,7 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 			return;
 		}
 
-		var notesIndex = parser.FindIndex(n => n is ICommentNode c && WikiRegexes.HeaderFinder().Match(c.Comment).Groups["title"].Value.OrdinalEquals("Notes"));
+		var notesIndex = parser.FindIndex(n => n is ICommentNode c && WikiRegexes.HeaderFinder.Match(c.Comment).Groups["title"].Value.OrdinalEquals("Notes"));
 		if (notesIndex == -1)
 		{
 			return;
