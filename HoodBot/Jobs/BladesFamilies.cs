@@ -131,11 +131,11 @@ internal sealed class BladesFamilies(JobManager jobManager) : WikiJob(jobManager
 			this.MagickaIncrement = (double?)stats["_magickaIncrement"] ?? 0;
 			this.StaminaBase = (double?)stats["_staminaBase"] ?? 0;
 			this.StaminaIncrement = (double?)stats["_staminaIncrement"] ?? 0;
-			this.HealthRegenRate = Math.Round(((double?)stats["_healthRegenRate"] ?? 0) * 100, 5);
+			this.HealthRegenRate = Math.Round(((double?)stats["_healthRegenRate"] ?? 0) * 100, 5, MidpointRounding.ToEven);
 			this.HealthRegenRateOutsideCombat = (double?)stats["_healthRegenRateOutsideCombat"] ?? 0;
-			this.StaminaRegenRate = Math.Round(((double?)stats["_staminaRegenRate"] ?? 0) * 100, 5);
+			this.StaminaRegenRate = Math.Round(((double?)stats["_staminaRegenRate"] ?? 0) * 100, 5, MidpointRounding.ToEven);
 			this.StaminaRegenRateOutsideCombat = (double?)stats["_staminaRegenRateOutsideCombat"] ?? 0;
-			this.MagickaRegenRate = Math.Round(((double?)stats["_magickaRegenRate"] ?? 0) * 100, 5);
+			this.MagickaRegenRate = Math.Round(((double?)stats["_magickaRegenRate"] ?? 0) * 100, 5, MidpointRounding.ToEven);
 			this.MagickaRegenRateOutsideCombat = (double?)stats["_magickaRegenRateOutsideCombat"] ?? 0;
 			this.InnateResistanceNone = (double?)stats["_innateResistanceNone"] ?? 0;
 			this.InnateResistanceSlashing = (double?)stats["_innateResistanceSlashing"] ?? 0;
