@@ -89,8 +89,9 @@ public class EsoQuests : EditJob
 		[14] = "Prologue",
 		[15] = "Pledge",
 		[16] = "Companion",
-		//// [17] = "Quest Type 17",
+		[17] = "Tales of Tribute",
 		[18] = "Scribing",
+		[19] = "Favor"
 	};
 
 	private static readonly Dictionary<int, string> RepeatTypes = new()
