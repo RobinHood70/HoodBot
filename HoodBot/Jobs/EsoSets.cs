@@ -118,9 +118,16 @@ internal sealed class EsoSets : EditJob
 		EsoSpace.SetBotUpdateVersion(this, "botitemset", version);
 	}
 
-	protected override void PageMissing(Page page) => page.Text = blankText?
-		.Replace("«Mod Header»", "{{Mod Header|" + EsoSpace.CurrentMod + "}}", StringComparison.Ordinal)
-		.Replace("«Set»", this.sets[page.Title].Name, StringComparison.Ordinal);
+	protected override void PageMissing(Page page)
+	{
+		page.Text = blankText;
+		if (EsoSpace.CurrentMod.Length > 0)
+		{
+			page.Text = page.Text.Replace("«Mod Header»", "{{Mod Header|" + EsoSpace.CurrentMod + "}}", StringComparison.Ordinal);
+		}
+
+		page.Text = page.Text.Replace("«Set»", this.sets[page.Title].Name, StringComparison.Ordinal);
+	}
 
 	protected override void PageLoaded(Page page)
 	{

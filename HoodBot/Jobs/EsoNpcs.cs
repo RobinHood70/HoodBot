@@ -401,7 +401,7 @@ internal sealed class EsoNpcs : EditJob
 		}
 
 		var sb = new StringBuilder().Append("{{Minimal|NPC}}");
-		if (mod is not null)
+		if (!string.IsNullOrEmpty(mod))
 		{
 			sb
 				.Append("{{Mod Header|")
