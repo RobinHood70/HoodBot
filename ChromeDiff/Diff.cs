@@ -53,7 +53,7 @@ public class Diff : IDiffViewer, IDisposable
 		this.windowCount = this.driver.WindowHandles.Count;
 		this.FillForm(this.driver, diff);
 		var diffButton = this.driver.FindElement(By.Id("wpDiff"));
-		diffButton.Submit();
+		diffButton?.Submit();
 	}
 
 	public bool Validate()
@@ -124,16 +124,16 @@ public class Diff : IDiffViewer, IDisposable
 		var encodedText = JavaScriptEncoder.Default.Encode(diff.Text);
 		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", textBox);
 
-		textBox = this.WaitForElement(By.Id("wpSummary"));
-		textBox.Clear();
+		var summaryBox = this.WaitForElement(By.Id("wpSummary"));
+		summaryBox.Clear();
 		encodedText = JavaScriptEncoder.Default.Encode(diff.EditSummary);
-		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", textBox);
+		js.ExecuteScript("arguments[0].value = '" + encodedText + "';", summaryBox);
 		if (diff.IsMinor)
 		{
 			try
 			{
-				textBox = js.FindElement(By.Id("wpDiff"));
-				textBox.Click();
+				var minorBox = js.FindElement(By.Id("wpMinoredit"));
+				minorBox.Click();
 			}
 			catch (NoSuchElementException)
 			{
