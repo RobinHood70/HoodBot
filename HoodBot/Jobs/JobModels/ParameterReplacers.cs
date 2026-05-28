@@ -383,11 +383,16 @@ public sealed class ParameterReplacers
 		}
 
 		pageNameParam.SetValue(target.PageName, ParameterFormat.Verbatim);
-		template.Remove("ns_base");
-		template.Remove("ns_id");
-		if (!targetNsBase.Base.OrdinalEquals("Lore"))
+		if (!targetNsBase.Base.OrdinalEquals("Lore") && !nsBase.Id.OrdinalEquals(targetNsBase.Id))
 		{
-			template.Add("ns_base", targetNsBase.Id);
+			if (nsParam is not null)
+			{
+				nsParam.SetValue(targetNsBase.Id, ParameterFormat.Copy);
+			}
+			else
+			{
+				template.Add("ns_base", targetNsBase.Id);
+			}
 		}
 	}
 
