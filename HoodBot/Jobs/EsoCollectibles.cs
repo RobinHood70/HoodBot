@@ -188,7 +188,12 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 				ReplaceLocations.Comments | ReplaceLocations.Text);
 		}
 
-		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException(TemplateName + " template not found.");
+		if (parser.FindTemplate(TemplateName) is not ITemplateNode template)
+		{
+			Debug.WriteLine($"{TemplateName} not found on page {parser.Page.Title}");
+			return;
+		}
+
 		template.Update("collectibletype", CatToTemplateType(item.CollectibleType));
 		if (parser.Page.IsMissing)
 		{
@@ -250,7 +255,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		"Memento" => "memento",
 		"Mount" => "mount",
 		"Non-Combat Pets" => "pet",
-		"Patrons" => "patron",
+		"Patrons" => "Patron", // Capitalized version preferred for some reason
 		"Tools" => "tool",
 		_ => null
 	};
@@ -310,21 +315,22 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 		var extract = new SiteParser(page);
 		var pre = extract.FindTemplate("Pre");
-		if (pre?.Find(1) is IParameterNode param)
+		if (pre?.Find(1)?.Value is not WikiNodeCollection value ||
+			value.Count == 0 ||
+			value[0] is not ITagNode tag ||
+			!tag.Name.OrdinalEquals("nowiki"))
 		{
-			var value = param.Value;
-			if (value.Count > 0 &&
-				value[0] is ITagNode tag &&
-				tag.Name.OrdinalEquals("nowiki") &&
-				tag.InnerText?.Trim() is string blankTemplate)
-			{
-				return GameInfo.Eso.ModTemplate.Length == 0
-					? blankTemplate
-					: GameInfo.Eso.ModHeader + blankTemplate;
-			}
+			throw new InvalidOperationException("Blank template not in expected format.");
 		}
 
-		throw new InvalidOperationException("Blank template not in expected format.");
+		var blankTemplate = GameInfo.Eso.ModHeader + tag.InnerText?.Trim();
+		var version = EsoLog.LatestDBUpdate("minedItemSummary", true, false); // Prefix could be any valid table set.
+		if (version.Pts)
+		{
+			blankTemplate = "{{Pre-Release}}" + blankTemplate;
+		}
+
+		return blankTemplate;
 	}
 
 	private void ParseCrate(Page crate)
