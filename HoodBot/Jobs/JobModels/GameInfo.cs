@@ -35,7 +35,9 @@ public sealed class GameInfo(string baseFolder, string modFolder, string modTemp
 
 	public string ModFolder { get; } = modFolder;
 
-	public string ModHeader => "{{Mod Header|" + this.ModTemplateName + "}}";
+	public string ModHeader => this.ModTemplate.Length == 0
+		? string.Empty
+		: "{{Mod Header|" + this.ModTemplateName + "}}";
 
 	public string ModTemplate { get; } = modTemplate;
 
