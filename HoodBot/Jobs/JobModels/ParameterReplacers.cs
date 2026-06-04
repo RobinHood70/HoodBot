@@ -31,7 +31,7 @@ public sealed class ParameterReplacers
 		this.globalUpdates = linkUpdates;
 		this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
 		this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
-		this.AddTemplateReplacers("Book Link", this.LoreFirst);
+		this.AddTemplateReplacers("Book Link", this.PageNameFirst);
 		this.AddTemplateReplacers("Bullet Link", this.BulletLink);
 		this.AddTemplateReplacers("Cat Footer", this.CatFooter);
 		this.AddTemplateReplacers("Cite Book", this.DefaultLoreFirst);
