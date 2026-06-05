@@ -70,7 +70,6 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		var title = TitleFactory.FromUnvalidated(this.Site, jobManager.WikiInfo.ResultsPage + "/ESO Collectibles");
 		this.SetTemporaryResultHandler(new PageResultHandler(title, false));
 		this.StatusWriteLine("DON'T FORGET TO UPDATE MOD HEADER!");
-
 		this.knownUntracked = new TitleCollection(this.Site)
 		{
 			"Online:Corrupted Indrik",
@@ -179,7 +178,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 	protected override void ItemPageLoaded(SiteParser parser, Collectible item)
 	{
-		if (parser.Page.IsMissing)
+		if (parser.Page.IsMissing || this.Clobber)
 		{
 			parser.ReplaceText(
 				"<gallery>\n</gallery>",
@@ -195,7 +194,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		}
 
 		template.Update("collectibletype", CatToTemplateType(item.CollectibleType));
-		if (parser.Page.IsMissing)
+		if (parser.Page.IsMissing || this.Clobber)
 		{
 			template.Update("description", item.Description);
 			template.Update("id", item.Id.ToStringInvariant());
@@ -229,8 +228,12 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 		if (this.crateTiers.TryGetValue(item.Name, out var crateInfo))
 		{
-			var crates = string.Join(", ", crateInfo);
-			template.Update("crate", crates);
+			for (var i = 0; i < crateInfo.Count; i++)
+			{
+				var crate = crateInfo[i];
+				var crateName = "crate" + (i == 0 ? string.Empty : (i + 1).ToStringInvariant());
+				template.Update(crateName, crate);
+			}
 		}
 
 		if (item.Tier is not null)
@@ -250,10 +253,9 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 	private static string? CatToFileSubcat(string collectibleType) => collectibleType switch
 	{
-		"Allies" => "ally",
-		"Customized Action" => "action",
-		"Memento" => "memento",
-		"Mount" => "mount",
+		"Customized Actions" => "action",
+		"Mementos" => "memento",
+		"Mounts" => "mount",
 		"Non-Combat Pets" => "pet",
 		"Patrons" => "Patron", // Capitalized version preferred for some reason
 		"Tools" => "tool",
@@ -302,6 +304,11 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		foreach (var crate in crownCrates)
 		{
 			this.ParseCrate(crate);
+		}
+
+		foreach (var value in this.crateTiers.Values)
+		{
+			value.Sort(StringComparer.Ordinal);
 		}
 	}
 
