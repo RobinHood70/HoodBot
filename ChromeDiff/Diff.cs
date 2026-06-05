@@ -74,6 +74,7 @@ public class Diff : IDiffViewer, IDisposable
 		return userKey is not null;
 	}
 
+	[DebuggerStepThrough]
 	public void Wait()
 	{
 		if (this.driver is null)
@@ -85,10 +86,14 @@ public class Diff : IDiffViewer, IDisposable
 		try
 		{
 			pageWait.Until(drv => drv.WindowHandles.Count < this.windowCount);
-			this.driver.Quit();
 		}
-		catch (Exception)
+		catch (WebDriverException)
 		{
+		}
+		finally
+		{
+			this.driver.Quit();
+			this.driver = null;
 		}
 	}
 	#endregion
