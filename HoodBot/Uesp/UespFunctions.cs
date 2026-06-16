@@ -99,7 +99,7 @@ public static class UespFunctions
 				"effect" => "e",
 				"food" => "f",
 				"fish" => "fi",
-				"furniture" => "furn",
+				"furnishing" => "furn",
 				"glyph" => "g",
 				"ingredient" => "i",
 				"jewelry" => "j",
