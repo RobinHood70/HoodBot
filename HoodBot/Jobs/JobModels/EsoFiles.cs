@@ -2,9 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
@@ -154,17 +156,17 @@ public static class EsoFiles
 		return allIcons;
 	}
 
-	public static IReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site) => GetOriginalFiles(site, PageModules.Default);
+	public static ReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site) => GetOriginalFiles(site, PageModules.Default);
 
-	public static IReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site, PageModules pageModules)
+	public static ReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site, PageModules pageModules)
 	{
 		const string TemplateName = "Online File";
 
 		ArgumentNullException.ThrowIfNull(site);
 		var retval = new Dictionary<string, FilePage>(StringComparer.OrdinalIgnoreCase);
 
-		var pages = new PageCollection(site, pageModules);
-		pages.SetLimitations(LimitationType.OnlyAllow);
+		var pages = new PageCollection(site, pageModules | PageModules.FileInfo);
+		pages.SetLimitations(LimitationType.OnlyAllow, MediaWikiNamespaces.File);
 		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn, true, Filter.Exclude, MediaWikiNamespaces.File);
 		foreach (var page in pages)
 		{
@@ -181,13 +183,21 @@ public static class EsoFiles
 				continue;
 			}
 
-			if (!retval.TryAdd(originalFileName, (FilePage)page))
+			var filePage = (FilePage)page;
+			if (!retval.TryAdd(originalFileName, filePage))
 			{
-				Debug.WriteLine("Duplicate files: " + page.Title.PageName + " and " + retval[originalFileName].Title.PageName);
+				// Always use earliest page in the event of a conflict. While this could lead to repeatedly sorting the same set of file revisions, the number of conflicts and the number of file revisions are both likely to be small.
+				var firstPage = retval[originalFileName];
+				var firstDate = firstPage.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
+				var currentDate = filePage.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
+				if (currentDate < firstDate)
+				{
+					retval[originalFileName] = filePage;
+				}
 			}
 		}
 
-		return retval;
+		return retval.AsReadOnly();
 	}
 
 	public static string LocalFileName(EsoFileTypes fileType) => LocalPath(fileType) + ".zip";
