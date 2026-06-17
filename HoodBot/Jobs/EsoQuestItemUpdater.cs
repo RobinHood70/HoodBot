@@ -11,7 +11,7 @@ using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
-internal sealed class EsoUpdateQuestItems : TemplateJob
+internal sealed class EsoQuestItemUpdater : TemplateJob
 {
 	#region Static Fields
 	private static readonly Dictionary<int, List<(string, string)>> Replacements = new()
@@ -47,7 +47,7 @@ internal sealed class EsoUpdateQuestItems : TemplateJob
 
 	#region Constructors
 	[JobInfo("Update Quest Items", "ESO")]
-	public EsoUpdateQuestItems(JobManager jobManager)
+	public EsoQuestItemUpdater(JobManager jobManager)
 		: base(jobManager)
 	{
 		var context = new Context(this.Site);
