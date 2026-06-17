@@ -173,20 +173,24 @@ public static class Extensions
 		return parameter.Anonymous || parameter.GetNumberFromName() != 0;
 	}
 
-	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
+	/// <summary>Updates a parameter only if it's not equal to the existing value, based on the comparer provided.</summary>
 	/// <param name="parameter">The parameter to alter.</param>
 	/// <param name="value">The value to update to.</param>
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <param name="comparer">The string comparer to define loose equality.</param>
-	/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
-	public static void LooseUpdate(this IParameterNode parameter, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+	/// <remarks>
+	/// This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.
+	/// Note that the value will still be escaped before being compared, so if you want to compare unescaped values, you should use the <see cref="GetValue(IParameterNode)"/> method to get the existing value and compare it to the new value before calling this method.
+	/// </remarks>
+	public static void Update(this IParameterNode parameter, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
 	{
+		// TODO: Consider unescaping oldText rather than escaping value, since the escaping methods used may not match. The difficulty is that unescaping will be wiki-dependent.
 		ArgumentNullException.ThrowIfNull(parameter);
 		ArgumentNullException.ThrowIfNull(value);
 		ArgumentNullException.ThrowIfNull(comparer);
-		var oldText = parameter.GetRaw();
+		var oldText = parameter.GetValue();
 		value = parameter.Factory.EscapeParameterText(value, parameter.Name is null);
-		if (!comparer.Equals(oldText, value.Trim()))
+		if (!comparer.Equals(oldText, value))
 		{
 			parameter.SetValueNoEscape(value, paramFormat);
 		}
@@ -392,35 +396,6 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="number">The numbered parameter to search for.</param>
 	/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
-	public static int FindNumberedIndex(this ITemplateNode template, int number)
-	{
-		ArgumentNullException.ThrowIfNull(template);
-		var retval = -1;
-		var i = 0;
-		var name = number.ToStringInvariant();
-		for (var index = 0; index < template.Parameters.Count; index++)
-		{
-			var node = template.Parameters[index];
-			if (node.Name == null)
-			{
-				if (++i == number)
-				{
-					retval = index;
-				}
-			}
-			else if (node.Name.ToValue().OrdinalEquals(name))
-			{
-				retval = index;
-			}
-		}
-
-		return retval;
-	}
-
-	/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
-	/// <param name="template">The template to work on.</param>
-	/// <param name="number">The numbered parameter to search for.</param>
-	/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
 	public static IParameterNode? Find(this ITemplateNode template, int number)
 	{
 		var index = template.FindNumberedIndex(number);
@@ -508,6 +483,35 @@ public static class Extensions
 			if (paramName.OrdinalEquals(name))
 			{
 				retval = i;
+			}
+		}
+
+		return retval;
+	}
+
+	/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
+	/// <param name="template">The template to work on.</param>
+	/// <param name="number">The numbered parameter to search for.</param>
+	/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
+	public static int FindNumberedIndex(this ITemplateNode template, int number)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		var retval = -1;
+		var i = 0;
+		var name = number.ToStringInvariant();
+		for (var index = 0; index < template.Parameters.Count; index++)
+		{
+			var node = template.Parameters[index];
+			if (node.Name == null)
+			{
+				if (++i == number)
+				{
+					retval = index;
+				}
+			}
+			else if (node.Name.ToValue().OrdinalEquals(name))
+			{
+				retval = index;
 			}
 		}
 
@@ -652,28 +656,6 @@ public static class Extensions
 		}
 
 		return false;
-	}
-
-	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
-	/// <param name="template">The template to alter.</param>
-	/// <param name="name">The name of the parameter to update or remove.</param>
-	/// <param name="value">The value to update to.</param>
-	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
-	/// <param name="comparer">The string comparer to define loose equality.</param>
-	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
-	public static IParameterNode? LooseUpdate(this ITemplateNode template, string name, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
-	{
-		ArgumentNullException.ThrowIfNull(template);
-		ArgumentNullException.ThrowIfNull(name);
-		ArgumentNullException.ThrowIfNull(value);
-		if (template.Find(name) is IParameterNode parameter)
-		{
-			parameter.LooseUpdate(value, paramFormat, comparer);
-			return parameter;
-		}
-
-		return template.Add(name, value, paramFormat);
 	}
 
 	/// <summary>Gets template parameters grouped into clusters based on their index.</summary>
@@ -994,6 +976,28 @@ public static class Extensions
 	/// <param name="value">The value of the parameter to add.</param>
 	/// <returns>The parameter that was altered.</returns>
 	public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy, false);
+
+	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
+	/// <param name="template">The template to alter.</param>
+	/// <param name="name">The name of the parameter to update or remove.</param>
+	/// <param name="value">The value to update to.</param>
+	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
+	/// <param name="comparer">The string comparer to define loose equality.</param>
+	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
+	/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
+	public static IParameterNode? Update(this ITemplateNode template, string name, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		ArgumentNullException.ThrowIfNull(name);
+		ArgumentNullException.ThrowIfNull(value);
+		if (template.Find(name) is IParameterNode parameter)
+		{
+			parameter.Update(value, paramFormat, comparer);
+			return parameter;
+		}
+
+		return template.Add(name, value, paramFormat);
+	}
 
 	/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist. Also applies the selected formatting.</summary>
 	/// <param name="template">The template to work on.</param>

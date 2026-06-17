@@ -181,12 +181,12 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 
 		var template = parser.FindTemplate(RulingTemplate) ?? throw new InvalidOperationException(RulingTemplate + " template not found.");
 
-		template.LooseUpdate("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
+		template.Update("text", ruling.Text, ParameterFormat.OnePerLine, comparer);
 
 		if (ruling.Conditions.Count > 0)
 		{
 			var newConditions = string.Join("<br>\n", ruling.Conditions);
-			template.LooseUpdate("conditions", newConditions, ParameterFormat.OnePerLine, comparer);
+			template.Update("conditions", newConditions, ParameterFormat.OnePerLine, comparer);
 		}
 
 		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
@@ -270,15 +270,15 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 				("flageffects", string.Empty));
 		}
 
-		template.LooseUpdate("text", string.Join(" ''or''<br>\n", choice.SubChoices), ParameterFormat.OnePerLine, comparer);
+		template.Update("text", string.Join(" ''or''<br>\n", choice.SubChoices), ParameterFormat.OnePerLine, comparer);
 		if (choice.Conditions.Count > 0)
 		{
-			template.LooseUpdate("conditions", string.Join("<br>\n", choice.Conditions), ParameterFormat.OnePerLine, comparer);
+			template.Update("conditions", string.Join("<br>\n", choice.Conditions), ParameterFormat.OnePerLine, comparer);
 		}
 
 		if (choice.EffectFlags.Count > 0)
 		{
-			template.LooseUpdate("flageffects", string.Join("<br>\n", choice.EffectFlags), ParameterFormat.OnePerLine, comparer);
+			template.Update("flageffects", string.Join("<br>\n", choice.EffectFlags), ParameterFormat.OnePerLine, comparer);
 		}
 
 		return template;
