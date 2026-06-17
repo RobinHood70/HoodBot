@@ -92,7 +92,7 @@ internal sealed class EsoUpdateQuestItems : TemplateJob
 				name = name2 ?? string.Empty;
 			}
 
-			this.WriteLine($"{{{{{this.TemplateName}|{item.Name}|icontype={abbr}|icon={name}|id={id}|loc={{{{huh}}}}|quest={item.QuestName}|{item.Description}}}}}");
+			this.WriteLine($"{{{{{this.TemplateName}|{item.Name}|icontype={abbr}|icon={name}|id={id}|loc=|quest={item.QuestName}|{item.Description}}}}}");
 		}
 
 		this.WriteLine("|}");
