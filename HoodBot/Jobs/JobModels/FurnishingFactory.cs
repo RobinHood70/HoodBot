@@ -127,7 +127,7 @@ internal static class FurnishingFactory
 			name: name,
 			nickName: null,
 			pageName: PageNameExceptions.GetValueOrDefault(id, TitleFactory.SanitizePageName(name, true)),
-			quality: GetQualityName((string)row["quality"]),
+			quality: EsoSpace.GetQualityName((string)row["quality"]),
 			resultItemLink: EsoLog.ExtractItemId((string)row["resultitemLink"]),
 			size: size,
 			skills: skills);
@@ -142,18 +142,6 @@ internal static class FurnishingFactory
 		1 => "Bind on Pickup",
 		2 => "Bind on Equip",
 		3 => "Backpack Bind on Pickup",
-		_ => null,
-	};
-
-	private static string? GetQualityName(string quality) => quality switch
-	{
-		"1-5" => "Any",
-		"1" => "Normal",
-		"2" => "Fine",
-		"3" => "Superior",
-		"4" => "Epic",
-		"5" => "Legendary",
-		"6" => "Mythic",
 		_ => null,
 	};
 

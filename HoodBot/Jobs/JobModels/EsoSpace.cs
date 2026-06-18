@@ -149,6 +149,18 @@ internal static class EsoSpace
 		return retval;
 	}
 
+	public static string? GetQualityName(string quality) => quality switch
+	{
+		"1-5" => "Any",
+		"1" => "Normal",
+		"2" => "Fine",
+		"3" => "Superior",
+		"4" => "Epic",
+		"5" => "Legendary",
+		"6" => "Mythic",
+		_ => null,
+	};
+
 	public static string? GuessMod(string? zone, string? defaultMod) => zone switch
 	{
 		"Southern Elsweyr" => "Dragonhold",
