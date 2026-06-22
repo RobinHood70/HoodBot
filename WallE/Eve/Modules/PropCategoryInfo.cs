@@ -6,12 +6,16 @@ using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon.RequestBuilder;
 using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-internal sealed class PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input) : PropModule<CategoryInfoInput, CategoryInfoResult>(wal, input, null)
+public sealed class PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input) : PropModule<CategoryInfoInput, CategoryInfoResult>(wal, input, null)
 {
+	#region Public Constants
+	public const string ModuleName = "categoryinfo";
+	#endregion
+
 	#region Public Override Properties
 	public override int MinimumVersion => 113;
 
-	public override string Name => "categoryinfo";
+	public override string Name => ModuleName;
 	#endregion
 
 	#region Protected Override Properties

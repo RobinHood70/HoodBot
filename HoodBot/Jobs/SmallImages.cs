@@ -12,13 +12,15 @@ internal sealed class SmallImages(JobManager jobManager) : WikiJob(jobManager, J
 	{
 		PageCollection files = new(this.Site, PageModules.FileInfo);
 		files.GetCategoryMembers("Category:Legends-Art", true);
+		files.Sort();
 		foreach (var page in files)
 		{
-			if (page is FilePage file && file.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
+			var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
+			if (fileInfo.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
 			{
 				this.WriteLine(string.Create(
 					CultureInfo.InvariantCulture,
-					$"* {SiteLink.ToText(file, LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
+					$"* {SiteLink.ToText(page.Title, LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
 			}
 		}
 	}

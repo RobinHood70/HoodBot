@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
@@ -21,7 +20,7 @@ internal static class EsoSpace
 
 	#region Static Fields
 	private static readonly char[] CommaOrSpace = [',', ' '];
-	private static VariablesPage? patchVarPage;
+	private static Page? patchVarPage;
 	#endregion
 
 	#region Public Properties
@@ -110,14 +109,15 @@ internal static class EsoSpace
 	public static PlaceCollection GetPlaces(Site site)
 	{
 		ArgumentNullException.ThrowIfNull(site);
-		var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "modpage", "settlement", "titlename", "type", "zone");
+		var places = site.GetMetaVariables(PageModules.None, true, "alliance", "modpage", "settlement", "titlename", "type", "zone");
 		places.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Online);
 		places.GetCategoryMembers("Online-Places");
 
 		PlaceCollection retval = new();
-		foreach (var page in places.OfType<VariablesPage>())
+		foreach (var page in places)
 		{
-			if (page.MainSet != null)
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			if (variables.MainSet != null)
 			{
 				retval.Add(new Place(page));
 			}
@@ -168,14 +168,15 @@ internal static class EsoSpace
 		_ => defaultMod,
 	};
 
-	public static bool ShouldUpload(string localFileName, FilePage filePage)
+	public static bool ShouldUpload(string localFileName, Page filePage)
 	{
 		// Assumes that FileInfo with Sha1 has been downloaded for page.
 		if (filePage.Exists)
 		{
 			var stream = File.OpenRead(localFileName);
 			var hashString = Globals.GetHash(stream, HashType.Sha1);
-			foreach (var fileRevision in filePage.FileRevisions)
+			var fileInfo = (FilePageModule)filePage.Custom[FilePageModule.PropertyName];
+			foreach (var fileRevision in fileInfo.FileRevisions)
 			{
 				if (fileRevision.Sha1.OrdinalEquals(hashString))
 				{
@@ -200,7 +201,8 @@ internal static class EsoSpace
 	{
 		ArgumentException.ThrowIfNullOrEmpty(paramName);
 		var patchPage = GetPatchPage(job);
-		var version = patchPage.GetVariable(paramName);
+		var variables = (VariablesPageModule)patchPage.Custom[VariablesPageModule.PropertyName];
+		var version = variables.GetVariable(paramName);
 		return version is null
 			? throw new InvalidOperationException($"Patch variable \"{paramName}\" not found")
 			: new EsoVersion(version);
@@ -225,16 +227,16 @@ internal static class EsoSpace
 	#endregion
 
 	#region Private Methods
-	private static VariablesPage GetPatchPage(WikiJob job)
+	private static Page GetPatchPage(WikiJob job)
 	{
 		if (patchVarPage is null)
 		{
 			job.StatusWriteLine("Fetching ESO update number");
 			TitleCollection patchTitle = new(job.Site, "Online:Patch");
-			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
+			var pages = job.Site.GetMetaVariables(PageModules.Default, false);
 			pages.GetTitles(patchTitle);
-			patchVarPage = pages.Count == 1 && pages[0] is VariablesPage varPage
-				? varPage
+			patchVarPage = pages.Count == 1
+				? pages[0]
 				: throw new InvalidOperationException("Could not find patch page.");
 		}
 

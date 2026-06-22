@@ -664,7 +664,7 @@ public class PageCollection : TitleData<Page, PageCollection>
 			}
 		}
 
-		var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.pageCreator.GetPropertyInputs(options), this.pageCreator.CreatePageItem);
+		var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.GetPropertyInputs(options), this.pageCreator.CreatePageItem);
 		this.PopulateMapCollections(result);
 		foreach (var item in result)
 		{

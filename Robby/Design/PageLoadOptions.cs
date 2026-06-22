@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design;
 
 using System;
+using System.Collections.Generic;
+using RobinHood70.WallE.Base;
 
 #region Public Enumerations
 
@@ -42,9 +44,6 @@ public enum PageModules
 	/// <summary>Load the list of transclusions of this page. When part of a pageset, this allows getting transclusions for multiple pages at once.</summary>
 	TranscludedIn = 1 << 9,
 
-	/// <summary>Load custom page information. Use this in conjunction with a custom PageCreator to control when your custom information is retrieved.</summary>
-	Custom = 1 << 15,
-
 	/// <summary>On File-space pages, load file backlinks.</summary>
 	FileUsage = 1 << 16,
 
@@ -58,7 +57,7 @@ public enum PageModules
 	Backlinks = FileUsage | LinksHere | TranscludedIn,
 
 	/// <summary>Load everything Robby is capable of handling.</summary>
-	All = Categories | CategoryInfo | DeletedRevisions | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
+	All = Categories | CategoryInfo | DeletedRevisions | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn
 }
 #endregion
 
@@ -116,6 +115,10 @@ public class PageLoadOptions
 	/// <summary>Gets or sets a value indicating whether to convert titles to other language variants when necessary.</summary>
 	/// <value><see langword="true"/> to convert titles; otherwise, <see langword="false"/>.</value>
 	public bool ConvertTitles { get; set; }
+
+	/// <summary>Gets the list of custom properties to be loaded.</summary>
+	/// <value>The list of custom properties to be loaded.</value>
+	public IList<IPropertyInput> CustomPropertyInputs { get; } = [];
 
 	/// <summary>Gets or sets the number of File revisions to retrieve.</summary>
 	/// <value>The number of File revisions to be retrieved.</value>

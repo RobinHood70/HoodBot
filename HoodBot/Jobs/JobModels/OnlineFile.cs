@@ -26,9 +26,10 @@ public sealed class OnlineFile
 	#endregion
 
 	#region Public Methods
-	public void MergeInfo(FilePage filePage, ITemplateNode template)
+	public void MergeInfo(Page page, ITemplateNode template)
 	{
-		if (filePage.FileRevisions.Count == 0)
+		var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
+		if (fileInfo.FileRevisions.Count == 0)
 		{
 			throw new InvalidOperationException("No file revisions, or creation time not found.");
 		}
@@ -46,7 +47,7 @@ public sealed class OnlineFile
 		}
 
 		var isOlder = false;
-		foreach (var fileRev in filePage.FileRevisions)
+		foreach (var fileRev in fileInfo.FileRevisions)
 		{
 			if (fileRev.Timestamp is DateTime revTimestamp && revTimestamp < this.CreationTime)
 			{
@@ -57,16 +58,16 @@ public sealed class OnlineFile
 
 		if (this.Title is null)
 		{
-			this.Title = filePage.Title;
+			this.Title = page.Title;
 		}
 		else if (isOlder)
 		{
 			this.Renames.Add(this.Title);
-			this.Title = filePage.Title;
+			this.Title = page.Title;
 		}
 		else
 		{
-			this.Renames.Add(filePage.Title);
+			this.Renames.Add(page.Title);
 		}
 
 		if (isOlder || this.Description is null)

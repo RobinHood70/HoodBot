@@ -8,12 +8,16 @@ using RobinHood70.WallE.Design;
 using RobinHood70.WallE.Eve;
 using RobinHood70.WikiCommon.RequestBuilder;
 
-internal sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
+public sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
 {
+	#region Public Constants
+	public const string ModuleName = "imageinfo";
+	#endregion
+
 	#region Public Override Properties
 	public override int MinimumVersion => 111;
 
-	public override string Name => "imageinfo";
+	public override string Name => ModuleName;
 	#endregion
 
 	#region Protected Override Properties

@@ -220,22 +220,18 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki, api, this.Site.EditingEnabled);
 		enUesp.Login(uespWiki.UserName, uespWiki.Password);
 
-		var pages = enUesp.CreateMetaPageCollection(PageModules.Info, false, "icon", "id", "id2", "id3", "id4", "id5");
+		var pages = enUesp.GetMetaVariables(PageModules.Info, false, "icon", "id", "id2", "id3", "id4", "id5");
 		pages.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Morrowind, UespNamespaces.Bloodmoon, UespNamespaces.Tribunal);
 		pages.GetBacklinks("Template:Game Book", WikiCommon.BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 		foreach (var page in pages)
 		{
-			if (page is not VariablesPage varPage)
-			{
-				throw new InvalidOperationException();
-			}
-
-			if (varPage.GetVariable("icon") is not string icon)
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			if (variables.GetVariable("icon") is not string icon)
 			{
 				continue;
 			}
 
-			foreach (var (key, value) in varPage.MainSet)
+			foreach (var (key, value) in variables.MainSet)
 			{
 				if (key.StartsWith("id", StringComparison.Ordinal))
 				{

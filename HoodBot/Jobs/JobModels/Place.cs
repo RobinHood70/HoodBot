@@ -22,22 +22,23 @@ public enum PlaceType
 internal sealed class Place : IEquatable<Place>
 {
 	#region Constructors
-	public Place(VariablesPage page)
+	public Place(Page page)
 	{
 		ArgumentNullException.ThrowIfNull(page);
-		this.Alliance = page.GetVariable("alliance");
+		var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+		this.Alliance = variables.GetVariable("alliance");
 		this.Key = page.Title.PageName;
-		if (page.GetVariable("modpage") is string mod)
+		if (variables.GetVariable("modpage") is string mod)
 		{
 			var split = mod.Split(TextArrays.Colon, 2);
 			this.Mod = split[^1];
 		}
 
-		this.Settlement = page.GetVariable("settlement");
+		this.Settlement = variables.GetVariable("settlement");
 		this.Title = page.Title;
-		this.TitleName = page.GetVariable("titlename") ?? page.Title.PageName;
-		this.TypeText = page.GetVariable("type");
-		this.Zone = page.GetVariable("zone");
+		this.TitleName = variables.GetVariable("titlename") ?? page.Title.PageName;
+		this.TypeText = variables.GetVariable("type");
+		this.Zone = variables.GetVariable("zone");
 	}
 
 	// For ad-hoc places created when no place was found.

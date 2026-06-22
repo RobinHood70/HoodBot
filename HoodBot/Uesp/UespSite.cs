@@ -19,6 +19,7 @@ public class UespSite : Site
 			eve.ModuleFactory
 				.RegisterProperty<VariablesInput>(PropVariables.CreateInstance)
 				.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+			Page.RegisterCustomPropertyHandler(PropVariables.ModuleName, VariablesPageModule.ParseVariablesResult);
 			eve.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 			eve.UserCheckFrequency = 10;
 		}

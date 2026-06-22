@@ -251,7 +251,7 @@ internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageI
 						module.Deserialize(innerResult);
 						if (module.OutputObject is object output)
 						{
-							item.ParseModuleOutput(output);
+							item.ParseModuleOutput(module.Name, output);
 						}
 					}
 				}

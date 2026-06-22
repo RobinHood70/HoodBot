@@ -581,7 +581,7 @@ public class TitleCollection : TitleData<Title, TitleCollection>, IMessageSource
 		{
 			PageLoadOptions loadOptions = new(this.Site.DefaultLoadOptions, PageModules.Info);
 			var creator = this.Site.PageCreator;
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
 

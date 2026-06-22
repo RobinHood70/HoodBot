@@ -3,8 +3,6 @@ namespace RobinHood70.WallE.Base;
 
 using System;
 using System.Collections.Generic;
-using RobinHood70.CommonCode;
-using RobinHood70.WallE.Properties;
 using RobinHood70.WikiCommon;
 
 #region Public Enumerations
@@ -21,13 +19,12 @@ public enum PageFlags
 public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApiTitle
 {
 	#region Fields
-	private readonly List<ContributorsItem> contributors = [];
 	private readonly List<CategoriesItem> categories = [];
+	private readonly List<ContributorsItem> contributors = [];
 	private readonly List<RevisionItem> deletedRevisions = [];
 	private readonly List<DuplicateFilesItem> duplicateFiles = [];
 	private readonly List<string> externalLinks = [];
 	private readonly List<FileUsageItem> fileUsages = [];
-	private readonly List<ImageInfoItem> imageInfoEntries = [];
 	private readonly List<IApiTitle> images = [];
 	private readonly List<InterwikiTitleItem> interwikiLinks = [];
 	private readonly List<LanguageLinksItem> languageLinks = [];
@@ -38,6 +35,7 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 	private readonly List<RevisionItem> revisions = [];
 	private readonly List<IApiTitle> templates = [];
 	private readonly List<TranscludedInItem> transcludedIn = [];
+	private Dictionary<string, object>? custom;
 	#endregion
 
 	#region Public Properties
@@ -49,6 +47,8 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 
 	public IReadOnlyList<ContributorsItem> Contributors => this.contributors;
 
+	public IReadOnlyDictionary<string, object>? Custom => this.custom;
+
 	public IReadOnlyList<RevisionItem> DeletedRevisions => this.deletedRevisions;
 
 	public IReadOnlyList<DuplicateFilesItem> DuplicateFiles => this.duplicateFiles;
@@ -59,11 +59,7 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 
 	public PageFlags Flags { get; } = flags;
 
-	public IReadOnlyList<ImageInfoItem> ImageInfoEntries => this.imageInfoEntries;
-
 	public IReadOnlyList<IApiTitle> Images => this.images;
-
-	public string? ImageRepository { get; private set; }
 
 	public PageInfo? Info { get; private set; }
 
@@ -93,7 +89,7 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 	#endregion
 
 	#region Public Methods
-	public void ParseModuleOutput(object output)
+	public void ParseModuleOutput(string name, object output)
 	{
 		// TODO: This is almost certainly not the best way to handle this, but it's better for separation of concerns than the previous method and allows read-only properties. Should re-examine later to see if there's some better method.
 		switch (output)
@@ -116,10 +112,6 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 				break;
 			case FileUsageResult result:
 				this.fileUsages.AddRange(result);
-				break;
-			case ImageInfoResult result:
-				this.ImageRepository ??= result.Repository;
-				this.imageInfoEntries.AddRange(result);
 				break;
 			case ImagesResult result:
 				this.images.AddRange(result);
@@ -158,7 +150,8 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 				this.transcludedIn.AddRange(result);
 				break;
 			default:
-				this.ParseCustomResult(output);
+				this.custom ??= new Dictionary<string, object>(1, StringComparer.Ordinal);
+				this.custom.Add(name, output);
 				break;
 		}
 	}
@@ -166,15 +159,5 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 
 	#region Public Override Methods
 	public override string ToString() => this.Title;
-	#endregion
-
-	#region Public Virtual Methods
-	protected virtual void ParseCustomResult(object output)
-	{
-		if (output is not null)
-		{
-			throw new NotSupportedException(Globals.CurrentCulture(EveMessages.OutputTypeNotHandled, output.GetType().Name));
-		}
-	}
 	#endregion
 }

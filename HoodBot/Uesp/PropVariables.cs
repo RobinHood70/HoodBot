@@ -10,6 +10,10 @@ using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 public class PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator? pageSetGenerator) : PropListModule<VariablesInput, VariablesResult, VariableItem>(wal, input, pageSetGenerator), IGeneratorModule
 {
+	#region Public Constants
+	public const string ModuleName = "metavars";
+	#endregion
+
 	#region Constructors
 	public PropVariables(WikiAbstractionLayer wal, VariablesInput input)
 		: this(wal, input, null)
@@ -20,7 +24,7 @@ public class PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPage
 	#region Public Override Properties
 	public override int MinimumVersion => 110;
 
-	public override string Name => "metavars";
+	public override string Name => ModuleName;
 	#endregion
 
 	#region Protected Override Properties

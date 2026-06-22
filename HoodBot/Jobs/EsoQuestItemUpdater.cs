@@ -59,7 +59,7 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 	#endregion
 
 	#region Private Properties
-	private IReadOnlyDictionary<string, FilePage> Files => field ??= EsoFiles.GetOriginalFiles(this.Site);
+	private IReadOnlyDictionary<string, Title> Files => field ??= EsoFiles.GetOriginalFiles((UespSite)this.Site);
 
 	private UespNamespaceList NsList => field ??= new UespNamespaceList(this.Site);
 	#endregion
@@ -85,9 +85,9 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 			var item = this.items[id];
 			var abbr = string.Empty;
 			var name = string.Empty;
-			if (this.Files.TryGetValue(item.Icon, out var filePage))
+			if (this.Files.TryGetValue(item.Icon, out var fileTitle))
 			{
-				var (_, abbr2, name2, _) = UespFunctions.AbbreviationFromIconName(this.NsList, filePage.Title.PageName);
+				var (_, abbr2, name2, _) = UespFunctions.AbbreviationFromIconName(this.NsList, fileTitle.PageName);
 				abbr = abbr2 ?? string.Empty;
 				name = name2 ?? string.Empty;
 			}
@@ -162,9 +162,9 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 			template.Add(item.Name);
 		}
 
-		if (this.Files.TryGetValue(item.Icon, out var filePage))
+		if (this.Files.TryGetValue(item.Icon, out var fileTitle))
 		{
-			var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NsList, filePage.Title.PageName);
+			var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NsList, fileTitle.PageName);
 			template.Update("icontype", abbr ?? string.Empty);
 			template.Update("icon", name ?? string.Empty);
 		}

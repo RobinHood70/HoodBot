@@ -6,18 +6,12 @@ using RobinHood70.Robby.Design;
 
 internal static class MetaTemplateExtensions
 {
-	public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables) => CreateMetaPageCollection(site, pageModules, followRedirects, true, variables);
-
-	public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, bool gameSpaceOnly, params string[] variables)
+	public static PageCollection GetMetaVariables(this Site site, PageModules pageModules, bool followRedirects, params string[] variables)
 	{
 		ArgumentNullException.ThrowIfNull(site);
-		PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
-		{
-			PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
-			{
-				GameSpaceOnly = gameSpaceOnly
-			}
-		};
+		VariablesInput variablesInput = new() { Variables = variables };
+		PageLoadOptions pageLoadOptions = new(pageModules, followRedirects);
+		pageLoadOptions.CustomPropertyInputs.Add(variablesInput);
 
 		return new PageCollection(site, pageLoadOptions);
 	}

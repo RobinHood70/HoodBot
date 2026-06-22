@@ -162,4 +162,7 @@
   <data name="RevisionSha1Failed" xml:space="preserve">
     <value>SHA1 check for revision {0} failed.</value>
   </data>
+  <data name="HandlerAlreadyExists" xml:space="preserve">
+    <value>A custom result handler already exists for the key {0}.</value>
+  </data>
 </root>

@@ -118,13 +118,13 @@ public class UpdateLoreBookLists(JobManager jobManager) : EditJob(jobManager)
 
 	private PageCollection FilterToListBooks()
 	{
-		var listBooks = this.Site.CreateMetaPageCollection(PageModules.Info, false, "listbook");
+		var listBooks = this.Site.GetMetaVariables(PageModules.Info, false, "listbook");
 		listBooks.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Lore);
 		listBooks.GetCustomGenerator(new VariablesInput() { Variables = ["listbook"] });
 		for (var i = listBooks.Count - 1; i >= 0; i--)
 		{
-			var varPage = (VariablesPage)listBooks[i];
-			var value = varPage.GetVariable("listbook");
+			var variables = (VariablesPageModule)listBooks[i].Custom[VariablesPageModule.PropertyName];
+			var value = variables.GetVariable("listbook");
 			if (value != null && !ListBookValue(value))
 			{
 				listBooks.RemoveAt(i);

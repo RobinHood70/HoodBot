@@ -102,6 +102,8 @@ public partial class Site : IMessageSource
 		this.DiscussionPages = new TitleCollection(this);
 		this.Culture = CultureInfo.CurrentCulture;
 		this.Namespaces = new NamespaceCollection(this, [], []);
+		Page.RegisterCustomPropertyHandler(CategoriesPageModule.PropertyName, CategoriesPageModule.ParseCategoryInfoResult);
+		Page.RegisterCustomPropertyHandler(FilePageModule.PropertyName, FilePageModule.ParseImageInfoResult);
 	}
 	#endregion
 
@@ -321,7 +323,21 @@ public partial class Site : IMessageSource
 	/// <param name="resource">The location of the resource (typically, a Uri path). This does <em>not</em> have to be located on the wiki.</param>
 	/// <param name="fileName">Name of the file.</param>
 	/// <remarks><paramref name="resource"/> is not a <see cref="Uri"/> in order to satisfy <see cref="IWikiAbstractionLayer"/>'s agnosticism. In practice, however, it will almost certainly always be one.</remarks>
-	public bool Download(string resource, string? fileName) => this.Download(new DownloadInput(resource, fileName));
+	public bool Download(string resource, string? fileName)
+	{
+		ArgumentNullException.ThrowIfNull(resource);
+		return this.Download(new DownloadInput(resource, fileName));
+	}
+
+	/// <summary>Downloads a resource to a local file.</summary>
+	/// <param name="resource">The location of the resource (typically, a Uri path). This does <em>not</em> have to be located on the wiki.</param>
+	/// <param name="fileName">Name of the file.</param>
+	/// <remarks><paramref name="resource"/> is not a <see cref="Uri"/> in order to satisfy <see cref="IWikiAbstractionLayer"/>'s agnosticism. In practice, however, it will almost certainly always be one.</remarks>
+	public bool Download(Uri resource, string? fileName)
+	{
+		ArgumentNullException.ThrowIfNull(resource);
+		return this.Download(resource.OriginalString, fileName);
+	}
 
 	/// <summary>Downloads the most recent version of a file from the wiki.</summary>
 	/// <param name="pageName">Name of the page. You do not have to specify the File namespace, but you may if it's convenient.</param>
@@ -330,9 +346,12 @@ public partial class Site : IMessageSource
 	{
 		TitleCollection fileTitle = new(this, MediaWikiNamespaces.File, pageName);
 		var filePages = fileTitle.Load(PageModules.FileInfo);
-		if (filePages.Count == 1 && filePages[0] is FilePage filePage)
+		if (filePages.Count == 1 &&
+			filePages[0].Custom.TryGetValue(FilePageModule.PropertyName, out var fileModule) &&
+			fileModule is FilePageModule filePage &&
+			filePage.LatestFileRevision is FileRevision fileRevision)
 		{
-			filePage.Download(fileName);
+			fileRevision.Download(this, fileName);
 		}
 	}
 
@@ -424,13 +443,13 @@ public partial class Site : IMessageSource
 	/// <param name="messages">The messages.</param>
 	/// <param name="arguments">Optional arguments to substitute into the messages.</param>
 	/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-	public IReadOnlyDictionary<string, MessagePage> LoadMessages(IEnumerable<string> messages, params string[] arguments) => this.LoadMessages(messages, arguments as IEnumerable<string>);
+	public IReadOnlyDictionary<string, MessageInfo> LoadMessages(IEnumerable<string> messages, params string[] arguments) => this.LoadMessages(messages, arguments as IEnumerable<string>);
 
 	/// <summary>Gets multiple messages from MediaWiki space.</summary>
 	/// <param name="messages">The messages.</param>
 	/// <param name="arguments">Optional arguments to substitute into the messages.</param>
 	/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-	public IReadOnlyDictionary<string, MessagePage> LoadMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadMessages(new AllMessagesInput
+	public IReadOnlyDictionary<string, MessageInfo> LoadMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadMessages(new AllMessagesInput
 	{
 		Messages = messages,
 		Arguments = arguments,
@@ -544,14 +563,14 @@ public partial class Site : IMessageSource
 	/// <param name="messages">The messages.</param>
 	/// <param name="arguments">Optional arguments to substitute into the message.</param>
 	/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-	public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadParsedMessages(messages, arguments, null);
+	public IReadOnlyDictionary<string, MessageInfo> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadParsedMessages(messages, arguments, null);
 
 	/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
 	/// <param name="messages">The messages.</param>
 	/// <param name="arguments">Optional arguments to substitute into the message.</param>
 	/// <param name="context">The title to use for parsing.</param>
 	/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-	public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title? context) => this.LoadMessages(new AllMessagesInput
+	public IReadOnlyDictionary<string, MessageInfo> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title? context) => this.LoadMessages(new AllMessagesInput
 	{
 		Messages = messages,
 		Arguments = arguments,
@@ -1337,15 +1356,14 @@ public partial class Site : IMessageSource
 
 	/// <summary>Gets one or more messages from MediaWiki space.</summary>
 	/// <param name="input">The input parameters.</param>
-	/// <returns>A read-only dictionary of message names and their associated <see cref="MessagePage"/> objects, as specified by the input parameters.</returns>
-	protected virtual IReadOnlyDictionary<string, MessagePage> LoadMessages(AllMessagesInput input)
+	/// <returns>A read-only dictionary of message names and their associated <see cref="MessageInfo"/> objects, as specified by the input parameters.</returns>
+	protected virtual IReadOnlyDictionary<string, MessageInfo> LoadMessages(AllMessagesInput input)
 	{
 		var result = this.AbstractionLayer.AllMessages(input);
-		Dictionary<string, MessagePage> retval = new(result.Count, StringComparer.Ordinal);
+		Dictionary<string, MessageInfo> retval = new(result.Count, StringComparer.Ordinal);
 		foreach (var item in result)
 		{
-			var factory = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], item.Name);
-			retval.Add(item.Name, new MessagePage(factory, item));
+			retval.Add(item.Name, new MessageInfo(item));
 		}
 
 		return retval.AsReadOnly();

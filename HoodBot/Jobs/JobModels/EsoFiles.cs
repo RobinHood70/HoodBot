@@ -8,10 +8,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using RobinHood70.CommonCode;
+using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon;
-using RobinHood70.WikiCommon.Parser;
 
 #region Public Enumerations
 public enum EsoFileTypes
@@ -156,47 +156,38 @@ public static class EsoFiles
 		return allIcons;
 	}
 
-	public static ReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site) => GetOriginalFiles(site, PageModules.Default);
-
-	public static ReadOnlyDictionary<string, FilePage> GetOriginalFiles(Site site, PageModules pageModules)
+	public static ReadOnlyDictionary<string, Title> GetOriginalFiles(UespSite site)
 	{
-		const string TemplateName = "Online File";
-
 		ArgumentNullException.ThrowIfNull(site);
-		var retval = new Dictionary<string, FilePage>(StringComparer.OrdinalIgnoreCase);
-
-		var pages = new PageCollection(site, pageModules | PageModules.FileInfo);
+		var retval = new Dictionary<string, Title>(StringComparer.OrdinalIgnoreCase);
+		var pages = site.GetMetaVariables(PageModules.Info | PageModules.FileInfo, false, "originalfile");
 		pages.SetLimitations(LimitationType.OnlyAllow, MediaWikiNamespaces.File);
-		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn, true, Filter.Exclude, MediaWikiNamespaces.File);
+		pages.GetCustomGenerator(new VariablesInput() { Variables = ["originalfile"] });
 		foreach (var page in pages)
 		{
-			var parser = new Robby.Parser.SiteParser(page);
-			if (parser.FindTemplate(TemplateName) is not ITemplateNode template)
-			{
-				Debug.WriteLine("Template not found: " + page.Title.FullPageName()); // This should not be possible.
-				continue;
-			}
-
-			if (template.GetValue("originalfile") is not string originalFileName)
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			if (variables.GetVariable("originalfile") is not string originalFileName)
 			{
 				Debug.WriteLine("Missing originalfileName parameter: " + page.Title.FullPageName()); // Possible, but undesirable.
 				continue;
 			}
 
-			var filePage = (FilePage)page;
-			if (!retval.TryAdd(originalFileName, filePage))
+			var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
+			if (!retval.TryAdd(originalFileName, page.Title))
 			{
 				// Always use earliest page in the event of a conflict. While this could lead to repeatedly sorting the same set of file revisions, the number of conflicts and the number of file revisions are both likely to be small.
 				var firstPage = retval[originalFileName];
-				var firstDate = firstPage.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
-				var currentDate = filePage.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
+				var fileModule = (FilePageModule)pages[firstPage].Custom[FilePageModule.PropertyName];
+				var firstDate = fileModule.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
+				var currentDate = fileInfo.FileRevisions.OrderBy(fr => fr.Timestamp).FirstOrDefault()?.Timestamp;
 				if (currentDate < firstDate)
 				{
-					retval[originalFileName] = filePage;
+					retval[originalFileName] = page.Title;
 				}
 			}
 		}
 
+		pages.Clear();
 		return retval.AsReadOnly();
 	}
 

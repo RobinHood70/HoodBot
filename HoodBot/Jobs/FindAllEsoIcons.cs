@@ -18,14 +18,12 @@ internal sealed class FindAllEsoIcons(JobManager jobManager) : EditJob(jobManage
 		this.Pages.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Exclude, "ON-icon-achievement-R");
 		foreach (var page in this.Pages)
 		{
-			if (page is FilePage file)
+			var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
+			foreach (var fileRev in fileInfo.FileRevisions)
 			{
-				foreach (var fileRev in file.FileRevisions)
+				if (fileRev.Sha1 is not null && checksums.TryGetValue(fileRev.Sha1, out var fileList))
 				{
-					if (fileRev.Sha1 is not null && checksums.TryGetValue(fileRev.Sha1, out var fileList))
-					{
-						Debug.WriteLine(file.Title.FullPageName() + " matched " + string.Join(", ", fileList));
-					}
+					Debug.WriteLine(page.Title.FullPageName() + " matched " + string.Join(", ", fileList));
 				}
 			}
 		}

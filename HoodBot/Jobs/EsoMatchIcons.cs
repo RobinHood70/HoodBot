@@ -71,7 +71,8 @@ public class EsoMatchIcons : EditJob
 			throw new InvalidOperationException();
 		}
 
-		if (page is not FilePage filePage || filePage.LatestFileRevision is not FileRevision latestRevision)
+		var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
+		if (fileInfo.LatestFileRevision is not FileRevision latestRevision)
 		{
 			return;
 		}
@@ -81,7 +82,7 @@ public class EsoMatchIcons : EditJob
 		SiteParser parser = new(page);
 		FindLicense(parser); // TODO: This is a dummy line put in here to shut up the nag until I can come back to this.
 		this.ReplaceLicense(parser);
-		PageParts parts = new(filePage);
+		PageParts parts = new(page);
 		if (foundIcons == null || foundIcons.Count == 0)
 		{
 			if (parts.OriginalFiles.Count > 0)

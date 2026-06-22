@@ -16,18 +16,12 @@ public abstract class PageCreator
 	public static DefaultPageCreator Default { get; } = new DefaultPageCreator();
 	#endregion
 
-	#region Public Methods
+	#region Public Static Methods
 
-	/// <summary>Creates a page.</summary>
-	/// <param name="title">An IHasTitle object representing the page to create.</param>
-	/// <returns>A fully populated Page object.</returns>
-	public Page CreatePage(Title title) => this.CreatePage(title, PageLoadOptions.None, null);
-
-	/// <summary>Gets regular and custom property inputs.</summary>
+	/// <summary>Converts PageLoadOptions to a list of property inputs.</summary>
 	/// <param name="options">Page load options.</param>
 	/// <returns>A list of property inputs, including any customized property inputs required.</returns>
-	/// <seealso cref="AddCustomPropertyInputs" />
-	public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
+	public static IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 	{
 		ArgumentNullException.ThrowIfNull(options);
 		var whatToLoad = options.Modules;
@@ -131,13 +125,18 @@ public abstract class PageCreator
 		}
 
 		// Always load custom flags last so implementers can examine or alter the entire list as needed.
-		if (whatToLoad.HasAnyFlag(PageModules.Custom))
-		{
-			this.AddCustomPropertyInputs(propertyInputs);
-		}
+		propertyInputs.AddRange(options.CustomPropertyInputs);
 
 		return propertyInputs;
 	}
+	#endregion
+
+	#region Public Methods
+
+	/// <summary>Creates a page.</summary>
+	/// <param name="title">An IHasTitle object representing the page to create.</param>
+	/// <returns>A fully populated Page object.</returns>
+	public Page CreatePage(Title title) => this.CreatePage(title, PageLoadOptions.None, null);
 	#endregion
 
 	#region Public Abstract Methods
@@ -160,12 +159,5 @@ public abstract class PageCreator
 	/// <param name="flags">The flags that apply to the page.</param>
 	/// <returns>A new PageItem for use by WallE.</returns>
 	public virtual PageItem CreatePageItem(int ns, string title, long pageId, PageFlags flags) => new(ns, title, pageId, flags);
-	#endregion
-
-	#region Protected Abstract Methods
-
-	/// <summary>Adds any custom property inputs.</summary>
-	/// <param name="propertyInputs">The property inputs.</param>
-	protected abstract void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs);
 	#endregion
 }

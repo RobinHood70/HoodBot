@@ -35,7 +35,7 @@ internal sealed class SFFixedLocations : EditJob
 		};
 
 		var sfSite = (UespSite)jobManager.Site;
-		this.Pages = sfSite.CreateMetaPageCollection(PageModules.Default, false, "editorid", "objectid");
+		this.Pages = sfSite.GetMetaVariables(PageModules.Default, false, "editorid", "objectid");
 	}
 	#endregion
 
@@ -63,9 +63,9 @@ internal sealed class SFFixedLocations : EditJob
 			this.CreateFooterSection(sections);
 		}
 
-		var metaPage = (VariablesPage)page;
-		var editorId = metaPage.GetVariable("editorid");
-		var objectId = metaPage.GetVariable("objectid");
+		var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+		var editorId = variables.GetVariable("editorid");
+		var objectId = variables.GetVariable("objectid");
 		var locations =
 			(editorId is not null && this.refUses.TryGetValue(editorId, out var refEditorId)) ? refEditorId :
 			(objectId is not null && this.refUses.TryGetValue(objectId, out var refObjectId)) ? refObjectId :

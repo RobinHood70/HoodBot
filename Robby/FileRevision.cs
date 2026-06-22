@@ -69,4 +69,20 @@ public class FileRevision
 	/// <summary>Gets the width of the image.</summary>
 	/// <value>The width of the image.</value>
 	public int Width { get; }
+
+	/// <summary>Downloads the file revision to the specified file name. The file will be downloaded from the URI associated with this file revision, so it is important to ensure that the URI is not null before calling this method.</summary>
+	/// <param name="site">The site to download the file from.</param>
+	/// <param name="fileName">The file name to save the downloaded file as.</param>
+	/// <exception cref="InvalidOperationException">Thrown when the URI is null.</exception>
+	public void Download(Site site, string fileName)
+	{
+		ArgumentNullException.ThrowIfNull(site);
+		ArgumentException.ThrowIfNullOrEmpty(fileName);
+		if (this.Uri is null)
+		{
+			throw new InvalidOperationException("Cannot download file because URI is null.");
+		}
+
+		site.Download(this.Uri.OriginalString, fileName);
+	}
 }

@@ -93,17 +93,13 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 	{
 		var retval = new TitleDictionary<Collectible>();
 		var site = (UespSite)this.Site;
-		var pages = site.CreateMetaPageCollection(PageModules.None, false, "id");
+		var pages = site.GetMetaVariables(PageModules.None, false, "id");
 		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 		var untracked = new TitleCollection(this.Site);
 		foreach (var page in pages)
 		{
-			if (page is not VariablesPage variablesPage)
-			{
-				continue;
-			}
-
-			var idText = variablesPage.GetVariable("id");
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			var idText = variables.GetVariable("id");
 			if (!long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
 			{
 				Debug.WriteLine($"Invalid id on page {page.Title}");

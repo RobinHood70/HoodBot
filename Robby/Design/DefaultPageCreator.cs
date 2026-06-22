@@ -1,8 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design;
 
 using System;
-using System.Collections.Generic;
-using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
 /// <summary>The default page creation mechanism.</summary>
@@ -19,23 +17,7 @@ public class DefaultPageCreator : PageCreator
 	public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem)
 	{
 		ArgumentNullException.ThrowIfNull(title);
-		return title.Namespace.Id switch
-		{
-			MediaWikiNamespaces.Category => new CategoryPage(title, options, apiItem),
-			MediaWikiNamespaces.File => new FilePage(title, options, apiItem),
-			MediaWikiNamespaces.MediaWiki => new MessagePage(title, options, apiItem),
-			_ => new Page(title, options, apiItem),
-		};
-	}
-	#endregion
-
-	#region Protected Override Methods
-
-	/// <summary>Adds any custom property inputs.</summary>
-	/// <param name="propertyInputs">The property inputs.</param>
-	protected override void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs)
-	{
-		// The default creator requires no custom inputs, by defnition, so this is a null function.
+		return new Page(title, options, apiItem);
 	}
 	#endregion
 }

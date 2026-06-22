@@ -133,40 +133,41 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	{
 		var retval = new TitleDictionary<Furnishing>();
 		var knownIds = new Dictionary<long, Title>();
-		var pages = this.Site.CreateMetaPageCollection(PageModules.None, false, "collectible", "id");
+		var pages = this.Site.GetMetaVariables(PageModules.None, false, "collectible", "id");
 		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 		foreach (var title in this.deprecatedTitles)
 		{
 			pages.Remove(title);
 		}
 
-		foreach (var varPage in pages.Cast<VariablesPage>())
+		foreach (var page in pages)
 		{
-			var collectible = varPage.GetVariable("collectible")?.Length > 0;
-			if (varPage.GetVariable("id") is string idText &&
+			var variables = (VariablesPageModule)page.Custom["variable"];
+			var collectible = variables.GetVariable("collectible")?.Length > 0;
+			if (variables.GetVariable("id") is string idText &&
 				long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, this.Site.Culture, out var id))
 			{
 				var furnId = Furnishing.GetKey(id, collectible);
 				if (this.furnishings.TryGetValue(furnId, out var item))
 				{
 					var realKey = Furnishing.GetKey(id, collectible);
-					if (!knownIds.TryAdd(realKey, varPage.Title))
+					if (!knownIds.TryAdd(realKey, page.Title))
 					{
-						this.Warn($"Same id found on multiple pages: {id} on {varPage.Title} and {knownIds[realKey]}");
+						this.Warn($"Same id found on multiple pages: {id} on {page.Title} and {knownIds[realKey]}");
 					}
 
-					item.PageName = varPage.Title.PageName; // Make sure the item knows what page it belongs to.
+					item.PageName = page.Title.PageName; // Make sure the item knows what page it belongs to.
 					var title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], item.PageName);
 					retval.Add(title, item);
 				}
 				else
 				{
-					Debug.WriteLine($"{varPage.Title} has an unrecognized id");
+					Debug.WriteLine($"{page.Title} has an unrecognized id");
 				}
 			}
 			else
 			{
-				Debug.WriteLine($"{varPage.Title} has a non-numeric or missing id");
+				Debug.WriteLine($"{page.Title} has a non-numeric or missing id");
 			}
 		}
 

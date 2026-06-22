@@ -405,7 +405,8 @@ public class EsoQuests : EditJob
 		var ignore = new HashSet<long>(existing.Count);
 		foreach (var page in existing)
 		{
-			if (page is VariablesPage varPage && varPage.GetVariable("ID") is string idText)
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			if (variables.GetVariable("ID") is string idText)
 			{
 				var split = idText.Split(',');
 				foreach (var id in split)
@@ -597,7 +598,7 @@ public class EsoQuests : EditJob
 
 	private PageCollection GetQuestIdsFromWiki()
 	{
-		var retval = this.Site.CreateMetaPageCollection(PageModules.Info | PageModules.Properties, true, "ID");
+		var retval = this.Site.GetMetaVariables(PageModules.Info | PageModules.Properties, true, "ID");
 		retval.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 		return retval;
 	}

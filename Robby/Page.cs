@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby.Design;
+using RobinHood70.Robby.Properties;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
@@ -18,9 +20,14 @@ using RobinHood70.WikiCommon;
 /// <seealso cref="Title" />
 public class Page : ITitle
 {
+	#region Static Fields
+	private static readonly Dictionary<string, Func<object, (string Key, object Value)>> CustomHandlers = new(StringComparer.Ordinal);
+	#endregion
+
 	#region Fields
 	private readonly Dictionary<Title, BacklinksTypes> backlinks = [];
 	private readonly List<Category> categories = [];
+	private readonly Dictionary<string, object> custom = new(0, StringComparer.Ordinal);
 	private readonly List<Title> links = [];
 	private readonly Dictionary<string, string> properties = new(StringComparer.Ordinal);
 	private readonly List<Revision> revisions = [];
@@ -63,6 +70,23 @@ public class Page : ITitle
 				PopulateProperties(pageItem);
 				PopulateTemplates(pageItem);
 				PopulateCategories(pageItem);
+				if (pageItem.Custom?.Count > 0)
+				{
+					this.custom = new Dictionary<string, object>(StringComparer.Ordinal);
+					foreach (var (key, value) in pageItem.Custom)
+					{
+						if (CustomHandlers.TryGetValue(key, out var handler))
+						{
+							var (customKey, customValue) = handler(value);
+							this.custom[customKey] = customValue;
+						}
+						else
+						{
+							Debug.WriteLine("No handler for custom property: " + key);
+							this.custom[key] = value;
+						}
+					}
+				}
 
 				this.IsLoaded = true;
 				break;
@@ -202,6 +226,9 @@ public class Page : ITitle
 		get => field ?? this.Site.Culture;
 		set;
 	}
+
+	/// <summary>Gets the custom properties for the page.</summary>
+	public IReadOnlyDictionary<string, object> Custom => this.custom;
 
 	/// <summary>Gets the current revision.</summary>
 	/// <value>The current revision.</value>
@@ -364,6 +391,20 @@ public class Page : ITitle
 	{
 		ArgumentNullException.ThrowIfNull(title);
 		return title.Site.CreatePage(title, text);
+	}
+
+	/// <summary>Registers a handler to transform a custom object to the desired form for a Page object.</summary>
+	/// <param name="key">The key for the custom property.</param>
+	/// <param name="handler">The handler to register.</param>
+	/// <exception cref="ArgumentException">Thrown if a handler for the specified key already exists.</exception>
+	public static void RegisterCustomPropertyHandler(string key, Func<object, (string Key, object Value)> handler)
+	{
+		ArgumentNullException.ThrowIfNull(key);
+		ArgumentNullException.ThrowIfNull(handler);
+		if (!CustomHandlers.TryAdd(key, handler))
+		{
+			throw new ArgumentException(Globals.CurrentCulture(Resources.HandlerAlreadyExists, key), nameof(key));
+		}
 	}
 	#endregion
 

@@ -56,7 +56,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 			var wikiIconName = iconInfo.IconName.PageName.Replace("\"", string.Empty, StringComparison.Ordinal);
 			var page = existing["File:" + wikiIconName];
 
-			if (EsoSpace.ShouldUpload(localFileName, (FilePage)page))
+			if (EsoSpace.ShouldUpload(localFileName, page))
 			{
 				var parser = new SiteParser(page);
 				_ = EsoSpace.FindOrCreateOnlineFile(parser, iconInfo.LocalIcon);
@@ -72,7 +72,7 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 	private PageCollection GetPages()
 	{
 		var uesp = (UespSite)this.Site;
-		var pages = uesp.CreateMetaPageCollection(PageModules.None, false, "collectible", "icon", "id", "transcluded");
+		var pages = uesp.GetMetaVariables(PageModules.None, false, "collectible", "icon", "id", "transcluded");
 		pages.GetBacklinks("Template:Online Furnishing Summary", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 		pages.Remove("Online:Alliance War Dog");
 		pages.Remove("Online:Alliance War Dog (Dominion)");
@@ -89,13 +89,13 @@ internal sealed class EsoFurnishingUpload(JobManager jobManager) : WikiJob(jobMa
 		var retvalDupes = new Dictionary<long, Page>();
 		foreach (var page in pages)
 		{
-			if (page is VariablesPage varPage &&
-				varPage.GetVariable("id") is string idText &&
+			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
+			if (variables.GetVariable("id") is string idText &&
 				idText.Length > 0 &&
-				collectibleFilter == (varPage.GetVariable("collectible") is not null))
+				collectibleFilter == (variables.GetVariable("collectible") is not null))
 			{
 				var id = long.Parse(idText, this.Site.Culture);
-				var icon = varPage.GetVariable("icon");
+				var icon = variables.GetVariable("icon");
 				if (string.IsNullOrEmpty(icon))
 				{
 					icon = Furnishing.IconName(page.Title.PageName);
