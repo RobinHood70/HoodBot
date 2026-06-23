@@ -4,10 +4,11 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using RobinHood70.CommonCode;
 
 [StructLayout(LayoutKind.Auto)]
-public readonly struct EsoVersion : IComparable<EsoVersion>, IEquatable<EsoVersion>
+public readonly partial struct EsoVersion : IComparable<EsoVersion>, IEquatable<EsoVersion>
 {
 	#region Public Constructors
 	public EsoVersion()
@@ -24,32 +25,27 @@ public readonly struct EsoVersion : IComparable<EsoVersion>, IEquatable<EsoVersi
 
 	public EsoVersion(string text)
 	{
-		if (text.Length == 0)
+		ArgumentNullException.ThrowIfNull(text);
+		var textSplit = text.Trim().Split("pts", 2, StringSplitOptions.None);
+		if (int.TryParse(textSplit[0], CultureInfo.InvariantCulture, out var version))
 		{
+			this.Version = version;
+			this.Pts = textSplit.Length == 2;
+		}
+		else
+		{
+			// Empty string or string coincidentally ending in "pts".
 			this.Version = Empty.Version;
 			this.Pts |= Empty.Pts;
-			return;
 		}
-
-		text = text?.Trim() ?? string.Empty;
-		var pts = text.EndsWith("pts", StringComparison.Ordinal);
-		if (pts)
-		{
-			text = text[..^3];
-		}
-
-		if (!int.TryParse(text, CultureInfo.InvariantCulture, out var version))
-		{
-			throw new ArgumentException("Not a valid ESO version.", nameof(text));
-		}
-
-		this.Version = version;
-		this.Pts = pts;
 	}
 	#endregion
 
 	#region Public Static Properties
 	public static EsoVersion Empty => new();
+
+	[GeneratedRegex(@"([0-9]+(pts)?)?\z", RegexOptions.ExplicitCapture, Globals.DefaultGeneratedRegexTimeout)]
+	public static partial Regex VersionFinder { get; }
 	#endregion
 
 	#region Public Properties

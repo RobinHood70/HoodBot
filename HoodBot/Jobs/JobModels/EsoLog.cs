@@ -14,7 +14,6 @@ internal static class EsoLog
 {
 	#region Fields
 	private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
-	private static readonly Regex UpdateFinder = new(@"\d*(pts)?\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	private static readonly Dictionary<string, EsoVersion[]> LatestVersions = new(StringComparer.Ordinal);
 	#endregion
 
@@ -87,7 +86,7 @@ internal static class EsoLog
 			var versionIsBlank = false;
 			foreach (var table in EsoDb.ShowTables(prefix))
 			{
-				var match = UpdateFinder.Match(table);
+				var match = EsoVersion.VersionFinder.Match(table);
 				if (match.Success)
 				{
 					if (match.Value.Length == 0)
