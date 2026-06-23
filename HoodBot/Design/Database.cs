@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using MySql.Data.MySqlClient;
-using RobinHood70.HoodBot.Jobs.JobModels;
 
 // This is a quick conversion from a static class to a standard class. This can probably be converted to use (or inherit from) ADO.NET classes at some point, but for now, I'm leaving this as close to the original code as possible for an easy changeover.
 public class Database
@@ -110,7 +109,7 @@ public class Database
 
 	public IEnumerable<T> RunQuery<T>(string query, long pageSize, Func<IDataRecord, T> factory) => RunQuery(this.ConnectionString, query, pageSize, factory);
 
-	public IEnumerable<string> ShowTables() => this.ShowTables(string.Empty);
+	public IEnumerable<string> ShowTables() => this.ShowTables(null);
 
 	public IEnumerable<string> ShowTables(string? prefix)
 	{
@@ -122,7 +121,7 @@ public class Database
 
 		foreach (var row in this.RunQuery(query))
 		{
-			yield return EsoLog.ConvertEncoding((string)row[0]);
+			yield return (string)row[0];
 		}
 	}
 	#endregion

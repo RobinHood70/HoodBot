@@ -163,11 +163,11 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 	#region Private Static Methods
 	private static Morph MorphFromRow(IDataRecord row) => new(
 		abilityId: (long)row["abilityId"],
-		effectLine: EsoLog.ConvertEncoding((string)row["effectLines"]),
+		effectLine: (string)row["effectLines"],
 		index: (sbyte)row["morph"],
 		maxRank: (sbyte)row["maxRank"],
-		name: EsoLog.ConvertEncoding((string)row["name"]),
-		target: EsoLog.ConvertEncoding((string)row["target"]));
+		name: (string)row["name"],
+		target: (string)row["target"]);
 	#endregion
 
 	#region Private Methods

@@ -202,7 +202,7 @@ internal sealed class EsoSets : EditJob
 	{
 		const int numEntries = 12;
 		var bonusDescriptions = new List<(string ItemCount, string Text)>(numEntries);
-		var name = EsoLog.ConvertEncoding((string)row["setName"]);
+		var name = (string)row["setName"];
 		for (var i = 1; i <= numEntries; i++)
 		{
 			var bonusDesc = (string)row[$"setBonusDesc{i}"];
@@ -211,7 +211,7 @@ internal sealed class EsoSets : EditJob
 				continue;
 			}
 
-			bonusDesc = EsoLog.ConvertEncoding(bonusDesc);
+			// bonusDesc = EsoLog.ConvertEncoding(bonusDesc);
 			var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.TrimEntries);
 			if (bonusSplit.Length != 2 || bonusSplit[0][0] != '(')
 			{

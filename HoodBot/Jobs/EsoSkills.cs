@@ -169,7 +169,7 @@ internal sealed class EsoSkills : EditJob
 	{
 		var abilityId = (int)row["abilityId"];
 		var index = (sbyte)row["idx"];
-		var value = EsoLog.ConvertEncoding((string)row["value"]);
+		var value = (string)row["value"];
 		var key = (version.ToString(), abilityId, index);
 		if (ValueReplacements.TryGetValue(key, out var replacement))
 		{
@@ -289,8 +289,8 @@ internal sealed class EsoSkills : EditJob
 			}
 
 			var isPassive = (sbyte)row["isPassive"] == 1;
-			var name = EsoLog.ConvertEncoding((string)row["baseName"]);
-			var classLine = EsoLog.ConvertEncoding((string)row["skillTypeName"]).Split("::", StringSplitOptions.None);
+			var name = (string)row["baseName"];
+			var classLine = ((string)row["skillTypeName"]).Split("::", StringSplitOptions.None);
 			var skillClass = classLine[0];
 			if (skillClass.OrdinalEquals("Craft"))
 			{
@@ -317,7 +317,7 @@ internal sealed class EsoSkills : EditJob
 				var learnedLevel = (int)row["learnedLevel"];
 				var skillType = ((string)row["icon"]).Contains("_artifact_", StringComparison.OrdinalIgnoreCase)
 					? "Artifact"
-					: EsoLog.ConvertEncoding((string)row["type"]);
+					: (string)row["type"];
 				newSkill = new ActiveSkill(name, pageName, skillClass, skillLine, learnedLevel, skillType);
 			}
 
