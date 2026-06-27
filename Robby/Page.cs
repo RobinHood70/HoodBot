@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby.Design;
-using RobinHood70.Robby.Properties;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 
@@ -401,10 +400,7 @@ public class Page : ITitle
 	{
 		ArgumentNullException.ThrowIfNull(key);
 		ArgumentNullException.ThrowIfNull(handler);
-		if (!CustomHandlers.TryAdd(key, handler))
-		{
-			throw new ArgumentException(Globals.CurrentCulture(Resources.HandlerAlreadyExists, key), nameof(key));
-		}
+		CustomHandlers.TryAdd(key, handler);
 	}
 	#endregion
 

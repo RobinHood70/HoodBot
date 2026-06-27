@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using RobinHood70.WikiCommon;
 
@@ -150,8 +151,29 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 				this.transcludedIn.AddRange(result);
 				break;
 			default:
+				// This isn't pretty, but we have to have a list of objects since there could be multiple partial/duplicate responses across different requests. Alternatives would be to implement a static custom handlers list here as well, like the Robby.Page object, or allow prop result classes to implement some kind of Merge<T>(T other) function.
+				ArgumentNullException.ThrowIfNull(output);
 				this.custom ??= new Dictionary<string, object>(1, StringComparer.Ordinal);
-				this.custom.Add(name, output);
+				if (!this.custom.TryGetValue(name, out var list))
+				{
+					var genericType = output.GetType();
+					var listType = typeof(List<>).MakeGenericType(genericType);
+					if (Activator.CreateInstance(listType) is IList runtimeList)
+					{
+						runtimeList.Add(output);
+						list = runtimeList;
+						this.custom.Add(name, list);
+					}
+					else
+					{
+						throw new InvalidOperationException();
+					}
+				}
+				else if (list is IList runtimeList)
+				{
+					runtimeList.Add(output);
+				}
+
 				break;
 		}
 	}

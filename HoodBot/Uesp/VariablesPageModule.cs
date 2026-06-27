@@ -15,20 +15,23 @@ public class VariablesPageModule
 	#endregion
 
 	#region Constructors
-	public VariablesPageModule(VariablesResult variables)
+	public VariablesPageModule(IEnumerable<VariablesResult> variables)
 	{
-		foreach (var item in variables)
+		foreach (var result in variables)
 		{
-			var setName = item.Set ?? string.Empty;
-			if (!this.sets.TryGetValue(setName, out var set))
+			foreach (var item in result)
 			{
-				set = new Dictionary<string, string>(StringComparer.Ordinal);
-				this.sets.Add(setName, set);
-			}
+				var setName = item.Set ?? string.Empty;
+				if (!this.sets.TryGetValue(setName, out var set))
+				{
+					set = new Dictionary<string, string>(StringComparer.Ordinal);
+					this.sets.Add(setName, set);
+				}
 
-			foreach (var entry in item.Dictionary)
-			{
-				set[entry.Key] = entry.Value;
+				foreach (var entry in item.Dictionary)
+				{
+					set[entry.Key] = entry.Value;
+				}
 			}
 		}
 	}
@@ -41,7 +44,7 @@ public class VariablesPageModule
 	#endregion
 
 	#region Public Static Methods
-	public static (string Key, object Value) ParseVariablesResult(object result) => result is VariablesResult variables
+	public static (string Key, object Value) ParseVariablesResult(object result) => result is IEnumerable<VariablesResult> variables
 		? (PropertyName, new VariablesPageModule(variables))
 		: throw new InvalidOperationException($"Unexpected result type: {result?.GetType().FullName ?? "null"}");
 	#endregion

@@ -22,31 +22,34 @@ public sealed class FilePageModule
 	#region Constructors
 
 	/// <summary>Initializes a new instance of the <see cref="FilePageModule"/> class.</summary>
-	/// <param name="imageInfo">The API item to extract information from.</param>
-	public FilePageModule(ImageInfoResult imageInfo)
+	/// <param name="imageInfos">The API item to extract information from.</param>
+	public FilePageModule(IEnumerable<ImageInfoResult> imageInfos)
 	{
-		ArgumentNullException.ThrowIfNull(imageInfo);
+		ArgumentNullException.ThrowIfNull(imageInfos);
 		this.fileRevisions.Clear();
 		var latest = DateTime.MinValue;
-		foreach (var imageInfoEntry in imageInfo)
+		foreach (var imageInfo in imageInfos)
 		{
-			FileRevision fileRevision = new(
-				bitDepth: imageInfoEntry.BitDepth,
-				size: imageInfoEntry.Size,
-				height: imageInfoEntry.Height,
-				width: imageInfoEntry.Width,
-				comment: imageInfoEntry.Comment,
-				mimeType: imageInfoEntry.MimeType,
-				sha1: imageInfoEntry.Sha1,
-				user: imageInfoEntry.User,
-				timestamp: imageInfoEntry.Timestamp,
-				uri: imageInfoEntry.Uri == null ? null : new Uri(imageInfoEntry.Uri));
-			this.fileRevisions.Add(fileRevision);
-
-			if (fileRevision.Timestamp > latest)
+			foreach (var imageInfoEntry in imageInfo)
 			{
-				this.LatestFileRevision = fileRevision;
-				latest = fileRevision.Timestamp.Value;
+				FileRevision fileRevision = new(
+					bitDepth: imageInfoEntry.BitDepth,
+					size: imageInfoEntry.Size,
+					height: imageInfoEntry.Height,
+					width: imageInfoEntry.Width,
+					comment: imageInfoEntry.Comment,
+					mimeType: imageInfoEntry.MimeType,
+					sha1: imageInfoEntry.Sha1,
+					user: imageInfoEntry.User,
+					timestamp: imageInfoEntry.Timestamp,
+					uri: imageInfoEntry.Uri == null ? null : new Uri(imageInfoEntry.Uri));
+				this.fileRevisions.Add(fileRevision);
+
+				if (fileRevision.Timestamp > latest)
+				{
+					this.LatestFileRevision = fileRevision;
+					latest = fileRevision.Timestamp.Value;
+				}
 			}
 		}
 	}
@@ -71,7 +74,7 @@ public sealed class FilePageModule
 	public static (string Key, object Value) ParseImageInfoResult(object result)
 	{
 		ArgumentNullException.ThrowIfNull(result);
-		return result is ImageInfoResult imageInfo
+		return result is List<ImageInfoResult> imageInfo
 			? (PropertyName, new FilePageModule(imageInfo))
 			: throw new InvalidOperationException($"Unexpected result type: {result.GetType().FullName}");
 	}

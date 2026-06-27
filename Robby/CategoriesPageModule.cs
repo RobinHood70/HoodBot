@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby;
 
 using System;
+using System.Collections.Generic;
 using RobinHood70.WallE.Base;
 using RobinHood70.WallE.Eve.Modules;
 
@@ -17,15 +18,21 @@ public sealed class CategoriesPageModule
 	#region Constructors
 
 	/// <summary>Initializes a new instance of the <see cref="CategoriesPageModule" /> class.</summary>
-	/// <param name="catInfo">The API item to extract information from.</param>
-	public CategoriesPageModule(CategoryInfoResult catInfo)
+	/// <param name="customResult">The API item to extract information from.</param>
+	public CategoriesPageModule(IEnumerable<object> customResult)
 	{
-		ArgumentNullException.ThrowIfNull(catInfo);
-		this.FileCount = catInfo.Files;
-		this.FullCount = catInfo.Size;
-		this.Hidden = catInfo.Hidden;
-		this.PageCount = catInfo.Pages;
-		this.SubcategoryCount = catInfo.Subcategories;
+		ArgumentNullException.ThrowIfNull(customResult);
+		if (customResult is List<CategoryInfoResult> catInfos)
+		{
+			foreach (var catInfo in catInfos)
+			{
+				this.FileCount = catInfo.Files;
+				this.FullCount = catInfo.Size;
+				this.Hidden = catInfo.Hidden;
+				this.PageCount = catInfo.Pages;
+				this.SubcategoryCount = catInfo.Subcategories;
+			}
+		}
 	}
 	#endregion
 
@@ -58,7 +65,7 @@ public sealed class CategoriesPageModule
 	/// <param name="result">The result to parse.</param>
 	/// <returns>A new <see cref="CategoriesPageModule" /> instance.</returns>
 	/// <exception cref="InvalidOperationException">Thrown when the result is not of the expected type.</exception>
-	public static (string Key, object Value) ParseCategoryInfoResult(object result) => result is CategoryInfoResult categories
+	public static (string Key, object Value) ParseCategoryInfoResult(object result) => result is List<CategoryInfoResult> categories
 		? (PropertyName, new CategoriesPageModule(categories))
 		: throw new InvalidOperationException($"Unexpected result type: {result?.GetType().FullName ?? "null"}");
 	#endregion
