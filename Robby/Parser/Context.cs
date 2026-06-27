@@ -37,13 +37,16 @@ public sealed class Context
 		this.AddParserFunctionHandler("pagename", PageNamePF);
 
 		this.AddTemplateHandler("Anchor", ReturnFirstParameter);
+		this.AddTemplateHandler("ESO Quality Color", ReturnSecondParameter);
 		this.AddTemplateHandler("Castles Happiness", Ignore);
 		this.AddTemplateHandler("FC", ReturnSecondParameter);
 		this.AddTemplateHandler("Hover", ReturnSecondParameter);
 		this.AddTemplateHandler("Huh", Ignore);
+		this.AddTemplateHandler("Lore Link", ReturnSecondOrFirstParameter);
 		this.AddTemplateHandler("Pipe", Pipe);
 		this.AddTemplateHandler("Sic", ReturnFirstParameter);
 		this.AddTemplateHandler("TR3", ReturnSecondOrFirstParameter);
+		this.AddTemplateHandler("Year", ReturnSecondOrFirstParameter);
 
 		this.AddVariableHandler("!", Pipe);
 		this.AddVariableHandler("fullpagename", FullPageNameVar);
