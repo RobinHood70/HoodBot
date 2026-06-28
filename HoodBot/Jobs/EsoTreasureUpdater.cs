@@ -149,11 +149,24 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 
 	protected override void BeforeLoadPages()
 	{
-		foreach (var row in Database.RunQuery(EsoLog.Connection, "SELECT itemId, icon, name, description, tags, quality, value FROM minedItemSummary WHERE type IN (56, 57) AND description != ''"))
+		foreach (var row in Database.RunQuery(EsoLog.Connection, "SELECT itemId, icon, name, allNames, description, tags, quality, value FROM minedItemSummary WHERE type IN (56, 57) AND description != ''"))
 		{
 			var id = (int)row["itemId"];
 			var icon = (string)row["icon"];
 			var name = (string)row["name"];
+			var allNamesText = (string)row["allNames"];
+			var allNames = allNamesText.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
+			if (allNames.Length == 1)
+			{
+				name = allNames[0];
+			}
+			else
+			{
+				Debug.WriteLine("Multiple Names...pick one!");
+				Debug.WriteLine(allNamesText);
+				throw new InvalidOperationException();
+			}
+
 			var description = (string)row["description"];
 			var tags = (string)row["tags"];
 			var tagSplit = tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -175,7 +188,7 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 		}
 	}
 
-	protected override string GetEditSummary(Page page) => "Update quest item info";
+	protected override string GetEditSummary(Page page) => "Update treasures";
 
 	protected override void LoadPages() => this.Pages.GetBacklinks($"Template:{this.TemplateName}", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 
