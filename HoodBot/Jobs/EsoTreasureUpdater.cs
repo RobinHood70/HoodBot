@@ -128,20 +128,24 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 
 		this.WriteLine("== Unused Items ==");
 		this.WriteLine("{|class=\"wikitable sortable\"");
-		this.WriteLine("!class=unsortable| !!Item!!Location(s)!!Quest!!Description");
+		this.WriteLine("!class=\"unsortable\"|Icon!!Item!!class=\"unsortable\"|Description!!width=5%|Value!!Type");
 		foreach (var id in this.unused)
 		{
 			var item = this.items[id];
-			var abbr = string.Empty;
-			var name = string.Empty;
+			var icon = string.Empty;
 			if (this.Files.TryGetValue(item.Icon, out var fileTitle))
 			{
 				var (_, abbr2, name2, _) = UespFunctions.AbbreviationFromIconName(this.NsList, fileTitle.PageName);
-				abbr = abbr2 ?? string.Empty;
-				name = name2 ?? string.Empty;
+				var abbr = abbr2 ?? string.Empty;
+				var name = name2 ?? string.Empty;
+				if (abbr.Length > 0 && name.Length > 0)
+				{
+					icon = $"{{{{Icon|{abbr}|{name}}}}}";
+				}
 			}
 
-			this.WriteLine($"{{{{{this.TemplateName}|{item.Name}|icontype={abbr}|icon={name}|id={id}|loc=|{item.Description}}}}}");
+			var tags = item.Tags.OrdinalEquals("None") ? string.Empty : item.Tags;
+			this.WriteLine($"{{{{{this.TemplateName}|{icon}|{item.Name}|{item.Description}|{tags}|{item.Quality}|id={id}|value={item.Value}}}}}");
 		}
 
 		this.WriteLine("|}");
@@ -168,6 +172,7 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 			}
 
 			var description = (string)row["description"];
+			description = EsoLog.ColourCode.Replace(description, "'''${content}'''");
 			var tags = (string)row["tags"];
 			var tagSplit = tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			tags = tagSplit.Length == 0 ? "None" : string.Join(", ", tagSplit);
@@ -190,14 +195,31 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 
 	protected override string GetEditSummary(Page page) => "Update treasures";
 
-	protected override void LoadPages() => this.Pages.GetBacklinks($"Template:{this.TemplateName}", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
+	protected override void LoadPages()
+	{
+		this.Pages.GetBacklinks($"Template:{this.TemplateName}", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
+		this.Pages.GetBacklinks($"Template:ESO Contraband Item", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
+	}
+
+	protected override void ParseText(SiteParser parser)
+	{
+		foreach (var template in parser.TemplateNodes)
+		{
+			if (template.GetTitle(this.Site).PageNameEquals("ESO Contraband Item"))
+			{
+				template.SetTitle(this.TemplateName);
+			}
+		}
+
+		base.ParseText(parser);
+	}
 
 	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
 	{
 		// Skip if id parameter is missing, invalid, or doesn't match an item in the dictionary.
 		if (template.PrioritizedFind("itemId", "id") is not IParameterNode idParam)
 		{
-			Debug.WriteLine($"ID parameter is missing or invalid on page {parser.Title} for template: " + template.ToRaw());
+			Debug.WriteLine($"ID parameter not found on page {parser.Title} for template: " + template.ToRaw());
 			return;
 		}
 
@@ -205,7 +227,7 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 		if (!int.TryParse(idValue, this.Site.Culture, out var id) ||
 			!this.items.TryGetValue(id, out var item))
 		{
-			Debug.WriteLine($"ID parameter is invalid or not found in items dictionary on page {parser.Title}: " + idValue);
+			Debug.WriteLine($"ID value not in items dictionary on page {parser.Title}: " + idValue);
 			return;
 		}
 
