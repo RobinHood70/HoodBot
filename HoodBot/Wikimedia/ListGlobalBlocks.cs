@@ -24,21 +24,34 @@ public sealed class ListGlobalBlocks(WikiAbstractionLayer wal, GlobalBlocksInput
 	{
 		ArgumentNullException.ThrowIfNull(input);
 		ArgumentNullException.ThrowIfNull(request);
+		var prop = input.Properties;
+		if (this.SiteVersion < 144)
+		{
+			if (prop.HasFlag(GlobalBlocksProperties.Target))
+			{
+				prop = prop & ~GlobalBlocksProperties.Target | GlobalBlocksProperties.Address;
+			}
+		}
+		else if (prop.HasFlag(GlobalBlocksProperties.Address))
+		{
+			prop = prop & ~GlobalBlocksProperties.Address | GlobalBlocksProperties.Target;
+		}
+
 		request
-			.Add("start", input.Start)
-			.Add("end", input.End)
-			.AddIf("dir", "newer", input.SortAscending)
-			.Add("ids", input.Ids)
-			.Add("addresses", input.Addresses)
-			.AddIfNotNull("ip", input.IP?.ToString())
-			.AddFlags("prop", input.Properties)
-			.Add("limit", this.Limit);
+				.Add("start", input.Start)
+				.Add("end", input.End)
+				.AddIf("dir", "newer", input.SortAscending)
+				.Add("ids", input.Ids)
+				.Add("addresses", input.Addresses)
+				.AddIfNotNull("ip", input.IP?.ToString())
+				.AddFlags("prop", prop)
+				.Add("limit", this.Limit);
 	}
 
 	protected override GlobalBlocksResult? GetItem(JToken result) => result == null
 		? null
 		: new GlobalBlocksResult(
-			Address: (string?)result["address"],
+			Address: (string?)result["target"] ?? (string?)result["address"],
 			AnonymousOnly: result["anononly"].GetBCBool(),
 			By: (string?)result["by"],
 			ByWiki: (string?)result["byid"],

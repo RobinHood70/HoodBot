@@ -17,7 +17,8 @@ public enum GlobalBlocksProperties
 	Expiry = 1 << 4,
 	Reason = 1 << 5,
 	Range = 1 << 6,
-	All = Id | Address | By | Timestamp | Expiry | Reason | Range
+	Target = 1 << 7,
+	All = Id | Target | By | Timestamp | Expiry | Reason | Range
 }
 #endregion
 
