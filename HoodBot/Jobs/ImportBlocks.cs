@@ -75,14 +75,17 @@ internal sealed class ImportBlocks(JobManager jobManager) : WikiJob(jobManager, 
 				continue;
 			}
 
-			var api = new WikiAbstractionLayer(this.client, wiki.Api, this.Logger);
+			var readSpan = TimeSpan.FromMilliseconds(wiki.ReadThrottling ?? 0);
+			var writeSpan = TimeSpan.FromMilliseconds(wiki.WriteThrottling ?? 1000);
+			var subClient = JobManager.CreateClient(readSpan, writeSpan, this.JobManager.CancelToken);
+			var api = new WikiAbstractionLayer(subClient, wiki.Api, this.Logger);
 			api.SendingRequest += JobManager.WalSendingRequest;
 
 			this.StatusWriteLine(string.Empty);
 			Site site;
 			try
 			{
-				site = this.JobManager.CreateSite(wiki.WikiInfo, api, this.Site.EditingEnabled);
+				site = this.JobManager.CreateSite(wiki.WikiInfo.SiteClassIdentifier, api, this.Site.EditingEnabled);
 				site.Login(wiki.UserName, wiki.Password);
 				this.StatusWriteLine("Getting blocks for " + site.Name);
 			}

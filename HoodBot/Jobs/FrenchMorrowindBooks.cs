@@ -217,7 +217,7 @@ internal sealed class FrenchMorrowindBooks : CreateOrUpdateJob<FrenchMorrowindBo
 
 		var api = new WikiAbstractionLayer(client, uespWiki.Api, this.Logger);
 		api.SendingRequest += JobManager.WalSendingRequest;
-		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki, api, this.Site.EditingEnabled);
+		var enUesp = (UespSite)this.JobManager.CreateSite(uespWiki.SiteClassIdentifier, api, this.Site.EditingEnabled);
 		enUesp.Login(uespWiki.UserName, uespWiki.Password);
 
 		var pages = enUesp.GetMetaVariables(PageModules.Info, false, "icon", "id", "id2", "id3", "id4", "id5");

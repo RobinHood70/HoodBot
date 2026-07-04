@@ -11,6 +11,7 @@ using RobinHood70.HoodBot.Uesp;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
+using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
 
@@ -39,6 +40,11 @@ internal sealed class MorrowindBooksInterlanguageLinks : ParsedPageJob
 	public MorrowindBooksInterlanguageLinks(JobManager jobManager)
 		: base(jobManager)
 	{
+		if (jobManager.AbstractionLayer is not IInternetEntryPoint wal)
+		{
+			throw new InvalidOperationException("Abstraction layer must be an internet entry point.");
+		}
+
 		this.Pages.FilterToNamespaces(UespNamespaces.Morrowind);
 		var hostSplit = SplitHost(jobManager.WikiInfo.Api);
 		this.baseLang = hostSplit[0];
@@ -50,8 +56,13 @@ internal sealed class MorrowindBooksInterlanguageLinks : ParsedPageJob
 		};
 
 		var wikiInfo = JobManager.FindWikiInfo(wi => wi.Api?.Host.OrdinalICEquals(this.otherLang + '.' + hostSplit[1]) ?? false) ?? throw new InvalidOperationException($"Could not find wiki info for language '{this.otherLang}'");
-		var otherWal = jobManager.CreateAbstractionLayer(wikiInfo);
-		this.otherSite = jobManager.CreateSite(wikiInfo, otherWal, true);
+		if (wikiInfo.Api is null)
+		{
+			throw new InvalidOperationException("Wiki info API is null.");
+		}
+
+		var otherWal = JobManager.CreateAbstractionLayer(wal.Client, wikiInfo.Api, wikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag);
+		this.otherSite = jobManager.CreateSite(wikiInfo.SiteClassIdentifier, otherWal, true);
 		this.otherSite.Login(wikiInfo.UserName, wikiInfo.Password);
 		this.editSummary = this.baseLang switch
 		{

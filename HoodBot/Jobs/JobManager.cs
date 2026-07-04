@@ -30,12 +30,20 @@ public class JobManager : IDisposable
 	#region Constructors
 	public JobManager(WikiInfo wikiInfo, bool editingEnabled, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
 	{
+		if (wikiInfo.Api is null)
+		{
+			throw new InvalidOperationException($"Api must be set for wiki '{wikiInfo.DisplayName}'");
+		}
+
 		this.WikiInfo = wikiInfo;
 		this.CancelToken = cancelSource.Token;
 		this.PauseToken = pauseSource.Token;
-		this.Client = this.CreateClient();
-		this.AbstractionLayer = this.CreateAbstractionLayer(this.WikiInfo);
-		this.Site = this.CreateSite(this.WikiInfo, this.AbstractionLayer, editingEnabled);
+		var readSpan = TimeSpan.FromMilliseconds(wikiInfo.ReadThrottling ?? 0);
+		var writeSpan = TimeSpan.FromMilliseconds(wikiInfo.WriteThrottling ?? 1000);
+		this.Client = CreateClient(readSpan, writeSpan, this.CancelToken);
+		this.Client.RequestingDelay += this.Client_RequestingDelay;
+		this.AbstractionLayer = CreateAbstractionLayer(this.Client, this.WikiInfo.Api, this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag);
+		this.Site = this.CreateSite(this.WikiInfo.SiteClassIdentifier, this.AbstractionLayer, editingEnabled);
 	}
 	#endregion
 
@@ -78,6 +86,22 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Static Methods
+
+	public static IMediaWikiClient CreateClient(TimeSpan readThrottle, TimeSpan writeThrottle, CancellationToken cancellationToken)
+	{
+		// TODO: Below is a quick hack. Should probably be integrated into the UI at some point.
+		NetworkCredential? credentials = null; // new NetworkCredential("user", "password");
+		IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, App.Locator.Logger, cancellationToken);
+		if (readThrottle.Ticks > 0 || writeThrottle.Ticks > 0)
+		{
+			client = new ThrottledClient(
+				client,
+				readThrottle,
+				writeThrottle);
+		}
+
+		return client;
+	}
 
 	public static WikiInfo? FindWikiInfo(Predicate<WikiInfo> predicate)
 	{
@@ -142,17 +166,16 @@ public class JobManager : IDisposable
 	#endregion
 
 	#region Public Methods
-	public IWikiAbstractionLayer CreateAbstractionLayer(WikiInfo wikiInfo)
+	public static IWikiAbstractionLayer CreateAbstractionLayer(IMediaWikiClient client, Uri api, int maxLag)
 	{
-		ArgumentNullException.ThrowIfNull(wikiInfo);
-		Globals.ThrowIfNull(wikiInfo.Api, nameof(JobManager), nameof(wikiInfo), nameof(wikiInfo.Api));
-		var api = wikiInfo.Api;
+		ArgumentNullException.ThrowIfNull(client);
+		ArgumentNullException.ThrowIfNull(api);
 		IWikiAbstractionLayer abstractionLayer = api.OriginalString.OrdinalEquals("/")
 			? new WallE.Test.WikiAbstractionLayer()
-			: new WikiAbstractionLayer(this.Client, api, App.Locator.Logger);
+			: new WikiAbstractionLayer(client, api, App.Locator.Logger);
 		if (abstractionLayer is IMaxLaggable maxLagWal)
 		{
-			maxLagWal.MaxLag = this.WikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
+			maxLagWal.MaxLag = maxLag;
 		}
 
 #if DEBUG
@@ -166,10 +189,10 @@ public class JobManager : IDisposable
 		return abstractionLayer;
 	}
 
-	public Site CreateSite(WikiInfo wikiInfo, IWikiAbstractionLayer abstractionLayer, bool editingEnabled)
+	public Site CreateSite(string? siteClassIdentifier, IWikiAbstractionLayer abstractionLayer, bool editingEnabled)
 	{
 		// TODO: Refactor OnPagePreview (and possibly others) so that CreateSite is no longer tied into JobManager and can be safely used from within a job like ImportBlocks. Should probably work as is for now, but is definitely sketchy.
-		var retval = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier)(abstractionLayer);
+		var retval = Site.GetFactoryMethod(siteClassIdentifier)(abstractionLayer);
 		retval.EditingEnabled = editingEnabled;
 		retval.Changing += SiteChanging;
 		retval.PagePreview += this.OnPagePreview;
@@ -352,23 +375,6 @@ public class JobManager : IDisposable
 				eventArgs.Description);
 			this.OnUpdateStatus(text + '\n');
 		}
-	}
-
-	private IMediaWikiClient CreateClient()
-	{
-		// TODO: Below is a quick hack. Should probably be integrated into the UI at some point.
-		NetworkCredential? credentials = null; // new NetworkCredential("user", "password");
-		IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), credentials, App.Locator.Logger, this.CancelToken);
-		if (this.WikiInfo.ReadThrottling > 0 || this.WikiInfo.WriteThrottling > 0)
-		{
-			client = new ThrottledClient(
-				client,
-				TimeSpan.FromMilliseconds(this.WikiInfo.ReadThrottling ?? 0),
-				TimeSpan.FromMilliseconds(this.WikiInfo.WriteThrottling ?? 1000));
-		}
-
-		client.RequestingDelay += this.Client_RequestingDelay;
-		return client;
 	}
 
 	private void DisposeAbstractionLayer()
