@@ -260,9 +260,9 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 	private static Collectible CollectibleFromRow(IDataRecord row)
 	{
 		var id = (long)row["id"];
-		var name = ReplacementData.CollectibleNameOverrides.GetValueOrDefault(id, EsoLog.ConvertEncoding((string)row["name"]));
-		var collectibleType = EsoLog.ConvertEncoding((string)row["categoryName"]);
-		var subCategory = EsoLog.ConvertEncoding((string)row["subCategoryName"]);
+		var name = ReplacementData.CollectibleNameOverrides.GetValueOrDefault(id, (string)row["name"]);
+		var collectibleType = (string)row["categoryName"];
+		var subCategory = (string)row["subCategoryName"];
 		var fileCategory = CatToFileSubcat(collectibleType) ?? SubcatToSingular(subCategory);
 		fileCategory = fileCategory.OrdinalEquals("Hair Style")
 			? "hairstyle"
@@ -270,8 +270,8 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		return new Collectible(
 			id: id,
 			name: name,
-			nickName: EsoLog.ConvertEncoding((string)row["nickname"]),
-			description: EsoLog.ConvertEncoding((string)row["description"]),
+			nickName: (string)row["nickname"],
+			description: (string)row["description"],
 			collectibleType: collectibleType,
 			subCategory: subCategory,
 			imageName: $"ON-{fileCategory}-{name}",
