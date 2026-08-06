@@ -26,7 +26,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		SELECT id, name, nickname, description, categoryName, subCategoryName
 		FROM collectibles
 		WHERE
-			((categoryName IN ('Appearance', 'Customized Actions', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Patrons', 'Tools') AND referenceId != 0) OR
+			((categoryName IN ('Appearance', 'Customized Actions', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Tools') AND referenceId != 0) OR
 			(categoryName = 'Allies' AND subCategoryName != 'Companions') OR
 			(categoryName = 'Furnishings' AND subCategoryName = 'Houseguests') OR
 			(categoryName = 'Upgrade')) OR
@@ -253,7 +253,6 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		"Mementos" => "memento",
 		"Mounts" => "mount",
 		"Non-Combat Pets" => "pet",
-		"Patrons" => "Patron", // Capitalized version preferred for some reason
 		"Tools" => "tool",
 		_ => null
 	};
