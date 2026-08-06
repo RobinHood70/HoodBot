@@ -174,11 +174,12 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 	protected override void ItemPageLoaded(SiteParser parser, Collectible item)
 	{
-		if (parser.Page.IsMissing || this.Clobber)
+		var shouldUpdate = parser.Page.IsMissing || this.Clobber;
+		if (shouldUpdate)
 		{
 			parser.ReplaceText(
-				"<gallery>\n</gallery>",
-				$"<gallery>\nON-crown store-{parser.Title.PageName}.jpg\n</gallery>",
+				"<collectible name>",
+				item.Name,
 				StringComparison.Ordinal,
 				ReplaceLocations.Comments | ReplaceLocations.Text);
 		}
@@ -190,7 +191,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		}
 
 		template.Update("collectibletype", CatToTemplateType(item.CollectibleType));
-		if (parser.Page.IsMissing || this.Clobber)
+		if (shouldUpdate)
 		{
 			template.Update("description", item.Description);
 			template.Update("id", item.Id.ToStringInvariant());
