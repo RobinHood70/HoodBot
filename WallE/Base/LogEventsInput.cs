@@ -39,7 +39,7 @@ public class LogEventsInput : ILimitableInput
 
 	public int MaxItems { get; set; }
 
-	public int? Namespace { get; set; }
+	public int? Namespace { get; private set; }
 
 	public string? Prefix { get; private set; }
 
@@ -51,7 +51,7 @@ public class LogEventsInput : ILimitableInput
 
 	public string? Tag { get; set; }
 
-	public string? Title { get; set; }
+	public string? Title { get; private set; }
 
 	public string? Type { get; set; }
 
@@ -59,10 +59,18 @@ public class LogEventsInput : ILimitableInput
 	#endregion
 
 	#region Public Static Methods
+	public static LogEventsInput FromNamespace(int ns) => new() { Namespace = ns };
+
 	public static LogEventsInput FromPrefix(string prefix)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
 		return new() { Prefix = prefix };
+	}
+
+	public static LogEventsInput FromTitle(string title)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(title);
+		return new() { Title = title };
 	}
 	#endregion
 }
