@@ -8,7 +8,7 @@ using RobinHood70.WallE.Design;
 using RobinHood70.WallE.Eve;
 using RobinHood70.WikiCommon.RequestBuilder;
 
-public sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
+internal sealed class PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input) : PropListModule<ImageInfoInput, ImageInfoResult, ImageInfoItem>(wal, input, null)
 {
 	#region Public Constants
 	public const string ModuleName = "imageinfo";

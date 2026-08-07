@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using RobinHood70.WallE.Base;
-using RobinHood70.WallE.Eve.Modules;
 
 /// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
 /// <seealso cref="Page" />
@@ -12,7 +11,7 @@ public sealed class FilePageModule
 	#region Public Constants
 
 	/// <summary>Gets the property name for the file revisions module.</summary>
-	public const string PropertyName = PropImageInfo.ModuleName;
+	public const string PropertyName = "imageinfo";
 	#endregion
 
 	#region Fields

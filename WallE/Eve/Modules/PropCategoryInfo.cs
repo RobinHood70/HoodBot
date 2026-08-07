@@ -6,7 +6,7 @@ using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon.RequestBuilder;
 using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-public sealed class PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input) : PropModule<CategoryInfoInput, CategoryInfoResult>(wal, input, null)
+internal sealed class PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input) : PropModule<CategoryInfoInput, CategoryInfoResult>(wal, input, null)
 {
 	#region Public Constants
 	public const string ModuleName = "categoryinfo";

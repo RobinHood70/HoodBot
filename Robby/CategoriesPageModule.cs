@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using RobinHood70.WallE.Base;
-using RobinHood70.WallE.Eve.Modules;
 
 /// <summary>In addition to regular page data, stores information about a category.</summary>
 /// <seealso cref="Page" />
@@ -12,7 +11,7 @@ public sealed class CategoriesPageModule
 	#region Public Constants
 
 	/// <summary>Gets the property name for the categories module.</summary>
-	public const string PropertyName = PropCategoryInfo.ModuleName;
+	public const string PropertyName = "categoryinfo";
 	#endregion
 
 	#region Constructors
