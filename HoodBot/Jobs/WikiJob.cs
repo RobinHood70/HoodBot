@@ -49,6 +49,9 @@ public abstract class WikiJob : IMessageSource
 	#region Public Properties
 	public JobLogger? JobLogger { get; protected set; }
 
+	// Note: This is internal set because the job manager sets it immediately after creating the job. It will be null within the constructor and should not be set by the job itself.
+	public string? JobName { get; internal set; }
+
 	public JobType JobType { get; }
 
 	public ILogger Logger => this.Site.Logger;

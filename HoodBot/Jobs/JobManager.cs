@@ -242,6 +242,7 @@ public class JobManager : IDisposable
 			}
 
 			var job = jobInfo.Instantiate(this);
+			job.JobName = jobInfo.Name;
 			try
 			{
 				await Task.Run(job.Execute, this.CancelToken).ConfigureAwait(true);
