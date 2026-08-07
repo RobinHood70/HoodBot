@@ -51,6 +51,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		1156, // NOT IN USE
 		1306, // NAME ME Summer Robe
 		6017, // Summerset (inactive duplicate, give or take a few words)
+		7864, // Antiquarian's Eye
 		9369, // Prairie Dog (clearly a test/deprecated item, real is at 10626)
 	];
 	#endregion
