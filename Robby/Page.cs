@@ -26,7 +26,7 @@ public class Page : ITitle
 	#region Fields
 	private readonly Dictionary<Title, BacklinksTypes> backlinks = [];
 	private readonly List<Category> categories = [];
-	private readonly Dictionary<string, object> custom = new(0, StringComparer.Ordinal);
+	private readonly Dictionary<string, object> custom = new(StringComparer.Ordinal);
 	private readonly List<Title> links = [];
 	private readonly Dictionary<string, string> properties = new(StringComparer.Ordinal);
 	private readonly List<Revision> revisions = [];
@@ -61,14 +61,14 @@ public class Page : ITitle
 			case PageItem pageItem:
 				this.IsInvalid = pageItem.Flags.HasAnyFlag(PageFlags.Invalid);
 				this.IsMissing = pageItem.Flags.HasAnyFlag(PageFlags.Missing);
-				PopulateRevisions(pageItem);
-				PopulateInfo(pageItem);
+				this.PopulateRevisions(pageItem);
+				this.PopulateInfo(pageItem);
 				this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
-				PopulateLinks(pageItem);
-				PopulateBacklinks(pageItem);
-				PopulateProperties(pageItem);
-				PopulateTemplates(pageItem);
-				PopulateCategories(pageItem);
+				this.PopulateLinks(pageItem);
+				this.PopulateBacklinks(pageItem);
+				this.PopulateProperties(pageItem);
+				this.PopulateTemplates(pageItem);
+				this.PopulateCategories(pageItem);
 				if (pageItem.Custom?.Count > 0)
 				{
 					this.custom = new Dictionary<string, object>(StringComparer.Ordinal);
@@ -91,109 +91,6 @@ public class Page : ITitle
 				break;
 			default:
 				break;
-		}
-
-		void PopulateBacklinks(PageItem pageItem)
-		{
-			this.backlinks.Clear();
-			PopulateBacklinksType(pageItem.FileUsages, BacklinksTypes.ImageUsage);
-			PopulateBacklinksType(pageItem.LinksHere, BacklinksTypes.Backlinks);
-			PopulateBacklinksType(pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
-		}
-
-		void PopulateBacklinksType(IEnumerable<IApiTitleOptional> list, BacklinksTypes type)
-		{
-			foreach (var link in list)
-			{
-				Globals.ThrowIfNull(link.Title, nameof(link), nameof(link.Title));
-				Title title = TitleFactory.FromUnvalidated(this.Title.Site, link.Title);
-				if (this.backlinks.ContainsKey(title))
-				{
-					this.backlinks[title] |= type;
-				}
-				else
-				{
-					this.backlinks[title] = type;
-				}
-			}
-		}
-
-		void PopulateCategories(PageItem pageItem)
-		{
-			this.categories.Clear();
-			foreach (var category in pageItem.Categories)
-			{
-				var factory = TitleFactory.CoValidate(this.Site, category.Namespace, category.Title);
-				this.categories.Add(new Category(factory, category.SortKey, category.Hidden));
-			}
-		}
-
-		void PopulateInfo(PageItem pageItem)
-		{
-			var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
-			if (pageItem.Info is PageInfo info)
-			{
-				this.CanonicalPath = info.CanonicalUrl;
-				this.Culture = Globals.GetCulture(info.Language);
-				this.CurrentRevisionId = info.LastRevisionId;
-				this.EditPath = info.EditUrl;
-				this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
-				this.isRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
-				this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
-				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
-				foreach (var protItem in pageItem.Info.Protections)
-				{
-					protections.Add(protItem.Type, new ProtectionEntry(protItem));
-				}
-			}
-			else
-			{
-				this.CanonicalPath = null;
-				this.CurrentRevisionId = 0;
-				this.EditPath = null;
-				this.IsNew = false;
-				this.isRedirect = false;
-				protections.Clear();
-				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-				this.Text = null;
-			}
-		}
-
-		void PopulateLinks(PageItem pageItem)
-		{
-			this.links.Clear();
-			foreach (var link in pageItem.Links)
-			{
-				this.links.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
-			}
-		}
-
-		void PopulateProperties(PageItem pageItem)
-		{
-			this.properties.Clear();
-			foreach (var property in pageItem.Properties)
-			{
-				this.properties[property.Name] = property.Value;
-			}
-		}
-
-		void PopulateRevisions(PageItem pageItem)
-		{
-			this.revisions.Clear();
-			this.CurrentRevision = null;
-			foreach (var rev in pageItem.Revisions)
-			{
-				this.revisions.Add(new Revision(rev));
-			}
-		}
-
-		void PopulateTemplates(PageItem pageItem)
-		{
-			this.templates.Clear();
-			foreach (var link in pageItem.Templates)
-			{
-				this.templates.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
-			}
 		}
 	}
 	#endregion
@@ -537,6 +434,111 @@ public class Page : ITitle
 	/// <summary>When overridden in a derived class, allows custom property inputs to be specified as necessary.</summary>
 	protected virtual void BuildCustomPropertyInputs()
 	{
+	}
+	#endregion
+
+	#region Private Methods
+	private void PopulateBacklinks(PageItem pageItem)
+	{
+		this.backlinks.Clear();
+		this.PopulateBacklinksType(pageItem.FileUsages, BacklinksTypes.ImageUsage);
+		this.PopulateBacklinksType(pageItem.LinksHere, BacklinksTypes.Backlinks);
+		this.PopulateBacklinksType(pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
+	}
+
+	private void PopulateBacklinksType(IEnumerable<IApiTitleOptional> list, BacklinksTypes type)
+	{
+		foreach (var link in list)
+		{
+			Globals.ThrowIfNull(link.Title, nameof(link), nameof(link.Title));
+			Title title = TitleFactory.FromUnvalidated(this.Title.Site, link.Title);
+			if (this.backlinks.ContainsKey(title))
+			{
+				this.backlinks[title] |= type;
+			}
+			else
+			{
+				this.backlinks[title] = type;
+			}
+		}
+	}
+
+	private void PopulateCategories(PageItem pageItem)
+	{
+		this.categories.Clear();
+		foreach (var category in pageItem.Categories)
+		{
+			var factory = TitleFactory.CoValidate(this.Site, category.Namespace, category.Title);
+			this.categories.Add(new Category(factory, category.SortKey, category.Hidden));
+		}
+	}
+
+	private void PopulateInfo(PageItem pageItem)
+	{
+		var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
+		if (pageItem.Info is PageInfo info)
+		{
+			this.CanonicalPath = info.CanonicalUrl;
+			this.Culture = Globals.GetCulture(info.Language);
+			this.CurrentRevisionId = info.LastRevisionId;
+			this.EditPath = info.EditUrl;
+			this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
+			this.isRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
+			this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
+			this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
+			foreach (var protItem in pageItem.Info.Protections)
+			{
+				protections.Add(protItem.Type, new ProtectionEntry(protItem));
+			}
+		}
+		else
+		{
+			this.CanonicalPath = null;
+			this.CurrentRevisionId = 0;
+			this.EditPath = null;
+			this.IsNew = false;
+			this.isRedirect = false;
+			protections.Clear();
+			this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
+			this.Text = null;
+		}
+	}
+
+	private void PopulateLinks(PageItem pageItem)
+	{
+		this.links.Clear();
+		foreach (var link in pageItem.Links)
+		{
+			this.links.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
+		}
+	}
+
+	private void PopulateProperties(PageItem pageItem)
+	{
+		this.properties.Clear();
+		foreach (var property in pageItem.Properties)
+		{
+			this.properties[property.Name] = property.Value;
+		}
+	}
+
+	private void PopulateRevisions(PageItem pageItem)
+	{
+		this.revisions.Clear();
+		this.CurrentRevision = null;
+		foreach (var rev in pageItem.Revisions)
+		{
+			this.revisions.Add(new Revision(rev));
+		}
+	}
+
+	private void PopulateTemplates(PageItem pageItem)
+	{
+		this.templates.Clear();
+		foreach (var link in pageItem.Templates)
+		{
+			this.templates.Add(TitleFactory.FromUnvalidated(this.Site, link.Title));
+		}
 	}
 	#endregion
 }

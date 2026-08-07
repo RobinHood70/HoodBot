@@ -6,6 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using RobinHood70.WikiCommon;
 
+#region Public Delegates
+public delegate void PageItemResultMethod(PageItem page, object result);
+#endregion
+
 #region Public Enumerations
 [Flags]
 public enum PageFlags
@@ -19,6 +23,10 @@ public enum PageFlags
 // Flags are part of the base info provided with the page info, so are included here in addition to the title info.
 public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApiTitle
 {
+	#region Static Fields
+	private static readonly Dictionary<Type, PageItemResultMethod> ResultHandlers = [];
+	#endregion
+
 	#region Fields
 	private readonly List<CategoriesItem> categories = [];
 	private readonly List<ContributorsItem> contributors = [];
@@ -37,6 +45,13 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 	private readonly List<IApiTitle> templates = [];
 	private readonly List<TranscludedInItem> transcludedIn = [];
 	private Dictionary<string, object>? custom;
+	#endregion
+
+	#region Static Constructors
+	static PageItem()
+	{
+		RegisterDefaultResultHandlers();
+	}
 	#endregion
 
 	#region Public Properties
@@ -89,97 +104,132 @@ public class PageItem(int ns, string title, long pageId, PageFlags flags) : IApi
 	public IReadOnlyList<TranscludedInItem> TranscludedIn => this.transcludedIn;
 	#endregion
 
+	#region Public Static Methods
+	public static void RegisterResultHandler<T>(PageItemResultMethod handler)
+	{
+		ArgumentNullException.ThrowIfNull(handler);
+		ResultHandlers[typeof(T)] = handler;
+	}
+	#endregion
+
 	#region Public Methods
 	public void ParseModuleOutput(string name, object output)
 	{
-		// TODO: This is almost certainly not the best way to handle this, but it's better for separation of concerns than the previous method and allows read-only properties. Should re-examine later to see if there's some better method.
-		switch (output)
+		ArgumentNullException.ThrowIfNull(output);
+		if (ResultHandlers.TryGetValue(output.GetType(), out var resultHandler))
 		{
-			case CategoriesResult result:
-				this.categories.AddRange(result);
-				break;
-			case CategoryInfoResult result:
-				this.CategoryInfo ??= result;
-				break;
-			case ContributorsResult result:
-				this.AnonContributors = result.AnonymousContributors;
-				this.contributors.AddRange(result);
-				break;
-			case DuplicateFilesResult result:
-				this.duplicateFiles.AddRange(result);
-				break;
-			case ExternalLinksResult result:
-				this.externalLinks.AddRange(result);
-				break;
-			case FileUsageResult result:
-				this.fileUsages.AddRange(result);
-				break;
-			case ImagesResult result:
-				this.images.AddRange(result);
-				break;
-			case InterwikiLinksResult result:
-				this.interwikiLinks.AddRange(result);
-				break;
-			case LanguageLinksResult result:
-				this.languageLinks.AddRange(result);
-				break;
-			case LinksHereResult result:
-				this.linksHere.AddRange(result);
-				break;
-			case LinksResult result:
-				this.links.AddRange(result);
-				break;
-			case PageInfo result:
-				this.Info ??= result;
-				break;
-			case PagePropertiesResult result:
-				this.properties.AddRange(result);
-				break;
-			case PropDeletedRevisionsResult result:
-				this.deletedRevisions.AddRange(result);
-				break;
-			case RedirectsResult result:
-				this.redirects.AddRange(result);
-				break;
-			case RevisionsResult result:
-				this.revisions.AddRange(result);
-				break;
-			case TemplatesResult result:
-				this.templates.AddRange(result);
-				break;
-			case TranscludedInResult result:
-				this.transcludedIn.AddRange(result);
-				break;
-			default:
-				// This isn't pretty, but we have to have a list of objects since there could be multiple partial/duplicate responses across different requests. Alternatives would be to implement a static custom handlers list here as well, like the Robby.Page object, or allow prop result classes to implement some kind of Merge<T>(T other) function.
-				ArgumentNullException.ThrowIfNull(output);
-				this.custom ??= new Dictionary<string, object>(1, StringComparer.Ordinal);
-				if (!this.custom.TryGetValue(name, out var list))
-				{
-					var genericType = output.GetType();
-					var listType = typeof(List<>).MakeGenericType(genericType);
-					if (Activator.CreateInstance(listType) is IList runtimeList)
-					{
-						runtimeList.Add(output);
-						list = runtimeList;
-						this.custom.Add(name, list);
-					}
-					else
-					{
-						throw new InvalidOperationException();
-					}
-				}
-				else if (list is IList runtimeList)
+			resultHandler(this, output);
+		}
+		else
+		{
+			// This isn't pretty, but we have to have a list of objects since there could be multiple partial/duplicate responses across different requests. Alternatives would be to implement a static custom handlers list here as well, like the Robby.Page object, or allow prop result classes to implement some kind of Merge<T>(T other) function.
+			this.custom ??= new Dictionary<string, object>(1, StringComparer.Ordinal);
+			if (!this.custom.TryGetValue(name, out var list))
+			{
+				var genericType = output.GetType();
+				var listType = typeof(List<>).MakeGenericType(genericType);
+				if (Activator.CreateInstance(listType) is IList runtimeList)
 				{
 					runtimeList.Add(output);
+					list = runtimeList;
+					this.custom.Add(name, list);
 				}
-
-				break;
+				else
+				{
+					throw new InvalidOperationException();
+				}
+			}
+			else if (list is IList runtimeList)
+			{
+				runtimeList.Add(output);
+			}
 		}
 	}
 	#endregion
 
 	#region Public Override Methods
 	public override string ToString() => this.Title;
+	#endregion
+
+	#region Private Static Methods
+	private static void CategoriesResultHandler(PageItem page, object result) =>
+		page.categories.AddRange((CategoriesResult)result);
+
+	private static void CategoryInfoResultHandler(PageItem page, object result) =>
+		page.CategoryInfo ??= (CategoryInfoResult)result;
+
+	private static void ContributorsResultHandler(PageItem page, object result)
+	{
+		var realResult = (ContributorsResult)result;
+		page.AnonContributors = realResult.AnonymousContributors;
+		page.contributors.AddRange(realResult);
+	}
+
+	private static void DuplicateFilesResultHandler(PageItem page, object result) =>
+		page.duplicateFiles.AddRange((DuplicateFilesResult)result);
+
+	private static void ExternalLinksResultHandler(PageItem page, object result) =>
+		page.externalLinks.AddRange((ExternalLinksResult)result);
+
+	private static void FileUsageResultHandler(PageItem page, object result) =>
+		page.fileUsages.AddRange((FileUsageResult)result);
+
+	private static void ImagesResultHandler(PageItem page, object result) =>
+		page.images.AddRange((ImagesResult)result);
+
+	private static void InterwikiLinksResultHandler(PageItem page, object result) =>
+		page.interwikiLinks.AddRange((InterwikiLinksResult)result);
+
+	private static void LanguageLinksResultHandler(PageItem page, object result) =>
+		page.languageLinks.AddRange((LanguageLinksResult)result);
+
+	private static void LinksHereResultHandler(PageItem page, object result) =>
+		page.linksHere.AddRange((LinksHereResult)result);
+
+	private static void LinksResultHandler(PageItem page, object result) =>
+		page.links.AddRange((LinksResult)result);
+
+	private static void PagePropertiesResultHandler(PageItem page, object result) =>
+		page.properties.AddRange((PagePropertiesResult)result);
+
+	private static void PropDeletedRevisionsResultHandler(PageItem page, object result) =>
+		page.deletedRevisions.AddRange((PropDeletedRevisionsResult)result);
+
+	private static void RedirectsResultHandler(PageItem page, object result) =>
+		page.redirects.AddRange((RedirectsResult)result);
+
+	private static void PageInfoHandler(PageItem page, object result) =>
+		page.Info ??= (PageInfo)result;
+
+	private static void RegisterDefaultResultHandlers()
+	{
+		RegisterResultHandler<CategoriesResult>(CategoriesResultHandler);
+		RegisterResultHandler<CategoryInfoResult>(CategoryInfoResultHandler);
+		RegisterResultHandler<ContributorsResult>(ContributorsResultHandler);
+		RegisterResultHandler<DuplicateFilesResult>(DuplicateFilesResultHandler);
+		RegisterResultHandler<ExternalLinksResult>(ExternalLinksResultHandler);
+		RegisterResultHandler<FileUsageResult>(FileUsageResultHandler);
+		RegisterResultHandler<ImagesResult>(ImagesResultHandler);
+		RegisterResultHandler<InterwikiLinksResult>(InterwikiLinksResultHandler);
+		RegisterResultHandler<LanguageLinksResult>(LanguageLinksResultHandler);
+		RegisterResultHandler<LinksHereResult>(LinksHereResultHandler);
+		RegisterResultHandler<LinksResult>(LinksResultHandler);
+		RegisterResultHandler<PagePropertiesResult>(PagePropertiesResultHandler);
+		RegisterResultHandler<PropDeletedRevisionsResult>(PropDeletedRevisionsResultHandler);
+		RegisterResultHandler<RedirectsResult>(RedirectsResultHandler);
+		RegisterResultHandler<PageInfo>(PageInfoHandler);
+		RegisterResultHandler<RevisionsResult>(RevisionsResultHandler);
+		RegisterResultHandler<TemplatesResult>(TemplatesResultHandler);
+		RegisterResultHandler<TranscludedInResult>(TranscludedInResultHandler);
+	}
+
+	private static void RevisionsResultHandler(PageItem page, object result) =>
+		page.revisions.AddRange((RevisionsResult)result);
+
+	private static void TemplatesResultHandler(PageItem page, object result) =>
+		page.templates.AddRange((TemplatesResult)result);
+
+	private static void TranscludedInResultHandler(PageItem page, object result) =>
+		page.transcludedIn.AddRange((TranscludedInResult)result);
 	#endregion
 }
