@@ -252,6 +252,8 @@ internal sealed class EsoNpcs : EditJob
 				Page when page.IsRedirect => "is a redirect to a content page without an Online NPC Summary",
 				Page when !this.allowUpdates && page.IsMissing && page.PreviouslyDeleted => "was previously deleted",
 				_ => null
+
+				// TODO: If possible, merge page.PreviouslyDeleted with Deleted log for consistency. Can also remove DeletedRevisions at that point or demote them to a custom check.
 			};
 
 			if (issue == null)
