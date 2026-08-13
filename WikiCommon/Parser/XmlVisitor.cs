@@ -44,7 +44,7 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	#region IWikiNodeVisitor Methods
 
 	/// <inheritdoc/>
-	public void Visit(IArgumentNode argument)
+	public void Visit(ArgumentNode argument)
 	{
 		ArgumentNullException.ThrowIfNull(argument);
 		this
@@ -63,28 +63,28 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ICommentNode comment)
+	public void Visit(CommentNode comment)
 	{
 		ArgumentNullException.ThrowIfNull(comment);
 		this.BuildValueNode("comment", comment.Comment);
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IHeaderNode header)
+	public void Visit(HeaderNode header)
 	{
 		ArgumentNullException.ThrowIfNull(header);
 		this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = header.Level }, header.Title);
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IIgnoreNode ignore)
+	public void Visit(IgnoreNode ignore)
 	{
 		ArgumentNullException.ThrowIfNull(ignore);
 		this.BuildValueNode("ignore", ignore.Value);
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ILinkNode link)
+	public void Visit(LinkNode link)
 	{
 		ArgumentNullException.ThrowIfNull(link);
 		this
@@ -109,7 +109,7 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IParameterNode parameter)
+	public void Visit(ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		this.BuildTagOpen("part", null, false);
@@ -131,7 +131,7 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITagNode tag)
+	public void Visit(TagNode tag)
 	{
 		ArgumentNullException.ThrowIfNull(tag);
 		this
@@ -152,7 +152,7 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITemplateNode template)
+	public void Visit(TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		this
@@ -167,7 +167,7 @@ public class XmlVisitor(bool prettyPrint) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITextNode text)
+	public void Visit(TextNode text)
 	{
 		ArgumentNullException.ThrowIfNull(text);
 		this.Indent();

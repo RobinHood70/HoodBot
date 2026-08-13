@@ -1,11 +1,10 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System;
 using System.Collections.Generic;
-using RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents a parameter to a template or link.</summary>
-public class ParameterNode : IParameterNode
+public class ParameterNode : IWikiNode, IParentNode
 {
 	#region Constructors
 
@@ -25,13 +24,15 @@ public class ParameterNode : IParameterNode
 
 	#region Public Properties
 
-	/// <inheritdoc/>
+	/// <summary>Gets a value indicating whether this <see cref="ParameterNode">parameter</see> is anonymous.</summary>
+	/// <value><see langword="true"/> if anonymous; otherwise, <see langword="false"/>.</value>
 	public bool Anonymous => this.Name == null;
 
 	/// <inheritdoc/>
 	public IWikiNodeFactory Factory { get; }
 
-	/// <inheritdoc/>
+	/// <summary>Gets the name of the parameter, if not anonymous.</summary>
+	/// <value>The name.</value>
 	public WikiNodeCollection? Name { get; private set; }
 
 	/// <inheritdoc/>
@@ -48,7 +49,8 @@ public class ParameterNode : IParameterNode
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <summary>Gets the parameter value.</summary>
+	/// <value>The value.</value>
 	public WikiNodeCollection Value { get; }
 	#endregion
 
@@ -58,14 +60,15 @@ public class ParameterNode : IParameterNode
 	/// <param name="visitor">The visiting class.</param>
 	public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
-	/// <inheritdoc/>
+	/// <summary>Adds a name to a previously anonymous parameter.</summary>
+	/// <param name="name">The name.</param>
 	public void AddName(IEnumerable<IWikiNode> name)
 	{
 		ArgumentNullException.ThrowIfNull(name);
 		this.Name = new WikiNodeCollection(this.Factory, name);
 	}
 
-	/// <inheritdoc/>
+	/// <summary>Changes the parameter from a named parameter to an anonymous one.</summary>
 	public void Anonymize() => this.Name = null;
 	#endregion
 

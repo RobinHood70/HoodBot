@@ -133,7 +133,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		return null;
 	}
 
-	private Title? ResolveTemplate(ITemplateNode linkTemplate, UespNamespace ns)
+	private Title? ResolveTemplate(TemplateNode linkTemplate, UespNamespace ns)
 	{
 		if (linkTemplate.Find($"{ns.Id}link")?.Value is WikiNodeCollection overridden)
 		{
@@ -185,9 +185,9 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		return fullSet;
 	}
 
-	private UespNamespace GetNamespace(ITemplateNode linkTemplate, Title title)
+	private UespNamespace GetNamespace(TemplateNode linkTemplate, Title title)
 	{
-		if (linkTemplate.Find("ns_base", "ns_id") is IParameterNode nsBase)
+		if (linkTemplate.Find("ns_base", "ns_id") is ParameterNode nsBase)
 		{
 			var lookup = nsBase.GetValue();
 			return this.nsList[lookup];
@@ -198,7 +198,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 
 	private List<IWikiNode>? LinkReplace(IWikiNode node, SiteParser parser)
 	{
-		if (node is not ITemplateNode linkTemplate ||
+		if (node is not TemplateNode linkTemplate ||
 			linkTemplate.GetTitle(parser.Site) != this.loreLinkTemplate)
 		{
 			return null;
@@ -214,7 +214,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 			return null;
 		}
 
-		var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is IParameterNode displayNode
+		var displayText = linkTemplate.PrioritizedFind($"{ns.Id}display", "display", "2") is ParameterNode displayNode
 			? displayNode.GetRaw()
 			: Title.ToLabelName(linkNode.GetRaw());
 		var retval = new List<IWikiNode>

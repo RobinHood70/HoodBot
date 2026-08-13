@@ -19,7 +19,7 @@
 		#region Protected Override Methods
 		protected override string GetEditSummary(Page page) => "Add \"Card art\" to unlabeled gallery images";
 
-		protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+		protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 		{
 			if (this.resultCount == 0 && this.Results is PageResultHandler pageResults)
 			{
@@ -42,7 +42,7 @@
 			}
 
 			var factory = (SiteNodeFactory)parser.Factory;
-			var galleryNodes = new List<ITagNode>(parser.FindAll<ITagNode>(tag => tag.Name.OrdinalEquals("gallery")));
+			var galleryNodes = new List<TagNode>(parser.FindAll<TagNode>(tag => tag.Name.OrdinalEquals("gallery")));
 			foreach (var galleryNode in galleryNodes)
 			{
 				if (galleryNode.InnerText is not null)

@@ -63,7 +63,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 
 	protected override void ItemPageLoaded(SiteParser parser, Creature item)
 	{
-		if (parser.FindTemplate("Creature Summary") is ITemplateNode template)
+		if (parser.FindTemplate("Creature Summary") is TemplateNode template)
 		{
 			template.Remove("resp");
 			template.Remove("typenamesp");
@@ -135,7 +135,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		return sb.ToString();
 	}
 
-	private static void NoNone(ITemplateNode template, string key, string value)
+	private static void NoNone(TemplateNode template, string key, string value)
 	{
 		if (value.OrdinalEquals("None"))
 		{
@@ -143,7 +143,7 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		}
 	}
 
-	private static void UpdateTemplate(ITemplateNode template, CsvRow row)
+	private static void UpdateTemplate(TemplateNode template, CsvRow row)
 	{
 		template.Update("baseid", row["FormID"]);
 		//// template.Update("species", row["Race"]);
@@ -175,11 +175,11 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 	private static void AddVariants(SiteParser parser, Creature item)
 	{
 		var newNodes = new WikiNodeCollection(parser.Factory);
-		var insertPos = parser.IndexOf<IHeaderNode>(0);
+		var insertPos = parser.IndexOf<HeaderNode>(0);
 		var stubTemplate = TitleFactory.FromTemplate(parser.Site, "Stub");
 		if (insertPos == -1)
 		{
-			insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == stubTemplate);
+			insertPos = parser.IndexOf<TemplateNode>(t => t.GetTitle(parser.Site) == stubTemplate);
 			if (insertPos == -1)
 			{
 				insertPos = parser.Count;
@@ -224,13 +224,13 @@ internal sealed class SFCreatures : CreateOrUpdateJob<SFCreatures.Creature>
 		return titleMap;
 	}
 
-	private void UpdateLoc(ITemplateNode template, Creature item)
+	private void UpdateLoc(TemplateNode template, Creature item)
 	{
 		// Remove loc if it's a link and duplicates planet
-		if (template.Find("loc") is IParameterNode loc)
+		if (template.Find("loc") is ParameterNode loc)
 		{
 			if (loc.Value.Count == 2 &&
-			loc.Value[0] is ILinkNode linkNode)
+			loc.Value[0] is LinkNode linkNode)
 			{
 				var link = SiteLink.FromLinkNode(this.Site, linkNode);
 				foreach (var row in item.Variants)

@@ -76,7 +76,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 		var npcTitles = new TitleCollection(this.Site);
 		for (var i = parser.Count - 1; i >= 0; i--)
 		{
-			if (parser[i] is ITemplateNode t && t.GetTitle(this.Site) == "Template:NPC Data")
+			if (parser[i] is TemplateNode t && t.GetTitle(this.Site) == "Template:NPC Data")
 			{
 				var name = t.Find(1)?.Value.ToRaw() ?? throw new InvalidOperationException("NPC Data template missing name.");
 				var title = TitleFactory.FromUnvalidated(this.Site, full + name);
@@ -94,7 +94,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 	protected override void ParseText(SiteParser parser)
 	{
 		var isSummary = true;
-		if (parser.FindTemplate("NPC Summary") is not ITemplateNode template)
+		if (parser.FindTemplate("NPC Summary") is not TemplateNode template)
 		{
 			isSummary = false;
 			template = parser.FindTemplate("Non-Relevant NPC")!;

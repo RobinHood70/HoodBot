@@ -190,7 +190,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		}
 
 		var choiceParam = template.Find("choices") ?? throw new InvalidOperationException();
-		var choiceDictionary = new Dictionary<int, ITemplateNode>();
+		var choiceDictionary = new Dictionary<int, TemplateNode>();
 		var searchTemplate = TitleFactory.FromTemplate(this.Site, "Castles Ruling/Choice");
 		foreach (var choiceTemplate in choiceParam.Value.FindTemplates(searchTemplate))
 		{
@@ -256,7 +256,7 @@ internal sealed partial class CastlesRulings : CreateOrUpdateJob<CastlesRulings.
 		return sb.ToString();
 	}
 
-	private static ITemplateNode UpdateChoiceTemplate(Choice choice, SiteParser parser, Dictionary<int, ITemplateNode> choiceDictionary, FlatteningComparer comparer)
+	private static TemplateNode UpdateChoiceTemplate(Choice choice, SiteParser parser, Dictionary<int, TemplateNode> choiceDictionary, FlatteningComparer comparer)
 	{
 		if (!choiceDictionary.TryGetValue(choice.Id, out var template))
 		{

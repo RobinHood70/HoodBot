@@ -78,7 +78,7 @@ public class PageJobLogger : JobLogger
 	#endregion
 
 	#region Private Static Methods
-	private static void AddDateTime(ITemplateNode template, DateTime? dateTime)
+	private static void AddDateTime(TemplateNode template, DateTime? dateTime)
 	{
 		if (dateTime.HasValue)
 		{
@@ -99,7 +99,7 @@ public class PageJobLogger : JobLogger
 	#endregion
 
 	#region Private Methods
-	private void AddParameters(ITemplateNode template, Section taskLog, int firstEntry)
+	private void AddParameters(TemplateNode template, Section taskLog, int firstEntry)
 	{
 		template.Add(this.logInfo!.Title);
 		if (!string.IsNullOrEmpty(this.logInfo.Details))
@@ -178,10 +178,10 @@ public class PageJobLogger : JobLogger
 		var currentTask = sections.FindFirst(this.currentTaskTitle) ?? throw BadLogPage;
 		var taskLog = sections.FindFirst(this.taskLogTitle) ?? throw BadLogPage;
 		var sameTaskText = UpdateCurrentStatus(currentTask, this.status);
-		var firstEntry = taskLog.Content.IndexOf<ITemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
+		var firstEntry = taskLog.Content.IndexOf<TemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
 		if (firstEntry != -1)
 		{
-			var entry = (ITemplateNode)taskLog.Content[firstEntry];
+			var entry = (TemplateNode)taskLog.Content[firstEntry];
 			if (this.end == null &&
 				sameTaskText &&
 				string.IsNullOrEmpty(entry.GetValue(3)) &&

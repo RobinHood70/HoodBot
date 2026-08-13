@@ -214,10 +214,10 @@ internal sealed class EsoTreasureUpdater : TemplateJob
 		base.ParseText(parser);
 	}
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
 		// Skip if id parameter is missing, invalid, or doesn't match an item in the dictionary.
-		if (template.PrioritizedFind("itemId", "id") is not IParameterNode idParam)
+		if (template.PrioritizedFind("itemId", "id") is not ParameterNode idParam)
 		{
 			Debug.WriteLine($"ID parameter not found on page {parser.Title} for template: " + template.ToRaw());
 			return;

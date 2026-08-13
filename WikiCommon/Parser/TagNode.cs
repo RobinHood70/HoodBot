@@ -1,7 +1,6 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using RobinHood70.CommonCode;
-using RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents an unparsed tag, such as pre or nowiki.</summary>
 /// <remarks>Initializes a new instance of the <see cref="TagNode"/> class.</remarks>
@@ -9,7 +8,7 @@ using RobinHood70.WikiCommon.Parser;
 /// <param name="attributes">The attributes.</param>
 /// <param name="innerText">The inner text.</param>
 /// <param name="close">The close.</param>
-public class TagNode(string name, string? attributes, string? innerText, string? close) : ITagNode
+public class TagNode(string name, string? attributes, string? innerText, string? close) : IWikiNode
 {
 	#region Public Properties
 

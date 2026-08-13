@@ -59,9 +59,9 @@ public class FixOriginalFiles(JobManager jobManager) : TemplateJob(jobManager)
 		base.LoadPages();
 	}
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
-		if (GetParameter(template) is not IParameterNode fileName)
+		if (GetParameter(template) is not ParameterNode fileName)
 		{
 			throw new InvalidOperationException("originalfile not found: " + parser.Page.Title.PageName);
 		}
@@ -89,15 +89,15 @@ public class FixOriginalFiles(JobManager jobManager) : TemplateJob(jobManager)
 	#endregion
 
 	#region Private Static Methods
-	private static IParameterNode? GetParameter(ITemplateNode template)
+	private static ParameterNode? GetParameter(TemplateNode template)
 	{
 		// Checks for legitimate value first, then handles possible malformations.
-		if (template.Find("originalfile") is IParameterNode retval)
+		if (template.Find("originalfile") is ParameterNode retval)
 		{
 			return retval;
 		}
 
-		if ((template.Parameters.Count & 1) == 1 && template.Find(1) is IParameterNode misplaced)
+		if ((template.Parameters.Count & 1) == 1 && template.Find(1) is ParameterNode misplaced)
 		{
 			misplaced.SetName("originalfile");
 			return misplaced;

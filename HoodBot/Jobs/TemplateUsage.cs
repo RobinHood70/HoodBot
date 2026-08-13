@@ -74,7 +74,7 @@ internal class TemplateUsage : WikiJob
 	#region Protected Virtual Methods
 	protected virtual bool ShouldAddPage(SiteParser parser) => true;
 
-	protected virtual bool ShouldAddTemplate(ITemplateNode template, SiteParser parser) => true;
+	protected virtual bool ShouldAddTemplate(TemplateNode template, SiteParser parser) => true;
 	#endregion
 
 	#region Private Static Methods
@@ -106,7 +106,7 @@ internal class TemplateUsage : WikiJob
 		}
 	}
 
-	private void AddTemplate(List<PageTemplate> templates, Dictionary<string, string> paramTranslator, SiteParser parser, ITemplateNode template)
+	private void AddTemplate(List<PageTemplate> templates, Dictionary<string, string> paramTranslator, SiteParser parser, TemplateNode template)
 	{
 		templates.Add(new PageTemplate(parser.Title, template));
 		foreach (var (name, _) in template.GetResolvedParameters())
@@ -179,7 +179,7 @@ internal class TemplateUsage : WikiJob
 	#endregion
 
 	#region Private Classes
-	private sealed record class PageTemplate(Title Page, ITemplateNode Template);
+	private sealed record class PageTemplate(Title Page, TemplateNode Template);
 	#endregion
 
 }

@@ -83,7 +83,7 @@ internal sealed class TemplateElement(WikiStack stack, int braceLength) : OpenCl
 		var pieceCount = this.DividerPieces.Count;
 		var matchingCount = count == 2 ? 2 : 3;
 		var factory = this.Stack.Factory;
-		List<IParameterNode> parameters = [];
+		List<ParameterNode> parameters = [];
 		for (var i = 1; i < pieceCount; i++)
 		{
 			var nvPiece = this.DividerPieces[i];

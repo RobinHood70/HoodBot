@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using RobinHood70.WikiCommon.Properties;
 // TODO: Expand class to handle numbered parameters better (or at all, in cases like Remove).
 
 /// <summary>Represents a template call.</summary>
-public class TemplateNode : ITemplateNode
+public class TemplateNode : ITitleNode, IWikiNode
 {
 	#region Constructors
 
@@ -17,7 +17,7 @@ public class TemplateNode : ITemplateNode
 	/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
 	/// <param name="title">The title.</param>
 	/// <param name="parameters">The parameters.</param>
-	public TemplateNode([NotNull, ValidatedNotNull] IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
+	public TemplateNode([NotNull, ValidatedNotNull] IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<ParameterNode> parameters)
 	{
 		ArgumentNullException.ThrowIfNull(factory);
 		ArgumentNullException.ThrowIfNull(title);
@@ -56,8 +56,9 @@ public class TemplateNode : ITemplateNode
 		}
 	}
 
-	/// <inheritdoc/>
-	public IList<IParameterNode> Parameters { get; }
+	/// <summary>Gets the parameters.</summary>
+	/// <value>The parameters.</value>
+	public IList<ParameterNode> Parameters { get; }
 
 	/// <inheritdoc/>
 	public WikiNodeCollection TitleNodes { get; }

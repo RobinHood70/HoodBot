@@ -1,15 +1,14 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System;
 using System.Collections.Generic;
-using RobinHood70.WikiCommon.Parser;
 using RobinHood70.WikiCommon.Properties;
 
 /// <summary>Represents a template argument, such as <c>{{{1|}}}</c>.</summary>
-public class ArgumentNode : IArgumentNode
+public class ArgumentNode : IWikiNode, IParentNode
 {
 	#region Fields
-	private List<IParameterNode>? extraValues;
+	private List<ParameterNode>? extraValues;
 	#endregion
 
 	#region Constructors
@@ -18,7 +17,7 @@ public class ArgumentNode : IArgumentNode
 	/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="defaultValue"/> factory).</param>
 	/// <param name="name">The title.</param>
 	/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="ExtraValues"/> collection.</param>
-	public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue)
+	public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<ParameterNode> defaultValue)
 	{
 		ArgumentNullException.ThrowIfNull(factory);
 		ArgumentNullException.ThrowIfNull(name);
@@ -48,7 +47,7 @@ public class ArgumentNode : IArgumentNode
 
 			if (defaultValue.Count > 1)
 			{
-				List<IParameterNode> remaining = [];
+				List<ParameterNode> remaining = [];
 				for (var i = 1; i < defaultValue.Count; i++)
 				{
 					remaining.Add(defaultValue[i]);
@@ -62,16 +61,21 @@ public class ArgumentNode : IArgumentNode
 
 	#region Public Properties
 
-	/// <inheritdoc/>
+	/// <summary>Gets the default value.</summary>
+	/// <value>The default value. This will be <see langword="null"/> if there is no default value (e.g., <c>{{{1}}}</c>) in order to distinguish it from a node with an empty default value (e.g., <c>{{{1|}}}</c>).</value>
+	/// <remarks>To prevent the possibility of DefaultValue being set to a WikiNodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
 	public WikiNodeCollection? DefaultValue { get; private set; }
 
-	/// <inheritdoc/>
-	public IReadOnlyList<IParameterNode>? ExtraValues => this.extraValues;
+	/// <summary>Gets any additional values after the default value (e.g., the b in {{{1|a|b}}}).</summary>
+	/// <value>The extra values.</value>
+	/// <remarks>The MediaWiki software allows constructs such as <c>{{{1|a|b}}}</c> but will only take <c>a</c> as the default value in that instance, ignoring <c>b</c> altogether. This property provides access to values beyond the first so that no information is lost.</remarks>
+	public IReadOnlyList<ParameterNode>? ExtraValues => this.extraValues;
 
 	/// <inheritdoc/>
 	public IWikiNodeFactory Factory { get; }
 
-	/// <inheritdoc/>
+	/// <summary>Gets the name of the argument.</summary>
+	/// <value>The argument name.</value>
 	public WikiNodeCollection Name { get; }
 
 	/// <inheritdoc/>

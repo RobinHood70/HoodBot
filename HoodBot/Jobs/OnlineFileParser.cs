@@ -291,16 +291,16 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	#endregion
 
 	#region Private Methods
-	private string? GetInfoText(ITemplateNode info) =>
-		info.Find("description") is not IParameterNode desc ? null :
-		desc.Value.FindTemplate(this.Site, "En") is ITemplateNode en && en.Find(1) is IParameterNode enValue ? enValue.ToRaw() :
+	private string? GetInfoText(TemplateNode info) =>
+		info.Find("description") is not ParameterNode desc ? null :
+		desc.Value.FindTemplate(this.Site, "En") is TemplateNode en && en.Find(1) is ParameterNode enValue ? enValue.ToRaw() :
 		desc.GetRaw();
 
 	private IList<IWikiNode>? NodeReplacer(IWikiNode node)
 	{
 		switch (node)
 		{
-			case IHeaderNode headerNode:
+			case HeaderNode headerNode:
 				var title = headerNode.GetTitle(true);
 				if (LicenseNames.Contains(title))
 				{
@@ -308,19 +308,19 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 				}
 
 				break;
-			case ITemplateNode templateNode:
+			case TemplateNode templateNode:
 				if (templateNode.GetTitle(this.Site).PageNameEquals("Zenimage"))
 				{
 					return [];
 				}
 
 				break;
-			case IArgumentNode:
-			case ICommentNode:
-			case IIgnoreNode:
-			case ILinkNode:
-			case IParameterNode:
-			case ITagNode:
+			case ArgumentNode:
+			case CommentNode:
+			case IgnoreNode:
+			case LinkNode:
+			case ParameterNode:
+			case TagNode:
 				break;
 			default:
 				throw new InvalidOperationException("Unknown node type encountered.");
@@ -410,10 +410,10 @@ public class OnlineFileParser(JobManager jobManager) : EditJob(jobManager)
 	private bool ParseSummary(SiteParser parser, Section summary)
 	{
 		string? text = null;
-		var infoOffset = summary.Content.IndexOf<ITemplateNode>(n => n.GetTitle(this.Site).PageNameEquals("Information"));
+		var infoOffset = summary.Content.IndexOf<TemplateNode>(n => n.GetTitle(this.Site).PageNameEquals("Information"));
 		if (infoOffset != -1)
 		{
-			var info = (ITemplateNode)summary.Content[infoOffset];
+			var info = (TemplateNode)summary.Content[infoOffset];
 			text = this.GetInfoText(info);
 		}
 

@@ -32,9 +32,9 @@ public class MissingNPCImages(JobManager jobManager) : TemplateJob(jobManager)
 
 	protected override string GetEditSummary(Page page) => "Comment out missing images";
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
-		if (template.Find("image") is IParameterNode image)
+		if (template.Find("image") is ParameterNode image)
 		{
 			var value = image.GetRaw();
 			if (value.Length > 0 &&

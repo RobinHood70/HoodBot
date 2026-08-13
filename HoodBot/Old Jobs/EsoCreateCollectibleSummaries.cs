@@ -97,7 +97,7 @@
 					if (headerNode.Level == 3 &&
 						!IgnoredHeaders.Contains(headerNode.GetTitle(true), StringComparer.OrdinalIgnoreCase))
 					{
-						foreach (var link in headerNode.Title.FindAll<ILinkNode>())
+						foreach (var link in headerNode.Title.FindAll<LinkNode>())
 						{
 							titles.Add(link.TitleValue);
 						}
@@ -123,7 +123,7 @@
 			var factory = parser.Factory;
 			foreach (var headerNode in parser.HeaderNodes)
 			{
-				if (headerNode.Title.Count == 1 && headerNode.Title[0] is ITextNode textNode)
+				if (headerNode.Title.Count == 1 && headerNode.Title[0] is TextNode textNode)
 				{
 					var headerText = textNode.Text.Trim(TextArrays.EqualsSign);
 					if (headerText.Length > 0)

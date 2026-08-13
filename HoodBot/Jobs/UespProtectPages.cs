@@ -262,7 +262,7 @@ internal sealed class UespProtectPages : EditJob
 		// Figure out where to put a new Protection template: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
 		if (page.IsRedirect)
 		{
-			insertPos = nodes.IndexOf<ILinkNode>(0) + 1;
+			insertPos = nodes.IndexOf<LinkNode>(0) + 1;
 			nodes.InsertRange(insertPos, [nodes.Factory.TextNode("\n")]);
 			insertPos++;
 		}
@@ -271,10 +271,10 @@ internal sealed class UespProtectPages : EditJob
 			|| !string.IsNullOrEmpty(protection.Header)
 			|| !string.IsNullOrEmpty(protection.Footer)))
 		{
-			while (insertPos < nodes.Count && !(nodes[insertPos] is IIgnoreNode ignoreNode && ignoreNode.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase)))
+			while (insertPos < nodes.Count && !(nodes[insertPos] is IgnoreNode ignoreNode && ignoreNode.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase)))
 			{
 				var nextNode = nodes[insertPos];
-				if (nextNode is ITextNode)
+				if (nextNode is TextNode)
 				{
 					break;
 				}
@@ -282,8 +282,8 @@ internal sealed class UespProtectPages : EditJob
 				insertPos++;
 			}
 
-			// If we didn't bail out because it's an ITextNode, increment position to be after the IIgnoreNode.
-			if (insertPos == nodes.Count || nodes[insertPos] is ITextNode)
+			// If we didn't bail out because it's an TextNode, increment position to be after the IgnoreNode.
+			if (insertPos == nodes.Count || nodes[insertPos] is TextNode)
 			{
 				insertPos = 1;
 				var newNodes = new IWikiNode[]
@@ -317,8 +317,8 @@ internal sealed class UespProtectPages : EditJob
 
 		// Check if we've pulled stuff out of an unwanted noinclude block.
 		if (parser.Count > insertPos &&
-			parser[insertPos] is IIgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
-			parser[insertPos + 1] is IIgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
+			parser[insertPos] is IgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
+			parser[insertPos + 1] is IgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
 		{
 			parser.RemoveRange(insertPos, 2);
 		}
@@ -333,7 +333,7 @@ internal sealed class UespProtectPages : EditJob
 	{
 		var footer = protection.Footer;
 		var footerTemplate = parser.Factory.TemplateNodeFromWikiText(footer);
-		if (parser.FindTemplate(footerTemplate.GetTitle(parser.Site)) is ITemplateNode existing)
+		if (parser.FindTemplate(footerTemplate.GetTitle(parser.Site)) is TemplateNode existing)
 		{
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddRange(footerTemplate.TitleNodes);
@@ -358,10 +358,10 @@ internal sealed class UespProtectPages : EditJob
 
 		var headerTemplate = nodes.Factory.TemplateNodeFromWikiText(header);
 		var headerTitle = headerTemplate.GetTitle(parser.Site);
-		var index = nodes.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == headerTitle);
+		var index = nodes.IndexOf<TemplateNode>(node => node.GetTitle(parser.Site) == headerTitle);
 		if (index != -1)
 		{
-			var existing = (ITemplateNode)nodes[index];
+			var existing = (TemplateNode)nodes[index];
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddRange(headerTemplate.TitleNodes);
 			nodes.RemoveAt(index);
@@ -389,7 +389,7 @@ internal sealed class UespProtectPages : EditJob
 			headerTemplate = existing;
 		}
 
-		var needsNewLine = nodes[insertPos] is IHeaderNode;
+		var needsNewLine = nodes[insertPos] is HeaderNode;
 		nodes.Insert(insertPos, headerTemplate);
 		if (needsNewLine)
 		{
@@ -402,13 +402,13 @@ internal sealed class UespProtectPages : EditJob
 	private static int AddJavascriptProtection(SiteParser parser, PageProtection protection, int insertPos)
 	{
 		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
-		var currentPos = parser.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
+		var currentPos = parser.IndexOf<TemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
 			parser.RemoveAt(currentPos);
 		}
 
-		if (parser.Count > 0 && parser[insertPos] is ITextNode text && text.Text.StartsWith("//", StringComparison.Ordinal))
+		if (parser.Count > 0 && parser[insertPos] is TextNode text && text.Text.StartsWith("//", StringComparison.Ordinal))
 		{
 			text.Text = text.Text[2..].TrimStart();
 			if (text.Text.Length == 0)
@@ -484,10 +484,10 @@ internal sealed class UespProtectPages : EditJob
 	private static int RemoveProtectionTemplate(SiteParser parser, int insertPos)
 	{
 		var protectionTemplateTitle = TitleFactory.FromTemplate(parser.Site, ProtectionTemplateName);
-		var currentPos = parser.IndexOf<ITemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
+		var currentPos = parser.IndexOf<TemplateNode>(node => node.GetTitle(parser.Site) == protectionTemplateTitle);
 		if (currentPos != -1)
 		{
-			var existing = (ITemplateNode)parser[currentPos];
+			var existing = (TemplateNode)parser[currentPos];
 			existing.TitleNodes.Clear();
 			existing.TitleNodes.AddText(ProtectionTemplateName);
 			existing.Remove("edit");

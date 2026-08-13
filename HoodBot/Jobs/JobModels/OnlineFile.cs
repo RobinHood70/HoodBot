@@ -26,7 +26,7 @@ public sealed class OnlineFile
 	#endregion
 
 	#region Public Methods
-	public void MergeInfo(Page page, ITemplateNode template)
+	public void MergeInfo(Page page, TemplateNode template)
 	{
 		var fileInfo = (FilePageModule)page.Custom[FilePageModule.PropertyName];
 		if (fileInfo.FileRevisions.Count == 0)

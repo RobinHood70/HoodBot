@@ -1068,7 +1068,7 @@ public partial class Site : IMessageSource
 	/// <summary>Gets the redirect target from the page text.</summary>
 	/// <param name="text">The text to parse.</param>
 	/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is ILinkNode linkNode
+	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is LinkNode linkNode
 		? TitleFactory.FromTitleNode(this, linkNode).ToFullTitle()
 		: null;
 
@@ -1249,7 +1249,7 @@ public partial class Site : IMessageSource
 	#endregion
 
 	#region Internal Methods
-	internal ILinkNode? GetRedirectFromTextInternal(string text)
+	internal LinkNode? GetRedirectFromTextInternal(string text)
 	{
 		ArgumentNullException.ThrowIfNull(text);
 		var redirectAliases = this.magicWords.TryGetValue("redirect", out var redirect)
@@ -1259,7 +1259,7 @@ public partial class Site : IMessageSource
 		var nodes = WikiNodeFactory.DefaultInstance.Parse(text);
 
 		// Is the text of the format TextNode, LinkNode?
-		if (nodes is [ITextNode textNode, ILinkNode linkNode, ..])
+		if (nodes is [TextNode textNode, LinkNode linkNode, ..])
 		{
 			var searchText = textNode.Text.TrimEnd();
 

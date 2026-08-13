@@ -36,13 +36,13 @@ internal static class EsoSpace
 	#endregion
 
 	#region Public Methods
-	public static void AddToOnlineFile(ITemplateNode template, string linkType, string linkValue) =>
+	public static void AddToOnlineFile(TemplateNode template, string linkType, string linkValue) =>
 		AddToOnlineFile(template, (linkType, linkValue));
 
-	public static void AddToOnlineFile(ITemplateNode template, params (string Type, string Value)[] links) =>
+	public static void AddToOnlineFile(TemplateNode template, params (string Type, string Value)[] links) =>
 		AddToOnlineFile(template, (IList<(string Type, string Value)>)links);
 
-	public static void AddToOnlineFile(ITemplateNode template, IList<(string Type, string Value)> links)
+	public static void AddToOnlineFile(TemplateNode template, IList<(string Type, string Value)> links)
 	{
 		// CONSIDER: This is kludgy - it clears and reinserts the entire parameter list every time to ensure correct format and sorting. Might want to rewrite as separate routines that get the SortedSet (or even revert to a list), clear the anonymous parameters, and update from list. That way, caller can optimize flow as needed.
 		ArgumentNullException.ThrowIfNull(template);
@@ -75,10 +75,10 @@ internal static class EsoSpace
 		}
 	}
 
-	public static ITemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
+	public static TemplateNode FindOrCreateOnlineFile(SiteParser parser, params string[] originalFileNames)
 	{
 		ArgumentNullException.ThrowIfNull(parser);
-		if (parser.FindTemplate("Online File") is not ITemplateNode template)
+		if (parser.FindTemplate("Online File") is not TemplateNode template)
 		{
 			template = parser.Factory.TemplateNodeFromWikiText("{{Online File\n|originalfile=\n}}");
 			parser.Insert(0, template);
@@ -92,7 +92,7 @@ internal static class EsoSpace
 		if (originalFileNames?.Length > 0)
 		{
 			var fileNames = new SortedSet<string>(originalFileNames, StringComparer.Ordinal);
-			if (template.Find("originalfile") is not IParameterNode fileParam)
+			if (template.Find("originalfile") is not ParameterNode fileParam)
 			{
 				fileParam = template.Factory.ParameterNodeFromParts("originalfile", string.Empty);
 			}
@@ -217,7 +217,7 @@ internal static class EsoSpace
 		var paramName = pageType;
 		var patchPage = GetPatchPage(job);
 		var parser = new SiteParser(patchPage);
-		if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
+		if (parser.FindTemplate("Online Patch") is TemplateNode template && template.Find(paramName) is ParameterNode param)
 		{
 			param.SetValue(version.ToString(), ParameterFormat.OnePerLine);
 			parser.UpdatePage();

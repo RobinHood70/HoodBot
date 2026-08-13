@@ -120,7 +120,7 @@ public abstract class LinkFinderJob : ParsedPageJob
 		}
 	}
 
-	protected virtual bool CheckLink(ILinkNode link) =>
+	protected virtual bool CheckLink(LinkNode link) =>
 		!(
 			this.sectionLinksOnly &&
 			SiteLink.FromLinkNode(this.Site, link) is var linkTitle &&

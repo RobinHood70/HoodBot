@@ -142,7 +142,7 @@ internal sealed class MorrowindBooksInterlanguageLinks : ParsedPageJob
 			}
 		}
 
-		var bookTemplates = new List<ITemplateNode>(this.FilterTemplates(parser, this.baseLang));
+		var bookTemplates = new List<TemplateNode>(this.FilterTemplates(parser, this.baseLang));
 		if (bookTemplates.Count == 0)
 		{
 			return;
@@ -168,7 +168,7 @@ internal sealed class MorrowindBooksInterlanguageLinks : ParsedPageJob
 	#endregion
 
 	#region Private Static Methods
-	private static IEnumerable<string> GetIds(ITemplateNode template)
+	private static IEnumerable<string> GetIds(TemplateNode template)
 	{
 		foreach (var param in template.Parameters.Where(p => IdFields.IsMatch(p.GetName() ?? string.Empty)))
 		{
@@ -192,11 +192,11 @@ internal sealed class MorrowindBooksInterlanguageLinks : ParsedPageJob
 	#endregion
 
 	#region Private Methods
-	private IEnumerable<ITemplateNode> FilterTemplates(SiteParser parser, string lang) => parser
+	private IEnumerable<TemplateNode> FilterTemplates(SiteParser parser, string lang) => parser
 		.FindTemplates(this.Site, this.templateNames[lang])
 		.Where(t => !(t.GetValue("scroll") ?? string.Empty).OrdinalEquals("1"));
 
-	private Title? FindOtherTitle(List<ITemplateNode> bookTemplates)
+	private Title? FindOtherTitle(List<TemplateNode> bookTemplates)
 	{
 		foreach (var template in bookTemplates)
 		{

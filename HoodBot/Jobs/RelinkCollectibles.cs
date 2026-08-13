@@ -65,7 +65,7 @@ public class RelinkCollectibles : MovePagesJob
 		this.PopulateFromCollections(collectionPages);
 	}
 
-	protected override void UpdateLinkNode(Page page, ILinkNode node, bool isRedirectTarget)
+	protected override void UpdateLinkNode(Page page, LinkNode node, bool isRedirectTarget)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(node);

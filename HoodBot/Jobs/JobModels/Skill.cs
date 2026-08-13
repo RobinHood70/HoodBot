@@ -148,7 +148,7 @@ internal abstract class Skill(string name, string pageName, string skillClass, s
 		};
 	}
 
-	protected static string IconValueFixup(IParameterNode? parameter, string newValue)
+	protected static string IconValueFixup(ParameterNode? parameter, string newValue)
 	{
 		if (parameter != null)
 		{
@@ -166,7 +166,7 @@ internal abstract class Skill(string name, string pageName, string skillClass, s
 
 	protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-	protected static void UpdateParameter(ITemplateNode template, string name, string value, TitleCollection usedList, string skillName)
+	protected static void UpdateParameter(TemplateNode template, string name, string value, TitleCollection usedList, string skillName)
 	{
 		ArgumentNullException.ThrowIfNull(name);
 		ArgumentNullException.ThrowIfNull(value);
@@ -183,6 +183,6 @@ internal abstract class Skill(string name, string pageName, string skillClass, s
 	#endregion
 
 	#region Protected Abstratct Methods
-	protected abstract void UpdateTemplate(Site site, ITemplateNode template);
+	protected abstract void UpdateTemplate(Site site, TemplateNode template);
 	#endregion
 }

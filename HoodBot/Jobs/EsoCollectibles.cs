@@ -120,7 +120,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		{
 			var parser = new SiteParser(page);
 			var text = $"Page found on wiki but not in collectibles: {page.Title}";
-			if (parser.FindTemplate(TemplateName) is ITemplateNode template)
+			if (parser.FindTemplate(TemplateName) is TemplateNode template)
 			{
 				text += " -> " + template.GetValue("collectibletype") + ", " + template.GetValue("type");
 			}
@@ -185,7 +185,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 				ReplaceLocations.Comments | ReplaceLocations.Text);
 		}
 
-		if (parser.FindTemplate(TemplateName) is not ITemplateNode template)
+		if (parser.FindTemplate(TemplateName) is not TemplateNode template)
 		{
 			Debug.WriteLine($"{TemplateName} not found on page {parser.Page.Title}");
 			return;
@@ -205,7 +205,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 			template.UpdateIfEmpty("titlename", item.Name);
 		}
 
-		if (template.Find("name") is IParameterNode nameParam &&
+		if (template.Find("name") is ParameterNode nameParam &&
 			nameParam.GetValue().Length != 0)
 		{
 			template.RenameParameter("name", "nickname");
@@ -321,7 +321,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		var pre = extract.FindTemplate("Pre");
 		if (pre?.Find(1)?.Value is not WikiNodeCollection value ||
 			value.Count == 0 ||
-			value[0] is not ITagNode tag ||
+			value[0] is not TagNode tag ||
 			!tag.Name.OrdinalEquals("nowiki"))
 		{
 			throw new InvalidOperationException("Blank template not in expected format.");

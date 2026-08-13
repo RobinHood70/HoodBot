@@ -82,7 +82,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	#region IVisitor Methods
 
 	/// <inheritdoc/>
-	public void Visit(IArgumentNode argument)
+	public void Visit(ArgumentNode argument)
 	{
 		ArgumentNullException.ThrowIfNull(argument);
 		if (!this.raw && argument.DefaultValue != null)
@@ -111,7 +111,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ICommentNode comment)
+	public void Visit(CommentNode comment)
 	{
 		ArgumentNullException.ThrowIfNull(comment);
 		if (this.raw)
@@ -121,7 +121,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IHeaderNode header)
+	public void Visit(HeaderNode header)
 	{
 		ArgumentNullException.ThrowIfNull(header);
 		var equalsSigns = new string('=', header.Level);
@@ -132,7 +132,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IIgnoreNode ignore)
+	public void Visit(IgnoreNode ignore)
 	{
 		ArgumentNullException.ThrowIfNull(ignore);
 		if (this.raw)
@@ -142,7 +142,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ILinkNode link)
+	public void Visit(LinkNode link)
 	{
 		ArgumentNullException.ThrowIfNull(link);
 		if (this.raw)
@@ -174,7 +174,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IParameterNode parameter)
+	public void Visit(ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		this.builder.Append('|');
@@ -188,7 +188,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITagNode tag)
+	public void Visit(TagNode tag)
 	{
 		ArgumentNullException.ThrowIfNull(tag);
 		if (!this.raw)
@@ -215,7 +215,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITemplateNode template)
+	public void Visit(TemplateNode template)
 	{
 		this.builder.Append("{{");
 		ArgumentNullException.ThrowIfNull(template);
@@ -229,7 +229,7 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITextNode text)
+	public void Visit(TextNode text)
 	{
 		ArgumentNullException.ThrowIfNull(text);
 		this.builder.Append(text.Text);

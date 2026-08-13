@@ -110,13 +110,13 @@ internal sealed class SFAidItems : CreateOrUpdateJob<SFItem>
 		template.Update("value", item.Value.ToStringInvariant(), ParameterFormat.OnePerLine, false);
 		template.UpdateIfEmpty("image", $"<!--SF-item-{item.Name}.png-->", ParameterFormat.OnePerLine);
 		var defaultImgdesc = title ?? pagename ?? parser.Title.PageName;
-		if (template.Find("imgdesc") is IParameterNode imgdesc &&
+		if (template.Find("imgdesc") is ParameterNode imgdesc &&
 			string.Equals(imgdesc.GetValue(), defaultImgdesc, StringComparison.OrdinalIgnoreCase))
 		{
 			template.Remove("imgdesc");
 		}
 
-		if (template.Find("effect") is IParameterNode effectParam)
+		if (template.Find("effect") is ParameterNode effectParam)
 		{
 			var effectText = effectParam.GetValue();
 			if (item.Description.Length > 0)

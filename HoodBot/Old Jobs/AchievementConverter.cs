@@ -119,7 +119,7 @@
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{
 				var node = parsedContent[pos];
-				if (node is ITemplateNode template)
+				if (node is TemplateNode template)
 				{
 					switch (template.GetTitleText().ToLowerInvariant())
 					{
@@ -138,7 +138,7 @@
 							break;
 						case "nowrap":
 							parsedContent.RemoveAt(pos);
-							if (template.Find(1) is IParameterNode param)
+							if (template.Find(1) is ParameterNode param)
 							{
 								parsedContent.InsertRange(pos, param.Value);
 							}
@@ -156,9 +156,9 @@
 			// Find closed groups with a pipe right after them which should be part of the group.
 			for (var pos = parsedContent.Count - 2; pos >= 0; pos--)
 			{
-				if (parsedContent[pos] is ITemplateNode template &&
+				if (parsedContent[pos] is TemplateNode template &&
 					template.GetTitleText().StartsWith("EAL/", StringComparison.Ordinal) &&
-					parsedContent[pos + 1] is ITextNode textNode)
+					parsedContent[pos + 1] is TextNode textNode)
 				{
 					var text = textNode.Text.Replace("}\n}", "}}", StringComparison.Ordinal).TrimStart('}');
 					var trimmedText = text.TrimStart();
@@ -182,7 +182,7 @@
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{
 				var node = parsedContent[pos];
-				if (node is ITemplateNode template &&
+				if (node is TemplateNode template &&
 					string.Equals(template.GetTitleText(), "EAL/Group", StringComparison.Ordinal))
 				{
 					if (template.Find(1) == null)
@@ -190,7 +190,7 @@
 						template.Remove("indent");
 						if (template.Find("title") == null)
 						{
-							if (template.Find("groupline") is not IParameterNode)
+							if (template.Find("groupline") is not ParameterNode)
 							{
 								template.Find("first")?.Anonymize();
 								template.Find("reward")?.Anonymize();
@@ -225,7 +225,7 @@
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{
 				var node = parsedContent[pos];
-				if (node is ITemplateNode template &&
+				if (node is TemplateNode template &&
 					string.Equals(template.GetTitleText(), "EAL/Group", StringComparison.Ordinal))
 				{
 					if (template.Find("title") == null)
@@ -235,7 +235,7 @@
 							(first != null && template.Find(1) == null))
 						{
 							template.SetTitle("EAL/Entry");
-							if (template.Find("groupline") is IParameterNode groupLine)
+							if (template.Find("groupline") is ParameterNode groupLine)
 							{
 								groupLine.SetName("line");
 							}
@@ -274,12 +274,12 @@
 			for (var pos = parsedContent.Count - 1; pos >= 0; pos--)
 			{
 				var node = parsedContent[pos];
-				if (node is ITemplateNode template)
+				if (node is TemplateNode template)
 				{
 					switch (template.GetTitleText().ToLowerInvariant())
 					{
 						case "eal/entry":
-							if (template.Find(1) is IParameterNode first)
+							if (template.Find(1) is ParameterNode first)
 							{
 								this.titles.Add(first.Value.ToValue());
 							}

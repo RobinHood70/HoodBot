@@ -57,7 +57,7 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 				continue;
 			}
 
-			/* if (section.Content.Find<ICommentNode>() is not null)
+			/* if (section.Content.Find<CommentNode>() is not null)
 			{
 				this.WriteLine($"* [[{parser.Page.FullPageName}]] will need to be converted manually.");
 				continue;
@@ -156,7 +156,7 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 	private string? ParseLine(Page page, string line, List<string> itemList)
 	{
 		var parsedLine = new SiteParser(page, line);
-		if (parsedLine.Count > 0 && parsedLine[0] is ITextNode textNode)
+		if (parsedLine.Count > 0 && parsedLine[0] is TextNode textNode)
 		{
 			var text = textNode.Text;
 			switch (text)
@@ -169,7 +169,7 @@ internal sealed class EsoHouseFurnishings(JobManager jobManager) : ParsedPageJob
 					return null;
 				case ":*":
 				case ";*":
-					if (parsedLine[1] is ITemplateNode furnishing && furnishing.GetTitle(this.Site) == "Template:Furnishing Link")
+					if (parsedLine[1] is TemplateNode furnishing && furnishing.GetTitle(this.Site) == "Template:Furnishing Link")
 					{
 						var link = furnishing.GetRaw(1);
 						var (_, count) = SplitLine(line);

@@ -25,7 +25,7 @@ public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 
 	private bool BotAllowed(SiteParser parser)
 	{
-		if (parser.FindTemplate("Bots") is not ITemplateNode botTemplate)
+		if (parser.FindTemplate("Bots") is not TemplateNode botTemplate)
 		{
 			return true;
 		}
@@ -36,7 +36,7 @@ public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 			return false;
 		}
 
-		if (botTemplate.Find("allow") is IParameterNode allowParam)
+		if (botTemplate.Find("allow") is ParameterNode allowParam)
 		{
 			var split = allowParam.GetValue().Split(TextArrays.Comma, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			if (split.Contains(botName))
@@ -45,7 +45,7 @@ public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 			}
 		}
 
-		if (botTemplate.Find("deny") is IParameterNode denyParam)
+		if (botTemplate.Find("deny") is ParameterNode denyParam)
 		{
 			var split = denyParam.GetValue().Split(TextArrays.Comma, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			if (split.Contains(botName))
@@ -54,7 +54,7 @@ public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 			}
 		}
 
-		if (botTemplate.Find("allowtasks") is IParameterNode allowTasksParam)
+		if (botTemplate.Find("allowtasks") is ParameterNode allowTasksParam)
 		{
 			var split = allowTasksParam.GetValue().Split(TextArrays.Comma, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			if (split.Contains(this.JobName) || split.Contains(botName + '.' + this.JobName))
@@ -63,7 +63,7 @@ public abstract class ParsedPageJob(JobManager jobManager) : EditJob(jobManager)
 			}
 		}
 
-		if (botTemplate.Find("denytasks") is IParameterNode denyTasksParam)
+		if (botTemplate.Find("denytasks") is ParameterNode denyTasksParam)
 		{
 			var split = denyTasksParam.GetValue().Split(TextArrays.Comma, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 			if (split.Contains(this.JobName) || split.Contains(botName + '.' + this.JobName))

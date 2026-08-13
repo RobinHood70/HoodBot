@@ -105,7 +105,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 	#endregion
 
 	#region Protected Override Methods
-	protected override void UpdateTemplate(Site site, ITemplateNode template)
+	protected override void UpdateTemplate(Site site, TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(template);
@@ -138,7 +138,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 		else
 		{
 			var newValue = FormatMeters(baseRank.Radius);
-			if (template.Find("radius", "area") is IParameterNode radiusParam)
+			if (template.Find("radius", "area") is ParameterNode radiusParam)
 			{
 				var oldValue = radiusParam.GetValue();
 				if (oldValue.OrdinalICEquals(newValue))
@@ -227,7 +227,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 			rank: (sbyte)row["rank"]);
 	}
 
-	private void UpdateMorph(ITemplateNode template, string baseSkillCost, TitleCollection usedList, Morph? morph, CultureInfo culture)
+	private void UpdateMorph(TemplateNode template, string baseSkillCost, TitleCollection usedList, Morph? morph, CultureInfo culture)
 	{
 		ArgumentNullException.ThrowIfNull(morph);
 		if (this.baseSkill is null)
@@ -299,7 +299,7 @@ internal sealed class ActiveSkill(string name, string pageName, string skillClas
 		}
 	}
 
-	private void UpdateMorphs(Site site, ITemplateNode template, string baseSkillCost)
+	private void UpdateMorphs(Site site, TemplateNode template, string baseSkillCost)
 	{
 		TitleCollection usedList = new(site);
 		foreach (var morph in this.Morphs)

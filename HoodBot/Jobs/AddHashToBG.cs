@@ -21,7 +21,7 @@ public class AddHashToBG(JobManager jobManager) : ParsedPageJob(jobManager)
 		foreach (var template in parser.TemplateNodes)
 		{
 			if (template.Parameters.Count >= 1 &&
-				template.Find(1) is IParameterNode parameter &&
+				template.Find(1) is ParameterNode parameter &&
 				parameter.GetValue() is string hex &&
 				hex.Length == 6 &&
 				int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))

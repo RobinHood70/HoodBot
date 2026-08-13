@@ -1,12 +1,11 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents a header.</summary>
-public class HeaderNode : IHeaderNode
+public class HeaderNode : IWikiNode, IParentNode
 {
 	// TODO: Rejig this so that header node is strictly the header with no trailing space. GetInnerText can then be removed since this will only ever be storing the interior text. Will need to look closely at HeaderElement, though, to make sure fallback unwikifying isn't affected.
 	#region Constructors
@@ -29,16 +28,18 @@ public class HeaderNode : IHeaderNode
 
 	#region Public Properties
 
-	/// <inheritdoc/>
+	/// <summary>Gets any text that appeared after the ==.</summary>
 	public WikiNodeCollection Comment { get; }
 
-	/// <inheritdoc/>
+	/// <summary>Gets or sets a value indicating whether this <see cref="HeaderNode"/> is confirmed (direct text) or possible (template or argument).</summary>
+	/// <value><see langword="true"/> if confirmed; otherwise, <see langword="false"/>.</value>
 	public bool Confirmed { get; set; }
 
 	/// <inheritdoc/>
 	public IWikiNodeFactory Factory { get; }
 
-	/// <inheritdoc/>
+	/// <summary>Gets the level.</summary>
+	/// <value>The level. This is equal to the number of visible equals signs.</value>
 	public int Level { get; }
 
 	/// <inheritdoc/>
@@ -50,7 +51,8 @@ public class HeaderNode : IHeaderNode
 		}
 	}
 
-	/// <inheritdoc/>
+	/// <summary>Gets the title.</summary>
+	/// <value>The title.</value>
 	public WikiNodeCollection Title { get; }
 	#endregion
 
@@ -67,7 +69,7 @@ public class HeaderNode : IHeaderNode
 	/// <returns>A <see cref="string"/> that represents this instance.</returns>
 	public override string ToString()
 	{
-		var retval = (this.Title.Count == 1 && this.Title[0] is ITextNode text)
+		var retval = (this.Title.Count == 1 && this.Title[0] is TextNode text)
 			? text.Text
 			: "<Header>";
 		var equalsSigns = new string('=', this.Level);

@@ -52,7 +52,7 @@ public class MerFinder : LinkFinderJob
 	}
 	#endregion
 
-	protected override bool CheckLink(ILinkNode link)
+	protected override bool CheckLink(LinkNode link)
 	{
 		var siteLink = SiteLink.FromLinkNode(this.Site, link);
 		return siteLink.Text is not "Dark Elf" and not "High Elf" and not "Wood Elf";

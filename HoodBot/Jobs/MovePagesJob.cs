@@ -639,26 +639,26 @@ public abstract class MovePagesJob : EditJob
 	{
 		switch (node)
 		{
-			case ITagNode tag:
+			case TagNode tag:
 				if (tag.Name.OrdinalEquals("gallery"))
 				{
 					this.UpdateGalleryLinks(page, tag);
 				}
 
 				break;
-			case ILinkNode link:
+			case LinkNode link:
 				this.UpdateLinkNode(page, link, this.isRedirectLink);
 				this.isRedirectLink = false;
 				break;
-			case ITemplateNode template:
+			case TemplateNode template:
 				this.UpdateTemplateNode(page, template);
 				break;
-			case IArgumentNode:
-			case ICommentNode:
-			case IHeaderNode:
-			case IIgnoreNode:
-			case IParameterNode:
-			case ITextNode:
+			case ArgumentNode:
+			case CommentNode:
+			case HeaderNode:
+			case IgnoreNode:
+			case ParameterNode:
+			case TextNode:
 				break;
 			default:
 				throw new InvalidOperationException("Unknown node type encountered: " + node.GetType().Name);
@@ -703,7 +703,7 @@ public abstract class MovePagesJob : EditJob
 		}
 	}
 
-	protected virtual void UpdateGalleryLinks(Page page, ITagNode tag)
+	protected virtual void UpdateGalleryLinks(Page page, TagNode tag)
 	{
 		if (tag is null || tag.InnerText is not string text || text.Trim().Length == 0)
 		{
@@ -747,7 +747,7 @@ public abstract class MovePagesJob : EditJob
 		return retval;
 	}
 
-	protected virtual void UpdateLinkNode(Page page, ILinkNode node, bool isRedirectTarget)
+	protected virtual void UpdateLinkNode(Page page, LinkNode node, bool isRedirectTarget)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(node);
@@ -806,7 +806,7 @@ public abstract class MovePagesJob : EditJob
 		}
 	}
 
-	protected virtual void UpdateTemplateNode(Page page, ITemplateNode template)
+	protected virtual void UpdateTemplateNode(Page page, TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		ArgumentNullException.ThrowIfNull(template);

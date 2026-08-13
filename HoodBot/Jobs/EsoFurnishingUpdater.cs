@@ -259,7 +259,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Private Static Methods
-	private static void CheckBehavior(ITemplateNode template, Furnishing furnishing)
+	private static void CheckBehavior(TemplateNode template, Furnishing furnishing)
 	{
 		if (furnishing.Behavior is not null && furnishing.Behavior.Length > 0)
 		{
@@ -275,14 +275,14 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private static void CheckComments(SiteParser parser, ITemplateNode template)
+	private static void CheckComments(SiteParser parser, TemplateNode template)
 	{
 		var cat = template.GetValue("cat");
 		var doHousing = cat is not null && NoHousingCats.Contains(cat);
 		RemoveComments(parser, doHousing);
 		PruneSecondaryTemplates(parser);
 
-		foreach (var comment in parser.FindAll<ICommentNode>(null, false, false, 0))
+		foreach (var comment in parser.FindAll<CommentNode>(null, false, false, 0))
 		{
 			CommentCounts[comment.Comment] = CommentCounts.TryGetValue(comment.Comment, out var value)
 				? ++value
@@ -290,7 +290,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private static void CheckIcon(ITemplateNode template, string labelName)
+	private static void CheckIcon(TemplateNode template, string labelName)
 	{
 		labelName = labelName.Replace(':', ',');
 		var defaultName = $"ON-icon-furnishing-{labelName}.png";
@@ -306,7 +306,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}*/
 	}
 
-	private static string CheckName(Page page, ITemplateNode template, Furnishing item)
+	private static string CheckName(Page page, TemplateNode template, Furnishing item)
 	{
 		var labelName = page.Title.LabelName();
 
@@ -333,9 +333,9 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		return labelName;
 	}
 
-	private static void FixBehavior(ITemplateNode template)
+	private static void FixBehavior(TemplateNode template)
 	{
-		if (template.Find("behavior") is IParameterNode behavior)
+		if (template.Find("behavior") is ParameterNode behavior)
 		{
 			var list = new List<string>(behavior.GetValue().Split(TextArrays.Comma));
 			for (var i = list.Count - 1; i >= 0; i--)
@@ -369,7 +369,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	{
 		for (var i = parser.Count - 2; i >= 0; i--)
 		{
-			if (parser[i] is ICommentNode comment)
+			if (parser[i] is CommentNode comment)
 			{
 				if (TemplateFinder.IsMatch(comment.Comment))
 				{
@@ -432,7 +432,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private void CheckImage(ITemplateNode template, string name, string link)
+	private void CheckImage(TemplateNode template, string name, string link)
 	{
 		var fileSpace = this.Site[MediaWikiNamespaces.File];
 		var imageName = Furnishing.ImageName(name);
@@ -487,15 +487,15 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private void FixBundles(ITemplateNode template)
+	private void FixBundles(TemplateNode template)
 	{
-		if (template.Find("bundles") is IParameterNode bundles)
+		if (template.Find("bundles") is ParameterNode bundles)
 		{
 			var value = bundles.Value;
 			var factory = template.Factory;
 			for (var i = 0; i < value.Count; i++)
 			{
-				if (value[i] is ILinkNode link)
+				if (value[i] is LinkNode link)
 				{
 					var siteLink = SiteLink.FromLinkNode(this.Site, link);
 					value.RemoveAt(i);
@@ -508,10 +508,10 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private void FixList(ITemplateNode template, string parameterName)
+	private void FixList(TemplateNode template, string parameterName)
 	{
 		var plural = parameterName + "s";
-		if (template.Find(plural, parameterName) is IParameterNode param)
+		if (template.Find(plural, parameterName) is ParameterNode param)
 		{
 			param.SetName(plural);
 			var curText = param.GetValue().AsSpan();
@@ -563,7 +563,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private void FurnishingFixes(ITemplateNode template, Page page, Furnishing item)
+	private void FurnishingFixes(TemplateNode template, Page page, Furnishing item)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		var rawTemplate = template.ToRaw();
@@ -672,7 +672,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		}
 	}
 
-	private void GenericTemplateFixes(ITemplateNode template)
+	private void GenericTemplateFixes(TemplateNode template)
 	{
 		template.Remove("animated");
 		template.Remove("audible");
@@ -728,7 +728,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		var blankPage = this.Site.LoadPage($"Template:{TemplateName}/Blank");
 		var parser = new SiteParser(blankPage);
 		var paramValue = parser.FindTemplate("Pre")?.Find(1)?.Value;
-		return paramValue?.Count == 1 && paramValue[0] is ITagNode nowiki && nowiki.InnerText is string text
+		return paramValue?.Count == 1 && paramValue[0] is TagNode nowiki && nowiki.InnerText is string text
 			? text.Trim()
 			: throw new InvalidOperationException("Template blank not in expected format.");
 	}

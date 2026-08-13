@@ -6,13 +6,13 @@ using RobinHood70.WikiCommon.Parser;
 /// <summary>Extensions to the WikiCommon.Parser interfaces.</summary>
 public static class ParserExtensions
 {
-	#region ILinkNode Methods
+	#region LinkNode Methods
 
 	/// <summary>Parses the link and returns the title portion as a <see cref="Title"/>.</summary>
 	/// <param name="link">The link to get the title for.</param>
 	/// <param name="site">The site the link is from.</param>
 	/// <returns>The title.</returns>
-	public static Title GetTitle(this ILinkNode link, Site site)
+	public static Title GetTitle(this LinkNode link, Site site)
 	{
 		ArgumentNullException.ThrowIfNull(link);
 		ArgumentNullException.ThrowIfNull(site);
@@ -20,13 +20,13 @@ public static class ParserExtensions
 	}
 	#endregion
 
-	#region ITemplateNode Methods
+	#region TemplateNode Methods
 
 	/// <summary>Parses the name of a template and returns it as a <see cref="Title"/>.</summary>
 	/// <param name="template">The template to get the title for.</param>
 	/// <param name="site">The site the title is from.</param>
 	/// <returns>The title.</returns>
-	public static Title GetTitle(this ITemplateNode template, Site site)
+	public static Title GetTitle(this TemplateNode template, Site site)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(site);

@@ -14,7 +14,7 @@ internal class Piece
 	public void AddLiteral(IWikiNodeFactory factory, string literal)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(literal);
-		if (this.Nodes.Count > 0 && this.Nodes[^1] is ITextNode node)
+		if (this.Nodes.Count > 0 && this.Nodes[^1] is TextNode node)
 		{
 			node.Text += literal;
 		}
@@ -31,7 +31,7 @@ internal class Piece
 			return;
 		}
 
-		if (this.Nodes.Count > 0 && this.Nodes[^1] is ITextNode lastNode && newList[0] is ITextNode first)
+		if (this.Nodes.Count > 0 && this.Nodes[^1] is TextNode lastNode && newList[0] is TextNode first)
 		{
 			lastNode.Text += first.Text;
 			this.Nodes.AddRange(newList[1..]);

@@ -50,17 +50,17 @@ public static class Extensions
 	}
 	#endregion
 
-	#region IEnumerable<IParameterNode> Methods
+	#region IEnumerable<ParameterNode> Methods
 
-	/// <summary>Converts a collection of <see cref="IParameterNode"/>s to key and value strings.</summary>
+	/// <summary>Converts a collection of <see cref="ParameterNode"/>s to key and value strings.</summary>
 	/// <param name="parameters">The parameters to convert.</param>
 	/// <returns>An enumeration of key/value strings. The key string is nullable.</returns>
-	public static IEnumerable<(string? Key, string Value)> ToKeyValue(this IEnumerable<IParameterNode> parameters)
+	public static IEnumerable<(string? Key, string Value)> ToKeyValue(this IEnumerable<ParameterNode> parameters)
 	{
 		ArgumentNullException.ThrowIfNull(parameters);
 		return ToKeyValue(parameters);
 
-		static IEnumerable<(string? Key, string Value)> ToKeyValue(IEnumerable<IParameterNode> parameters)
+		static IEnumerable<(string? Key, string Value)> ToKeyValue(IEnumerable<ParameterNode> parameters)
 		{
 			foreach (var param in parameters)
 			{
@@ -73,14 +73,14 @@ public static class Extensions
 	}
 	#endregion
 
-	#region IHeaderNode Extensions
+	#region HeaderNode Extensions
 
 	/// <summary>Gets the text inside the heading delimiters.</summary>
 	/// <param name="header">The header to get the title for.</param>
 	/// <param name="trim">if set to <see langword="true"/>, trims the inner text before returning it.</param>
 	/// <returns>The text inside the heading delimiters.</returns>
 	/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
-	public static string GetTitle(this IHeaderNode? header, bool trim)
+	public static string GetTitle(this HeaderNode? header, bool trim)
 	{
 		if (header is null)
 		{
@@ -115,12 +115,12 @@ public static class Extensions
 	public static string ToValue(this IList<IWikiNode> nodes) => WikiTextVisitor.Value(nodes);
 	#endregion
 
-	#region IParameterNode Extensions
+	#region ParameterNode Extensions
 
 	/// <summary>Get the trimmed value of the parameter.</summary>
 	/// <param name="parameter">The parameter to work on.</param>
 	/// <returns>The trimmed text of the parameter value.</returns>
-	public static string? GetName(this IParameterNode parameter)
+	public static string? GetName(this ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		return parameter.Name?.ToValue().Trim();
@@ -129,7 +129,7 @@ public static class Extensions
 	/// <summary>Gets the parameter number if it's numeric.</summary>
 	/// <param name="parameter">The parameter to check.</param>
 	/// <returns>The parameter number if it's an integer; otherwise 0.</returns>
-	public static int GetNumberFromName(this IParameterNode? parameter)
+	public static int GetNumberFromName(this ParameterNode? parameter)
 	{
 		int.TryParse(parameter?.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber);
 		return namedNumber;
@@ -138,7 +138,7 @@ public static class Extensions
 	/// <summary>Get the trimmed raw value of the parameter.</summary>
 	/// <param name="parameter">The parameter to work on.</param>
 	/// <returns>The trimmed raw text of the parameter value.</returns>
-	public static string GetRaw(this IParameterNode parameter)
+	public static string GetRaw(this ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		return parameter.Value.ToRaw().Trim();
@@ -147,7 +147,7 @@ public static class Extensions
 	/// <summary>Get the trimmed value of the parameter.</summary>
 	/// <param name="parameter">The parameter to work on.</param>
 	/// <returns>The trimmed text of the parameter value.</returns>
-	public static string GetValue(this IParameterNode parameter)
+	public static string GetValue(this ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		return parameter.Value.ToValue().Trim();
@@ -157,17 +157,17 @@ public static class Extensions
 	/// <param name="parameter">The parameter.</param>
 	/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
 	/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
-	public static bool IsNullOrWhitespace(this IParameterNode? parameter) => parameter == null || parameter.Value.Count switch
+	public static bool IsNullOrWhitespace(this ParameterNode? parameter) => parameter == null || parameter.Value.Count switch
 	{
 		0 => true,
-		1 => parameter.Value[0] is ITextNode textNode && textNode.Text.TrimStart().Length == 0,
+		1 => parameter.Value[0] is TextNode textNode && textNode.Text.TrimStart().Length == 0,
 		_ => false,
 	};
 
 	/// <summary>Determines if a parameter is numeric.</summary>
 	/// <param name="parameter">The parameter to check.</param>
 	/// <returns><see langword="true"/> if the parameter is anonymous or if the parameter name is an integer; otherwise <see langword="false"/>.</returns>
-	public static bool IsNumeric(this IParameterNode? parameter)
+	public static bool IsNumeric(this ParameterNode? parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		return parameter.Anonymous || parameter.GetNumberFromName() != 0;
@@ -180,9 +180,9 @@ public static class Extensions
 	/// <param name="comparer">The string comparer to define loose equality.</param>
 	/// <remarks>
 	/// This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.
-	/// Note that the value will still be escaped before being compared, so if you want to compare unescaped values, you should use the <see cref="GetValue(IParameterNode)"/> method to get the existing value and compare it to the new value before calling this method.
+	/// Note that the value will still be escaped before being compared, so if you want to compare unescaped values, you should use the <see cref="GetValue(ParameterNode)"/> method to get the existing value and compare it to the new value before calling this method.
 	/// </remarks>
-	public static void Update(this IParameterNode parameter, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+	public static void Update(this ParameterNode parameter, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
 	{
 		// TODO: Consider unescaping oldText rather than escaping value, since the escaping methods used may not match. The difficulty is that unescaping will be wiki-dependent.
 		ArgumentNullException.ThrowIfNull(parameter);
@@ -199,7 +199,7 @@ public static class Extensions
 	/// <summary>Sets the name to the specified text.</summary>
 	/// <param name="parameter">The parameter to set the name of.</param>
 	/// <param name="name">The name.</param>
-	public static void SetName(this IParameterNode parameter, string name)
+	public static void SetName(this ParameterNode parameter, string name)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		ArgumentNullException.ThrowIfNull(name);
@@ -209,7 +209,7 @@ public static class Extensions
 	/// <summary>Sets the name from a list of nodes.</summary>
 	/// <param name="parameter">The parameter to set the name of.</param>
 	/// <param name="name">The name.</param>
-	public static void SetName(this IParameterNode parameter, IEnumerable<IWikiNode> name)
+	public static void SetName(this ParameterNode parameter, IEnumerable<IWikiNode> name)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		ArgumentNullException.ThrowIfNull(name);
@@ -228,13 +228,13 @@ public static class Extensions
 	/// <param name="parameter">The parameter to set the value of.</param>
 	/// <param name="value">The value. May not be null.</param>
 	/// <param name="paramFormat">The desired parameter format.</param>
-	public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat paramFormat) => SetValueNoEscape(parameter, parameter?.Factory.EscapeParameterText(value, parameter.Name is null), paramFormat);
+	public static void SetValue(this ParameterNode parameter, string? value, ParameterFormat paramFormat) => SetValueNoEscape(parameter, parameter?.Factory.EscapeParameterText(value, parameter.Name is null), paramFormat);
 
 	/// <summary>Special-purpose version of SetValue that sets the value without escaping it.</summary>
 	/// <param name="parameter">The parameter to set the value of.</param>
 	/// <param name="value">The value. May not be null.</param>
 	/// <param name="paramFormat">The desired parameter format.</param>
-	public static void SetValueNoEscape(this IParameterNode parameter, string? value, ParameterFormat paramFormat)
+	public static void SetValueNoEscape(this ParameterNode parameter, string? value, ParameterFormat paramFormat)
 	{
 		// This method uses a different name rather than a boolean choice, since it will be very rare that you wouldn't want to escape the value.
 		ArgumentNullException.ThrowIfNull(parameter);
@@ -259,7 +259,7 @@ public static class Extensions
 
 	/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
 	/// <param name="parameter">The parameter to convert.</param>
-	public static string ToKeyValue(this IParameterNode parameter)
+	public static string ToKeyValue(this ParameterNode parameter)
 	{
 		ArgumentNullException.ThrowIfNull(parameter);
 		return parameter.Name is WikiNodeCollection name
@@ -268,13 +268,13 @@ public static class Extensions
 	}
 	#endregion
 
-	#region ITagNode Extensions
+	#region TagNode Extensions
 
 	/// <summary>Gets the attributes from a tag.</summary>
 	/// <param name="tag">The tag to examine.</param>
 	/// <returns>The list of attributes on the specified tag. Name-only tags will be returned as [name] = null.</returns>
 	/// <remarks>This is a very simple Regex-based solution that should cover the vast majority of tags. For complete HTML compliance, you'll need to use another method.</remarks>
-	public static IReadOnlyList<KeyValuePair<string, string?>> GetAttributeList(this ITagNode tag)
+	public static IReadOnlyList<KeyValuePair<string, string?>> GetAttributeList(this TagNode tag)
 	{
 		ArgumentNullException.ThrowIfNull(tag);
 		if (string.IsNullOrEmpty(tag.Attributes))
@@ -294,14 +294,14 @@ public static class Extensions
 	}
 	#endregion
 
-	#region ITemplateNode Extensions
+	#region TemplateNode Extensions
 
 	/// <summary>Adds a new parameter to the template. Copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="name">The name of the parameter to add.</param>
 	/// <param name="value">The value of the parameter to add.</param>
 	/// <returns>The added parameter.</returns>
-	public static IParameterNode Add(this ITemplateNode template, string name, string value) => template.Add(name, value, ParameterFormat.Copy);
+	public static ParameterNode Add(this TemplateNode template, string name, string value) => template.Add(name, value, ParameterFormat.Copy);
 
 	/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 	/// <param name="template">The template to work on.</param>
@@ -310,11 +310,11 @@ public static class Extensions
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <returns>The added parameter.</returns>
 	/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-	public static IParameterNode Add(this ITemplateNode template, string? name, string value, ParameterFormat paramFormat)
+	public static ParameterNode Add(this TemplateNode template, string? name, string value, ParameterFormat paramFormat)
 	{
-		// TODO: Needs rewrite using IParameterNode.SetValue
+		// TODO: Needs rewrite using ParameterNode.SetValue
 		ArgumentNullException.ThrowIfNull(template);
-		IParameterNode retval;
+		ParameterNode retval;
 		if (name is not null && template.Find(name) is not null)
 		{
 			throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
@@ -372,14 +372,14 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="value">The value of the parameter to add.</param>
 	/// <returns>The added parameter.</returns>
-	public static IParameterNode Add(this ITemplateNode template, string value) => template.Add(value, ParameterFormat.Copy);
+	public static ParameterNode Add(this TemplateNode template, string value) => template.Add(value, ParameterFormat.Copy);
 
 	/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="value">The value of the parameter to add.</param>
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <returns>The added parameter.</returns>
-	public static IParameterNode Add(this ITemplateNode template, string value, ParameterFormat paramFormat) => Add(template, null, value, paramFormat);
+	public static ParameterNode Add(this TemplateNode template, string value, ParameterFormat paramFormat) => Add(template, null, value, paramFormat);
 
 	/// <summary>Adds a parameter with the specified value if it does not already exist.</summary>
 	/// <param name="template">The template to work on.</param>
@@ -388,7 +388,7 @@ public static class Extensions
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <remarks>If the value already exists, even if blank, it will remain unchanged.</remarks>
 	/// <returns>The parameter that was altered.</returns>
-	public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value, ParameterFormat paramFormat) => template.Find(name) is IParameterNode parameter
+	public static ParameterNode AddIfNotExists(this TemplateNode template, string name, string value, ParameterFormat paramFormat) => template.Find(name) is ParameterNode parameter
 		? parameter
 		: template.Add(name, value, paramFormat);
 
@@ -396,7 +396,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="number">The numbered parameter to search for.</param>
 	/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
-	public static IParameterNode? Find(this ITemplateNode template, int number)
+	public static ParameterNode? Find(this TemplateNode template, int number)
 	{
 		var index = template.FindNumberedIndex(number);
 		return index == -1 ? null : template.Parameters[index];
@@ -406,16 +406,16 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IParameterNode? Find(this ITemplateNode template, params string[] parameterNames) => template.Find(false, parameterNames);
+	public static ParameterNode? Find(this TemplateNode template, params string[] parameterNames) => template.Find(false, parameterNames);
 
 	/// <summary>Finds the last parameter with any of the provided names.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IParameterNode? Find(this ITemplateNode template, bool ignoreCase, params string[] parameterNames)
+	public static ParameterNode? Find(this TemplateNode template, bool ignoreCase, params string[] parameterNames)
 	{
-		IParameterNode? retval = null;
+		ParameterNode? retval = null;
 		foreach (var parameter in template.FindAll(ignoreCase, parameterNames))
 		{
 			retval = parameter;
@@ -428,33 +428,33 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, params string[] parameterNames) => template.FindAll(false, parameterNames);
+	public static IEnumerable<ParameterNode> FindAll(this TemplateNode template, params string[] parameterNames) => template.FindAll(false, parameterNames);
 
 	/// <summary>Finds the last parameter with any of the provided names.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, IEnumerable<string> parameterNames) => template.FindAll(false, parameterNames);
-
-	/// <summary>Finds the last parameter with any of the provided names.</summary>
-	/// <param name="template">The template to work on.</param>
-	/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
-	/// <param name="parameterNames">The names of the parameters to search for.</param>
-	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, bool ignoreCase, params string[] parameterNames) => template.FindAll(ignoreCase, (IEnumerable<string>)parameterNames);
+	public static IEnumerable<ParameterNode> FindAll(this TemplateNode template, IEnumerable<string> parameterNames) => template.FindAll(false, parameterNames);
 
 	/// <summary>Finds the last parameter with any of the provided names.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
+	public static IEnumerable<ParameterNode> FindAll(this TemplateNode template, bool ignoreCase, params string[] parameterNames) => template.FindAll(ignoreCase, (IEnumerable<string>)parameterNames);
+
+	/// <summary>Finds the last parameter with any of the provided names.</summary>
+	/// <param name="template">The template to work on.</param>
+	/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+	/// <param name="parameterNames">The names of the parameters to search for.</param>
+	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+	public static IEnumerable<ParameterNode> FindAll(this TemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(parameterNames);
 		return FindAll(template, ignoreCase, parameterNames);
 
-		static IEnumerable<IParameterNode> FindAll(ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
+		static IEnumerable<ParameterNode> FindAll(TemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 		{
 			HashSet<string> nameSet = new(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 			foreach (var (name, parameter) in GetResolvedParameters(template))
@@ -471,7 +471,7 @@ public static class Extensions
 	/// <param name="template">The template.</param>
 	/// <param name="name">The name.</param>
 	/// <returns>The index of the requested parameter or -1 if not found.</returns>
-	public static int FindIndex(this ITemplateNode template, string name)
+	public static int FindIndex(this TemplateNode template, string name)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(name);
@@ -493,7 +493,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="number">The numbered parameter to search for.</param>
 	/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
-	public static int FindNumberedIndex(this ITemplateNode template, int number)
+	public static int FindNumberedIndex(this TemplateNode template, int number)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		var retval = -1;
@@ -523,12 +523,12 @@ public static class Extensions
 	/// <value>The numbered parameters.</value>
 	/// <remarks>Parameters returned by this function include both fully anonymous and numerically named parameters. The index returned is not guaranteed to be unique or consecutive. For example, a template like <c>{{Test|anon1a|anon2|1=anon1b|anon3}}</c> would return, in order: 1=anon1a, 2=anon2, 1=anon1b, 3=anon3.</remarks>
 	/// <returns>A tuple containing the parameter number as well as the parameter itself.</returns>
-	public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(this ITemplateNode template)
+	public static IEnumerable<(int Index, ParameterNode Parameter)> GetNumericParameters(this TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return GetNumericParameters(template);
 
-		static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(ITemplateNode template)
+		static IEnumerable<(int Index, ParameterNode Parameter)> GetNumericParameters(TemplateNode template)
 		{
 			var i = 0;
 			foreach (var parameter in template.Parameters)
@@ -548,15 +548,15 @@ public static class Extensions
 	/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <returns>A read-only dictionary of the parameters.</returns>
-	public static IReadOnlyDictionary<int, IParameterNode> GetNumericParametersSorted(this ITemplateNode template) => GetNumericParametersSorted(template, false);
+	public static IReadOnlyDictionary<int, ParameterNode> GetNumericParametersSorted(this TemplateNode template) => GetNumericParametersSorted(template, false);
 
 	/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="addMissing">Set to <see langword="true"/> if missing parameters (e.g., <c>{{Template|1=First|3=Missing2}}</c>) should be inserted as <see langword="null"/> values.</param>
 	/// <returns>A read-only dictionary of the parameters.</returns>
-	public static IReadOnlyDictionary<int, IParameterNode> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
+	public static IReadOnlyDictionary<int, ParameterNode> GetNumericParametersSorted(this TemplateNode template, bool addMissing)
 	{
-		SortedDictionary<int, IParameterNode> retval = [];
+		SortedDictionary<int, ParameterNode> retval = [];
 		var highest = 0;
 		foreach (var (index, parameter) in GetNumericParameters(template))
 		{
@@ -586,7 +586,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="number">The numbered parameter to search for.</param>
 	/// <returns>The trimmed raw text of the parameter value or <see langword="null"/> if not found.</returns>
-	public static string? GetRaw(this ITemplateNode template, int number)
+	public static string? GetRaw(this TemplateNode template, int number)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return template.Find(number)?.GetRaw();
@@ -596,7 +596,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="name">The name of the parameter to search for.</param>
 	/// <returns>The trimmed raw text of the parameter value or <see langword="null"/> if not found.</returns>
-	public static string? GetRaw(this ITemplateNode template, string name)
+	public static string? GetRaw(this TemplateNode template, string name)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return template.Find(name)?.GetRaw();
@@ -605,12 +605,12 @@ public static class Extensions
 	/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <returns>A tuple containing the parameter name as well as the parameter itself.</returns>
-	public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)
+	public static IEnumerable<(string Name, ParameterNode Parameter)> GetResolvedParameters(this TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return GetResolvedParameters(template);
 
-		static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(ITemplateNode template)
+		static IEnumerable<(string Name, ParameterNode Parameter)> GetResolvedParameters(TemplateNode template)
 		{
 			var anonIndex = 0;
 			foreach (var parameter in template.Parameters)
@@ -625,7 +625,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="number">The numbered parameter to search for.</param>
 	/// <returns>The trimmed text of the parameter value or <see langword="null"/> if not found.</returns>
-	public static string? GetValue(this ITemplateNode template, int number)
+	public static string? GetValue(this TemplateNode template, int number)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return template.Find(number)?.GetValue();
@@ -635,7 +635,7 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="name">The name of the parameter to search for.</param>
 	/// <returns>The trimmed text of the parameter value or <see langword="null"/> if not found.</returns>
-	public static string? GetValue(this ITemplateNode template, string name)
+	public static string? GetValue(this TemplateNode template, string name)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return template.Find(name)?.GetValue();
@@ -644,7 +644,7 @@ public static class Extensions
 	/// <summary>Determines whether any parameters have numeric names.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <returns><see langword="true"/> if the parameter collection has any names which are valid integers; otherwise, <see langword="false"/>.</returns>
-	public static bool HasNumericNames(this ITemplateNode template)
+	public static bool HasNumericNames(this TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		foreach (var param in template.Parameters)
@@ -663,16 +663,16 @@ public static class Extensions
 	/// <param name="length">The length of each cluster.</param>
 	/// <returns>Numeric and numerically-numbered parameters in groups of <paramref name="length"/>.</returns>
 	/// <example>Using <c>ParameterCluster(2)</c> on <c>{{MyTemplate|A|1|B|2|C|2=0}}</c> would return three lists: { "A", "0" }, { "B", "2" }, and { "C", null }. In the first case, "0" is returned because of the overridden parameter <c>2=0</c>. In the last case, <see langword="null"/> is returned because the parameter has no pairing within the template call. </example>
-	public static IEnumerable<IList<IParameterNode>> ParameterCluster(this ITemplateNode template, int length)
+	public static IEnumerable<IList<ParameterNode>> ParameterCluster(this TemplateNode template, int length)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		return ParameterCluster(template, length);
 
-		static IEnumerable<IList<IParameterNode>> ParameterCluster(ITemplateNode template, int length)
+		static IEnumerable<IList<ParameterNode>> ParameterCluster(TemplateNode template, int length)
 		{
 			var parameters = template.GetNumericParametersSorted(true);
 			var i = 1;
-			List<IParameterNode> retval = [];
+			List<ParameterNode> retval = [];
 			while (i < parameters.Count)
 			{
 				for (var j = 0; j < length; j++)
@@ -701,14 +701,14 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="parameterNames">The case-sensitive names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IParameterNode? PrioritizedFind(this ITemplateNode template, params string[] parameterNames) => PrioritizedFind(template, false, parameterNames);
+	public static ParameterNode? PrioritizedFind(this TemplateNode template, params string[] parameterNames) => PrioritizedFind(template, false, parameterNames);
 
 	/// <summary>Gets the highest-priority match based on the order of <paramref name="parameterNames"/> and returns that value or <see langword="null"/>.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
 	/// <param name="parameterNames">The names of the parameters to search for.</param>
 	/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-	public static IParameterNode? PrioritizedFind(this ITemplateNode template, bool ignoreCase, params string[] parameterNames)
+	public static ParameterNode? PrioritizedFind(this TemplateNode template, bool ignoreCase, params string[] parameterNames)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(parameterNames);
@@ -716,7 +716,7 @@ public static class Extensions
 		var comparison = ignoreCase
 			? StringComparison.OrdinalIgnoreCase
 			: StringComparison.Ordinal;
-		var paramList = new List<(string Name, IParameterNode Value)>(template.GetResolvedParameters());
+		var paramList = new List<(string Name, ParameterNode Value)>(template.GetResolvedParameters());
 		foreach (var param in parameterNames)
 		{
 			for (var i = paramList.Count - 1; i >= 0; i--)
@@ -736,7 +736,7 @@ public static class Extensions
 	/// <param name="parameterName">The name of the parameter.</param>
 	/// <returns><see langword="true"/>if any parameters were removed.</returns>
 	/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-	public static bool Remove(this ITemplateNode template, string parameterName)
+	public static bool Remove(this TemplateNode template, string parameterName)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(parameterName);
@@ -784,7 +784,7 @@ public static class Extensions
 	/// <summary>Removes any parameters with the same name as a later parameter.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
-	public static void RemoveDuplicates(this ITemplateNode template)
+	public static void RemoveDuplicates(this TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		Dictionary<string, int> nameList = new(StringComparer.Ordinal);
@@ -818,8 +818,8 @@ public static class Extensions
 
 	/// <summary>Removes any named parameters that only have whitespace values.</summary>
 	/// <param name="template">The template to work on.</param>
-	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(ITemplateNode)"/> first.</remarks>
-	public static void RemoveEmpties(this ITemplateNode template)
+	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(TemplateNode)"/> first.</remarks>
+	public static void RemoveEmpties(this TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		for (var index = template.Parameters.Count - 1; index >= 0; index--)
@@ -835,8 +835,8 @@ public static class Extensions
 	/// <summary>Removes any named parameters that only have whitespace values, excluding the parameter names specified.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="exclusions">Parameter names not to remove, even if empty. To support case-insensitive parameters, pass an <see cref="IReadOnlySet{T}"/> with the appropriate comparer; otherwise, Ordinal comparison will be used.</param>
-	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(ITemplateNode)"/> first.</remarks>
-	public static void RemoveEmpties(this ITemplateNode template, IEnumerable<string> exclusions)
+	/// <remarks>Anonymous parameters are not removed, even if empty, since that would alter the numbering of all subsequent anonymous parameters. In the case of duplicate parameters, empties will be removed regardless of where they show up in sequence, meaning that values could be altered. To avoid that issue, run <see cref="RemoveDuplicates(TemplateNode)"/> first.</remarks>
+	public static void RemoveEmpties(this TemplateNode template, IEnumerable<string> exclusions)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		var set = exclusions is IReadOnlySet<string> alreadySet
@@ -864,7 +864,7 @@ public static class Extensions
 	/// <param name="condition">The condition for the parameter to be removed.</param>
 	/// <returns><see langword="true"/>if any parameters were removed.</returns>
 	/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-	public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<WikiNodeCollection?> condition)
+	public static bool RemoveIfValue(this TemplateNode template, string parameterName, Predicate<WikiNodeCollection?> condition)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(parameterName);
@@ -878,7 +878,7 @@ public static class Extensions
 	/// <param name="condition">The condition for the parameter to be removed.</param>
 	/// <returns><see langword="true"/>if any parameters were removed.</returns>
 	/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-	public static bool RemoveIf(this ITemplateNode template, string parameterName, bool condition) => condition && Remove(template, parameterName);
+	public static bool RemoveIf(this TemplateNode template, string parameterName, bool condition) => condition && Remove(template, parameterName);
 
 	/// <summary>Finds the parameters with the given name and removes it.</summary>
 	/// <param name="template">The template to work on.</param>
@@ -886,7 +886,7 @@ public static class Extensions
 	/// <param name="to">What to rename the parameter to.</param>
 	/// <returns><see langword="true"/>if any parameters were removed.</returns>
 	/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-	public static bool RenameParameter(this ITemplateNode template, string from, string to)
+	public static bool RenameParameter(this TemplateNode template, string from, string to)
 	{
 		var retval = false;
 		foreach (var parameter in template.FindAll(from))
@@ -902,7 +902,7 @@ public static class Extensions
 	/// <summary>Sets a new Title value. preserving whitespace.</summary>
 	/// <param name="template">The template.</param>
 	/// <param name="newTitle">The new title.</param>
-	public static void SetTitle(this ITemplateNode template, string newTitle)
+	public static void SetTitle(this TemplateNode template, string newTitle)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		newTitle ??= string.Empty;
@@ -915,13 +915,13 @@ public static class Extensions
 	/// <param name="template">The template to work on.</param>
 	/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
 	/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
-	public static void Sort(this ITemplateNode template, params string[] sortOrder) => template.Sort(sortOrder as IEnumerable<string>);
+	public static void Sort(this TemplateNode template, params string[] sortOrder) => template.Sort(sortOrder as IEnumerable<string>);
 
 	/// <summary>Sorts parameters in the order specified.</summary>
 	/// <param name="template">The template to work on.</param>
 	/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
 	/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
-	public static void Sort(this ITemplateNode template, IEnumerable<string> sortOrder)
+	public static void Sort(this TemplateNode template, IEnumerable<string> sortOrder)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(sortOrder);
@@ -933,8 +933,8 @@ public static class Extensions
 			i++;
 		}
 
-		var sorted = new IParameterNode?[indeces.Count];
-		List<IParameterNode> unsorted = [];
+		var sorted = new ParameterNode?[indeces.Count];
+		List<ParameterNode> unsorted = [];
 		foreach (var (name, parameter) in GetResolvedParameters(template))
 		{
 			var index = indeces.GetValueOrDefault(name, -1);
@@ -967,7 +967,7 @@ public static class Extensions
 	/// <param name="template">The template to search.</param>
 	/// <param name="parameterName">The parameter name.</param>
 	/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <see langword="false"/>.</returns>
-	public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
+	public static bool TrueOrFalse(this TemplateNode? template, string parameterName) =>
 		template?.GetRaw(parameterName)?.Length != 0;
 
 	/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
@@ -975,7 +975,7 @@ public static class Extensions
 	/// <param name="name">The name of the parameter to add.</param>
 	/// <param name="value">The value of the parameter to add.</param>
 	/// <returns>The parameter that was altered.</returns>
-	public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy, false);
+	public static ParameterNode? Update(this TemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy, false);
 
 	/// <summary>Updates a parameter only if it's not loosely equal to the existing value, based on the comparer provided.</summary>
 	/// <param name="template">The template to alter.</param>
@@ -985,12 +985,12 @@ public static class Extensions
 	/// <param name="comparer">The string comparer to define loose equality.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
 	/// <remarks>This method can be used for things like case-insensitive checks or removing markup before determining whether the value should be updated.</remarks>
-	public static IParameterNode? Update(this ITemplateNode template, string name, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
+	public static ParameterNode? Update(this TemplateNode template, string name, string value, ParameterFormat paramFormat, IEqualityComparer<string> comparer)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(name);
 		ArgumentNullException.ThrowIfNull(value);
-		if (template.Find(name) is IParameterNode parameter)
+		if (template.Find(name) is ParameterNode parameter)
 		{
 			parameter.Update(value, paramFormat, comparer);
 			return parameter;
@@ -1007,14 +1007,14 @@ public static class Extensions
 	/// <param name="removeIfEmpty">If set to <see langword="true"/> and <paramref name="value"/> is an empty string, remove the parameter. Otherwise, the parameter will only be removed if <paramref name="value"/> is <see langword="null"/>.</param>
 	/// <returns>The added parameter.</returns>
 	/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-	public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeIfEmpty) => template.UpdateOrRemove(name, value, paramFormat, value is null || (removeIfEmpty && value.Length == 0));
+	public static ParameterNode? Update(this TemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeIfEmpty) => template.UpdateOrRemove(name, value, paramFormat, value is null || (removeIfEmpty && value.Length == 0));
 
 	/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
 	/// <param name="template">The template to update.</param>
 	/// <param name="name">The name of the parameter to update.</param>
 	/// <param name="value">The value to update the parameter to.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.Copy);
+	public static ParameterNode UpdateIfEmpty(this TemplateNode template, string name, string value) => UpdateIfEmpty(template, name, value, ParameterFormat.Copy);
 
 	/// <summary>Updates a parameter with the specified value if it is blank or does not exist.</summary>
 	/// <param name="template">The template to update.</param>
@@ -1022,10 +1022,10 @@ public static class Extensions
 	/// <param name="value">The value to update the parameter to.</param>
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
+	public static ParameterNode UpdateIfEmpty(this TemplateNode template, string name, string value, ParameterFormat paramFormat)
 	{
 		ArgumentNullException.ThrowIfNull(template);
-		if (template.Find(name) is IParameterNode parameter)
+		if (template.Find(name) is ParameterNode parameter)
 		{
 			if (parameter.GetValue().Length == 0)
 			{
@@ -1045,7 +1045,7 @@ public static class Extensions
 	/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 	/// <param name="removeCondition">Whether the parameter should be removed.</param>
 	/// <returns>The parameter affected, regardless of whether it was changed.</returns>
-	public static IParameterNode? UpdateOrRemove(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeCondition)
+	public static ParameterNode? UpdateOrRemove(this TemplateNode template, string name, string? value, ParameterFormat paramFormat, bool removeCondition)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		ArgumentNullException.ThrowIfNull(name);
@@ -1057,7 +1057,7 @@ public static class Extensions
 
 		// "value is null" is a valid removeCondition, so we only throw after the remove condition has been checked.
 		ArgumentNullException.ThrowIfNull(value);
-		if (template.Find(name) is IParameterNode retval)
+		if (template.Find(name) is ParameterNode retval)
 		{
 			retval.SetValue(value, paramFormat);
 			return retval;
@@ -1217,7 +1217,7 @@ public static class Extensions
 	#endregion
 
 	#region Private Methods
-	private static int FindCopyParameter(this ITemplateNode template, bool isAnon)
+	private static int FindCopyParameter(this TemplateNode template, bool isAnon)
 	{
 		for (var i = template.Parameters.Count - 1; i >= 0; i--)
 		{

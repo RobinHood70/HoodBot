@@ -83,7 +83,7 @@ internal sealed class UpdateCrownCrateUnknowns(JobManager jobManager) : ParsedPa
 				crateCardTemplate.SetTitle(EsoCrateCardList + "\n");
 			}
 
-			if (subsection.Content.FindTemplate(crateCardList) is not ITemplateNode template)
+			if (subsection.Content.FindTemplate(crateCardList) is not TemplateNode template)
 			{
 				Debug.WriteLine($"Template not found on {cardInfo.Type}/{subsection.GetTitle()}.");
 				continue;

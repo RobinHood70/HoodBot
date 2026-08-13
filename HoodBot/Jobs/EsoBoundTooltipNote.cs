@@ -77,14 +77,14 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 		{
 			switch (node)
 			{
-				case IHeaderNode headerNode:
+				case HeaderNode headerNode:
 					if (headerNode.Level == 2 && (headerNode.GetTitle(true)?.OrdinalEquals("Notes") ?? false))
 					{
 						commentCount++;
 					}
 
 					break;
-				case ICommentNode commentNode:
+				case CommentNode commentNode:
 					var matches = WikiRegexes.HeaderFinder.Matches(commentNode.Comment);
 					foreach (Match match in matches)
 					{
@@ -107,14 +107,14 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 	{
 		switch (prevContent[^1])
 		{
-			case ITextNode text:
+			case TextNode text:
 				if (text.Text[^1] != '\n')
 				{
 					prevContent.AddText("\n");
 				}
 
 				break;
-			case ICommentNode comment:
+			case CommentNode comment:
 				if (comment.Comment[^1] != '\n')
 				{
 					prevContent.AddText("\n");
@@ -127,7 +127,7 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 		}
 	}
 
-	private static bool IsValidPage(ITemplateNode summaryTemplate, ITemplateNode? purchaseTemplate)
+	private static bool IsValidPage(TemplateNode summaryTemplate, TemplateNode? purchaseTemplate)
 	{
 		var bindType = summaryTemplate.Find("bindtype");
 		if (!bindType.IsNullOrWhitespace())
@@ -147,19 +147,19 @@ internal sealed class EsoBoundTooltipNote : ParsedPageJob
 
 	private static void RemoveNotesComment(SiteParser parser)
 	{
-		if (parser.Find<IHeaderNode>(headerNode => headerNode.Level == 2 && (headerNode.GetTitle(true)?.OrdinalEquals("Notes") ?? false)) is not null)
+		if (parser.Find<HeaderNode>(headerNode => headerNode.Level == 2 && (headerNode.GetTitle(true)?.OrdinalEquals("Notes") ?? false)) is not null)
 		{
 			return;
 		}
 
-		var notesIndex = parser.FindIndex(n => n is ICommentNode c && WikiRegexes.HeaderFinder.Match(c.Comment).Groups["title"].Value.OrdinalEquals("Notes"));
+		var notesIndex = parser.FindIndex(n => n is CommentNode c && WikiRegexes.HeaderFinder.Match(c.Comment).Groups["title"].Value.OrdinalEquals("Notes"));
 		if (notesIndex == -1)
 		{
 			return;
 		}
 
-		var comment = (ICommentNode)parser[notesIndex];
-		if (notesIndex > 0 && parser[notesIndex - 1] is ICommentNode instructions && instructions.Comment.StartsWith("<!--Instructions: ", StringComparison.Ordinal))
+		var comment = (CommentNode)parser[notesIndex];
+		if (notesIndex > 0 && parser[notesIndex - 1] is CommentNode instructions && instructions.Comment.StartsWith("<!--Instructions: ", StringComparison.Ordinal))
 		{
 			parser.RemoveRange(notesIndex - 1, 2);
 			notesIndex--;

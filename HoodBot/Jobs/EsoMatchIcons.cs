@@ -13,7 +13,6 @@ using RobinHood70.Robby.Design;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
-using RobinHood70.WikiCommon.Parser.Basic;
 
 public class EsoMatchIcons : EditJob
 {
@@ -190,7 +189,7 @@ public class EsoMatchIcons : EditJob
 		List<SiteLink> retval = [];
 		for (var i = 0; i < parser.Count; i++)
 		{
-			if (parser[i] is ILinkNode link)
+			if (parser[i] is LinkNode link)
 			{
 				var siteLink = SiteLink.FromLinkNode(site, link);
 				if (siteLink.Title.Namespace == MediaWikiNamespaces.Category)
@@ -290,7 +289,7 @@ public class EsoMatchIcons : EditJob
 		var i = 0;
 		while (i < parsedPage.Count)
 		{
-			if (parsedPage[i] is ITemplateNode template &&
+			if (parsedPage[i] is TemplateNode template &&
 				this.licenseTemplates.Contains(template.GetTitle(this.Site)))
 			{
 				if (found)

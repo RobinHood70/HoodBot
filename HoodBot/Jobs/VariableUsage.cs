@@ -141,7 +141,7 @@ internal sealed class VariableUsage(JobManager jobManager) : WikiJob(jobManager,
 	private sealed class LoadSaveCall : ITitle
 	{
 		#region Constructors
-		public LoadSaveCall(Title title, ITemplateNode loadSave)
+		public LoadSaveCall(Title title, TemplateNode loadSave)
 		{
 			List<string> variables = [];
 			this.Title = title;

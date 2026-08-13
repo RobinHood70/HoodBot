@@ -139,10 +139,10 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 
 	protected override void LoadPages() => this.Pages.GetBacklinks($"Template:{this.TemplateName}", BacklinksTypes.EmbeddedIn, true, Filter.Exclude);
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
 		// Skip if id parameter is missing, invalid, or doesn't match an item in the dictionary.
-		if (template.Find("id") is not IParameterNode idParam ||
+		if (template.Find("id") is not ParameterNode idParam ||
 			!int.TryParse(idParam.GetValue(), this.Site.Culture, out var id) ||
 			!this.items.TryGetValue(id, out var item))
 		{
@@ -150,7 +150,7 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 		}
 
 		this.unused.Remove(id);
-		if (template.Find(1) is IParameterNode nameParam)
+		if (template.Find(1) is ParameterNode nameParam)
 		{
 			if (!this.comparer.Equals(nameParam.GetValue(), item.Name))
 			{
@@ -180,7 +180,7 @@ internal sealed class EsoQuestItemUpdater : TemplateJob
 			}
 		}
 
-		if (template.Find(2) is IParameterNode descriptionParam)
+		if (template.Find(2) is ParameterNode descriptionParam)
 		{
 			if (!this.comparer.Equals(descriptionParam.GetValue(), item.Description))
 			{

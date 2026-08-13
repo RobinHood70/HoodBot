@@ -19,12 +19,12 @@ internal sealed class EsoBlankNpcImages(JobManager jobManager) : TemplateUsage(
 		parser.Page.Title.Namespace == UespNamespaces.Online &&
 		parser.FindTemplate("Template:Mod Header") is null;
 
-	protected override bool ShouldAddTemplate(ITemplateNode template, SiteParser parser)
+	protected override bool ShouldAddTemplate(TemplateNode template, SiteParser parser)
 	{
 		static bool IsWhitespace(IWikiNode node) =>
-			node is ITextNode text && text.Text.Trim().Length == 0;
+			node is TextNode text && text.Text.Trim().Length == 0;
 
-		if (template.Find("image") is not IParameterNode image)
+		if (template.Find("image") is not ParameterNode image)
 		{
 			return false;
 		}
@@ -32,7 +32,7 @@ internal sealed class EsoBlankNpcImages(JobManager jobManager) : TemplateUsage(
 		var value = image.Value;
 		foreach (var node in value)
 		{
-			if (node is not ICommentNode && !IsWhitespace(node))
+			if (node is not CommentNode && !IsWhitespace(node))
 			{
 				return false;
 			}

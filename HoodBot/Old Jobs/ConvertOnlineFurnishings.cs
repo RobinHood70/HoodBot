@@ -112,12 +112,12 @@
 		protected override void PageLoaded(Page page)
 		{
 			var originalParser = new SiteParser(page);
-			var index = originalParser.FindIndex(node => node is ITemplateNode templateNode &&
+			var index = originalParser.FindIndex(node => node is TemplateNode templateNode &&
 				templateNode.Title.Namespace == MediaWikiNamespaces.Template &&
 				templateNode.Title.PageNameEquals("Online Furnishing Summary"));
 			if (index != -1)
 			{
-				var template = (ITemplateNode)originalParser[index];
+				var template = (TemplateNode)originalParser[index];
 				var parser = new SiteParser(this.Site.CreatePage(page.Title, string.Empty))
 				{
 					template
@@ -149,7 +149,7 @@
 
 		#region Private Static Methods
 		/*
-		private static void ConvertAchievements(SiteParser parser, ITemplateNode template)
+		private static void ConvertAchievements(SiteParser parser, TemplateNode template)
 		{
 			if (template.GetRaw("achievement") is string achievement && IsCollectible(template))
 			{
@@ -169,7 +169,7 @@
 		}
 		*/
 
-		private static bool IsCollectible(ITemplateNode template)
+		private static bool IsCollectible(TemplateNode template)
 		{
 			var furnLimitType = template.GetRaw("furnLimitType");
 			return
@@ -177,7 +177,7 @@
 				furnLimitType.OrdinalICEquals("Special Collectible");
 		}
 
-		private static void ConvertAntiquity(SiteParser parser, ITemplateNode template)
+		private static void ConvertAntiquity(SiteParser parser, TemplateNode template)
 		{
 			if (template.GetRaw("antiquity") is string antiquity)
 			{
@@ -241,7 +241,7 @@
 			}
 		}
 
-		private static void ConvertBooks(SiteParser parser, ITemplateNode template)
+		private static void ConvertBooks(SiteParser parser, TemplateNode template)
 		{
 			var bookList = new List<string>(36);
 			for (var i = 1; i <= 36; i++)
@@ -290,7 +290,7 @@
 			}
 		}
 
-		private static void ConvertCrafting(SiteParser parser, ITemplateNode template)
+		private static void ConvertCrafting(SiteParser parser, TemplateNode template)
 		{
 			if (template.Find(CraftingParameters) is not null)
 			{
@@ -332,7 +332,7 @@
 			}
 		}
 
-		private static void ConvertHouses(SiteParser parser, ITemplateNode template)
+		private static void ConvertHouses(SiteParser parser, TemplateNode template)
 		{
 			if (template.GetRaw("cat") is string cat && !NonHouseCats.Contains(cat))
 			{
@@ -345,11 +345,11 @@
 			}
 		}
 
-		private static void ConvertLead(SiteParser parser, ITemplateNode template)
+		private static void ConvertLead(SiteParser parser, TemplateNode template)
 		{
 			// template.SetTitle("User:RobinHood70/Vav");
 			// template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("name", parser.Page.PageName + '\n'));
-			if (template.Find("note") is IParameterNode note)
+			if (template.Find("note") is ParameterNode note)
 			{
 				parser.AddText("\n");
 				parser.AddRange(note.Value);
@@ -364,7 +364,7 @@
 			parser.Add(parser.Factory.TemplateNodeFromParts("NewLeft"));
 		}
 
-		private static void ConvertPurchase(SiteParser parser, ITemplateNode template)
+		private static void ConvertPurchase(SiteParser parser, TemplateNode template)
 		{
 			if (IsCollectible(template) && !RewardProhibited(template))
 			{
@@ -431,13 +431,13 @@
 					"}}\n\n-->");
 			}
 
-			static bool RewardProhibited(ITemplateNode template) =>
+			static bool RewardProhibited(TemplateNode template) =>
 				template.GetRaw("vendorcrowns") is string vendorCrowns &&
 				(vendorCrowns.Contains("Crown Store", StringComparison.OrdinalIgnoreCase) ||
 				vendorCrowns.Contains("Housing", StringComparison.OrdinalIgnoreCase));
 		}
 
-		private static void ConvertSources(SiteParser parser, ITemplateNode template)
+		private static void ConvertSources(SiteParser parser, TemplateNode template)
 		{
 			var source = template.GetRaw("source");
 			var bundles = template.GetRaw("bundles");
@@ -483,7 +483,7 @@
 			}
 		}
 
-		private static bool ParseAntiquity(StringBuilder sb, ITemplateNode template, int i)
+		private static bool ParseAntiquity(StringBuilder sb, TemplateNode template, int i)
 		{
 			var multiCodex = false;
 			var name = "lead" + (i == 1 ? string.Empty : i.ToStringInvariant());

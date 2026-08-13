@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using RobinHood70.Robby.Design;
 using RobinHood70.WikiCommon;
 using RobinHood70.WikiCommon.Parser;
-using RobinHood70.WikiCommon.Parser.Basic;
 
 /// <summary>Extends WikiNodeCollection to include <see cref="Title"/>-based methods, either directly or indirectly.</summary>
 public static class ParserHelpers
@@ -24,7 +23,7 @@ public static class ParserHelpers
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(category);
-		var lastCategoryIndex = nodes.LastIndexOf<ILinkNode>(link =>
+		var lastCategoryIndex = nodes.LastIndexOf<LinkNode>(link =>
 			TitleFactory.FromTitleNode(site, link).Title.Namespace == MediaWikiNamespaces.Category);
 		if (lastCategoryIndex == -1)
 		{
@@ -59,7 +58,7 @@ public static class ParserHelpers
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(category);
-		var afterCategoryIndex = nodes.LastIndexOf<ILinkNode>(link =>
+		var afterCategoryIndex = nodes.LastIndexOf<LinkNode>(link =>
 			TitleFactory.FromTitleNode(site, link).Title is var title &&
 			title.Namespace == MediaWikiNamespaces.Category &&
 			title.PageNameEquals(afterCategory));
@@ -76,9 +75,9 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="site">The site being worked with.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
+	/// <returns>The first <see cref="LinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public static ILinkNode? FindLink(this WikiNodeCollection nodes, Site site, string find)
+	public static LinkNode? FindLink(this WikiNodeCollection nodes, Site site, string find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
@@ -92,9 +91,9 @@ public static class ParserHelpers
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
+	/// <returns>The first <see cref="LinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public static ILinkNode? FindLink(this WikiNodeCollection nodes, Title find)
+	public static LinkNode? FindLink(this WikiNodeCollection nodes, Title find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -106,9 +105,9 @@ public static class ParserHelpers
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
+	/// <returns>The first <see cref="LinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public static ILinkNode? FindLink(this WikiNodeCollection nodes, IFullTitle find)
+	public static LinkNode? FindLink(this WikiNodeCollection nodes, IFullTitle find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -121,9 +120,9 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="site">The site being worked with.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The <see cref="LinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public static IEnumerable<ILinkNode> FindLinks(this WikiNodeCollection nodes, Site site, string find)
+	public static IEnumerable<LinkNode> FindLinks(this WikiNodeCollection nodes, Site site, string find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
@@ -137,9 +136,9 @@ public static class ParserHelpers
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The <see cref="LinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-	public static IEnumerable<ILinkNode> FindLinks(this WikiNodeCollection nodes, Title find)
+	public static IEnumerable<LinkNode> FindLinks(this WikiNodeCollection nodes, Title find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -151,9 +150,9 @@ public static class ParserHelpers
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The <see cref="LinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public static IEnumerable<ILinkNode> FindLinks(this WikiNodeCollection nodes, IFullTitle find)
+	public static IEnumerable<LinkNode> FindLinks(this WikiNodeCollection nodes, IFullTitle find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -166,8 +165,8 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="site">The site being worked with.</param>
 	/// <param name="find">The name of the template to find.</param>
-	/// <returns>The first <see cref="ITemplateNode"/> that matches the title provided, if found.</returns>
-	public static ITemplateNode? FindTemplate(this WikiNodeCollection nodes, Site site, string find)
+	/// <returns>The first <see cref="TemplateNode"/> that matches the title provided, if found.</returns>
+	public static TemplateNode? FindTemplate(this WikiNodeCollection nodes, Site site, string find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
@@ -179,7 +178,7 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public static ITemplateNode? FindTemplate(this WikiNodeCollection nodes, Title find)
+	public static TemplateNode? FindTemplate(this WikiNodeCollection nodes, Title find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -193,7 +192,7 @@ public static class ParserHelpers
 	/// <param name="site">The site being worked with.</param>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public static IEnumerable<ITemplateNode> FindTemplates(this WikiNodeCollection nodes, Site site, string find)
+	public static IEnumerable<TemplateNode> FindTemplates(this WikiNodeCollection nodes, Site site, string find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
@@ -205,7 +204,7 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public static IEnumerable<ITemplateNode> FindTemplates(this WikiNodeCollection nodes, Title find)
+	public static IEnumerable<TemplateNode> FindTemplates(this WikiNodeCollection nodes, Title find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -217,7 +216,7 @@ public static class ParserHelpers
 	/// <param name="site">The site being worked with.</param>
 	/// <param name="find">The templates to find.</param>
 	/// <returns>The templates that match the provided titles, if any.</returns>
-	public static IEnumerable<ITemplateNode> FindTemplates(this WikiNodeCollection nodes, Site site, IEnumerable<string> find)
+	public static IEnumerable<TemplateNode> FindTemplates(this WikiNodeCollection nodes, Site site, IEnumerable<string> find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(site);
@@ -229,7 +228,7 @@ public static class ParserHelpers
 	/// <param name="nodes">The node collection to work on.</param>
 	/// <param name="find">The templates to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public static IEnumerable<ITemplateNode> FindTemplates(this WikiNodeCollection nodes, IList<Title> find)
+	public static IEnumerable<TemplateNode> FindTemplates(this WikiNodeCollection nodes, IList<Title> find)
 	{
 		ArgumentNullException.ThrowIfNull(nodes);
 		ArgumentNullException.ThrowIfNull(find);
@@ -237,7 +236,7 @@ public static class ParserHelpers
 			? []
 			: FindTemplatesInternal(nodes, find);
 
-		IEnumerable<ITemplateNode> FindTemplatesInternal(WikiNodeCollection nodes, IList<Title> find)
+		IEnumerable<TemplateNode> FindTemplatesInternal(WikiNodeCollection nodes, IList<Title> find)
 		{
 			var site = find[0].Site;
 			return nodes.FindTemplates(
@@ -268,16 +267,16 @@ public static class ParserHelpers
 		for (var i = nodes.Count - 1; i >= 0; i--)
 		{
 			var node = nodes[i];
-			if (node is ITemplateNode template && template.GetTitle(title.Site) == title)
+			if (node is TemplateNode template && template.GetTitle(title.Site) == title)
 			{
 				nodes.RemoveAt(i);
 				var afterNewLine = i == 0 ||
-					(nodes[i - 1] is ITextNode textBefore &&
+					(nodes[i - 1] is TextNode textBefore &&
 					textBefore.Text.Length > 0 &&
 					textBefore.Text[^1] == '\n');
 				if (afterNewLine &&
 					i < nodes.Count &&
-					nodes[i] is ITextNode textAfter)
+					nodes[i] is TextNode textAfter)
 				{
 					textAfter.Text = textAfter.Text.TrimStart();
 					if (textAfter.Text.Length == 0)

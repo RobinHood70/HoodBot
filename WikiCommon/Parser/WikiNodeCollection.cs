@@ -89,25 +89,25 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <value>The factory.</value>
 	public IWikiNodeFactory Factory { get; }
 
-	/// <summary>Gets the <see cref="IHeaderNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="HeaderNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
-	public IEnumerable<IHeaderNode> HeaderNodes => this.FindAll<IHeaderNode>();
+	public IEnumerable<HeaderNode> HeaderNodes => this.FindAll<HeaderNode>();
 
-	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="LinkNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ILinkNode> LinkNodes => this.FindAll<ILinkNode>();
+	public IEnumerable<LinkNode> LinkNodes => this.FindAll<LinkNode>();
 
-	/// <summary>Gets the <see cref="ITextNode"/>s in the main body of the page without looking inside links, templates, etc.</summary>
+	/// <summary>Gets the <see cref="TextNode"/>s in the main body of the page without looking inside links, templates, etc.</summary>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ITextNode> RootTextNodes => this.FindAll<ITextNode>(null, false, false, 0);
+	public IEnumerable<TextNode> RootTextNodes => this.FindAll<TextNode>(null, false, false, 0);
 
-	/// <summary>Gets the <see cref="ITemplateNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="TemplateNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ITemplateNode> TemplateNodes => this.FindAll<ITemplateNode>();
+	public IEnumerable<TemplateNode> TemplateNodes => this.FindAll<TemplateNode>();
 
-	/// <summary>Gets the <see cref="ITextNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="TextNode"/>s on the page.</summary>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ITextNode> TextNodes => this.FindAll<ITextNode>();
+	public IEnumerable<TextNode> TextNodes => this.FindAll<TextNode>();
 	#endregion
 
 	#region Public Methods
@@ -118,11 +118,11 @@ public class WikiNodeCollection : List<IWikiNode>
 
 	/// <summary>Adds text to the end of the collection.</summary>
 	/// <param name="text">The text.</param>
-	/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
+	/// <remarks>Adds text to the final node in the collection if it's an <see cref="TextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
 	public void AddText([Localizable(false)] string text)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(text);
-		if (this.Count > 0 && this[^1] is ITextNode node)
+		if (this.Count > 0 && this[^1] is TextNode node)
 		{
 			node.Text += text;
 		}
@@ -262,23 +262,23 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <param name="condition">The condition the link node must satisfy.</param>
 	/// <returns>The first link node that satisfies the condition.</returns>
 	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
-	public ILinkNode? FindLink(Predicate<ILinkNode> condition) => this.Find(condition);
+	public LinkNode? FindLink(Predicate<LinkNode> condition) => this.Find(condition);
 
-	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="LinkNode"/>s on the page.</summary>
 	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ILinkNode> FindLinks(Predicate<ILinkNode> condition) => this.FindAll(condition);
+	public IEnumerable<LinkNode> FindLinks(Predicate<LinkNode> condition) => this.FindAll(condition);
 
 	/// <summary>Finds a single link node, non-recursively, that satisfies the condition.</summary>
 	/// <param name="condition">The condition the link node must satisfy.</param>
 	/// <returns>The first link node that satisfies the condition.</returns>
 	/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
-	public ITemplateNode? FindTemplate(Predicate<ITemplateNode> condition) => this.Find(condition);
+	public TemplateNode? FindTemplate(Predicate<TemplateNode> condition) => this.Find(condition);
 
-	/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+	/// <summary>Gets the <see cref="LinkNode"/>s on the page.</summary>
 	/// <param name="condition">The condition to condition.</param>
 	/// <value>The header nodes.</value>
-	public IEnumerable<ITemplateNode> FindTemplates(Predicate<ITemplateNode> condition) => this.FindAll(condition);
+	public IEnumerable<TemplateNode> FindTemplates(Predicate<TemplateNode> condition) => this.FindAll(condition);
 
 	/// <summary>Replaces all current content with the content of the sections provided.</summary>
 	/// <param name="sections">The new sections for the page.</param>
@@ -288,7 +288,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		this.Clear();
 		foreach (var section in sections)
 		{
-			if (section.Header is IHeaderNode header)
+			if (section.Header is HeaderNode header)
 			{
 				this.Add(header);
 			}
@@ -324,7 +324,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <param name="headerText">Name of the header.</param>
 	/// <returns>The first header with the specified text.</returns>
 	/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-	public int IndexOfHeader(string headerText) => this.IndexOf<IHeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
+	public int IndexOfHeader(string headerText) => this.IndexOf<HeaderNode>(header => header.GetTitle(true).OrdinalEquals(headerText));
 
 	/// <summary>Parses the provided text to the best of its ability before adding it to the current <see cref="WikiNodeCollection"/>.</summary>
 	/// <remarks>Note that this parses <em>only</em> the text provided, so passing incomplete text for a node will result in incorrect nodes being added. For example, using AddParsed("[[Hello") and AddParsed("|Goodbye]])" will result in different nodes than using AddParsed("[[Hello|Goodbye]]").</remarks>
@@ -336,7 +336,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <summary>Adds text to the end of the collection.</summary>
 	/// <param name="index">This index at which to insert the text.</param>
 	/// <param name="text">The text.</param>
-	/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
+	/// <remarks>Adds text to the final node in the collection if it's an <see cref="TextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
 	public void InsertText(int index, [Localizable(false)] string text)
 	{
 		if (index < 0 || index > this.Count)
@@ -349,11 +349,11 @@ public class WikiNodeCollection : List<IWikiNode>
 			return;
 		}
 
-		if (index < this.Count && this[index] is ITextNode currentNode)
+		if (index < this.Count && this[index] is TextNode currentNode)
 		{
 			currentNode.Text = text + currentNode.Text;
 		}
-		else if (index != 0 && this[index - 1] is ITextNode prevNode)
+		else if (index != 0 && this[index - 1] is TextNode prevNode)
 		{
 			prevNode.Text += text;
 		}
@@ -394,7 +394,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		// Count - 1 because we can't merge the last node with anything.
 		for (var i = 0; i < this.Count - 1; i++)
 		{
-			if (this[i..(i + 1)] is [ITextNode currentText, ITextNode nextText])
+			if (this[i..(i + 1)] is [TextNode currentText, TextNode nextText])
 			{
 				nextText.Text = currentText.Text + nextText.Text;
 				this.RemoveAt(i);
@@ -415,7 +415,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	/// <returns>A new WikiNodeCollection created from the text.</returns>
 	public IList<IWikiNode> Parse(string? text) => this.Factory.Parse(text);
 
-	/// <summary>Replaces text found in all ITextNode nodes.</summary>
+	/// <summary>Replaces text found in all TextNode nodes.</summary>
 	/// <param name="pattern">The Regex pattern to look for.</param>
 	/// <param name="replacement">The text that should replace <paramref name="pattern"/>.</param>
 	/// <param name="options">The RegexOptions to use.</param>
@@ -425,7 +425,7 @@ public class WikiNodeCollection : List<IWikiNode>
 	public void RegexReplace([StringSyntax(StringSyntaxAttribute.Regex, nameof(options))] string pattern, string replacement, RegexOptions options, ReplaceLocations replaceIn) =>
 		RegexReplacePrivate(this, pattern, replacement, options, replaceIn);
 
-	/// <summary>Replaces text found in all ITextNode nodes.</summary>
+	/// <summary>Replaces text found in all TextNode nodes.</summary>
 	/// <param name="pattern">The Regex pattern to look for.</param>
 	/// <param name="evaluator">The MatchEvaluator that should replace <paramref name="pattern"/>.</param>
 	/// <param name="options">The RegexOptions to use.</param>
@@ -481,7 +481,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 	}
 
-	/// <summary>Replaces text found in all ITextNode nodes and, optionally, all ICommentNodes.</summary>
+	/// <summary>Replaces text found in all TextNode nodes and, optionally, all ICommentNodes.</summary>
 	/// <param name="oldValue">The text to look for.</param>
 	/// <param name="newValue">The text that should replace <paramref name="oldValue"/>.</param>
 	/// <param name="comparisonType">The string comparison method to use.</param>
@@ -506,10 +506,10 @@ public class WikiNodeCollection : List<IWikiNode>
 		var startIndex = 0;
 		while (i < this.Count)
 		{
-			if (this[i] is ITextNode t && t.Text.IndexOf(separator, textIndex, StringComparison.Ordinal) is var matchIndex && matchIndex != -1)
+			if (this[i] is TextNode t && t.Text.IndexOf(separator, textIndex, StringComparison.Ordinal) is var matchIndex && matchIndex != -1)
 			{
 				var before = new WikiNodeCollection(this.Factory);
-				if (this[startNode] is ITextNode lastText)
+				if (this[startNode] is TextNode lastText)
 				{
 					int textEnd;
 					if (i == startNode)
@@ -552,7 +552,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 
 		var remainder = new WikiNodeCollection(this.Factory);
-		if (startNode < this.Count && this[startNode] is ITextNode text)
+		if (startNode < this.Count && this[startNode] is TextNode text)
 		{
 			if (startIndex < text.Text.Length)
 			{
@@ -591,10 +591,10 @@ public class WikiNodeCollection : List<IWikiNode>
 		var startIndex = 0;
 		while (i < this.Count)
 		{
-			if (this[i] is ITextNode t && pattern.Match(t.Text, textIndex) is Match match && match.Success)
+			if (this[i] is TextNode t && pattern.Match(t.Text, textIndex) is Match match && match.Success)
 			{
 				var before = new WikiNodeCollection(this.Factory);
-				if (this[startNode] is ITextNode lastText)
+				if (this[startNode] is TextNode lastText)
 				{
 					int textEnd;
 					if (i == startNode)
@@ -644,7 +644,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		}
 
 		var remainder = new WikiNodeCollection(this.Factory);
-		if (startNode < this.Count && this[startNode] is ITextNode text)
+		if (startNode < this.Count && this[startNode] is TextNode text)
 		{
 			if (startIndex < text.Text.Length)
 			{
@@ -682,7 +682,7 @@ public class WikiNodeCollection : List<IWikiNode>
 		var section = new Section(null, new WikiNodeCollection(this.Factory));
 		foreach (var node in this)
 		{
-			if (node is IHeaderNode header && header.Level <= level)
+			if (node is HeaderNode header && header.Level <= level)
 			{
 				if (section.Header != null || section.Content.Count > 0)
 				{
@@ -719,13 +719,13 @@ public class WikiNodeCollection : List<IWikiNode>
 
 		switch (this[^1])
 		{
-			case ICommentNode comment:
+			case CommentNode comment:
 				comment.Comment = comment.Comment.TrimEnd();
 				break;
-			case IHeaderNode header:
+			case HeaderNode header:
 				header.Comment?.TrimStart();
 				break;
-			case ITextNode text:
+			case TextNode text:
 				text.Text = text.Text.TrimEnd();
 				if (text.Text.Length == 0)
 				{
@@ -749,13 +749,13 @@ public class WikiNodeCollection : List<IWikiNode>
 
 		switch (this[0])
 		{
-			case ICommentNode comment:
+			case CommentNode comment:
 				comment.Comment = comment.Comment.TrimStart();
 				break;
-			case IHeaderNode header:
+			case HeaderNode header:
 				header.Comment?.TrimStart();
 				break;
-			case ITextNode text:
+			case TextNode text:
 				text.Text = text.Text.TrimStart();
 				if (text.Text.Length == 0)
 				{
@@ -777,35 +777,35 @@ public class WikiNodeCollection : List<IWikiNode>
 		{
 			switch (node)
 			{
-				case ICommentNode comment:
+				case CommentNode comment:
 					if (replaceIn.HasFlag(ReplaceLocations.Comments))
 					{
 						comment.Comment = Regex.Replace(comment.Comment, pattern, replacement, options, Globals.DefaultRegexTimeout);
 					}
 
 					break;
-				case IHeaderNode header:
+				case HeaderNode header:
 					if (replaceIn.HasFlag(ReplaceLocations.Headers))
 					{
 						RegexReplacePrivate(header.Title, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ILinkNode link:
+				case LinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						RegexReplacePrivate(link.Text, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case IParameterNode param:
+				case ParameterNode param:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						RegexReplacePrivate(param.Value, pattern, replacement, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ITemplateNode template:
+				case TemplateNode template:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						foreach (var param in template.Parameters)
@@ -815,16 +815,16 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
-				case ITextNode text:
+				case TextNode text:
 					if (replaceIn.HasFlag(ReplaceLocations.Text))
 					{
 						text.Text = Regex.Replace(text.Text, pattern, replacement, options, Globals.DefaultRegexTimeout);
 					}
 
 					break;
-				case IArgumentNode:
-				case IIgnoreNode:
-				case ITagNode:
+				case ArgumentNode:
+				case IgnoreNode:
+				case TagNode:
 					break;
 				default:
 					throw new InvalidOperationException("Unknown node type encountered.");
@@ -838,35 +838,35 @@ public class WikiNodeCollection : List<IWikiNode>
 		{
 			switch (node)
 			{
-				case ICommentNode comment:
+				case CommentNode comment:
 					if (replaceIn.HasFlag(ReplaceLocations.Comments))
 					{
 						comment.Comment = Regex.Replace(comment.Comment, pattern, evaluator, options, Globals.DefaultRegexTimeout);
 					}
 
 					break;
-				case IHeaderNode header:
+				case HeaderNode header:
 					if (replaceIn.HasFlag(ReplaceLocations.Headers))
 					{
 						RegexReplacePrivate(header.Title, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ILinkNode link:
+				case LinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						RegexReplacePrivate(link.Text, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case IParameterNode param:
+				case ParameterNode param:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						RegexReplacePrivate(param.Value, pattern, evaluator, options, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ITemplateNode template:
+				case TemplateNode template:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						foreach (var param in template.Parameters)
@@ -876,7 +876,7 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
-				case ITextNode text:
+				case TextNode text:
 					if (replaceIn.HasFlag(ReplaceLocations.Text))
 					{
 						text.Text = Regex.Replace(text.Text, pattern, evaluator, options, Globals.DefaultRegexTimeout);
@@ -895,35 +895,35 @@ public class WikiNodeCollection : List<IWikiNode>
 		{
 			switch (node)
 			{
-				case ICommentNode comment:
+				case CommentNode comment:
 					if (replaceIn.HasFlag(ReplaceLocations.Comments))
 					{
 						comment.Comment = comment.Comment.Replace(from, to, comparison);
 					}
 
 					break;
-				case IHeaderNode header:
+				case HeaderNode header:
 					if (replaceIn.HasFlag(ReplaceLocations.Headers))
 					{
 						ReplaceTextPrivate(header.Title, from, to, comparison, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ILinkNode link:
+				case LinkNode link:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						ReplaceTextPrivate(link.Text, from, to, comparison, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case IParameterNode param:
+				case ParameterNode param:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						ReplaceTextPrivate(param.Value, from, to, comparison, replaceIn | ReplaceLocations.Text);
 					}
 
 					break;
-				case ITemplateNode template:
+				case TemplateNode template:
 					if (replaceIn.HasFlag(ReplaceLocations.ParameterValues))
 					{
 						foreach (var param in template.Parameters)
@@ -933,16 +933,16 @@ public class WikiNodeCollection : List<IWikiNode>
 					}
 
 					break;
-				case ITextNode text:
+				case TextNode text:
 					if (replaceIn.HasFlag(ReplaceLocations.Text))
 					{
 						text.Text = text.Text.Replace(from, to, comparison);
 					}
 
 					break;
-				case IArgumentNode:
-				case IIgnoreNode:
-				case ITagNode:
+				case ArgumentNode:
+				case IgnoreNode:
+				case TagNode:
 					break;
 				default:
 					throw new InvalidOperationException("Unknown node type encountered.");

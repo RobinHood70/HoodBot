@@ -48,7 +48,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	#region IWikiNodeVisitor Methods
 
 	/// <inheritdoc/>
-	public void Visit(IArgumentNode argument)
+	public void Visit(ArgumentNode argument)
 	{
 		ArgumentNullException.ThrowIfNull(argument);
 		var argName = Build(argument.Name, context).Trim();
@@ -61,12 +61,12 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ICommentNode comment)
+	public void Visit(CommentNode comment)
 	{
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IHeaderNode header)
+	public void Visit(HeaderNode header)
 	{
 		ArgumentNullException.ThrowIfNull(header);
 		var equals = new string('=', header.Level);
@@ -76,12 +76,12 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IIgnoreNode ignore)
+	public void Visit(IgnoreNode ignore)
 	{
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ILinkNode link)
+	public void Visit(LinkNode link)
 	{
 		var siteLink = SiteLink.FromLinkNode(this.Context.Site, link);
 		var text = Build(siteLink.Text ?? siteLink.OriginalTitle?.Trim(), this.Context, this.Frame);
@@ -104,10 +104,10 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(IParameterNode parameter) => throw new NotSupportedException("This should never be hit, since neither template nor link parsing ever call it.");
+	public void Visit(ParameterNode parameter) => throw new NotSupportedException("This should never be hit, since neither template nor link parsing ever call it.");
 
 	/// <inheritdoc/>
-	public void Visit(ITagNode tag)
+	public void Visit(TagNode tag)
 	{
 		// For now, we just return the inner text under the assumption that tags will be things like <s><i><b> and so forth. More complex decision-making can be added later if needed.
 		ArgumentNullException.ThrowIfNull(tag);
@@ -115,7 +115,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITemplateNode template)
+	public void Visit(TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(template);
 		var newFrame = this.CreateFrame(template, this.Frame);
@@ -131,7 +131,7 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	}
 
 	/// <inheritdoc/>
-	public void Visit(ITextNode text)
+	public void Visit(TextNode text)
 	{
 		ArgumentNullException.ThrowIfNull(text);
 		this.builder.Append(text.Text);
@@ -163,14 +163,14 @@ public sealed class ParseToText(Context context, MagicWordFrame frame) : IWikiNo
 	#endregion
 
 	#region Private Methods
-	private MagicWordFrame CreateFrame(ITemplateNode template, MagicWordFrame parent)
+	private MagicWordFrame CreateFrame(TemplateNode template, MagicWordFrame parent)
 	{
 		var name = Build(template.TitleNodes, this.Context);
 		var parameters = this.BuildParameters(template);
 		return new MagicWordFrame(name, parameters, parent);
 	}
 
-	private Dictionary<string, string> BuildParameters(ITemplateNode template)
+	private Dictionary<string, string> BuildParameters(TemplateNode template)
 	{
 		var parameters = new Dictionary<string, string>(StringComparer.Ordinal);
 		var paramNum = 1;

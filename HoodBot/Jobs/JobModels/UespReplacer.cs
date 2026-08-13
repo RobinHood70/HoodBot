@@ -42,9 +42,9 @@ internal sealed class UespReplacer
 		ArgumentNullException.ThrowIfNull(newNodes);
 		this.Site = site;
 		this.oldNodes = oldNodes.Clone();
-		this.oldNodes.RemoveAll<IIgnoreNode>();
+		this.oldNodes.RemoveAll<IgnoreNode>();
 		this.newNodes = newNodes.Clone();
-		this.newNodes.RemoveAll<IIgnoreNode>();
+		this.newNodes.RemoveAll<IgnoreNode>();
 		this.RemoveableTemplates = new TitleCollection(
 			site,
 			MediaWikiNamespaces.Template,
@@ -111,22 +111,22 @@ internal sealed class UespReplacer
 		var searchTitles = new TitleCollection(site, "Template:Huh", "Template:Nowrap");
 		for (var i = 0; i < nodes.Count; i++)
 		{
-			if (nodes[i] is ITextNode textNode)
+			if (nodes[i] is TextNode textNode)
 			{
 				// TODO: This used to just be fugly, it's now a disaster. Rewrite.
 
 				// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 				var text = textNode.Text;
 				if (i > 0 &&
-					nodes[i - 1] is ITemplateNode previous &&
+					nodes[i - 1] is TemplateNode previous &&
 					searchTitles.Contains(previous.GetTitle(site)))
 				{
 					text = WikiTextVisitor.Raw(previous) + text;
 					var boldStart = false;
-					ITextNode? backText = null;
+					TextNode? backText = null;
 					if (i > 1)
 					{
-						backText = nodes[i - 2] as ITextNode;
+						backText = nodes[i - 2] as TextNode;
 						if (backText != null)
 						{
 							boldStart = backText.Text.EndsWith("'''", StringComparison.Ordinal);
@@ -192,7 +192,7 @@ internal sealed class UespReplacer
 		ArgumentNullException.ThrowIfNull(usedList);
 		for (var i = 0; i < nodes.Count; i++)
 		{
-			if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is WikiNodeCollection linkNodes)
+			if (nodes[i] is TextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is WikiNodeCollection linkNodes)
 			{
 				nodes.RemoveAt(i);
 				nodes.InsertRange(i, linkNodes);
@@ -208,7 +208,7 @@ internal sealed class UespReplacer
 		var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
 		for (var i = 0; i < nodes.Count; i++)
 		{
-			if (nodes[i] is ITextNode textNode)
+			if (nodes[i] is TextNode textNode)
 			{
 				var text = textNode.Text;
 				WikiNodeCollection replacementNodes = new(factory);
@@ -286,13 +286,13 @@ internal sealed class UespReplacer
 	public ICollection<Title> CheckNewLinks()
 	{
 		HashSet<Title> oldLinks = [];
-		foreach (var node in this.oldNodes.FindAll<ILinkNode>(null, false, true, 0))
+		foreach (var node in this.oldNodes.FindAll<LinkNode>(null, false, true, 0))
 		{
 			var siteLink = SiteLink.FromLinkNode(this.Site, node);
 			oldLinks.Add(siteLink.Title);
 		}
 
-		foreach (var node in this.newNodes.FindAll<ILinkNode>(null, false, true, 0))
+		foreach (var node in this.newNodes.FindAll<LinkNode>(null, false, true, 0))
 		{
 			var siteLink = SiteLink.FromLinkNode(this.Site, node);
 			oldLinks.Remove(siteLink.Title);
@@ -304,12 +304,12 @@ internal sealed class UespReplacer
 	public ICollection<Title> CheckNewTemplates()
 	{
 		HashSet<Title> oldTemplates = [];
-		foreach (var node in this.oldNodes.FindAll<ITemplateNode>(null, false, true, 0))
+		foreach (var node in this.oldNodes.FindAll<TemplateNode>(null, false, true, 0))
 		{
 			oldTemplates.Add(TitleFactory.FromTitleNode(this.Site, node));
 		}
 
-		foreach (var node in this.newNodes.FindAll<ITemplateNode>(null, false, true, 0))
+		foreach (var node in this.newNodes.FindAll<TemplateNode>(null, false, true, 0))
 		{
 			oldTemplates.Remove(TitleFactory.FromTitleNode(this.Site, node));
 		}
@@ -386,7 +386,7 @@ internal sealed class UespReplacer
 
 					foreach (var newNode in replacement.To)
 					{
-						if (newNode is ILinkNode link)
+						if (newNode is LinkNode link)
 						{
 							var siteLink = SiteLink.FromLinkNode(usedList.Site, link);
 							if (usedList.Contains(siteLink.Title) && link.Text.Count > 0)
@@ -422,7 +422,7 @@ internal sealed class UespReplacer
 		return retval;
 	}
 
-	private static IWikiNode ReplaceTemplatableText(Site site, Match match, IWikiNodeFactory factory)
+	private static TemplateNode ReplaceTemplatableText(Site site, Match match, IWikiNodeFactory factory)
 	{
 		var type = match.Groups["type"].Value.UpperFirst(site.Culture);
 		var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
@@ -498,9 +498,9 @@ internal sealed class UespReplacer
 
 	private void RemoveTrivialTemplates(WikiNodeCollection nodes)
 	{
-		bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromTitleNode(this.Site, node));
+		bool IsRemovable(TemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromTitleNode(this.Site, node));
 
-		nodes.RemoveAll<ITemplateNode>(IsRemovable);
+		nodes.RemoveAll<TemplateNode>(IsRemovable);
 	}
 
 	private string StrippedTextFromNodes(WikiNodeCollection nodes)

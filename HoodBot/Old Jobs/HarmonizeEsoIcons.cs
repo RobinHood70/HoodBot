@@ -64,7 +64,7 @@ internal sealed class HarmonizeEsoIcons(JobManager jobManager) : MovePagesJob(jo
 		foreach (var filePage in filePages.Cast<FilePage>())
 		{
 			var parser = new SiteParser(filePage);
-			if (parser.FindTemplate("Online File") is not ITemplateNode template)
+			if (parser.FindTemplate("Online File") is not TemplateNode template)
 			{
 				continue;
 			}

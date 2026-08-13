@@ -77,7 +77,7 @@ public class EsoHealthReplacer(JobManager jobManager) : ParsedPageJob(jobManager
 	{
 		foreach (var template in parser.FindTemplates("ESO Health"))
 		{
-			if (template.Find(1) is IParameterNode param &&
+			if (template.Find(1) is ParameterNode param &&
 				param.Value is WikiNodeCollection nodes &&
 				EsoHealthReplacements.TryGetValue(nodes.ToRaw().Trim().Replace(",", string.Empty, StringComparison.Ordinal), out var newValue))
 			{
@@ -98,7 +98,7 @@ public class EsoHealthReplacer(JobManager jobManager) : ParsedPageJob(jobManager
 				globalReaction = string.Empty;
 			}
 
-			if (npcTemplate.Find("health") is IParameterNode healthParam &&
+			if (npcTemplate.Find("health") is ParameterNode healthParam &&
 				healthParam.Value is WikiNodeCollection healthNodes)
 			{
 				foreach (var entry in EsoHealthReplacements)

@@ -212,7 +212,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				var parser = item.Parser;
 				if (parser.FindTemplate(t =>
 					t.GetTitle(this.Site) == factionTitle &&
-					t.GetValue("edid").OrdinalICEquals(edid)) is not ITemplateNode template)
+					t.GetValue("edid").OrdinalICEquals(edid)) is not TemplateNode template)
 				{
 					continue;
 				}
@@ -220,7 +220,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				var membersNode = template.AddIfNotExists("members", "{{Factions/Members\n  }}", ParameterFormat.Packed);
 				var factionMembersTemplate = membersNode.Value.FindTemplate(factionMembersTitle) ?? throw new InvalidOperationException();
 				var factionMembersNode = factionMembersTemplate.AddIfNotExists("members", string.Empty, ParameterFormat.Packed);
-				if (factionMembersNode.Value.FindTemplate(listTitle) is not ITemplateNode listTemplate)
+				if (factionMembersNode.Value.FindTemplate(listTitle) is not TemplateNode listTemplate)
 				{
 					listTemplate = factionMembersNode.Factory.TemplateNodeFromParts("List");
 					factionMembersNode.Value.Add(listTemplate);
@@ -232,7 +232,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 				// Add existing members, using first link found as title but retaining full parsed text as value.
 				foreach (var (_, parameter) in listTemplate.GetNumericParameters())
 				{
-					if (parameter.Value.Find<ILinkNode>() is ILinkNode linkNode)
+					if (parameter.Value.Find<LinkNode>() is LinkNode linkNode)
 					{
 						var siteLink = SiteLink.FromLinkNode(this.Site, linkNode);
 						innerMembers.TryAdd(siteLink.Title, parameter.Value);
@@ -331,7 +331,7 @@ internal sealed class SFFactions : CreateOrUpdateJob<SFFactions.Redirect>
 
 	private void ConfirmInitialHeader(Section section)
 	{
-		if (section.Content.FindTemplate(this.Site, "Factions") is ITemplateNode firstFaction)
+		if (section.Content.FindTemplate(this.Site, "Factions") is TemplateNode firstFaction)
 		{
 			firstFaction.AddIfNotExists("header", "1", ParameterFormat.OnePerLine);
 		}

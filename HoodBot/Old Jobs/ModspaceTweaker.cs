@@ -76,7 +76,7 @@
 			var headerNodes = 0;
 			foreach (var node in parser)
 			{
-				if (node is IHeaderNode)
+				if (node is HeaderNode)
 				{
 					if (headerNodes == 1)
 					{
@@ -85,7 +85,7 @@
 
 					headerNodes++;
 				}
-				else if (node is ITextNode textNode)
+				else if (node is TextNode textNode)
 				{
 					if (textNode.Text.IndexOf("'''" + pageName, StringComparison.OrdinalIgnoreCase) != -1 ||
 						textNode.Text.IndexOf(pageName + "'''", StringComparison.OrdinalIgnoreCase) != -1)
@@ -109,13 +109,13 @@
 		private static void DoBookSummary(SiteParser parser, HashSet<string> loreBooks)
 		{
 			var nodes = parser;
-			var i = nodes.FindIndex<ITemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
+			var i = nodes.FindIndex<TemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
 			if (i != -1)
 			{
-				var template = (ITemplateNode)parser[i];
+				var template = (TemplateNode)parser[i];
 				template.Title.Clear();
 				template.Title.AddText("Game Book\n");
-				if ((template.Find("Fancy") ?? template.Find("fancy")) is IParameterNode fancy)
+				if ((template.Find("Fancy") ?? template.Find("fancy")) is ParameterNode fancy)
 				{
 					var letter = fancy.Value.ToValue().Trim();
 					var newNodes = new IWikiNode[]
@@ -124,7 +124,7 @@
 						nodes.Factory.TemplateNodeFromParts("LetterPic", (null, letter))
 					};
 
-					if (nodes[i + 1] is ITextNode textNode && textNode.Text[0] == '\n')
+					if (nodes[i + 1] is TextNode textNode && textNode.Text[0] == '\n')
 					{
 						textNode.Text = textNode.Text[1..];
 					}
@@ -133,7 +133,7 @@
 					template.Parameters.Remove(fancy);
 				}
 
-				if (template.Find("loc") is IParameterNode loc && loc.Value.Count > 0 && loc.Value[^1] is ITextNode locTextNode)
+				if (template.Find("loc") is ParameterNode loc && loc.Value.Count > 0 && loc.Value[^1] is TextNode locTextNode)
 				{
 					locTextNode.Text = locTextNode.Text.TrimEnd().TrimEnd('.') + '\n';
 				}
@@ -149,7 +149,7 @@
 		{
 			foreach (var npcSummary in parser.FindTemplates("NPC Summary"))
 			{
-				if (npcSummary.Find("faction") is IParameterNode faction
+				if (npcSummary.Find("faction") is ParameterNode faction
 					&& faction.Value is var value
 					&& value.ToRaw().Trim() is var text
 					&& text.Length > 0

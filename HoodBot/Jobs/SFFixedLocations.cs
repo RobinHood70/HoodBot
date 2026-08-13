@@ -118,7 +118,7 @@ internal sealed class SFFixedLocations : EditJob
 		var lastContent = sections[0].Content;
 		for (var nodeIndex = 0; nodeIndex < lastContent.Count; nodeIndex++)
 		{
-			if (lastContent[nodeIndex] is ITemplateNode template &&
+			if (lastContent[nodeIndex] is TemplateNode template &&
 				this.footerTemplates.Contains(template.GetTitle(this.Site)))
 			{
 				var footerSection = new Section(null, new WikiNodeCollection(lastContent.Factory));

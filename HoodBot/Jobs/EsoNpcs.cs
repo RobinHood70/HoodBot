@@ -93,7 +93,7 @@ internal sealed class EsoNpcs : EditJob
 			var placeInfo = EsoSpace.PlaceInfo;
 
 			var parser = new SiteParser(page);
-			if (parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
+			if (parser.FindTemplate("Online NPC Summary") is TemplateNode template)
 			{
 				UpdateLocations(npc, template, placeInfo);
 				parser.UpdatePage();
@@ -154,7 +154,7 @@ internal sealed class EsoNpcs : EditJob
 		return sb.ToString();
 	}
 
-	private static void UpdateLocations(NpcData npc, ITemplateNode template, IEnumerable<PlaceInfo> placeInfos)
+	private static void UpdateLocations(NpcData npc, TemplateNode template, IEnumerable<PlaceInfo> placeInfos)
 	{
 		foreach (var (placeType, paramName, _, variesCount) in placeInfos)
 		{
@@ -185,12 +185,12 @@ internal sealed class EsoNpcs : EditJob
 			InsertLocation(template, "loc", locText);
 		}
 
-		static void InsertLocation(ITemplateNode template, string name, string locText)
+		static void InsertLocation(TemplateNode template, string name, string locText)
 		{
 			if (locText.Length > 0)
 			{
 				locText += '\n';
-				if (template.Find(name) is IParameterNode loc)
+				if (template.Find(name) is ParameterNode loc)
 				{
 					var value = loc.GetValue();
 					if (!value.OrdinalEquals(locText))
@@ -267,7 +267,7 @@ internal sealed class EsoNpcs : EditJob
 						template.Find("house").IsNullOrWhitespace() &&
 						template.Find("ship").IsNullOrWhitespace() &&
 						template.Find("store").IsNullOrWhitespace() &&
-						template.Find("loc") is IParameterNode loc &&
+						template.Find("loc") is ParameterNode loc &&
 						(loc.IsNullOrWhitespace() || loc.GetValue().OrdinalICEquals("{{huh}}")))
 					{
 						this.npcCollection.Add(npc);

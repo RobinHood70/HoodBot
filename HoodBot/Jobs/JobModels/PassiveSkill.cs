@@ -74,7 +74,7 @@ internal sealed class PassiveSkill(string name, string pageName, string skillCla
 	#endregion
 
 	#region Protected Override Methods
-	protected override void UpdateTemplate(Site site, ITemplateNode template)
+	protected override void UpdateTemplate(Site site, TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(template);

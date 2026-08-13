@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.Robby.Parser;
 
-//// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that accepts Site and emits Site-specific wrappers around ITemplateNode and ILinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, ITemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
+//// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that accepts Site and emits Site-specific wrappers around TemplateNode and LinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, TemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
 
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
 	/// <param name="page">The page to parse.</param>
 	/// <param name="inclusionType">The inclusion type for the text.</param>
-	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</param>
+	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IgnoreNode"/>s (<see langword="false"/>).</param>
 	public SiteParser(Page page, InclusionType inclusionType, bool strictInclusion)
 		: this(page, page?.Text, inclusionType, strictInclusion)
 	{
@@ -42,7 +42,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 	/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
-	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</param>
+	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IgnoreNode"/>s (<see langword="false"/>).</param>
 	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
 		: base(WikiNodeFactory.DefaultInstance)
 	{
@@ -77,7 +77,7 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <remarks>This property is a direct link to Title and will therefore change if the Title's Site does. Changing Sites within a session may produce unexpected results.</remarks>
 	public Site Site { get; }
 
-	/// <summary>Gets a value indicating whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IIgnoreNode"/>s (<see langword="false"/>).</summary>
+	/// <summary>Gets a value indicating whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IgnoreNode"/>s (<see langword="false"/>).</summary>
 	public bool StrictInclusion { get; }
 
 	/// <summary>Gets a set of functions to evaluate templates (e.g., <c>{{PAGENAME}}</c>) and resolve them into meaningful values (NOT IMPLEMENTED).</summary>
@@ -99,30 +99,30 @@ public class SiteParser : WikiNodeCollection, ITitle
 
 	/// <summary>Finds the first link that matches the provided title.</summary>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The first <see cref="ILinkNode"/> that matches the title provided, if found.</returns>
+	/// <returns>The first <see cref="LinkNode"/> that matches the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public ILinkNode? FindLink(string find) => this.FindLink(this.Site, find);
+	public LinkNode? FindLink(string find) => this.FindLink(this.Site, find);
 
 	/// <summary>Finds all links that match the provided title.</summary>
 	/// <param name="find">The title to find.</param>
-	/// <returns>The <see cref="ILinkNode"/>s that match the title provided, if found.</returns>
+	/// <returns>The <see cref="LinkNode"/>s that match the title provided, if found.</returns>
 	/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-	public IEnumerable<ILinkNode> FindLinks(string find) => this.FindLinks(this.Site, find);
+	public IEnumerable<LinkNode> FindLinks(string find) => this.FindLinks(this.Site, find);
 
 	/// <summary>Finds the first template that matches the provided title.</summary>
 	/// <param name="find">The name of the template to find.</param>
-	/// <returns>The first <see cref="ITemplateNode"/> that matches the title provided, if found.</returns>
-	public ITemplateNode? FindTemplate(string find) => this.FindTemplate(this.Site, find);
+	/// <returns>The first <see cref="TemplateNode"/> that matches the title provided, if found.</returns>
+	public TemplateNode? FindTemplate(string find) => this.FindTemplate(this.Site, find);
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="find">The template to find.</param>
 	/// <returns>The templates that match the title provided, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(string find) => this.FindTemplates(this.Site, find);
+	public IEnumerable<TemplateNode> FindTemplates(string find) => this.FindTemplates(this.Site, find);
 
 	/// <summary>Finds all templates that match the provided title.</summary>
 	/// <param name="find">The templates to find.</param>
 	/// <returns>The templates that match the provided titles, if any.</returns>
-	public IEnumerable<ITemplateNode> FindTemplates(IEnumerable<string> find) => this.FindTemplates(this.Site, find);
+	public IEnumerable<TemplateNode> FindTemplates(IEnumerable<string> find) => this.FindTemplates(this.Site, find);
 
 	/// <summary>Removes all instances of a template and, if appropriate, pulls up any following text to the template's former position.</summary>
 	/// <param name="find">The name of the template.</param>

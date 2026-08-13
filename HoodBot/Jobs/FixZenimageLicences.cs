@@ -38,7 +38,7 @@ public class FixZenimageLicences(JobManager jobManager) : TemplateJob(jobManager
 		this.Pages.GetTitles(goodTitles);
 	}
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
 		template.TitleNodes.Clear();
 		template.TitleNodes.AddText("Zenimage");

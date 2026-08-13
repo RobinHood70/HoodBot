@@ -107,7 +107,7 @@
 			}
 		}
 
-		protected override void UpdateTemplateNode(Page page, ITemplateNode template)
+		protected override void UpdateTemplateNode(Page page, TemplateNode template)
 		{
 			base.UpdateTemplateNode(page, template);
 			foreach (var nsBase in template.FindAll("ns_base", "ns_id"))

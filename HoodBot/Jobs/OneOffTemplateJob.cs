@@ -22,7 +22,7 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 	#region Protected Override Methods
 	protected override string GetEditSummary(Page page) => "Corriger l'icône";
 
-	protected override void ParseTemplate(ITemplateNode template, SiteParser parser)
+	protected override void ParseTemplate(TemplateNode template, SiteParser parser)
 	{
 		foreach (var link in parser.LinkNodes)
 		{
@@ -38,7 +38,7 @@ public class OneOffTemplateJob(JobManager jobManager) : TemplateJob(jobManager)
 			return;
 		}
 
-		if (template.Find("icon") is IParameterNode icon)
+		if (template.Find("icon") is ParameterNode icon)
 		{
 			var text = icon.Value.ToRaw().Trim();
 			switch (text[3..].ToLowerInvariant())

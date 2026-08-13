@@ -93,7 +93,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 	protected override void ItemPageLoaded(SiteParser parser, List<SFItem> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.IndexOf<ITemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
+		var insertPos = parser.IndexOf<TemplateNode>(t => t.GetTitle(parser.Site).PageNameEquals("Item Summary"));
 		if (insertPos == -1)
 		{
 			throw new InvalidOperationException("Item Summary template not found on page.");
@@ -101,7 +101,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 
 		foreach (var item in list)
 		{
-			if (FindMatchingTemplate(parser, item) is ITemplateNode template)
+			if (FindMatchingTemplate(parser, item) is TemplateNode template)
 			{
 				template.Update("objectid", item.FormId);
 				template.Update("weight", item.Weight.ToStringInvariant());
@@ -138,7 +138,7 @@ internal sealed class SFArmor : CreateOrUpdateJob<List<SFItem>>
 		.Append("|corrosive={{Huh}}\n")
 		.Append("}}");
 
-	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, SFItem item)
+	private static TemplateNode? FindMatchingTemplate(SiteParser parser, SFItem item)
 	{
 		var templates = parser.FindTemplates("Item Summary");
 		foreach (var template in templates)

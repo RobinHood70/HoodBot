@@ -10,7 +10,7 @@ public class Section
 	/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 	/// <param name="header">The header node for the section (null for lead).</param>
 	/// <param name="content">The <see cref="WikiNodeCollection"/> representing the content of the section.</param>
-	public Section(IHeaderNode? header, WikiNodeCollection content)
+	public Section(HeaderNode? header, WikiNodeCollection content)
 	{
 		ArgumentNullException.ThrowIfNull(content);
 		this.Content = content;
@@ -24,7 +24,7 @@ public class Section
 	public WikiNodeCollection Content { get; }
 
 	/// <summary>Gets or sets the header node for the section (null for lead).</summary>
-	public IHeaderNode? Header { get; set; }
+	public HeaderNode? Header { get; set; }
 	#endregion
 
 	#region Public Static Methods

@@ -151,7 +151,7 @@ public static class UespFunctions
 			};
 	}
 
-	public static string IconAbbreviation(UespNamespace ns, ITemplateNode template)
+	public static string IconAbbreviation(UespNamespace ns, TemplateNode template)
 	{
 		ArgumentNullException.ThrowIfNull(ns);
 		ArgumentNullException.ThrowIfNull(template);

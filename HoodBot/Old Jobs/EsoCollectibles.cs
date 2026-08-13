@@ -124,20 +124,20 @@
 			return NameSubstitutes.Substitute(localCat + ':' + name);
 		}
 
-		private static string GetSectionTitle(IHeaderNode header)
+		private static string GetSectionTitle(HeaderNode header)
 		{
 			StringBuilder sb = new();
 			foreach (var node in header.Title)
 			{
 				switch (node)
 				{
-					case ITextNode text:
+					case TextNode text:
 						sb.Append(text.Text);
 						break;
-					case ILinkNode link:
+					case LinkNode link:
 						sb.Append(WikiTextVisitor.Raw(link.Parameters)[1..]);
 						break;
-					case ITemplateNode template:
+					case TemplateNode template:
 						sb.Append(TrimHeader(template));
 						break;
 				}
@@ -153,12 +153,12 @@
 		private static void ParseCollectible(CollectibleInfo collectible, SiteParser parser)
 		{
 			var page = parser.Page;
-			var templateIndex = parser.FindIndex<ITemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
-			var template = (ITemplateNode)parser[templateIndex];
+			var templateIndex = parser.FindIndex<TemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
+			var template = (TemplateNode)parser[templateIndex];
 			var removeParens = page.PageName.Split(" (", 2)[0];
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
-			if ((template.Find("image") ?? template.Add("image")) is IParameterNode parameter)
+			if ((template.Find("image") ?? template.Add("image")) is ParameterNode parameter)
 			{
 				if (parameter.Value.ToRaw().Trim().Length == 0)
 				{
@@ -194,7 +194,7 @@
 			{
 				var price = template.Find("price") ?? template.Add("price", string.Empty);
 				var value = price.Value;
-				if (value.Count == 1 && value[0] is ITextNode text && text.Text.Trim().Length == 0)
+				if (value.Count == 1 && value[0] is TextNode text && text.Text.Trim().Length == 0)
 				{
 					value.Clear();
 					value.AddRange(collectible.Price);
@@ -210,7 +210,7 @@
 			parser.UpdatePage();
 		}
 
-		private static string TrimHeader(ITemplateNode template) => template.TitleValue.PageName switch
+		private static string TrimHeader(TemplateNode template) => template.TitleValue.PageName switch
 		{
 			"Anchor" or "Item Link" => template.GetValue(1) ?? string.Empty,
 			"ESO Quality Color" => template.GetValue(2) ?? string.Empty,
@@ -219,9 +219,9 @@
 
 		private static bool ValidateSection(Section section) =>
 			section.Content is var content
-			&& content.Has<ITextNode>(text => DescriptionFinder.IsMatch(text.Text))
-			&& (content.Has<ITemplateNode>(template => template.TitleValue.PageNameEquals("Icon"))
-				|| content.Has<ILinkNode>(link => link.TitleValue.Namespace == MediaWikiNamespaces.File));
+			&& content.Has<TextNode>(text => DescriptionFinder.IsMatch(text.Text))
+			&& (content.Has<TemplateNode>(template => template.TitleValue.PageNameEquals("Icon"))
+				|| content.Has<LinkNode>(link => link.TitleValue.Namespace == MediaWikiNamespaces.File));
 		#endregion
 
 		#region Private Methods
@@ -254,7 +254,7 @@
 				? parser
 				: new SiteParser(this.Site.CreatePage(newPage.DisambigName, this.blankText));
 
-			static bool ParserHasTemplate(SiteParser parser) => parser.Has<ITemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			static bool ParserHasTemplate(SiteParser parser) => parser.Has<TemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 		}
 
 		private void GetCrownCrates()
@@ -273,11 +273,11 @@
 			//// var tier = string.Empty;
 			foreach (var node in parser)
 			{
-				if (node is IHeaderNode header)
+				if (node is HeaderNode header)
 				{
 					//// tier = GetSectionTitle(header);
 				}
-				else if (node is ITemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
+				else if (node is TemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
 				{
 					foreach (var parameter in template.ParameterCluster(2))
 					{
@@ -347,7 +347,7 @@
 						this.Pages.Add(parser.Page);
 					}
 
-					if (collectible.AssociatedSection.Header is IHeaderNode header)
+					if (collectible.AssociatedSection.Header is HeaderNode header)
 					{
 						var equalsSigns = new string('=', header.Level);
 						var title = header.Title;
@@ -386,7 +386,7 @@
 				sectionInfo.Sections.Add(section);
 				if (section.Header is not null &&
 					(section.Content.Count != 1 ||
-					section.Content[0] is not ITextNode textNode ||
+					section.Content[0] is not TextNode textNode ||
 					textNode.Text.Trim().Length != 0))
 				{
 					if (ValidateSection(section))
@@ -412,7 +412,7 @@
 			return sectionInfo;
 		}
 
-		private void ReportInvalidSections(Page page, List<IHeaderNode> invalidHeaders)
+		private void ReportInvalidSections(Page page, List<HeaderNode> invalidHeaders)
 		{
 			if (invalidHeaders.Count > 0)
 			{
@@ -424,7 +424,7 @@
 			}
 		}
 
-		private void ReportNotFoundSections(Page page, List<IHeaderNode> notFound)
+		private void ReportNotFoundSections(Page page, List<HeaderNode> notFound)
 		{
 			if (notFound.Count > 0)
 			{
@@ -469,33 +469,33 @@
 					var node = content[i];
 					switch (node)
 					{
-						case ITextNode text:
+						case TextNode text:
 							this.NewContent.AddText(DescriptionReplacer.Replace(text.Text, string.Empty));
 							break;
-						case ILinkNode link when
+						case LinkNode link when
 							link.TitleValue.Namespace == MediaWikiNamespaces.File &&
 							link.TitleValue.PageName.StartsWith("ON-icon-", StringComparison.Ordinal):
 							iconCount++;
 							iconOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case ILinkNode link when
+						case LinkNode link when
 							link.TitleValue.Namespace == MediaWikiNamespaces.File:
 							fileCount++;
 							fileOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case ITemplateNode template when template.TitleValue.PageNameEquals("ESO Crowns"):
+						case TemplateNode template when template.TitleValue.PageNameEquals("ESO Crowns"):
 							this.Acquisition = "Crown Store";
 							this.Price = template;
 							this.NewContent.Add(node);
 							break;
-						case ITemplateNode template when template.TitleValue.PageNameEquals("Icon"):
+						case TemplateNode template when template.TitleValue.PageNameEquals("Icon"):
 							iconCount++;
 							iconOffset = this.NewContent.Count;
 							this.NewContent.Add(node); // Will be removed later if appropriate
 							break;
-						case ITemplateNode template when
+						case TemplateNode template when
 							template.TitleValue.PageNameEquals("NewLeft") ||
 							template.TitleValue.PageNameEquals("NewLine"):
 							// Do nothing
@@ -506,7 +506,7 @@
 					}
 				}
 
-				if (fileCount == 1 && this.NewContent[fileOffset] is ILinkNode imageLink)
+				if (fileCount == 1 && this.NewContent[fileOffset] is LinkNode imageLink)
 				{
 					this.Image = imageLink.TitleValue.PageName[0..^4];
 					var link = SiteLink.FromLinkNode(site, imageLink);
@@ -523,8 +523,8 @@
 				{
 					var fileName = this.NewContent[iconOffset] switch
 					{
-						ITemplateNode iconTemplate => UespFunctions.IconAbbreviation("ON", iconTemplate),
-						ILinkNode iconLink => iconLink.TitleValue.PageName,
+						TemplateNode iconTemplate => UespFunctions.IconAbbreviation("ON", iconTemplate),
+						LinkNode iconLink => iconLink.TitleValue.PageName,
 						_ => throw new InvalidOperationException(),
 					};
 					fileName = fileName[0..^4];
@@ -565,7 +565,7 @@
 
 			public string NickName { get; }
 
-			public ITemplateNode? Price { get; }
+			public TemplateNode? Price { get; }
 
 			public string? Tier { get; }
 
@@ -645,9 +645,9 @@
 			#region Public Properties
 			public List<CollectibleInfo> Collectibles { get; } = new();
 
-			public List<IHeaderNode> InvalidHeaders { get; } = new();
+			public List<HeaderNode> InvalidHeaders { get; } = new();
 
-			public List<IHeaderNode> NotFound { get; } = new();
+			public List<HeaderNode> NotFound { get; } = new();
 
 			public List<Section> Sections { get; } = new();
 			#endregion

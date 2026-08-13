@@ -113,7 +113,7 @@ internal sealed partial class SFEffects(JobManager jobManager) : CreateOrUpdateJ
 			throw new InvalidOperationException("Page is not a redirect!");
 		}
 
-		if (parser.LinkNodes.First() is not ILinkNode linkNode ||
+		if (parser.LinkNodes.First() is not LinkNode linkNode ||
 			linkNode.GetTitle(parser.Site) != this.effectsTitle)
 		{
 			throw new InvalidOperationException("Redirect does not point to Effects page!");

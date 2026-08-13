@@ -348,14 +348,14 @@ public class SiteLink : ILinkTitle
 	/// <param name="factory">The factory to use to create internal links.</param>
 	/// <param name="tag">The gallery tag to work on.</param>
 	/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
-	public static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, ITagNode tag)
+	public static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, TagNode tag)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(factory);
 		ArgumentNullException.ThrowIfNull(tag);
 		return FromGalleryNode(site, factory, tag);
 
-		static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, ITagNode tag)
+		static IEnumerable<SiteLink> FromGalleryNode(Site site, IWikiNodeFactory factory, TagNode tag)
 		{
 			if (tag.InnerText?.Trim() is string innerText &&
 						innerText.Length > 0)
@@ -389,22 +389,22 @@ public class SiteLink : ILinkTitle
 		return FromLinkNode(site[MediaWikiNamespaces.File], linkNode);
 	}
 
-	/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
+	/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
 	/// <param name="site">The site the link is from.</param>
 	/// <param name="link">The link node.</param>
 	/// <returns>A new SiteLink.</returns>
-	public static SiteLink FromLinkNode(Site site, ILinkNode link)
+	public static SiteLink FromLinkNode(Site site, LinkNode link)
 	{
 		ArgumentNullException.ThrowIfNull(site);
 		ArgumentNullException.ThrowIfNull(link);
 		return FromLinkNode(site[MediaWikiNamespaces.Main], link);
 	}
 
-	/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
+	/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
 	/// <param name="ns">The default namespace. Main for most; File for gallery links.</param>
 	/// <param name="link">The link node.</param>
 	/// <returns>A new SiteLink.</returns>
-	public static SiteLink FromLinkNode(Namespace ns, ILinkNode link)
+	public static SiteLink FromLinkNode(Namespace ns, LinkNode link)
 	{
 		ArgumentNullException.ThrowIfNull(ns);
 		ArgumentNullException.ThrowIfNull(link);
@@ -585,9 +585,9 @@ public class SiteLink : ILinkTitle
 		}
 	}
 
-	/// <summary>Converts the link to a <see cref="ILinkNode"/>.</summary>
-	/// <returns>A <see cref="ILinkNode"/> containing the parsed link text.</returns>
-	public ILinkNode ToLinkNode()
+	/// <summary>Converts the link to a <see cref="LinkNode"/>.</summary>
+	/// <returns>A <see cref="LinkNode"/> containing the parsed link text.</returns>
+	public LinkNode ToLinkNode()
 	{
 		List<string> values = [];
 		foreach (var parameter in this.Parameters)
@@ -599,9 +599,9 @@ public class SiteLink : ILinkTitle
 		return WikiNodeFactory.DefaultInstance.LinkNodeFromParts(this.LinkTarget(false), values);
 	}
 
-	/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
+	/// <summary>Copies values from the link into a <see cref="LinkNode"/>.</summary>
 	/// <param name="node">The node to update.</param>
-	public void UpdateLinkNode(ILinkNode node)
+	public void UpdateLinkNode(LinkNode node)
 	{
 		ArgumentNullException.ThrowIfNull(node);
 		var thisNode = this.ToLinkNode();
@@ -681,7 +681,7 @@ public class SiteLink : ILinkTitle
 	#endregion
 
 	#region Private Static Methods
-	private static ILinkNode CreateLinkNode(string link)
+	private static LinkNode CreateLinkNode(string link)
 	{
 		// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
 		var removeSpace = false;
@@ -728,12 +728,12 @@ public class SiteLink : ILinkTitle
 		}
 	}
 
-	private static void TrimTrailingSpace(ILinkNode linkNode)
+	private static void TrimTrailingSpace(LinkNode linkNode)
 	{
 		var nodes = linkNode.Text.Count == 0
 			? linkNode.TitleNodes
 			: linkNode.Text;
-		if (nodes[^1] is ITextNode last)
+		if (nodes[^1] is TextNode last)
 		{
 			if (last.Text.Length == 1)
 			{

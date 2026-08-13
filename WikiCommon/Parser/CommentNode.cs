@@ -1,11 +1,10 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System.Diagnostics.CodeAnalysis;
 using RobinHood70.CommonCode;
-using RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents a wikitext (HTML) comment.</summary>
-public class CommentNode : ICommentNode
+public class CommentNode : IWikiNode
 {
 	#region Constructors
 
@@ -19,7 +18,8 @@ public class CommentNode : ICommentNode
 
 	#region Public Properties
 
-	/// <inheritdoc/>
+	/// <summary>Gets or sets the comment text.</summary>
+	/// <value>The comment text, including leading and trailing markers as well as trailing spaces and tabs.</value>
 	[AllowNull]
 	public string Comment
 	{

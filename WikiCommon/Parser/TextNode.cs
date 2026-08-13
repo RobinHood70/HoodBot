@@ -1,17 +1,17 @@
-﻿namespace RobinHood70.WikiCommon.Parser.Basic;
+﻿namespace RobinHood70.WikiCommon.Parser;
 
 using System.ComponentModel;
 using RobinHood70.CommonCode;
-using RobinHood70.WikiCommon.Parser;
 
 /// <summary>Represents a block of text.</summary>
 /// <remarks>Initializes a new instance of the <see cref="TextNode"/> class.</remarks>
 /// <param name="text">The text.</param>
-public class TextNode([Localizable(false)] string text) : ITextNode
+public class TextNode([Localizable(false)] string text) : IWikiNode
 {
 	#region Public Properties
 
-	/// <inheritdoc/>
+	/// <summary>Gets or sets the text.</summary>
+	/// <value>The text.</value>
 	public string Text { get; set; } = text;
 	#endregion
 

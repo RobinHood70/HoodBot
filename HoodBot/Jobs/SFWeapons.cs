@@ -80,7 +80,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 	protected override void ItemPageLoaded(SiteParser parser, List<CsvRow> list)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
+		var insertPos = parser.LastIndexOf<TemplateNode>(t => t.GetTitle(parser.Site) == "Template:Item Summary");
 		if (insertPos == -1)
 		{
 			throw new InvalidOperationException("Item Summary template not found.");
@@ -122,7 +122,7 @@ internal sealed class SFWeapons : CreateOrUpdateJob<List<CsvRow>>
 		.Append("|mods={{Huh}}\n")
 		.Append("}}");
 
-	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
+	private static TemplateNode? FindMatchingTemplate(SiteParser parser, CsvRow row)
 	{
 		var templates = parser.FindTemplates("Item Summary");
 		foreach (var template in templates)

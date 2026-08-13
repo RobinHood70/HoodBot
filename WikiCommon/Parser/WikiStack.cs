@@ -13,13 +13,13 @@ using RobinHood70.WikiCommon.Properties;
 /// <summary>What to include when parsing.</summary>
 public enum InclusionType
 {
-	/// <summary>Parse text as if it were transcluded to another page. Ignored text and tags will be put into <see cref="IIgnoreNode"/>s unless using strict inclusion.</summary>
+	/// <summary>Parse text as if it were transcluded to another page. Ignored text and tags will be put into <see cref="IgnoreNode"/>s unless using strict inclusion.</summary>
 	Transcluded,
 
-	/// <summary>Parse text as it would appear on the current page. Ignored text and tags will be put into <see cref="IIgnoreNode"/>s unless using strict inclusion.</summary>
+	/// <summary>Parse text as it would appear on the current page. Ignored text and tags will be put into <see cref="IgnoreNode"/>s unless using strict inclusion.</summary>
 	CurrentPage,
 
-	/// <summary>Parse all text. Only inclusion tags themselves will be put into <see cref="IIgnoreNode"/>s; all remaining text will be parsed.</summary>
+	/// <summary>Parse all text. Only inclusion tags themselves will be put into <see cref="IgnoreNode"/>s; all remaining text will be parsed.</summary>
 	Raw,
 }
 
@@ -163,7 +163,7 @@ public sealed class WikiStack
 
 		foreach (var node in finalNodes.Nodes)
 		{
-			if (node is IHeaderNode hNode && !hNode.Confirmed)
+			if (node is HeaderNode hNode && !hNode.Confirmed)
 			{
 				hNode.Confirmed = true;
 			}
@@ -283,7 +283,7 @@ public sealed class WikiStack
 		if (wsStart > 0 && wsEnd < this.textLength && this.Text[wsStart - 1] == '\n' && this.Text[wsEnd] == '\n')
 		{
 			var wsLength = this.Index - wsStart;
-			if (wsLength > 0 && piece.Nodes[^1] is ITextNode last)
+			if (wsLength > 0 && piece.Nodes[^1] is TextNode last)
 			{
 				var lastValue = last.Text;
 				if (lastValue.SpanReverse(HeaderElement.CommentWhiteSpace, lastValue.Length) == wsLength)

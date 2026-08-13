@@ -105,7 +105,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	protected override void ItemPageLoaded(SiteParser parser, Npcs item)
 	{
 		// Currently designed for insert only, no updating. Template code has to be duplicated here as well as on NewPageText so that it passes validity checks but also handles insertion correctly.
-		var insertPos = parser.LastIndexOf<ITemplateNode>(t => t.GetTitle(parser.Site) == "Template:NPC Summary");
+		var insertPos = parser.LastIndexOf<TemplateNode>(t => t.GetTitle(parser.Site) == "Template:NPC Summary");
 		if (insertPos == -1)
 		{
 			throw new InvalidOperationException("NPC Summary template not found.");
@@ -160,7 +160,7 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 			.Append("}}");
 	}
 
-	private static ITemplateNode? FindMatchingTemplate(SiteParser parser, Npc search)
+	private static TemplateNode? FindMatchingTemplate(SiteParser parser, Npc search)
 	{
 		var templates = parser.FindTemplates("NPC Summary");
 		foreach (var template in templates)

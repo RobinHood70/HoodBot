@@ -29,6 +29,6 @@ public abstract class TemplateJob(JobManager jobManager) : ParsedPageJob(jobMana
 	#endregion
 
 	#region Protected Abstract Methods
-	protected abstract void ParseTemplate(ITemplateNode template, SiteParser parser);
+	protected abstract void ParseTemplate(TemplateNode template, SiteParser parser);
 	#endregion
 }

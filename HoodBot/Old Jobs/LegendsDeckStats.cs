@@ -28,7 +28,7 @@
 		{
 			ArgumentNullException.ThrowIfNull(parser);
 			SortedDictionary<int, int> powerCount = [];
-			if (parser.FindTemplate("Legends Deck Summary") is not ITemplateNode deckSummary)
+			if (parser.FindTemplate("Legends Deck Summary") is not TemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}
@@ -36,7 +36,7 @@
 			foreach (var template in parser.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
-				List<IParameterNode> specialParams = new(template.FindAll("skipQuantity", "skipNotes"));
+				List<ParameterNode> specialParams = new(template.FindAll("skipQuantity", "skipNotes"));
 				var paramCount = 3 - specialParams.Count;
 				foreach (var cluster in template.ParameterCluster(paramCount))
 				{
@@ -59,7 +59,7 @@
 			{
 				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);
 				var paramValue = entry.Value.ToString(CultureInfo.InvariantCulture) + '\n';
-				if (deckSummary.Find(paramName) is IParameterNode param)
+				if (deckSummary.Find(paramName) is ParameterNode param)
 				{
 					param.Value.Clear();
 					param.Value.AddText(paramValue);

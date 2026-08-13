@@ -52,7 +52,7 @@ internal sealed class RemoveCraftingMotifHeaders(JobManager jobManager) : EditJo
 	{
 		for (var i = 0; i < parser.Count; i++)
 		{
-			if (parser[i] is IHeaderNode header && header.Level == 4)
+			if (parser[i] is HeaderNode header && header.Level == 4)
 			{
 				parser[i] = parser.Factory.TextNode(header.Title.ToRaw().Trim() + header.Comment.ToRaw().TrimEnd());
 			}

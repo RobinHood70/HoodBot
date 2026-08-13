@@ -40,13 +40,13 @@
 			{
 				CheckText(parser, i + 1);
 				CheckText(parser, i + 3);
-				var header = (IHeaderNode)parser[i];
-				if (header.Title.Count < 3 || header.Title[1] is not ILinkNode link)
+				var header = (HeaderNode)parser[i];
+				if (header.Title.Count < 3 || header.Title[1] is not LinkNode link)
 				{
-					link = (ILinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.GetTitle(true));
+					link = (LinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.GetTitle(true));
 				}
 
-				var template = (ITemplateNode)parser[i + 2];
+				var template = (TemplateNode)parser[i + 2];
 				var text = "{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Item}}";
 				var page = this.Site.CreatePage(link.TitleValue, text);
 				this.Pages.Add(page);
@@ -54,7 +54,7 @@
 
 			static void CheckText(WikiNodeCollection parsed, int offset)
 			{
-				if (offset < parsed.Count && (parsed[offset] is not ITextNode textNode || textNode.Text.TrimStart().Length != 0))
+				if (offset < parsed.Count && (parsed[offset] is not TextNode textNode || textNode.Text.TrimStart().Length != 0))
 				{
 					throw new InvalidOperationException();
 				}
