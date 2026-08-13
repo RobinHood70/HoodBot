@@ -495,7 +495,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			var factory = template.Factory;
 			for (var i = 0; i < value.Count; i++)
 			{
-				if (value is ILinkNode link)
+				if (value[i] is ILinkNode link)
 				{
 					var siteLink = SiteLink.FromLinkNode(this.Site, link);
 					value.RemoveAt(i);
