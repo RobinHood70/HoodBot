@@ -9,7 +9,7 @@ internal static class MetaTemplateExtensions
 	public static PageCollection GetMetaVariables(this Site site, PageModules pageModules, bool followRedirects, params string[] variables)
 	{
 		ArgumentNullException.ThrowIfNull(site);
-		VariablesInput variablesInput = new() { Variables = variables };
+		VariablesInput variablesInput = new() { Variables = variables.Length > 0 ? variables : null };
 		PageLoadOptions pageLoadOptions = new(pageModules, followRedirects);
 		pageLoadOptions.CustomPropertyInputs.Add(variablesInput);
 
