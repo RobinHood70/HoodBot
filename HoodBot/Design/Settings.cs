@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Design;
 
+using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,7 +20,7 @@ internal static class Settings
 		where T : IJsonSettings<T>, new()
 	{
 		T settingsFile = new();
-		try
+		if (File.Exists(settingsFile.FileName))
 		{
 			using var file = File.OpenText(settingsFile.FileName);
 			using JsonTextReader reader = new(file);
@@ -31,9 +32,11 @@ internal static class Settings
 
 			settingsFile.FromJson(json);
 		}
-		catch (FileNotFoundException) when (!mustExist)
+		else if (mustExist)
 		{
-			// Do nothing
+			var msg = $"{settingsFile.FileName} not found!";
+			Debug.WriteLine(msg); // In case this occurs in an initializer, this makes it easier to debug.
+			throw new FileNotFoundException(msg, settingsFile.FileName);
 		}
 
 		return settingsFile;
@@ -43,6 +46,12 @@ internal static class Settings
 		where T : IJsonSettings<T>, new()
 	{
 		var json = settings.ToJson();
+		var path = Path.GetDirectoryName(settings.FileName);
+		if (!string.IsNullOrEmpty(path))
+		{
+			Directory.CreateDirectory(path);
+		}
+
 		using var textWriter = File.CreateText(settings.FileName);
 		using JsonTextWriter writer = new(textWriter)
 		{
@@ -53,4 +62,4 @@ internal static class Settings
 		json.WriteTo(writer);
 	}
 }
-#endregion
+	#endregion
