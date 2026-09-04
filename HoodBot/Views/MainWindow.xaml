@@ -13,6 +13,7 @@
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
 	Width="900"
 	Height="700"
+	Icon="/Assets/HoodBot.ico"
 	DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">

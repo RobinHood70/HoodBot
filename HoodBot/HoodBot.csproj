@@ -4,7 +4,7 @@
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
 		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
+		<ApplicationIcon>Assets\HoodBot.ico</ApplicationIcon>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>latest</AnalysisLevel>
@@ -28,6 +28,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="Old Jobs\*" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Assets\HoodBot.ico" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
