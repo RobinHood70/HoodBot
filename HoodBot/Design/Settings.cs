@@ -61,5 +61,5 @@ internal static class Settings
 		};
 		json.WriteTo(writer);
 	}
-}
 	#endregion
+}
