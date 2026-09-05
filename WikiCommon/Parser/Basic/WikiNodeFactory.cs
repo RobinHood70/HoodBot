@@ -23,13 +23,24 @@ public class WikiNodeFactory : IWikiNodeFactory
 
 	#region Public Properties
 
+	/// <inheritdoc/>
+	public ICollection<string> AllowMissingEndTag { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "includeonly", "noinclude", "onlyinclude" };
+
 	/// <summary>Gets or sets the text to use when escaping equals signs.</summary>
 	/// <value>The equals sign escape text.</value>
 	public string EqualsEscape { get; set; } = "{{=}}";
 
+	/// <summary>Gets the list of tags which should be parsed as ignored ITagNodes (i.e., where there's valid wikitext inside of them).</summary>
+	/// <value>The tags.</value>
+	public ICollection<string> ParsedTags { get; } = [];
+
 	/// <summary>Gets or sets the text to use when escaping pipes.</summary>
 	/// <value>The pipe escape text.</value>
 	public string PipeEscape { get; set; } = "{{Pipe}}";
+
+	/// <summary>Gets the list of tags which are not parsed into wikitext.</summary>
+	/// <value>The unparsed tags.</value>
+	public ICollection<string> UnparsedTags { get; } = ["gallery", "indicator", "nowiki", "pre"];
 	#endregion
 
 	#region Public Methods
@@ -146,7 +157,7 @@ public class WikiNodeFactory : IWikiNodeFactory
 
 	/// <inheritdoc/>
 	public IList<IWikiNode> Parse(string? text, InclusionType inclusionType, bool strictInclusion) =>
-		new WikiStack(this, text, inclusionType, strictInclusion).GetNodes();
+		new WikiStack(this, text, inclusionType, strictInclusion, 4).GetNodes();
 
 	/// <inheritdoc/>
 	public T SingleNode<T>(string? text, [CallerMemberName] string callerName = "<Unknown>")

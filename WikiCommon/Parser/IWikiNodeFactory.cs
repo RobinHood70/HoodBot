@@ -9,6 +9,18 @@ using System.Runtime.CompilerServices;
 /// <remarks>This should always be the primary point of entry for creating new nodes.</remarks>
 public interface IWikiNodeFactory
 {
+	#region Properties
+
+	/// <summary>Gets the collection of tags that do not have to be closed (at all) to function correctly.</summary>
+	ICollection<string> AllowMissingEndTag { get; }
+
+	/// <summary>Gets the collection of tags which should be parsed as ignored ITagNodes (i.e., where there's valid wikitext inside of them).</summary>
+	ICollection<string> ParsedTags { get; }
+
+	/// <summary>Gets the collection of tags which are not parsed into wikitext.</summary>
+	ICollection<string> UnparsedTags { get; }
+	#endregion
+
 	#region Methods
 
 	/// <summary>Creates a new instance of an <see cref="ArgumentNode"/> class.</summary>

@@ -44,7 +44,18 @@ public class SiteParser : WikiNodeCollection, ITitle
 	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IgnoreNode"/>s (<see langword="false"/>).</param>
 	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion)
-		: base(WikiNodeFactory.DefaultInstance)
+		: this(page, text, inclusionType, strictInclusion, WikiNodeFactory.DefaultInstance)
+	{
+	}
+
+	/// <summary>Initializes a new instance of the <see cref="SiteParser"/> class.</summary>
+	/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
+	/// <param name="text">The text to parse. Null values will be treated as empty strings.</param>
+	/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
+	/// <param name="strictInclusion">Whether unparsed text should be omitted altogether (<see langword="true"/>) or included as <see cref="IgnoreNode"/>s (<see langword="false"/>).</param>
+	/// <param name="factory">The factory to use for further parsing. This allows for custom tag parsing options.</param>
+	public SiteParser(Page page, string? text, InclusionType inclusionType, bool strictInclusion, IWikiNodeFactory factory)
+		: base(factory)
 	{
 		ArgumentNullException.ThrowIfNull(page);
 		this.Page = page;

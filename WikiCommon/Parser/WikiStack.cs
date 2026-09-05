@@ -27,16 +27,11 @@ public enum InclusionType
 public sealed class WikiStack
 {
 	#region Private Constants
-	private const int StartSize = 4;
 	private const string IncludeOnlyTag = "includeonly";
 	private const string NoIncludeTag = "noinclude";
 	private const string OnlyIncludeTag = "onlyinclude";
 	private const string OnlyIncludeTagClose = "</" + OnlyIncludeTag + ">";
 	private const string OnlyIncludeTagOpen = "<" + OnlyIncludeTag + ">";
-	#endregion
-
-	#region Static Fields
-	private static readonly HashSet<string> AllowMissingEndTag = new(StringComparer.OrdinalIgnoreCase) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
 	#endregion
 
 	#region Fields
@@ -59,14 +54,15 @@ public sealed class WikiStack
 	/// <param name="factory">The <see cref="IWikiNodeFactory">factory</see> to use for creating nodes.</param>
 	/// <param name="text">The text to work with. Null values will be treated as empty strings.</param>
 	/// <param name="inclusionType">The inclusion type for the text.</param>
-	/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-	public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion)
+	/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>. Does nothing in Raw mode.</param>
+	/// <param name="capacity">The number of elements that the stack can initially store.</param>
+	public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion, int capacity)
 	{
 		ArgumentNullException.ThrowIfNull(factory);
 		this.Factory = factory;
 
 		// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
-		this.array = new StackElement[StartSize];
+		this.array = new StackElement[capacity];
 		this.Top = new RootElement(this);
 		this.array[0] = this.Top;
 		this.count = 1;
@@ -75,8 +71,8 @@ public sealed class WikiStack
 		this.Text = text;
 		this.textLength = text.Length;
 
-		this.ignoredTags.UnionWith(ParsedTags);
-		HashSet<string> allTags = new(UnparsedTags, StringComparer.Ordinal);
+		this.ignoredTags.UnionWith(factory.ParsedTags);
+		HashSet<string> allTags = new(factory.UnparsedTags, StringComparer.Ordinal);
 		switch (inclusionType)
 		{
 			case InclusionType.Transcluded:
@@ -122,17 +118,6 @@ public sealed class WikiStack
 		this.tagsRegex = new Regex(@"\G(" + string.Join('|', regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		this.Preprocess();
 	}
-	#endregion
-
-	#region Public Static Properties
-
-	/// <summary>Gets the list of tags which should be parsed as ignored ITagNodes (i.e., where there's valid wikitext inside of them).</summary>
-	/// <value>The tags.</value>
-	public static IList<string> ParsedTags { get; } = [];
-
-	/// <summary>Gets the list of tags which are not parsed into wikitext.</summary>
-	/// <value>The unparsed tags.</value>
-	public static IList<string> UnparsedTags { get; } = ["pre", "nowiki", "gallery", "indicator"];
 	#endregion
 
 	#region Internal Properties
@@ -405,7 +390,7 @@ public sealed class WikiStack
 				tagClose = match.Value;
 				this.Index = match.Index + match.Length;
 			}
-			else if (AllowMissingEndTag.Contains(tagOpen))
+			else if (this.Factory.AllowMissingEndTag.Contains(tagOpen))
 			{
 				inner = this.Text[(tagEndPos + 1)..];
 				tagClose = string.Empty;
