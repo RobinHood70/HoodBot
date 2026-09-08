@@ -39,9 +39,13 @@ public abstract class PropListModule<TInput, TOutput, TItem>(WikiAbstractionLaye
 				this.Output.Add(item);
 			}
 
-			if (this.ItemsRemaining != int.MaxValue && --this.ItemsRemaining < 0)
+			if (this.ItemsRemaining != int.MaxValue)
 			{
-				break;
+				this.ItemsRemaining--;
+				if (this.ItemsRemaining < 0)
+				{
+					break;
+				}
 			}
 		}
 	}
