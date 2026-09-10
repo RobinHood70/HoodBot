@@ -578,6 +578,11 @@ public partial class Site : IMessageSource
 		EnableParserTitle = context?.FullPageName(),
 	});
 
+	/// <summary>Gets the data associated with a query page.</summary>
+	/// <param name="title">The title of the query page.</param>
+	/// <returns>The query page data for each title.</returns>
+	public TitleDictionary<QueryPageData> LoadQueryPage(string title) => this.LoadQueryPage(title, null);
+
 	/// <summary>Gets all recent changes.</summary>
 	/// <returns>A read-only list of all recent changes.</returns>
 	public IReadOnlyList<RecentChange> LoadRecentChanges() => this.LoadRecentChanges(new RecentChangesOptions());
@@ -1071,6 +1076,32 @@ public partial class Site : IMessageSource
 	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is LinkNode linkNode
 		? TitleFactory.FromTitleNode(this, linkNode).ToFullTitle()
 		: null;
+
+	/// <summary>Gets the data associated with a query page.</summary>
+	/// <param name="page">The title of the query page.</param>
+	/// <param name="parameters">Parameters as a collection of key-value pairs.</param>
+	/// <returns>The query page data for each title.</returns>
+	/// <remarks>When sort values are not unique, query pages return the subset of results with the same sort value in random order, usually repeating or omitting results in that group. This is a flaw in the query page API that has never been addressed. Query pages should therefore not be relied upon for accurate results in this kind of scenario.</remarks>
+	public virtual TitleDictionary<QueryPageData> LoadQueryPage(string page, IReadOnlyDictionary<string, string>? parameters)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(page);
+
+		var retval = new TitleDictionary<QueryPageData>();
+		var queryPageInput = new QueryPageInput(page)
+		{
+			Parameters = parameters
+		};
+
+		var result = this.AbstractionLayer.QueryPage(queryPageInput);
+		foreach (var item in result)
+		{
+			var title = TitleFactory.FromValidated(this, item.Title);
+			var data = new QueryPageData(item);
+			retval[title] = data; // See remarks section, above, for why we assign rather than add.
+		}
+
+		return retval;
+	}
 
 	/// <summary>Gets all page property names in use on the wiki.</summary>
 	/// <returns>All page property names on the wiki.</returns>
