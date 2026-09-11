@@ -52,6 +52,7 @@ public class Request : KeyedCollection<string, Parameter>
 
 	/// <summary>Gets or sets the prefix to prepend to each parameter name.</summary>
 	/// <value>The prefix. This can be null or empty if no prefix is required.</value>
+	// TODO: Get rid of this, it's fugly. It's annoying, but probably clearer and less error-prone to just append the prefix where necessary directly in the calling code.
 	public string Prefix { get; set; } = string.Empty;
 
 	/// <summary>Gets a value indicating whether the wiki supports \x1F unit separators.</summary>
