@@ -1,4 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -59,6 +60,8 @@ internal class TemplateUsage : WikiJob
 
 		this.StatusWriteLine("Loading pages");
 		var results = PageCollection.Unlimited(this.Site);
+		//// results.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.TamrielRebuilt, UespNamespaces.ProjectTamriel);
+
 		if (this.checkAllTemplates)
 		{
 			results.GetNamespace(MediaWikiNamespaces.Template);
