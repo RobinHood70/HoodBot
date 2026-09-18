@@ -240,8 +240,8 @@ internal static class JTokenLogEvent
 		private void ExtraDataMove()
 		{
 			this.Result.Add("suppressredirect", this.parms["suppressredirect"] != null);
-			this.Result.Add("ns", (int?)(this.parms["target_ns"] ?? this.parms["new_ns"])); // MoveLog ?? RC
-			this.Result.Add("title", (string?)(this.parms["target_title"] ?? this.parms["new_title"]));
+			this.Result.Add("target_ns", (int?)(this.parms["target_ns"] ?? this.parms["new_ns"])); // MoveLog ?? RC
+			this.Result.Add("target_title", (string?)(this.parms["target_title"] ?? this.parms["new_title"]));
 		}
 
 		private void ExtraDataNewUsers()
