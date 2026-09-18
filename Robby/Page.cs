@@ -32,6 +32,7 @@ public class Page : ITitle
 	private readonly List<Revision> revisions = [];
 	private readonly List<Title> templates = [];
 	private bool? isRedirect;
+	private string text = string.Empty;
 	#endregion
 
 	#region Constructors
@@ -45,7 +46,6 @@ public class Page : ITitle
 		// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not quite sure how that would work and it's not the priority right now.
 		this.LoadOptions = options;
 		this.Title = title;
-		this.Text = string.Empty;
 		switch (apiItem)
 		{
 			case null:
@@ -247,10 +247,11 @@ public class Page : ITitle
 	[AllowNull]
 	public string Text
 	{
-		get;
+		// Do not convert this to a field-backed property or it can cause isRedirect to be ignored.
+		get => this.text;
 		set
 		{
-			field = value ?? string.Empty;
+			this.text = value ?? string.Empty;
 			this.isRedirect = null;
 		}
 	}
@@ -485,7 +486,7 @@ public class Page : ITitle
 			this.IsNew = info.Flags.HasAnyFlag(PageInfoFlags.New);
 			this.isRedirect = info.Flags.HasAnyFlag(PageInfoFlags.Redirect);
 			this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
-			this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
+			this.text = this.CurrentRevisionId == 0 ? string.Empty : this.CurrentRevision?.Text ?? string.Empty;
 			foreach (var protItem in pageItem.Info.Protections)
 			{
 				protections.Add(protItem.Type, new ProtectionEntry(protItem));
@@ -500,7 +501,7 @@ public class Page : ITitle
 			this.isRedirect = false;
 			protections.Clear();
 			this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-			this.Text = null;
+			this.text = string.Empty;
 		}
 	}
 
