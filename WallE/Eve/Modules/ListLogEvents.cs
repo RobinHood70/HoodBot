@@ -51,8 +51,16 @@ internal sealed class ListLogEvents(WikiAbstractionLayer wal, LogEventsInput inp
 	{
 		ArgumentNullException.ThrowIfNull(input);
 		ArgumentNullException.ThrowIfNull(request);
+		var prop = input.Properties;
+		if (prop.HasAnyFlag(LogEventsProperties.Details))
+		{
+			// Type is necessary to figure out how to handle details, so ensure that it's set.
+			// CONSIDER: Can we just use the results to figure out what we've got and ignore the type/action?
+			prop |= LogEventsProperties.Type;
+		}
+
 		request
-			.AddFlags("prop", input.Properties)
+			.AddFlags("prop", prop)
 			.AddIfNotNull("type", input.Type)
 			.AddIfNotNull("action", input.Action)
 			.Add("start", input.Start)
