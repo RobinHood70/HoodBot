@@ -599,21 +599,19 @@ internal sealed class UespProtectPages : EditJob
 		return retval;
 	}
 
-	private ProtectionLevel ProtectionFromPage(Page protTitle, string protectionType)
+	private ProtectionLevel ProtectionFromPage(Page page, string protectionType)
 	{
-		if (!protTitle.Protections.TryGetValue(protectionType, out var protection))
+		var protLevel = page.ProtectionLevel(protectionType);
+		switch (protLevel)
 		{
-			return ProtectionLevel.None;
-		}
-
-		switch (protection.Level)
-		{
+			case null:
+				return ProtectionLevel.None;
 			case "sysop":
 				return ProtectionLevel.Full;
 			case "autoconfirmed":
 				return ProtectionLevel.Semi;
 			default:
-				this.StatusWriteLine("Unknown protection level: " + protection.Level);
+				this.StatusWriteLine("Unknown protection level: " + protLevel);
 				return ProtectionLevel.Unknown;
 		}
 	}

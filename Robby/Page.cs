@@ -327,6 +327,13 @@ public class Page : ITitle
 	/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>
 	public bool ModuleLoaded(PageModules module) => this.LoadOptions.Modules.HasAnyFlag(module);
 
+	/// <summary>Convenience function to get a specific protection level as a string.</summary>
+	/// <param name="protectionType">The protection type to search for.</param>
+	/// <returns>The protection level, or <see langword="null"/> if the page has no protection for that type.</returns>
+	public string? ProtectionLevel(string protectionType) => this.Protections.TryGetValue(protectionType, out var protection)
+		? protection.Level
+		: null;
+
 	/// <summary>Saves the page.</summary>
 	/// <param name="editSummary">The edit summary.</param>
 	/// <param name="isMinor">Whether the edit should be marked as minor.</param>
