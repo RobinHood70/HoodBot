@@ -600,15 +600,15 @@ public class SiteLink : ILinkTitle
 	}
 
 	/// <summary>Copies values from the link into a <see cref="LinkNode"/>.</summary>
-	/// <param name="node">The node to update.</param>
-	public void UpdateLinkNode(LinkNode node)
+	/// <param name="link">The node to update.</param>
+	public void UpdateLinkNode(LinkNode link)
 	{
-		ArgumentNullException.ThrowIfNull(node);
+		ArgumentNullException.ThrowIfNull(link);
 		var thisNode = this.ToLinkNode();
-		node.TitleNodes.Clear();
-		node.TitleNodes.AddRange(thisNode.TitleNodes);
-		node.Text.Clear();
-		node.Text.AddRange(thisNode.Text);
+		link.TitleNodes.Clear();
+		link.TitleNodes.AddRange(thisNode.TitleNodes);
+		link.Text.Clear();
+		link.Text.AddRange(thisNode.Text);
 	}
 
 	/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
