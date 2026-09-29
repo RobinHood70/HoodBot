@@ -213,6 +213,9 @@
   <data name="UserName" xml:space="preserve">
     <value>Nom de l'utilisateur  :</value>
   </data>
+  <data name="UserNameNotSet" xml:space="preserve">
+    <value>Vous devez saisir un nom d'utilisateur, soit dans les informations enregistrées du wiki, soit dans le formulaire principal.</value>
+  </data>
   <data name="Wiki" xml:space="preserve">
     <value>Wiki:</value>
   </data>
@@ -233,5 +236,17 @@
   </data>
   <data name="LogPageLead" xml:space="preserve">
     <value>Il s'agit du journal d'activité de HoodBot. Il permet aux utilisateurs de savoir ce que le bot est en train de faire, ainsi que de conserver une liste de ce qu'il a fait précédemment au cas où une tâche spécifique devrait être entièrement annulée.</value>
+  </data>
+  <data name="Results" xml:space="preserve">
+    <value>Résultats</value>
+  </data>
+  <data name="BotResults" xml:space="preserve">
+    <value>Résultats fournis par le bot</value>
+  </data>
+  <data name="JobStarted" xml:space="preserve">
+    <value>Tâche lancée</value>
+  </data>
+  <data name="JobFinished" xml:space="preserve">
+    <value>Tâche terminée</value>
   </data>
 </root>

@@ -115,6 +115,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bot Results.
+        /// </summary>
+        public static string BotResults {
+            get {
+                return ResourceManager.GetString("BotResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Current Task.
         /// </summary>
         public static string CurrentTask {
@@ -214,6 +223,24 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Job Finished.
+        /// </summary>
+        public static string JobFinished {
+            get {
+                return ResourceManager.GetString("JobFinished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job Started.
+        /// </summary>
+        public static string JobStarted {
+            get {
+                return ResourceManager.GetString("JobStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Log Page:.
         /// </summary>
         public static string LogPage {
@@ -300,6 +327,15 @@ namespace RobinHood70.HoodBot.Properties {
         public static string RequiredInfo {
             get {
                 return ResourceManager.GetString("RequiredInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Results.
+        /// </summary>
+        public static string Results {
+            get {
+                return ResourceManager.GetString("Results", resourceCulture);
             }
         }
         
