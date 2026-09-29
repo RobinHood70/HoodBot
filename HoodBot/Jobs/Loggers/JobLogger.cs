@@ -1,7 +1,19 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Loggers;
 
-public abstract class JobLogger
+using System.Globalization;
+using System.Resources;
+using RobinHood70.HoodBot.Properties;
+
+public abstract class JobLogger(CultureInfo? culture)
 {
+	#region Public Properties
+	public CultureInfo Culture { get; } = culture ?? CultureInfo.CurrentUICulture;
+	#endregion
+
+	#region Protected Properties
+	protected ResourceManager ResourceManager { get; } = new ResourceManager(typeof(Resources));
+	#endregion
+
 	#region Public Abstract Methods
 
 	/// <summary>Adds a new entry to the log.</summary>

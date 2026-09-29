@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design;
 
 using System;
+using System.Globalization;
 using System.IO;
 
 /// <summary>Implements the <see cref="ResultHandler" /> class and stores results in a local file.</summary>
@@ -12,8 +13,10 @@ public class FileResultHandler : ResultHandler
 	#endregion
 
 	/// <summary>Initializes a new instance of the <see cref="FileResultHandler"/> class.</summary>
+	/// <param name="culture">The culture to use for any text.</param>
 	/// <param name="fileName">The file name to save to. Will be overwritten if it exists.</param>
-	public FileResultHandler(string fileName)
+	public FileResultHandler(CultureInfo culture, string fileName)
+		: base(culture)
 	{
 		ArgumentNullException.ThrowIfNull(fileName);
 		this.fileName = fileName;

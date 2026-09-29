@@ -3,7 +3,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Resources;
 using RobinHood70.CommonCode;
 using RobinHood70.HoodBot.Properties;
 using RobinHood70.Robby;
@@ -18,11 +17,7 @@ public class PageJobLogger : JobLogger
 	#endregion
 
 	#region Fields
-	private readonly string clearStatus;
-	private readonly string currentTaskTitle;
-	private readonly string logPageLead;
 	private readonly Title logTitle;
-	private readonly string taskLogTitle;
 	private DateTime? end;
 	private LogInfo? logInfo;
 	private Page? logPage;
@@ -32,18 +27,17 @@ public class PageJobLogger : JobLogger
 
 	#region Constructors
 	public PageJobLogger(Title logTitle)
+		: base(logTitle?.Site.Culture)
 	{
 		// For now, log page translations are stored in HoodBot's resource files. If this becomes more complex in the future, or uses more languages than HoodBot itself supports (currently English and French), translations should be moved to their own resx files. All translations are here in the constructor.
 		ArgumentNullException.ThrowIfNull(logTitle);
-		var rm = new ResourceManager(typeof(Resources));
-		var culture = logTitle.Site.Culture;
-		this.clearStatus = rm.GetString("TaskNone", culture) ?? "None";
-		this.currentTaskTitle = rm.GetString("CurrentTask", culture) ?? "Current Task";
-		this.logPageLead = rm.GetString("LogPageLead", culture) ?? string.Empty;
-		this.taskLogTitle = rm.GetString("TaskLog", culture) ?? "Task Log";
 		this.logTitle = logTitle;
-		this.status = this.clearStatus;
+		this.status = this.NoneText;
 	}
+	#endregion
+
+	#region Private Properties
+	private string NoneText => this.ResourceManager.GetString("TaskNone", this.Culture) ?? "None";
 	#endregion
 
 	#region Public Override Methods
@@ -55,14 +49,16 @@ public class PageJobLogger : JobLogger
 		this.end = null;
 		this.status = info.Title;
 		this.UpdateEntry();
-		this.SaveLogPage("Job Started", this.UpdateEntry);
+		var logText = this.ResourceManager.GetString("JobStarted", this.Culture) ?? "Job Started";
+		this.SaveLogPage(logText, this.UpdateEntry);
 	}
 
 	public override void CloseLog()
 	{
-		if (this.logPage != null)
+		if (this.logPage is not null)
 		{
-			this.SaveLogPage("Job Finished", this.EndLogEntry);
+			var logText = this.ResourceManager.GetString("JobFinished", this.Culture) ?? "JobFinished";
+			this.SaveLogPage(logText, this.EndLogEntry);
 		}
 
 		this.start = null;
@@ -72,7 +68,7 @@ public class PageJobLogger : JobLogger
 	public override void EndLogEntry()
 	{
 		this.end = DateTime.UtcNow;
-		this.status = this.clearStatus;
+		this.status = this.NoneText;
 		this.UpdateEntry();
 	}
 	#endregion
@@ -154,20 +150,23 @@ public class PageJobLogger : JobLogger
 	{
 		Debug.Assert(this.logInfo != null, "LogInfo is null.");
 		this.logPage ??= this.logTitle.Load();
+		var currentTaskTitle = this.ResourceManager.GetString("CurrentTask", this.Culture) ?? "Current Task";
+		var taskLogTitle = this.ResourceManager.GetString("TaskLog", this.Culture) ?? "Task Log";
 		if (this.logPage.Text.Length == 0)
 		{
+			var logPageLead = this.ResourceManager.GetString("LogPageLead", this.Culture) ?? string.Empty;
 			this.logPage.Text =
 				"<cleanspace>\n" +
 				"{{#local:hidetime|{{#expr:({{#time:Y}}*12+{{#time:m}}-{{#arg:months|1}})-1}}}}\n" +
 				"{{#local:year|{{#expr:trunc(({{{hidetime}}})/12)}}}}\n" +
 				"{{#local:month|{{padleft:{{#expr:({{{hidetime}}} mod 12)+1}}|2}}}}\n" +
 				"{{#local:hidetime|{{{year}}}{{{month}}}}}\n" +
-				"</cleanspace>" + this.logPageLead + '\n' +
+				"</cleanspace>" + logPageLead + '\n' +
 				"\n" +
-				"== " + this.currentTaskTitle + " ==\n" +
+				"== " + currentTaskTitle + " ==\n" +
 				this.status + ".\n" +
 				"\n" +
-				"== " + this.taskLogTitle + " ==\n" +
+				"== " + taskLogTitle + " ==\n" +
 				"{| class=\"center\" style=\"white-space:nowrap; border-collapse:collapse;\"\n" +
 				"|}";
 		}
@@ -175,8 +174,8 @@ public class PageJobLogger : JobLogger
 		SiteParser parser = new(this.logPage);
 		var factory = parser.Factory;
 		var sections = parser.ToSections(2);
-		var currentTask = sections.FindFirst(this.currentTaskTitle) ?? throw BadLogPage;
-		var taskLog = sections.FindFirst(this.taskLogTitle) ?? throw BadLogPage;
+		var currentTask = sections.FindFirst(currentTaskTitle) ?? throw BadLogPage;
+		var taskLog = sections.FindFirst(taskLogTitle) ?? throw BadLogPage;
 		var sameTaskText = UpdateCurrentStatus(currentTask, this.status);
 		var firstEntry = taskLog.Content.IndexOf<TemplateNode>(template => template.GetTitle(parser.Site).PageNameEquals("/Entry"));
 		if (firstEntry != -1)

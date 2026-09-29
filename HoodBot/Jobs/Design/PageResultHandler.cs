@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design;
 
+using System;
 using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 
@@ -18,10 +19,12 @@ public class PageResultHandler : ResultHandler
 	/// <param name="title">The title of the results page.</param>
 	/// <param name="saveAsBot">Whether the edit should be flagged as a bot edit when the results are saved.</param>
 	public PageResultHandler(Title title, bool saveAsBot)
+		: base(title?.Site.Culture)
 	{
+		ArgumentNullException.ThrowIfNull(title);
 		this.title = title;
 		this.saveAsBot = saveAsBot;
-		this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);
+		this.DefaultText = this.ResourceManager.GetString("Results", this.Culture);
 	}
 	#endregion
 

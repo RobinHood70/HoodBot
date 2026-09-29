@@ -23,16 +23,17 @@ public class RelinkCollectibles : MovePagesJob
 	#region Constructors
 	[JobInfo("Relink ESO Collectibles", "ESO")]
 	public RelinkCollectibles(JobManager jobManager)
-			: base(jobManager, false)
+			: base(jobManager, false, false, false)
 	{
 		this.MoveAction = MoveAction.None;
-		this.EditSummaryMove = "Match page name to item";
 		this.AllowFromEqualsTo = true; // Replacements are dummy replacements to trigger GetToLink();
 		this.esoTitles = new TitleCollection(this.Site);
 	}
 	#endregion
 
 	#region Protected Override Methods
+
+	protected override string GetEditSummaryMove(Title from, Title to) => "Match page name to item";
 
 	protected override SiteLink GetToLink(Page page, bool isRedirectTarget, SiteLink from, Title to)
 	{

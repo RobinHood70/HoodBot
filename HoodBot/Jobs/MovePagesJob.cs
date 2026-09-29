@@ -60,13 +60,14 @@ public abstract class MovePagesJob : EditJob
 {
 	#region Fields
 	private readonly SortedDictionary<Title, DetailedActions> actions = new(TitleComparer.Instance);
+	private readonly bool allowOnlyTemplateDocs;
 	private readonly TitleDictionary<Title> moves = [];
 	private bool isRedirectLink;
 	private string? logDetails;
 	#endregion
 
 	#region Constructors
-	protected MovePagesJob(JobManager jobManager, bool updateUserSpace)
+	protected MovePagesJob(JobManager jobManager, bool updateUserSpace, bool updateTemplateDocs, bool updateAllTemplateSpace)
 		: base(jobManager)
 	{
 		this.ParameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
@@ -74,6 +75,13 @@ public abstract class MovePagesJob : EditJob
 		{
 			this.Pages.NamespaceLimitations.Remove(MediaWikiNamespaces.User);
 		}
+
+		if (updateAllTemplateSpace || updateTemplateDocs)
+		{
+			this.Pages.NamespaceLimitations.Remove(MediaWikiNamespaces.Template);
+		}
+
+		this.allowOnlyTemplateDocs = updateTemplateDocs;
 	}
 	#endregion
 
@@ -136,14 +144,6 @@ public abstract class MovePagesJob : EditJob
 	protected bool AllowFromEqualsTo { get; set; }
 
 	protected bool DeleteOnSuccess { get; set; } = true;
-
-	protected string EditSummaryEditMovedPage { get; set; } = "Update moved page text";
-
-	protected string EditSummaryMove { get; set; } = "Rename";
-
-	protected string EditSummaryPropose { get; set; } = "Propose for deletion";
-
-	protected string EditSummaryUpdateLinks { get; set; } = "Update links after page move";
 
 	protected FollowUpActions FollowUpActions { get; set; } = FollowUpActions.Default;
 
@@ -210,6 +210,14 @@ public abstract class MovePagesJob : EditJob
 		this.actions.Add(from, new DetailedActions(initialActions, reason));
 	}
 
+	protected virtual string GetEditSummaryEditMovedPage(Page page) => "Update moved page text";
+
+	protected virtual string GetEditSummaryMove(Title from, Title to) => "Rename";
+
+	protected virtual string GetEditSummaryPropose(Page page) => "Propose for deletion";
+
+	protected virtual string GetEditSummaryUpdateLinks(Page page) => "Update links after page move";
+
 	// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optional, to be called only when necessary.")]
 	protected void LoadReplacementsFromFile(string fileName, ReplacementActions actions)
 	{
@@ -235,7 +243,7 @@ public abstract class MovePagesJob : EditJob
 		}
 	}
 
-	protected override string GetEditSummary(Page page) => this.EditSummaryUpdateLinks;
+	protected override string GetEditSummary(Page page) => this.GetEditSummaryUpdateLinks(page);
 
 	protected override void LoadPages()
 	{
@@ -282,7 +290,7 @@ public abstract class MovePagesJob : EditJob
 			this.MovePages();
 		}
 
-		base.Main();
+		this.SavePages();
 		if (this.FollowUpActions.HasAnyFlag(FollowUpActions.CheckLinksRemaining))
 		{
 			this.CheckRemaining();
@@ -463,7 +471,10 @@ public abstract class MovePagesJob : EditJob
 			titles.Remove(title);
 		}
 
-		FilterTemplatesExceptDocs(titles);
+		if (this.allowOnlyTemplateDocs)
+		{
+			FilterTemplatesExceptDocs(titles);
+		}
 	}
 
 	protected virtual IReadOnlyDictionary<Title, TitleCollection> GetCategoryMembers(PageCollection fromPages)
@@ -560,22 +571,22 @@ public abstract class MovePagesJob : EditJob
 		this.ResetProgress(moveCount);
 		foreach (var action in this.actions)
 		{
-			var to = this.moves[action.Key];
-			var fromNs = action.Key.Namespace;
+			var from = action.Key;
+			var to = this.moves[from];
 			var moveTalkPage =
-				!fromNs.IsTalkSpace &&
+				!from.Namespace.IsTalkSpace &&
 				this.MoveExtra.HasAnyFlag(MoveOptions.MoveTalkPage);
 			var moveSubPages =
-				fromNs.AllowsSubpages &&
+				from.Namespace.AllowsSubpages &&
 				this.MoveExtra.HasAnyFlag(MoveOptions.MoveSubPages);
 			this.Site.Move(
-				action.Key,
+				from,
 				to,
-				this.EditSummaryMove,
+				this.GetEditSummaryMove(from, to),
 				moveTalkPage,
 				moveSubPages,
 				this.SuppressRedirects);
-			if (editPages.TryGetValue(action.Key, out var editPage))
+			if (editPages.TryGetValue(from, out var editPage))
 			{
 				var actionValue = action.Value;
 				var parser = new SiteParser(editPage);
@@ -583,9 +594,9 @@ public abstract class MovePagesJob : EditJob
 				string? editSummary = null;
 				if (actionValue.HasAction(ReplacementActions.Edit))
 				{
-					editSummary = this.EditSummaryEditMovedPage;
+					editSummary = this.GetEditSummaryEditMovedPage(editPage);
 					isMinor = this.GetIsMinorEdit(editPage);
-					this.CustomEdit(parser, action.Key);
+					this.CustomEdit(parser, from);
 				}
 
 				if (actionValue.HasAction(ReplacementActions.Propose))
@@ -593,7 +604,7 @@ public abstract class MovePagesJob : EditJob
 					var reason = action.Value.Reason;
 					Globals.ThrowIfNull(reason, nameof(action), nameof(action.Value), nameof(action.Value.Reason));
 					ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason + "}}");
-					editSummary = this.EditSummaryPropose;
+					editSummary = this.GetEditSummaryPropose(editPage);
 					isMinor = false;
 				}
 
@@ -747,16 +758,16 @@ public abstract class MovePagesJob : EditJob
 		return retval;
 	}
 
-	protected virtual void UpdateLinkNode(Page page, LinkNode node, bool isRedirectTarget)
+	protected virtual void UpdateLinkNode(Page page, LinkNode link, bool isRedirectTarget)
 	{
 		ArgumentNullException.ThrowIfNull(page);
-		ArgumentNullException.ThrowIfNull(node);
-		var from = SiteLink.FromLinkNode(this.Site, node);
+		ArgumentNullException.ThrowIfNull(link);
+		var from = SiteLink.FromLinkNode(this.Site, link);
 		if (this.LinkUpdateMatch(from) is Title to)
 		{
 			this
 				.GetToLink(page, isRedirectTarget, from, to)
-				.UpdateLinkNode(node);
+				.UpdateLinkNode(link);
 		}
 
 		if (from.Title.Namespace == MediaWikiNamespaces.Media)
@@ -766,7 +777,7 @@ public abstract class MovePagesJob : EditJob
 			{
 				this
 					.GetToLink(page, isRedirectTarget, from, TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Media], toMedia.PageName))
-					.UpdateLinkNode(node);
+					.UpdateLinkNode(link);
 			}
 		}
 	}
@@ -779,6 +790,7 @@ public abstract class MovePagesJob : EditJob
 		if (addCaption &&
 			toLink.Text is null &&
 			from.OriginalTitle is not null &&
+			from.Title.Namespace != MediaWikiNamespaces.Category &&
 			this.FollowUpActions.HasAnyFlag(FollowUpActions.RetainDirectLinkText))
 		{
 			// If there's no link text then we want to preserve the previous display text for any caption-less links by adding a new caption. Logic further up sets addCaption appropriately so this won't occur for a redirect target or in galleries.
@@ -940,6 +952,7 @@ public abstract class MovePagesJob : EditJob
 	private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<Title, TitleCollection> categoryMembers)
 	{
 		TitleCollection backlinkTitles = new(this.Site);
+		backlinkTitles.SetLimitations(this.Pages.LimitationType, this.Pages.NamespaceLimitations); // Follow this.Pages limitations
 		if (this.FollowUpActions.HasAnyFlag(FollowUpActions.AffectsBacklinks))
 		{
 			GetBacklinkTitles(fromPages, backlinkTitles);

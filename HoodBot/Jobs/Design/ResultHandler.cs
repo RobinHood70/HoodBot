@@ -14,18 +14,19 @@ public abstract class ResultHandler
 	#endregion
 
 	#region Constructors
-	protected ResultHandler()
+
+	/// <summary>Initializes a new instance of the <see cref="ResultHandler"/> class.</summary>
+	/// <param name="culture">The culture to use for any text.</param>
+	protected ResultHandler(CultureInfo? culture)
 	{
+		this.Culture = culture ?? CultureInfo.CurrentUICulture;
 		this.DefaultText = this.ResourceManager.GetString("BotResults", this.Culture) ?? "Bot Results";
 		this.Description = this.DefaultText;
 	}
 	#endregion
 
 	#region Public Properties
-
-	/// <summary>Gets or sets the culture, which controls the language used for the class.</summary>
-	/// <value>The culture.</value>
-	public CultureInfo Culture { get; set; } = CultureInfo.CurrentUICulture;
+	public CultureInfo Culture { get; }
 
 	/// <summary>Gets or sets the default text for the <see cref="Description"/>.</summary>
 	/// <value>The default text for the <see cref="Description"/>.</value>
