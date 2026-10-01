@@ -46,7 +46,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 	#region Protected Override Methods
 	protected override void AfterLoadPages()
 	{
-		if (false && this.warnings.Count > 0)
+		if (this.warnings.Count > 0)
 		{
 			this.warnings.Sort(StringComparer.Ordinal);
 			this.WriteLine("{| class=\"wikitable\"");
@@ -58,8 +58,7 @@ internal sealed partial class UpdateFromPeoplePage : ParsedPageJob
 			}
 
 			this.WriteLine("|}");
-			this.Results.Save();
-			this.Results.Clear();
+			this.Results?.Save();
 		}
 	}
 
