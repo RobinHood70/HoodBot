@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using RobinHood70.CommonCode;
@@ -26,7 +25,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		SELECT id, name, nickname, description, categoryName, subCategoryName
 		FROM collectibles
 		WHERE
-			((categoryName IN ('Appearance', 'Customized Actions', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Tools') AND referenceId != 0) OR
+			((categoryName IN ('Appearance', 'Customized Actions', 'Emotes', 'Mementos', 'Mounts', 'Non-Combat Pets', 'Tools') AND referenceId != 0) OR
 			(categoryName = 'Allies' AND subCategoryName != 'Companions') OR
 			(categoryName = 'Furnishings' AND subCategoryName = 'Houseguests') OR
 			(categoryName = 'Upgrade')) OR
@@ -97,15 +96,31 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		var pages = site.GetMetaVariables(PageModules.None, false, "id");
 		pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 		var untracked = new TitleCollection(this.Site);
+		var dupes = new Dictionary<long, Title>();
+		var warnings = new SortedSet<string>(StringComparer.Ordinal);
 		foreach (var page in pages)
 		{
 			var variables = (VariablesPageModule)page.Custom[VariablesPageModule.PropertyName];
 			var idText = variables.GetVariable("id");
 			if (!long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
 			{
-				Debug.WriteLine($"Invalid id on page {page.Title}");
+				warnings.Add($"* Invalid id on page {page.Title}");
+				continue;
 			}
-			else if (this.allCollectibles.Remove(id, out var item))
+
+			if (!dupes.TryAdd(id, page.Title))
+			{
+				warnings.Add($"* Duplicate IDs on {dupes[id]} and {page.Title}.");
+			}
+
+			if (this.allCollectibles.TryGetValue(id, out var dbCollectible) &&
+				!dbCollectible.Name.OrdinalEquals(page.Title.PageName) &&
+				!dbCollectible.Name.OrdinalEquals(page.Title.LabelName()))
+			{
+				warnings.Add($"* Page name on wiki [[{page.Title}]] does not match database name {dbCollectible.Name}");
+			}
+
+			if (this.allCollectibles.Remove(id, out var item))
 			{
 				retval.Add(page.Title, item);
 			}
@@ -119,15 +134,17 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 		foreach (var page in untrackedPages)
 		{
 			var parser = new SiteParser(page);
-			var text = $"Page found on wiki but not in collectibles: {page.Title}";
+			var text = $"* Page found on wiki but not in collectibles: {page.Title}";
 			if (parser.FindTemplate(TemplateName) is TemplateNode template)
 			{
-				text += " -> " + template.GetValue("collectibletype") + ", " + template.GetValue("type");
+				text += " -> " + template.GetValue("collectibletype") + '/' + template.GetValue("type");
 			}
 
-			Debug.WriteLine(text);
+			warnings.Add(text);
 		}
 
+		this.WriteLine(string.Join('\n', warnings));
+		this.Results?.Save(); // Premature save to wiki
 		return retval;
 	}
 
@@ -187,7 +204,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 
 		if (parser.FindTemplate(TemplateName) is not TemplateNode template)
 		{
-			Debug.WriteLine($"{TemplateName} not found on page {parser.Page.Title}");
+			this.WriteLine($"* {{{{tl|{TemplateName}}}}} not found on page {parser.Page.Title}");
 			return;
 		}
 
@@ -252,6 +269,7 @@ internal sealed class EsoCollectibles : CreateOrUpdateJob<Collectible>
 	private static string? CatToFileSubcat(string collectibleType) => collectibleType switch
 	{
 		"Customized Actions" => "action",
+		"Emotes" => "emote",
 		"Mementos" => "memento",
 		"Mounts" => "mount",
 		"Non-Combat Pets" => "pet",
