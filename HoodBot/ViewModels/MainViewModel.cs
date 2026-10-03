@@ -59,11 +59,11 @@ public partial class MainViewModel : ObservableRecipient
 	#region Public Commands
 	public RelayCommand EditSettings => new(this.OpenEditWindow);
 
-	public RelayCommand Play
+	public AsyncRelayCommand Play
 	{
 		get
 		{
-			async void ExecuteJobsAsync()
+			async Task ExecuteJobsAsync()
 			{
 				if (!this.executing && this.SelectedItem is WikiInfoViewModel wikiInfo)
 				{
