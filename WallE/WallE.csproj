@@ -25,11 +25,11 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="3.0.78">
+	  <PackageReference Include="Meziantou.Analyzer" Version="3.0.294">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
 	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
