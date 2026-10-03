@@ -32,7 +32,7 @@ internal sealed partial class DeprecatedSourceTags : EditJob
 	#endregion
 
 	#region Private Properties
-	[GeneratedRegex(@"\s+(?<name>[\w\-.:]+)(\s*=\s*(?:""(?<value>[^""]*)""|'(?<value>[^']*)'|(?<value>[^\s""'>]+)))?", RegexOptions.None)]
+	[GeneratedRegex(@"\s+(?<name>[\w\-.:]+)(\s*=\s*(?:""(?<value>[^""]*)""|'(?<value>[^']*)'|(?<value>[^\s""'>]+)))?", RegexOptions.None, Globals.DefaultGeneratedRegexTimeout)]
 	private static partial Regex HtmlAttribute { get; }
 	#endregion
 
