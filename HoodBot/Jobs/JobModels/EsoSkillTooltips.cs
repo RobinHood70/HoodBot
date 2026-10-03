@@ -5,7 +5,7 @@ using System.Globalization;
 
 /// <summary>This class is a modified version of the EsoSkillTooltips class from the ESO Log project (esoSkillTooltips.js), adapted for use in HoodBot.</summary>
 /// <remarks>While not all functions are replicated, and those that are aren't necessarily completely identical (even allowing for language differences), any function that's essentially the same uses the same name as the original for easy comparison.</remarks>
-internal static partial class EsoSkillTooltips
+internal static class EsoSkillTooltips
 {
 	#region Public Methods
 	/* Static class for now, may be better as instantiable with parameters moved out of individual functions. */
