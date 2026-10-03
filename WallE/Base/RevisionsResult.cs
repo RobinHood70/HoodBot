@@ -3,6 +3,4 @@ namespace RobinHood70.WallE.Base;
 
 using System.Collections.Generic;
 
-public class RevisionsResult : List<RevisionItem>
-{
-}
+public class RevisionsResult : List<RevisionItem>;

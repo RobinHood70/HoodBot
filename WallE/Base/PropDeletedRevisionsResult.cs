@@ -3,6 +3,4 @@ namespace RobinHood70.WallE.Base;
 
 using System.Collections.Generic;
 
-public class PropDeletedRevisionsResult : List<RevisionItem>
-{
-}
+public class PropDeletedRevisionsResult : List<RevisionItem>;

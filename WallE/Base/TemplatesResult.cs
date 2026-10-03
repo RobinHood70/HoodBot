@@ -4,6 +4,4 @@ namespace RobinHood70.WallE.Base;
 using System.Collections.Generic;
 using RobinHood70.WikiCommon;
 
-public class TemplatesResult : List<IApiTitle>
-{
-}
+public class TemplatesResult : List<IApiTitle>;

@@ -231,8 +231,6 @@ internal sealed class SFNpcs : CreateOrUpdateJob<SFNpcs.Npcs>
 	#endregion
 
 	#region Internal Classes
-	internal sealed class Npcs : List<Npc>
-	{
-	}
+	internal sealed class Npcs : List<Npc>;
 	#endregion
 }

@@ -3,6 +3,4 @@ namespace RobinHood70.WallE.Base;
 
 using System.Collections.Generic;
 
-public class CategoriesResult : List<CategoriesItem>
-{
-}
+public class CategoriesResult : List<CategoriesItem>;

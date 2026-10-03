@@ -12,5 +12,9 @@ public interface ILimitableInput
 	/// <summary>Gets or sets the number of items to fetch in total.</summary>
 	/// <value>The number of items to fetch in total.</value>
 	int MaxItems { get; set; }
+
+	/*
+	/// <summary>Gets or sets the offset into the result set to start at.</summary>
+	int Offset { get; set; } */
 	#endregion
 }

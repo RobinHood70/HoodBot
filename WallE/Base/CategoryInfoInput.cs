@@ -2,6 +2,4 @@
 namespace RobinHood70.WallE.Base;
 
 // Class is deliberately empty. Created against the possibility of future expansion and due to the way properties are identified.
-public class CategoryInfoInput : IPropertyInput
-{
-}
+public class CategoryInfoInput : IPropertyInput;

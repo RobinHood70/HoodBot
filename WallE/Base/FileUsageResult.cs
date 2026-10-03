@@ -3,6 +3,4 @@ namespace RobinHood70.WallE.Base;
 
 using System.Collections.Generic;
 
-public class FileUsageResult : List<FileUsageItem>
-{
-}
+public class FileUsageResult : List<FileUsageItem>;
