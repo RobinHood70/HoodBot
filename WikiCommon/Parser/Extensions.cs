@@ -131,8 +131,16 @@ public static class Extensions
 	/// <returns>The parameter number if it's an integer; otherwise 0.</returns>
 	public static int GetNumberFromName(this ParameterNode? parameter)
 	{
-		int.TryParse(parameter?.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber);
-		return namedNumber;
+		if (parameter is not null && parameter.Name is not null)
+		{
+			var text = parameter.Name.ToValue().Trim();
+			if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber))
+			{
+				return namedNumber;
+			}
+		}
+
+		return 0;
 	}
 
 	/// <summary>Get the trimmed raw value of the parameter.</summary>
