@@ -42,14 +42,13 @@ internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 			if (npc.Title is not null)
 			{
 				Dictionary<Place, int> locCopy = new(npc.UnknownLocations);
-				foreach (var kvp in locCopy)
+				foreach (var (key, count) in locCopy)
 				{
-					var key = kvp.Key;
 					try
 					{
 						if (places[key.TitleName] is Place place)
 						{
-							npc.Places.Add(place, kvp.Value);
+							npc.Places.Add(place, count);
 							npc.UnknownLocations.Remove(key);
 						}
 						else
