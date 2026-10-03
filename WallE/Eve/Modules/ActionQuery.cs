@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -152,12 +151,12 @@ internal sealed class ActionQuery : ActionModule
 			{
 				this.ParseResponse(response);
 			}
-			catch (JsonReaderException)
+			catch (JsonReaderException jre)
 			{
-				Debug.WriteLine(response);
-				throw new InvalidDataException(response.Contains("Just a moment", StringComparison.Ordinal)
+				var message = response.Contains("Just a moment", StringComparison.Ordinal)
 					? EveMessages.CloudflareBlock
-					: null);
+					: null;
+				throw new InvalidDataException(message, jre);
 			}
 		}
 		while (this.continueModule?.Continues ?? false);
