@@ -13,11 +13,6 @@ using System.Text;
 /// </list></param>
 public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 {
-	#region Static Fields
-	private static readonly WikiTextVisitor RawVisitor = new(true);
-	private static readonly WikiTextVisitor ValueVisitor = new(false);
-	#endregion
-
 	#region Fields
 	private readonly StringBuilder builder = new();
 	private readonly bool raw = raw;
@@ -28,22 +23,22 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	/// <summary>Returns the raw text for a node.</summary>
 	/// <param name="node">The node.</param>
 	/// <returns>The raw text for the specified node.</returns>
-	public static string Raw(IWikiNode node) => RawVisitor.Build(node);
+	public static string Raw(IWikiNode node) => new WikiTextVisitor(true).Build(node);
 
 	/// <summary>Returns the raw text for a set of nodes.</summary>
 	/// <param name="nodes">The nodes.</param>
 	/// <returns>The raw text for the specified nodes.</returns>
-	public static string Raw(IEnumerable<IWikiNode>? nodes) => RawVisitor.Build(nodes);
+	public static string Raw(IEnumerable<IWikiNode>? nodes) => new WikiTextVisitor(true).Build(nodes);
 
 	/// <summary>Returns the value text for a node.</summary>
 	/// <param name="node">The node.</param>
 	/// <returns>The value text for the specified node.</returns>
-	public static string Value(IWikiNode node) => ValueVisitor.Build(node);
+	public static string Value(IWikiNode node) => new WikiTextVisitor(false).Build(node);
 
 	/// <summary>Returns the value text for a node collection.</summary>
 	/// <param name="nodes">The nodes.</param>
 	/// <returns>The value text for the specified nodes.</returns>
-	public static string Value(IEnumerable<IWikiNode>? nodes) => ValueVisitor.Build(nodes);
+	public static string Value(IEnumerable<IWikiNode>? nodes) => new WikiTextVisitor(false).Build(nodes);
 	#endregion
 
 	#region Public Methods
