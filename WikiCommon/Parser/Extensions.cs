@@ -649,8 +649,25 @@ public static class Extensions
 		return template.Find(name)?.GetValue();
 	}
 
-	/// <summary>Determines whether any parameters have numeric names.</summary>
-	/// <param name="template">The template to work on.</param>
+	/// <summary>Checks whether there are any anonymous parameters.</summary>
+	/// <param name="template">The template to check.</param>
+	/// <returns><see langword="true"/> if the template contains at least one anonymous parameter; otherwise, <see langword="false"/>.</returns>
+	public static bool HasAnonymous(this TemplateNode template)
+	{
+		ArgumentNullException.ThrowIfNull(template);
+		foreach (var param in template.Parameters)
+		{
+			if (param.Anonymous)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>Checks whether any parameters have numeric names.</summary>
+	/// <param name="template">The template to check.</param>
 	/// <returns><see langword="true"/> if the parameter collection has any names which are valid integers; otherwise, <see langword="false"/>.</returns>
 	public static bool HasNumericNames(this TemplateNode template)
 	{
