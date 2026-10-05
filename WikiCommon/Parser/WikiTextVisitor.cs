@@ -154,8 +154,13 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 			return;
 		}
 
-		var text = link.Text.Count > 0 ? link.Text : link.TitleNodes;
-		text.Accept(this);
+		// Surrounding whitespace is ignored by links, so rather than build directly, we sub-parse and trim the result.
+		var subVisitor = new WikiTextVisitor(false);
+		var text = link.Text.Count > 0
+			? link.Text
+			: link.TitleNodes;
+		var linkText = subVisitor.Build(text);
+		this.builder.Append(linkText.Trim());
 	}
 
 	/// <inheritdoc/>
