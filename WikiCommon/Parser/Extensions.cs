@@ -97,22 +97,22 @@ public static class Extensions
 	/// <summary>Converts the <see cref="IWikiNode"/> to raw text.</summary>
 	/// <param name="node">The node to convert.</param>
 	/// <returns>The converted node.</returns>
-	public static string ToRaw(this IWikiNode node) => WikiTextVisitor.Raw(node);
+	public static string ToRaw(this IWikiNode node) => new WikiTextVisitor(true).Build(node);
 
 	/// <summary>Converts the node collection to raw text.</summary>
 	/// <param name="nodes">The nodes to convert.</param>
 	/// <returns>The converted nodes.</returns>
-	public static string ToRaw(this IEnumerable<IWikiNode> nodes) => WikiTextVisitor.Raw(nodes);
+	public static string ToRaw(this IEnumerable<IWikiNode> nodes) => new WikiTextVisitor(true).Build(nodes);
 
 	/// <summary>Converts the node to its value text.</summary>
 	/// <param name="node">The node to convert.</param>
 	/// <returns>The converted node.</returns>
-	public static string ToValue(this IWikiNode node) => WikiTextVisitor.Value(node);
+	public static string ToValue(this IWikiNode node) => new WikiTextVisitor(false).Build(node);
 
 	/// <summary>Converts the node collection to its value text.</summary>
 	/// <param name="nodes">The nodes to convert.</param>
 	/// <returns>The converted nodes.</returns>
-	public static string ToValue(this IList<IWikiNode> nodes) => WikiTextVisitor.Value(nodes);
+	public static string ToValue(this IList<IWikiNode> nodes) => new WikiTextVisitor(false).Build(nodes);
 	#endregion
 
 	#region ParameterNode Extensions
