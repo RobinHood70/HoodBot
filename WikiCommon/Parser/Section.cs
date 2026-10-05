@@ -65,15 +65,11 @@ public class Section
 
 	/// <summary>Gets the text title of the section's header.</summary>
 	/// <returns>The section's title.</returns>
-	public string? GetRawTitle() => this.Header is null
-		? null
-		: WikiTextVisitor.Raw(this.Header);
+	public string? GetRawTitle() => this.Header?.ToRaw();
 
 	/// <summary>Gets the text title of the section's header. The title will be stripped of cruft and trimmed so that it's suitable for searching.</summary>
 	/// <returns>The section's title.</returns>
-	public string? GetTitle() => this.Header is null
-		? null
-		: WikiTextVisitor.Value(this.Header.Title).Trim();
+	public string? GetTitle() => this.Header?.Title.ToValue().Trim();
 
 	/// <summary>Gets the raw text of the section.</summary>
 	/// <returns>The raw text of the section.</returns>
@@ -87,7 +83,7 @@ public class Section
 	{
 		var title = this.GetRawTitle();
 		var text = this.Content?.Count > 0
-			? WikiTextVisitor.Raw(this.Content[0])
+			? this.Content[0].ToRaw()
 			: string.Empty;
 		if (text.Length > 15)
 		{

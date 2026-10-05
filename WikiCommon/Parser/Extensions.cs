@@ -87,7 +87,7 @@ public static class Extensions
 			return string.Empty;
 		}
 
-		var text = WikiTextVisitor.Raw(header.Title);
+		var text = header.Title.ToRaw();
 		return trim ? text.Trim() : text;
 	}
 	#endregion

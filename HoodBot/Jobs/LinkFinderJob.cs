@@ -111,7 +111,7 @@ public abstract class LinkFinderJob : ParsedPageJob
 			foreach (var link in parser.FindLinks(title))
 			{
 				if (this.CheckLink(link) &&
-					WikiTextVisitor.Raw(link) is var textTitle &&
+					link.ToRaw() is var textTitle &&
 					!links.Contains(textTitle, StringComparer.Ordinal))
 				{
 					links.Add(textTitle.Trim());
@@ -145,6 +145,6 @@ public abstract class LinkFinderJob : ParsedPageJob
 			: base(TitleComparer.Instance)
 		{
 		}
-		#endregion
 	}
+	#endregion
 }

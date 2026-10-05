@@ -412,7 +412,7 @@ internal sealed class EsoNpcs : EditJob
 		}
 
 		sb
-			.AppendLine(WikiTextVisitor.Raw(template))
+			.AppendLine(template.ToRaw())
 			.AppendLine()
 			.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
 			.AppendLine("{{NewLeft}}")

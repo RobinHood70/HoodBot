@@ -205,7 +205,7 @@ internal sealed class LoreLinkResolver : ParsedPageJob
 		}
 
 		var page = parser.Page;
-		var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {WikiTextVisitor.Raw(linkTemplate)} on page {page.Title.FullPageName()}.");
+		var linkNode = linkTemplate.Find(1) ?? throw new InvalidOperationException($"Malformed link node {linkTemplate.ToRaw()} on page {page.Title.FullPageName()}.");
 		var ns = this.GetNamespace(linkTemplate, page.Title);
 
 		// If link doesn't resolve to anything, do nothing.

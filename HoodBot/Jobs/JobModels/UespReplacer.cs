@@ -121,7 +121,7 @@ internal sealed class UespReplacer
 					nodes[i - 1] is TemplateNode previous &&
 					searchTitles.Contains(previous.GetTitle(site)))
 				{
-					text = WikiTextVisitor.Raw(previous) + text;
+					text = previous.ToRaw() + text;
 					var boldStart = false;
 					TextNode? backText = null;
 					if (i > 1)

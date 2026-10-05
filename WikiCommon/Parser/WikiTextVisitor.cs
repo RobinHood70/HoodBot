@@ -18,29 +18,6 @@ public class WikiTextVisitor(bool raw) : IWikiNodeVisitor
 	private readonly bool raw = raw;
 	#endregion
 
-	#region Public Static Methods
-
-	/// <summary>Returns the raw text for a node.</summary>
-	/// <param name="node">The node.</param>
-	/// <returns>The raw text for the specified node.</returns>
-	public static string Raw(IWikiNode node) => new WikiTextVisitor(true).Build(node);
-
-	/// <summary>Returns the raw text for a set of nodes.</summary>
-	/// <param name="nodes">The nodes.</param>
-	/// <returns>The raw text for the specified nodes.</returns>
-	public static string Raw(IEnumerable<IWikiNode>? nodes) => new WikiTextVisitor(true).Build(nodes);
-
-	/// <summary>Returns the value text for a node.</summary>
-	/// <param name="node">The node.</param>
-	/// <returns>The value text for the specified node.</returns>
-	public static string Value(IWikiNode node) => new WikiTextVisitor(false).Build(node);
-
-	/// <summary>Returns the value text for a node collection.</summary>
-	/// <param name="nodes">The nodes.</param>
-	/// <returns>The value text for the specified nodes.</returns>
-	public static string Value(IEnumerable<IWikiNode>? nodes) => new WikiTextVisitor(false).Build(nodes);
-	#endregion
-
 	#region Public Methods
 
 	/// <summary>Builds the specified node or node collection into wiki text.</summary>

@@ -371,7 +371,7 @@ public class EsoMatchIcons : EditJob
 		public string ToText()
 		{
 			var sb = new StringBuilder()
-				.Append(WikiTextVisitor.Raw(this.PreSummary).TrimEnd())
+				.Append(this.PreSummary?.ToRaw().TrimEnd())
 				.Append('\n');
 			if (!string.IsNullOrEmpty(this.PreText))
 			{
@@ -434,7 +434,7 @@ public class EsoMatchIcons : EditJob
 
 			if (this.PostSummary?.Count > 0)
 			{
-				sb.Append(WikiTextVisitor.Raw(this.PostSummary).TrimStart());
+				sb.Append(this.PostSummary?.ToRaw().TrimStart());
 			}
 
 			return sb.ToString().TrimEnd();
@@ -455,7 +455,8 @@ public class EsoMatchIcons : EditJob
 			var isPreText = true;
 			StringBuilder preText = new();
 			StringBuilder postText = new();
-			foreach (var line in WikiTextVisitor.Raw(parser.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
+			var nodes = parser.GetRange(summaryIndex, summaryEnd - summaryIndex);
+			foreach (var line in nodes.ToRaw().Split(TextArrays.NewLineChars))
 			{
 				var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
 				if (fromWeb.Length > 1)
