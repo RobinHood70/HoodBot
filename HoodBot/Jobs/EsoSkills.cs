@@ -59,6 +59,13 @@ internal sealed class EsoSkills : EditJob
 		[("50", 33195, 3)] = ("1 second", "1 seconds"),
 		[("50", 41567, 2)] = ("1 minute", "60 seconds"),
 		[("50", 93914, 3)] = ("1 minute", "60 seconds"),
+		[("51", 23234, 1)] = ("1 second", "1 seconds"),
+		[("51", 24574, 1)] = ("1 minute", "1 minutes"),
+		[("51", 32166, 3)] = ("1 minute", "60 seconds"),
+		[("51", 33195, 3)] = ("1 second", "1 seconds"),
+		[("51", 41567, 2)] = ("1 minute", "60 seconds"),
+		[("51", 93914, 3)] = ("1 minute", "60 seconds"),
+		[("51", 93914, 5)] = ("1 minute", "60 seconds"),
 	};
 
 	private static readonly HashSet<int> ConsumingTrapIds = [40317, 43071, 43077, 43083];
