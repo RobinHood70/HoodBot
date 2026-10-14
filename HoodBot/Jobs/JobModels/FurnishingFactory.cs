@@ -60,21 +60,21 @@ internal static class FurnishingFactory
 		var id = (long)row["id"];
 		var name = NameExceptions.TryGetValue(id, out var correctedName)
 			? correctedName
-			: RegexLibrary.PruneExcessSpaces(EsoLog.ConvertEncoding((string)row["name"])).Trim();
-		var desc = EsoLog.ConvertEncoding((string)row["description"]);
+			: RegexLibrary.PruneExcessSpaces((string)row["name"]).Trim();
+		var desc = (string)row["description"];
 		var size = SizeFromDesc(desc);
 
 		return new Furnishing(
 			id: id,
-			behavior: EsoLog.ConvertEncoding((string)row["tags"]),
+			behavior: (string)row["tags"],
 			bindType: null,
 			description: desc,
 			furnishingLimitType: FurnishingType.CollectibleFurnishings,
-			furnishingCategory: EsoLog.ConvertEncoding((string)row["furnCategory"]),
-			furnishingSubcategory: EsoLog.ConvertEncoding((string)row["furnSubCategory"]),
+			furnishingCategory: (string)row["furnCategory"],
+			furnishingSubcategory: ((string)row["furnSubCategory"]),
 			materials: [],
 			name: name,
-			nickName: EsoLog.ConvertEncoding((string)row["nickname"]),
+			nickName: (string)row["nickname"],
 			pageName: TitleFactory.SanitizePageName(name, true),
 			quality: null,
 			resultItemLink: null,
@@ -101,10 +101,7 @@ internal static class FurnishingFactory
 		}
 
 		var id = (int)row["itemId"];
-		var desc = EsoLog.ConvertEncoding((string)row["description"]);
-		desc = desc
-			.Replace(" |cFFFFFF", "\n:", StringComparison.Ordinal)
-			.Replace("|r", string.Empty, StringComparison.Ordinal);
+		var desc = (string)row["description"];
 		var size = SizeFromDesc(desc);
 		var name = NameExceptions.TryGetValue(id, out var correctedName)
 			? correctedName
