@@ -315,7 +315,7 @@ internal sealed class Morph(long abilityId, string effectLine, sbyte index, sbyt
 						}
 						else if (!finalType.OrdinalEquals(split[2]))
 						{
-							throw new InvalidOperationException($"Multiple suffixes in {coef.AbilityId}, index {coef.Index}: {finalType}, {split[2]}");
+							throw new InvalidOperationException($"Multiple suffixes in \"{this.Name}\" (abilityId {coef.AbilityId}), index {coef.Index}: {finalType}, {split[2]}. Check EsoSkill.ValueReplacements.");
 						}
 					}
 				}
