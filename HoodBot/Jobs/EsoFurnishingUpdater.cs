@@ -28,6 +28,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Static Fields
+	private static readonly Regex BoonFinder = new(@"grants \|cFFFFFFBoon: (?<stone>.*?): (?<text>.*?)\|r", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 	private static readonly Dictionary<string, int> CommentCounts = new(StringComparer.OrdinalIgnoreCase);
 	private static readonly HashSet<string> FurnishingKeep = new(StringComparer.Ordinal)
 	{
@@ -51,6 +52,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Fields
+	private readonly FlatteningComparer comparer;
+	private readonly Context context;
 	private readonly TitleCollection deprecatedTitles;
 	private readonly Dictionary<long, Furnishing> furnishings = [];
 	private readonly List<string> fileMessages = [];
@@ -75,6 +78,10 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			"Online:Orcish Shrine, Malacath",
 		};
 		this.removeUnneededStuff = removeUnneededStuff;
+
+		this.context = new Context(this.Site);
+		var subComparer = this.Site.GetStringComparer(false);
+		this.comparer = new FlatteningComparer(this.context, subComparer);
 	}
 	#endregion
 
@@ -142,7 +149,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 
 		foreach (var page in pages)
 		{
-			var variables = (VariablesPageModule)page.Custom["variable"];
+			var variables = (VariablesPageModule)page.Custom["metavars"];
 			var collectible = variables.GetVariable("collectible")?.Length > 0;
 			if (variables.GetVariable("id") is string idText &&
 				long.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, this.Site.Culture, out var id))
@@ -242,9 +249,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	protected override void ItemPageLoaded(SiteParser parser, Furnishing item)
 	{
 		var template = parser.FindTemplate(TemplateName) ?? throw new InvalidOperationException(TemplateName + " template not found.");
-		template.UpdateIfEmpty("id", item.Id.ToStringInvariant(), ParameterFormat.OnePerLine);
 		this.GenericTemplateFixes(template);
-		if (template.Parameters.Any(p => p.Anonymous))
+		if (template.HasAnonymous())
 		{
 			this.Warn("Template has anonymous parameter on " + parser.Title);
 		}
@@ -259,6 +265,13 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	#endregion
 
 	#region Private Static Methods
+	private static string BoonReplacer(Match match)
+	{
+		var stone = match.Groups["stone"].Value;
+		var text = match.Groups["text"].Value;
+		return $"grants:\n* '''Boon: [[Online:{stone} (Mundus Stone)|{stone}]]: {text}'''";
+	}
+
 	private static void CheckBehavior(TemplateNode template, Furnishing furnishing)
 	{
 		if (furnishing.Behavior is not null && furnishing.Behavior.Length > 0)
@@ -324,7 +337,7 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 		// Otherwise, make sure the name is correct.
 		if (!item.Name.OrdinalEquals(labelName))
 		{
-			Debug.WriteLine($"Warning: Name mismatch on {page.Title}: {item.Name} vs {labelName}. Could be an incorrect ID.");
+			Debug.WriteLine($"Warning: Page title in database does not match wiki. Could be an incorrect ID.\n  {item.Name} (database)\n  {labelName} ([[{page.Title}]])");
 			template.Update("name", item.Name, ParameterFormat.OnePerLine, true);
 			return item.Name;
 		}
@@ -566,7 +579,8 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	private void FurnishingFixes(TemplateNode template, Page page, Furnishing item)
 	{
 		ArgumentNullException.ThrowIfNull(page);
-		var rawTemplate = template.ToRaw();
+		this.context.Page = page;
+		template.UpdateIfEmpty("id", item.Id.ToStringInvariant(), ParameterFormat.OnePerLine);
 		var name = CheckName(page, template, item);
 		CheckIcon(template, name);
 		this.CheckImage(template, name, SiteLink.ToText(page, LinkFormat.LabelName));
@@ -582,18 +596,23 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			template.Update("size", item.Size, ParameterFormat.OnePerLine, false);
 		}
 
-		var desc = item.Description?.Replace("and and", "{{sic|and and|and}}", StringComparison.Ordinal);
-		var doUpdate = true;
-		if (desc.OrdinalEquals($"This is a {item.Size?.ToLower(this.Site.Culture)} house item."))
+		if (item.Id == 223151)
 		{
-			var descParam = template.Find("desc");
-			if (descParam is null || (descParam.ToValue().Trim() is var descValue && (descValue.Length == 0 || descValue.OrdinalEquals(desc))))
-			{
-				doUpdate = false;
-			}
 		}
 
-		if (doUpdate)
+		var descValue = template.GetValue("desc");
+		var desc = item.Description ?? string.Empty;
+		desc = desc
+			.Replace("…", "...", StringComparison.Ordinal)
+			.Replace(" \n", "<br>", StringComparison.Ordinal)
+			.Replace("\n", "<br>", StringComparison.Ordinal);
+		desc = BoonFinder.Replace(desc, BoonReplacer);
+		desc = desc
+			.Replace("|cFFFFFF", "'''", StringComparison.OrdinalIgnoreCase)
+			.Replace("|r", "'''", StringComparison.OrdinalIgnoreCase);
+
+		if (!this.comparer.Equals(descValue, desc) &&
+			!desc.OrdinalEquals($"This is a {item.Size?.ToLower(this.Site.Culture)} house item."))
 		{
 			template.Update("desc", desc, ParameterFormat.OnePerLine, false);
 		}
@@ -658,17 +677,24 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 			template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
 		}
 
-		if (item.FurnishingLimitType is not FurnishingType.SpecialCollectibles and not FurnishingType.CollectibleFurnishings)
+		if (item.FurnishingType is not FurnishingType.SpecialCollectibles and not FurnishingType.CollectibleFurnishings)
 		{
 			template.Remove("collectible");
 		}
 
-		if (!rawTemplate.OrdinalEquals(template.ToRaw()))
+		if (item.FurnishingType != Furnishing.ParseFurnishingType(template.GetValue("furnLimitType")))
 		{
-			// Only update these if something else changed.
-			var wantsToBe = Furnishing.GetFurnishingLimitType(item.FurnishingLimitType);
-			template.Update("furnLimitType", wantsToBe);
-			template.Update("quality", item.Quality, ParameterFormat.OnePerLine, true);
+			template.Update("furnLimitType", Furnishing.GetFurnishingType(item.FurnishingType));
+		}
+
+		if (!string.IsNullOrEmpty(item.Quality))
+		{
+			var quality = template.GetValue("quality");
+			if (!(quality?.Length == 1 && char.ToLowerInvariant(quality[0]) == char.ToLowerInvariant(item.Quality[0])) &&
+				!item.Quality.OrdinalEquals(quality))
+			{
+				template.Update("quality", item.Quality, ParameterFormat.OnePerLine, true);
+			}
 		}
 	}
 

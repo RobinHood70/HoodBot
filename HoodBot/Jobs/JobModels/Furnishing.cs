@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels;
 
+using System;
 using System.Collections.Generic;
 using RobinHood70.CommonCode;
 
-#region Internal Enumerations
-internal enum FurnishingType
+#region Public Enumerations
+public enum FurnishingType
 {
 	None = -1,
 	TraditionalFurnishings,
@@ -14,14 +15,33 @@ internal enum FurnishingType
 }
 #endregion
 
-internal sealed class Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
+public sealed class Furnishing(long id, string? behavior, string? bindType, string? description, string furnishingCategory, string furnishingSubcategory, FurnishingType furnishingLimitType, IReadOnlyList<string> materials, string name, string? nickName, string pageName, string? quality, string? resultItemLink, string? size, IReadOnlyList<string> skills)
 {
+	#region Static Fields
+	private static readonly Dictionary<string, FurnishingType> FurnishingTypeSynonyms = new(StringComparer.OrdinalIgnoreCase)
+	{
+		["specialc"] = FurnishingType.SpecialCollectibles,
+		["special collectible"] = FurnishingType.SpecialCollectibles,
+		["special collectibles"] = FurnishingType.SpecialCollectibles,
+		["collectible"] = FurnishingType.CollectibleFurnishings,
+		["collectible furnishing"] = FurnishingType.CollectibleFurnishings,
+		["collectible furnishings"] = FurnishingType.CollectibleFurnishings,
+		["special"] = FurnishingType.SpecialFurnishings,
+		["specialf"] = FurnishingType.SpecialFurnishings,
+		["special furnishing"] = FurnishingType.SpecialFurnishings,
+		["special furnishings"] = FurnishingType.SpecialFurnishings,
+		["traditional"] = FurnishingType.TraditionalFurnishings,
+		["traditional furnishing"] = FurnishingType.TraditionalFurnishings,
+		["traditional furnishings"] = FurnishingType.TraditionalFurnishings
+	};
+	#endregion
+
 	#region Public Properties
 	public string? Behavior { get; } = behavior;
 
 	public string? BindType { get; } = bindType;
 
-	public bool Collectible => this.FurnishingLimitType == FurnishingType.CollectibleFurnishings;
+	public bool Collectible => this.FurnishingType == FurnishingType.CollectibleFurnishings;
 
 	public string? Description { get; } = description;
 
@@ -33,7 +53,7 @@ internal sealed class Furnishing(long id, string? behavior, string? bindType, st
 
 	public string FurnishingCategory { get; } = furnishingCategory;
 
-	public FurnishingType FurnishingLimitType { get; } = furnishingLimitType;
+	public FurnishingType FurnishingType { get; } = furnishingLimitType;
 
 	public string FurnishingSubcategory { get; } = furnishingSubcategory;
 
@@ -57,7 +77,7 @@ internal sealed class Furnishing(long id, string? behavior, string? bindType, st
 	#endregion
 
 	#region Public Static Methods
-	public static string? GetFurnishingLimitType(FurnishingType furnishingLimitType) => furnishingLimitType switch
+	public static string? GetFurnishingType(FurnishingType furnishingType) => furnishingType switch
 	{
 		FurnishingType.None => string.Empty,
 		FurnishingType.TraditionalFurnishings => "Traditional Furnishings",
@@ -72,6 +92,10 @@ internal sealed class Furnishing(long id, string? behavior, string? bindType, st
 	public static string IconName(string itemName) => $"ON-icon-furnishing-{itemName.Replace(':', ',')}.png";
 
 	public static string ImageName(string itemName) => $"ON-furnishing-{itemName.Replace(':', ',')}.jpg";
+
+	public static FurnishingType ParseFurnishingType(string? text) => text is not null && FurnishingTypeSynonyms.TryGetValue(text, out var result)
+		? result
+		: FurnishingType.None;
 	#endregion
 
 	#region Public Override Methods
