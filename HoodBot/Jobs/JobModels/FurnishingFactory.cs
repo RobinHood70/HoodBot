@@ -71,7 +71,7 @@ internal static class FurnishingFactory
 			description: desc,
 			furnishingLimitType: FurnishingType.CollectibleFurnishings,
 			furnishingCategory: (string)row["furnCategory"],
-			furnishingSubcategory: ((string)row["furnSubCategory"]),
+			furnishingSubcategory: (string)row["furnSubCategory"],
 			materials: [],
 			name: name,
 			nickName: (string)row["nickname"],
