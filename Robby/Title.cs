@@ -221,6 +221,11 @@ public sealed class Title : IEquatable<Title>, ITitle
 	public Title? TalkPage() => this.Namespace.TalkSpace is null
 		? null
 		: new(this.Namespace.TalkSpace, this.PageName);
+
+	/// <summary>Creates a new Title instance with the specified page name in the current namespace.</summary>
+	/// <param name="pageName">The page name to use for the new instance. If <see langword="null"/>, the current page name is used, creating a clone of the original Title.</param>
+	/// <returns>A new Title instance with the given page name.</returns>
+	public Title WithPageName(string? pageName) => new(this.Namespace, pageName ?? this.PageName);
 	#endregion
 
 	#region Public Override Methods
