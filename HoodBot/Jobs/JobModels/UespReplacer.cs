@@ -77,14 +77,13 @@ internal sealed class UespReplacer
 	{
 		if (!initialized)
 		{
-			var jobSite = job.Site;
 			job.StatusWriteLine("Parsing replacements");
-			if (jobSite.User is not User user)
+			if (job.Site.User is not User user)
 			{
 				throw new InvalidOperationException("Not logged in.");
 			}
 
-			var replacements = jobSite.LoadPageText(user.Title, "/ESO Replacements");
+			var replacements = user.LoadSubPageText("ESO Replacements");
 			if (string.IsNullOrEmpty(replacements))
 			{
 				throw new InvalidOperationException("Replacements page not found or empty!");

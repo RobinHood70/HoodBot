@@ -49,7 +49,7 @@ public class RelinkCollectibles : MovePagesJob
 				return from;
 			}
 
-			var retval = from.WithTitle(TitleFactory.FromUnvalidated(to.Namespace, newTitle.PageName));
+			var retval = from.WithTitle(to.WithPageName(newTitle.PageName));
 			retval.Fragment = null;
 			this.UpdateLinkText(page, from, retval, !isRedirectTarget);
 
@@ -141,7 +141,7 @@ public class RelinkCollectibles : MovePagesJob
 				{
 					var indexedTitle = title.PageName + ' ' + c;
 					allTitles.Add(title.Namespace.DecoratedName() + indexedTitle);
-					this.disambigs.Add(TitleFactory.FromValidated(title.Namespace, indexedTitle), disambig);
+					this.disambigs.Add(title.WithPageName(indexedTitle), disambig);
 				}
 			}
 			else

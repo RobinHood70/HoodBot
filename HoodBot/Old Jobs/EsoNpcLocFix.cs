@@ -164,7 +164,7 @@
 				}
 				else
 				{
-					matchAgainst.Add(TitleFactory.FromName(page.Namespace, value));
+					matchAgainst.Add(page.Title.WithPageName(value));
 				}
 			}
 		}

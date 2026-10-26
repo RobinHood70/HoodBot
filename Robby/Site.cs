@@ -512,28 +512,6 @@ public partial class Site : IMessageSource
 		return pages.Count == 1 ? pages[0].Text : null;
 	}
 
-	/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
-	/// <param name="title">Name of the page.</param>
-	/// <param name="subPageName">The subpage to get.</param>
-	/// <returns>The text of the page.</returns>
-	public string? LoadPageText(Title title, string subPageName)
-	{
-		ArgumentNullException.ThrowIfNull(title);
-		var titleName = title.PageName;
-		if (!string.IsNullOrEmpty(subPageName))
-		{
-			if (subPageName[0] != '/')
-			{
-				titleName += '/';
-			}
-
-			titleName += subPageName;
-		}
-
-		var newTitle = TitleFactory.FromUnvalidated(title.Namespace, titleName);
-		return this.LoadPageText(newTitle);
-	}
-
 	/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 	/// <param name="msg">The message.</param>
 	/// <param name="arguments">Optional arguments to substitute into the message.</param>
@@ -708,17 +686,6 @@ public partial class Site : IMessageSource
 		}
 
 		return this.LoadPage(this.User.Title.FullPageName() + subPageName);
-	}
-
-	/// <summary>This is a convenience method to quickly get the text of a single subpage in the user's space.</summary>
-	/// <param name="subPageName">Name of the user subpage.</param>
-	/// <returns>The text of the page.</returns>
-	public string? LoadUserSubPageText(string subPageName)
-	{
-		ArgumentException.ThrowIfNullOrEmpty(subPageName);
-		return this.User is not User user
-			? throw new InvalidOperationException("Not logged in.")
-			: this.LoadPageText(user.Title, subPageName);
 	}
 
 	/// <summary>Gets users that have the specified rights.</summary>

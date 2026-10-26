@@ -424,7 +424,7 @@ public sealed class ParameterReplacers
 	{
 		foreach (var (_, param) in template.GetNumericParameters())
 		{
-			Title from = TitleFactory.FromUnvalidated(page.Title.Namespace, param.GetValue());
+			var from = page.Title.WithPageName(param.GetValue());
 			if (this.globalUpdates.TryGetValue(from, out var to) && from.Namespace == to.Namespace)
 			{
 				param.SetValue(to.PageName, ParameterFormat.Copy);

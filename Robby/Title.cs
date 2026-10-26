@@ -215,6 +215,13 @@ public sealed class Title : IEquatable<Title>, ITitle
 			? this.PageName[subPageLoc..]
 			: this.PageName;
 
+	/// <summary>Creates a new Title instance that's a subpage of the current title.</summary>
+	/// <param name="subPageName">The page name to use for the new instance. If <see langword="null"/>, the current Title is returned.</param>
+	/// <returns>The requested subpage as a new Title instance.</returns>
+	public Title SubPage(string? subPageName) => subPageName is null
+		? this
+		: new(this.Namespace, this.PageName + "/" + subPageName);
+
 	/// <summary>Gets a Title object for the Title's corresponding subject page.</summary>
 	/// <returns>The talk page.</returns>
 	/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
@@ -223,9 +230,11 @@ public sealed class Title : IEquatable<Title>, ITitle
 		: new(this.Namespace.TalkSpace, this.PageName);
 
 	/// <summary>Creates a new Title instance with the specified page name in the current namespace.</summary>
-	/// <param name="pageName">The page name to use for the new instance. If <see langword="null"/>, the current page name is used, creating a clone of the original Title.</param>
+	/// <param name="pageName">The page name to use for the new instance. If <see langword="null"/>, the current Title is returned.</param>
 	/// <returns>A new Title instance with the given page name.</returns>
-	public Title WithPageName(string? pageName) => new(this.Namespace, pageName ?? this.PageName);
+	public Title WithPageName(string? pageName) => pageName is null
+		? this
+		: new(this.Namespace, pageName);
 	#endregion
 
 	#region Public Override Methods

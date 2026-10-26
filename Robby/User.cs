@@ -229,6 +229,11 @@ public class User : ITitle
 		return retval;
 	}
 
+	/// <summary>This simplifies the code for loading user subpages.</summary>
+	/// <param name="subPageName">The name of the subpage.</param>
+	/// <returns>The text of the page.</returns>
+	public string? LoadSubPageText(string subPageName) => this.Title.Site.LoadPageText(this.Title.SubPage(subPageName));
+
 	/// <summary>Loads all user information. This is necessary for any User object not provided by one of the <see cref="Site"/>.LoadUserInformation() methods.</summary>
 	/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
 	public void LoadUserInfo()

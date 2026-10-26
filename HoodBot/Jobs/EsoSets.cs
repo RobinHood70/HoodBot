@@ -33,12 +33,11 @@ internal sealed class EsoSets : EditJob
 		["Orpheon the Tactician"] = "Orpheon the Tactician (set)",
 		["Squall of Retribution"] = "Squall of Retribution (set)",
 	};
-
-	private static string? blankText;
 	#endregion
 
 	#region Fields
 	private readonly Dictionary<Title, SetData> sets = [];
+	private string? blankText;
 	#endregion
 
 	#region Constructors
@@ -79,14 +78,20 @@ internal sealed class EsoSets : EditJob
 			this.Warn($"A page for {setName} could not be determined. Please check this and add the title to {nameof(TitleOverrides)}.");
 		}
 
-		blankText = this.Site.LoadUserSubPageText("Blank Set");
-		if (blankText is not null)
+		if (this.Site.User is not User user)
 		{
-			var index = blankText.IndexOf("-->", StringComparison.Ordinal);
+			throw new InvalidOperationException("Not logged in.");
+		}
+
+		if (user.LoadSubPageText("Blank Set") is string blankSetText)
+		{
+			var index = blankSetText.IndexOf("-->", StringComparison.Ordinal);
 			if (index != -1)
 			{
-				blankText = blankText[(index + 3)..].TrimStart();
+				blankSetText = blankSetText[(index + 3)..].TrimStart();
 			}
+
+			this.blankText = blankSetText;
 		}
 	}
 
@@ -120,7 +125,7 @@ internal sealed class EsoSets : EditJob
 
 	protected override void PageMissing(Page page)
 	{
-		page.Text = blankText;
+		page.Text = this.blankText;
 		if (EsoSpace.CurrentMod.Length > 0)
 		{
 			page.Text = page.Text.Replace("«Mod Header»", "{{Mod Header|" + EsoSpace.CurrentMod + "}}", StringComparison.Ordinal);
