@@ -187,12 +187,19 @@ public sealed class Title : IEquatable<Title>, ITitle
 
 	/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
 	/// <returns>The name of the base page.</returns>
-	public string RootPageName() =>
-		this.Namespace.AllowsSubpages &&
-		this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
-		subPageLoc >= 0
-			? this.PageName[..subPageLoc]
-			: this.PageName;
+	public string RootPageName()
+	{
+		if (this.Namespace.AllowsSubpages)
+		{
+			var subPageLoc = this.PageName.IndexOf('/', StringComparison.Ordinal);
+			if (subPageLoc >= 0)
+			{
+				return this.PageName[..subPageLoc];
+			}
+		}
+
+		return this.PageName;
+	}
 
 	/// <summary>Gets a Title object for the Title's corresponding subject page.</summary>
 	/// <returns>The subject page.</returns>
