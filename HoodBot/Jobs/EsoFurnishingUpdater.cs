@@ -43,9 +43,9 @@ internal sealed partial class EsoFurnishingUpdater : CreateOrUpdateJob<Furnishin
 	private static readonly Dictionary<string, HashSet<string>> Pruneables = new(StringComparer.Ordinal)
 	{
 		["Online Furnishing Antiquity/Start"] = new HashSet<string>(StringComparer.Ordinal) { "leads" },
-		["Online Furnishing Antiquity/Row"] = [],
+		["Online Furnishing Antiquity/Row"] = new HashSet<string>(StringComparer.Ordinal),
 		["Online Furnishing Crafting"] = new HashSet<string>(StringComparer.Ordinal) { "craft" },
-		["Online Furnishing Purchase"] = []
+		["Online Furnishing Purchase"] = new HashSet<string>(StringComparer.Ordinal)
 	};
 
 	private static readonly string TemplateName = "Online Furnishing Summary";

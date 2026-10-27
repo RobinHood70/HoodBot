@@ -16,7 +16,7 @@ public sealed class OnlineFile
 
 	public bool NoSummary { get; private set; }
 
-	public SortedSet<string> OriginalFiles { get; } = [];
+	public SortedSet<string> OriginalFiles { get; } = new SortedSet<string>(StringComparer.Ordinal);
 
 	public IList<Title> Renames { get; } = [];
 

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json.Linq;
 using RobinHood70.CommonCode;
 using RobinHood70.WallE.Base;
@@ -141,7 +140,7 @@ internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageI
 	// Written this way just to make it obvious that in this case, the input is not being used, since this.input is the correct "parameter".
 	protected override void BuildRequestPageSet(Request request, QueryInput input) => this.BuildRequestPageSet(request);
 
-	[SuppressMessage("Usage", "IDE0028:Simplify collection initialization", Justification = "We want to create a KeyedPages here, not a generic list.")]
+	// [SuppressMessage("Usage", "IDE0028:Simplify collection initialization", Justification = "We want to create a KeyedPages here, not a generic list.")]
 	protected override IList<PageItem> CreatePageList() => new KeyedPages();
 
 	protected override void DeserializeActionExtra(JToken result)
