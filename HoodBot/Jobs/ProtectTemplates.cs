@@ -70,11 +70,16 @@ internal sealed class ProtectTemplates : WikiJob
 		}
 
 		this.docPages.GetTitles(docTitles);
+		var alreadyUpdated = new HashSet<Title>(TitleComparer.Instance);
 		foreach (var (title, protection) in this.protections)
 		{
-			// Add text before starting the save process so we get missing-docs warnings first and can decide if we want to create doc pages manually.
+			// Add text before starting the save process so we get missing-docs warnings first and can decide if we want to create the doc pages manually. Includes already-updated logic to Main loop.
 			var docPage = this.FindDocPage(title);
-			AddTemplate(docPage, protection);
+			if (!alreadyUpdated.Contains(docPage.Title))
+			{
+				this.AddTemplate(docPage, protection);
+				alreadyUpdated.Add(docPage.Title);
+			}
 		}
 
 		return true;
@@ -83,65 +88,24 @@ internal sealed class ProtectTemplates : WikiJob
 	protected override void Main()
 	{
 		this.ResetProgress(this.protections.Count);
+		var alreadySaved = new HashSet<Title>(TitleComparer.Instance);
 		foreach (var (title, protection) in this.protections)
 		{
 			title.Protect("High traffic page", protection.Edit, protection.Move, null);
 			var docPage = this.FindDocPage(title);
-			docPage.Save("Add protection template", true);
+			if (!alreadySaved.Contains(docPage.Title))
+			{
+				// Handles the case where subpages of a template are protected, but the doc page should only be saved once.
+				docPage.Save("Add/update protection template", true);
+				alreadySaved.Add(docPage.Title);
+			}
+
 			this.Progress++;
 		}
 	}
 	#endregion
 
 	#region Private Static Methods
-	private static void AddTemplate(Page docPage, Protection protection)
-	{
-		var parser = new SiteParser(docPage);
-		TemplateNode? temProtect = null;
-		foreach (var template in parser.TemplateNodes)
-		{
-			if (template.GetTitle(parser.Site).PageNameEquals("TemProtect"))
-			{
-				temProtect = template;
-				break;
-			}
-		}
-
-		if (temProtect is null)
-		{
-			temProtect = parser.Factory.TemplateNodeFromParts("TemProtect");
-			var insertLoc = 0;
-			if (parser.Count == 0 ||
-				parser[insertLoc] is not TagNode tag ||
-				!tag.Name.OrdinalEquals("includeonly"))
-			{
-				parser.Insert(insertLoc, parser.Factory.TagNode("includeonly", null, null, null));
-				parser.Insert(insertLoc + 1, parser.Factory.TagNode("/includeonly", null, null, null));
-				if (parser.Count > 2 && parser[insertLoc + 2] is HeaderNode)
-				{
-					parser.InsertText(insertLoc + 2, "\n");
-				}
-			}
-
-			insertLoc++;
-			parser.Insert(insertLoc, temProtect);
-		}
-
-		var parameters = temProtect.Parameters;
-		if (parameters.Count > 0)
-		{
-			Debug.WriteLine($"Template has parameters on {docPage.Title}");
-		}
-
-		parameters.Clear();
-		if (protection.Edit.OrdinalEquals(ProtectSysop) && protection.Move.OrdinalEquals(ProtectSysop))
-		{
-			temProtect.Add("level", "full");
-		}
-
-		parser.UpdatePage();
-	}
-
 	private static Title GetRootDocTitle(Title title) => title.WithPageName(title.RootPageName() + "/Doc");
 
 	private static Title GetThisDocTitle(Title title) => title.SubPage("Doc");
@@ -190,6 +154,53 @@ internal sealed class ProtectTemplates : WikiJob
 	#endregion
 
 	#region Private Methods
+	private void AddTemplate(Page docPage, Protection protection)
+	{
+		var parser = new SiteParser(docPage);
+		TemplateNode? temProtect = null;
+		foreach (var template in parser.TemplateNodes)
+		{
+			if (template.GetTitle(parser.Site).PageNameEquals("TemProtect"))
+			{
+				temProtect = template;
+				break;
+			}
+		}
+
+		if (temProtect is null)
+		{
+			temProtect = parser.Factory.TemplateNodeFromParts("TemProtect");
+			var insertLoc = 0;
+			if (parser.Count == 0 ||
+				parser[insertLoc] is not IgnoreNode ignored ||
+				!ignored.Value.OrdinalICEquals("<includeonly>"))
+			{
+				parser.Insert(insertLoc, parser.Factory.IgnoreNode("<includeonly>"));
+				parser.Insert(insertLoc + 1, parser.Factory.IgnoreNode("</includeonly>"));
+				if (parser.Count > 2 && parser[insertLoc + 2] is HeaderNode)
+				{
+					parser.InsertText(insertLoc + 2, "\n");
+				}
+			}
+
+			insertLoc++;
+			parser.Insert(insertLoc, temProtect);
+		}
+
+		if (temProtect.Parameters.Count > 0)
+		{
+			this.StatusWriteLine($"Template has parameters on {docPage.Title}");
+		}
+
+		temProtect.Parameters.Clear();
+		if (protection.Edit.OrdinalEquals(ProtectSysop) && protection.Move.OrdinalEquals(ProtectSysop))
+		{
+			temProtect.Add("level", "full");
+		}
+
+		parser.UpdatePage();
+	}
+
 	private void CheckProtectionMismatches()
 	{
 		foreach (var (title, protection) in this.protections)
