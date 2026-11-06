@@ -46,7 +46,30 @@ public class Diff : IDiffViewer, IDisposable
 			options.AddArgument($"--user-agent={diff.UserAgent}");
 		}
 
-		this.driver = new ChromeDriver(options);
+		var launched = false;
+		while (!launched)
+		{
+			try
+			{
+				this.driver = new ChromeDriver(options);
+				launched = true;
+			}
+			catch (InvalidOperationException ex)
+			{
+				Debug.WriteLine($"Failed to launch Chrome, trying again in 5 seconds: {ex.Message}");
+				Thread.Sleep(5000);
+			}
+			catch (WebDriverException ex)
+			{
+				throw new InvalidOperationException("Failed to launch Chrome. Make sure Chrome is installed and the ChromeDriver is available.", ex);
+			}
+		}
+
+		if (this.driver is null)
+		{
+			// Lets the compiler know that driver is not null below.
+			throw new InvalidOperationException("Failed to launch Chrome.");
+		}
 
 		// Navigate to the edit page.
 		this.driver.Navigate().GoToUrl(diff.EditPath);
