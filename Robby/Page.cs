@@ -10,6 +10,7 @@ using RobinHood70.CommonCode;
 using RobinHood70.Robby.Design;
 using RobinHood70.WallE.Base;
 using RobinHood70.WikiCommon;
+using RobinHood70.WikiCommon.Parser;
 
 // CONSIDER: Possibly extend to include a collection of results, indexed by a text key, so each module can be tracked separately and extending the entire Page object isn't required for new modules. This would allow extensions to co-exist (e.g., variables on a file page). The two potential issues I see are:
 // * Boxing, which could be mitigated by having only extra data follow this scheme, while the basic page data uses the existing structure.
@@ -205,7 +206,7 @@ public class Page : ITitle
 	{
 		get
 		{
-			this.isRedirect ??= this.Site.GetRedirectFromTextInternal(this.Text) is not null;
+			this.isRedirect ??= this.Site.GetRedirectLink(this.Text) is not null;
 			return this.isRedirect.Value;
 		}
 	}
@@ -303,6 +304,14 @@ public class Page : ITitle
 	#endregion
 
 	#region Public Methods
+
+	/// <summary>Gets the redirect target from the page text.</summary>
+	/// <returns>A <see cref="LinkNode"/> object with the raw redirect or <see langword="null"/>.</returns>
+	public LinkNode? GetRedirectLink() => this.Site.GetRedirectLink(this.Text);
+
+	/// <summary>Gets the redirect target from the page text.</summary>
+	/// <returns>A <see cref="FullTitle"/> object with the parsed redirect or <see langword="null"/>.</returns>
+	public FullTitle? GetRedirectTarget() => this.Site.GetRedirectFromText(this.Text);
 
 	/// <summary>Gets the revision that comes immediately before the oldest revision currently in <see cref="Revisions"/>.</summary>
 	/// <remarks>If no revisions are currently loaded or no older revisions exist on the wiki, this method will fail silently. Check the count of revisions before and after to determine success.</remarks>

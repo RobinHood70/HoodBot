@@ -74,7 +74,7 @@ public partial class Site : IMessageSource
 	#endregion
 
 	#region Static Fields
-	private static readonly string[] DefaultRedirect = ["#REDIRECT"];
+	private static readonly MagicWord DefaultRedirect = new("redirect", ["#REDIRECT"], false);
 	private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new(StringComparer.Ordinal);
 	#endregion
 
@@ -1039,10 +1039,39 @@ public partial class Site : IMessageSource
 
 	/// <summary>Gets the redirect target from the page text.</summary>
 	/// <param name="text">The text to parse.</param>
-	/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectFromTextInternal(text) is LinkNode linkNode
+	/// <returns>A <see cref="FullTitle"/> object with the parsed redirect.</returns>
+	public virtual FullTitle? GetRedirectFromText(string text) => this.GetRedirectLink(text) is LinkNode linkNode
 		? TitleFactory.FromTitleNode(this, linkNode).ToFullTitle()
 		: null;
+
+	/// <summary>Gets the redirect target from the page text as a <see cref="LinkNode"/>.</summary>
+	/// <param name="text">The text to parse.</param>
+	/// <returns>A <see cref="LinkNode"/> object with the parsed redirect or null if the text was not a standard redirect.</returns>
+	public LinkNode? GetRedirectLink(string text)
+	{
+		ArgumentNullException.ThrowIfNull(text);
+		var redirectWord = this.magicWords.TryGetValue("redirect", out var redirect)
+			? redirect
+			: DefaultRedirect;
+		var redirects = new MagicWordDictionary([redirectWord]);
+		var nodes = WikiNodeFactory.DefaultInstance.Parse(text);
+
+		// Is the text of the format TextNode, LinkNode?
+		if (nodes is not ([TextNode textNode, LinkNode linkNode, ..]))
+		{
+			return null;
+		}
+
+		var searchText = textNode.Text.TrimEnd();
+
+		// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
+		if (searchText.Length > 0 && searchText[^1] == ':')
+		{
+			searchText = searchText[0..^1].TrimEnd();
+		}
+
+		return redirects.ContainsKey(searchText) ? linkNode : null;
+	}
 
 	/// <summary>Gets the data associated with a query page.</summary>
 	/// <param name="page">The title of the query page.</param>
@@ -1244,37 +1273,6 @@ public partial class Site : IMessageSource
 	/// <param name="sender">The sending object.</param>
 	/// <param name="warning">The warning.</param>
 	public virtual void PublishWarning(IMessageSource sender, string warning) => LogWarning(this.Logger, warning);
-	#endregion
-
-	#region Internal Methods
-	internal LinkNode? GetRedirectFromTextInternal(string text)
-	{
-		ArgumentNullException.ThrowIfNull(text);
-		var redirectAliases = this.magicWords.TryGetValue("redirect", out var redirect)
-			? redirect.Aliases
-			: DefaultRedirect;
-		HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-		var nodes = WikiNodeFactory.DefaultInstance.Parse(text);
-
-		// Is the text of the format TextNode, LinkNode?
-		if (nodes is [TextNode textNode, LinkNode linkNode, ..])
-		{
-			var searchText = textNode.Text.TrimEnd();
-
-			// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
-			if (searchText.Length > 0 && searchText[^1] == ':')
-			{
-				searchText = searchText[0..^1].TrimEnd();
-			}
-
-			if (redirects.Contains(searchText))
-			{
-				return linkNode;
-			}
-		}
-
-		return null;
-	}
 	#endregion
 
 	#region Protected Virtual Methods
