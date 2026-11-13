@@ -27,9 +27,9 @@ public static class ParserHelpers
 			TitleFactory.FromTitleNode(site, link).Title.Namespace == MediaWikiNamespaces.Category);
 		if (lastCategoryIndex == -1)
 		{
+			// If this is the first category on a page, adds two LFs to separate the category from the rest of the text. If newLineBefore is true, a second LF will be added in AddCategoryInternal, so we only need to add one here.
 			if (nodes.Count > 0)
 			{
-				// makes sure two LFs are added no matter what, since newLineBefore adds a LF already
 				if (nodes[^1] is TextNode text)
 				{
 					text.Text = text.Text.TrimEnd();
@@ -40,9 +40,13 @@ public static class ParserHelpers
 
 			lastCategoryIndex = nodes.Count;
 		}
+		else
+		{
+			lastCategoryIndex++;
+		}
 
 		var categoryTitle = TitleFactory.FromUnvalidated(site[MediaWikiNamespaces.Category], category).Title;
-		return AddCategoryInternal(nodes, lastCategoryIndex + 1, categoryTitle, newLineBefore);
+		return AddCategoryInternal(nodes, lastCategoryIndex, categoryTitle, newLineBefore);
 	}
 
 	/// <summary>Adds a category to the page.</summary>
