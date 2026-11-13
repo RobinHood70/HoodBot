@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs;
 
-using RobinHood70.CommonCode;
 using RobinHood70.Robby;
 using RobinHood70.Robby.Parser;
 using RobinHood70.WikiCommon;
@@ -14,39 +13,35 @@ internal sealed class OneOffParseJob(JobManager jobManager) : ParsedPageJob(jobM
 
 	protected override void LoadPages()
 	{
-		this.Pages.GetBacklinks("Modèle:Bas de page du livre", BacklinksTypes.EmbeddedIn, true, Filter.Any);
-		this.Pages.GetBacklinks("Modèle:Pied de page Livre", BacklinksTypes.EmbeddedIn, true, Filter.Any);
-		this.Pages.GetBacklinks("Modèle:Boîte de citations", BacklinksTypes.EmbeddedIn, true, Filter.Any);
-		this.Pages.GetBacklinks("Modèle:Arbre", BacklinksTypes.EmbeddedIn, true, Filter.Any);
-		this.Pages.GetBacklinks("Modèle:Arbre/début", BacklinksTypes.EmbeddedIn, true, Filter.Any);
-		this.Pages.GetBacklinks("Modèle:Arbre/fin", BacklinksTypes.EmbeddedIn, true, Filter.Any);
+		var imageList = new TitleCollection(this.Site);
+		var pages = new PageCollection(this.Site);
+		pages.GetCategoryMembers("Online-Furnishings-Library-Readable Literature", CategoryMemberTypes.Page, false);
+		foreach (var page in pages)
+		{
+			var parser = new SiteParser(page);
+			if (parser.FindTemplate("Online Furnishing Summary") is not TemplateNode template)
+			{
+				this.WriteLine($"* [[{page.Title}]] does not have the template.");
+				continue;
+			}
+
+			if (template.GetValue("image") is not string image || image.Length == 0)
+			{
+				var pageName = page.Title.LabelName().Replace(':', ',');
+				image = $"ON-furnishing-{pageName}.jpg";
+			}
+
+			imageList.TryAdd("File:" + image);
+		}
+
+		this.Pages.GetTitles(imageList);
 	}
 
 	protected override void ParseText(SiteParser parser)
 	{
-		foreach (var template in parser.TemplateNodes)
+		if (parser.Page.Exists)
 		{
-			var title = template.GetTitle(this.Site);
-			if (title.PageNameEquals("Bas de page du livre") || title.PageNameEquals("Pied de page Livre"))
-			{
-				template.SetTitle("Pied de page de livre");
-			}
-			else if (title.PageNameEquals("Boîte de citations"))
-			{
-				template.SetTitle("Boîte de citation");
-			}
-			else if (title.PageNameEquals("Arbre"))
-			{
-				template.SetTitle("Chart");
-			}
-			else if (title.PageNameEquals("Arbre/début"))
-			{
-				template.SetTitle("Chart/start");
-			}
-			else if (title.PageNameEquals("Arbre/fin"))
-			{
-				template.SetTitle("Chart/end");
-			}
+			parser.AddCategoryAfter(this.Site, "Online-Furnishing Images-Library-Readable Literature", "Online-Furnishing Images-Library-Literature", true);
 		}
 	}
 	#endregion
